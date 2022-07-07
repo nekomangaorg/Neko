@@ -416,6 +416,9 @@ fun SheetLayout(
                     closeSheet()
                     mergeActions.remove()
                 },
+                cancelClick = {
+                    closeSheet()
+                },
             )
         }
 

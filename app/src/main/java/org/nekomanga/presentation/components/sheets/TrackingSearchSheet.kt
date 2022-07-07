@@ -1,10 +1,10 @@
 package org.nekomanga.presentation.components.sheets
 
+import Header
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,22 +14,16 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,16 +35,12 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -58,6 +48,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.dialog.TrackingSwitchDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 
@@ -74,7 +65,7 @@ fun TrackingSearchSheet(
     openInBrowser: (String) -> Unit,
     trackSearchItemClick: (TrackSearch) -> Unit,
 ) {
-    val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .6
+    val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
 
     var trackSearchItem by remember { mutableStateOf<TrackSearch?>(null) }
 
@@ -85,7 +76,7 @@ fun TrackingSearchSheet(
             modifier = Modifier.fillMaxWidth(),
         ) {
 
-            Header(cancelClick)
+            Header(stringResource(id = R.string.select_an_entry), cancelClick)
 
             when (trackSearchResult) {
                 is TrackSearchResult.Success -> {
@@ -136,35 +127,10 @@ fun TrackingSearchSheet(
                 }
                 else -> CenteredBox(themeColorState = themeColorState, trackSearchResult = trackSearchResult)
             }
-            Footer(themeColorState, title, searchTracker)
+
+            SearchFooter(themeColorState = themeColorState, title = title, search = searchTracker)
         }
     }
-}
-
-@Composable
-private fun ColumnScope.Header(cancelClick: () -> Unit) {
-
-    Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-        IconButton(onClick = { cancelClick() }) {
-            Icon(
-                imageVector = Icons.Default.Close, contentDescription = null,
-                modifier = Modifier
-                    .size(28.dp),
-                tint = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center),
-            text = stringResource(id = R.string.select_an_entry),
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center,
-        )
-    }
-
-    Gap(4.dp)
-    Divider()
 }
 
 @Composable
@@ -271,9 +237,14 @@ private fun TrackSearchItem(themeColorState: ThemeColorState, trackSearch: Track
                         }
                     }
 
+                    val summary = when (trackSearch.summary.isBlank()) {
+                        true -> stringResource(id = R.string.no_description)
+                        false -> trackSearch.summary
+                    }
+
                     Text(
-                        text = trackSearch.summary,
-                        maxLines = 4,
+                        text = summary,
+                        maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast),
                         style = MaterialTheme.typography.bodyLarge,
@@ -296,44 +267,3 @@ private fun TrackSearchItem(themeColorState: ThemeColorState, trackSearch: Track
     }
 }
 
-@Composable
-private fun ColumnScope.Footer(themeColorState: ThemeColorState, title: String, searchTracker: (String) -> Unit) {
-
-    val focusManager = LocalFocusManager.current
-    var searchText by remember { mutableStateOf(title) }
-
-    Divider()
-    Gap(4.dp)
-
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        value = searchText,
-        label = {
-            Text(text = stringResource(id = R.string.title))
-        },
-        trailingIcon = {
-            if (searchText.isNotEmpty()) {
-                IconButton(onClick = { searchText = "" }) {
-                    Icon(imageVector = Icons.Default.Cancel, contentDescription = null, tint = themeColorState.buttonColor)
-                }
-            }
-        },
-        onValueChange = { searchText = it },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedLabelColor = themeColorState.buttonColor,
-            focusedBorderColor = themeColorState.buttonColor,
-            cursorColor = themeColorState.buttonColor,
-        ),
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Search,
-        ),
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                focusManager.clearFocus()
-                searchTracker(searchText)
-            },
-        ),
-    )
-}
