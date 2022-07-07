@@ -23,7 +23,11 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergedManga
+import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
+import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
+import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
+import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeManga
+import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
@@ -94,14 +98,11 @@ class MangaComposePresenter(
     private val _alternativeArtwork = MutableStateFlow(emptyList<Artwork>())
     val alternativeArtwork: StateFlow<List<Artwork>> = _alternativeArtwork.asStateFlow()
 
-    private val _isMerged = MutableStateFlow(
-        if (manga.value.isMerged()) {
-            MergedManga.IsMerged(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!)
-        } else {
-            MergedManga.NotMerged
-        },
-    )
-    val isMerged: StateFlow<MergedManga> = _isMerged.asStateFlow()
+    private val _isMerged = MutableStateFlow(getIsMergedManga())
+    val isMerged: StateFlow<IsMergedManga> = _isMerged.asStateFlow()
+
+    private val _mergeSearchResult = MutableStateFlow<MergeSearchResult>(MergeSearchResult.Loading)
+    val mergeSearchResult: StateFlow<MergeSearchResult> = _mergeSearchResult.asStateFlow()
 
     private val _currentArtwork = MutableStateFlow(
         Artwork(
@@ -460,6 +461,40 @@ class MangaComposePresenter(
         }
     }
 
+    fun searchMergedManga(query: String) {
+        presenterScope.launchIO {
+            _mergeSearchResult.value = MergeSearchResult.Loading
+
+            runCatching {
+                val mergedMangaResults = sourceManager.getMergeSource()
+                    .searchManga(query)
+                    .map { MergeManga(thumbnail = it.thumbnail_url ?: "", title = it.title, url = it.url) }
+                _mergeSearchResult.value = when (mergedMangaResults.isEmpty()) {
+                    true -> MergeSearchResult.NoResult
+                    false -> MergeSearchResult.Success(mergedMangaResults)
+                }
+            }.getOrElse {
+                _mergeSearchResult.value = MergeSearchResult.Error(it.message ?: "Error looking up information")
+            }
+        }
+    }
+
+    /**
+     * Attach the selected merge manga entry
+     */
+    fun addMergedManga(mergeManga: MergeManga) {
+        presenterScope.launch {
+            val editManga = manga.value
+            editManga.apply {
+                merge_manga_url = mergeManga.url
+                merge_manga_image_url = merge_manga_image_url
+            }
+            db.insertManga(editManga).executeOnIO()
+            updateMangaFlow()
+            onRefresh()
+        }
+    }
+
     /**
      * Updates the artwork flow
      */
@@ -511,14 +546,21 @@ class MangaComposePresenter(
     }
 
     /**
+     * Get current merge result
+     */
+    fun getIsMergedManga(): IsMergedManga {
+        return when (manga.value.isMerged()) {
+            true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!)
+            false -> No
+        }
+    }
+
+    /**
      * Update flows for merge
      */
     private fun updateMergeFlow() {
         presenterScope.launch {
-            _isMerged.value = when (manga.value.isMerged()) {
-                true -> MergedManga.IsMerged(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!)
-                false -> MergedManga.NotMerged
-            }
+            _isMerged.value = getIsMergedManga()
         }
     }
 

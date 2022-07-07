@@ -52,7 +52,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
     @Composable
     override fun ScreenContent() {
         MangaScreen(
-            manga = presenter.manga.value,
+            manga = presenter.manga.collectAsState().value,
             artwork = presenter.currentArtwork.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
@@ -62,11 +62,11 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
                 set = { enabledCategories -> presenter.updateMangaCategories(enabledCategories) },
                 addNew = { newCategory -> presenter.addNewCategory(newCategory) },
             ),
-            generatePalette = { setPalette(it) },
+            generatePalette = this::setPalette,
             themeBasedOffCover = preferences.themeMangaDetails(),
             titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
             creatorLongClick = { context, content -> copyToClipboard(context, content, R.string.creator) },
-            toggleFavorite = { presenter.toggleFavorite() },
+            toggleFavorite = presenter::toggleFavorite,
             loggedInTrackingServices = presenter.loggedInTrackingService.collectAsState(),
             trackServiceCount = presenter.trackServiceCount.collectAsState(),
             tracks = presenter.tracks.collectAsState(),
@@ -83,10 +83,13 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             ),
             trackSearchResult = presenter.trackSearchResult.collectAsState(),
             alternativeArtwork = presenter.alternativeArtwork.collectAsState(),
-            mergedManga = presenter.isMerged.collectAsState(),
+            isMergedManga = presenter.isMerged.collectAsState(),
             mergeActions = MergeActions(
-                remove = { presenter.removeMergedManga() },
+                remove = presenter::removeMergedManga,
+                search = presenter::searchMergedManga,
+                add = presenter::addMergedManga,
             ),
+            mergeSearchResult = presenter.mergeSearchResult.collectAsState(),
             similarClick = { router.pushController(SimilarController(presenter.manga.value).withFadeTransaction()) },
             externalLinks = presenter.externalLinks.collectAsState(),
             shareClick = { context -> viewScope.launch { shareManga(context) } },

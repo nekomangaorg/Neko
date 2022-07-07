@@ -48,8 +48,9 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergedManga
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
+import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
+import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
@@ -97,7 +98,8 @@ fun MangaScreen(
     trackSearchResult: State<TrackSearchResult>,
     similarClick: () -> Unit = {},
     externalLinks: State<List<ExternalLink>>,
-    mergedManga: State<MergedManga>,
+    isMergedManga: State<IsMergedManga>,
+    mergeSearchResult: State<MergeSearchResult>,
     alternativeArtwork: State<List<Artwork>>,
     coverActions: CoverActions,
     mergeActions: MergeActions,
@@ -184,10 +186,11 @@ fun MangaScreen(
                         trackSearchResult = trackSearchResult.value,
                         trackSuggestedDates = trackSuggestedDates.value,
                         externalLinks = externalLinks.value,
-                        mergedManga = mergedManga.value,
+                        isMergedManga = isMergedManga.value,
                         alternativeArtwork = alternativeArtwork.value,
                         coverActions = coverActions,
                         mergeActions = mergeActions,
+                        mergeSearchResult = mergeSearchResult.value,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
                 }
@@ -230,7 +233,7 @@ fun MangaScreen(
                             manga = manga,
                             artwork = artwork.value,
                             showBackdrop = themeBasedOffCover,
-                            isMerged = mergedManga.value is MergedManga.IsMerged,
+                            isMerged = isMergedManga.value is IsMergedManga.Yes,
                             inLibrary = inLibrary,
                             titleLongClick = { title -> titleLongClick(context, title) },
                             creatorLongClick = { creator -> creatorLongClick(context, creator) },
@@ -304,7 +307,8 @@ fun SheetLayout(
     trackSuggestedDates: TrackingSuggestedDates?,
     externalLinks: List<ExternalLink>,
     alternativeArtwork: List<Artwork>,
-    mergedManga: MergedManga,
+    isMergedManga: IsMergedManga,
+    mergeSearchResult: MergeSearchResult,
     openInBrowser: (String) -> Unit,
     coverActions: CoverActions,
     mergeActions: MergeActions,
@@ -406,8 +410,16 @@ fun SheetLayout(
         }
 
         is BottomSheetScreen.MergeSheet -> {
+            if (isMergedManga is IsMergedManga.No) {
+                LaunchedEffect(key1 = 1) {
+                    mergeActions.search(title)
+                }
+            }
             MergeSheet(
-                themeColorState = themeColorState, mergedManga = mergedManga,
+                themeColorState = themeColorState,
+                isMergedManga = isMergedManga,
+                title = title,
+                mergeSearchResults = mergeSearchResult,
                 openMergeSource = { url ->
                     closeSheet()
                     openInBrowser(url)
@@ -418,6 +430,11 @@ fun SheetLayout(
                 },
                 cancelClick = {
                     closeSheet()
+                },
+                search = mergeActions.search,
+                mergeMangaClick = { mergeManga ->
+                    closeSheet()
+                    mergeActions.add(mergeManga)
                 },
             )
         }

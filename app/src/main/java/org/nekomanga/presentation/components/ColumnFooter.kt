@@ -13,10 +13,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -28,10 +24,9 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, search: (String) -> Unit) {
+fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, textChanged: (String) -> Unit, search: (String) -> Unit) {
 
     val focusManager = LocalFocusManager.current
-    var searchText by remember { mutableStateOf(title) }
 
     Divider()
     Gap(4.dp)
@@ -40,18 +35,18 @@ fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, se
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
-        value = searchText,
+        value = title,
         label = {
             Text(text = stringResource(id = R.string.title))
         },
         trailingIcon = {
-            if (searchText.isNotEmpty()) {
-                IconButton(onClick = { searchText = "" }) {
+            if (title.isNotEmpty()) {
+                IconButton(onClick = { textChanged("") }) {
                     Icon(imageVector = Icons.Default.Cancel, contentDescription = null, tint = themeColorState.buttonColor)
                 }
             }
         },
-        onValueChange = { searchText = it },
+        onValueChange = { textChanged(it) },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedLabelColor = themeColorState.buttonColor,
             focusedBorderColor = themeColorState.buttonColor,
@@ -63,7 +58,7 @@ fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, se
         keyboardActions = KeyboardActions(
             onSearch = {
                 focusManager.clearFocus()
-                search(searchText)
+                search(title)
             },
         ),
     )

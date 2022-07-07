@@ -3,13 +3,9 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.Context
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeManga
 
 object MangaConstants {
-
-    sealed class MergedManga {
-        class IsMerged(val url: String) : MergedManga()
-        object NotMerged : MergedManga()
-    }
 
     class CategoryActions(
         val set: (List<Category>) -> Unit = {},
@@ -35,5 +31,7 @@ object MangaConstants {
 
     class MergeActions(
         val remove: () -> Unit,
+        val search: (String) -> Unit,
+        val add: (MergeManga) -> Unit,
     )
 }
