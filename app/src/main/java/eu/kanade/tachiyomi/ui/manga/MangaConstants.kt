@@ -12,18 +12,18 @@ object MangaConstants {
     }
 
     class CategoryActions(
-        val setCategories: (List<Category>) -> Unit = {},
-        val addNewCategory: (String) -> Unit = {},
+        val set: (List<Category>) -> Unit = {},
+        val addNew: (String) -> Unit = {},
     )
 
     class TrackActions(
-        val trackStatusChanged: (Int, TrackingConstants.TrackAndService) -> Unit,
-        val trackScoreChanged: (Int, TrackingConstants.TrackAndService) -> Unit,
-        val trackChapterChanged: (Int, TrackingConstants.TrackAndService) -> Unit,
-        val searchTracker: (String, TrackService) -> Unit,
-        val trackSearchItemClick: (TrackingConstants.TrackAndService) -> Unit,
-        val trackingRemoved: (Boolean, TrackService) -> Unit,
-        val trackingDateChanged: (TrackingConstants.TrackDateChange) -> Unit,
+        val statusChange: (Int, TrackingConstants.TrackAndService) -> Unit,
+        val scoreChange: (Int, TrackingConstants.TrackAndService) -> Unit,
+        val chapterChange: (Int, TrackingConstants.TrackAndService) -> Unit,
+        val dateChange: (TrackingConstants.TrackDateChange) -> Unit,
+        val search: (String, TrackService) -> Unit,
+        val searchItemClick: (TrackingConstants.TrackAndService) -> Unit,
+        val remove: (Boolean, TrackService) -> Unit,
     )
 
     class CoverActions(

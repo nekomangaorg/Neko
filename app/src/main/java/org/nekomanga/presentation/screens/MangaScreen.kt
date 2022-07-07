@@ -101,7 +101,6 @@ fun MangaScreen(
     alternativeArtwork: State<List<Artwork>>,
     coverActions: CoverActions,
     mergeActions: MergeActions,
-    removeMergeSource: () -> Unit = {},
     shareClick: (Context) -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
@@ -173,7 +172,7 @@ fun MangaScreen(
                         currentScreen = currentSheet,
                         themeColorState = themeColorState,
                         inLibrary = inLibrary,
-                        addNewCategory = categoryActions.addNewCategory,
+                        addNewCategory = categoryActions.addNew,
                         allCategories = categories.value,
                         mangaCategories = mangaCategories.value,
                         loggedInTrackingServices = loggedInTrackingServices.value,
@@ -244,7 +243,7 @@ fun MangaScreen(
                                     openSheet(
                                         BottomSheetScreen.CategoriesSheet(
                                             addingToLibrary = true,
-                                            setCategories = categoryActions.setCategories,
+                                            setCategories = categoryActions.set,
                                             addToLibraryClick = { inLibrary = toggleFavorite() },
                                         ),
                                     )
@@ -257,7 +256,7 @@ fun MangaScreen(
                                 openSheet(
                                     BottomSheetScreen.CategoriesSheet(
                                         addingToLibrary = false,
-                                        setCategories = categoryActions.setCategories,
+                                        setCategories = categoryActions.set,
                                     ),
                                 )
                             },
@@ -336,10 +335,10 @@ fun SheetLayout(
                     BottomSheetScreen.TrackingSearchSheet(service, track),
                 )
             },
-            trackStatusChanged = trackActions.trackStatusChanged,
-            trackScoreChanged = trackActions.trackScoreChanged,
-            trackingRemoved = trackActions.trackingRemoved,
-            trackChapterChanged = trackActions.trackChapterChanged,
+            trackStatusChanged = trackActions.statusChange,
+            trackScoreChanged = trackActions.scoreChange,
+            trackingRemoved = trackActions.remove,
+            trackChapterChanged = trackActions.chapterChange,
             trackingStartDateClick = { trackAndService, trackingDate ->
                 closeSheet()
                 openSheet(
@@ -356,7 +355,7 @@ fun SheetLayout(
         is BottomSheetScreen.TrackingSearchSheet -> {
             //do the initial search this way we dont need to "reset" the state after the sheet closes
             LaunchedEffect(key1 = currentScreen.trackingService.id) {
-                trackActions.searchTracker(title, currentScreen.trackingService)
+                trackActions.search(title, currentScreen.trackingService)
             }
 
             TrackingSearchSheet(
@@ -369,12 +368,12 @@ fun SheetLayout(
                     closeSheet()
                     openSheet(BottomSheetScreen.TrackingSheet)
                 },
-                searchTracker = { query -> trackActions.searchTracker(query, currentScreen.trackingService) },
+                searchTracker = { query -> trackActions.search(query, currentScreen.trackingService) },
                 openInBrowser = openInBrowser,
-                trackingRemoved = trackActions.trackingRemoved,
+                trackingRemoved = trackActions.remove,
                 trackSearchItemClick = { trackSearch ->
                     closeSheet()
-                    trackActions.trackSearchItemClick(TrackAndService(trackSearch, currentScreen.trackingService))
+                    trackActions.searchItemClick(TrackAndService(trackSearch, currentScreen.trackingService))
                     openSheet(BottomSheetScreen.TrackingSheet)
                 },
             )
@@ -391,7 +390,7 @@ fun SheetLayout(
                 },
                 trackDateChanged = { trackDateChanged ->
                     closeSheet()
-                    trackActions.trackingDateChanged(trackDateChanged)
+                    trackActions.dateChange(trackDateChanged)
                     openSheet(BottomSheetScreen.TrackingSheet)
                 },
             )
