@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -113,8 +114,16 @@ fun MangaScreen(
     chapterFilterText: String,
     onBackPressed: () -> Unit,
 ) {
+
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+
+    /**
+     * CLose the bottom sheet on back if its open
+     */
+    BackHandler(enabled = sheetState.isVisible) {
+        scope.launch { sheetState.hide() }
+    }
 
     val context = LocalContext.current
 
