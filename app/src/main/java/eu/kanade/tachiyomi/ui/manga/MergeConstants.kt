@@ -1,12 +1,8 @@
 package eu.kanade.tachiyomi.ui.manga
 
-object MergeConstants {
+import org.nekomanga.domain.manga.MergeManga
 
-    data class MergeManga(
-        val thumbnail: String,
-        val url: String,
-        val title: String,
-    )
+object MergeConstants {
 
     sealed class IsMergedManga {
         class Yes(val url: String) : IsMergedManga()

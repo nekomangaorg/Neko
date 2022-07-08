@@ -3,7 +3,8 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.Context
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeManga
+import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.manga.MergeManga
 
 object MangaConstants {
 
@@ -33,5 +34,10 @@ object MangaConstants {
         val remove: () -> Unit,
         val search: (String) -> Unit,
         val add: (MergeManga) -> Unit,
+    )
+
+    class ChapterActions(
+        val deleteChapters: (List<ChapterItem>) -> Unit,
+        val clearRemovedChapters: () -> Unit,
     )
 }

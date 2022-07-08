@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -47,6 +48,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
@@ -59,10 +61,12 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
+import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.sheets.ArtworkSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
@@ -113,6 +117,9 @@ fun MangaScreen(
     numberOfChapters: Int,
     chapterHeaderClick: () -> Unit = {},
     chapterFilterText: String,
+    chapters: State<List<ChapterItem>>,
+    removedChapters: State<List<ChapterItem>>,
+    chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
 ) {
 
@@ -129,6 +136,7 @@ fun MangaScreen(
     val context = LocalContext.current
 
     var inLibrary by remember { mutableStateOf(manga.favorite) }
+    val hasRemovedChapters by remember { mutableStateOf(removedChapters.value) }
 
     var currentBottomSheet: BottomSheetScreen? by remember {
         mutableStateOf(null)
@@ -294,6 +302,22 @@ fun MangaScreen(
                         )
 
                     }
+
+                    items(chapters.value) { chapter ->
+                        ChapterRow(themeColor = themeColorState, chapterItem = chapter)
+                    }
+                }
+                if (hasRemovedChapters.isNotEmpty()) {
+                    RemovedChaptersDialog(
+                        themeColorState = themeColorState, chapters = hasRemovedChapters,
+                        onConfirm = { removeDeleted ->
+                            if (removeDeleted) {
+                                chapterActions.deleteChapters(hasRemovedChapters)
+                                chapterActions.clearRemovedChapters
+                            }
+                        },
+                        onDismiss = chapterActions.clearRemovedChapters,
+                    )
                 }
             }
         }

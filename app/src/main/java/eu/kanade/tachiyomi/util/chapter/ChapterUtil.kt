@@ -24,6 +24,13 @@ class ChapterUtil {
             }
         }
 
+        fun relativeDate(chapterDate: Long): String? {
+            return when (chapterDate > 0) {
+                true -> chapterDate.timeSpanFromNow
+                false -> null
+            }
+        }
+
         fun setTextViewForChapter(
             textView: TextView,
             chapter: Chapter,

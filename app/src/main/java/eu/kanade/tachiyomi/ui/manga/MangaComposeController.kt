@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
@@ -107,6 +108,12 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             numberOfChapters = 0,
             chapterHeaderClick = {},
             chapterFilterText = "",
+            chapters = presenter.activeChapters.collectAsState(),
+            removedChapters = presenter.removedChapters.collectAsState(),
+            chapterActions = ChapterActions(
+                deleteChapters = { chapterItems -> presenter.deleteChapters(chapterItems) },
+                clearRemovedChapters = presenter::clearRemovedChapters,
+            ),
         ) { activity?.onBackPressed() }
     }
 

@@ -30,17 +30,18 @@ import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.NekoColors
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 @Composable
-fun ChapterRow(chapter: Chapter, buttonColor: Color, shouldHideChapterTitles: Boolean = false, state: Download.State = Download.State.NOT_DOWNLOADED, progress: Float? = null) {
+fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, shouldHideChapterTitles: Boolean = false) {
+    val chapter = chapterItem.chapter
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -51,7 +52,7 @@ fun ChapterRow(chapter: Chapter, buttonColor: Color, shouldHideChapterTitles: Bo
         Column(modifier = Modifier.align(Alignment.CenterVertically)) {
 
             val titleText = when (shouldHideChapterTitles) {
-                true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapter.chapter_number.toDouble()))
+                true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapter.chapterNumber.toDouble()))
                 false -> chapter.name
             }
 
@@ -62,7 +63,7 @@ fun ChapterRow(chapter: Chapter, buttonColor: Color, shouldHideChapterTitles: Bo
                         modifier = Modifier
                             .size(16.dp)
                             .align(Alignment.CenterVertically),
-                        tint = buttonColor,
+                        tint = themeColor.buttonColor,
                     )
                 }
                 Text(
@@ -75,28 +76,28 @@ fun ChapterRow(chapter: Chapter, buttonColor: Color, shouldHideChapterTitles: Bo
 
             val statuses = mutableListOf<String>()
 
-            ChapterUtil.relativeDate(chapter)?.let { statuses.add(it) }
+            ChapterUtil.relativeDate(chapter.dateUpload)?.let { statuses.add(it) }
 
-            val showPagesLeft = !chapter.read && chapter.last_page_read > 0
+            val showPagesLeft = !chapter.read && chapter.lastPageRead > 0
             val resources = LocalContext.current.resources
 
-            if (showPagesLeft && chapter.pages_left > 0) {
+            if (showPagesLeft && chapter.pagesLeft > 0) {
                 statuses.add(
-                    resources.getQuantityString(R.plurals.pages_left, chapter.pages_left, chapter.pages_left),
+                    resources.getQuantityString(R.plurals.pages_left, chapter.pagesLeft, chapter.pagesLeft),
                 )
             } else if (showPagesLeft) {
                 statuses.add(
-                    stringResource(id = R.string.page_, chapter.last_page_read + 1),
+                    stringResource(id = R.string.page_, chapter.lastPageRead + 1),
                 )
             }
 
-            if (chapter.scanlator?.isNotBlank() == true) {
-                statuses.add(chapter.scanlator!!)
+            if (chapter.scanlator.isNotBlank()) {
+                statuses.add(chapter.scanlator)
             }
 
             Row {
                 if (chapter.language.isNotNullOrEmpty() && chapter.language.equals("en", true).not()) {
-                    val drawable = AppCompatResources.getDrawable(LocalContext.current, MdLang.fromIsoCode(chapter.language!!)?.iconResId!!)
+                    val drawable = AppCompatResources.getDrawable(LocalContext.current, MdLang.fromIsoCode(chapter.language)?.iconResId!!)
                     Image(
                         painter = rememberDrawablePainter(drawable = drawable),
                         modifier = Modifier
@@ -124,7 +125,7 @@ fun ChapterRow(chapter: Chapter, buttonColor: Color, shouldHideChapterTitles: Bo
 
 
 
-        DownloadButton(buttonColor, state, progress, Modifier.align(Alignment.CenterVertically))
+        DownloadButton(themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress.toFloat(), Modifier.align(Alignment.CenterVertically))
     }
 }
 

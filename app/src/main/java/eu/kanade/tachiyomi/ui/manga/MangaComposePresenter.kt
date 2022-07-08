@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -26,7 +27,6 @@ import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
-import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
@@ -45,7 +45,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.domain.manga.MergeManga
 import org.threeten.bp.ZoneId
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -62,7 +65,7 @@ class MangaComposePresenter(
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
-    val mangaRepository: MangaRepository = Injekt.get(),
+    val mangaRepository: MangaDetailsRepository = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaComposeController>() {
 
     private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)
@@ -104,6 +107,9 @@ class MangaComposePresenter(
     private val _mergeSearchResult = MutableStateFlow<MergeSearchResult>(MergeSearchResult.Loading)
     val mergeSearchResult: StateFlow<MergeSearchResult> = _mergeSearchResult.asStateFlow()
 
+    private val _removedChapters = MutableStateFlow(emptyList<ChapterItem>())
+    val removedChapters: StateFlow<List<ChapterItem>> = _removedChapters.asStateFlow()
+
     private val _currentArtwork = MutableStateFlow(
         Artwork(
             url = "",
@@ -118,6 +124,12 @@ class MangaComposePresenter(
     private val _altTitles = MutableStateFlow<List<String>>(emptyList())
     val altTitles: StateFlow<List<String>> = _altTitles.asStateFlow()
 
+    private val _allChapters = MutableStateFlow<List<ChapterItem>>(emptyList())
+    val allChapters: StateFlow<List<ChapterItem>> = _allChapters.asStateFlow()
+
+    private val _activeChapters = MutableStateFlow<List<ChapterItem>>(emptyList())
+    val activeChapters: StateFlow<List<ChapterItem>> = _activeChapters.asStateFlow()
+
     override fun onCreate() {
         super.onCreate()
         if (!manga.value.initialized) {
@@ -131,6 +143,7 @@ class MangaComposePresenter(
      * Update all flows that dont require network
      */
     fun updateAllFlows() {
+        updateChapterFlow()
         updateCategoryFlows()
         updateTrackingFlows()
         updateExternalFlows()
@@ -142,7 +155,7 @@ class MangaComposePresenter(
     fun onRefresh() {
         _isRefreshing.value = true
         presenterScope.launchIO {
-            mangaRepository.update(manga.value, true).collect { result ->
+            mangaRepository.update(manga.value, true, presenterScope).collect { result ->
                 when (result) {
                     is MangaResult.Error -> {
                         //send a toast
@@ -154,14 +167,23 @@ class MangaComposePresenter(
                     }
                     is MangaResult.UpdatedManga -> {
                         updateMangaFlow()
+                        updateArtworkFlow()
+                    }
+                    is MangaResult.ChaptersRemoved -> {
+                        val removedChapters = allChapters.value.filter {
+                            it.chapter.id in result.chapterIdsRemoved && it.isDownloaded
+                        }
+
+                        if (removedChapters.isNotEmpty()) {
+                            when (preferences.deleteRemovedChapters().get()) {
+                                2 -> deleteChapters(removedChapters)
+                                1 -> {}
+                                else -> _removedChapters.value = removedChapters
+                            }
+                        }
                     }
                 }
             }
-
-            //if (controller?.isNotOnline() == true) {
-            //_isRefreshing.value = false
-            // return@launchIO
-            // }
 
         }
     }
@@ -509,6 +531,34 @@ class MangaComposePresenter(
     }
 
     /**
+     * Updates the visible chapters for a manga
+     */
+    private fun updateChapterFlow() {
+        presenterScope.launchIO {
+            //possibly move this into a chapter repository
+            val allChapters = db.getChapters(mangaId).executeOnIO().mapNotNull { it.toSimpleChapter() }.map { chapter ->
+                val downloadState = when {
+                    downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga.value) -> Download.State.DOWNLOADED
+                    downloadManager.hasQueue() -> downloadManager.queue.find { it.chapter.id == chapter.id }?.status ?: Download.State.default
+                    else -> Download.State.default
+                }
+                ChapterItem(
+                    chapter = chapter,
+                    downloadState = downloadState,
+                    downloadProgress = 0, //TODO figure out how to get this
+                )
+
+            }
+            _allChapters.value = allChapters
+            /**
+             * TODO make sure to copy any logic needed from getChapters() in the old presenter for all the filters and what not
+             * then pass that to active chapters
+             */
+            _activeChapters.value = allChapters
+        }
+    }
+
+    /**
      * Updates the flows for all categories, and manga categories
      */
     private fun updateCategoryFlows() {
@@ -642,5 +692,28 @@ class MangaComposePresenter(
         db.insertManga(editManga).executeAsBlocking()
         updateMangaFlow()
         return editManga.favorite
+    }
+
+    /**
+     * Delete the list of chapters
+     */
+    fun deleteChapters(chapterItems: List<ChapterItem>, isEverything: Boolean = false) {
+        //do on global scope cause we don't want exiting the manga to prevent the deletin
+        launchIO {
+            if (isEverything) {
+                downloadManager.deleteManga(manga.value, sourceManager.getMangadex())
+            } else {
+                downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, manga.value, sourceManager.getMangadex())
+            }
+        }
+
+        updateChapterFlow()
+    }
+
+    /**
+     * clears the removedChapter flow
+     */
+    fun clearRemovedChapters() {
+        _removedChapters.value = emptyList()
     }
 }
