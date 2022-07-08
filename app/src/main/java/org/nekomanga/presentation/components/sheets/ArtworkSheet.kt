@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -73,7 +74,9 @@ fun ArtworkSheet(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween,
             ) {
-                Box(modifier = Modifier.weight(1f)) {
+                Box(modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(currentImage)
