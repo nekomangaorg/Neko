@@ -115,6 +115,9 @@ class MangaComposePresenter(
     )
     val currentArtwork: StateFlow<Artwork> = _currentArtwork.asStateFlow()
 
+    private val _altTitles = MutableStateFlow<List<String>>(emptyList())
+    val altTitles: StateFlow<List<String>> = _altTitles.asStateFlow()
+
     override fun onCreate() {
         super.onCreate()
         if (!manga.value.initialized) {
@@ -133,6 +136,7 @@ class MangaComposePresenter(
         updateExternalFlows()
         updateMergeFlow()
         updateArtworkFlow()
+        updateAltTitlesFlow()
     }
 
     fun onRefresh() {
@@ -606,6 +610,15 @@ class MangaComposePresenter(
     private fun updateMangaFlow() {
         presenterScope.launch {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
+        }
+    }
+
+    /**
+     * Update flows for external links
+     */
+    private fun updateAltTitlesFlow() {
+        presenterScope.launch {
+            _altTitles.value = listOf("test1", "test2", "test3")
         }
     }
 

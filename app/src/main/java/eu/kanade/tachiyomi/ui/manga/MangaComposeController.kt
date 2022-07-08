@@ -53,6 +53,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
     override fun ScreenContent() {
         MangaScreen(
             manga = presenter.manga.collectAsState().value,
+            altTitles = presenter.altTitles.collectAsState(),
             artwork = presenter.currentArtwork.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,

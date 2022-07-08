@@ -37,11 +37,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeManga
@@ -55,7 +58,7 @@ import org.nekomanga.presentation.theme.Shapes
 fun MergeSheet(
     themeColorState: ThemeColorState,
     title: String,
-    altTitles: List<String> = listOf("test", "One piece", "Some really really really long title", "two piece"),
+    altTitles: List<String>,
     isMergedManga: IsMergedManga,
     mergeSearchResults: MergeSearchResult,
     search: (String) -> Unit,
@@ -123,14 +126,14 @@ private fun SuccessResults(mergeMangaList: List<MergeManga>, mergeMangaClick: (M
                 modifier = Modifier
                     .aspectRatio(3f / 4f)
                     .fillMaxWidth(.25f)
+                    .clip(RoundedCornerShape(Shapes.coverRadius))
                     .clickable { mergeMangaClick(item) },
             ) {
                 AsyncImage(
-                    model = item.thumbnail, contentDescription = null,
+                    model = ImageRequest.Builder(LocalContext.current).data(item.thumbnail).crossfade(true).placeholder(Pastel.getColorLight()).build(), contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(Shapes.coverRadius)),
+                        .fillMaxWidth(),
                 )
                 Column(
                     Modifier
@@ -172,18 +175,19 @@ private fun BoxScope.NonSuccessResultsAndChips(themeColorState: ThemeColorState,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Gap(16.dp)
-
         when (searchResults) {
             is MergeSearchResult.Loading -> CircularProgressIndicator(color = themeColorState.buttonColor, modifier = Modifier.size(32.dp))
             is MergeSearchResult.NoResult -> Text(text = stringResource(id = R.string.no_results_found))
             is MergeSearchResult.Error -> Text(text = searchResults.errorMessage)
             else -> {}
         }
+        Gap(16.dp)
         if (altTitles.isNotEmpty()) {
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp),
             ) {
                 val allTitles = listOf(title) + altTitles
                 items(allTitles) { item ->

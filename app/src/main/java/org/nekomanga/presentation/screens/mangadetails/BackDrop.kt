@@ -22,7 +22,7 @@ fun BackDrop(artwork: Artwork, showBackdrop: Boolean, modifier: Modifier = Modif
                 modifier = Modifier
                     .matchParentSize()
                     .background(
-                        Color(artwork.vibrantColor).copy(alpha = .2f),
+                        Color(artwork.vibrantColor).copy(alpha = .15f),
                     ),
             )
         }

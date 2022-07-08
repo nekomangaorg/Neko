@@ -79,6 +79,7 @@ import java.text.DateFormat
 @Composable
 fun MangaScreen(
     manga: Manga,
+    altTitles: State<List<String>>,
     artwork: State<Artwork>,
     isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
@@ -192,6 +193,7 @@ fun MangaScreen(
                         openSheet = openSheet,
                         trackActions = trackActions,
                         title = manga.title,
+                        altTitles = altTitles.value,
                         trackSearchResult = trackSearchResult.value,
                         trackSuggestedDates = trackSuggestedDates.value,
                         externalLinks = externalLinks.value,
@@ -311,6 +313,7 @@ fun SheetLayout(
     tracks: List<Track>,
     dateFormat: DateFormat,
     title: String,
+    altTitles: List<String>,
     trackActions: TrackActions,
     trackSearchResult: TrackSearchResult,
     trackSuggestedDates: TrackingSuggestedDates?,
@@ -428,6 +431,7 @@ fun SheetLayout(
                 themeColorState = themeColorState,
                 isMergedManga = isMergedManga,
                 title = title,
+                altTitles = altTitles,
                 mergeSearchResults = mergeSearchResult,
                 openMergeSource = { url ->
                     closeSheet()
