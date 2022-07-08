@@ -3,6 +3,7 @@ package org.nekomanga.presentation.components
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -135,7 +136,8 @@ fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, onClick: (
             DownloadButton(
                 themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress.toFloat(),
                 Modifier
-                    .align(Alignment.CenterVertically),
+                    .align(Alignment.CenterVertically)
+                    .combinedClickable(onClick = {}, onLongClick = {}),
             )
         }
     }

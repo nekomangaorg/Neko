@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.core.content.getSystemService
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -105,8 +106,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             ),
             genreClick = {},
             genreLongClick = {},
-            quickReadText = presenter.quickReadText.collectAsState(),
-            quickReadClick = {},
+            quickReadText = presenter.nextUnreadChapter.collectAsState(),
             chapterHeaderClick = {},
             chapterFilterText = "",
             chapters = presenter.activeChapters.collectAsState(),
@@ -114,9 +114,18 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             chapterActions = ChapterActions(
                 deleteChapters = { chapterItems -> presenter.deleteChapters(chapterItems) },
                 clearRemovedChapters = presenter::clearRemovedChapters,
-                openChapter = { context, chapterItem -> startActivity(ReaderActivity.newIntent(context, presenter.manga.value, chapterItem.chapter.toDbChapter())) },
+                readNextChapter = { context ->
+                    presenter.nextUnreadChapter.value.simpleChapter?.let {
+                        openChapter(context, it.toDbChapter())
+                    }
+                },
+                openChapter = { context, chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
             ),
         ) { activity?.onBackPressed() }
+    }
+
+    private fun openChapter(context: Context, chapter: Chapter) {
+        startActivity(ReaderActivity.newIntent(context, presenter.manga.value, chapter))
     }
 
     private fun setPalette(drawable: Drawable) {

@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.QuickReadText
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
@@ -112,8 +112,8 @@ class MangaComposePresenter(
     private val _removedChapters = MutableStateFlow(emptyList<ChapterItem>())
     val removedChapters: StateFlow<List<ChapterItem>> = _removedChapters.asStateFlow()
 
-    private val _quickReadText = MutableStateFlow(QuickReadText())
-    val quickReadText: StateFlow<QuickReadText> = _quickReadText.asStateFlow()
+    private val _nextUnreadChapter = MutableStateFlow(NextUnreadChapter())
+    val nextUnreadChapter: StateFlow<NextUnreadChapter> = _nextUnreadChapter.asStateFlow()
 
     private val _currentArtwork = MutableStateFlow(
         Artwork(
@@ -564,7 +564,7 @@ class MangaComposePresenter(
             _activeChapters.value = allChapters
 
             //do this after so the text gets updated
-            updateQuickReadTextFlow()
+            updateNextUnreadChapter()
         }
     }
 
@@ -730,11 +730,11 @@ class MangaComposePresenter(
     /**
      * Get Quick read text for the button
      */
-    private fun updateQuickReadTextFlow() {
+    private fun updateNextUnreadChapter() {
         presenterScope.launch {
             val nextChapter = chapterSort.getNextUnreadChapter(activeChapters.value.map { it.chapter.toDbChapter() })?.toSimpleChapter()
-            _quickReadText.value = when (nextChapter == null) {
-                true -> QuickReadText()
+            _nextUnreadChapter.value = when (nextChapter == null) {
+                true -> NextUnreadChapter()
                 false -> {
                     val id = when (nextChapter.lastPageRead > 0) {
                         true -> R.string.continue_reading_
@@ -749,7 +749,7 @@ class MangaComposePresenter(
                             nextChapter.chapterText
                         }
 
-                    QuickReadText(id, readTxt)
+                    NextUnreadChapter(id, readTxt, nextChapter)
                 }
             }
         }

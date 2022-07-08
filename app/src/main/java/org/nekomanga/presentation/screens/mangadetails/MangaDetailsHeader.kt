@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.QuickReadText
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import jp.wasabeef.gap.Gap
 import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.domain.manga.Artwork
@@ -65,7 +65,7 @@ fun MangaDetailsHeader(
     shareClick: () -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
-    quickReadText: QuickReadText,
+    quickReadText: NextUnreadChapter,
     quickReadClick: () -> Unit = {},
     numberOfChapters: Int,
     chapterHeaderClick: () -> Unit = {},
@@ -76,7 +76,7 @@ fun MangaDetailsHeader(
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
         val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
-
+        
         val isExpanded = rememberSaveable {
             when (isTablet) {
                 false -> mutableStateOf(manga.favorite.not())

@@ -5,11 +5,15 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.MergeManga
 
 object MangaConstants {
 
-    data class QuickReadText(@StringRes val id: Int? = null, val text: String = "")
+    /**
+     * Holds the next unread chapter and the text to display for the quick read button.
+     */
+    data class NextUnreadChapter(@StringRes val id: Int? = null, val text: String = "", val simpleChapter: SimpleChapter? = null)
 
     class CategoryActions(
         val set: (List<Category>) -> Unit = {},
@@ -43,5 +47,6 @@ object MangaConstants {
         val deleteChapters: (List<ChapterItem>) -> Unit,
         val clearRemovedChapters: () -> Unit,
         val openChapter: (Context, ChapterItem) -> Unit,
+        val readNextChapter: (Context) -> Unit,
     )
 }

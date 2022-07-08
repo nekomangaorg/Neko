@@ -51,7 +51,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.QuickReadText
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
@@ -114,8 +114,7 @@ fun MangaScreen(
     shareClick: (Context) -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
-    quickReadText: State<QuickReadText>,
-    quickReadClick: () -> Unit = {},
+    quickReadText: State<NextUnreadChapter>,
     chapterHeaderClick: () -> Unit = {},
     chapterFilterText: String,
     chapters: State<List<ChapterItem>>,
@@ -295,7 +294,7 @@ fun MangaScreen(
                             shareClick = { shareClick(context) },
                             genreClick = genreClick,
                             genreLongClick = genreLongClick,
-                            quickReadClick = quickReadClick,
+                            quickReadClick = { chapterActions.readNextChapter(context) },
                             quickReadText = quickReadText.value,
                             numberOfChapters = chapters.value.size,
                             chapterHeaderClick = chapterHeaderClick,

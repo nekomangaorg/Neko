@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -26,7 +27,11 @@ fun DownloadButton(buttonColor: Color, state: Download.State, progress: Float, m
     val errorColor = MaterialTheme.colorScheme.errorContainer
     val errorIconColor = MaterialTheme.colorScheme.onErrorContainer
 
-    CombinedClickableIconButton(modifier = modifier) {
+    CombinedClickableIconButton(
+        modifier = Modifier
+            .clip(CircleShape)
+            .then(modifier),
+    ) {
 
         val download = when (state) {
             Download.State.CHECKED -> DownloadHolder(Icons.Filled.Check, MaterialTheme.colorScheme.surface, buttonColor, Color.Transparent)

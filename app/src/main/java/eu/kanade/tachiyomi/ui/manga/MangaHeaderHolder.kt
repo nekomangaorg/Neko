@@ -47,7 +47,7 @@ class MangaHeaderHolder(
             NekoTheme {
                 val trackServiceCount: Int by presenter.trackServiceCountState.collectAsState()
 
-                val quickReadText = MangaConstants.QuickReadText()
+                val quickReadText = MangaConstants.NextUnreadChapter()
 
                 var inLibrary by remember { mutableStateOf(manga.favorite) }
 
