@@ -64,6 +64,7 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
@@ -304,7 +305,7 @@ fun MangaScreen(
                     }
 
                     items(chapters.value) { chapter ->
-                        ChapterRow(themeColor = themeColorState, chapterItem = chapter)
+                        ChapterRow(themeColor = themeColorState, chapterItem = chapter, onClick = { chapterActions.openChapter(context, chapter) })
                     }
                 }
                 if (hasRemovedChapters.isNotEmpty()) {

@@ -448,7 +448,7 @@ class MangaComposePresenter(
     fun setCover(url: String) {
         coverCache.setCustomCoverToCache(manga.value, url)
         MangaCoverMetadata.remove(mangaId)
-        updateArtwork(url)
+        updateCurrentArtworkFlow(url)
     }
 
     /**
@@ -457,7 +457,7 @@ class MangaComposePresenter(
     fun resetCover() {
         coverCache.deleteCustomCover(manga.value)
         MangaCoverMetadata.remove(mangaId)
-        updateArtwork()
+        updateCurrentArtworkFlow()
     }
 
     /**
@@ -531,7 +531,7 @@ class MangaComposePresenter(
     /**
      * Updates the artwork flow
      */
-    private fun updateArtwork(url: String = "") {
+    private fun updateCurrentArtworkFlow(url: String = "") {
         presenterScope.launch {
             _currentArtwork.value = Artwork(url = url, inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId)
         }
@@ -743,17 +743,26 @@ class MangaComposePresenter(
                     val readTxt =
                         if (nextChapter.isMergedChapter() || (nextChapter.volume.isEmpty() && nextChapter.chapterText.isEmpty())) {
                             nextChapter.name
+                        } else if (nextChapter.volume.isNotEmpty()) {
+                            "Vol. " + nextChapter.volume + " " + nextChapter.chapterText
                         } else {
-                            val vol = if (nextChapter.volume.isNotEmpty()) {
-                                "Vol. " + nextChapter.volume
-                            } else {
-                                ""
-                            }
-                            vol + " " + nextChapter.chapterText
+                            nextChapter.chapterText
                         }
+
                     QuickReadText(id, readTxt)
                 }
             }
+        }
+    }
+
+    /**
+     * This method request updates after the actitivy resumed (usually after a return from the reader)
+     */
+    fun resume() {
+        presenterScope.launch {
+            updateMangaFlow()
+            updateChapterFlows()
+            updateTrackingFlows()
         }
     }
 }

@@ -42,5 +42,6 @@ object MangaConstants {
     class ChapterActions(
         val deleteChapters: (List<ChapterItem>) -> Unit,
         val clearRemovedChapters: () -> Unit,
+        val openChapter: (Context, ChapterItem) -> Unit,
     )
 }

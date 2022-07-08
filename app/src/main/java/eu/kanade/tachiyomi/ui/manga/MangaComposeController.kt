@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -21,6 +22,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -112,6 +114,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             chapterActions = ChapterActions(
                 deleteChapters = { chapterItems -> presenter.deleteChapters(chapterItems) },
                 clearRemovedChapters = presenter::clearRemovedChapters,
+                openChapter = { context, chapterItem -> startActivity(ReaderActivity.newIntent(context, presenter.manga.value, chapterItem.chapter.toDbChapter())) },
             ),
         ) { activity?.onBackPressed() }
     }
@@ -201,6 +204,13 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             } catch (e: Exception) {
                 context.toast(e.message)
             }
+        }
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        if (presenter.isScopeInitialized) {
+            presenter.resume()
         }
     }
 }

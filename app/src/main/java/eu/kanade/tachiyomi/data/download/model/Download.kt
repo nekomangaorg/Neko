@@ -11,13 +11,16 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
 
     var pages: List<Page>? = null
 
-    @Volatile @Transient
+    @Volatile
+    @Transient
     var totalProgress: Int = 0
 
-    @Volatile @Transient
+    @Volatile
+    @Transient
     var downloadedImages: Int = 0
 
-    @Volatile @Transient
+    @Volatile
+    @Transient
     var status: State = State.default
         set(status) {
             field = status
@@ -25,9 +28,11 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
             statusCallback?.invoke(this)
         }
 
-    @Transient private var statusSubject: PublishSubject<Download>? = null
+    @Transient
+    private var statusSubject: PublishSubject<Download>? = null
 
-    @Transient private var statusCallback: ((Download) -> Unit)? = null
+    @Transient
+    private var statusCallback: ((Download) -> Unit)? = null
 
     val pageProgress: Int
         get() {
@@ -60,6 +65,10 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
 
         companion object {
             val default = NOT_DOWNLOADED
+        }
+
+        fun isActive(): Boolean {
+            return this == QUEUE || this == DOWNLOADING
         }
     }
 }

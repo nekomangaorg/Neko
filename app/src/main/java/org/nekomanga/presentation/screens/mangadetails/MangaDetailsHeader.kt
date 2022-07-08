@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,8 +37,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.QuickReadText
 import jp.wasabeef.gap.Gap
 import me.saket.cascade.CascadeDropdownMenu
-import onColor
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -68,111 +71,115 @@ fun MangaDetailsHeader(
     chapterHeaderClick: () -> Unit = {},
     chapterFilterText: String,
 ) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme, LocalTextSelectionColors provides themeColor.textSelectionColors) {
 
-    var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
+        var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
-    val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
+        val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
 
-    val isExpanded = rememberSaveable {
-        when (isTablet) {
-            false -> mutableStateOf(manga.favorite.not())
-            true -> mutableStateOf(true)
+        val isExpanded = rememberSaveable {
+            when (isTablet) {
+                false -> mutableStateOf(manga.favorite.not())
+                true -> mutableStateOf(true)
+            }
         }
-    }
 
-    Column {
-        Box {
-            BackDrop(
-                artwork = artwork,
-                showBackdrop = showBackdrop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeightIn(250.dp, 400.dp),
-                generatePalette = generatePalette,
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface),
-                        ),
-                    ),
-            )
-
-            Column(modifier = Modifier.align(Alignment.BottomStart)) {
-                InformationBlock(
-                    manga = manga,
+        Column {
+            Box {
+                BackDrop(
+                    artwork = artwork,
+                    showBackdrop = showBackdrop,
                     modifier = Modifier
-                        .statusBarsPadding()
-                        .padding(top = 70.dp),
-                    isExpanded = isExpanded.value,
-                    isMerged = isMerged,
-                    titleLongClick = titleLongClick,
-                    creatorLongClicked = creatorLongClick,
+                        .fillMaxWidth()
+                        .requiredHeightIn(250.dp, 400.dp),
+                    generatePalette = generatePalette,
                 )
-                Gap(height = 24.dp)
-                ButtonBlock(
-                    isMerged = isMerged,
-                    inLibrary = inLibrary,
-                    loggedIntoTrackers = loggedIntoTrackers,
-                    trackServiceCount = trackServiceCount,
-                    themeColor = themeColor,
-                    favoriteClick = {
-                        if (inLibrary.not()) {
-                            toggleFavorite()
-                        } else {
-                            favoriteExpanded = true
-                        }
-                    },
-                    trackingClick = trackingClick,
-                    artworkClick = artworkClick,
-                    similarClick = similarClick,
-                    mergeClick = mergeClick,
-                    linksClick = linksClick,
-                    shareClick = shareClick,
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface),
+                            ),
+                        ),
                 )
-                FavoriteDropDown(
-                    favoriteExpanded = favoriteExpanded,
-                    categories = categories,
-                    moveCategories = moveCategories,
-                    toggleFavorite = toggleFavorite,
-                    onDismiss = { favoriteExpanded = false },
-                )
-            }
-        }
-        Gap(16.dp)
-        DescriptionBlock(
-            manga = manga,
-            themeColor = themeColor,
-            isExpanded = isExpanded.value,
-            isTablet = isTablet,
-            expandCollapseClick = {
-                //dont expand/collapse when tablet
-                if (isTablet.not()) {
-                    isExpanded.value = isExpanded.value.not()
+
+                Column(modifier = Modifier.align(Alignment.BottomStart)) {
+                    InformationBlock(
+                        manga = manga,
+                        modifier = Modifier
+                            .statusBarsPadding()
+                            .padding(top = 70.dp),
+                        isExpanded = isExpanded.value,
+                        isMerged = isMerged,
+                        titleLongClick = titleLongClick,
+                        creatorLongClicked = creatorLongClick,
+                    )
+                    Gap(height = 24.dp)
+                    ButtonBlock(
+                        isMerged = isMerged,
+                        inLibrary = inLibrary,
+                        loggedIntoTrackers = loggedIntoTrackers,
+                        trackServiceCount = trackServiceCount,
+                        themeColor = themeColor,
+                        favoriteClick = {
+                            if (inLibrary.not()) {
+                                toggleFavorite()
+                            } else {
+                                favoriteExpanded = true
+                            }
+                        },
+                        trackingClick = trackingClick,
+                        artworkClick = artworkClick,
+                        similarClick = similarClick,
+                        mergeClick = mergeClick,
+                        linksClick = linksClick,
+                        shareClick = shareClick,
+                    )
+                    FavoriteDropDown(
+                        favoriteExpanded = favoriteExpanded,
+                        categories = categories,
+                        moveCategories = moveCategories,
+                        toggleFavorite = toggleFavorite,
+                        onDismiss = { favoriteExpanded = false },
+                    )
                 }
-            },
-            genreClick = genreClick,
-            genreLongClick = genreLongClick,
-        )
-        if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
-            Gap(16.dp)
-            ElevatedButton(
-                onClick = quickReadClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
-                colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
-            ) {
-                Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = themeColor.buttonColor.onColor())
             }
+            Gap(16.dp)
+            DescriptionBlock(
+                manga = manga,
+                themeColor = themeColor,
+                isExpanded = isExpanded.value,
+                isTablet = isTablet,
+                expandCollapseClick = {
+                    //dont expand/collapse when tablet
+                    if (isTablet.not()) {
+                        isExpanded.value = isExpanded.value.not()
+                    }
+                },
+                genreClick = genreClick,
+                genreLongClick = genreLongClick,
+            )
+            if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
+                Gap(16.dp)
+                CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColor.altContainerColor)) {
+                    ElevatedButton(
+                        onClick = quickReadClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
+                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
+                    ) {
+                        Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)
+                    }
+                }
+            }
+            Gap(8.dp)
+            ChapterHeader(themeColor = themeColor, numberOfChapters = numberOfChapters, filterText = chapterFilterText, onClick = chapterHeaderClick)
         }
-        Gap(8.dp)
-        ChapterHeader(themeColor = themeColor, numberOfChapters = numberOfChapters, filterText = chapterFilterText, onClick = chapterHeaderClick)
     }
 }
 

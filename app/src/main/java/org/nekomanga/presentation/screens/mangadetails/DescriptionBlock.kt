@@ -17,12 +17,10 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,82 +73,80 @@ fun DescriptionBlock(
     }
 
     val interactionSource = remember { MutableInteractionSource() }
-    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = expandCollapseClick,
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = expandCollapseClick,
+            ),
+        // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
+    ) {
+
+        if (isExpanded.not()) {
+            val text = description.replace(
+                Regex(
+                    "[\\r\\n\\s*]{2,}",
+                    setOf(RegexOption.MULTILINE),
                 ),
-            // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
-        ) {
+                "\n",
+            )
 
-            if (isExpanded.not()) {
-                val text = description.replace(
-                    Regex(
-                        "[\\r\\n\\s*]{2,}",
-                        setOf(RegexOption.MULTILINE),
-                    ),
-                    "\n",
+            val lineHeight = with(LocalDensity.current) {
+                MaterialTheme.typography.bodyLarge.fontSize.toDp() + 5.dp
+            }
+
+            Box {
+                Text(
+                    modifier = Modifier.align(Alignment.TopStart),
+                    text = text,
+                    maxLines = 3,
+                    style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)),
                 )
-
-                val lineHeight = with(LocalDensity.current) {
-                    MaterialTheme.typography.bodyLarge.fontSize.toDp() + 5.dp
-                }
-
-                Box {
-                    Text(
-                        modifier = Modifier.align(Alignment.TopStart),
-                        text = text,
-                        maxLines = 3,
-                        style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)),
-                    )
-                    Box(
-                        modifier = Modifier
-                            .height(lineHeight)
-                            .align(Alignment.BottomEnd)
-                            .width(150.dp)
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface.copy(alpha = .8f), MaterialTheme.colorScheme.surface),
-                                ),
+                Box(
+                    modifier = Modifier
+                        .height(lineHeight)
+                        .align(Alignment.BottomEnd)
+                        .width(150.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface.copy(alpha = .8f), MaterialTheme.colorScheme.surface),
                             ),
-                    ) {
-                        MoreLessButton(themeColor.buttonColor, true, Modifier.align(Alignment.TopEnd))
-                    }
+                        ),
+                ) {
+                    MoreLessButton(themeColor.buttonColor, true, Modifier.align(Alignment.TopEnd))
                 }
-            } else {
-                val text = description.trim()
-                SelectionContainer {
-                    Markdown(
-                        content = text,
-                        colors = markdownColors(),
-                        typography = markdownTypography(),
-                        flavour = CommonMarkFlavourDescriptor(),
-                        modifier = Modifier.clickable {
-                            expandCollapseClick()
-                        },
-                    )
-                }
+            }
+        } else {
+            val text = description.trim()
+            SelectionContainer {
+                Markdown(
+                    content = text,
+                    colors = markdownColors(),
+                    typography = markdownTypography(),
+                    flavour = CommonMarkFlavourDescriptor(),
+                    modifier = Modifier.clickable {
+                        expandCollapseClick()
+                    },
+                )
+            }
 
+            Gap(16.dp)
+
+
+
+            Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
+
+            if (isTablet.not()) {
                 Gap(16.dp)
-
-
-
-                Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
-
-                if (isTablet.not()) {
-                    Gap(16.dp)
-                    MoreLessButton(
-                        buttonColor = themeColor.buttonColor,
-                        isMore = false,
-                        Modifier
-                            .clickable(onClick = expandCollapseClick)
-                            .align(Alignment.End),
-                    )
-                }
+                MoreLessButton(
+                    buttonColor = themeColor.buttonColor,
+                    isMore = false,
+                    Modifier
+                        .clickable(onClick = expandCollapseClick)
+                        .align(Alignment.End),
+                )
             }
         }
     }

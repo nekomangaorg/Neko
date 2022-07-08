@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.screens
+package org.nekomanga.presentation.components
 
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
@@ -35,25 +35,29 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.chapter.ChapterItem
-import org.nekomanga.presentation.components.DownloadButton
-import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.screens.ThemeColorState
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 @Composable
-fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, shouldHideChapterTitles: Boolean = false) {
+fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, onClick: () -> Unit, shouldHideChapterTitles: Boolean = false) {
     val chapter = chapterItem.chapter
     CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { }
+                .clickable { onClick() }
                 .padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .fillMaxWidth(.8f),
+            ) {
 
                 val titleText = when (shouldHideChapterTitles) {
                     true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapter.chapterNumber.toDouble()))
@@ -69,6 +73,7 @@ fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, shouldHide
                                 .align(Alignment.CenterVertically),
                             tint = themeColor.buttonColor,
                         )
+                        Gap(4.dp)
                     }
                     Text(
                         text = titleText,
@@ -127,7 +132,11 @@ fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, shouldHide
 
             }
 
-            DownloadButton(themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress.toFloat(), Modifier.align(Alignment.CenterVertically))
+            DownloadButton(
+                themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress.toFloat(),
+                Modifier
+                    .align(Alignment.CenterVertically),
+            )
         }
     }
 }
@@ -142,7 +151,7 @@ fun ChapterRowTester(buttonColor: Color, state: Download.State = Download.State.
             horizontalArrangement = Arrangement.End,
         ) {
             Text(text = "Downloaded", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.DOWNLOADED, null, Modifier.align(Alignment.CenterVertically))
+            DownloadButton(buttonColor, Download.State.DOWNLOADED, 0f, Modifier.align(Alignment.CenterVertically))
         }
 
         Row(
@@ -162,7 +171,7 @@ fun ChapterRowTester(buttonColor: Color, state: Download.State = Download.State.
             horizontalArrangement = Arrangement.End,
         ) {
             Text(text = "NotDownloaded", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.NOT_DOWNLOADED, null, Modifier.align(Alignment.CenterVertically))
+            DownloadButton(buttonColor, Download.State.NOT_DOWNLOADED, 0f, Modifier.align(Alignment.CenterVertically))
         }
 
         Row(
@@ -182,7 +191,7 @@ fun ChapterRowTester(buttonColor: Color, state: Download.State = Download.State.
             horizontalArrangement = Arrangement.End,
         ) {
             Text(text = "Checked", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.CHECKED, null, Modifier.align(Alignment.CenterVertically))
+            DownloadButton(buttonColor, Download.State.CHECKED, 0f, Modifier.align(Alignment.CenterVertically))
         }
 
         Row(
@@ -192,7 +201,7 @@ fun ChapterRowTester(buttonColor: Color, state: Download.State = Download.State.
             horizontalArrangement = Arrangement.End,
         ) {
             Text(text = "Error", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.ERROR, null, Modifier.align(Alignment.CenterVertically))
+            DownloadButton(buttonColor, Download.State.ERROR, 0f, Modifier.align(Alignment.CenterVertically))
         }
     }
 }
