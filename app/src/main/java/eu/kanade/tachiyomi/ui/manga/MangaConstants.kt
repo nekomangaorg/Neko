@@ -1,12 +1,15 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
+import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.MergeManga
 
 object MangaConstants {
+
+    data class QuickReadText(@StringRes val id: Int? = null, val text: String = "")
 
     class CategoryActions(
         val set: (List<Category>) -> Unit = {},

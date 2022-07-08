@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.QuickReadText
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
@@ -35,6 +36,7 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange.EditTracki
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -110,6 +112,9 @@ class MangaComposePresenter(
     private val _removedChapters = MutableStateFlow(emptyList<ChapterItem>())
     val removedChapters: StateFlow<List<ChapterItem>> = _removedChapters.asStateFlow()
 
+    private val _quickReadText = MutableStateFlow(QuickReadText())
+    val quickReadText: StateFlow<QuickReadText> = _quickReadText.asStateFlow()
+
     private val _currentArtwork = MutableStateFlow(
         Artwork(
             url = "",
@@ -130,6 +135,8 @@ class MangaComposePresenter(
     private val _activeChapters = MutableStateFlow<List<ChapterItem>>(emptyList())
     val activeChapters: StateFlow<List<ChapterItem>> = _activeChapters.asStateFlow()
 
+    private val chapterSort = ChapterSort(manga.value, chapterFilter, preferences)
+
     override fun onCreate() {
         super.onCreate()
         if (!manga.value.initialized) {
@@ -143,7 +150,7 @@ class MangaComposePresenter(
      * Update all flows that dont require network
      */
     fun updateAllFlows() {
-        updateChapterFlow()
+        updateChapterFlows()
         updateCategoryFlows()
         updateTrackingFlows()
         updateExternalFlows()
@@ -533,7 +540,7 @@ class MangaComposePresenter(
     /**
      * Updates the visible chapters for a manga
      */
-    private fun updateChapterFlow() {
+    private fun updateChapterFlows() {
         presenterScope.launchIO {
             //possibly move this into a chapter repository
             val allChapters = db.getChapters(mangaId).executeOnIO().mapNotNull { it.toSimpleChapter() }.map { chapter ->
@@ -555,6 +562,9 @@ class MangaComposePresenter(
              * then pass that to active chapters
              */
             _activeChapters.value = allChapters
+
+            //do this after so the text gets updated
+            updateQuickReadTextFlow()
         }
     }
 
@@ -707,7 +717,7 @@ class MangaComposePresenter(
             }
         }
 
-        updateChapterFlow()
+        updateChapterFlows()
     }
 
     /**
@@ -715,5 +725,35 @@ class MangaComposePresenter(
      */
     fun clearRemovedChapters() {
         _removedChapters.value = emptyList()
+    }
+
+    /**
+     * Get Quick read text for the button
+     */
+    private fun updateQuickReadTextFlow() {
+        presenterScope.launch {
+            val nextChapter = chapterSort.getNextUnreadChapter(activeChapters.value.map { it.chapter.toDbChapter() })?.toSimpleChapter()
+            _quickReadText.value = when (nextChapter == null) {
+                true -> QuickReadText()
+                false -> {
+                    val id = when (nextChapter.lastPageRead > 0) {
+                        true -> R.string.continue_reading_
+                        false -> R.string.start_reading_
+                    }
+                    val readTxt =
+                        if (nextChapter.isMergedChapter() || (nextChapter.volume.isEmpty() && nextChapter.chapterText.isEmpty())) {
+                            nextChapter.name
+                        } else {
+                            val vol = if (nextChapter.volume.isNotEmpty()) {
+                                "Vol. " + nextChapter.volume
+                            } else {
+                                ""
+                            }
+                            vol + " " + nextChapter.chapterText
+                        }
+                    QuickReadText(id, readTxt)
+                }
+            }
+        }
     }
 }

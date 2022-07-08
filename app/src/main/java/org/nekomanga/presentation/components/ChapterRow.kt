@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,90 +44,91 @@ import java.text.DecimalFormatSymbols
 @Composable
 fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, shouldHideChapterTitles: Boolean = false) {
     val chapter = chapterItem.chapter
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { }
-            .padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
 
-            val titleText = when (shouldHideChapterTitles) {
-                true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapter.chapterNumber.toDouble()))
-                false -> chapter.name
-            }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { }
+                .padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
 
-            Row {
-                if (chapter.bookmark) {
-                    Icon(
-                        imageVector = Icons.Filled.Bookmark, contentDescription = null,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .align(Alignment.CenterVertically),
-                        tint = themeColor.buttonColor,
+                val titleText = when (shouldHideChapterTitles) {
+                    true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapter.chapterNumber.toDouble()))
+                    false -> chapter.name
+                }
+
+                Row {
+                    if (chapter.bookmark) {
+                        Icon(
+                            imageVector = Icons.Filled.Bookmark, contentDescription = null,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .align(Alignment.CenterVertically),
+                            tint = themeColor.buttonColor,
+                        )
+                    }
+                    Text(
+                        text = titleText,
+                        style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium, letterSpacing = (-.6).sp),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Text(
-                    text = titleText,
-                    style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium, letterSpacing = (-.6).sp),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
 
-            val statuses = mutableListOf<String>()
+                val statuses = mutableListOf<String>()
 
-            ChapterUtil.relativeDate(chapter.dateUpload)?.let { statuses.add(it) }
+                ChapterUtil.relativeDate(chapter.dateUpload)?.let { statuses.add(it) }
 
-            val showPagesLeft = !chapter.read && chapter.lastPageRead > 0
-            val resources = LocalContext.current.resources
+                val showPagesLeft = !chapter.read && chapter.lastPageRead > 0
+                val resources = LocalContext.current.resources
 
-            if (showPagesLeft && chapter.pagesLeft > 0) {
-                statuses.add(
-                    resources.getQuantityString(R.plurals.pages_left, chapter.pagesLeft, chapter.pagesLeft),
-                )
-            } else if (showPagesLeft) {
-                statuses.add(
-                    stringResource(id = R.string.page_, chapter.lastPageRead + 1),
-                )
-            }
-
-            if (chapter.scanlator.isNotBlank()) {
-                statuses.add(chapter.scanlator)
-            }
-
-            Row {
-                if (chapter.language.isNotNullOrEmpty() && chapter.language.equals("en", true).not()) {
-                    val drawable = AppCompatResources.getDrawable(LocalContext.current, MdLang.fromIsoCode(chapter.language)?.iconResId!!)
-                    Image(
-                        painter = rememberDrawablePainter(drawable = drawable),
-                        modifier = Modifier
-                            .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        contentDescription = "flag",
+                if (showPagesLeft && chapter.pagesLeft > 0) {
+                    statuses.add(
+                        resources.getQuantityString(R.plurals.pages_left, chapter.pagesLeft, chapter.pagesLeft),
+                    )
+                } else if (showPagesLeft) {
+                    statuses.add(
+                        stringResource(id = R.string.page_, chapter.lastPageRead + 1),
                     )
                 }
-                Text(
-                    text = statuses.joinToString(" • "),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast),
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = (-.6).sp,
-                    ),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
 
-                statuses.joinToString(" • ")
+                if (chapter.scanlator.isNotBlank()) {
+                    statuses.add(chapter.scanlator)
+                }
+
+                Row {
+                    if (chapter.language.isNotNullOrEmpty() && chapter.language.equals("en", true).not()) {
+                        val drawable = AppCompatResources.getDrawable(LocalContext.current, MdLang.fromIsoCode(chapter.language)?.iconResId!!)
+                        Image(
+                            painter = rememberDrawablePainter(drawable = drawable),
+                            modifier = Modifier
+                                .height(16.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            contentDescription = "flag",
+                        )
+                    }
+                    Text(
+                        text = statuses.joinToString(" • "),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast),
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = (-.6).sp,
+                        ),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+
+                    statuses.joinToString(" • ")
+
+                }
 
             }
 
+            DownloadButton(themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress.toFloat(), Modifier.align(Alignment.CenterVertically))
         }
-
-
-
-        DownloadButton(themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress.toFloat(), Modifier.align(Alignment.CenterVertically))
     }
 }
 

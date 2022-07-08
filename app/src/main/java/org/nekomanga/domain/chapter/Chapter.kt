@@ -155,7 +155,7 @@ fun Chapter.toSimpleChapter(): SimpleChapter? {
 data class ChapterItem(
     val chapter: SimpleChapter,
     val downloadState: Download.State = Download.State.default,
-    val downloadProgress: Int = 0,
+    val downloadProgress: Int = -1,
 ) {
     val isDownloaded = downloadState == Download.State.DOWNLOADED
 }

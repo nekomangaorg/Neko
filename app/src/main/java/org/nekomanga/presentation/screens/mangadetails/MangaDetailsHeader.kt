@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.QuickReadText
 import jp.wasabeef.gap.Gap
 import me.saket.cascade.CascadeDropdownMenu
 import onColor
@@ -61,7 +62,7 @@ fun MangaDetailsHeader(
     shareClick: () -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
-    quickReadText: String = "",
+    quickReadText: QuickReadText,
     quickReadClick: () -> Unit = {},
     numberOfChapters: Int,
     chapterHeaderClick: () -> Unit = {},
@@ -158,7 +159,7 @@ fun MangaDetailsHeader(
             genreLongClick = genreLongClick,
         )
         Gap(16.dp)
-        if (quickReadText.isNotEmpty()) {
+        if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
             ElevatedButton(
                 onClick = quickReadClick,
                 modifier = Modifier
@@ -167,7 +168,7 @@ fun MangaDetailsHeader(
                 contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
                 colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
             ) {
-                Text(text = quickReadText, style = MaterialTheme.typography.titleMedium, color = themeColor.buttonColor.onColor())
+                Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = themeColor.buttonColor.onColor())
             }
         }
 

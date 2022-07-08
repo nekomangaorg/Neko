@@ -13,7 +13,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -48,7 +47,7 @@ class MangaHeaderHolder(
             NekoTheme {
                 val trackServiceCount: Int by presenter.trackServiceCountState.collectAsState()
 
-                val quickReadText = getQuickReadText(presenter, LocalContext.current)
+                val quickReadText = MangaConstants.QuickReadText()
 
                 var inLibrary by remember { mutableStateOf(manga.favorite) }
 

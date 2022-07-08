@@ -34,7 +34,7 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChapters: Int, filterText
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(16.dp),
+                .padding(8.dp),
         ) {
             ChapterText(
                 numberOfChapters,
@@ -90,7 +90,7 @@ private fun FilterIcon(buttonColor: Color, modifier: Modifier = Modifier) {
     Icon(
         imageVector = Icons.Filled.FilterList,
         modifier = modifier
-            .size(32.dp),
+            .size(28.dp),
         tint = buttonColor, contentDescription = null,
     )
 }
