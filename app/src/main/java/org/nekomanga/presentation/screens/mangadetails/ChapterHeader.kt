@@ -34,7 +34,7 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChapters: Int, filterText
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(8.dp),
+                .padding(horizontal = 8.dp, vertical = 12.dp),
         ) {
             ChapterText(
                 numberOfChapters,

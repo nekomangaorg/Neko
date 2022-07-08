@@ -158,8 +158,8 @@ fun MangaDetailsHeader(
             genreClick = genreClick,
             genreLongClick = genreLongClick,
         )
-        Gap(16.dp)
         if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
+            Gap(16.dp)
             ElevatedButton(
                 onClick = quickReadClick,
                 modifier = Modifier
@@ -171,7 +171,6 @@ fun MangaDetailsHeader(
                 Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = themeColor.buttonColor.onColor())
             }
         }
-
         Gap(8.dp)
         ChapterHeader(themeColor = themeColor, numberOfChapters = numberOfChapters, filterText = chapterFilterText, onClick = chapterHeaderClick)
     }
