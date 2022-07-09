@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.util.lang
 
 import android.content.Context
 import android.graphics.Typeface
-import android.os.Build
-import android.text.Html
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -15,6 +13,7 @@ import android.text.style.StyleSpan
 import android.text.style.SuperscriptSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
+import androidx.core.text.parseAsHtml
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import java.util.Locale
@@ -208,9 +207,5 @@ fun String.isUUID() =
  * HTML-decode the string
  */
 fun String.htmlDecode(): String {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY).toString()
-    } else {
-        Html.fromHtml(this).toString()
-    }
+    return this.parseAsHtml().toString()
 }
