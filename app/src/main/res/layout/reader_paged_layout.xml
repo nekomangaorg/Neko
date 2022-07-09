@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            app:title="@string/nav_layout"
+            app:title="@string/tap_zones"
             android:entries="@array/reader_nav" />
 
         <eu.kanade.tachiyomi.widget.MaterialSpinnerView
@@ -111,7 +111,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            app:title="@string/nav_layout"
+            app:title="@string/tap_zones"
             android:entries="@array/reader_nav" />
 
         <eu.kanade.tachiyomi.widget.MaterialSpinnerView

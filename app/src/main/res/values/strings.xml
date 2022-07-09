@@ -362,7 +362,7 @@
     <string name="true_32bit_color">32-bit color</string>
     <string name="page_preload_amount">Page preload amount</string>
     <string name="amount_of_pages_to_preload">The amount of pages to preload when reading. Higher values will result in a smoother reading experience, at the cost of higher cache and network usage.</string>
-    <string name="reduces_banding_impacts_performance">Reduces banding, but impacts
+    <string name="reduces_banding_impacts_performance">Reduces banding, but may impact
         performance</string>
     <string name="invert_double_pages">Invert double pages</string>
     <string name="zoom_double_page_spreads">Zoom into double page spreads</string>
@@ -400,7 +400,7 @@
     <string name="continuous_vertical">Continuous vertical</string>
     <string name="paged">Paged</string>
     <string name="scale_type">Scale type</string>
-    <string name="nav_layout">Navigation layout</string>
+    <string name="tap_zones">Tap zones</string>
     <string name="fit_screen">Fit screen</string>
     <string name="stretch">Stretch</string>
     <string name="fit_width">Fit width</string>
@@ -436,7 +436,7 @@
     <string name="kindlish_nav">Kindle-ish</string>
     <string name="edge_nav">Edge</string>
     <string name="right_and_left_nav">Right and Left</string>
-    <string name="invert_tapping">Invert tapping</string>
+    <string name="invert_tapping">Invert tap zones</string>
     <string name="none">None</string>
     <string name="horizontally">Horizontally</string>
     <string name="vertically">Vertically</string>

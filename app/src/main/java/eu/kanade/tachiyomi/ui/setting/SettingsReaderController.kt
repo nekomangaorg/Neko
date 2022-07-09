@@ -159,7 +159,7 @@ class SettingsReaderController : SettingsController() {
 
             intListPreference(activity) {
                 key = Keys.navigationModePager
-                titleRes = R.string.nav_layout
+                titleRes = R.string.tap_zones
                 entries = context.resources.getStringArray(R.array.reader_nav).also { values ->
                     entryRange = 0..values.size
                 }.toList()
@@ -286,7 +286,7 @@ class SettingsReaderController : SettingsController() {
 
             intListPreference(activity) {
                 key = Keys.navigationModeWebtoon
-                titleRes = R.string.nav_layout
+                titleRes = R.string.tap_zones
                 entries = context.resources.getStringArray(R.array.reader_nav).also { values ->
                     entryRange = 0..values.size
                 }.toList()
