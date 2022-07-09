@@ -156,6 +156,25 @@
         <item name="colorOnDownloadBadge">@color/md_white_1000</item>
     </style>
 
+    <style name="Theme.Tachiyomi.Lavender">
+        <item name="colorPrimary">@color/lavender_primary</item>
+        <item name="colorPrimaryInverse">@color/lavender_primary_inverse</item>
+        <item name="colorPrimaryVariant">@color/lavender_primary_variant</item>
+        <item name="colorOnPrimary">@color/lavender_on_primary</item>
+        <item name="colorSecondary">@color/lavender_secondary</item>
+        <item name="colorOnSecondary">@color/lavender_on_secondary</item>
+        <item name="colorSecondaryVariant">@color/lavender_secondary_variant</item>
+        <item name="colorTertiary">@color/lavender_tertiary</item>
+        <item name="colorOnTertiary">@color/lavender_on_tertiary</item>
+        <item name="colorControlHighlight">@color/lavender_highlight</item>
+        <item name="tabBarIconColor">@color/lavender_tab_bar_icon</item>
+        <item name="background">@color/lavender_background</item>
+        <item name="colorOnBackground">@color/lavender_on_background</item>
+        <item name="colorSurface">@color/lavender_surface</item>
+        <item name="actionBarTintColor">@color/lavender_on_surface</item>
+        <item name="elevationOverlayColor">@color/lavender_elevation_overlay</item>
+    </style>
+
     <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorPrimary">@color/primaryStrawberry</item>
         <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>

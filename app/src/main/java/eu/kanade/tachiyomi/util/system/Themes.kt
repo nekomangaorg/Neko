@@ -46,6 +46,12 @@ enum class Themes(
         R.string.teal_ocean,
         R.string.sapphire_dusk,
     ),
+    LAVENDER(
+        R.style.Theme_Tachiyomi_Lavender,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.lavender,
+        R.string.violet,
+    ),
     GREY_WOLF(
         R.style.Theme_Tachiyomi_GreyWolf,
         AppCompatDelegate.MODE_NIGHT_YES,

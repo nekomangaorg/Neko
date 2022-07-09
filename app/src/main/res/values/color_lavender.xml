@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Colors for Lavender theme
+  ~ Original color scheme by CrepeTF
+  ~
+  ~ Key colors:
+  ~ Primary #9C64D3
+  ~ Secondary #7B46AF
+  ~ Tertiary #EDE2FF
+  ~ Neutral #EDE2FF
+-->
+<resources>
+    <color name="lavender_primary">#9C64D3</color>
+    <color name="lavender_on_primary">#EDE2FF</color>
+    <color name="lavender_primary_variant">#DED3F3</color>
+    <color name="lavender_primary_inverse">#D6BAFF</color>
+    <color name="lavender_secondary">#7B46AF</color>
+    <color name="lavender_on_secondary">#EDE2FF</color>
+    <color name="lavender_highlight">#1F4E2E7E</color>
+    <color name="lavender_secondary_variant">#4D2078</color>
+    <color name="lavender_tertiary">#EDE2FF</color>
+    <color name="lavender_on_tertiary">#7B46AF</color>
+    <color name="lavender_tab_bar_icon">#7B46AF</color>
+    <color name="lavender_background">#EDE2FF</color>
+    <color name="lavender_on_background">#1B1B22</color>
+    <color name="lavender_surface">#EDE2FF</color>
+    <color name="lavender_on_surface">#1B1B22</color>
+    <color name="lavender_elevation_overlay">@color/lavender_primary</color>
+</resources>
