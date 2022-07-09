@@ -613,18 +613,18 @@ class LibraryPresenter(
                 LibraryItem(it, headerItem)
             }.toMutableList()
 
-            val categoriesHidden = preferences.collapsedCategories().get().mapNotNull {
-                it.toIntOrNull()
-            }.toMutableSet()
+            val categoriesHidden = if (forceShowAllCategories) {
+                emptySet()
+            } else {
+                preferences.collapsedCategories().get().mapNotNull { it.toIntOrNull() }.toSet()
+            }
 
             if (categorySet.contains(0)) categories.add(0, createDefaultCategory())
             if (libraryIsGrouped) {
                 categories.forEach { category ->
                     val catId = category.id ?: return@forEach
-                    if (catId > 0 && !categorySet.contains(catId) && (
-                            catId !in categoriesHidden ||
-                                !showAll
-                            )
+                    if (catId > 0 && !categorySet.contains(catId) &&
+                        (catId !in categoriesHidden || !showAll)
                     ) {
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
