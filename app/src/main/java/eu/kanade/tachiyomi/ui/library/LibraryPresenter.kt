@@ -101,6 +101,8 @@ class LibraryPresenter(
         private set
     var allLibraryItems: List<LibraryItem> = emptyList()
         private set
+    private var hiddenLibraryItems: List<LibraryItem> = emptyList()
+    var forceShowAllCategories = false
     val showAllCategories
         get() = preferences.showAllCategories().get()
 
@@ -171,12 +173,13 @@ class LibraryPresenter(
             categories = lastCategories ?: db.getCategories().executeAsBlocking().toMutableList()
         }
         presenterScope.launch {
-            val library = withContext(Dispatchers.IO) { getLibraryFromDB() }
-            library.apply {
-                setDownloadCount(library)
-                setUnreadBadge(library)
-            }
+            val (library, hiddenItems) = withContext(Dispatchers.IO) { getLibraryFromDB() }
+            setDownloadCount(library)
+            setUnreadBadge(library)
+            setDownloadCount(hiddenItems)
+            setUnreadBadge(hiddenItems)
             allLibraryItems = library
+            hiddenLibraryItems = hiddenItems
             var mangaMap = library
             mangaMap = applyFilters(mangaMap)
             mangaMap = applySort(mangaMap)
@@ -279,7 +282,8 @@ class LibraryPresenter(
         val missingCategorySet = categories.mapNotNull { it.id }.toMutableSet()
         val filteredItems = items.filter f@{ item ->
             if (!showEmptyCategoriesWhileFiltering && item.manga.isHidden()) {
-                val subItems = sectionedLibraryItems[item.manga.category]
+                val subItems = sectionedLibraryItems[item.manga.category]?.takeUnless { it.size <= 1 }
+                    ?: hiddenLibraryItems.filter { it.manga.category == item.manga.category }
                 if (subItems.isNullOrEmpty()) return@f filtersOff
                 else {
                     return@f subItems.any {
@@ -574,7 +578,7 @@ class LibraryPresenter(
      *
      * @return an list of all the manga in a itemized form.
      */
-    private fun getLibraryFromDB(): List<LibraryItem> {
+    private fun getLibraryFromDB(): Pair<List<LibraryItem>, List<LibraryItem>> {
         removeArticles = preferences.removeArticles().get()
         val categories = db.getCategories().executeAsBlocking().toMutableList()
         var libraryManga = db.getLibraryMangaList().executeAsBlocking()
@@ -582,6 +586,7 @@ class LibraryPresenter(
         if (groupType > BY_DEFAULT) {
             libraryManga = libraryManga.distinctBy { it.id }
         }
+        val hiddenItems = mutableListOf<LibraryItem>()
 
         val items = if (groupType <= BY_DEFAULT || !libraryIsGrouped) {
             val categoryAll = Category.createAll(
@@ -631,6 +636,7 @@ class LibraryPresenter(
                             it.manga.title + "-" + it.manga.author
                         }
                         sectionedLibraryItems[catId] = mangaToRemove
+                        hiddenItems.addAll(mangaToRemove)
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
@@ -658,7 +664,7 @@ class LibraryPresenter(
 
         this.allCategories = categories
 
-        return items
+        return items to hiddenItems
     }
 
     private fun getCustomMangaItems(libraryManga: List<LibraryManga>): Pair<
