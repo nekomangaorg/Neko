@@ -853,6 +853,24 @@ class LibraryPresenter(
     }
 
     /**
+     * Delete the downloaded chapters from the selected manga from the library.
+     *
+     * @param mangaList the list of manga to delete.
+     */
+    fun deleteChaptersForManga(mangaList: List<Manga>) {
+        presenterScope.launch {
+            // Create a set of the list
+            val mangaToDeleteChapters = mangaList.distinctBy { it.id }
+            mangaToDeleteChapters.forEach {
+                val chapters = db.getChapters(it.id!!).executeOnIO()
+                deleteChapters(it, chapters)
+            }
+            getLibrary()
+
+        }
+    }
+
+    /**
      * Remove the selected manga from the library.
      *
      * @param mangaList the list of manga to delete.

@@ -1835,6 +1835,7 @@ class LibraryController(
             R.id.action_share -> shareManga()
             R.id.action_delete -> {
                 activity!!.materialAlertDialog()
+                    .setTitle(R.string.remove)
                     .setMessage(R.string.remove_from_library_question)
                     .setPositiveButton(R.string.remove) { _, _ ->
                         deleteMangaListFromLibrary()
@@ -1844,6 +1845,16 @@ class LibraryController(
             }
             R.id.action_download_unread -> {
                 presenter.downloadUnread(selectedMangaSet.toList())
+            }
+            R.id.action_delete_downloads -> {
+                activity!!.materialAlertDialog()
+                    .setTitle(R.string.remove)
+                    .setMessage(R.string.delete_downloads_question)
+                    .setPositiveButton(R.string.delete) { _, _ ->
+                        deleteDownloadedChaptersFromMangaList()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
             }
             R.id.action_mark_as_read -> {
                 activity!!.materialAlertDialog()
@@ -1912,6 +1923,12 @@ class LibraryController(
             putExtra(Intent.EXTRA_TEXT, urls)
         }
         startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
+    }
+
+    private fun deleteDownloadedChaptersFromMangaList() {
+        val mangaList = selectedMangaSet.toList()
+        presenter.deleteChaptersForManga(mangaList)
+        destroyActionModeIfNeeded()
     }
 
     private fun deleteMangaListFromLibrary() {
