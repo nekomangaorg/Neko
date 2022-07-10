@@ -505,8 +505,6 @@ class PreferencesHelper(val context: Context) {
 
     fun useStaggeredGrid() = flowPrefs.getBoolean("use_staggered_grid", false)
 
-    fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
-
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
 
     fun thumbnailQuality() = prefs.getInt(Keys.thumbnailQuality, 0)

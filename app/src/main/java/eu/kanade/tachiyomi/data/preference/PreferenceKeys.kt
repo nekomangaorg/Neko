@@ -287,7 +287,7 @@ object PreferenceKeys {
 
     const val contentRating = "content_rating_options"
 
-    const val lowQualityCovers = "low_quality_covers"
+    const val coverQuality = "coverQuality"
 
     const val dataSaver = "data_saver_bool"
 

@@ -34,8 +34,7 @@ class ApiMangaParser {
     suspend fun mangaDetailsParse(mangaDto: MangaDataDto): SManga {
         try {
             val mangaAttributesDto = mangaDto.attributes
-
-            val manga = mangaDto.toBasicManga()
+            val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality())
 
             val simpleChapters = withIOContext {
                 val aggregateDto = network.service.aggregateChapters(
