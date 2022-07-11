@@ -37,7 +37,7 @@ fun PreferenceRow(
 ) {
     val height = if (subtitle != null) 72.dp else 56.dp
 
-    val titleTextStyle = MaterialTheme.typography.bodyLarge
+    val titleTextStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
     val subtitleTextStyle = MaterialTheme.typography.bodyMedium.copy(
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
     )
