@@ -5,7 +5,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,18 +36,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
@@ -61,6 +66,7 @@ import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.saket.cascade.CascadeDropdownMenu
 import onColor
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -68,7 +74,15 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 @Composable
-fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, shouldHideChapterTitles: Boolean = false, onClick: () -> Unit, onBookmark: () -> Unit, onRead: () -> Unit) {
+fun ChapterRow(
+    themeColor: ThemeColorState,
+    chapterItem: ChapterItem,
+    shouldHideChapterTitles: Boolean = false,
+    onClick: () -> Unit,
+    onBookmark: () -> Unit,
+    onWebView: () -> Unit,
+    onRead: () -> Unit,
+) {
     val scope = rememberCoroutineScope()
     CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
         val dismissState = rememberDismissState(initialValue = DismissValue.Default)
@@ -118,13 +132,12 @@ fun ChapterRow(themeColor: ThemeColorState, chapterItem: ChapterItem, shouldHide
                 }
             },
             dismissContent = {
-                ChapterInfo(themeColor = themeColor, chapterItem = chapterItem, onClick = onClick, shouldHideChapterTitles = shouldHideChapterTitles)
+                ChapterInfo(themeColor = themeColor, shouldHideChapterTitles = shouldHideChapterTitles, chapterItem = chapterItem, onClick = onClick, onWebView = onWebView)
             },
         )
         when {
             dismissState.isDismissed(DismissDirection.EndToStart) -> reset(scope = scope, dismissState = dismissState, action = onRead)
             dismissState.isDismissed(DismissDirection.StartToEnd) -> reset(scope = scope, dismissState = dismissState, action = onBookmark)
-
         }
 
     }
@@ -160,20 +173,58 @@ private fun Background(icon: ImageVector, contentDescription: String?, alignment
 }
 
 @Composable
-private fun ChapterInfo(themeColor: ThemeColorState, chapterItem: ChapterItem, onClick: () -> Unit, shouldHideChapterTitles: Boolean) {
+private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Boolean, chapterItem: ChapterItem, onClick: () -> Unit, onWebView: () -> Unit) {
     val chapter = chapterItem.chapter
+    var dropdown by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+
     val lowContrast = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)
     val (textColor, secondaryTextColor) = when (chapter.read) {
         true -> lowContrast to lowContrast
         false -> MaterialTheme.colorScheme.onSurface to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
     }
+
+    val rowColor = when (dropdown) {
+        true -> themeColor.rippleTheme.defaultColor().copy(alpha = themeColor.rippleTheme.rippleAlpha().focusedAlpha)
+        false -> MaterialTheme.colorScheme.surface
+    }
+
+    CascadeDropdownMenu(
+        expanded = dropdown,
+        offset = DpOffset(8.dp, 0.dp),
+        onDismissRequest = { dropdown = false },
+    ) {
+        val style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
+        androidx.compose.material3.DropdownMenuItem(
+            text = {
+                androidx.compose.material.Text(
+                    text = stringResource(R.string.open_in_webview),
+                    style = style,
+                )
+            },
+            onClick = {
+                onWebView()
+                dropdown = false
+            },
+        )
+    }
+
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .background(color = rowColor)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    dropdown = !dropdown
+                },
+            )
             .padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
+
         Column(
             modifier = Modifier
                 .align(Alignment.CenterVertically)

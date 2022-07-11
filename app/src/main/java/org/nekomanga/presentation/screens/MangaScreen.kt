@@ -316,6 +316,7 @@ fun MangaScreen(
                                     !chapter.chapter.read,
                                 )
                             },
+                            onWebView = { context.asActivity().openInBrowser(chapter.chapter.fullUrl()) },
                         )
                     }
                 }
