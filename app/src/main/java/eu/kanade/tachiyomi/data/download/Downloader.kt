@@ -529,7 +529,12 @@ class Downloader(
         // check if the original page was previously split before then skip.
         if (imageFile.name!!.contains("__")) return true
 
-        return ImageUtil.splitTallImage(imageFile, imageFilePath)
+        return try {
+            ImageUtil.splitTallImage(imageFile, imageFilePath)
+        } catch (e: Exception) {
+            Timber.e(e)
+            false
+        }
     }
 
     /**
