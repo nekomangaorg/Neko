@@ -8,25 +8,33 @@ import kotlin.math.floor
  */
 fun List<SChapter>.getMissingChapterCount(mangaStatus: Int): String? {
     //if (mangaStatus == SManga.COMPLETED) return null
-
-    val chapterNumberArray = this.asSequence().distinctBy {
-        if (it.chapter_txt.isNotEmpty()) {
-            it.vol + it.chapter_txt
-        } else {
-            it.name
-        }
-    }.sortedBy { it.chapter_number }
-        .map { floor(it.chapter_number).toInt() }.toList().toIntArray()
-
     var count = 0
+    if (this.isNotEmpty()) {
 
-    if (chapterNumberArray.isNotEmpty()) {
-        chapterNumberArray.forEachIndexed { index, chpNum ->
-            val lastIndex = index - 1
-            if (lastIndex >= 0 && (chpNum - 1) > chapterNumberArray[lastIndex]) {
-                count += (chpNum - chapterNumberArray[lastIndex]) - 1
+        val chapterNumberArray = this.asSequence().distinctBy {
+            if (it.chapter_txt.isNotEmpty()) {
+                it.vol + it.chapter_txt
+            } else {
+                it.name
             }
+        }.sortedBy { it.chapter_number }
+            .map { floor(it.chapter_number).toInt() }.toList().toIntArray()
 
+        while (count != chapterNumberArray[0] - 1) {
+            count++
+            if (count > 5000) {
+                break
+            }
+        }
+
+        if (chapterNumberArray.isNotEmpty()) {
+            chapterNumberArray.forEachIndexed { index, chpNum ->
+                val lastIndex = index - 1
+                if (lastIndex >= 0 && (chpNum - 1) > chapterNumberArray[lastIndex]) {
+                    count += (chpNum - chapterNumberArray[lastIndex]) - 1
+                }
+
+            }
         }
     }
 
