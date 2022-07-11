@@ -27,12 +27,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import eu.kanade.tachiyomi.R
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun NekoScaffold(
     title: String,
     onNavigationIconClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    themeColorState: ThemeColorState? = null,
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
     subtitle: String = "",
@@ -52,7 +54,7 @@ fun NekoScaffold(
         snackbarHost = snackBarHost,
         topBar =
         {
-            CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
+            CompositionLocalProvider(LocalRippleTheme provides (themeColorState?.rippleTheme ?: PrimaryColorRippleTheme)) {
                 if (subtitle.isEmpty() && title.isNotEmpty()) {
                     CenterAlignedTopAppBar(
                         colors = TopAppBarDefaults.smallTopAppBarColors(

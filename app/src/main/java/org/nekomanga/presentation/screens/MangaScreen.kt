@@ -219,6 +219,7 @@ fun MangaScreen(
 
         NekoScaffold(
             title = "",
+            themeColorState = themeColorState,
             onNavigationIconClicked = onBackPressed,
             actions = {
 
