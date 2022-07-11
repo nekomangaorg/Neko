@@ -112,14 +112,16 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             chapters = presenter.activeChapters.collectAsState(),
             removedChapters = presenter.removedChapters.collectAsState(),
             chapterActions = ChapterActions(
-                deleteChapters = { chapterItems -> presenter.deleteChapters(chapterItems) },
-                clearRemovedChapters = presenter::clearRemovedChapters,
-                readNextChapter = { context ->
+                bookmark = presenter::bookmarkChapter,
+                delete = presenter::deleteChapters,
+                clearRemoved = presenter::clearRemovedChapters,
+                markRead = presenter::markRead,
+                openNext = { context ->
                     presenter.nextUnreadChapter.value.simpleChapter?.let {
                         openChapter(context, it.toDbChapter())
                     }
                 },
-                openChapter = { context, chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
+                open = { context, chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
             ),
         ) { activity?.onBackPressed() }
     }

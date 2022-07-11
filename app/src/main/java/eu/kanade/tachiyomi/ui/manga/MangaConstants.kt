@@ -44,9 +44,11 @@ object MangaConstants {
     )
 
     class ChapterActions(
-        val deleteChapters: (List<ChapterItem>) -> Unit,
-        val clearRemovedChapters: () -> Unit,
-        val openChapter: (Context, ChapterItem) -> Unit,
-        val readNextChapter: (Context) -> Unit,
+        val bookmark: (ChapterItem) -> Unit,
+        val clearRemoved: () -> Unit,
+        val delete: (List<ChapterItem>) -> Unit,
+        val markRead: (List<ChapterItem>, Boolean) -> Unit,
+        val open: (Context, ChapterItem) -> Unit,
+        val openNext: (Context) -> Unit,
     )
 }

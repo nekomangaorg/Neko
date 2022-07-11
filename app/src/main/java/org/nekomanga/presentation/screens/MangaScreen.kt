@@ -294,7 +294,7 @@ fun MangaScreen(
                             shareClick = { shareClick(context) },
                             genreClick = genreClick,
                             genreLongClick = genreLongClick,
-                            quickReadClick = { chapterActions.readNextChapter(context) },
+                            quickReadClick = { chapterActions.openNext(context) },
                             quickReadText = quickReadText.value,
                             numberOfChapters = chapters.value.size,
                             chapterHeaderClick = chapterHeaderClick,
@@ -304,7 +304,18 @@ fun MangaScreen(
                     }
 
                     items(chapters.value) { chapter ->
-                        ChapterRow(themeColor = themeColorState, chapterItem = chapter, onClick = { chapterActions.openChapter(context, chapter) })
+                        ChapterRow(
+                            themeColor = themeColorState,
+                            chapterItem = chapter,
+                            onClick = { chapterActions.open(context, chapter) },
+                            onBookmark = { chapterActions.bookmark(chapter) },
+                            onRead = {
+                                chapterActions.markRead(
+                                    listOf(chapter),
+                                    !chapter.chapter.read,
+                                )
+                            },
+                        )
                     }
                 }
                 if (hasRemovedChapters.isNotEmpty()) {
@@ -312,11 +323,11 @@ fun MangaScreen(
                         themeColorState = themeColorState, chapters = hasRemovedChapters,
                         onConfirm = { removeDeleted ->
                             if (removeDeleted) {
-                                chapterActions.deleteChapters(hasRemovedChapters)
-                                chapterActions.clearRemovedChapters
+                                chapterActions.delete(hasRemovedChapters)
+                                chapterActions.clearRemoved
                             }
                         },
-                        onDismiss = chapterActions.clearRemovedChapters,
+                        onDismiss = chapterActions.clearRemoved,
                     )
                 }
             }

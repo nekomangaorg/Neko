@@ -721,6 +721,46 @@ class MangaComposePresenter(
     }
 
     /**
+     * Flips the bookmark status for the chapter
+     */
+    fun bookmarkChapter(chapterItem: ChapterItem) {
+        presenterScope.launch {
+            val chapter = chapterItem.chapter.toDbChapter()
+            chapter.apply {
+                this.bookmark = !this.bookmark
+            }
+            db.updateChapterProgress(chapter).executeOnIO()
+            updateChapterFlows()
+        }
+    }
+
+    /**
+     * Marks the given chapters read or unread
+     */
+    fun markRead(chapterItems: List<ChapterItem>, read: Boolean) {
+        presenterScope.launchIO {
+            val chapters = chapterItems.map { it.chapter.toDbChapter() }
+            chapters.forEach {
+                it.read = read
+                if (!read) {
+                    //TODO see if we need
+                    // lastRead: Int? = null,
+                    //         pagesLeft: Int? = null,
+                    // it.last_page_read = lastRead ?: 0
+                    // it.pages_left = pagesLeft ?: 0
+                }
+            }
+
+            //TODO rest of background stuff
+            db.updateChaptersProgress(chapters).executeAsBlocking()
+            updateChapterFlows()
+
+            //TODO do the rest of the background stuffv
+
+        }
+    }
+
+    /**
      * clears the removedChapter flow
      */
     fun clearRemovedChapters() {
