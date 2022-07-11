@@ -1,14 +1,13 @@
 package eu.kanade.tachiyomi.util
 
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
 import kotlin.math.floor
 
 /**
  * Calculate the missing chapters for a given list of chapters. Return null if none are missing
  */
 fun List<SChapter>.getMissingChapterCount(mangaStatus: Int): String? {
-    if (mangaStatus == SManga.COMPLETED) return null
+    //if (mangaStatus == SManga.COMPLETED) return null
 
     val chapterNumberArray = this.asSequence().distinctBy {
         if (it.chapter_txt.isNotEmpty()) {
