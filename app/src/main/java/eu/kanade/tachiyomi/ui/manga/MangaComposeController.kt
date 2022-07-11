@@ -113,6 +113,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             removedChapters = presenter.removedChapters.collectAsState(),
             chapterActions = ChapterActions(
                 bookmark = presenter::bookmarkChapter,
+                download = presenter::downloadChapters,
                 delete = presenter::deleteChapters,
                 clearRemoved = presenter::clearRemovedChapters,
                 markRead = presenter::markRead,

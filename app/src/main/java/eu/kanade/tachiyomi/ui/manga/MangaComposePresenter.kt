@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -24,6 +25,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
@@ -68,7 +70,7 @@ class MangaComposePresenter(
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     val mangaRepository: MangaDetailsRepository = Injekt.get(),
-) : BaseCoroutinePresenter<MangaComposeController>() {
+) : BaseCoroutinePresenter<MangaComposeController>(), DownloadQueue.DownloadListener {
 
     private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)
     val manga: StateFlow<Manga> = _currentManga.asStateFlow()
@@ -139,6 +141,7 @@ class MangaComposePresenter(
 
     override fun onCreate() {
         super.onCreate()
+        downloadManager.addListener(this)
         if (!manga.value.initialized) {
             onRefresh()
         } else {
@@ -549,10 +552,14 @@ class MangaComposePresenter(
                     downloadManager.hasQueue() -> downloadManager.queue.find { it.chapter.id == chapter.id }?.status ?: Download.State.default
                     else -> Download.State.default
                 }
+
                 ChapterItem(
                     chapter = chapter,
                     downloadState = downloadState,
-                    downloadProgress = 0, //TODO figure out how to get this
+                    downloadProgress = when (downloadState == Download.State.DOWNLOADING) {
+                        true -> downloadManager.queue.find { it.chapter.id == chapter.id }!!.progress
+                        false -> 0
+                    },
                 )
 
             }
@@ -721,6 +728,18 @@ class MangaComposePresenter(
     }
 
     /**
+     * Delete the list of chapters
+     */
+    fun downloadChapters(chapterItems: List<ChapterItem>, downloadAction: DownloadAction) {
+        presenterScope.launch {
+            when (downloadAction) {
+                is DownloadAction.Download -> downloadManager.downloadChapters(manga.value, chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+                is DownloadAction.Remove -> deleteChapters(chapterItems, chapterItems.size == allChapters.value.size)
+            }
+        }
+    }
+
+    /**
      * Flips the bookmark status for the chapter
      */
     fun bookmarkChapter(chapterItem: ChapterItem) {
@@ -792,6 +811,28 @@ class MangaComposePresenter(
                     NextUnreadChapter(id, readTxt, nextChapter)
                 }
             }
+        }
+    }
+
+    //callback from Downloader
+    override fun updateDownload(download: Download) {
+        presenterScope.launch {
+            _activeChapters.value = activeChapters.value.map {
+                if (it.chapter.id == download.chapter.id) {
+                    XLog.e("ESCO ${download.status}")
+                    XLog.e("ESCO ${download.progress}")
+                    it.copy(chapter = it.chapter, downloadState = download.status, downloadProgress = download.progress)
+                } else {
+                    it
+                }
+            }
+        }
+    }
+
+    //callback from Downloader
+    override fun updateDownloads() {
+        presenterScope.launch {
+            updateChapterFlows()
         }
     }
 

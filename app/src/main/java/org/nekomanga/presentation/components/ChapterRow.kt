@@ -61,6 +61,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.CoroutineScope
@@ -82,6 +83,7 @@ fun ChapterRow(
     onBookmark: () -> Unit,
     onWebView: () -> Unit,
     onRead: () -> Unit,
+    onDownload: (DownloadAction) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
@@ -132,7 +134,7 @@ fun ChapterRow(
                 }
             },
             dismissContent = {
-                ChapterInfo(themeColor = themeColor, shouldHideChapterTitles = shouldHideChapterTitles, chapterItem = chapterItem, onClick = onClick, onWebView = onWebView)
+                ChapterInfo(themeColor = themeColor, shouldHideChapterTitles = shouldHideChapterTitles, chapterItem = chapterItem, onClick = onClick, onWebView = onWebView, onDownload = onDownload)
             },
         )
         when {
@@ -173,7 +175,7 @@ private fun Background(icon: ImageVector, contentDescription: String?, alignment
 }
 
 @Composable
-private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Boolean, chapterItem: ChapterItem, onClick: () -> Unit, onWebView: () -> Unit) {
+private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Boolean, chapterItem: ChapterItem, onClick: () -> Unit, onWebView: () -> Unit, onDownload: (DownloadAction) -> Unit) {
     val chapter = chapterItem.chapter
     var dropdown by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
@@ -303,12 +305,19 @@ private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Bo
             }
 
         }
-
         DownloadButton(
             themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress.toFloat(),
             Modifier
                 .align(Alignment.CenterVertically)
-                .combinedClickable(onClick = {}, onLongClick = {}),
+                .combinedClickable(
+                    onClick = {
+                        when (chapterItem.downloadState) {
+                            Download.State.DOWNLOADED -> onDownload(DownloadAction.Remove)
+                            else -> onDownload(DownloadAction.Download)
+                        }
+                    },
+                    onLongClick = {},
+                ),
         )
     }
 }

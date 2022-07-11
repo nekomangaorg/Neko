@@ -1,10 +1,12 @@
 package org.nekomanga.presentation.components
 
 import CombinedClickableIconButton
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Cancel
@@ -22,10 +24,15 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
 
 @Composable
-fun DownloadButton(buttonColor: Color, state: Download.State, progress: Float, modifier: Modifier = Modifier) {
+fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: Float, modifier: Modifier = Modifier) {
     val disabledColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
     val errorColor = MaterialTheme.colorScheme.errorContainer
     val errorIconColor = MaterialTheme.colorScheme.onErrorContainer
+
+    val animatedProgress = animateFloatAsState(
+        targetValue = downloadProgress,
+        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+    ).value
 
     CombinedClickableIconButton(
         modifier = Modifier
@@ -62,32 +69,23 @@ fun DownloadButton(buttonColor: Color, state: Download.State, progress: Float, m
                 tint = download.iconColor,
             )
         }
-        if (state == Download.State.NOT_DOWNLOADED) {
-            if (progress < 0) {
+        if (state == Download.State.NOT_DOWNLOADED || state == Download.State.QUEUE) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(28.dp),
+                color = download.progressColor, strokeWidth = 3.dp,
+            )
+        } else if (state == Download.State.DOWNLOADING) {
+            if (downloadProgress != 0f) {
                 CircularProgressIndicator(
+                    progress = 100f,
                     modifier = Modifier
                         .size(28.dp),
-                    color = download.progressColor, strokeWidth = 3.dp,
+                    color = disabledColor, strokeWidth = 3.dp,
                 )
-            } else {
-                CircularProgressIndicator(
-                    progress = progress,
-                    modifier = Modifier
-                        .size(28.dp),
-                    color = download.progressColor, strokeWidth = 3.dp,
-                )
-            }
-        } else if (state != Download.State.DOWNLOADED && state != Download.State.ERROR && state != Download.State.CHECKED) {
-            if (progress != 0f) {
-                if (progress < 0) {
+                if (downloadProgress > .01f) {
                     CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(28.dp),
-                        color = download.progressColor, strokeWidth = 3.dp,
-                    )
-                } else {
-                    CircularProgressIndicator(
-                        progress = progress,
+                        progress = animatedProgress,
                         modifier = Modifier
                             .size(28.dp),
                         color = download.progressColor, strokeWidth = 3.dp,

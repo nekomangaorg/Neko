@@ -15,6 +15,17 @@ object MangaConstants {
      */
     data class NextUnreadChapter(@StringRes val id: Int? = null, val text: String = "", val simpleChapter: SimpleChapter? = null)
 
+    sealed class DownloadAction {
+        object Download : DownloadAction()
+        object Remove : DownloadAction()
+    }
+
+    sealed class MarkAction {
+        class Bookmark(chapterItems: List<ChapterItem>) : MarkAction()
+        class Read(chapterItems: List<ChapterItem>) : MarkAction()
+        class Unread(chapterItems: List<ChapterItem>) : MarkAction()
+    }
+
     class CategoryActions(
         val set: (List<Category>) -> Unit = {},
         val addNew: (String) -> Unit = {},
@@ -46,6 +57,7 @@ object MangaConstants {
     class ChapterActions(
         val bookmark: (ChapterItem) -> Unit,
         val clearRemoved: () -> Unit,
+        val download: (List<ChapterItem>, DownloadAction) -> Unit,
         val delete: (List<ChapterItem>) -> Unit,
         val markRead: (List<ChapterItem>, Boolean) -> Unit,
         val open: (Context, ChapterItem) -> Unit,
