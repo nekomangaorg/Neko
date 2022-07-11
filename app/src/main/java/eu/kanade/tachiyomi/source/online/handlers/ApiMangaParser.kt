@@ -176,12 +176,13 @@ class ApiMangaParser {
     }
 
     fun chapterListParse(
+        lastChapterNumber: Int?,
         chapterListResponse: List<ChapterDataDto>,
         groupMap: Map<String, String>,
     ): List<SChapter> {
         return chapterListResponse.asSequence()
             .map {
-                mapChapter(it, groupMap)
+                mapChapter(it, lastChapterNumber, groupMap)
             }.toList()
     }
 
@@ -205,6 +206,7 @@ class ApiMangaParser {
 
     private fun mapChapter(
         networkChapter: ChapterDataDto,
+        lastChapterNumber: Int?,
         groups: Map<String, String>,
     ): SChapter {
         val chapter = SChapter.create()
@@ -237,15 +239,9 @@ class ApiMangaParser {
         if (chapterName.isEmpty()) {
             chapterName.add("Oneshot")
         }
-        /*if ((status == 2 || status == 3)) {
-            if (finalChapterNumber != null) {
-                if ((isOneShot(networkChapter, finalChapterNumber) && totalChapterCount == 1) ||
-                    networkChapter.chapter == finalChapterNumber && finalChapterNumber.toIntOrNull() != 0
-                ) {
-                    chapterName.add("[END]")
-                }
-            }
-        }*/
+        if (lastChapterNumber != null && attributes.chapter == lastChapterNumber.toString()) {
+            chapterName.add("[END]")
+        }
 
         chapter.name = MdUtil.cleanString(chapterName.joinToString(" "))
         // Convert from unix time

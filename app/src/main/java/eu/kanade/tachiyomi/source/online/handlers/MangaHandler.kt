@@ -111,7 +111,8 @@ class MangaHandler {
                 }
 
                 val groupMap = getGroupMap(results)
-                apiMangaParser.chapterListParse(results, groupMap)
+                val chapterListParse = apiMangaParser.chapterListParse(manga.last_chapter_number, results, groupMap)
+                chapterListParse
             }
         }
     }
