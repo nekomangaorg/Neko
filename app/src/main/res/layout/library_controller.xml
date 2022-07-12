@@ -57,12 +57,6 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <eu.kanade.tachiyomi.ui.base.MaterialFastScroll
-        android:id="@+id/fast_scroller"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:fastScrollerBubbleEnabled="true" />
-
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/header_card"
         android:layout_marginTop="6dp"
@@ -126,6 +120,13 @@
             android:id="@+id/rounded_category_hopper" />
 
     </FrameLayout>
+
+    <eu.kanade.tachiyomi.ui.base.MaterialFastScroll
+        android:id="@+id/fast_scroller"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:fastScrollerBubbleEnabled="true" />
+
     <!-- Adding bottom sheet after main content -->
     <include layout="@layout/filter_bottom_sheet"
         android:id="@+id/filter_bottom_sheet"/>
