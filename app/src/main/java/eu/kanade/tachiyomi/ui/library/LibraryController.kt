@@ -84,6 +84,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.moveCategories
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
@@ -159,6 +160,8 @@ class LibraryController(
 
     var singleCategory: Boolean = false
         private set
+    var hopperAnimation: ValueAnimator? = null
+    var catGestureDetector: GestureDetectorCompat? = null
 
     /**
      * Library search query.
@@ -290,8 +293,7 @@ class LibraryController(
                 if (!binding.fastScroller.isFastScrolling) {
                     updateSmallerViewsTopMargins()
                 }
-                binding.roundedCategoryHopper.upCategory.alpha = if (isAtTop()) 0.25f else 1f
-                binding.roundedCategoryHopper.downCategory.alpha = if (isAtBottom()) 0.25f else 1f
+                updateHopperAlpha()
             }
             if (!binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden()) {
                 scrollDistance += abs(dy)
@@ -328,6 +330,11 @@ class LibraryController(
                 removeStaggeredObserver()
             }
         }
+    }
+
+    fun updateHopperAlpha() {
+        binding.roundedCategoryHopper.upCategory.alpha = if (isAtTop()) 0.25f else 1f
+        binding.roundedCategoryHopper.downCategory.alpha = if (isAtBottom()) 0.25f else 1f
     }
 
     private fun removeStaggeredObserver() {
@@ -382,6 +389,7 @@ class LibraryController(
                     closerToHopperBottom
                 }
             val end = if (closerToEdge) maxHopperOffset else 0f
+            hopperAnimation?.cancel()
             val alphaAnimation = ValueAnimator.ofFloat(hopperOffset, end)
             alphaAnimation.addUpdateListener { valueAnimator ->
                 hopperOffset = valueAnimator.animatedValue as Float
@@ -392,6 +400,7 @@ class LibraryController(
                 updateHopperY()
             }
             alphaAnimation.duration = shortAnimationDuration.toLong()
+            hopperAnimation = alphaAnimation
             alphaAnimation.start()
         }
     }
@@ -711,6 +720,7 @@ class LibraryController(
                 true
             }.show()
         }
+        catGestureDetector = GestureDetectorCompat(binding.root.context, LibraryCategoryGestureDetector(this))
 
         binding.roundedCategoryHopper.categoryButton.setOnLongClickListener {
             when (preferences.hopperLongPressAction().get()) {
@@ -763,6 +773,20 @@ class LibraryController(
         }
     }
 
+    fun handleGeneralEvent(event: MotionEvent) {
+        if (presenter.showAllCategories) return
+        if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
+            val result = catGestureDetector?.onTouchEvent(event) ?: false
+            if (!result && binding.libraryGridRecycler.recycler.translationX != 0f) {
+                binding.libraryGridRecycler.recycler.animate().setDuration(150L)
+                    .translationX(0f)
+                    .start()
+            }
+        } else {
+            catGestureDetector?.onTouchEvent(event)
+        }
+    }
+
     fun updateHopperY(windowInsets: WindowInsetsCompat? = null) {
         val view = view ?: return
         val insets = windowInsets ?: view.rootWindowInsetsCompat
@@ -800,24 +824,26 @@ class LibraryController(
         binding.jumperCategoryText.isVisible = !hide
     }
 
-    private fun jumpToNextCategory(next: Boolean) {
-        val category = getVisibleHeader() ?: return
+    fun jumpToNextCategory(next: Boolean): Boolean {
+        val category = getVisibleHeader() ?: return false
         if (presenter.showAllCategories) {
             if (!next) {
                 val fPosition = binding.libraryGridRecycler.recycler.findFirstVisibleItemPosition()
                 if (fPosition > adapter.currentItems.indexOf(category)) {
                     scrollToHeader(category.category.order)
-                    return
+                    return true
                 }
             }
             val newOffset = adapter.headerItems.indexOf(category) + (if (next) 1 else -1)
-            if (if (!next) newOffset > -1 else newOffset < adapter.headerItems.size) {
+            return if (if (!next) newOffset > -1 else newOffset < adapter.headerItems.size) {
                 val newCategory = (adapter.headerItems[newOffset] as LibraryHeaderItem).category
                 val newOrder = newCategory.order
                 scrollToHeader(newOrder)
                 showCategoryText(newCategory.name)
+                true
             } else {
                 binding.libraryGridRecycler.recycler.scrollToPosition(if (next) adapter.itemCount - 1 else 0)
+                true
             }
         } else {
             val newOffset =
@@ -833,8 +859,13 @@ class LibraryController(
                 val newOrder = newCategory.order
                 scrollToHeader(newOrder)
                 showCategoryText(newCategory.name)
+                hopperAnimation?.cancel()
+                hopperOffset = 0f
+                updateHopperY()
+                return true
             }
         }
+        return false
     }
 
     private fun getHeader(firstCompletelyVisible: Boolean = false): LibraryHeaderItem? {
@@ -1034,6 +1065,15 @@ class LibraryController(
             )
         }
         adapter.setItems(mangaMap)
+        if (binding.libraryGridRecycler.recycler.translationX != 0f) {
+            val time = binding.root.resources.getInteger(
+                android.R.integer.config_shortAnimTime,
+            ).toLong()
+            viewScope.launchUI {
+                delay(time / 2)
+                binding.libraryGridRecycler.recycler.translationX = 0f
+            }
+        }
         singleCategory = presenter.categories.size <= 1
         binding.progress.isVisible = false
         if (!freshStart) {
@@ -1120,6 +1160,27 @@ class LibraryController(
             setSubtitle()
             showMiniBar()
         }
+        updateHopperAlpha()
+        val isSingleCategory = !presenter.showAllCategories || presenter.forceShowAllCategories
+        val context = binding.roundedCategoryHopper.root.context
+        binding.roundedCategoryHopper.upCategory.setImageDrawable(
+            context.contextCompatDrawable(
+                if (isSingleCategory) {
+                    R.drawable.ic_arrow_start_24dp
+                } else {
+                    R.drawable.ic_expand_less_24dp
+                },
+            ),
+        )
+        binding.roundedCategoryHopper.downCategory.setImageDrawable(
+            context.contextCompatDrawable(
+                if (isSingleCategory) {
+                    R.drawable.ic_arrow_end_24dp
+                } else {
+                    R.drawable.ic_expand_more_24dp
+                },
+            ),
+        )
     }
 
     private fun showSlideAnimation() {
@@ -1186,6 +1247,7 @@ class LibraryController(
         activityBinding?.appBar?.updateAppBarAfterY(binding.libraryGridRecycler.recycler)
         binding.swipeRefresh.isEnabled = !show
         setSubtitle()
+        binding.categoryRecycler.isInvisible = !show
         if (show) {
             binding.categoryRecycler.post {
                 binding.categoryRecycler.scrollToCategory(activeCategory)
