@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
@@ -88,11 +89,15 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             generatePalette = this::setPalette,
             themeBasedOffCover = preferences.themeMangaDetails(),
             titleLongClick = { context, content ->
-                presenter.copiedToClipboard(context.getString(R.string.title))
+                if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
+                    presenter.copiedToClipboard(context.getString(R.string.title))
+                }
                 copyToClipboard(context, content, R.string.title)
             },
             creatorLongClick = { context, content ->
-                presenter.copiedToClipboard(context.getString(R.string.creator))
+                if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
+                    presenter.copiedToClipboard(context.getString(R.string.creator))
+                }
                 copyToClipboard(context, content, R.string.creator)
             },
             toggleFavorite = presenter::toggleFavorite,

@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens
 
 import ToolTipIconButton
 import android.content.Context
+import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -100,11 +101,13 @@ fun AboutScreen(
                     },
                     onClick = {
                         onVersionClicked(context)
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                context.getString(R.string._copied_to_clipboard, "Build information"),
-                                withDismissAction = true,
-                            )
+                        if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    context.getString(R.string._copied_to_clipboard, "Build information"),
+                                    withDismissAction = true,
+                                )
+                            }
                         }
                     },
                 )
