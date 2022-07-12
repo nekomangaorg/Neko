@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.library
 import android.graphics.Rect
 import android.view.GestureDetector
 import android.view.MotionEvent
-import android.view.View
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.activityBinding
 import kotlin.math.abs
