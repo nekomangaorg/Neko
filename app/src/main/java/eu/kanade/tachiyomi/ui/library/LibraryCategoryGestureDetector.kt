@@ -19,11 +19,12 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
     override fun onDown(e: MotionEvent): Boolean {
         locked = false
         controller ?: return false
-        val startingOnLibraryView = listOf<View?>(
+        val startingOnLibraryView = listOf(
             controller.activityBinding?.bottomNav,
             controller.binding.filterBottomSheet.root,
             controller.binding.categoryHopperFrame,
             controller.activityBinding?.appBar,
+            controller.visibleHeaderHolder()?.itemView,
         ).none {
             it ?: return false
             val viewRect = Rect()

@@ -868,6 +868,12 @@ class LibraryController(
         return false
     }
 
+    fun visibleHeaderHolder(): LibraryHeaderHolder? {
+        return adapter.getHeaderPositions().firstOrNull()?.let {
+            binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(it) as? LibraryHeaderHolder
+        }
+    }
+
     private fun getHeader(firstCompletelyVisible: Boolean = false): LibraryHeaderItem? {
         val position = if (firstCompletelyVisible) {
             binding.libraryGridRecycler.recycler.findFirstCompletelyVisibleItemPosition()
