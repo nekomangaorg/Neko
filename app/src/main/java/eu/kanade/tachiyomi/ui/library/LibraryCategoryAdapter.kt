@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.os.Build
+import android.view.HapticFeedbackConstants
 import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -32,6 +33,8 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
     var showNumber = preferences.categoryNumberOfItems().get()
 
     var showOutline = preferences.outlineOnCovers().get()
+
+    private var lastCategory = ""
 
     val hasActiveFilters: Boolean
         get() = controller?.hasActiveFilters == true
@@ -178,7 +181,10 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
         val db: DatabaseHelper by injectLazy()
         if (position == itemCount - 1) return recyclerView.context.getString(R.string.bottom)
         return when (val item: IFlexible<*>? = getItem(position)) {
-            is LibraryHeaderItem -> item.category.name
+            is LibraryHeaderItem -> {
+                vibrateOnCategoryChange(item.category.name)
+                item.category.name
+            }
             is LibraryItem -> {
                 val text = if (item.manga.isBlank()) return item.header?.category?.name.orEmpty()
                 else when (getSort(position)) {
@@ -262,6 +268,9 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         getFirstLetter(title)
                     }
                 }
+                if (!isSingleCategory) {
+                    vibrateOnCategoryChange(item.header?.category?.name.orEmpty())
+                }
                 when {
                     isSingleCategory -> text
                     recyclerView.resources.isLTR -> text + " - " + item.header?.category?.name.orEmpty()
@@ -269,6 +278,13 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                 }
             }
             else -> ""
+        }
+    }
+
+    private fun vibrateOnCategoryChange(categoryName: String) {
+        if (categoryName != lastCategory) {
+            lastCategory = categoryName
+            recyclerView.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
         }
     }
 
