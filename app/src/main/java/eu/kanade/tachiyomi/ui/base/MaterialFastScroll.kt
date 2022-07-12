@@ -15,7 +15,8 @@ import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.isLTR
 import kotlin.math.abs
 
-class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+@Suppress("LeakingThis")
+open class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FastScroller(context, attrs) {
 
     var canScroll = false

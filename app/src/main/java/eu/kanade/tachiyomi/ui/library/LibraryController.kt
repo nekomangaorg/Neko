@@ -1267,6 +1267,12 @@ class LibraryController(
         }
     }
 
+    fun scrollToCategory(category: Category?) {
+        if (category != null && activeCategory != category.order) {
+            scrollToHeader(category.order)
+        }
+    }
+
     private fun scrollToHeader(pos: Int, removeObserver: Boolean = true) {
         if (removeObserver) {
             removeStaggeredObserver()
