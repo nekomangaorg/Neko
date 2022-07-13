@@ -56,7 +56,8 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
             }
         } else if (abs(diffX) >= abs(diffY) &&
             abs(diffX) > SWIPE_THRESHOLD * 5 &&
-            abs(velocityX) > SWIPE_VELOCITY_THRESHOLD
+            abs(velocityX) > SWIPE_VELOCITY_THRESHOLD &&
+            sign(diffX) == sign(velocityX)
         ) {
             val hopperGravity = (controller.binding.categoryHopperFrame.layoutParams as CoordinatorLayout.LayoutParams).gravity
             if (diffX <= 0) {
