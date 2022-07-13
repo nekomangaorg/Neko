@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
@@ -674,26 +675,33 @@ class LibraryPresenter(
         val tagItems: MutableMap<String, LibraryHeaderItem> = mutableMapOf()
 
         // internal function to make headers
-        fun makeOrGetHeader(name: String): LibraryHeaderItem {
+        fun makeOrGetHeader(name: String, checkNameSwap: Boolean = false): LibraryHeaderItem {
             return if (tagItems.containsKey(name)) {
                 tagItems[name]!!
             } else {
+                if (checkNameSwap && name.contains(" ")) {
+                    val swappedName = name.split(" ").reversed().joinToString(" ")
+                    if (tagItems.containsKey(swappedName)) {
+                        return tagItems[swappedName]!!
+                    }
+                }
                 val headerItem = LibraryHeaderItem({ getCategory(it) }, tagItems.count())
                 tagItems[name] = headerItem
                 headerItem
             }
         }
 
+        val unknown = context.getString(R.string.unknown)
         val items = libraryManga.map { manga ->
             when (groupType) {
                 BY_TAG -> {
                     val tags = if (manga.genre.isNullOrBlank()) {
-                        listOf("Unknown")
+                        listOf(unknown)
                     } else {
                         manga.genre?.split(",")?.mapNotNull {
                             val tag = it.trim().capitalizeWords()
-                            if (tag.isBlank()) null else tag
-                        } ?: listOf("Unknown")
+                            tag.ifBlank { null }
+                        } ?: listOf(unknown)
                     }
                     tags.map {
                         LibraryItem(manga, makeOrGetHeader(it))
@@ -716,6 +724,23 @@ class LibraryPresenter(
                     }
                     listOf(LibraryItem(manga, makeOrGetHeader(status)))
                 }
+                BY_AUTHOR -> {
+                    if (manga.artist.isNullOrBlank() && manga.author.isNullOrBlank()) {
+                        listOf(LibraryItem(manga, makeOrGetHeader(unknown)))
+                    } else {
+                        listOfNotNull(
+                            manga.author.takeUnless { it.isNullOrBlank() },
+                            manga.artist.takeUnless { it.isNullOrBlank() },
+                        ).map {
+                            it.split(",", "/", " x ", " - ", ignoreCase = true).mapNotNull { name ->
+                                val author = name.trim()
+                                author.ifBlank { null }
+                            }
+                        }.flatten().distinct().map {
+                            LibraryItem(manga, makeOrGetHeader(it, true))
+                        }
+                    }
+                }
                 else -> listOf(LibraryItem(manga, makeOrGetHeader(mapStatus(manga.status))))
             }
         }.flatten().toMutableList()
@@ -730,13 +755,15 @@ class LibraryPresenter(
                 id = item.value.catId
                 isHidden = getDynamicCategoryName(this) in hiddenDynamics
             }
-        }.sortedBy {
-            if (groupType == BY_TRACK_STATUS) {
-                mapTrackingOrder(it.name)
-            } else {
-                it.name
-            }
-        }
+        }.sortedWith(
+            compareBy(String.CASE_INSENSITIVE_ORDER) {
+                if (groupType == BY_TRACK_STATUS) {
+                    mapTrackingOrder(it.name)
+                } else {
+                    it.name
+                }
+            },
+        )
         if (preferences.collapsedDynamicAtBottom().get()) {
             headers = headers.filterNot { it.isHidden } + headers.filter { it.isHidden }
         }
