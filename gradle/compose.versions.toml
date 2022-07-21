@@ -1,6 +1,6 @@
 [versions]
 accompanist_version = "0.24.7-alpha"
-compose_version = "1.2.0-beta02"
+compose_version = "1.2.0-rc02"
 
 [libraries]
 
@@ -15,6 +15,7 @@ material3-core = "androidx.compose.material3:material3:1.0.0-alpha12"
 material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.10"
 
 activity = "androidx.activity:activity-compose:1.6.0-alpha03"
+animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
@@ -33,4 +34,4 @@ markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
 
 [bundles]
 accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompainist-webview"]
-compose = ["activity", "paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
+compose = ["activity", "animations", "paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]

@@ -46,6 +46,11 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
             return pages.map(Page::progress).average().roundToInt()
         }
 
+    val progressFloat: Float
+        get() {
+            return (progress.toFloat().div(100))
+        }
+
     fun setStatusSubject(subject: PublishSubject<Download>?) {
         statusSubject = subject
     }

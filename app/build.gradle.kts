@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 object Configs {
     const val applicationId = "tachiyomi.mangadex"
-    const val compileSdkVersion = 31
+    const val compileSdkVersion = 32
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -244,6 +244,7 @@ tasks {
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+            "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
             "-opt-in=kotlin.time.ExperimentalTime",
             "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",

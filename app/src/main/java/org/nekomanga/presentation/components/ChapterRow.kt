@@ -306,7 +306,7 @@ private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Bo
 
         }
         DownloadButton(
-            themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress.toFloat(),
+            themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
             Modifier
                 .align(Alignment.CenterVertically)
                 .combinedClickable(

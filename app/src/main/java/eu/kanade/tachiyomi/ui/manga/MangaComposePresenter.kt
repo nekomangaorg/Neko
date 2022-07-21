@@ -557,8 +557,8 @@ class MangaComposePresenter(
                     chapter = chapter,
                     downloadState = downloadState,
                     downloadProgress = when (downloadState == Download.State.DOWNLOADING) {
-                        true -> downloadManager.queue.find { it.chapter.id == chapter.id }!!.progress
-                        false -> 0
+                        true -> downloadManager.queue.find { it.chapter.id == chapter.id }!!.progressFloat
+                        false -> 0f
                     },
                 )
 
@@ -819,9 +819,8 @@ class MangaComposePresenter(
         presenterScope.launch {
             _activeChapters.value = activeChapters.value.map {
                 if (it.chapter.id == download.chapter.id) {
-                    XLog.e("ESCO ${download.status}")
-                    XLog.e("ESCO ${download.progress}")
-                    it.copy(chapter = it.chapter, downloadState = download.status, downloadProgress = download.progress)
+                    XLog.e("ESCO ${download.status} - ${download.progressFloat}")
+                    it.copy(chapter = it.chapter, downloadState = download.status, downloadProgress = download.progressFloat)
                 } else {
                     it
                 }
