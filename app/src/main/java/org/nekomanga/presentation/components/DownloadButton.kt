@@ -64,7 +64,7 @@ fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: 
     )
 
     val infinitePulse = rememberInfiniteTransition()
-    val (initialState, finalState) = when (state.isActive()) {
+    val (initialState, finalState) = when (state.isActive() && downloadProgress != 1f) {
         true -> 0f to NekoColors.disabledAlphaLowContrast
         false -> 1f to 1f
     }
