@@ -361,7 +361,7 @@ class Downloader(
             .flatMap { Observable.from(it) }
             // Start downloading images, consider we can have downloaded images already
             // Concurrently do 5 pages at a time
-            .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, pagesToDownload)
+            .flatMap({ page -> getOrDownloadImage(page, download, tmpDir).subscribeOn(Schedulers.io()) }, pagesToDownload)
             // Do when page is downloaded.
             .doOnNext { notifier.onProgressChange(download) }
             .toList()
