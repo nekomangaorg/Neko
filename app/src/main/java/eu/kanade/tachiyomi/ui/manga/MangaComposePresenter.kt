@@ -735,6 +735,7 @@ class MangaComposePresenter(
             when (downloadAction) {
                 is DownloadAction.Download -> downloadManager.downloadChapters(manga.value, chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
                 is DownloadAction.Remove -> deleteChapters(chapterItems, chapterItems.size == allChapters.value.size)
+                is DownloadAction.Cancel -> deleteChapters(chapterItems, chapterItems.size == allChapters.value.size)
             }
         }
     }
@@ -816,7 +817,7 @@ class MangaComposePresenter(
 
     //callback from Downloader
     override fun updateDownload(download: Download) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _activeChapters.value = activeChapters.value.map {
                 if (it.chapter.id == download.chapter.id) {
                     XLog.e("ESCO ${download.status} - ${download.progressFloat}")

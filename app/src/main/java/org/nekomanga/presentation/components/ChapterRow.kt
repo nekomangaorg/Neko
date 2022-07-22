@@ -1,8 +1,6 @@
 package org.nekomanga.presentation.components
 
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -43,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -51,9 +48,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
@@ -67,9 +64,8 @@ import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.saket.cascade.CascadeDropdownMenu
-import onColor
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -96,41 +92,29 @@ fun ChapterRow(
                 DismissDirection.EndToStart,
                 DismissDirection.StartToEnd,
             ),
-            dismissThresholds = { FractionalThreshold(.1f) },
+            dismissThresholds = { FractionalThreshold(.2f) },
             background = {
-                val color by animateColorAsState(
-                    when (dismissState.targetValue) {
-                        DismissValue.Default -> MaterialTheme.colorScheme.surface
-                        DismissValue.DismissedToStart -> themeColor.altContainerColor
-                        DismissValue.DismissedToEnd -> themeColor.buttonColor
-                    },
-                )
+                val color = when (dismissState.dismissDirection) {
+                    null -> MaterialTheme.colorScheme.surface
+                    else -> MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColor.buttonColor, 8.dp)
+                }
 
-                val scale by animateFloatAsState(
-                    if (dismissState.targetValue == DismissValue.Default) 0f else 1.25f,
-                )
                 when (dismissState.dismissDirection) {
                     DismissDirection.EndToStart -> {
-                        val icon = when (chapterItem.chapter.read) {
-                            true -> Icons.Default.VisibilityOff
-                            false -> Icons.Default.Visibility
+                        val (icon, text) = when (chapterItem.chapter.read) {
+                            true -> Icons.Default.VisibilityOff to R.string.mark_as_unread
+                            false -> Icons.Default.Visibility to R.string.mark_as_read
                         }
-                        Background(icon, null, Alignment.CenterEnd, color, scale, themeColor.altContainerColor.onColor())
-                    }
-                    DismissDirection.StartToEnd -> {
-                        val icon = when (chapterItem.chapter.bookmark) {
-                            true -> Icons.Default.BookmarkRemove
-                            false -> Icons.Default.BookmarkAdd
-                        }
-                        Background(icon, null, Alignment.CenterStart, color, scale, MaterialTheme.colorScheme.surface)
+                        Background(icon, Alignment.CenterEnd, color, stringResource(id = text), themeColor.buttonColor)
                     }
                     else -> {
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surface),
-                        )
+                        val (icon, text) = when (chapterItem.chapter.bookmark) {
+                            true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
+                            false -> Icons.Default.BookmarkAdd to R.string.add_bookmark
+                        }
+                        Background(icon, Alignment.CenterStart, color, stringResource(id = text), themeColor.buttonColor)
                     }
+
                 }
             },
             dismissContent = {
@@ -157,7 +141,7 @@ private fun reset(scope: CoroutineScope, dismissState: DismissState, action: () 
 }
 
 @Composable
-private fun Background(icon: ImageVector, contentDescription: String?, alignment: Alignment, color: Color, scale: Float, iconColor: Color) {
+private fun Background(icon: ImageVector, alignment: Alignment, color: Color, text: String, contentColor: Color) {
     Box(
         Modifier
             .fillMaxSize()
@@ -165,12 +149,20 @@ private fun Background(icon: ImageVector, contentDescription: String?, alignment
             .padding(horizontal = Dp(20f)),
         contentAlignment = alignment,
     ) {
-        Icon(
-            icon,
-            contentDescription = contentDescription,
-            modifier = Modifier.scale(scale),
-            tint = iconColor,
-        )
+        Column(modifier = Modifier.align(alignment)) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            )
+            Text(
+                text = text,
+                textAlign = TextAlign.Center,
+                color = contentColor,
+            )
+        }
+
     }
 }
 
@@ -178,6 +170,8 @@ private fun Background(icon: ImageVector, contentDescription: String?, alignment
 private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Boolean, chapterItem: ChapterItem, onClick: () -> Unit, onWebView: () -> Unit, onDownload: (DownloadAction) -> Unit) {
     val chapter = chapterItem.chapter
     var dropdown by remember { mutableStateOf(false) }
+    var chapterDropdown by remember { mutableStateOf(false) }
+
     val haptic = LocalHapticFeedback.current
 
     val lowContrast = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)
@@ -191,26 +185,17 @@ private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Bo
         false -> MaterialTheme.colorScheme.surface
     }
 
-    CascadeDropdownMenu(
+    SimpleDropdownMenu(
         expanded = dropdown,
-        offset = DpOffset(8.dp, 0.dp),
-        onDismissRequest = { dropdown = false },
-    ) {
-        val style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
-        androidx.compose.material3.DropdownMenuItem(
-            text = {
-                androidx.compose.material.Text(
-                    text = stringResource(R.string.open_in_webview),
-                    style = style,
-                )
-            },
-            onClick = {
-                onWebView()
-                dropdown = false
-            },
-        )
-    }
+        onDismiss = { dropdown = false },
+        dropDownItems = listOf(
+            SimpleDropdownItem(
+                text = stringResource(R.string.open_in_webview),
+                onClick = { onWebView() },
+            ),
+        ),
 
+        )
 
     Row(
         modifier = Modifier
@@ -305,84 +290,42 @@ private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Bo
             }
 
         }
-        DownloadButton(
-            themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
-            Modifier
-                .align(Alignment.CenterVertically)
-                .combinedClickable(
-                    onClick = {
-                        when (chapterItem.downloadState) {
-                            Download.State.DOWNLOADED -> onDownload(DownloadAction.Remove)
-                            else -> onDownload(DownloadAction.Download)
-                        }
-                    },
-                    onLongClick = {},
+        Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
+
+            DownloadButton(
+                themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
+                Modifier
+                    .combinedClickable(
+                        onClick = {
+                            when (chapterItem.downloadState) {
+                                Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
+                                else -> chapterDropdown = true
+                            }
+                        },
+                        onLongClick = {},
+                    ),
+            )
+            SimpleDropdownMenu(
+                expanded = chapterDropdown,
+                onDismiss = { chapterDropdown = false },
+                dropDownItems = listOf(
+                    SimpleDropdownItem(
+                        text = stringResource(
+                            when (chapterItem.downloadState) {
+                                Download.State.DOWNLOADED -> R.string.remove
+                                else -> R.string.cancel
+                            },
+                        ),
+                        onClick = {
+                            val action = when (chapterItem.downloadState) {
+                                Download.State.DOWNLOADING -> DownloadAction.Cancel
+                                else -> DownloadAction.Remove
+                            }
+                            onDownload(action)
+                        },
+                    ),
                 ),
-        )
-    }
-}
-
-@Composable
-fun ChapterRowTester(buttonColor: Color, state: Download.State = Download.State.NOT_DOWNLOADED) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Text(text = "Downloaded", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.DOWNLOADED, 0f, Modifier.align(Alignment.CenterVertically))
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Text(text = "Downloading", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.DOWNLOADING, 1f, Modifier.align(Alignment.CenterVertically))
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Text(text = "NotDownloaded", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.NOT_DOWNLOADED, 0f, Modifier.align(Alignment.CenterVertically))
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Text(text = "Queue", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.QUEUE, -1f, Modifier.align(Alignment.CenterVertically))
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Text(text = "Checked", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.CHECKED, 0f, Modifier.align(Alignment.CenterVertically))
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.End,
-        ) {
-            Text(text = "Error", color = MaterialTheme.colorScheme.onSurface)
-            DownloadButton(buttonColor, Download.State.ERROR, 0f, Modifier.align(Alignment.CenterVertically))
+            )
         }
     }
 }

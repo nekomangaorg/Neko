@@ -317,7 +317,9 @@ fun MangaScreen(
                                 )
                             },
                             onWebView = { context.asActivity().openInBrowser(chapter.chapter.fullUrl()) },
-                            onDownload = { downloadAction -> chapterActions.download(listOf(chapter), downloadAction) },
+                            onDownload = { downloadAction ->
+                                chapterActions.download(listOf(chapter), downloadAction)
+                            },
                         )
                     }
                 }

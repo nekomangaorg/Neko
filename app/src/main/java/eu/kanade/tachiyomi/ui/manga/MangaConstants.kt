@@ -18,7 +18,10 @@ object MangaConstants {
     sealed class DownloadAction {
         object Download : DownloadAction()
         object Remove : DownloadAction()
+        object Cancel : DownloadAction()
     }
+
+    data class DownloadActionHolder(val chapters: List<ChapterItem>, val downloadAction: DownloadAction)
 
     sealed class MarkAction {
         class Bookmark(chapterItems: List<ChapterItem>) : MarkAction()
