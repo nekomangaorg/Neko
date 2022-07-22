@@ -2,7 +2,8 @@ package org.nekomanga.presentation.components
 
 import CombinedClickableIconButton
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.EaseInOutCirc
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -58,6 +59,23 @@ fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: 
     var downloadComplete by remember { mutableStateOf(false) }
     var wasDownloading by remember { mutableStateOf(false) }
 
+    LaunchedEffect(state) {
+        when (state) {
+            //this reset download complete in case you remove the chapter and want to redownload it
+            Download.State.NOT_DOWNLOADED -> downloadComplete = false
+            //this signals its downloading, so a future downloaded state triggers the animation
+            Download.State.DOWNLOADING -> wasDownloading = true
+            Download.State.DOWNLOADED -> {
+                //this will run the animation for the check
+                if (wasDownloading) {
+                    downloadComplete = !downloadComplete
+                    wasDownloading = false
+                }
+            }
+            else -> {}
+        }
+    }
+
     val downloadCompletePainter = rememberAnimatedVectorPainter(
         animatedImageVector = AnimatedImageVector.animatedVectorResource(R.drawable.anim_dl_to_check_to_dl),
         atEnd = !downloadComplete,
@@ -69,7 +87,11 @@ fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: 
         false -> 1f to 1f
     }
 
-    val alpha = infinitePulse.animateFloat(initialValue = initialState, targetValue = finalState, animationSpec = infiniteRepeatable(tween(2000, easing = LinearOutSlowInEasing)))
+    val alpha = infinitePulse.animateFloat(
+        initialValue = initialState,
+        targetValue = finalState,
+        animationSpec = infiniteRepeatable(tween(1000, easing = EaseInOutCirc), repeatMode = RepeatMode.Reverse),
+    )
 
 
     CombinedClickableIconButton(
@@ -104,21 +126,9 @@ fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: 
             if (state == Download.State.QUEUE) {
                 DownloadProgress(color = download.progressColor)
             } else if (state == Download.State.DOWNLOADING) {
-                //this signals its downloading, so a future downloaded state triggers the animation
-                LaunchedEffect(state) {
-                    wasDownloading = true
-                }
-
                 DownloadProgress(determinate = true, color = veryLowContrast, progress = 1f)
                 DownloadProgress(determinate = true, color = download.progressColor, progress = animatedProgress)
-            } else if (wasDownloading && state == Download.State.DOWNLOADED) {
-                //this will run the animation 
-                LaunchedEffect(state) {
-                    downloadComplete = !downloadComplete
-                    wasDownloading = false
-                }
             }
-
         }
     }
 }
