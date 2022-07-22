@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsRepository
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.latest.LatestRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
@@ -64,6 +65,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { TrackManager(app) }
 
         addSingletonFactory { ChapterFilter() }
+
+        addSingletonFactory { ChapterItemFilter() }
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 

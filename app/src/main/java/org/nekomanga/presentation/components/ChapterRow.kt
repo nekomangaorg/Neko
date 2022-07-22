@@ -107,13 +107,14 @@ fun ChapterRow(
                         }
                         Background(icon, Alignment.CenterEnd, color, stringResource(id = text), themeColor.buttonColor)
                     }
-                    else -> {
+                    DismissDirection.StartToEnd -> {
                         val (icon, text) = when (chapterItem.chapter.bookmark) {
                             true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
                             false -> Icons.Default.BookmarkAdd to R.string.add_bookmark
                         }
                         Background(icon, Alignment.CenterStart, color, stringResource(id = text), themeColor.buttonColor)
                     }
+                    else -> {}
 
                 }
             },
@@ -122,15 +123,15 @@ fun ChapterRow(
             },
         )
         when {
-            dismissState.isDismissed(DismissDirection.EndToStart) -> reset(scope = scope, dismissState = dismissState, action = onRead)
-            dismissState.isDismissed(DismissDirection.StartToEnd) -> reset(scope = scope, dismissState = dismissState, action = onBookmark)
+            dismissState.isDismissed(DismissDirection.EndToStart) -> Reset(scope = scope, dismissState = dismissState, action = onRead)
+            dismissState.isDismissed(DismissDirection.StartToEnd) -> Reset(scope = scope, dismissState = dismissState, action = onBookmark)
         }
 
     }
 }
 
 @Composable
-private fun reset(scope: CoroutineScope, dismissState: DismissState, action: () -> Unit) {
+private fun Reset(scope: CoroutineScope, dismissState: DismissState, action: () -> Unit) {
     LaunchedEffect(key1 = dismissState.dismissDirection) {
         scope.launch {
             dismissState.reset()
@@ -189,9 +190,22 @@ private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Bo
         expanded = dropdown,
         onDismiss = { dropdown = false },
         dropDownItems = listOf(
-            SimpleDropdownItem(
+            SimpleDropDownItem.Action(
                 text = stringResource(R.string.open_in_webview),
                 onClick = { onWebView() },
+            ),
+            SimpleDropDownItem.Parent(
+                text = stringResource(R.string.mark_previous_as),
+                children = listOf(
+                    SimpleDropDownItem.Action(
+                        text = stringResource(R.string.read),
+                        onClick = {},
+                    ),
+                    SimpleDropDownItem.Action(
+                        text = stringResource(R.string.unread),
+                        onClick = {},
+                    ),
+                ),
             ),
         ),
 
@@ -309,7 +323,7 @@ private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Bo
                 expanded = chapterDropdown,
                 onDismiss = { chapterDropdown = false },
                 dropDownItems = listOf(
-                    SimpleDropdownItem(
+                    SimpleDropDownItem.Action(
                         text = stringResource(
                             when (chapterItem.downloadState) {
                                 Download.State.DOWNLOADED -> R.string.remove

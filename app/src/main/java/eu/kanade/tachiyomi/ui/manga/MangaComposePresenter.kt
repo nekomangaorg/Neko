@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.os.Build
 import android.os.Environment
+import com.crazylegend.string.isNotNullOrEmpty
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -37,8 +38,10 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange.EditTrackingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
-import eu.kanade.tachiyomi.util.chapter.ChapterFilter
-import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.getMissingCount
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -65,7 +68,7 @@ class MangaComposePresenter(
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
-    val chapterFilter: ChapterFilter = Injekt.get(),
+    val chapterFilter: ChapterItemFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
@@ -117,6 +120,8 @@ class MangaComposePresenter(
     private val _nextUnreadChapter = MutableStateFlow(NextUnreadChapter())
     val nextUnreadChapter: StateFlow<NextUnreadChapter> = _nextUnreadChapter.asStateFlow()
 
+    private var allChapterScanlators: Set<String> = emptySet()
+
     private val _currentArtwork = MutableStateFlow(
         Artwork(
             url = "",
@@ -137,7 +142,7 @@ class MangaComposePresenter(
     private val _activeChapters = MutableStateFlow<List<ChapterItem>>(emptyList())
     val activeChapters: StateFlow<List<ChapterItem>> = _activeChapters.asStateFlow()
 
-    private val chapterSort = ChapterSort(manga.value, chapterFilter, preferences)
+    private val chapterSort = ChapterItemSort(manga.value, chapterFilter, preferences)
 
     override fun onCreate() {
         super.onCreate()
@@ -152,7 +157,8 @@ class MangaComposePresenter(
     /**
      * Update all flows that dont require network
      */
-    fun updateAllFlows() {
+    private fun updateAllFlows() {
+        updateMangaFlow()
         updateChapterFlows()
         updateCategoryFlows()
         updateTrackingFlows()
@@ -257,7 +263,7 @@ class MangaComposePresenter(
 
     /** Figures out the suggested reading dates
      */
-    fun getSuggestedDate() {
+    private fun getSuggestedDate() {
         presenterScope.launch {
             val chapters = db.getHistoryByMangaId(mangaId).executeOnIO()
 
@@ -468,32 +474,20 @@ class MangaComposePresenter(
      */
     fun removeMergedManga() {
         presenterScope.launchIO {
+
             val editManga = manga.value
             editManga.apply {
                 merge_manga_url = null
             }
             db.insertManga(editManga).executeOnIO()
             updateMangaFlow()
-            val dbChapters =
-                db.getChapters(manga.value).executeOnIO().partition { it.isMergedChapter() }
-            val mergedChapters = dbChapters.first
-            val nonMergedChapters = dbChapters.second
+
+            val mergedChapters =
+                db.getChapters(manga.value).executeOnIO().filter { it.isMergedChapter() }
+
             downloadManager.deleteChapters(mergedChapters, manga.value, sourceManager.getMangadex())
             db.deleteChapters(mergedChapters).executeOnIO()
-            /**
-             * Scanlator filter stuff
-             * allChapterScanlators =
-            nonMergedChapters.flatMap { it.scanlatorList() }.toSet()
-            if (allChapterScanlators.size == 1) filteredScanlators = emptySet()
-            if (filteredScanlators.isNotEmpty()) {
-            val newSet = filteredScanlators.toMutableSet()
-            newSet.remove(sourceManager.getMergeSource().name)
-            filteredScanlators = newSet.toSet()
-            }
-             */
-
-            updateMergeFlow()
-
+            updateAllFlows()
         }
     }
 
@@ -568,10 +562,30 @@ class MangaComposePresenter(
              * TODO make sure to copy any logic needed from getChapters() in the old presenter for all the filters and what not
              * then pass that to active chapters
              */
-            _activeChapters.value = allChapters
+            allChapterScanlators = allChapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
+            if (allChapterScanlators.size == 1 && manga.value.filtered_scanlators.isNotNullOrEmpty()) {
+                updateMangaScanlator(emptySet())
+            }
 
-            //do this after so the text gets updated
+            _activeChapters.value = chapterSort.getChaptersSorted(allChapters)
+
+            //do this after so the texts gets updated
             updateNextUnreadChapter()
+            updateMissingChapters()
+        }
+    }
+
+    private fun updateMangaScanlator(filteredScanlators: Set<String>) {
+        presenterScope.launch {
+            db.getManga(mangaId).executeOnIO()?.apply {
+                this.filtered_scanlators = when (filteredScanlators.isEmpty()) {
+                    true -> null
+                    false -> ChapterUtil.getScanlatorString(filteredScanlators)
+                }
+            }?.run {
+                db.insertManga(this)
+                updateMangaFlow()
+            }
         }
     }
 
@@ -619,7 +633,7 @@ class MangaComposePresenter(
     /**
      * Get current merge result
      */
-    fun getIsMergedManga(): IsMergedManga {
+    private fun getIsMergedManga(): IsMergedManga {
         return when (manga.value.isMerged()) {
             true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!)
             false -> No
@@ -792,7 +806,7 @@ class MangaComposePresenter(
      */
     private fun updateNextUnreadChapter() {
         presenterScope.launch {
-            val nextChapter = chapterSort.getNextUnreadChapter(activeChapters.value.map { it.chapter.toDbChapter() })?.toSimpleChapter()
+            val nextChapter = chapterSort.getNextUnreadChapter(activeChapters.value)?.chapter ?: null
             _nextUnreadChapter.value = when (nextChapter == null) {
                 true -> NextUnreadChapter()
                 false -> {
@@ -811,6 +825,23 @@ class MangaComposePresenter(
 
                     NextUnreadChapter(id, readTxt, nextChapter)
                 }
+            }
+        }
+    }
+
+    /**
+     * updates the missing chapter count on a manga if needed
+     */
+    private fun updateMissingChapters() {
+        presenterScope.launch {
+            val currentMissingChapters = allChapters.value.getMissingCount(manga.value.status)
+            if (currentMissingChapters != manga.value.missing_chapters) {
+                val editManga = manga.value
+                editManga.apply {
+                    this.missing_chapters = currentMissingChapters
+                }
+                db.insertManga(editManga)
+                updateMangaFlow()
             }
         }
     }

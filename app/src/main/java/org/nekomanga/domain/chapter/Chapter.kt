@@ -68,8 +68,7 @@ data class SimpleChapter(
             chapterNumber = sChapter.chapter_number,
             scanlator = sChapter.scanlator ?: "",
             volume = sChapter.vol,
-
-            )
+        )
     }
 
     companion object {

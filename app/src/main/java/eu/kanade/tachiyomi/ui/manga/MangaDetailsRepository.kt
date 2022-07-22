@@ -42,7 +42,7 @@ class MangaDetailsRepository {
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
-    suspend fun update(manga: Manga, isOnline: Boolean, scope: CoroutineScope) = channelFlow<MangaResult> {
+    suspend fun update(manga: Manga, isOnline: Boolean, scope: CoroutineScope) = channelFlow {
         var errorFromNetwork: Throwable? = null
         var errorFromMerged: Throwable? = null
 
