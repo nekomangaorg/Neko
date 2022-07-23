@@ -38,7 +38,7 @@ iconics-material = "com.mikepenz:community-material-typeface:6.4.95.0-kotlin"
 iconics-dx = "com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin"
 iconics-outlined = "com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin"
 
-jsoup = "org.jsoup:jsoup:1.15.1"
+jsoup = "org.jsoup:jsoup:1.15.2"
 
 
 nucleus = { module = "info.android15.nucleus:nucleus", version.ref = "nucleus_version" }
@@ -83,7 +83,7 @@ flexible-adapter-ui = "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c801
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp_version" }
 okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp_version" }
 okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttp_version" }
-okio = "com.squareup.okio:okio:3.1.0"
+okio = "com.squareup.okio:okio:3.2.0"
 
 flowprefs = "com.fredporciuncula:flow-preferences:1.7.0"
 sandwich = "com.github.skydoves:sandwich:1.2.5"
