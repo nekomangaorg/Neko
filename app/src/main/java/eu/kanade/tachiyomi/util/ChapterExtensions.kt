@@ -65,14 +65,17 @@ fun List<ChapterItem>.getMissingCount(mangaStatus: Int): String? {
         }.sortedBy { it.chapterNumber }
             .map { floor(it.chapterNumber).toInt() }.toList().toIntArray()
 
-        while (count != chapterNumberArray[0] - 1) {
-            count++
-            if (count > 5000) {
-                break
-            }
-        }
-
         if (chapterNumberArray.isNotEmpty()) {
+
+            if (chapterNumberArray.first() > 1) {
+                while (count != (chapterNumberArray[0] - 1)) {
+                    count++
+                    if (count > 5000) {
+                        break
+                    }
+                }
+            }
+
             chapterNumberArray.forEachIndexed { index, chpNum ->
                 val lastIndex = index - 1
                 if (lastIndex >= 0 && (chpNum - 1) > chapterNumberArray[lastIndex]) {
