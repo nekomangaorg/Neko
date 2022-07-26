@@ -79,6 +79,7 @@ fun ChapterRow(
     onBookmark: () -> Unit,
     onWebView: () -> Unit,
     onRead: () -> Unit,
+    markPrevious: (Boolean) -> Unit,
     onDownload: (DownloadAction) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -119,7 +120,15 @@ fun ChapterRow(
                 }
             },
             dismissContent = {
-                ChapterInfo(themeColor = themeColor, shouldHideChapterTitles = shouldHideChapterTitles, chapterItem = chapterItem, onClick = onClick, onWebView = onWebView, onDownload = onDownload)
+                ChapterInfo(
+                    themeColor = themeColor,
+                    shouldHideChapterTitles = shouldHideChapterTitles,
+                    chapterItem = chapterItem,
+                    onClick = onClick,
+                    onWebView = onWebView,
+                    onDownload = onDownload,
+                    markPrevious = markPrevious,
+                )
             },
         )
         when {
@@ -168,7 +177,15 @@ private fun Background(icon: ImageVector, alignment: Alignment, color: Color, te
 }
 
 @Composable
-private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Boolean, chapterItem: ChapterItem, onClick: () -> Unit, onWebView: () -> Unit, onDownload: (DownloadAction) -> Unit) {
+private fun ChapterInfo(
+    themeColor: ThemeColorState,
+    shouldHideChapterTitles: Boolean,
+    chapterItem: ChapterItem,
+    onClick: () -> Unit,
+    onWebView: () -> Unit,
+    onDownload: (DownloadAction) -> Unit,
+    markPrevious: (Boolean) -> Unit,
+) {
     val chapter = chapterItem.chapter
     var dropdown by remember { mutableStateOf(false) }
     var chapterDropdown by remember { mutableStateOf(false) }
@@ -199,11 +216,11 @@ private fun ChapterInfo(themeColor: ThemeColorState, shouldHideChapterTitles: Bo
                 children = listOf(
                     SimpleDropDownItem.Action(
                         text = stringResource(R.string.read),
-                        onClick = {},
+                        onClick = { markPrevious(true) },
                     ),
                     SimpleDropDownItem.Action(
                         text = stringResource(R.string.unread),
-                        onClick = {},
+                        onClick = { markPrevious(false) },
                     ),
                 ),
             ),

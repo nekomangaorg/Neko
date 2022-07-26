@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -304,7 +304,7 @@ fun MangaScreen(
 
                     }
 
-                    items(chapters.value) { chapter ->
+                    itemsIndexed(chapters.value) { index, chapter ->
                         ChapterRow(
                             themeColor = themeColorState,
                             chapterItem = chapter,
@@ -319,6 +319,10 @@ fun MangaScreen(
                             onWebView = { context.asActivity().openInBrowser(chapter.chapter.fullUrl()) },
                             onDownload = { downloadAction ->
                                 chapterActions.download(listOf(chapter), downloadAction)
+                            },
+                            markPrevious = { read ->
+                                val chaptersToMark = chapters.value.subList(0, index)
+                                chapterActions.markRead(chaptersToMark, read)
                             },
                         )
                     }
