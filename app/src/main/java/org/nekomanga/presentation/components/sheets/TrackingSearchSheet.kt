@@ -90,6 +90,10 @@ fun TrackingSearchSheet(
                         item {
                             Gap(8.dp)
                         }
+                        if (alreadySelectedTrack == null && trackSearchResult.trackSearchResult.size == 1) {
+                            trackSearchItemClick(trackSearchResult.trackSearchResult.first())
+                        }
+                        
                         items(trackSearchResult.trackSearchResult) { item: TrackSearch ->
                             TrackSearchItem(
                                 themeColorState = themeColorState,
