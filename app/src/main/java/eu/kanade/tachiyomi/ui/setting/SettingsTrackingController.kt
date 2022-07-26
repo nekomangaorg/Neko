@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
+import androidx.preference.Preference
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
@@ -44,6 +45,25 @@ class SettingsTrackingController :
             trackPreference(trackManager.myAnimeList) {
                 activity?.openInBrowser(MyAnimeListApi.authUrl())
             }
+            switchPreference {
+                isPersistent = false
+                isIconSpaceReserved = true
+                title = context.getString(
+                    R.string.auto_track,
+                )
+
+                preferences.getStringPref(Keys.trackUsername(trackManager.myAnimeList.id))
+                    .asImmediateFlowIn(viewScope) {
+                        isVisible = it.isNotEmpty()
+                    }
+
+                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.MYANIMELIST.toString())
+
+                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+                    updateAutoAddTracker(newValue as Boolean, TrackManager.MYANIMELIST)
+                }
+
+            }
             trackPreference(trackManager.aniList) {
                 activity?.openInBrowser(AnilistApi.authUrl())
             }
@@ -77,10 +97,47 @@ class SettingsTrackingController :
                     }
                 }
             }
+            switchPreference {
+                isPersistent = false
+                isIconSpaceReserved = true
+                title = context.getString(
+                    R.string.auto_track,
+                )
+
+                preferences.getStringPref(Keys.trackUsername(trackManager.aniList.id))
+                    .asImmediateFlowIn(viewScope) {
+                        isVisible = it.isNotEmpty()
+                    }
+
+                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.ANILIST.toString())
+
+                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+                    updateAutoAddTracker(newValue as Boolean, TrackManager.ANILIST)
+                }
+            }
             trackPreference(trackManager.kitsu) {
                 val dialog = TrackLoginDialog(trackManager.kitsu, R.string.email)
                 dialog.targetController = this@SettingsTrackingController
                 dialog.showDialog(router)
+            }
+            switchPreference {
+                key = "auto_add_kitsu"
+                isPersistent = false
+                isIconSpaceReserved = true
+                title = context.getString(
+                    R.string.auto_track,
+                )
+
+                preferences.getStringPref(Keys.trackUsername(trackManager.kitsu.id))
+                    .asImmediateFlowIn(viewScope) {
+                        isVisible = it.isNotEmpty()
+                    }
+
+                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.KITSU.toString())
+
+                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+                    updateAutoAddTracker(newValue as Boolean, TrackManager.KITSU)
+                }
             }
 
             trackPreference(trackManager.mangaUpdates) {
@@ -89,6 +146,24 @@ class SettingsTrackingController :
                 dialog.showDialog(router)
             }
         }
+    }
+
+    private fun updateAutoAddTracker(newValue: Boolean, trackId: Int): Boolean {
+        if (newValue) {
+            preferences.autoAddTracker().asImmediateFlowIn(viewScope) {
+                val mutableSet = it.toMutableSet()
+                mutableSet.add(trackId.toString())
+                preferences.setAutoAddTracker(mutableSet)
+            }
+        } else {
+            preferences.autoAddTracker().asImmediateFlowIn(viewScope) {
+                val mutableSet = it.toMutableSet()
+                mutableSet.remove(trackId.toString())
+                preferences.setAutoAddTracker(mutableSet)
+            }
+        }
+
+        return true
     }
 
     private inline fun PreferenceGroup.trackPreference(

@@ -28,7 +28,7 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun RemoveTrackingDialog(themeColorState: ThemeColorState, name: String, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
+fun RemoveTrackingDialog(themeColorState: ThemeColorState, name: String, canRemoveFromTracker: Boolean, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
         var removeFromTracker by remember { mutableStateOf(true) }
 
@@ -44,15 +44,17 @@ fun RemoveTrackingDialog(themeColorState: ThemeColorState, name: String, onConfi
                             .clickable { removeFromTracker = !removeFromTracker },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Checkbox(
-                            checked = removeFromTracker,
-                            onCheckedChange = {
-                                removeFromTracker = !removeFromTracker
-                            },
-                            colors = CheckboxDefaults.colors(checkedColor = themeColorState.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
-                        )
-                        Gap(4.dp)
-                        Text(text = stringResource(id = R.string.remove_tracking_from_, name), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
+                        if (canRemoveFromTracker) {
+                            Checkbox(
+                                checked = removeFromTracker,
+                                onCheckedChange = {
+                                    removeFromTracker = !removeFromTracker
+                                },
+                                colors = CheckboxDefaults.colors(checkedColor = themeColorState.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
+                            )
+                            Gap(4.dp)
+                            Text(text = stringResource(id = R.string.remove_tracking_from_, name), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
+                        }
                     }
                 }
             },
@@ -60,7 +62,7 @@ fun RemoveTrackingDialog(themeColorState: ThemeColorState, name: String, onConfi
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onConfirm(removeFromTracker)
+                        onConfirm(removeFromTracker && canRemoveFromTracker)
                         onDismiss()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),

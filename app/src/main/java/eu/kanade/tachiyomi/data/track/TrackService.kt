@@ -20,6 +20,7 @@ abstract class TrackService(val id: Int) {
     val networkService: NetworkHelper by injectLazy()
     val db: DatabaseHelper by injectLazy()
     open fun canRemoveFromService() = false
+    open fun isAutoAddTracker() = false
     open val client: OkHttpClient
         get() = networkService.client
 

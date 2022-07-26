@@ -264,7 +264,7 @@ object PreferenceKeys {
     const val coverColors = "cover_colors"
 
     const val coverVibrantColors = "cover_vibrant_colors"
-    
+
     const val hideChapterTitles = "hide_chapter_titles"
 
     const val chaptersDescAsDefault = "chapters_desc_as_default"
@@ -298,6 +298,8 @@ object PreferenceKeys {
     const val logLevel = "log_level"
 
     const val showContentRatingFilter = "show_R18_filter"
+
+    const val autoAddTracker = "auto_add_tracker"
 
     const val enablePort443Only = "use_port_443_only_for_image_server"
 

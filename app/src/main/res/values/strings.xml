@@ -566,6 +566,7 @@
     <string name="kitsu" translatable="false">Kitsu</string>
     <string name="manga_updates" translatable="false">MangaUpdates</string>
     <string name="update_tracking_scoring_type">Update %1$s\'s scoring type</string>
+    <string name="auto_track">Automatically link tracking</string>
     <string name="scoring_type_updated">Scoring type updated</string>
     <string name="could_not_update_scoring_">Could not update scoring type: %1$s</string>
     <string name="current_date_">Current date: %1$s</string>

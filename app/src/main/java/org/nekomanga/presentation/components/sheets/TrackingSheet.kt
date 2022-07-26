@@ -106,6 +106,7 @@ fun TrackingSheet(
             RemoveTrackingDialog(
                 themeColorState = themeColor,
                 name = stringResource(id = trackAndService.service.nameRes()),
+                canRemoveFromTracker = trackAndService.service.canRemoveFromService(),
                 onConfirm = { alsoRemoveFromTracker ->
                     trackingRemoved(alsoRemoveFromTracker, trackAndService.service)
                 },
@@ -200,7 +201,7 @@ private fun TrackingServiceItem(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (trackAndService == null) {
-                NoTrack(themeColor = themeColor, service = service, onLogoClick, { onSearchTrackClick(null) })
+                NoTrack(themeColor = themeColor, service = service, onLogoClick) { onSearchTrackClick(null) }
             } else {
                 TrackRowOne(
                     themeColor = themeColor,
@@ -245,7 +246,7 @@ private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: Trac
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Logo(service = service, track = track, onClick = onLogoClick)
-        if (service.isMdList()) {
+        if (service.isAutoAddTracker()) {
             Text(
                 text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Start,
                 modifier = Modifier

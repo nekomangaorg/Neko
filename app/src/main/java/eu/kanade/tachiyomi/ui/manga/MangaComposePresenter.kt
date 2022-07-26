@@ -208,7 +208,7 @@ class MangaComposePresenter(
      * Updates the database with categories for the manga
      */
     fun updateMangaCategories(enabledCategories: List<Category>) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val categories = enabledCategories.map { MangaCategory.create(manga.value, it) }
             db.setMangaCategories(categories, listOf(manga.value))
             updateCategoryFlows()
@@ -219,7 +219,7 @@ class MangaComposePresenter(
      * Add New Category
      */
     fun addNewCategory(newCategory: String) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val category = Category.create(newCategory)
             db.insertCategory(category).executeAsBlocking()
             updateCategoryFlows()
@@ -230,7 +230,7 @@ class MangaComposePresenter(
      * Update tracker with new status
      */
     fun updateTrackStatus(statusIndex: Int, trackAndService: TrackAndService) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val track = trackAndService.track.apply {
                 this.status = trackAndService.service.getStatusList()[statusIndex]
             }
@@ -245,7 +245,7 @@ class MangaComposePresenter(
      * Update tracker with new score
      */
     fun updateTrackScore(scoreIndex: Int, trackAndService: TrackAndService) {
-        presenterScope.launch {
+        presenterScope.launchIO {
 
             val track = trackAndService.track.apply {
                 this.score = trackAndService.service.indexToScore(scoreIndex)
@@ -264,7 +264,7 @@ class MangaComposePresenter(
     /** Figures out the suggested reading dates
      */
     private fun getSuggestedDate() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val chapters = db.getHistoryByMangaId(mangaId).executeOnIO()
 
             _trackSuggestedDates.value = TrackingSuggestedDates(
@@ -309,7 +309,7 @@ class MangaComposePresenter(
      * Updates the remote tracking service with tracking changes
      */
     private fun updateTrackingService(track: Track, service: TrackService) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             runCatching {
                 val updatedTrack = service.update(track)
                 db.insertTrack(updatedTrack).executeOnIO()
@@ -325,10 +325,11 @@ class MangaComposePresenter(
      * Search Tracker
      */
     fun searchTracker(title: String, service: TrackService) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _trackSearchResult.value = TrackSearchResult.Loading
             runCatching {
-                val results = service.search(title, manga.value, true)
+                val previouslyTracked = _tracks.value.firstOrNull { service.matchingTrack(it) }
+                val results = service.search(title, manga.value, previouslyTracked != null)
                 _trackSearchResult.value = when (results.isEmpty()) {
                     true -> TrackSearchResult.NoResult
                     false -> TrackSearchResult.Success(results)
@@ -342,8 +343,8 @@ class MangaComposePresenter(
     /**
      * Register tracker
      */
-    fun registerTracking(trackAndService: TrackAndService) {
-        presenterScope.launch {
+    fun registerTracking(trackAndService: TrackAndService, skipTrackFlowUpdate: Boolean = false) {
+        presenterScope.launchIO {
             runCatching {
                 val trackItem = trackAndService.track.apply {
                     manga_id = mangaId
@@ -352,7 +353,9 @@ class MangaComposePresenter(
                 trackAndService.service.bind(trackItem)
             }.onSuccess { track ->
                 db.insertTrack(track).executeOnIO()
-                updateTrackingFlows()
+                if (!skipTrackFlowUpdate) {
+                    updateTrackingFlows()
+                }
             }.onFailure { exception ->
                 //log the error and emit it to a snackbar
             }
@@ -363,7 +366,7 @@ class MangaComposePresenter(
      * Remove a tracker with an option to remove it from the tracking service
      */
     fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackService) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val tracks = db.getTracks(mangaId).executeOnIO().filter { it.sync_id == service.id }
             db.deleteTrackForManga(mangaId, service).executeOnIO()
             if (alsoRemoveFromTracker && service.canRemoveFromService()) {
@@ -513,7 +516,7 @@ class MangaComposePresenter(
      * Attach the selected merge manga entry
      */
     fun addMergedManga(mergeManga: MergeManga) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val editManga = manga.value
             editManga.apply {
                 merge_manga_url = mergeManga.url
@@ -529,7 +532,7 @@ class MangaComposePresenter(
      * Updates the artwork flow
      */
     private fun updateCurrentArtworkFlow(url: String = "") {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _currentArtwork.value = Artwork(url = url, inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId)
         }
     }
@@ -576,7 +579,7 @@ class MangaComposePresenter(
     }
 
     private fun updateMangaScanlator(filteredScanlators: Set<String>) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             db.getManga(mangaId).executeOnIO()?.apply {
                 this.filtered_scanlators = when (filteredScanlators.isEmpty()) {
                     true -> null
@@ -593,7 +596,7 @@ class MangaComposePresenter(
      * Updates the flows for all categories, and manga categories
      */
     private fun updateCategoryFlows() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _allCategories.value = db.getCategories().executeOnIO()
             _mangaCategories.value = db.getCategoriesForManga(mangaId).executeOnIO()
         }
@@ -603,7 +606,7 @@ class MangaComposePresenter(
      * Update flows for tracking
      */
     private fun updateTrackingFlows() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
             _tracks.value = db.getTracks(manga.value).executeOnIO()
 
@@ -618,6 +621,40 @@ class MangaComposePresenter(
                             (trackService.isMdList() && (trackService as MdList).isUnfollowed(track).not()))
                 }
             }
+
+            withIOContext {
+                val autoAddTracker = preferences.autoAddTracker().get()
+                var refreshRequired = false
+
+                //Always add the mdlist initial unfollowed tracker
+                _loggedInTrackingService.value.firstOrNull { it.isMdList() }?.let { mdList ->
+                    mdList as MdList
+                    if (!_tracks.value.any { mdList.matchingTrack(it) }) {
+                        val track = mdList.createInitialTracker(manga.value)
+                        db.insertTrack(track).executeOnIO()
+                        mdList.bind(track)
+                        refreshRequired = true
+                    }
+                }
+
+                if (autoAddTracker.size > 1 && manga.value.favorite) {
+                    autoAddTracker.map { it.toInt() }.forEach { autoAddTrackerId ->
+                        _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
+                            val id = trackManager.getIdFromManga(trackService, manga.value)
+                            if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
+                                val trackResult = trackService.search("", manga.value, false)
+                                trackResult.firstOrNull()?.let { track ->
+                                    registerTracking(TrackAndService(track, trackService), true)
+                                    refreshRequired = true
+                                }
+                            }
+                        }
+                    }
+                    if (refreshRequired) {
+                        updateTrackingFlows()
+                    }
+                }
+            }
         }
     }
 
@@ -625,7 +662,7 @@ class MangaComposePresenter(
      * Update flows for external links
      */
     private fun updateExternalFlows() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _externalLinks.value = manga.value.getExternalLinks()
         }
     }
@@ -644,7 +681,7 @@ class MangaComposePresenter(
      * Update flows for merge
      */
     private fun updateMergeFlow() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _isMerged.value = getIsMergedManga()
         }
     }
@@ -661,7 +698,7 @@ class MangaComposePresenter(
      * Update flows for merge
      */
     private fun updateArtworkFlow() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val simple = Artwork(
                 url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/dfcaab7a-2c3c-4ea5-8641-abffd2a95b5f.jpg",
                 inLibrary = manga.value.favorite,
@@ -689,7 +726,7 @@ class MangaComposePresenter(
      * Update flows for external links
      */
     private fun updateMangaFlow() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
         }
     }
@@ -698,7 +735,7 @@ class MangaComposePresenter(
      * Update flows for external links
      */
     private fun updateAltTitlesFlow() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             _altTitles.value = listOf("test1", "test2", "test3")
         }
     }
@@ -745,7 +782,7 @@ class MangaComposePresenter(
      * Delete the list of chapters
      */
     fun downloadChapters(chapterItems: List<ChapterItem>, downloadAction: DownloadAction) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             when (downloadAction) {
                 is DownloadAction.Download -> downloadManager.downloadChapters(manga.value, chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
                 is DownloadAction.Remove -> deleteChapters(chapterItems, chapterItems.size == allChapters.value.size)
@@ -758,7 +795,7 @@ class MangaComposePresenter(
      * Flips the bookmark status for the chapter
      */
     fun bookmarkChapter(chapterItem: ChapterItem) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val chapter = chapterItem.chapter.toDbChapter()
             chapter.apply {
                 this.bookmark = !this.bookmark
@@ -805,7 +842,7 @@ class MangaComposePresenter(
      * Get Quick read text for the button
      */
     private fun updateNextUnreadChapter() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val nextChapter = chapterSort.getNextUnreadChapter(activeChapters.value)?.chapter ?: null
             _nextUnreadChapter.value = when (nextChapter == null) {
                 true -> NextUnreadChapter()
@@ -833,7 +870,7 @@ class MangaComposePresenter(
      * updates the missing chapter count on a manga if needed
      */
     private fun updateMissingChapters() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             val currentMissingChapters = allChapters.value.getMissingCount(manga.value.status)
             if (currentMissingChapters != manga.value.missing_chapters) {
                 val editManga = manga.value
@@ -862,7 +899,7 @@ class MangaComposePresenter(
 
     //callback from Downloader
     override fun updateDownloads() {
-        presenterScope.launch {
+        presenterScope.launchIO {
             updateChapterFlows()
         }
     }

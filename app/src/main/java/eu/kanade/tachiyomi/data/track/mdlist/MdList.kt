@@ -25,6 +25,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun nameRes() = R.string.mdlist
 
+    override fun isAutoAddTracker() = true
+
     override fun getLogo(): Int {
         return R.drawable.ic_tracker_mangadex_logo
     }
@@ -142,7 +144,16 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         query: String,
         manga: Manga,
         wasPreviouslyTracked: Boolean,
-    ): List<TrackSearch> = throw Exception("not used")
+    ): List<TrackSearch> {
+        val track = TrackSearch.create(TrackManager.MDLIST).apply {
+            this.manga_id = manga.id!!
+            this.status = FollowStatus.UNFOLLOWED.int
+            this.tracking_url = MdUtil.baseUrl + manga.url
+            this.title = manga.title
+        }
+
+        return listOf(track)
+    }
 
     override suspend fun login(username: String, password: String): Boolean =
         throw Exception("not used")
