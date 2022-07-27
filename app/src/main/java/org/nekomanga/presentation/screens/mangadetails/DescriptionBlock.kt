@@ -21,7 +21,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -67,9 +71,17 @@ fun DescriptionBlock(
         generateTagColor(surfaceColor, secondaryColor, themeColor.buttonColor, isDarkTheme)
     }
 
-    val description = when (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
-        true -> "THIS MANGA IS NOT MIGRATED TO V5"
-        false -> manga.description ?: stringResource(R.string.no_description)
+    val noDescription = stringResource(R.string.no_description)
+    var description by remember { mutableStateOf(noDescription) }
+
+    if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+        LaunchedEffect(key1 = 1) {
+            description = "THIS MANGA IS NOT MIGRATED TO V5"
+        }
+    } else if (manga.description != null) {
+        LaunchedEffect(key1 = 1) {
+            description = manga.description!!
+        }
     }
 
     val interactionSource = remember { MutableInteractionSource() }
