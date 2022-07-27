@@ -118,7 +118,7 @@ fun MangaScreen(
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
     quickReadText: State<NextUnreadChapter>,
-    chapterFilterText: String,
+    chapterFilterText: State<String>,
     chapters: State<List<ChapterItem>>,
     removedChapters: State<List<ChapterItem>>,
     chapterSortFilter: State<MangaConstants.SortFilter>,
@@ -307,7 +307,7 @@ fun MangaScreen(
                             quickReadText = quickReadText.value,
                             numberOfChapters = chapters.value.size,
                             chapterHeaderClick = { openSheet(BottomSheetScreen.FilterChapterSheet) },
-                            chapterFilterText = chapterFilterText,
+                            chapterFilterText = chapterFilterText.value,
                         )
 
                     }

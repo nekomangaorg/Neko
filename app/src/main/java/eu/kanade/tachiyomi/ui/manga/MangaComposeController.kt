@@ -108,7 +108,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             genreClick = {},
             genreLongClick = {},
             quickReadText = presenter.nextUnreadChapter.collectAsState(),
-            chapterFilterText = "",
+            chapterFilterText = presenter.chapterFilterText.collectAsState(),
             chapters = presenter.activeChapters.collectAsState(),
             removedChapters = presenter.removedChapters.collectAsState(),
             chapterSortFilter = presenter.chapterSortFilter.collectAsState(),

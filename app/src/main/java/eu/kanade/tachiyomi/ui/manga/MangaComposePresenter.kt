@@ -150,6 +150,9 @@ class MangaComposePresenter(
     private val _chapterFilter = MutableStateFlow(getFilter())
     val chapterFilter: StateFlow<MangaConstants.Filter> = _chapterFilter.asStateFlow()
 
+    private val _chapterFilterText = MutableStateFlow(getFilterText())
+    val chapterFilterText: StateFlow<String> = _chapterFilterText.asStateFlow()
+
     private val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
 
     override fun onCreate() {
@@ -717,6 +720,19 @@ class MangaComposePresenter(
         return MangaConstants.Filter(showAll = all, unread = read, downloaded = downloaded, bookmarked = bookmark)
     }
 
+    private fun getFilterText(): String {
+        val filter = _chapterFilter.value
+        val filtersId = mutableListOf<Int?>()
+        filtersId.add(if (filter.unread == ToggleableState.Indeterminate) R.string.read else null)
+        filtersId.add(if (filter.unread == ToggleableState.On) R.string.unread else null)
+        filtersId.add(if (filter.downloaded == ToggleableState.On) R.string.downloaded else null)
+        filtersId.add(if (filter.downloaded == ToggleableState.Indeterminate) R.string.not_downloaded else null)
+        filtersId.add(if (filter.bookmarked == ToggleableState.On) R.string.bookmarked else null)
+        filtersId.add(if (filter.bookmarked == ToggleableState.Indeterminate) R.string.not_bookmarked else null)
+        //filtersId.add(if (manga.filtered_scanlators?.isNotEmpty() == true) R.string.scanlators else null)
+        return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
+    }
+
     /**
      * Get change Sort option
      */
@@ -861,6 +877,7 @@ class MangaComposePresenter(
         presenterScope.launchIO {
             _chapterSortFilter.value = getSortFilter()
             _chapterFilter.value = getFilter()
+            _chapterFilterText.value = getFilterText()
         }
     }
 
