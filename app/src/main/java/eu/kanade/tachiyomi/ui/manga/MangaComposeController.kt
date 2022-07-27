@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
@@ -107,10 +108,13 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             genreClick = {},
             genreLongClick = {},
             quickReadText = presenter.nextUnreadChapter.collectAsState(),
-            chapterHeaderClick = {},
             chapterFilterText = "",
             chapters = presenter.activeChapters.collectAsState(),
             removedChapters = presenter.removedChapters.collectAsState(),
+            chapterSortFilter = presenter.chapterSortFilter.collectAsState(),
+            chapterFilterActions = ChapterFilterActions(
+                changeSort = presenter::changeSortFilter,
+            ),
             chapterActions = ChapterActions(
                 bookmark = presenter::bookmarkChapter,
                 download = presenter::downloadChapters,

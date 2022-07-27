@@ -47,8 +47,10 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
@@ -73,6 +75,7 @@ import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.sheets.ArtworkSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.ExternalLinksSheet
+import org.nekomanga.presentation.components.sheets.FilterChapterSheet
 import org.nekomanga.presentation.components.sheets.MergeSheet
 import org.nekomanga.presentation.components.sheets.TrackingDateSheet
 import org.nekomanga.presentation.components.sheets.TrackingSearchSheet
@@ -115,10 +118,11 @@ fun MangaScreen(
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
     quickReadText: State<NextUnreadChapter>,
-    chapterHeaderClick: () -> Unit = {},
     chapterFilterText: String,
     chapters: State<List<ChapterItem>>,
     removedChapters: State<List<ChapterItem>>,
+    chapterSortFilter: State<MangaConstants.SortFilter>,
+    chapterFilterActions: ChapterFilterActions,
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
 ) {
@@ -210,6 +214,8 @@ fun MangaScreen(
                         coverActions = coverActions,
                         mergeActions = mergeActions,
                         mergeSearchResult = mergeSearchResult.value,
+                        chapterSortFilter = chapterSortFilter.value,
+                        chapterFilterActions = chapterFilterActions,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
                 }
@@ -298,13 +304,13 @@ fun MangaScreen(
                             quickReadClick = { chapterActions.openNext(context) },
                             quickReadText = quickReadText.value,
                             numberOfChapters = chapters.value.size,
-                            chapterHeaderClick = chapterHeaderClick,
+                            chapterHeaderClick = { openSheet(BottomSheetScreen.FilterChapterSheet) },
                             chapterFilterText = chapterFilterText,
                         )
 
                     }
 
-                    itemsIndexed(chapters.value) { index, chapter ->
+                    itemsIndexed(items = chapters.value, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
                         ChapterRow(
                             themeColor = themeColorState,
                             chapterItem = chapter,
@@ -368,6 +374,8 @@ fun SheetLayout(
     openInBrowser: (String) -> Unit,
     coverActions: CoverActions,
     mergeActions: MergeActions,
+    chapterSortFilter: MangaConstants.SortFilter,
+    chapterFilterActions: ChapterFilterActions,
     openSheet: (BottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
 ) {
@@ -513,6 +521,9 @@ fun SheetLayout(
                 },
             )
         }
+        is BottomSheetScreen.FilterChapterSheet -> {
+            FilterChapterSheet(themeColorState = themeColorState, sortFilter = chapterSortFilter, changeSort = chapterFilterActions.changeSort)
+        }
     }
 }
 
@@ -527,6 +538,7 @@ sealed class BottomSheetScreen {
     object ExternalLinksSheet : BottomSheetScreen()
     object MergeSheet : BottomSheetScreen()
     object ArtworkSheet : BottomSheetScreen()
+    object FilterChapterSheet : BottomSheetScreen()
     class TrackingSearchSheet(val trackingService: TrackService, val alreadySelectedTrack: Track?) : BottomSheetScreen()
     class TrackingDateSheet(val trackAndService: TrackAndService, val trackingDate: TrackingDate, val trackSuggestedDates: TrackingSuggestedDates?) : BottomSheetScreen()
 }

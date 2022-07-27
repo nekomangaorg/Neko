@@ -7,12 +7,12 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ChapterItemSort(
-    val manga: Manga,
     val chapterFilter: ChapterItemFilter = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
 ) {
 
     fun <T : ChapterItem> getChaptersSorted(
+        manga: Manga,
         rawChapters: List<T>,
         andFiltered: Boolean = true,
         filterForReader: Boolean = false,
@@ -28,10 +28,11 @@ class ChapterItemSort(
             else -> rawChapters
         }
 
-        return chapters.sortedWith(sortComparator())
+        return chapters.sortedWith(sortComparator(manga))
     }
 
     fun <T : ChapterItem> getNextUnreadChapter(
+        manga: Manga,
         rawChapters: List<T>,
         andFiltered: Boolean = true,
     ): T? {
@@ -39,10 +40,10 @@ class ChapterItemSort(
             andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
             else -> rawChapters
         }
-        return chapters.sortedWith(sortComparator(true)).find { !it.chapter.read }
+        return chapters.sortedWith(sortComparator(manga, true)).find { !it.chapter.read }
     }
 
-    fun <T : ChapterItem> sortComparator(ignoreAsc: Boolean = false): Comparator<T> {
+    fun <T : ChapterItem> sortComparator(manga: Manga, ignoreAsc: Boolean = false): Comparator<T> {
         val sortDescending = !ignoreAsc && manga.sortDescending(preferences)
         val sortFunction: (T, T) -> Int =
             when (manga.chapterOrder(preferences)) {

@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
@@ -142,7 +143,10 @@ class MangaComposePresenter(
     private val _activeChapters = MutableStateFlow<List<ChapterItem>>(emptyList())
     val activeChapters: StateFlow<List<ChapterItem>> = _activeChapters.asStateFlow()
 
-    private val chapterSort = ChapterItemSort(manga.value, chapterFilter, preferences)
+    private val _chapterSortFilter = MutableStateFlow(getSortFilter())
+    val chapterSortFilter: StateFlow<MangaConstants.SortFilter> = _chapterSortFilter.asStateFlow()
+
+    private val chapterSort = ChapterItemSort(chapterFilter, preferences)
 
     override fun onCreate() {
         super.onCreate()
@@ -522,7 +526,7 @@ class MangaComposePresenter(
                 merge_manga_url = mergeManga.url
                 merge_manga_image_url = merge_manga_image_url
             }
-            db.insertManga(editManga).executeOnIO()
+            db.insertManga(editManga).executeAsBlocking()
             updateMangaFlow()
             onRefresh()
         }
@@ -569,8 +573,8 @@ class MangaComposePresenter(
             if (allChapterScanlators.size == 1 && manga.value.filtered_scanlators.isNotNullOrEmpty()) {
                 updateMangaScanlator(emptySet())
             }
-
-            _activeChapters.value = chapterSort.getChaptersSorted(allChapters)
+           
+            _activeChapters.value = chapterSort.getChaptersSorted(manga.value, allChapters)
 
             //do this after so the texts gets updated
             updateNextUnreadChapter()
@@ -670,6 +674,48 @@ class MangaComposePresenter(
     /**
      * Get current merge result
      */
+    private fun getSortFilter(): MangaConstants.SortFilter {
+        val sortOrder = manga.value.chapterOrder(preferences)
+        val status = when (manga.value.sortDescending(preferences)) {
+            true -> MangaConstants.SortState.Descending
+            false -> MangaConstants.SortState.Ascending
+        }
+        return when (sortOrder) {
+            Manga.CHAPTER_SORTING_NUMBER -> MangaConstants.SortFilter(chapterNumberSort = status)
+            Manga.CHAPTER_SORTING_UPLOAD_DATE -> MangaConstants.SortFilter(uploadDateSort = status)
+            else -> MangaConstants.SortFilter(sourceOrderSort = status)
+        }
+    }
+
+    /**
+     * Get current merge result
+     */
+    fun changeSortFilter(sortOption: SortOption) {
+        presenterScope.launchIO {
+            val manga = _currentManga.value
+
+            val sortInt = when (sortOption.sortType) {
+                MangaConstants.SortType.ChapterNumber -> Manga.CHAPTER_SORTING_NUMBER
+                MangaConstants.SortType.SourceOrder -> Manga.CHAPTER_SORTING_SOURCE
+                MangaConstants.SortType.UploadDate -> Manga.CHAPTER_SORTING_UPLOAD_DATE
+            }
+            val descInt = when (sortOption.sortState) {
+                MangaConstants.SortState.Ascending -> Manga.CHAPTER_SORT_ASC
+                else -> Manga.CHAPTER_SORT_DESC
+            }
+
+            manga.setChapterOrder(sortInt, descInt)
+
+            db.insertManga(manga).executeAsBlocking()
+            updateMangaFlow()
+            updateFilterFlow()
+            updateChapterFlows()
+        }
+    }
+
+    /**
+     * Get current merge result
+     */
     private fun getIsMergedManga(): IsMergedManga {
         return when (manga.value.isMerged()) {
             true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!)
@@ -723,11 +769,20 @@ class MangaComposePresenter(
     }
 
     /**
-     * Update flows for external links
+     * Update flows for manga
      */
     private fun updateMangaFlow() {
         presenterScope.launchIO {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
+        }
+    }
+
+    /**
+     * Update filterflow
+     */
+    private fun updateFilterFlow() {
+        presenterScope.launchIO {
+            _chapterSortFilter.value = getSortFilter()
         }
     }
 
@@ -843,7 +898,7 @@ class MangaComposePresenter(
      */
     private fun updateNextUnreadChapter() {
         presenterScope.launchIO {
-            val nextChapter = chapterSort.getNextUnreadChapter(activeChapters.value)?.chapter ?: null
+            val nextChapter = chapterSort.getNextUnreadChapter(manga.value, activeChapters.value)?.chapter
             _nextUnreadChapter.value = when (nextChapter == null) {
                 true -> NextUnreadChapter()
                 false -> {

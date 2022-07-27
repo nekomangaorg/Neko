@@ -15,6 +15,33 @@ object MangaConstants {
      */
     data class NextUnreadChapter(@StringRes val id: Int? = null, val text: String = "", val simpleChapter: SimpleChapter? = null)
 
+    data class SortFilter(
+        val sourceOrderSort: SortState = SortState.None,
+        val chapterNumberSort: SortState = SortState.None,
+        val uploadDateSort: SortState = SortState.None,
+    )
+
+    data class SortOption(
+        val sortState: SortState,
+        val sortType: SortType,
+    )
+
+    enum class SortType {
+        SourceOrder,
+        ChapterNumber,
+        UploadDate
+    }
+
+    enum class SortState {
+        Ascending,
+        Descending,
+        None
+    }
+
+    class ChapterFilterActions(
+        val changeSort: (sortOptions: SortOption) -> Unit = {},
+    )
+
     sealed class DownloadAction {
         object Download : DownloadAction()
         object Remove : DownloadAction()
