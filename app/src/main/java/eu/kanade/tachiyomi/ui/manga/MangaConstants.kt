@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
 import androidx.annotation.StringRes
+import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
 import org.nekomanga.domain.chapter.ChapterItem
@@ -26,6 +27,25 @@ object MangaConstants {
         val sortType: SortType,
     )
 
+    data class Filter(
+        val showAll: Boolean = false,
+        val unread: ToggleableState = ToggleableState.Off,
+        val downloaded: ToggleableState = ToggleableState.Off,
+        val bookmarked: ToggleableState = ToggleableState.Off,
+    )
+
+    data class FilterOption(
+        val filterType: FilterType,
+        val filterState: ToggleableState,
+    )
+
+    enum class FilterType {
+        All,
+        Unread,
+        Downloaded,
+        Bookmarked
+    }
+
     enum class SortType {
         SourceOrder,
         ChapterNumber,
@@ -39,7 +59,8 @@ object MangaConstants {
     }
 
     class ChapterFilterActions(
-        val changeSort: (sortOptions: SortOption) -> Unit = {},
+        val changeSort: (sortOptions: SortOption) -> Unit,
+        val changeFilter: (filterOption: FilterOption) -> Unit,
     )
 
     sealed class DownloadAction {

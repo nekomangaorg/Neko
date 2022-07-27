@@ -112,8 +112,10 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             chapters = presenter.activeChapters.collectAsState(),
             removedChapters = presenter.removedChapters.collectAsState(),
             chapterSortFilter = presenter.chapterSortFilter.collectAsState(),
+            chapterFilter = presenter.chapterFilter.collectAsState(),
             chapterFilterActions = ChapterFilterActions(
-                changeSort = presenter::changeSortFilter,
+                changeSort = presenter::changeSortOption,
+                changeFilter = presenter::changeFilterOption,
             ),
             chapterActions = ChapterActions(
                 bookmark = presenter::bookmarkChapter,

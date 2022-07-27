@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.os.Build
 import android.os.Environment
+import androidx.compose.ui.state.ToggleableState
 import com.crazylegend.string.isNotNullOrEmpty
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
@@ -69,7 +70,7 @@ class MangaComposePresenter(
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
-    val chapterFilter: ChapterItemFilter = Injekt.get(),
+    val chapterItemFilter: ChapterItemFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
@@ -146,7 +147,10 @@ class MangaComposePresenter(
     private val _chapterSortFilter = MutableStateFlow(getSortFilter())
     val chapterSortFilter: StateFlow<MangaConstants.SortFilter> = _chapterSortFilter.asStateFlow()
 
-    private val chapterSort = ChapterItemSort(chapterFilter, preferences)
+    private val _chapterFilter = MutableStateFlow(getFilter())
+    val chapterFilter: StateFlow<MangaConstants.Filter> = _chapterFilter.asStateFlow()
+
+    private val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
 
     override fun onCreate() {
         super.onCreate()
@@ -573,7 +577,7 @@ class MangaComposePresenter(
             if (allChapterScanlators.size == 1 && manga.value.filtered_scanlators.isNotNullOrEmpty()) {
                 updateMangaScanlator(emptySet())
             }
-           
+
             _activeChapters.value = chapterSort.getChaptersSorted(manga.value, allChapters)
 
             //do this after so the texts gets updated
@@ -672,7 +676,7 @@ class MangaComposePresenter(
     }
 
     /**
-     * Get current merge result
+     * Get current sort filter
      */
     private fun getSortFilter(): MangaConstants.SortFilter {
         val sortOrder = manga.value.chapterOrder(preferences)
@@ -688,9 +692,35 @@ class MangaComposePresenter(
     }
 
     /**
-     * Get current merge result
+     * Get current sort filter
      */
-    fun changeSortFilter(sortOption: SortOption) {
+    private fun getFilter(): MangaConstants.Filter {
+        val read = when (manga.value.readFilter(preferences)) {
+            Manga.CHAPTER_SHOW_UNREAD -> ToggleableState.On
+            Manga.CHAPTER_SHOW_READ -> ToggleableState.Indeterminate
+            else -> ToggleableState.Off
+        }
+        val bookmark = when (manga.value.bookmarkedFilter(preferences)) {
+            Manga.CHAPTER_SHOW_BOOKMARKED -> ToggleableState.On
+            Manga.CHAPTER_SHOW_NOT_BOOKMARKED -> ToggleableState.Indeterminate
+            else -> ToggleableState.Off
+        }
+
+        val downloaded = when (manga.value.downloadedFilter(preferences)) {
+            Manga.CHAPTER_SHOW_DOWNLOADED -> ToggleableState.On
+            Manga.CHAPTER_SHOW_NOT_DOWNLOADED -> ToggleableState.Indeterminate
+            else -> ToggleableState.Off
+        }
+        val all = read == ToggleableState.Off && bookmark == ToggleableState.Off && downloaded == ToggleableState.Off
+
+
+        return MangaConstants.Filter(showAll = all, unread = read, downloaded = downloaded, bookmarked = bookmark)
+    }
+
+    /**
+     * Get change Sort option
+     */
+    fun changeSortOption(sortOption: SortOption) {
         presenterScope.launchIO {
             val manga = _currentManga.value
 
@@ -705,6 +735,53 @@ class MangaComposePresenter(
             }
 
             manga.setChapterOrder(sortInt, descInt)
+
+            db.insertManga(manga).executeAsBlocking()
+            updateMangaFlow()
+            updateFilterFlow()
+            updateChapterFlows()
+        }
+    }
+
+    /**
+     * Get current merge result
+     */
+    fun changeFilterOption(filterOption: MangaConstants.FilterOption) {
+        presenterScope.launchIO {
+            val manga = _currentManga.value
+
+            when (filterOption.filterType) {
+                MangaConstants.FilterType.All -> {
+                    manga.readFilter = Manga.SHOW_ALL
+                    manga.bookmarkedFilter = Manga.SHOW_ALL
+                    manga.downloadedFilter = Manga.SHOW_ALL
+                }
+                MangaConstants.FilterType.Unread -> {
+                    manga.readFilter = when (filterOption.filterState) {
+                        ToggleableState.On -> Manga.CHAPTER_SHOW_UNREAD
+                        ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_READ
+                        else -> Manga.SHOW_ALL
+                    }
+                }
+                MangaConstants.FilterType.Bookmarked -> {
+                    manga.bookmarkedFilter = when (filterOption.filterState) {
+                        ToggleableState.On -> Manga.CHAPTER_SHOW_BOOKMARKED
+                        ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+                        else -> Manga.SHOW_ALL
+                    }
+                }
+                MangaConstants.FilterType.Downloaded -> {
+                    manga.downloadedFilter = when (filterOption.filterState) {
+                        ToggleableState.On -> Manga.CHAPTER_SHOW_DOWNLOADED
+                        ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+                        else -> Manga.SHOW_ALL
+                    }
+                }
+            }
+
+            manga.setFilterToLocal()
+
+            //if matches global do stuff
 
             db.insertManga(manga).executeAsBlocking()
             updateMangaFlow()
@@ -783,6 +860,7 @@ class MangaComposePresenter(
     private fun updateFilterFlow() {
         presenterScope.launchIO {
             _chapterSortFilter.value = getSortFilter()
+            _chapterFilter.value = getFilter()
         }
     }
 

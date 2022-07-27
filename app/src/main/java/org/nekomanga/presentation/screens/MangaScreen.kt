@@ -122,6 +122,7 @@ fun MangaScreen(
     chapters: State<List<ChapterItem>>,
     removedChapters: State<List<ChapterItem>>,
     chapterSortFilter: State<MangaConstants.SortFilter>,
+    chapterFilter: State<MangaConstants.Filter>,
     chapterFilterActions: ChapterFilterActions,
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
@@ -215,6 +216,7 @@ fun MangaScreen(
                         mergeActions = mergeActions,
                         mergeSearchResult = mergeSearchResult.value,
                         chapterSortFilter = chapterSortFilter.value,
+                        chapterFilter = chapterFilter.value,
                         chapterFilterActions = chapterFilterActions,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
@@ -375,6 +377,7 @@ fun SheetLayout(
     coverActions: CoverActions,
     mergeActions: MergeActions,
     chapterSortFilter: MangaConstants.SortFilter,
+    chapterFilter: MangaConstants.Filter,
     chapterFilterActions: ChapterFilterActions,
     openSheet: (BottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
@@ -522,7 +525,13 @@ fun SheetLayout(
             )
         }
         is BottomSheetScreen.FilterChapterSheet -> {
-            FilterChapterSheet(themeColorState = themeColorState, sortFilter = chapterSortFilter, changeSort = chapterFilterActions.changeSort)
+            FilterChapterSheet(
+                themeColorState = themeColorState,
+                sortFilter = chapterSortFilter,
+                changeSort = chapterFilterActions.changeSort,
+                changeFilter = chapterFilterActions.changeFilter,
+                filter = chapterFilter,
+            )
         }
     }
 }

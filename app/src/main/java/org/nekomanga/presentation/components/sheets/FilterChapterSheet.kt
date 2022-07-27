@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,7 +38,13 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun FilterChapterSheet(themeColorState: ThemeColorState, sortFilter: MangaConstants.SortFilter, changeSort: (SortOption) -> Unit) {
+fun FilterChapterSheet(
+    themeColorState: ThemeColorState,
+    sortFilter: MangaConstants.SortFilter,
+    filter: MangaConstants.Filter,
+    changeSort: (SortOption) -> Unit,
+    changeFilter: (MangaConstants.FilterOption) -> Unit,
+) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
         BaseSheet(themeColor = themeColorState) {
@@ -46,7 +53,7 @@ fun FilterChapterSheet(themeColorState: ThemeColorState, sortFilter: MangaConsta
                     Sort(themeColorState = themeColorState, sortFilter, changeSort)
                 }
                 item {
-                    Filter(themeColorState = themeColorState)
+                    Filter(themeColorState = themeColorState, filter, changeFilter)
                 }
 
             }
@@ -106,7 +113,7 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
 }
 
 @Composable
-private fun Filter(themeColorState: ThemeColorState) {
+private fun Filter(themeColorState: ThemeColorState, filter: MangaConstants.Filter, changeFilter: (MangaConstants.FilterOption) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,30 +121,97 @@ private fun Filter(themeColorState: ThemeColorState) {
     ) {
         Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.labelMedium)
         Gap(8.dp)
-        FilterLine(themeColorState, ToggleableState.On, stringResource(id = R.string.show_all))
-        FilterLine(themeColorState, ToggleableState.Off, stringResource(id = R.string.show_unread_chapters))
-        FilterLine(themeColorState, ToggleableState.Indeterminate, stringResource(id = R.string.show_downloaded_chapters))
-        FilterLine(themeColorState, ToggleableState.Indeterminate, stringResource(id = R.string.show_bookmarked_chapters))
+        showAllFilterLine(themeColorState = themeColorState, checked = filter.showAll, text = stringResource(id = R.string.show_all), onChecked = changeFilter)
+        FilterLine(
+            themeColorState = themeColorState,
+            state = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.Unread, filterState = filter.unread),
+            text = stringResource(id = R.string.show_unread_chapters),
+            changeFilter = changeFilter,
+        )
+        FilterLine(
+            themeColorState = themeColorState,
+            state = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.Downloaded, filterState = filter.downloaded),
+            text = stringResource(id = R.string.show_downloaded_chapters),
+            changeFilter = changeFilter,
+        )
+        FilterLine(
+            themeColorState = themeColorState,
+            state = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.Bookmarked, filterState = filter.bookmarked),
+            text = stringResource(id = R.string.show_bookmarked_chapters),
+            changeFilter = changeFilter,
+        )
 
     }
 }
 
 @Composable
-private fun FilterLine(themeColorState: ThemeColorState, state: ToggleableState, text: String) {
+private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.FilterOption, text: String, changeFilter: (MangaConstants.FilterOption) -> Unit) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { },
+            .clickable {
+                changeFilter(
+                    state.copy(
+                        filterState = when (state.filterState) {
+                            ToggleableState.On -> ToggleableState.Indeterminate
+                            ToggleableState.Indeterminate -> ToggleableState.Off
+                            ToggleableState.Off -> ToggleableState.On
+                        },
+                    ),
+                )
+            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TriStateCheckbox(
-            state = state,
+            state = state.filterState,
             colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
-            onClick = { /*TODO*/ },
+            onClick = {
+                changeFilter(
+                    state.copy(
+                        filterState = when (state.filterState) {
+                            ToggleableState.On -> ToggleableState.Indeterminate
+                            ToggleableState.Indeterminate -> ToggleableState.Off
+                            ToggleableState.Off -> ToggleableState.On
+                        },
+                    ),
+                )
+            },
         )
         Gap(width = 8.dp)
         Text(text = text, style = MaterialTheme.typography.bodyLarge)
 
     }
 }
+
+@Composable
+private fun showAllFilterLine(themeColorState: ThemeColorState, checked: Boolean, text: String, onChecked: (MangaConstants.FilterOption) -> Unit = {}) {
+
+    val reverseChecked = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.All, filterState = ToggleableState(!checked))
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                if (!checked) {
+                    onChecked(reverseChecked)
+                }
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(
+            checked = checked,
+            colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
+            onCheckedChange = {
+                onChecked(reverseChecked)
+            },
+            enabled = !checked,
+        )
+        Gap(width = 8.dp)
+        Text(text = text, style = MaterialTheme.typography.bodyLarge)
+
+    }
+}
+
+
+
