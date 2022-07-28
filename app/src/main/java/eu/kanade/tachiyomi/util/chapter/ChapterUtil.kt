@@ -159,7 +159,7 @@ class ChapterUtil {
             if (scanlators.isNullOrBlank()) return emptyList()
             return scanlators.split(scanlatorSeparator).distinct()
         }
-
+        
         fun getScanlatorString(scanlators: Set<String>): String {
             return scanlators.toList().sorted().joinToString(scanlatorSeparator)
         }

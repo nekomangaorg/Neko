@@ -123,6 +123,7 @@ fun MangaScreen(
     removedChapters: State<List<ChapterItem>>,
     chapterSortFilter: State<MangaConstants.SortFilter>,
     chapterFilter: State<MangaConstants.Filter>,
+    scanlatorFilter: State<MangaConstants.ScanlatorFilter>,
     chapterFilterActions: ChapterFilterActions,
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
@@ -217,6 +218,7 @@ fun MangaScreen(
                         mergeSearchResult = mergeSearchResult.value,
                         chapterSortFilter = chapterSortFilter.value,
                         chapterFilter = chapterFilter.value,
+                        scanlatorFilter = scanlatorFilter.value,
                         chapterFilterActions = chapterFilterActions,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
@@ -378,6 +380,7 @@ fun SheetLayout(
     mergeActions: MergeActions,
     chapterSortFilter: MangaConstants.SortFilter,
     chapterFilter: MangaConstants.Filter,
+    scanlatorFilter: MangaConstants.ScanlatorFilter,
     chapterFilterActions: ChapterFilterActions,
     openSheet: (BottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
@@ -531,6 +534,8 @@ fun SheetLayout(
                 changeSort = chapterFilterActions.changeSort,
                 changeFilter = chapterFilterActions.changeFilter,
                 filter = chapterFilter,
+                scanlatorFilter = scanlatorFilter,
+                changeScanlatorFilter = chapterFilterActions.changeScanlator,
             )
         }
     }

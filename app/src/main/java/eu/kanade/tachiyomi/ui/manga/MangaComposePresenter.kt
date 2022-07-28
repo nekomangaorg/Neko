@@ -150,6 +150,9 @@ class MangaComposePresenter(
     private val _chapterFilter = MutableStateFlow(getFilter())
     val chapterFilter: StateFlow<MangaConstants.Filter> = _chapterFilter.asStateFlow()
 
+    private val _scanlatorFilter = MutableStateFlow(getScanlatorFilter())
+    val scanlatorFilter: StateFlow<MangaConstants.ScanlatorFilter> = _scanlatorFilter.asStateFlow()
+
     private val _chapterFilterText = MutableStateFlow(getFilterText())
     val chapterFilterText: StateFlow<String> = _chapterFilterText.asStateFlow()
 
@@ -177,6 +180,7 @@ class MangaComposePresenter(
         updateMergeFlow()
         updateArtworkFlow()
         updateAltTitlesFlow()
+        updateFilterFlow()
     }
 
     fun onRefresh() {
@@ -572,13 +576,16 @@ class MangaComposePresenter(
 
             }
             _allChapters.value = allChapters
-            /**
-             * TODO make sure to copy any logic needed from getChapters() in the old presenter for all the filters and what not
-             * then pass that to active chapters
-             */
+
+            val needToRefreshFilters = allChapterScanlators.isEmpty()
+
             allChapterScanlators = allChapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
             if (allChapterScanlators.size == 1 && manga.value.filtered_scanlators.isNotNullOrEmpty()) {
                 updateMangaScanlator(emptySet())
+            }
+            //this is only really needed on initial load since all chapter scanlators is empty and the scanlator filter sheet would be also
+            if (needToRefreshFilters) {
+                updateFilterFlow()
             }
 
             _activeChapters.value = chapterSort.getChaptersSorted(manga.value, allChapters)
@@ -591,15 +598,16 @@ class MangaComposePresenter(
 
     private fun updateMangaScanlator(filteredScanlators: Set<String>) {
         presenterScope.launchIO {
-            db.getManga(mangaId).executeOnIO()?.apply {
-                this.filtered_scanlators = when (filteredScanlators.isEmpty()) {
-                    true -> null
-                    false -> ChapterUtil.getScanlatorString(filteredScanlators)
-                }
-            }?.run {
-                db.insertManga(this)
-                updateMangaFlow()
+            val manga = manga.value
+            manga.filtered_scanlators = when (filteredScanlators.isEmpty()) {
+                true -> null
+                false -> ChapterUtil.getScanlatorString(filteredScanlators)
             }
+
+            db.insertManga(manga).executeOnIO()
+            updateMangaFlow()
+            updateFilterFlow()
+
         }
     }
 
@@ -720,8 +728,20 @@ class MangaComposePresenter(
         return MangaConstants.Filter(showAll = all, unread = read, downloaded = downloaded, bookmarked = bookmark)
     }
 
+    /**
+     * Get current sort filter
+     */
+    private fun getScanlatorFilter(): MangaConstants.ScanlatorFilter {
+        val filteredScanlators = ChapterUtil.getScanlators(manga.value.filtered_scanlators).toSet()
+        val scanlatorOptions = allChapterScanlators.sorted().map { scanlator ->
+            MangaConstants.ScanlatorOption(name = scanlator, disabled = filteredScanlators.contains(scanlator))
+        }
+        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions)
+    }
+
     private fun getFilterText(): String {
         val filter = _chapterFilter.value
+        val hasDisabledScanlators = _scanlatorFilter.value.scanlators.any { it.disabled }
         val filtersId = mutableListOf<Int?>()
         filtersId.add(if (filter.unread == ToggleableState.Indeterminate) R.string.read else null)
         filtersId.add(if (filter.unread == ToggleableState.On) R.string.unread else null)
@@ -729,6 +749,7 @@ class MangaComposePresenter(
         filtersId.add(if (filter.downloaded == ToggleableState.Indeterminate) R.string.not_downloaded else null)
         filtersId.add(if (filter.bookmarked == ToggleableState.On) R.string.bookmarked else null)
         filtersId.add(if (filter.bookmarked == ToggleableState.Indeterminate) R.string.not_bookmarked else null)
+        filtersId.add(if (hasDisabledScanlators) R.string.scanlators else null)
         //filtersId.add(if (manga.filtered_scanlators?.isNotEmpty() == true) R.string.scanlators else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
@@ -806,6 +827,35 @@ class MangaComposePresenter(
         }
     }
 
+    fun changeScanlatorOption(scanlatorOption: MangaConstants.ScanlatorOption?) {
+        presenterScope.launchIO {
+            val manga = manga.value
+
+            val newFilteredScanlators = if (scanlatorOption != null) {
+                val filteredScanlators = ChapterUtil.getScanlators(manga.filtered_scanlators).toMutableSet()
+                when (scanlatorOption.disabled) {
+                    true -> filteredScanlators.add(scanlatorOption.name)
+                    false -> filteredScanlators.remove(scanlatorOption.name)
+                }
+                filteredScanlators
+            } else {
+                emptySet()
+            }
+
+            manga.filtered_scanlators = if (newFilteredScanlators.isEmpty()) {
+                null
+            } else {
+                ChapterUtil.getScanlatorString(newFilteredScanlators)
+            }
+
+            db.insertManga(manga).executeAsBlocking()
+            updateMangaFlow()
+            updateFilterFlow()
+            updateChapterFlows()
+
+        }
+    }
+
     /**
      * Get current merge result
      */
@@ -877,6 +927,7 @@ class MangaComposePresenter(
         presenterScope.launchIO {
             _chapterSortFilter.value = getSortFilter()
             _chapterFilter.value = getFilter()
+            _scanlatorFilter.value = getScanlatorFilter()
             _chapterFilterText.value = getFilterText()
         }
     }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
@@ -17,11 +18,13 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
@@ -42,18 +45,30 @@ fun FilterChapterSheet(
     themeColorState: ThemeColorState,
     sortFilter: MangaConstants.SortFilter,
     filter: MangaConstants.Filter,
+    scanlatorFilter: MangaConstants.ScanlatorFilter,
     changeSort: (SortOption) -> Unit,
     changeFilter: (MangaConstants.FilterOption) -> Unit,
+    changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
-        BaseSheet(themeColor = themeColorState) {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .8
+
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeightIn(0.dp, maxLazyHeight.dp),
+            ) {
                 item {
                     Sort(themeColorState = themeColorState, sortFilter, changeSort)
                 }
                 item {
                     Filter(themeColorState = themeColorState, filter, changeFilter)
+                }
+
+                item {
+                    Scanlator(themeColorState = themeColorState, scanlatorFilter, changeScanlatorFilter)
                 }
 
             }
@@ -121,7 +136,12 @@ private fun Filter(themeColorState: ThemeColorState, filter: MangaConstants.Filt
     ) {
         Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.labelMedium)
         Gap(8.dp)
-        showAllFilterLine(themeColorState = themeColorState, checked = filter.showAll, text = stringResource(id = R.string.show_all), onChecked = changeFilter)
+        showAllFilterLine(
+            themeColorState = themeColorState,
+            checked = filter.showAll,
+            text = stringResource(id = R.string.show_all),
+            onChecked = { changeFilter(MangaConstants.FilterOption(filterType = MangaConstants.FilterType.All, filterState = ToggleableState(!filter.showAll))) },
+        )
         FilterLine(
             themeColorState = themeColorState,
             state = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.Unread, filterState = filter.unread),
@@ -185,16 +205,13 @@ private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.F
 }
 
 @Composable
-private fun showAllFilterLine(themeColorState: ThemeColorState, checked: Boolean, text: String, onChecked: (MangaConstants.FilterOption) -> Unit = {}) {
-
-    val reverseChecked = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.All, filterState = ToggleableState(!checked))
-
+private fun showAllFilterLine(themeColorState: ThemeColorState, checked: Boolean, text: String, onChecked: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
                 if (!checked) {
-                    onChecked(reverseChecked)
+                    onChecked()
                 }
             },
         verticalAlignment = Alignment.CenterVertically,
@@ -202,13 +219,61 @@ private fun showAllFilterLine(themeColorState: ThemeColorState, checked: Boolean
         Checkbox(
             checked = checked,
             colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
-            onCheckedChange = {
-                onChecked(reverseChecked)
-            },
+            onCheckedChange = { onChecked() },
             enabled = !checked,
         )
         Gap(width = 8.dp)
         Text(text = text, style = MaterialTheme.typography.bodyLarge)
+
+    }
+}
+
+@Composable
+private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaConstants.ScanlatorFilter, changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.filter_groups), style = MaterialTheme.typography.labelMedium)
+            if (scanlatorFilter.scanlators.any { it.disabled }) {
+                TextButton(onClick = { changeScanlatorFilter(null) }) {
+                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                }
+            }
+        }
+
+        scanlatorFilter.scanlators.forEach { scanlatorOption ->
+            ScanlatorLine(themeColorState = themeColorState, scanlatorOption = scanlatorOption) { changeScanlatorFilter(scanlatorOption.copy(disabled = !scanlatorOption.disabled)) }
+        }
+    }
+}
+
+@Composable
+private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: MangaConstants.ScanlatorOption, changeScanlatorFilter: () -> Unit) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                changeScanlatorFilter()
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TriStateCheckbox(
+            state = if (scanlatorOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
+            colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
+            onClick = changeScanlatorFilter,
+        )
+        Gap(width = 8.dp)
+        Text(text = scanlatorOption.name, style = MaterialTheme.typography.bodyLarge)
 
     }
 }

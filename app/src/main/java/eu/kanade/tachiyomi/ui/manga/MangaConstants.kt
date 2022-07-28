@@ -27,6 +27,15 @@ object MangaConstants {
         val sortType: SortType,
     )
 
+    data class ScanlatorFilter(
+        val scanlators: List<ScanlatorOption>,
+    )
+
+    data class ScanlatorOption(
+        val name: String,
+        val disabled: Boolean = false,
+    )
+
     data class Filter(
         val showAll: Boolean = false,
         val unread: ToggleableState = ToggleableState.Off,
@@ -61,6 +70,7 @@ object MangaConstants {
     class ChapterFilterActions(
         val changeSort: (sortOptions: SortOption) -> Unit,
         val changeFilter: (filterOption: FilterOption) -> Unit,
+        val changeScanlator: (scanlatorOption: ScanlatorOption?) -> Unit,
     )
 
     sealed class DownloadAction {
