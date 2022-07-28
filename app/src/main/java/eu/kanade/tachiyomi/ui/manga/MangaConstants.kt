@@ -20,6 +20,7 @@ object MangaConstants {
         val sourceOrderSort: SortState = SortState.None,
         val chapterNumberSort: SortState = SortState.None,
         val uploadDateSort: SortState = SortState.None,
+        val matchesGlobalDefaults: Boolean = true,
     )
 
     data class SortOption(
@@ -41,6 +42,7 @@ object MangaConstants {
         val unread: ToggleableState = ToggleableState.Off,
         val downloaded: ToggleableState = ToggleableState.Off,
         val bookmarked: ToggleableState = ToggleableState.Off,
+        val matchesGlobalDefaults: Boolean = true,
     )
 
     data class FilterOption(
@@ -67,10 +69,16 @@ object MangaConstants {
         None
     }
 
+    enum class SetGlobal {
+        Sort,
+        Filter
+    }
+
     class ChapterFilterActions(
-        val changeSort: (sortOptions: SortOption) -> Unit,
-        val changeFilter: (filterOption: FilterOption) -> Unit,
+        val changeSort: (sortOptions: SortOption?) -> Unit,
+        val changeFilter: (filterOption: FilterOption?) -> Unit,
         val changeScanlator: (scanlatorOption: ScanlatorOption?) -> Unit,
+        val setAsGlobal: (SetGlobal) -> Unit,
     )
 
     sealed class DownloadAction {

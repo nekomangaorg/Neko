@@ -536,6 +536,7 @@ fun SheetLayout(
                 filter = chapterFilter,
                 scanlatorFilter = scanlatorFilter,
                 changeScanlatorFilter = chapterFilterActions.changeScanlator,
+                setAsGlobal = chapterFilterActions.setAsGlobal,
             )
         }
     }

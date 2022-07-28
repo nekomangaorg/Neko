@@ -118,6 +118,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
                 changeSort = presenter::changeSortOption,
                 changeFilter = presenter::changeFilterOption,
                 changeScanlator = presenter::changeScanlatorOption,
+                setAsGlobal = presenter::setGlobalOption,
             ),
             chapterActions = ChapterActions(
                 bookmark = presenter::bookmarkChapter,

@@ -695,10 +695,13 @@ class MangaComposePresenter(
             true -> MangaConstants.SortState.Descending
             false -> MangaConstants.SortState.Ascending
         }
+
+        val matchesDefaults = mangaSortMatchesDefault()
+
         return when (sortOrder) {
-            Manga.CHAPTER_SORTING_NUMBER -> MangaConstants.SortFilter(chapterNumberSort = status)
-            Manga.CHAPTER_SORTING_UPLOAD_DATE -> MangaConstants.SortFilter(uploadDateSort = status)
-            else -> MangaConstants.SortFilter(sourceOrderSort = status)
+            Manga.CHAPTER_SORTING_NUMBER -> MangaConstants.SortFilter(chapterNumberSort = status, matchesGlobalDefaults = matchesDefaults)
+            Manga.CHAPTER_SORTING_UPLOAD_DATE -> MangaConstants.SortFilter(uploadDateSort = status, matchesGlobalDefaults = matchesDefaults)
+            else -> MangaConstants.SortFilter(sourceOrderSort = status, matchesGlobalDefaults = matchesDefaults)
         }
     }
 
@@ -706,6 +709,7 @@ class MangaComposePresenter(
      * Get current sort filter
      */
     private fun getFilter(): MangaConstants.Filter {
+
         val read = when (manga.value.readFilter(preferences)) {
             Manga.CHAPTER_SHOW_UNREAD -> ToggleableState.On
             Manga.CHAPTER_SHOW_READ -> ToggleableState.Indeterminate
@@ -724,8 +728,9 @@ class MangaComposePresenter(
         }
         val all = read == ToggleableState.Off && bookmark == ToggleableState.Off && downloaded == ToggleableState.Off
 
+        val matchesDefaults = mangaFilterMatchesDefault()
 
-        return MangaConstants.Filter(showAll = all, unread = read, downloaded = downloaded, bookmarked = bookmark)
+        return MangaConstants.Filter(showAll = all, unread = read, downloaded = downloaded, bookmarked = bookmark, matchesGlobalDefaults = matchesDefaults)
     }
 
     /**
@@ -757,21 +762,26 @@ class MangaComposePresenter(
     /**
      * Get change Sort option
      */
-    fun changeSortOption(sortOption: SortOption) {
+    fun changeSortOption(sortOption: SortOption?) {
         presenterScope.launchIO {
             val manga = _currentManga.value
 
-            val sortInt = when (sortOption.sortType) {
-                MangaConstants.SortType.ChapterNumber -> Manga.CHAPTER_SORTING_NUMBER
-                MangaConstants.SortType.SourceOrder -> Manga.CHAPTER_SORTING_SOURCE
-                MangaConstants.SortType.UploadDate -> Manga.CHAPTER_SORTING_UPLOAD_DATE
-            }
-            val descInt = when (sortOption.sortState) {
-                MangaConstants.SortState.Ascending -> Manga.CHAPTER_SORT_ASC
-                else -> Manga.CHAPTER_SORT_DESC
-            }
+            if (sortOption == null) {
+                manga.setSortToGlobal()
+            } else {
 
-            manga.setChapterOrder(sortInt, descInt)
+                val sortInt = when (sortOption.sortType) {
+                    MangaConstants.SortType.ChapterNumber -> Manga.CHAPTER_SORTING_NUMBER
+                    MangaConstants.SortType.SourceOrder -> Manga.CHAPTER_SORTING_SOURCE
+                    MangaConstants.SortType.UploadDate -> Manga.CHAPTER_SORTING_UPLOAD_DATE
+                }
+                val descInt = when (sortOption.sortState) {
+                    MangaConstants.SortState.Ascending -> Manga.CHAPTER_SORT_ASC
+                    else -> Manga.CHAPTER_SORT_DESC
+                }
+
+                manga.setChapterOrder(sortInt, descInt)
+            }
 
             db.insertManga(manga).executeAsBlocking()
             updateMangaFlow()
@@ -783,42 +793,55 @@ class MangaComposePresenter(
     /**
      * Get current merge result
      */
-    fun changeFilterOption(filterOption: MangaConstants.FilterOption) {
+    fun changeFilterOption(filterOption: MangaConstants.FilterOption?) {
         presenterScope.launchIO {
             val manga = _currentManga.value
 
-            when (filterOption.filterType) {
-                MangaConstants.FilterType.All -> {
-                    manga.readFilter = Manga.SHOW_ALL
-                    manga.bookmarkedFilter = Manga.SHOW_ALL
-                    manga.downloadedFilter = Manga.SHOW_ALL
-                }
-                MangaConstants.FilterType.Unread -> {
-                    manga.readFilter = when (filterOption.filterState) {
-                        ToggleableState.On -> Manga.CHAPTER_SHOW_UNREAD
-                        ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_READ
-                        else -> Manga.SHOW_ALL
+            if (!manga.usesLocalFilter && manga.readFilter(preferences) == Manga.SHOW_ALL && manga.downloadedFilter(preferences) == Manga.SHOW_ALL && manga.bookmarkedFilter(preferences) == Manga.SHOW_ALL) {
+                manga.readFilter = Manga.SHOW_ALL
+                manga.bookmarkedFilter = Manga.SHOW_ALL
+                manga.downloadedFilter = Manga.SHOW_ALL
+            }
+
+            if (filterOption == null) {
+                manga.setFilterToGlobal()
+            } else {
+                when (filterOption.filterType) {
+                    MangaConstants.FilterType.All -> {
+                        manga.readFilter = Manga.SHOW_ALL
+                        manga.bookmarkedFilter = Manga.SHOW_ALL
+                        manga.downloadedFilter = Manga.SHOW_ALL
+                    }
+                    MangaConstants.FilterType.Unread -> {
+                        manga.readFilter = when (filterOption.filterState) {
+                            ToggleableState.On -> Manga.CHAPTER_SHOW_UNREAD
+                            ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_READ
+                            else -> Manga.SHOW_ALL
+                        }
+                    }
+                    MangaConstants.FilterType.Bookmarked -> {
+                        manga.bookmarkedFilter = when (filterOption.filterState) {
+                            ToggleableState.On -> Manga.CHAPTER_SHOW_BOOKMARKED
+                            ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+                            else -> Manga.SHOW_ALL
+                        }
+                    }
+                    MangaConstants.FilterType.Downloaded -> {
+                        manga.downloadedFilter = when (filterOption.filterState) {
+                            ToggleableState.On -> Manga.CHAPTER_SHOW_DOWNLOADED
+                            ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+                            else -> Manga.SHOW_ALL
+                        }
                     }
                 }
-                MangaConstants.FilterType.Bookmarked -> {
-                    manga.bookmarkedFilter = when (filterOption.filterState) {
-                        ToggleableState.On -> Manga.CHAPTER_SHOW_BOOKMARKED
-                        ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
-                        else -> Manga.SHOW_ALL
-                    }
-                }
-                MangaConstants.FilterType.Downloaded -> {
-                    manga.downloadedFilter = when (filterOption.filterState) {
-                        ToggleableState.On -> Manga.CHAPTER_SHOW_DOWNLOADED
-                        ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
-                        else -> Manga.SHOW_ALL
-                    }
+                manga.setFilterToLocal()
+                if (mangaFilterMatchesDefault()) {
+                    manga.setFilterToGlobal()
                 }
             }
 
-            manga.setFilterToLocal()
+            XLog.e("ESCO ${manga.readFilter(preferences)}, ${manga.downloadedFilter(preferences)}, ${manga.bookmarkedFilter(preferences)}")
 
-            //if matches global do stuff
 
             db.insertManga(manga).executeAsBlocking()
             updateMangaFlow()
@@ -827,6 +850,9 @@ class MangaComposePresenter(
         }
     }
 
+    /**
+     * Changes the filtered scanlators, if null then it resets the scanlator filter
+     */
     fun changeScanlatorOption(scanlatorOption: MangaConstants.ScanlatorOption?) {
         presenterScope.launchIO {
             val manga = manga.value
@@ -854,6 +880,47 @@ class MangaComposePresenter(
             updateChapterFlows()
 
         }
+    }
+
+    /**
+     * Changes the filtered scanlators, if null then it resets the scanlator filter
+     */
+    fun setGlobalOption(option: MangaConstants.SetGlobal) {
+        presenterScope.launchIO {
+            val manga = manga.value
+            when (option) {
+                MangaConstants.SetGlobal.Sort -> {
+                    preferences.sortChapterOrder().set(manga.sorting)
+                    preferences.chaptersDescAsDefault().set(manga.sortDescending)
+                    manga.setSortToGlobal()
+                }
+                MangaConstants.SetGlobal.Filter -> {
+                    preferences.filterChapterByRead().set(manga.readFilter)
+                    preferences.filterChapterByDownloaded().set(manga.downloadedFilter)
+                    preferences.filterChapterByBookmarked().set(manga.bookmarkedFilter)
+                    manga.setFilterToGlobal()
+                }
+            }
+            db.insertManga(manga).executeAsBlocking()
+            updateMangaFlow()
+            updateFilterFlow()
+        }
+    }
+
+    fun mangaSortMatchesDefault(): Boolean {
+        return (
+            manga.value.sortDescending == preferences.chaptersDescAsDefault().get() &&
+                manga.value.sorting == preferences.sortChapterOrder().get()
+            ) || !manga.value.usesLocalSort
+    }
+
+    fun mangaFilterMatchesDefault(): Boolean {
+        return (
+            manga.value.readFilter == preferences.filterChapterByRead().get() &&
+                manga.value.downloadedFilter == preferences.filterChapterByDownloaded().get() &&
+                manga.value.bookmarkedFilter == preferences.filterChapterByBookmarked().get() &&
+                manga.value.hideChapterTitles == preferences.hideChapterTitlesByDefault().get()
+            ) || !manga.value.usesLocalFilter
     }
 
     /**

@@ -46,9 +46,10 @@ fun FilterChapterSheet(
     sortFilter: MangaConstants.SortFilter,
     filter: MangaConstants.Filter,
     scanlatorFilter: MangaConstants.ScanlatorFilter,
-    changeSort: (SortOption) -> Unit,
-    changeFilter: (MangaConstants.FilterOption) -> Unit,
+    changeSort: (SortOption?) -> Unit,
+    changeFilter: (MangaConstants.FilterOption?) -> Unit,
     changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit,
+    setAsGlobal: (MangaConstants.SetGlobal) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
@@ -61,10 +62,10 @@ fun FilterChapterSheet(
                     .requiredHeightIn(0.dp, maxLazyHeight.dp),
             ) {
                 item {
-                    Sort(themeColorState = themeColorState, sortFilter, changeSort)
+                    Sort(themeColorState = themeColorState, sortFilter, changeSort) { setAsGlobal(MangaConstants.SetGlobal.Sort) }
                 }
                 item {
-                    Filter(themeColorState = themeColorState, filter, changeFilter)
+                    Filter(themeColorState = themeColorState, filter, changeFilter) { setAsGlobal(MangaConstants.SetGlobal.Filter) }
                 }
 
                 item {
@@ -77,13 +78,27 @@ fun FilterChapterSheet(
 }
 
 @Composable
-private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.SortFilter, changeSort: (SortOption) -> Unit) {
+private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.SortFilter, changeSort: (SortOption?) -> Unit, setGlobal: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
     ) {
-        Text(text = stringResource(id = R.string.sort), style = MaterialTheme.typography.labelMedium)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.sort), style = MaterialTheme.typography.labelMedium)
+            if (!sortFilter.matchesGlobalDefaults) {
+                TextButton(onClick = setGlobal) {
+                    Text(text = stringResource(id = R.string.set_as_default), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                }
+                TextButton(onClick = { changeSort(null) }) {
+                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                }
+            }
+        }
         Gap(8.dp)
         SortLine(themeColorState, SortOption(sortFilter.sourceOrderSort, SourceOrder), stringResource(id = R.string.by_source_order), changeSort)
         SortLine(themeColorState, SortOption(sortFilter.chapterNumberSort, ChapterNumber), stringResource(id = R.string.by_chapter_number), changeSort)
@@ -128,14 +143,28 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
 }
 
 @Composable
-private fun Filter(themeColorState: ThemeColorState, filter: MangaConstants.Filter, changeFilter: (MangaConstants.FilterOption) -> Unit) {
+private fun Filter(themeColorState: ThemeColorState, filter: MangaConstants.Filter, changeFilter: (MangaConstants.FilterOption?) -> Unit, setGlobal: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
     ) {
-        Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.labelMedium)
-        Gap(8.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.filter), style = MaterialTheme.typography.labelMedium)
+
+            if (!filter.matchesGlobalDefaults) {
+                TextButton(onClick = setGlobal) {
+                    Text(text = stringResource(id = R.string.set_as_default), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                }
+                TextButton(onClick = { changeFilter(null) }) {
+                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                }
+            }
+        }
         showAllFilterLine(
             themeColorState = themeColorState,
             checked = filter.showAll,
