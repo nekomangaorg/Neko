@@ -401,12 +401,12 @@ class MangaComposePresenter(
      * share the cover that is written in the destination folder.  If a url is  passed in then share that one instead of the
      * manga thumbnail url one
      */
-    suspend fun shareMangaCover(destDir: File, url: String = ""): File? {
+    suspend fun shareMangaCover(destDir: File, artwork: Artwork): File? {
         return withIOContext {
             return@withIOContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 destDir.deleteRecursively()
                 try {
-                    saveCover(destDir, url)
+                    saveCover(destDir, artwork)
                 } catch (e: java.lang.Exception) {
                     XLog.e("warn", e)
                     null
@@ -421,15 +421,15 @@ class MangaComposePresenter(
     /**
      * Save the given url cover to file
      */
-    suspend fun saveCover(url: String) {
-        return withIOContext {
+    fun saveCover(artwork: Artwork) {
+        presenterScope.launchIO {
             try {
                 val directory = File(
                     Environment.getExternalStorageDirectory().absolutePath +
                         File.separator + Environment.DIRECTORY_PICTURES +
                         File.separator + preferences.context.getString(R.string.app_name),
                 )
-                saveCover(directory, url)
+                saveCover(directory, artwork)
             } catch (e: Exception) {
                 XLog.e("warn", e)
                 //toast
@@ -440,27 +440,25 @@ class MangaComposePresenter(
     /**
      * Save Cover to directory, if given a url save that specific cover
      */
-    private fun saveCover(directory: File, url: String = ""): File {
-        val cover =
-            if (url.isBlank()) {
-                coverCache.getCustomCoverFile(manga.value).takeIf { it.exists() } ?: coverCache.getCoverFile(manga.value.thumbnail_url, manga.value.favorite)
-            } else {
-                coverCache.getCoverFile(url)
-            }
-
+    private fun saveCover(directory: File, artwork: Artwork): File {
+        val cover = if (artwork.url.isBlank()) {
+            coverCache.getCustomCoverFile(manga.value).takeIf { it.exists() } ?: coverCache.getCoverFile(manga.value.thumbnail_url, manga.value.favorite)
+        } else {
+            coverCache.getCoverFile(artwork.url)
+        }
         val type = ImageUtil.findImageType(cover.inputStream())
             ?: throw Exception("Not an image")
 
         directory.mkdirs()
 
         // Build destination file.
-        val suffix = when (url.isNotBlank()) {
-            true -> "-" + MdUtil.getMangaId(url)
-            false -> ""
+        val fileNameNoExtension = listOfNotNull(
+            manga.value.title,
+            artwork.volume.ifEmpty { null },
+            MdUtil.getMangaId(manga.value.url),
+        ).joinToString("-")
 
-        }
-
-        val filename = DiskUtil.buildValidFilename("${manga.value.title}${suffix}.${type.extension}")
+        val filename = DiskUtil.buildValidFilename("${fileNameNoExtension}.${type.extension}")
 
         val destFile = File(directory, filename)
         cover.inputStream().use { input ->
@@ -474,21 +472,25 @@ class MangaComposePresenter(
     /**
      * Set custom cover
      */
-    fun setCover(url: String) {
-        coverCache.setCustomCoverToCache(manga.value, url)
-        MangaCoverMetadata.remove(mangaId)
-        updateCurrentArtworkFlow(url)
-        updateAlternativeArtworkFlow()
+    fun setCover(artwork: Artwork) {
+        presenterScope.launchIO {
+            coverCache.setCustomCoverToCache(manga.value, artwork.url)
+            MangaCoverMetadata.remove(mangaId)
+            updateCurrentArtworkFlow(artwork.url)
+            updateAlternativeArtworkFlow()
+        }
     }
 
     /**
      * Reset cover
      */
     fun resetCover() {
-        coverCache.deleteCustomCover(manga.value)
-        MangaCoverMetadata.remove(mangaId)
-        updateCurrentArtworkFlow()
-        updateAlternativeArtworkFlow()
+        presenterScope.launchIO {
+            coverCache.deleteCustomCover(manga.value)
+            MangaCoverMetadata.remove(mangaId)
+            updateCurrentArtworkFlow()
+            updateAlternativeArtworkFlow()
+        }
     }
 
     /**
@@ -965,13 +967,13 @@ class MangaComposePresenter(
             val uuid = MdUtil.getMangaId(manga.value.url)
             val quality = preferences.thumbnailQuality()
             val currentUsed = currentArtwork.value.copy(description = "Selected")
-            _alternativeArtwork.value = db.getArtwork(manga.value).executeAsBlocking().map {
+            _alternativeArtwork.value = db.getArtwork(manga.value).executeAsBlocking().map { aw ->
                 Artwork(
-                    mangaId = it.mangaId,
-                    url = MdUtil.cdnCoverUrl(uuid, it.fileName, quality),
-                    volume = it.volume,
-                    description = it.description,
-                    active = currentUsed.url.contains(it.fileName) || currentUsed.originalArtwork.contains(it.fileName),
+                    mangaId = aw.mangaId,
+                    url = MdUtil.cdnCoverUrl(uuid, aw.fileName, quality),
+                    volume = aw.volume,
+                    description = aw.description,
+                    active = currentUsed.url.contains(aw.fileName) || (currentUsed.url.isBlank() && currentUsed.originalArtwork.contains(aw.fileName)),
                 )
             }
 

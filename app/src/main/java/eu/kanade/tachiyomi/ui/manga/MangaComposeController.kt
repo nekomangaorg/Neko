@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy
 
@@ -98,12 +99,12 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             mergeSearchResult = presenter.mergeSearchResult.collectAsState(),
             similarClick = { router.pushController(SimilarController(presenter.manga.value).withFadeTransaction()) },
             externalLinks = presenter.externalLinks.collectAsState(),
-            shareClick = { context -> viewScope.launch { shareManga(context) } },
+            shareClick = this::shareManga,
             coverActions = CoverActions(
-                share = { context, url -> viewScope.launch { shareCover(context, url) } },
-                set = { url -> viewScope.launch { setCover(url) } },
-                save = { url -> viewScope.launch { saveCover(url) } },
-                reset = { viewScope.launch { resetCover() } },
+                share = this::shareCover,
+                set = presenter::setCover,
+                save = presenter::saveCover,
+                reset = presenter::resetCover,
             ),
             genreClick = {},
             genreLongClick = {},
@@ -162,68 +163,53 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
     }
 
     /**
-     * Save the image of the given image
-     */
-    suspend fun saveCover(urlOfCover: String) {
-        presenter.saveCover(urlOfCover)
-    }
-
-    /**
      * Share a cover with the given url
      */
-    suspend fun shareCover(context: Context, urlOfCover: String) {
-        val cover = presenter.shareMangaCover(context.sharedCacheDir(), urlOfCover)
-        withUIContext {
-            val stream = cover?.getUriCompat(context)
-            try {
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    putExtra(Intent.EXTRA_STREAM, stream)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    clipData = ClipData.newRawUri(null, stream)
-                    type = "image/*"
+    fun shareCover(context: Context, artwork: Artwork) {
+        viewScope.launch {
+            val cover = presenter.shareMangaCover(context.sharedCacheDir(), artwork)
+            withUIContext {
+                val stream = cover?.getUriCompat(context)
+                try {
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        putExtra(Intent.EXTRA_STREAM, stream)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        clipData = ClipData.newRawUri(null, stream)
+                        type = "image/*"
+                    }
+                    startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
+                } catch (e: Exception) {
+                    context.toast(e.message)
                 }
-                startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
-            } catch (e: Exception) {
-                context.toast(e.message)
             }
-        }
-    }
-
-    suspend fun setCover(urlOfCover: String) {
-        withUIContext {
-            presenter.setCover(urlOfCover)
-        }
-    }
-
-    suspend fun resetCover() {
-        withUIContext {
-            presenter.resetCover()
         }
     }
 
     /**
      * Share the given manga
      */
-    suspend fun shareManga(context: Context) {
-        val cover = presenter.shareMangaCover(context.sharedCacheDir())
-        withUIContext {
-            val stream = cover?.getUriCompat(context)
-            try {
-                val manga = presenter.manga.value
-                var url = presenter.sourceManager.getMangadex().mangaDetailsRequest(manga).url.toString()
-                url = "$url/" + presenter.manga.value.getSlug()
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/*"
-                    putExtra(Intent.EXTRA_TEXT, url)
-                    putExtra(Intent.EXTRA_TITLE, manga.title)
-                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    if (stream != null) {
-                        clipData = ClipData.newRawUri(null, stream)
+    fun shareManga(context: Context) {
+        viewScope.launch {
+            val cover = presenter.shareMangaCover(context.sharedCacheDir(), presenter.currentArtwork.value)
+            withUIContext {
+                val stream = cover?.getUriCompat(context)
+                try {
+                    val manga = presenter.manga.value
+                    var url = presenter.sourceManager.getMangadex().mangaDetailsRequest(manga).url.toString()
+                    url = "$url/" + presenter.manga.value.getSlug()
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/*"
+                        putExtra(Intent.EXTRA_TEXT, url)
+                        putExtra(Intent.EXTRA_TITLE, manga.title)
+                        flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        if (stream != null) {
+                            clipData = ClipData.newRawUri(null, stream)
+                        }
                     }
+                    startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
+                } catch (e: Exception) {
+                    context.toast(e.message)
                 }
-                startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
-            } catch (e: Exception) {
-                context.toast(e.message)
             }
         }
     }

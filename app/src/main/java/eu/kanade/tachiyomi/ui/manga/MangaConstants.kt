@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
+import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.MergeManga
 
 object MangaConstants {
@@ -111,9 +112,9 @@ object MangaConstants {
     )
 
     class CoverActions(
-        val share: (Context, String) -> Unit,
-        val set: (String) -> Unit,
-        val save: (String) -> Unit,
+        val share: (Context, Artwork) -> Unit,
+        val set: (Artwork) -> Unit,
+        val save: (Artwork) -> Unit,
         val reset: () -> Unit,
     )
 
