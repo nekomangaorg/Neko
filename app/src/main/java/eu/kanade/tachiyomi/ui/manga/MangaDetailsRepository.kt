@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -84,6 +85,13 @@ class MangaDetailsRepository {
     private fun ProducerScope<MangaResult>.startMangaJob(scope: CoroutineScope, manga: Manga): Job {
         return scope.launchIO {
             runCatching {
+                withIOContext {
+                    val artwork = mangaDex.getArtwork(manga.id!!, MdUtil.getMangaId(manga.url))
+                    db.deleteArtworkForManga(manga).executeOnIO()
+                    db.insertArtWorkList(artwork).executeOnIO()
+                    send(MangaResult.UpdatedArtwork)
+
+                }
                 mangaDex.getMangaDetails(manga)
             }.onFailure { e ->
                 XLog.e("error with mangadex getting manga", e)
@@ -168,6 +176,7 @@ class MangaDetailsRepository {
 sealed class MangaResult {
     class Error(val id: Int? = null, val text: String = "") : MangaResult()
     object UpdatedManga : MangaResult()
+    object UpdatedArtwork : MangaResult()
     object UpdatedChapters : MangaResult()
     class ChaptersRemoved(val chapterIdsRemoved: List<Long>) : MangaResult()
     object Success : MangaResult()

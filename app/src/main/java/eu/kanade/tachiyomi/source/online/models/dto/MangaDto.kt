@@ -51,6 +51,15 @@ data class TagDto(
 )
 
 @Serializable
+data class RelationshipDtoList(
+    val limit: Int,
+    val offset: Int,
+    val total: Int,
+    val result: String,
+    val data: List<RelationshipDto>,
+)
+
+@Serializable
 data class RelationshipDto(
     val id: String,
     val type: String,
@@ -61,6 +70,9 @@ data class RelationshipDto(
 data class IncludesAttributesDto(
     val name: String? = null,
     val fileName: String? = null,
+    val description: String? = null,
+    val locale: String? = null,
+    val volume: String? = null,
 )
 
 @Serializable

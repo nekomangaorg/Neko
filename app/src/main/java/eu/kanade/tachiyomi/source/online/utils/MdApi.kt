@@ -9,6 +9,7 @@ object MdApi {
     const val manga = "/manga"
     const val statistics = "/statistics/manga"
     const val chapter = "/chapter"
+    const val cover = "/cover"
     const val group = "/group"
     const val author = "/author"
     const val userFollows = "/user/follows/manga"

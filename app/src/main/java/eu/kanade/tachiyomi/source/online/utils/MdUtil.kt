@@ -29,6 +29,7 @@ class MdUtil {
         const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
 
         const val mangaLimit = 20
+        const val artworkLimit = 100
         const val latestChapterLimit = 100
 
         /**
@@ -192,7 +193,7 @@ class MdUtil {
 
             return Parser.unescapeEntities(cleanedString, false)
         }
-        
+
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
             .apply { timeZone = TimeZone.getTimeZone("UTC") }
 

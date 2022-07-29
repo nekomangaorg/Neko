@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.database
 import android.content.Context
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.pushtorefresh.storio.sqlite.impl.DefaultStorIOSQLite
+import eu.kanade.tachiyomi.data.database.mappers.ArtworkTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.CacheMangaTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.CategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.ChapterTypeMapping
@@ -12,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.mappers.MangaTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.SearchMetadataTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.SimilarTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.TrackTypeMapping
+import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.CachedManga
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -21,6 +23,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.database.models.SearchMetadata
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.queries.ArtworkQueries
 import eu.kanade.tachiyomi.data.database.queries.CachedMangaQueries
 import eu.kanade.tachiyomi.data.database.queries.CategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.ChapterQueries
@@ -36,6 +39,7 @@ import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
  * This class provides operations to manage the database through its interfaces.
  */
 open class DatabaseHelper(context: Context) :
+    ArtworkQueries,
     MangaQueries,
     ChapterQueries,
     TrackQueries,
@@ -62,6 +66,7 @@ open class DatabaseHelper(context: Context) :
         .addTypeMapping(History::class.java, HistoryTypeMapping())
         .addTypeMapping(MangaSimilar::class.java, SimilarTypeMapping())
         .addTypeMapping(CachedManga::class.java, CacheMangaTypeMapping())
+        .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
         .build()
 
     inline fun inTransaction(block: () -> Unit) = db.inTransaction(block)

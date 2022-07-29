@@ -12,5 +12,14 @@ data class SimpleManga(
 
 data class MergeManga(val thumbnail: String, val url: String, val title: String)
 
-data class Artwork(val url: String, val mangaId: Long, val inLibrary: Boolean, val originalArtwork: String, @ColorInt val vibrantColor: Int? = null)
+data class Artwork(
+    val url: String,
+    val mangaId: Long,
+    val inLibrary: Boolean = false,
+    val originalArtwork: String = "",
+    @ColorInt val vibrantColor: Int? = null,
+    val description: String = "",
+    val volume: String = "",
+    val active: Boolean = false,
+)
 
