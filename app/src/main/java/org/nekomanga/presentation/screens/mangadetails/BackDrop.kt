@@ -6,23 +6,23 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun BackDrop(artwork: Artwork, showBackdrop: Boolean, modifier: Modifier = Modifier, generatePalette: (drawable: Drawable) -> Unit = {}) {
+fun BackDrop(themeColorState: ThemeColorState, artwork: Artwork, showBackdrop: Boolean, modifier: Modifier = Modifier, generatePalette: (drawable: Drawable) -> Unit = {}) {
     Box {
-        if (showBackdrop && artwork.vibrantColor != null) {
+        if (showBackdrop) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .background(
-                        Color(artwork.vibrantColor).copy(alpha = .15f),
+                        themeColorState.buttonColor.copy(alpha = .25f),
                     ),
             )
         }

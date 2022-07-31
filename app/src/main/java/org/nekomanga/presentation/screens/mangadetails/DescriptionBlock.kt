@@ -51,6 +51,7 @@ import jp.wasabeef.gap.Gap
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.sheets.conditional
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -59,6 +60,7 @@ fun DescriptionBlock(
     themeColor: ThemeColorState,
     isExpanded: Boolean,
     isTablet: Boolean,
+    canExpandCollapse: Boolean,
     expandCollapseClick: () -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
@@ -85,18 +87,23 @@ fun DescriptionBlock(
     }
 
     val interactionSource = remember { MutableInteractionSource() }
+
+    val clickable = Modifier.conditional(canExpandCollapse) {
+        this.clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = expandCollapseClick,
+        )
+    }
+
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = expandCollapseClick,
-            ),
+            .then(clickable),
         // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
     ) {
 
-        if (isExpanded.not()) {
+        if (!isExpanded) {
             val text = description.replace(
                 Regex(
                     "[\\r\\n\\s*]{2,}",
@@ -131,6 +138,10 @@ fun DescriptionBlock(
                 }
             }
         } else {
+            if (isTablet) {
+                Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
+                Gap(16.dp)
+            }
             val text = description.trim()
             SelectionContainer {
                 Markdown(
@@ -138,25 +149,18 @@ fun DescriptionBlock(
                     colors = markdownColors(),
                     typography = markdownTypography(),
                     flavour = CommonMarkFlavourDescriptor(),
-                    modifier = Modifier.clickable {
-                        expandCollapseClick()
-                    },
+                    modifier = clickable,
                 )
             }
 
-            Gap(16.dp)
-
-
-
-            Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
-
-            if (isTablet.not()) {
+            if (!isTablet) {
+                Gap(16.dp)
+                Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
                 Gap(16.dp)
                 MoreLessButton(
                     buttonColor = themeColor.buttonColor,
                     isMore = false,
-                    Modifier
-                        .clickable(onClick = expandCollapseClick)
+                    clickable
                         .align(Alignment.End),
                 )
             }

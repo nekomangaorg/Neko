@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -48,7 +48,8 @@ fun MangaDetailsHeader(
     showBackdrop: Boolean = true,
     isMerged: Boolean = true,
     inLibrary: Boolean = true,
-    themeColor: ThemeColorState,
+    isTablet: Boolean = false,
+    themeColorState: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},
@@ -67,19 +68,14 @@ fun MangaDetailsHeader(
     genreLongClick: (String) -> Unit = {},
     quickReadText: NextUnreadChapter,
     quickReadClick: () -> Unit = {},
-    numberOfChapters: Int,
-    chapterHeaderClick: () -> Unit = {},
-    chapterFilterText: String,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme, LocalTextSelectionColors provides themeColor.textSelectionColors) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
 
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
-        val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
-        
         val isExpanded = rememberSaveable {
             when (isTablet) {
-                false -> mutableStateOf(manga.favorite.not())
+                false -> mutableStateOf(!manga.favorite)
                 true -> mutableStateOf(true)
             }
         }
@@ -87,6 +83,7 @@ fun MangaDetailsHeader(
         Column {
             Box {
                 BackDrop(
+                    themeColorState = themeColorState,
                     artwork = artwork,
                     showBackdrop = showBackdrop,
                     modifier = Modifier
@@ -123,7 +120,7 @@ fun MangaDetailsHeader(
                         inLibrary = inLibrary,
                         loggedIntoTrackers = loggedIntoTrackers,
                         trackServiceCount = trackServiceCount,
-                        themeColor = themeColor,
+                        themeColor = themeColorState,
                         favoriteClick = {
                             if (inLibrary.not()) {
                                 toggleFavorite()
@@ -147,38 +144,49 @@ fun MangaDetailsHeader(
                     )
                 }
             }
+            if (isTablet && quickReadText.text.isNotEmpty() && quickReadText.id != null) {
+                quickReadButton(quickReadText, themeColorState, quickReadClick)
+            }
             Gap(16.dp)
             DescriptionBlock(
                 manga = manga,
-                themeColor = themeColor,
+                themeColor = themeColorState,
                 isExpanded = isExpanded.value,
                 isTablet = isTablet,
+                canExpandCollapse = !isTablet,
                 expandCollapseClick = {
-                    //dont expand/collapse when tablet
-                    if (isTablet.not()) {
-                        isExpanded.value = isExpanded.value.not()
-                    }
+                    isExpanded.value = !isExpanded.value
                 },
                 genreClick = genreClick,
                 genreLongClick = genreLongClick,
             )
-            if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
-                Gap(16.dp)
-                CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColor.altContainerColor)) {
-                    ElevatedButton(
-                        onClick = quickReadClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
-                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
-                    ) {
-                        Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)
-                    }
-                }
+            if (!isTablet && quickReadText.text.isNotEmpty() && quickReadText.id != null) {
+                quickReadButton(quickReadText, themeColorState, quickReadClick)
+                Gap(8.dp)
             }
-            Gap(8.dp)
-            ChapterHeader(themeColor = themeColor, numberOfChapters = numberOfChapters, filterText = chapterFilterText, onClick = chapterHeaderClick)
+        }
+    }
+}
+
+@Composable
+private fun ColumnScope.quickReadButton(
+    quickReadText: NextUnreadChapter,
+    themeColor: ThemeColorState,
+    quickReadClick: () -> Unit,
+) {
+    if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
+        Gap(16.dp)
+        CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColor.altContainerColor)) {
+            ElevatedButton(
+                onClick = quickReadClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
+                colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
+            ) {
+                Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)
+            }
         }
     }
 }

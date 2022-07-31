@@ -29,11 +29,12 @@ fun Divider() {
 }
 
 @Composable
-fun VerticalDivider() {
+fun VerticalDivider(modifier: Modifier = Modifier) {
     androidx.compose.material3.Divider(
         modifier = Modifier
             .fillMaxHeight()
-            .width(1.dp),
+            .width(1.dp)
+            .then(modifier),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
     )
 }

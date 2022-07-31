@@ -60,7 +60,7 @@ class MangaHeaderHolder(
                     creatorLongClick = { creator ->
                         adapter.delegate.copyToClipboard(creator, R.string.creator)
                     },
-                    themeColor = ThemeColorState(
+                    themeColorState = ThemeColorState(
                         MaterialTheme.colorScheme.primary,
                         PrimaryColorRippleTheme,
                         dynamicTextSelectionColor(MaterialTheme.colorScheme.primary),
@@ -80,9 +80,6 @@ class MangaHeaderHolder(
                     genreLongClick = { adapter.delegate.tagLongClicked(it) },
                     quickReadText = quickReadText,
                     quickReadClick = { adapter.delegate.readNextChapter() },
-                    numberOfChapters = presenter.chapters.size,
-                    chapterFilterText = presenter.currentFilters(),
-                    chapterHeaderClick = { adapter.delegate.showChapterFilter() },
                 )
             }
         }

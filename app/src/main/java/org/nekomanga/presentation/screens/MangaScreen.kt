@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,26 +24,31 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import eu.kanade.presentation.components.VerticalDivider
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -57,11 +64,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
-import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
@@ -72,14 +76,9 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
-import org.nekomanga.presentation.components.sheets.ArtworkSheet
-import org.nekomanga.presentation.components.sheets.EditCategorySheet
-import org.nekomanga.presentation.components.sheets.ExternalLinksSheet
-import org.nekomanga.presentation.components.sheets.FilterChapterSheet
-import org.nekomanga.presentation.components.sheets.MergeSheet
-import org.nekomanga.presentation.components.sheets.TrackingDateSheet
-import org.nekomanga.presentation.components.sheets.TrackingSearchSheet
-import org.nekomanga.presentation.components.sheets.TrackingSheet
+import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
+import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
+import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.Shapes
 import java.text.DateFormat
@@ -90,6 +89,7 @@ fun MangaScreen(
     manga: Manga,
     altTitles: State<List<String>>,
     artwork: State<Artwork>,
+    vibrantColor: State<Int?>,
     isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
     themeBasedOffCover: Boolean = true,
@@ -144,15 +144,14 @@ fun MangaScreen(
     var inLibrary by remember { mutableStateOf(manga.favorite) }
     val hasRemovedChapters by remember { mutableStateOf(removedChapters.value) }
 
-    var currentBottomSheet: BottomSheetScreen? by remember {
+    var currentBottomSheet: DetailsBottomSheetScreen? by remember {
         mutableStateOf(null)
     }
 
     val isDarkTheme = isSystemInDarkTheme()
+    val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val surfaceColor = MaterialTheme.colorScheme.surface
-
-    val vibrantColor = MangaCoverMetadata.getVibrantColor(manga.id!!)
 
     val defaultTextSelection = LocalTextSelectionColors.current
 
@@ -167,8 +166,8 @@ fun MangaScreen(
         )
     }
 
-    if (themeBasedOffCover && vibrantColor != null) {
-        val color = getButtonThemeColor(Color(vibrantColor), isDarkTheme)
+    if (themeBasedOffCover && vibrantColor.value != null) {
+        val color = getButtonThemeColor(Color(vibrantColor.value!!), isDarkTheme)
         themeColorState = ThemeColorState(
             buttonColor = color,
             rippleTheme = DynamicRippleTheme(color),
@@ -182,7 +181,7 @@ fun MangaScreen(
         currentBottomSheet = null
     }
 
-    val openSheet: (BottomSheetScreen) -> Unit = {
+    val openSheet: (DetailsBottomSheetScreen) -> Unit = {
         scope.launch {
             currentBottomSheet = it
             sheetState.show()
@@ -194,7 +193,7 @@ fun MangaScreen(
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 currentBottomSheet?.let { currentSheet ->
-                    SheetLayout(
+                    DetailsBottomSheet(
                         currentScreen = currentSheet,
                         themeColorState = themeColorState,
                         inLibrary = inLibrary,
@@ -257,305 +256,184 @@ fun MangaScreen(
                             .asPaddingValues().calculateBottomPadding(),
                     )
 
-                LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
-                    item {
-                        MangaDetailsHeader(
-                            manga = manga,
-                            artwork = artwork.value,
-                            showBackdrop = themeBasedOffCover,
-                            isMerged = isMergedManga.value is IsMergedManga.Yes,
-                            inLibrary = inLibrary,
-                            titleLongClick = { title -> titleLongClick(context, title) },
-                            creatorLongClick = { creator -> creatorLongClick(context, creator) },
-                            themeColor = themeColorState,
-                            generatePalette = generatePalette,
-                            loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
-                            trackServiceCount = trackServiceCount.value,
-                            toggleFavorite = {
-                                if (inLibrary.not()) {
-                                    openSheet(
-                                        BottomSheetScreen.CategoriesSheet(
-                                            addingToLibrary = true,
-                                            setCategories = categoryActions.set,
-                                            addToLibraryClick = { inLibrary = toggleFavorite() },
-                                        ),
-                                    )
-                                } else {
-                                    inLibrary = toggleFavorite()
-                                }
-                            },
-                            categories = categories.value,
-                            moveCategories = {
+                val details = @Composable {
+                    MangaDetailsHeader(
+                        manga = manga,
+                        artwork = artwork.value,
+                        showBackdrop = themeBasedOffCover,
+                        isMerged = isMergedManga.value is IsMergedManga.Yes,
+                        inLibrary = inLibrary,
+                        isTablet = isTablet,
+                        titleLongClick = { title: String -> titleLongClick(context, title) },
+                        creatorLongClick = { creator: String -> creatorLongClick(context, creator) },
+                        themeColorState = themeColorState,
+                        generatePalette = generatePalette,
+                        loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
+                        trackServiceCount = trackServiceCount.value,
+                        toggleFavorite = {
+                            if (inLibrary.not()) {
                                 openSheet(
-                                    BottomSheetScreen.CategoriesSheet(
-                                        addingToLibrary = false,
+                                    DetailsBottomSheetScreen.CategoriesSheet(
+                                        addingToLibrary = true,
                                         setCategories = categoryActions.set,
+                                        addToLibraryClick = { inLibrary = toggleFavorite() },
                                     ),
                                 )
-                            },
-                            trackingClick = {
-                                openSheet(
-                                    BottomSheetScreen.TrackingSheet,
-                                )
-                            },
-                            similarClick = similarClick,
-                            artworkClick = { openSheet(BottomSheetScreen.ArtworkSheet) },
-                            mergeClick = { openSheet(BottomSheetScreen.MergeSheet) },
-                            linksClick = { openSheet(BottomSheetScreen.ExternalLinksSheet) },
-                            shareClick = { shareClick(context) },
-                            genreClick = genreClick,
-                            genreLongClick = genreLongClick,
-                            quickReadClick = { chapterActions.openNext(context) },
-                            quickReadText = quickReadText.value,
-                            numberOfChapters = chapters.value.size,
-                            chapterHeaderClick = { openSheet(BottomSheetScreen.FilterChapterSheet) },
-                            chapterFilterText = chapterFilterText.value,
-                        )
-
-                    }
-
-                    itemsIndexed(items = chapters.value, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
-                        ChapterRow(
-                            themeColor = themeColorState,
-                            chapterItem = chapter,
-                            onClick = { chapterActions.open(context, chapter) },
-                            onBookmark = { chapterActions.bookmark(chapter) },
-                            onRead = {
-                                chapterActions.markRead(
-                                    listOf(chapter),
-                                    !chapter.chapter.read,
-                                )
-                            },
-                            onWebView = { context.asActivity().openInBrowser(chapter.chapter.fullUrl()) },
-                            onDownload = { downloadAction ->
-                                chapterActions.download(listOf(chapter), downloadAction)
-                            },
-                            markPrevious = { read ->
-                                val chaptersToMark = chapters.value.subList(0, index)
-                                chapterActions.markRead(chaptersToMark, read)
-                            },
-                        )
-                    }
-                }
-                if (hasRemovedChapters.isNotEmpty()) {
-                    RemovedChaptersDialog(
-                        themeColorState = themeColorState, chapters = hasRemovedChapters,
-                        onConfirm = { removeDeleted ->
-                            if (removeDeleted) {
-                                chapterActions.delete(hasRemovedChapters)
-                                chapterActions.clearRemoved
+                            } else {
+                                inLibrary = toggleFavorite()
                             }
                         },
-                        onDismiss = chapterActions.clearRemoved,
+                        categories = categories.value,
+                        moveCategories = {
+                            openSheet(
+                                DetailsBottomSheetScreen.CategoriesSheet(
+                                    addingToLibrary = false,
+                                    setCategories = categoryActions.set,
+                                ),
+                            )
+                        },
+                        trackingClick = { openSheet(DetailsBottomSheetScreen.TrackingSheet) },
+                        similarClick = similarClick,
+                        artworkClick = { openSheet(DetailsBottomSheetScreen.ArtworkSheet) },
+                        mergeClick = { openSheet(DetailsBottomSheetScreen.MergeSheet) },
+                        linksClick = { openSheet(DetailsBottomSheetScreen.ExternalLinksSheet) },
+                        shareClick = { shareClick(context) },
+                        genreClick = genreClick,
+                        genreLongClick = genreLongClick,
+                        quickReadClick = { chapterActions.openNext(context) },
+                        quickReadText = quickReadText.value,
                     )
+                }
+
+                val chapterHeader = @Composable {
+                    ChapterHeader(
+                        themeColor = themeColorState,
+                        numberOfChapters = chapters.value.size,
+                        filterText = chapterFilterText.value,
+                        onClick = { openSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
+                    )
+                }
+
+                val chapterRow = @Composable { index: Int, chapter: ChapterItem ->
+                    ChapterRow(
+                        themeColor = themeColorState,
+                        chapterItem = chapter,
+                        onClick = { chapterActions.open(context, chapter) },
+                        onBookmark = { chapterActions.bookmark(chapter) },
+                        onRead = {
+                            chapterActions.markRead(
+                                listOf(chapter),
+                                !chapter.chapter.read,
+                            )
+                        },
+                        onWebView = { context.asActivity().openInBrowser(chapter.chapter.fullUrl()) },
+                        onDownload = { downloadAction ->
+                            chapterActions.download(listOf(chapter), downloadAction)
+                        },
+                        markPrevious = { read ->
+                            val chaptersToMark = chapters.value.subList(0, index)
+                            chapterActions.markRead(chaptersToMark, read)
+                        },
+                    )
+                }
+
+
+                CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+
+                    if (isTablet) {
+                        TabletLayout(
+                            contentPadding = contentPadding,
+                            details = details,
+                            chapterHeader = chapterHeader,
+                            chapters = chapters.value,
+                            chapterRow = chapterRow,
+                        )
+                    } else {
+                        NonTablet(contentPadding = contentPadding, details = details, chapterHeader = chapterHeader, chapters = chapters, chapterRow = chapterRow)
+                    }
+
+                    if (hasRemovedChapters.isNotEmpty()) {
+                        RemovedChaptersDialog(
+                            themeColorState = themeColorState, chapters = hasRemovedChapters,
+                            onConfirm = { removeDeleted ->
+                                if (removeDeleted) {
+                                    chapterActions.delete(hasRemovedChapters)
+                                    chapterActions.clearRemoved
+                                }
+                            },
+                            onDismiss = chapterActions.clearRemoved,
+                        )
+                    }
                 }
             }
         }
-
     }
 }
 
 @Composable
-fun SheetLayout(
-    currentScreen: BottomSheetScreen,
-    themeColorState: ThemeColorState,
-    inLibrary: Boolean,
-    allCategories: List<Category>,
-    mangaCategories: List<Category>,
-    addNewCategory: (String) -> Unit,
-    loggedInTrackingServices: List<TrackService>,
-    tracks: List<Track>,
-    dateFormat: DateFormat,
-    title: String,
-    altTitles: List<String>,
-    trackActions: TrackActions,
-    trackSearchResult: TrackSearchResult,
-    trackSuggestedDates: TrackingSuggestedDates?,
-    externalLinks: List<ExternalLink>,
-    alternativeArtwork: List<Artwork>,
-    isMergedManga: IsMergedManga,
-    mergeSearchResult: MergeSearchResult,
-    openInBrowser: (String) -> Unit,
-    coverActions: CoverActions,
-    mergeActions: MergeActions,
-    chapterSortFilter: MangaConstants.SortFilter,
-    chapterFilter: MangaConstants.Filter,
-    scanlatorFilter: MangaConstants.ScanlatorFilter,
-    chapterFilterActions: ChapterFilterActions,
-    openSheet: (BottomSheetScreen) -> Unit,
-    closeSheet: () -> Unit,
+private fun NonTablet(
+    contentPadding: PaddingValues,
+    details: @Composable () -> Unit,
+    chapterHeader: @Composable () -> Unit,
+    chapters: State<List<ChapterItem>>,
+    chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
-    val context = LocalContext.current
-    when (currentScreen) {
-        is BottomSheetScreen.CategoriesSheet -> EditCategorySheet(
-            addingToLibrary = currentScreen.addingToLibrary,
-            categories = allCategories,
-            mangaCategories = mangaCategories,
-            themeColorState = themeColorState,
-            cancelClick = closeSheet,
-            addNewCategory = addNewCategory,
-            confirmClicked = currentScreen.setCategories,
-            addToLibraryClick = currentScreen.addToLibraryClick,
-        )
-        BottomSheetScreen.TrackingSheet -> TrackingSheet(
-            themeColor = themeColorState,
-            services = loggedInTrackingServices,
-            tracks = tracks,
-            dateFormat = dateFormat,
-            onLogoClick = openInBrowser,
-            onSearchTrackClick = { service, track ->
-                closeSheet()
-                openSheet(
-                    BottomSheetScreen.TrackingSearchSheet(service, track),
-                )
-            },
-            trackStatusChanged = trackActions.statusChange,
-            trackScoreChanged = trackActions.scoreChange,
-            trackingRemoved = trackActions.remove,
-            trackChapterChanged = trackActions.chapterChange,
-            trackingStartDateClick = { trackAndService, trackingDate ->
-                closeSheet()
-                openSheet(
-                    BottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, trackSuggestedDates),
-                )
-            },
-            trackingFinishDateClick = { trackAndService, trackingDate ->
-                closeSheet()
-                openSheet(
-                    BottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, trackSuggestedDates),
-                )
-            },
-        )
-        is BottomSheetScreen.TrackingSearchSheet -> {
-            //do the initial search this way we dont need to "reset" the state after the sheet closes
-            LaunchedEffect(key1 = currentScreen.trackingService.id) {
-                trackActions.search(title, currentScreen.trackingService)
-            }
-
-            TrackingSearchSheet(
-                themeColorState = themeColorState,
-                title = title,
-                trackSearchResult = trackSearchResult,
-                alreadySelectedTrack = currentScreen.alreadySelectedTrack,
-                service = currentScreen.trackingService,
-                cancelClick = {
-                    closeSheet()
-                    openSheet(BottomSheetScreen.TrackingSheet)
-                },
-                searchTracker = { query -> trackActions.search(query, currentScreen.trackingService) },
-                openInBrowser = openInBrowser,
-                trackingRemoved = trackActions.remove,
-                trackSearchItemClick = { trackSearch ->
-                    closeSheet()
-                    trackActions.searchItemClick(TrackAndService(trackSearch, currentScreen.trackingService))
-                    openSheet(BottomSheetScreen.TrackingSheet)
-                },
-            )
-        }
-        is BottomSheetScreen.TrackingDateSheet -> {
-            TrackingDateSheet(
-                themeColorState = themeColorState,
-                trackAndService = currentScreen.trackAndService,
-                trackingDate = currentScreen.trackingDate,
-                trackSuggestedDates = currentScreen.trackSuggestedDates,
-                onDismiss = {
-                    closeSheet()
-                    openSheet(BottomSheetScreen.TrackingSheet)
-                },
-                trackDateChanged = { trackDateChanged ->
-                    closeSheet()
-                    trackActions.dateChange(trackDateChanged)
-                    openSheet(BottomSheetScreen.TrackingSheet)
-                },
-            )
-        }
-        is BottomSheetScreen.ExternalLinksSheet -> {
-            ExternalLinksSheet(
-                themeColorState = themeColorState, externalLinks = externalLinks,
-                onLinkClick = { url ->
-                    closeSheet()
-                    openInBrowser(url)
-                },
-            )
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
+        item {
+            details()
         }
 
-        is BottomSheetScreen.MergeSheet -> {
-            if (isMergedManga is IsMergedManga.No) {
-                LaunchedEffect(key1 = 1) {
-                    mergeActions.search(title)
-                }
-            }
-            MergeSheet(
-                themeColorState = themeColorState,
-                isMergedManga = isMergedManga,
-                title = title,
-                altTitles = altTitles,
-                mergeSearchResults = mergeSearchResult,
-                openMergeSource = { url ->
-                    closeSheet()
-                    openInBrowser(url)
-                },
-                removeMergeSource = {
-                    closeSheet()
-                    mergeActions.remove()
-                },
-                cancelClick = {
-                    closeSheet()
-                },
-                search = mergeActions.search,
-                mergeMangaClick = { mergeManga ->
-                    closeSheet()
-                    mergeActions.add(mergeManga)
-                },
-            )
+        item {
+            chapterHeader()
         }
 
-        is BottomSheetScreen.ArtworkSheet -> {
-            ArtworkSheet(
-                themeColorState = themeColorState,
-                alternativeArtwork = alternativeArtwork,
-                inLibrary = inLibrary,
-                saveClick = coverActions.save,
-                shareClick = { url -> coverActions.share(context, url) },
-                setClick = { url ->
-                    closeSheet()
-                    coverActions.set(url)
-                },
-                resetClick = {
-                    closeSheet()
-                    coverActions.reset()
-                },
-            )
-        }
-        is BottomSheetScreen.FilterChapterSheet -> {
-            FilterChapterSheet(
-                themeColorState = themeColorState,
-                sortFilter = chapterSortFilter,
-                changeSort = chapterFilterActions.changeSort,
-                changeFilter = chapterFilterActions.changeFilter,
-                filter = chapterFilter,
-                scanlatorFilter = scanlatorFilter,
-                changeScanlatorFilter = chapterFilterActions.changeScanlator,
-                setAsGlobal = chapterFilterActions.setAsGlobal,
-            )
+        itemsIndexed(items = chapters.value, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
+            chapterRow(index, chapter)
         }
     }
 }
 
-sealed class BottomSheetScreen {
-    class CategoriesSheet(
-        val addingToLibrary: Boolean = false,
-        val setCategories: (List<Category>) -> Unit,
-        val addToLibraryClick: () -> Unit = {},
-    ) : BottomSheetScreen()
+@Composable
+private fun TabletLayout(
+    contentPadding: PaddingValues,
+    details: @Composable () -> Unit,
+    chapterHeader: @Composable () -> Unit,
+    chapters: List<ChapterItem>,
+    chapterRow: @Composable (Int, ChapterItem) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth(.5f)
+                .fillMaxHeight(),
+            contentPadding = contentPadding,
+        ) {
+            item { details() }
+        }
 
-    object TrackingSheet : BottomSheetScreen()
-    object ExternalLinksSheet : BottomSheetScreen()
-    object MergeSheet : BottomSheetScreen()
-    object ArtworkSheet : BottomSheetScreen()
-    object FilterChapterSheet : BottomSheetScreen()
-    class TrackingSearchSheet(val trackingService: TrackService, val alreadySelectedTrack: Track?) : BottomSheetScreen()
-    class TrackingDateSheet(val trackAndService: TrackAndService, val trackingDate: TrackingDate, val trackSuggestedDates: TrackingSuggestedDates?) : BottomSheetScreen()
+        VerticalDivider(
+            Modifier
+                .zIndex(100f)
+                .align(Alignment.TopCenter),
+        )
+
+        LazyColumn(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .fillMaxWidth(.5f)
+                .fillMaxHeight()
+                .zIndex(0f),
+            contentPadding = contentPadding,
+        ) {
+            item { chapterHeader() }
+            itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
+                chapterRow(index, chapter)
+            }
+        }
+    }
 }
 
 private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color {
@@ -570,7 +448,7 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
 
     val ratio = when (isNightMode) {
         true -> (-(luminance - 1)) * .33f
-        false -> luminance * .5f
+        false -> luminance * .3f
     }
 
     return when ((isNightMode && luminance <= 0.6) || (isNightMode.not() && luminance > 0.4)) {
@@ -585,6 +463,4 @@ class ThemeColorState(buttonColor: Color, rippleTheme: RippleTheme, textSelectio
     var textSelectionColors by mutableStateOf(textSelectionColors)
     var altContainerColor by mutableStateOf(altContainerColor)
 }
-
-//data class themeColorState(val buttonColor: Color, val rippleTheme: RippleTheme, val textSelectionColors: TextSelectionColors, val containerColor: Color)
 

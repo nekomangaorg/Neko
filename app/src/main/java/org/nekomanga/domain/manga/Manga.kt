@@ -1,7 +1,5 @@
 package org.nekomanga.domain.manga
 
-import androidx.annotation.ColorInt
-
 data class SimpleManga(
     val id: Long,
     val inLibrary: Boolean,
@@ -17,7 +15,6 @@ data class Artwork(
     val mangaId: Long,
     val inLibrary: Boolean = false,
     val originalArtwork: String = "",
-    @ColorInt val vibrantColor: Int? = null,
     val description: String = "",
     val volume: String = "",
     val active: Boolean = false,

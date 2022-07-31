@@ -130,10 +130,12 @@ class MangaComposePresenter(
             mangaId = mangaId,
             inLibrary = manga.value.favorite,
             originalArtwork = manga.value.thumbnail_url ?: "",
-            vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
         ),
     )
     val currentArtwork: StateFlow<Artwork> = _currentArtwork.asStateFlow()
+
+    private val _vibrantColor = MutableStateFlow(MangaCoverMetadata.getVibrantColor(mangaId))
+    val vibrantColor: StateFlow<Int?> = _vibrantColor.asStateFlow()
 
     private val _altTitles = MutableStateFlow<List<String>>(emptyList())
     val altTitles: StateFlow<List<String>> = _altTitles.asStateFlow()
@@ -478,6 +480,7 @@ class MangaComposePresenter(
             MangaCoverMetadata.remove(mangaId)
             updateCurrentArtworkFlow(artwork.url)
             updateAlternativeArtworkFlow()
+            updateVibrantColorFlow()
         }
     }
 
@@ -490,6 +493,7 @@ class MangaComposePresenter(
             MangaCoverMetadata.remove(mangaId)
             updateCurrentArtworkFlow()
             updateAlternativeArtworkFlow()
+            updateVibrantColorFlow()
         }
     }
 
@@ -555,6 +559,12 @@ class MangaComposePresenter(
     private fun updateCurrentArtworkFlow(url: String = "") {
         presenterScope.launchIO {
             _currentArtwork.value = Artwork(url = url, inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId)
+        }
+    }
+
+    private fun updateVibrantColorFlow() {
+        presenterScope.launchIO {
+            _vibrantColor.value = MangaCoverMetadata.getVibrantColor(mangaId)
         }
     }
 
@@ -956,7 +966,7 @@ class MangaComposePresenter(
      */
     fun updateMangaColor(vibrantColor: Int) {
         MangaCoverMetadata.addVibrantColor(mangaId, vibrantColor)
-        _currentArtwork.value = currentArtwork.value.copy(vibrantColor = vibrantColor)
+        updateVibrantColorFlow()
     }
 
     /**
