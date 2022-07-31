@@ -137,9 +137,6 @@ class MangaComposePresenter(
     private val _vibrantColor = MutableStateFlow(MangaCoverMetadata.getVibrantColor(mangaId))
     val vibrantColor: StateFlow<Int?> = _vibrantColor.asStateFlow()
 
-    private val _altTitles = MutableStateFlow<List<String>>(emptyList())
-    val altTitles: StateFlow<List<String>> = _altTitles.asStateFlow()
-
     private val _allChapters = MutableStateFlow<List<ChapterItem>>(emptyList())
     val allChapters: StateFlow<List<ChapterItem>> = _allChapters.asStateFlow()
 
@@ -181,7 +178,6 @@ class MangaComposePresenter(
         updateExternalFlows()
         updateMergeFlow()
         updateAlternativeArtworkFlow()
-        updateAltTitlesFlow()
         updateFilterFlow()
     }
 
@@ -1008,15 +1004,6 @@ class MangaComposePresenter(
             _chapterFilter.value = getFilter()
             _scanlatorFilter.value = getScanlatorFilter()
             _chapterFilterText.value = getFilterText()
-        }
-    }
-
-    /**
-     * Update flows for external links
-     */
-    private fun updateAltTitlesFlow() {
-        presenterScope.launchIO {
-            _altTitles.value = listOf("test1", "test2", "test3")
         }
     }
 

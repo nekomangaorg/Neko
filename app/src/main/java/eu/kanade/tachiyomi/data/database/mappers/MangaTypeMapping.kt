@@ -12,6 +12,7 @@ import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ALT_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANILIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANIME_PLANET_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
@@ -98,6 +99,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_MERGE_MANGA_URL, obj.merge_manga_url)
         put(COL_MANGA_LAST_CHAPTER, obj.last_chapter_number)
         put(COL_MERGE_MANGA_IMAGE_URL, obj.merge_manga_image_url)
+        put(COL_ALT_TITLE, obj.alt_titles)
     }
 }
 
@@ -136,6 +138,7 @@ interface BaseMangaGetResolver {
         follow_status =
             cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
         merge_manga_image_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_IMAGE_URL))
+        alt_titles = cursor.getString(cursor.getColumnIndex(COL_ALT_TITLE))
     }
 }
 

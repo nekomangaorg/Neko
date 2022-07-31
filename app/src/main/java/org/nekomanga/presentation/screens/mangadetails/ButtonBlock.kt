@@ -48,7 +48,7 @@ fun ButtonBlock(
     inLibrary: Boolean,
     loggedIntoTrackers: Boolean,
     trackServiceCount: Int,
-    themeColor: ThemeColorState,
+    themeColorState: ThemeColorState,
     favoriteClick: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
@@ -58,7 +58,7 @@ fun ButtonBlock(
     shareClick: () -> Unit = {},
 ) {
 
-    val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = themeColor.altContainerColor)
+    val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.altContainerColor)
     val checkedBorderStroke = BorderStroke(1.dp, Color.Transparent)
 
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
@@ -83,7 +83,7 @@ fun ButtonBlock(
             colors = favConfig.buttonColors,
             onClick = favoriteClick, border = favConfig.borderStroke, contentPadding = padding,
         ) {
-            ButtonContent(favConfig.icon!!, color = themeColor.buttonColor, text = favConfig.text)
+            ButtonContent(favConfig.icon!!, color = themeColorState.buttonColor, text = favConfig.text)
         }
 
         if (loggedIntoTrackers) {
@@ -101,7 +101,7 @@ fun ButtonBlock(
 
 
             OutlinedButton(onClick = trackingClick, colors = trackerConfig.buttonColors, border = trackerConfig.borderStroke, contentPadding = padding) {
-                ButtonContent(trackerConfig.icon!!, color = themeColor.buttonColor, text = trackerConfig.text)
+                ButtonContent(trackerConfig.icon!!, color = themeColorState.buttonColor, text = trackerConfig.text)
             }
         }
 
@@ -109,13 +109,13 @@ fun ButtonBlock(
 
 
         OutlinedButton(onClick = artworkClick, border = uncheckedBorderStroke, contentPadding = iconicsPadding) {
-            IconicsButtonContent(iIcon = MaterialDesignDx.Icon.gmf_art_track, color = themeColor.buttonColor, text = stringResource(id = R.string.artwork), iconicsSize = 32.dp)
+            IconicsButtonContent(iIcon = MaterialDesignDx.Icon.gmf_art_track, color = themeColorState.buttonColor, text = stringResource(id = R.string.artwork), iconicsSize = 32.dp)
         }
 
         Gap(gapBetweenButtons)
 
         OutlinedButton(onClick = similarClick, border = uncheckedBorderStroke, contentPadding = padding) {
-            ButtonContent(Icons.Filled.AccountTree, color = themeColor.buttonColor, text = stringResource(R.string.similar_work))
+            ButtonContent(Icons.Filled.AccountTree, color = themeColorState.buttonColor, text = stringResource(R.string.similar_work))
         }
 
         Gap(gapBetweenButtons)
@@ -136,20 +136,20 @@ fun ButtonBlock(
         }
 
         OutlinedButton(onClick = mergeClick, colors = mergeConfig.buttonColors, border = mergeConfig.borderStroke, contentPadding = iconicsPadding) {
-            IconicsButtonContent(iIcon = mergeConfig.iIcon!!, color = themeColor.buttonColor, text = mergeConfig.text, iconicsSize = 28.dp)
+            IconicsButtonContent(iIcon = mergeConfig.iIcon!!, color = themeColorState.buttonColor, text = mergeConfig.text, iconicsSize = 28.dp)
         }
 
 
         Gap(gapBetweenButtons)
 
         OutlinedButton(onClick = linksClick, border = uncheckedBorderStroke, contentPadding = padding) {
-            ButtonContent(icon = Icons.Filled.OpenInBrowser, color = themeColor.buttonColor, text = stringResource(R.string.links))
+            ButtonContent(icon = Icons.Filled.OpenInBrowser, color = themeColorState.buttonColor, text = stringResource(R.string.links))
         }
 
         Gap(gapBetweenButtons)
 
         OutlinedButton(onClick = shareClick, border = uncheckedBorderStroke, contentPadding = padding) {
-            ButtonContent(icon = Icons.Filled.Share, color = themeColor.buttonColor, text = stringResource(R.string.share))
+            ButtonContent(icon = Icons.Filled.Share, color = themeColorState.buttonColor, text = stringResource(R.string.share))
         }
     }
 }

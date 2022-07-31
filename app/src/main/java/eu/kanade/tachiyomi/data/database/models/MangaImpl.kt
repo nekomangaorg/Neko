@@ -72,6 +72,8 @@ open class MangaImpl : Manga {
 
     override var last_chapter_number: Int? = null
 
+    override var alt_titles: String? = null
+
     override var relationship: String? = null
 
     override fun copyFrom(other: SManga) {

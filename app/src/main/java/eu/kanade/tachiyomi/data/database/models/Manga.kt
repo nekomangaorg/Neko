@@ -45,7 +45,7 @@ interface Manga : SManga {
     var chapter_flags: Int
 
     var filtered_scanlators: String?
-
+    
     fun isBlank() = id == Long.MIN_VALUE
 
     fun isHidden() = status == -1
@@ -174,6 +174,10 @@ interface Manga : SManga {
         return id!!.toMangaCacheKey()
     }
 
+    fun getAltTitles(): List<String> {
+        return alt_titles?.split("|~|") ?: emptyList()
+    }
+
     fun getExternalLinks(): List<ExternalLink> {
         val list = mutableListOf<ExternalLink>()
         list.add(Dex(MdUtil.getMangaId(url)))
@@ -284,8 +288,6 @@ interface Manga : SManga {
         const val TYPE_MANHUA = 3
         const val TYPE_COMIC = 4
         const val TYPE_WEBTOON = 5
-
-        private val vibrantCoverColorMap: HashMap<Long, Int?> = hashMapOf()
 
         fun create(source: Long): Manga = MangaImpl().apply {
             this.source = source

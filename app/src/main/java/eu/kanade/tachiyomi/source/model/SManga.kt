@@ -53,7 +53,13 @@ interface SManga : Serializable {
 
     var last_chapter_number: Int?
 
+    var alt_titles: String?
+
     var relationship: String?
+
+    fun setAltTitles(altTitles: List<String>?) {
+        alt_titles = altTitles?.joinToString("|~|")
+    }
 
     fun copyFrom(other: SManga) {
         if (other.author != null) {
@@ -117,6 +123,10 @@ interface SManga : Serializable {
 
         if (other.last_chapter_number != null) {
             last_chapter_number = other.last_chapter_number
+        }
+
+        if (other.alt_titles != null) {
+            alt_titles = other.alt_titles
         }
 
         missing_chapters = other.missing_chapters

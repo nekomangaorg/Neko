@@ -76,6 +76,9 @@ class ApiMangaParser {
                 relationshipDto.type.equals(MdConstants.Types.artist, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
+            val altTitles = mangaAttributesDto.altTitles?.map { it.asMdMap<String>().values }?.flatten()
+            manga.setAltTitles(altTitles)
+            
             manga.author = authors.joinToString()
             manga.artist = artists.joinToString()
             manga.lang_flag = mangaAttributesDto.originalLanguage

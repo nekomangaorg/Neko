@@ -120,7 +120,7 @@ fun MangaDetailsHeader(
                         inLibrary = inLibrary,
                         loggedIntoTrackers = loggedIntoTrackers,
                         trackServiceCount = trackServiceCount,
-                        themeColor = themeColorState,
+                        themeColorState = themeColorState,
                         favoriteClick = {
                             if (inLibrary.not()) {
                                 toggleFavorite()
@@ -150,7 +150,7 @@ fun MangaDetailsHeader(
             Gap(16.dp)
             DescriptionBlock(
                 manga = manga,
-                themeColor = themeColorState,
+                themeColorState = themeColorState,
                 isExpanded = isExpanded.value,
                 isTablet = isTablet,
                 canExpandCollapse = !isTablet,
@@ -171,19 +171,19 @@ fun MangaDetailsHeader(
 @Composable
 private fun ColumnScope.quickReadButton(
     quickReadText: NextUnreadChapter,
-    themeColor: ThemeColorState,
+    themeColorState: ThemeColorState,
     quickReadClick: () -> Unit,
 ) {
     if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
         Gap(16.dp)
-        CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColor.altContainerColor)) {
+        CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)) {
             ElevatedButton(
                 onClick = quickReadClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
-                colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
+                colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
             ) {
                 Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)
             }

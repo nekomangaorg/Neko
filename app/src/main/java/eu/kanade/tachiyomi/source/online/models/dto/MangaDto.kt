@@ -32,7 +32,7 @@ data class MangaDataDto(
 @Serializable
 data class MangaAttributesDto(
     val title: Map<String, String?>,
-    val altTitles: List<JsonElement>,
+    val altTitles: List<JsonElement>?,
     val description: JsonElement,
     val links: JsonElement?,
     val originalLanguage: String,

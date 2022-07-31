@@ -57,7 +57,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun DescriptionBlock(
     manga: Manga,
-    themeColor: ThemeColorState,
+    themeColorState: ThemeColorState,
     isExpanded: Boolean,
     isTablet: Boolean,
     canExpandCollapse: Boolean,
@@ -70,7 +70,7 @@ fun DescriptionBlock(
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val isDarkTheme = isSystemInDarkTheme()
     val tagColor = remember {
-        generateTagColor(surfaceColor, secondaryColor, themeColor.buttonColor, isDarkTheme)
+        generateTagColor(surfaceColor, secondaryColor, themeColorState.buttonColor, isDarkTheme)
     }
 
     val noDescription = stringResource(R.string.no_description)
@@ -134,7 +134,7 @@ fun DescriptionBlock(
                             ),
                         ),
                 ) {
-                    MoreLessButton(themeColor.buttonColor, true, Modifier.align(Alignment.TopEnd))
+                    MoreLessButton(themeColorState.buttonColor, true, Modifier.align(Alignment.TopEnd))
                 }
             }
         } else {
@@ -158,7 +158,7 @@ fun DescriptionBlock(
                 Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
                 Gap(16.dp)
                 MoreLessButton(
-                    buttonColor = themeColor.buttonColor,
+                    buttonColor = themeColorState.buttonColor,
                     isMore = false,
                     clickable
                         .align(Alignment.End),
