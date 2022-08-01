@@ -45,7 +45,11 @@ interface Manga : SManga {
     var chapter_flags: Int
 
     var filtered_scanlators: String?
-    
+
+    var user_cover: String?
+
+    var user_title: String?
+
     fun isBlank() = id == Long.MIN_VALUE
 
     fun isHidden() = status == -1

@@ -229,7 +229,6 @@ fun MangaListPreview() {
                 Manga.create(0L).apply {
                     url = ""
                     title = "test 1"
-                    relationship = "doujinshi"
                 },
             ),
             DisplayManga(

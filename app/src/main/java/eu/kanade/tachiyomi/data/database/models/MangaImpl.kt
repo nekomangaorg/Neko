@@ -74,7 +74,9 @@ open class MangaImpl : Manga {
 
     override var alt_titles: String? = null
 
-    override var relationship: String? = null
+    override var user_cover: String? = null
+
+    override var user_title: String? = null
 
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl &&

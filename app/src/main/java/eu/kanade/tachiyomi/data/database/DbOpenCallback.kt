@@ -133,7 +133,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
 
         if (oldVersion < 31) {
-            db.execSQL(MangaTable.addOtherUrlsCol)
+            db.execSQL(MangaTable.addAltTitles)
+            db.execSQL(MangaTable.addUserCover)
+            db.execSQL(MangaTable.addUserTitle)
             db.execSQL(ArtworkTable.createTableQuery)
         }
     }

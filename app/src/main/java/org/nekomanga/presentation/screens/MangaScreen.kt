@@ -255,7 +255,7 @@ fun MangaScreen(
                             .asPaddingValues().calculateBottomPadding(),
                     )
 
-                val details = @Composable {
+                fun details() = @Composable {
                     MangaDetailsHeader(
                         manga = manga,
                         artwork = artwork.value,
@@ -304,7 +304,7 @@ fun MangaScreen(
                     )
                 }
 
-                val chapterHeader = @Composable {
+                fun chapterHeader() = @Composable {
                     ChapterHeader(
                         themeColor = themeColorState,
                         numberOfChapters = chapters.value.size,
@@ -313,7 +313,7 @@ fun MangaScreen(
                     )
                 }
 
-                val chapterRow = @Composable { index: Int, chapter: ChapterItem ->
+                fun chapterRow() = @Composable { index: Int, chapter: ChapterItem ->
                     ChapterRow(
                         themeColor = themeColorState,
                         chapterItem = chapter,
@@ -342,13 +342,13 @@ fun MangaScreen(
                     if (isTablet) {
                         TabletLayout(
                             contentPadding = contentPadding,
-                            details = details,
-                            chapterHeader = chapterHeader,
+                            details = details(),
+                            chapterHeader = chapterHeader(),
                             chapters = chapters.value,
-                            chapterRow = chapterRow,
+                            chapterRow = chapterRow(),
                         )
                     } else {
-                        NonTablet(contentPadding = contentPadding, details = details, chapterHeader = chapterHeader, chapters = chapters, chapterRow = chapterRow)
+                        NonTablet(contentPadding = contentPadding, details = details(), chapterHeader = chapterHeader(), chapters = chapters, chapterRow = chapterRow())
                     }
 
                     if (hasRemovedChapters.isNotEmpty()) {

@@ -126,7 +126,7 @@ class MangaComposePresenter(
 
     private val _currentArtwork = MutableStateFlow(
         Artwork(
-            url = "",
+            url = manga.value.user_cover ?: "",
             mangaId = mangaId,
             inLibrary = manga.value.favorite,
             originalArtwork = manga.value.thumbnail_url ?: "",
@@ -172,6 +172,7 @@ class MangaComposePresenter(
      */
     private fun updateAllFlows() {
         updateMangaFlow()
+        updateCurrentArtworkFlow()
         updateChapterFlows()
         updateCategoryFlows()
         updateTrackingFlows()
@@ -474,7 +475,11 @@ class MangaComposePresenter(
         presenterScope.launchIO {
             coverCache.setCustomCoverToCache(manga.value, artwork.url)
             MangaCoverMetadata.remove(mangaId)
-            updateCurrentArtworkFlow(artwork.url)
+            val manga = manga.value
+            manga.user_cover = artwork.url
+            db.insertManga(manga).executeOnIO()
+            updateMangaFlow()
+            updateCurrentArtworkFlow()
             updateAlternativeArtworkFlow()
             updateVibrantColorFlow()
         }
@@ -487,6 +492,10 @@ class MangaComposePresenter(
         presenterScope.launchIO {
             coverCache.deleteCustomCover(manga.value)
             MangaCoverMetadata.remove(mangaId)
+            val manga = manga.value
+            manga.user_cover = null
+            db.insertManga(manga).executeOnIO()
+            updateMangaFlow()
             updateCurrentArtworkFlow()
             updateAlternativeArtworkFlow()
             updateVibrantColorFlow()
@@ -552,9 +561,10 @@ class MangaComposePresenter(
     /**
      * Updates the artwork flow
      */
-    private fun updateCurrentArtworkFlow(url: String = "") {
+    private fun updateCurrentArtworkFlow() {
         presenterScope.launchIO {
-            _currentArtwork.value = Artwork(url = url, inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId)
+
+            _currentArtwork.value = Artwork(url = manga.value.user_cover ?: "", inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId)
         }
     }
 
@@ -972,7 +982,8 @@ class MangaComposePresenter(
         presenterScope.launchIO {
             val uuid = MdUtil.getMangaId(manga.value.url)
             val quality = preferences.thumbnailQuality()
-            val currentUsed = currentArtwork.value.copy(description = "Selected")
+            val currentUsed = currentArtwork.value
+
             _alternativeArtwork.value = db.getArtwork(manga.value).executeAsBlocking().map { aw ->
                 Artwork(
                     mangaId = aw.mangaId,

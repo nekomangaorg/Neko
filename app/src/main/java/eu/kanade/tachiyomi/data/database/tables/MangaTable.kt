@@ -76,6 +76,10 @@ object MangaTable {
 
     const val COL_ALT_TITLE = "alt_titles"
 
+    const val COL_USER_COVER = "user_cover"
+
+    const val COL_USER_TITLE = "user_title"
+
     val createTableQuery: String
         get() =
             """CREATE TABLE $TABLE(
@@ -111,7 +115,9 @@ object MangaTable {
             $COL_MERGE_MANGA_IMAGE_URL TEXT,
             $COL_MANGA_LAST_CHAPTER INTEGER,
             $COL_FOLLOW_STATUS INTEGER,
-            $COL_ALT_TITLE TEXT
+            $COL_ALT_TITLE TEXT,
+            $COL_USER_COVER TEXT,
+            $COL_USER_TITLE TEXT
             )
             """
 
@@ -175,6 +181,12 @@ object MangaTable {
 
     val addAltTitles: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ALT_TITLE} TEXT DEFAULT NULL"
+
+    val addUserTitle: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_USER_TITLE} TEXT DEFAULT NULL"
+
+    val addUserCover: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_USER_TITLE} TEXT DEFAULT NULL"
 
     val clearScanlators: String
         get() = "UPDATE ${MangaTable.TABLE} SET ${MangaTable.COL_SCANLATOR_FILTER_FLAG} = NULL where _id in (select _id from ${MangaTable.TABLE} where ${MangaTable.COL_SCANLATOR_FILTER_FLAG} IS NOT NULL)"
