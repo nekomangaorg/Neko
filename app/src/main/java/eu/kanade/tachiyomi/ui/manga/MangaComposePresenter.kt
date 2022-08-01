@@ -1198,12 +1198,14 @@ class MangaComposePresenter(
     //callback from Downloader
     override fun updateDownload(download: Download) {
         presenterScope.launchIO {
-            _activeChapters.value = activeChapters.value.map {
-                if (it.chapter.id == download.chapter.id) {
-                    it.copy(chapter = it.chapter, downloadState = download.status, downloadProgress = download.progressFloat)
-                } else {
-                    it
+            val currentChapters = activeChapters.value
+            val index = currentChapters.indexOfFirst { it.chapter.id == download.chapter.id }
+            if (index > 0) {
+                currentChapters.toMutableList().apply {
+                    val item = removeAt(index).copy(downloadState = download.status, downloadProgress = download.progressFloat)
+                    add(index, item)
                 }
+                _activeChapters.value = currentChapters
             }
         }
     }

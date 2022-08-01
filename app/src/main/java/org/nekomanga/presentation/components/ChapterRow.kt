@@ -92,7 +92,7 @@ fun ChapterRow(
                 DismissDirection.EndToStart,
                 DismissDirection.StartToEnd,
             ),
-            dismissThresholds = { FractionalThreshold(.5f) },
+            dismissThresholds = { FractionalThreshold(.8f) },
             background = {
                 val color = when (dismissState.dismissDirection) {
                     null -> MaterialTheme.colorScheme.surface
