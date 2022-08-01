@@ -14,7 +14,14 @@ open class MangaImpl : Manga {
 
     override lateinit var url: String
 
-    override lateinit var title: String
+    override var title: String
+        get() = user_title ?: ogTitle
+        set(value) {
+            ogTitle = value
+        }
+
+    lateinit var ogTitle: String
+        private set
 
     override var artist: String? = null
 

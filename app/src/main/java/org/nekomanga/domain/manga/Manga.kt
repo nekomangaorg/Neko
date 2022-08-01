@@ -1,12 +1,20 @@
 package org.nekomanga.domain.manga
 
-data class SimpleManga(
+import eu.kanade.tachiyomi.data.database.models.Manga
+
+data class MangaItem(
     val id: Long,
     val inLibrary: Boolean,
-    val thumbnailUrl: String,
-    val initialized: Boolean,
-    val coverLastModified: Boolean,
-)
+    val title: String,
+) {
+    fun fromManga(manga: Manga): MangaItem {
+        return MangaItem(
+            id = manga.id!!,
+            inLibrary = manga.favorite,
+            title = manga.title,
+        )
+    }
+}
 
 data class MergeManga(val thumbnail: String, val url: String, val title: String)
 

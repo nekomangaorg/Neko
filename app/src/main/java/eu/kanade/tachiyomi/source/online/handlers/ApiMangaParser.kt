@@ -78,7 +78,7 @@ class ApiMangaParser {
 
             val altTitles = mangaAttributesDto.altTitles?.map { it.asMdMap<String>().values }?.flatten()
             manga.setAltTitles(altTitles)
-            
+
             manga.author = authors.joinToString()
             manga.artist = artists.joinToString()
             manga.lang_flag = mangaAttributesDto.originalLanguage
@@ -104,8 +104,6 @@ class ApiMangaParser {
             if (otherUrls.isNotEmpty()) {
                 manga.other_urls = otherUrls.joinToString("||")
             }
-
-            // val filteredChapters = filterChapterForChecking(networkApiManga)
 
             val tempStatus = parseStatus(mangaAttributesDto.status ?: "")
             val publishedOrCancelled =

@@ -80,6 +80,9 @@ class MangaComposePresenter(
     private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)
     val manga: StateFlow<Manga> = _currentManga.asStateFlow()
 
+    private val _currentTitle = MutableStateFlow(manga.value.title)
+    val currentTitle: StateFlow<String> = _currentTitle.asStateFlow()
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -499,6 +502,20 @@ class MangaComposePresenter(
             updateCurrentArtworkFlow()
             updateAlternativeArtworkFlow()
             updateVibrantColorFlow()
+        }
+    }
+
+    /**
+     * Set custom title or resets if given null
+     */
+    fun setAltTitle(title: String?) {
+        presenterScope.launchIO {
+            _currentTitle.value = title ?: manga.value.originalTitle
+
+            val manga = manga.value
+            manga.user_title = title
+            db.insertManga(manga).executeOnIO()
+            updateMangaFlow()
         }
     }
 

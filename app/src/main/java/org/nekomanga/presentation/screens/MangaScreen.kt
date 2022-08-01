@@ -59,6 +59,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
@@ -87,6 +88,7 @@ import java.text.DateFormat
 @Composable
 fun MangaScreen(
     manga: Manga,
+    currentTitle: State<String>,
     artwork: State<Artwork>,
     vibrantColor: State<Int?>,
     isRefreshing: State<Boolean>,
@@ -113,9 +115,8 @@ fun MangaScreen(
     alternativeArtwork: State<List<Artwork>>,
     coverActions: CoverActions,
     mergeActions: MergeActions,
-    shareClick: (Context) -> Unit = {},
-    genreClick: (String) -> Unit = {},
-    genreLongClick: (String) -> Unit = {},
+    shareClick: (Context) -> Unit,
+    descriptionActions: DescriptionActions,
     quickReadText: State<NextUnreadChapter>,
     chapterFilterText: State<String>,
     chapters: State<List<ChapterItem>>,
@@ -204,7 +205,7 @@ fun MangaScreen(
                         dateFormat = dateFormat,
                         openSheet = openSheet,
                         trackActions = trackActions,
-                        title = manga.title,
+                        title = manga.originalTitle,
                         altTitles = manga.getAltTitles(),
                         trackSearchResult = trackSearchResult.value,
                         trackSuggestedDates = trackSuggestedDates.value,
@@ -258,6 +259,7 @@ fun MangaScreen(
                 fun details() = @Composable {
                     MangaDetailsHeader(
                         manga = manga,
+                        title = currentTitle.value,
                         artwork = artwork.value,
                         showBackdrop = themeBasedOffCover,
                         isMerged = isMergedManga.value is IsMergedManga.Yes,
@@ -297,8 +299,7 @@ fun MangaScreen(
                         mergeClick = { openSheet(DetailsBottomSheetScreen.MergeSheet) },
                         linksClick = { openSheet(DetailsBottomSheetScreen.ExternalLinksSheet) },
                         shareClick = { shareClick(context) },
-                        genreClick = genreClick,
-                        genreLongClick = genreLongClick,
+                        descriptionActions = descriptionActions,
                         quickReadClick = { chapterActions.openNext(context) },
                         quickReadText = quickReadText.value,
                     )

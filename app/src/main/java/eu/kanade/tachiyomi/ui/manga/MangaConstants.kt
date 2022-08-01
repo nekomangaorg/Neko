@@ -101,6 +101,13 @@ object MangaConstants {
         val addNew: (String) -> Unit = {},
     )
 
+    class DescriptionActions(
+        val genreClick: (String) -> Unit,
+        val genreLongClick: (String) -> Unit,
+        val altTitleClick: (String) -> Unit,
+        val altTitleResetClick: () -> Unit,
+    )
+
     class TrackActions(
         val statusChange: (Int, TrackingConstants.TrackAndService) -> Unit,
         val scoreChange: (Int, TrackingConstants.TrackAndService) -> Unit,

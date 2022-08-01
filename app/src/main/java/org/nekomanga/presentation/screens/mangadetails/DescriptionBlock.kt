@@ -7,19 +7,27 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +40,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -57,6 +66,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun DescriptionBlock(
     manga: Manga,
+    title: String,
     themeColorState: ThemeColorState,
     isExpanded: Boolean,
     isTablet: Boolean,
@@ -64,6 +74,8 @@ fun DescriptionBlock(
     expandCollapseClick: () -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
+    altTitleClick: (String) -> Unit = {},
+    altTitleResetClick: () -> Unit = {},
 ) {
 
     val surfaceColor = MaterialTheme.colorScheme.surface
@@ -154,6 +166,15 @@ fun DescriptionBlock(
             }
 
             if (!isTablet) {
+                Gap(8.dp)
+                AltTitles(
+                    altTitles = manga.getAltTitles(),
+                    currentTitle = title,
+                    themeColorState = themeColorState,
+                    tagColor = tagColor,
+                    altTitleClick = altTitleClick,
+                    resetClick = altTitleResetClick,
+                )
                 Gap(16.dp)
                 Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
                 Gap(16.dp)
@@ -194,6 +215,67 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
         )
         Gap(4.dp)
         Icon(modifier = Modifier.align(Alignment.CenterVertically), imageVector = icon, contentDescription = null, tint = buttonColor)
+    }
+}
+
+@Composable
+private fun AltTitles(altTitles: List<String>, currentTitle: String, tagColor: Color, themeColorState: ThemeColorState, altTitleClick: (String) -> Unit, resetClick: () -> Unit) {
+    if (altTitles.isNotEmpty()) {
+        val isCustomTitle = altTitles.contains(currentTitle)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "Alt Titles:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+            )
+            if (isCustomTitle) {
+                TextButton(onClick = resetClick) {
+                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                }
+            }
+        }
+        val onChipColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = NekoColors.mediumAlphaHighContrast)
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(
+                        constraints.copy(
+                            maxWidth = constraints.maxWidth + 32.dp.roundToPx(), //add the end padding 16.dp
+                        ),
+                    )
+                    layout(placeable.width, placeable.height) {
+                        placeable.place(0, 0)
+                    }
+                },
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            item { Gap(8.dp) }
+            items(altTitles) { title ->
+                val currentlySelected = isCustomTitle && title == currentTitle
+                AssistChip(
+                    onClick = {
+                        if (!currentlySelected) {
+                            altTitleClick(title)
+                        }
+                    },
+                    colors = AssistChipDefaults.assistChipColors(containerColor = tagColor, labelColor = onChipColor),
+                    border = null,
+                    leadingIcon = {
+                        if (currentlySelected) {
+                            Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = onChipColor)
+                        }
+                    },
+                    label = {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .padding(0.dp),
+                        )
+                    },
+                )
+            }
+            item { Gap(8.dp) }
+        }
     }
 }
 

@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -59,6 +60,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
     override fun ScreenContent() {
         MangaScreen(
             manga = presenter.manga.collectAsState().value,
+            currentTitle = presenter.currentTitle.collectAsState(),
             artwork = presenter.currentArtwork.collectAsState(),
             vibrantColor = presenter.vibrantColor.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),
@@ -68,6 +70,12 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             categoryActions = CategoryActions(
                 set = { enabledCategories -> presenter.updateMangaCategories(enabledCategories) },
                 addNew = { newCategory -> presenter.addNewCategory(newCategory) },
+            ),
+            descriptionActions = DescriptionActions(
+                genreClick = {},
+                genreLongClick = {},
+                altTitleClick = presenter::setAltTitle,
+                altTitleResetClick = { presenter.setAltTitle(null) },
             ),
             generatePalette = this::setPalette,
             themeBasedOffCover = preferences.themeMangaDetails(),
@@ -106,8 +114,6 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
                 save = presenter::saveCover,
                 reset = presenter::resetCover,
             ),
-            genreClick = {},
-            genreLongClick = {},
             quickReadText = presenter.nextUnreadChapter.collectAsState(),
             chapterFilterText = presenter.chapterFilterText.collectAsState(),
             chapters = presenter.activeChapters.collectAsState(),

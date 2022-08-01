@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import jp.wasabeef.gap.Gap
 import me.saket.cascade.CascadeDropdownMenu
@@ -44,6 +45,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun MangaDetailsHeader(
     manga: Manga,
+    title: String,
     artwork: Artwork,
     showBackdrop: Boolean = true,
     isMerged: Boolean = true,
@@ -64,8 +66,7 @@ fun MangaDetailsHeader(
     mergeClick: () -> Unit = {},
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
-    genreClick: (String) -> Unit = {},
-    genreLongClick: (String) -> Unit = {},
+    descriptionActions: DescriptionActions,
     quickReadText: NextUnreadChapter,
     quickReadClick: () -> Unit = {},
 ) {
@@ -106,6 +107,7 @@ fun MangaDetailsHeader(
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
                         manga = manga,
+                        title = title,
                         modifier = Modifier
                             .statusBarsPadding()
                             .padding(top = 70.dp),
@@ -150,6 +152,7 @@ fun MangaDetailsHeader(
             Gap(16.dp)
             DescriptionBlock(
                 manga = manga,
+                title = title,
                 themeColorState = themeColorState,
                 isExpanded = isExpanded.value,
                 isTablet = isTablet,
@@ -157,8 +160,10 @@ fun MangaDetailsHeader(
                 expandCollapseClick = {
                     isExpanded.value = !isExpanded.value
                 },
-                genreClick = genreClick,
-                genreLongClick = genreLongClick,
+                genreClick = descriptionActions.genreClick,
+                genreLongClick = descriptionActions.genreLongClick,
+                altTitleClick = descriptionActions.altTitleClick,
+                altTitleResetClick = descriptionActions.altTitleResetClick,
             )
             if (!isTablet && quickReadText.text.isNotEmpty() && quickReadText.id != null) {
                 quickReadButton(quickReadText, themeColorState, quickReadClick)

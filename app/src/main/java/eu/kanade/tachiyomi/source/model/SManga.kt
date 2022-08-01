@@ -55,6 +55,9 @@ interface SManga : Serializable {
 
     var alt_titles: String?
 
+    val originalTitle: String
+        get() = (this as? MangaImpl)?.ogTitle ?: title
+
     fun setAltTitles(altTitles: List<String>?) {
         alt_titles = altTitles?.joinToString("|~|")
     }
@@ -126,7 +129,7 @@ interface SManga : Serializable {
         if (other.alt_titles != null) {
             alt_titles = other.alt_titles
         }
-        
+
         missing_chapters = other.missing_chapters
 
         status = other.status

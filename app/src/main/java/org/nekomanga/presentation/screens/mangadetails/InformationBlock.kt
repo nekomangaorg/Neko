@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.HotelClass
 import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,7 +22,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crazylegend.common.ifTrue
@@ -39,7 +37,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
-import org.nekomanga.presentation.theme.NekoTheme
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -47,6 +44,7 @@ import kotlin.math.roundToInt
 @Composable
 fun InformationBlock(
     manga: Manga,
+    title: String,
     modifier: Modifier = Modifier,
     isExpanded: Boolean = true,
     isMerged: Boolean = true,
@@ -63,9 +61,9 @@ fun InformationBlock(
             .fillMaxHeight()
             .padding(horizontal = 8.dp),
     ) {
-        if (manga.title.isNotNullOrEmpty()) {
+        if (title.isNotNullOrEmpty()) {
             NoRippleText(
-                text = manga.title,
+                text = title,
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 4,
                 onLongClick = titleLongClick,
                 style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium),
@@ -199,17 +197,3 @@ fun InformationBlock(
     }
 }
 
-@Preview
-@Composable
-private fun InformationBlock() {
-    val manga = Manga.create(1L).apply {
-        title = "One Piece"
-        author = "Eiichiro Oda"
-        status = SManga.ONGOING
-    }
-    NekoTheme {
-        Surface {
-            InformationBlock(manga = manga)
-        }
-    }
-}

@@ -53,33 +53,37 @@ class MangaHeaderHolder(
 
                 MangaDetailsHeader(
                     manga = manga,
+                    title = manga.title,
                     artwork = Artwork(url = "", mangaId = manga.id!!, inLibrary = manga.favorite, manga.thumbnail_url ?: ""),
-                    titleLongClick = { title ->
-                        adapter.delegate.copyToClipboard(title, R.string.title)
-                    },
-                    creatorLongClick = { creator ->
-                        adapter.delegate.copyToClipboard(creator, R.string.creator)
-                    },
+                    inLibrary = inLibrary,
                     themeColorState = ThemeColorState(
                         MaterialTheme.colorScheme.primary,
                         PrimaryColorRippleTheme,
                         dynamicTextSelectionColor(MaterialTheme.colorScheme.primary),
                         Color(ColorUtils.blendARGB(MaterialTheme.colorScheme.primary.toArgb(), MaterialTheme.colorScheme.surface.toArgb(), .706f)),
                     ),
+                    titleLongClick = { title ->
+                        adapter.delegate.copyToClipboard(title, R.string.title)
+                    },
+                    creatorLongClick = { creator ->
+                        adapter.delegate.copyToClipboard(creator, R.string.creator)
+                    },
+                    loggedIntoTrackers = presenter.loggedServices.isNotEmpty(),
                     trackServiceCount = trackServiceCount,
                     toggleFavorite = { presenter.toggleFavorite() },
-                    inLibrary = inLibrary,
-                    loggedIntoTrackers = presenter.loggedServices.isNotEmpty(),
                     trackingClick = { adapter.delegate.showTrackingSheet() },
                     artworkClick = { },
                     similarClick = { adapter.delegate.openSimilar() },
                     mergeClick = { adapter.delegate.openMerge() },
                     linksClick = { adapter.delegate.showExternalSheet() },
                     shareClick = { adapter.delegate.prepareToShareManga() },
-                    genreClick = { adapter.delegate.tagClicked(it) },
-                    genreLongClick = { adapter.delegate.tagLongClicked(it) },
+                    // genreClick = { adapter.delegate.tagClicked(it) },
+                    //genreLongClick = { adapter.delegate.tagLongClicked(it) },
                     quickReadText = quickReadText,
                     quickReadClick = { adapter.delegate.readNextChapter() },
+                    descriptionActions = MangaConstants.DescriptionActions(
+                        {}, {}, {}, {},
+                    ),
                 )
             }
         }
