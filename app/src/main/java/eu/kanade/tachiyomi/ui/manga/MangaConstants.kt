@@ -83,8 +83,13 @@ object MangaConstants {
     )
 
     sealed class DownloadAction {
+        data class DownloadNextUnread(val numberToDownload: Int) : DownloadAction()
+        object DownloadAll : DownloadAction()
+        object DownloadUnread : DownloadAction()
         object Download : DownloadAction()
         object Remove : DownloadAction()
+        object RemoveRead : DownloadAction()
+        object RemoveAll : DownloadAction()
         object Cancel : DownloadAction()
     }
 

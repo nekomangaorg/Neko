@@ -238,7 +238,6 @@ private fun ColumnScope.AltTitles(altTitles: List<String>, currentTitle: String,
         Text(
             text = "Alt Titles:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
-        Gap(4.dp)
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -303,7 +302,7 @@ private fun ColumnScope.Genres(genres: List<String>?, tagColor: Color, genreClic
     Text(
         text = "Tags:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
     )
-    Gap(4.dp)
+    Gap(8.dp)
     FlowRow(mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 12.dp, crossAxisSpacing = 12.dp) {
         genres.forEach { genre ->
             Chip(

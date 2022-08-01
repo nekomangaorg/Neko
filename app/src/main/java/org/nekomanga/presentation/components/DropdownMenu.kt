@@ -17,8 +17,8 @@ import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: List<SimpleDropDownItem>, themeColorState: ThemeColorState) {
-    val customColor: Color = themeColorState.buttonColor
+fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: List<SimpleDropDownItem>, themeColorState: ThemeColorState? = null) {
+    val customColor: Color = themeColorState?.buttonColor ?: MaterialTheme.colorScheme.surface
     val background = Modifier.background(color = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(customColor, 8.dp))
     CascadeDropdownMenu(
         expanded = expanded,
@@ -89,5 +89,5 @@ private fun Item(modifier: Modifier, text: String, style: TextStyle, onClick: ()
 
 sealed class SimpleDropDownItem {
     data class Action(val text: String, val onClick: () -> Unit) : SimpleDropDownItem()
-    data class Parent(val text: String, val children: List<Action>) : SimpleDropDownItem()
+    data class Parent(val text: String, val children: List<SimpleDropDownItem>) : SimpleDropDownItem()
 }

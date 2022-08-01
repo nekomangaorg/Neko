@@ -1079,8 +1079,25 @@ class MangaComposePresenter(
     fun downloadChapters(chapterItems: List<ChapterItem>, downloadAction: DownloadAction) {
         presenterScope.launchIO {
             when (downloadAction) {
+                is DownloadAction.DownloadAll -> downloadManager.downloadChapters(manga.value, activeChapters.value.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
                 is DownloadAction.Download -> downloadManager.downloadChapters(manga.value, chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+                is DownloadAction.DownloadNextUnread -> {
+                    val filteredChapters =
+                        activeChapters.value.filter { !it.chapter.read && !it.isDownloaded }.sortedWith(chapterSort.sortComparator(manga.value, true)).take(downloadAction.numberToDownload)
+                            .map { it.chapter.toDbChapter() }
+                    downloadManager.downloadChapters(manga.value, filteredChapters)
+                }
+                is DownloadAction.DownloadUnread -> {
+                    val filteredChapters =
+                        activeChapters.value.filter { !it.chapter.read && !it.isDownloaded }.sortedWith(chapterSort.sortComparator(manga.value, true)).map { it.chapter.toDbChapter() }
+                    downloadManager.downloadChapters(manga.value, filteredChapters)
+                }
                 is DownloadAction.Remove -> deleteChapters(chapterItems, chapterItems.size == allChapters.value.size)
+                is DownloadAction.RemoveAll -> deleteChapters(activeChapters.value, activeChapters.value.size == allChapters.value.size)
+                is DownloadAction.RemoveRead -> {
+                    val filteredChapters = activeChapters.value.filter { it.chapter.read && it.isDownloaded }
+                    deleteChapters(filteredChapters, filteredChapters.size == allChapters.value.size)
+                }
                 is DownloadAction.Cancel -> deleteChapters(chapterItems, chapterItems.size == allChapters.value.size)
             }
         }
