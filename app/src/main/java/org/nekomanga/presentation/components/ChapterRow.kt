@@ -62,7 +62,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
@@ -121,7 +120,7 @@ fun ChapterRow(
             },
             dismissContent = {
                 ChapterInfo(
-                    themeColor = themeColor,
+                    themeColorState = themeColor,
                     shouldHideChapterTitles = shouldHideChapterTitles,
                     chapterItem = chapterItem,
                     onClick = onClick,
@@ -144,7 +143,6 @@ private fun Reset(scope: CoroutineScope, dismissState: DismissState, action: () 
     LaunchedEffect(key1 = dismissState.dismissDirection) {
         scope.launch {
             dismissState.reset()
-            delay(100)
             action()
         }
     }
@@ -178,7 +176,7 @@ private fun Background(icon: ImageVector, alignment: Alignment, color: Color, te
 
 @Composable
 private fun ChapterInfo(
-    themeColor: ThemeColorState,
+    themeColorState: ThemeColorState,
     shouldHideChapterTitles: Boolean,
     chapterItem: ChapterItem,
     onClick: () -> Unit,
@@ -199,12 +197,13 @@ private fun ChapterInfo(
     }
 
     val rowColor = when (dropdown) {
-        true -> themeColor.rippleTheme.defaultColor().copy(alpha = themeColor.rippleTheme.rippleAlpha().focusedAlpha)
+        true -> themeColorState.rippleTheme.defaultColor().copy(alpha = themeColorState.rippleTheme.rippleAlpha().focusedAlpha)
         false -> MaterialTheme.colorScheme.surface
     }
 
     SimpleDropdownMenu(
         expanded = dropdown,
+        themeColorState = themeColorState,
         onDismiss = { dropdown = false },
         dropDownItems = listOf(
             SimpleDropDownItem.Action(
@@ -261,7 +260,7 @@ private fun ChapterInfo(
                         modifier = Modifier
                             .size(16.dp)
                             .align(Alignment.CenterVertically),
-                        tint = themeColor.buttonColor,
+                        tint = themeColorState.buttonColor,
                     )
                     Gap(4.dp)
                 }
@@ -324,7 +323,7 @@ private fun ChapterInfo(
         Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
 
             DownloadButton(
-                themeColor.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
+                themeColorState.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
                 Modifier
                     .combinedClickable(
                         onClick = {
@@ -338,6 +337,7 @@ private fun ChapterInfo(
             )
             SimpleDropdownMenu(
                 expanded = chapterDropdown,
+                themeColorState = themeColorState,
                 onDismiss = { chapterDropdown = false },
                 dropDownItems = listOf(
                     SimpleDropDownItem.Action(

@@ -10,6 +10,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -151,6 +152,15 @@ fun DescriptionBlock(
             }
         } else {
             if (isTablet) {
+                AltTitles(
+                    altTitles = manga.getAltTitles(),
+                    currentTitle = title,
+                    themeColorState = themeColorState,
+                    tagColor = tagColor,
+                    altTitleClick = altTitleClick,
+                    resetClick = altTitleResetClick,
+                )
+                Gap(8.dp)
                 Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
                 Gap(16.dp)
             }
@@ -219,20 +229,16 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
 }
 
 @Composable
-private fun AltTitles(altTitles: List<String>, currentTitle: String, tagColor: Color, themeColorState: ThemeColorState, altTitleClick: (String) -> Unit, resetClick: () -> Unit) {
+private fun ColumnScope.AltTitles(altTitles: List<String>, currentTitle: String, tagColor: Color, themeColorState: ThemeColorState, altTitleClick: (String) -> Unit, resetClick: () -> Unit) {
     if (altTitles.isNotEmpty()) {
         val isCustomTitle = altTitles.contains(currentTitle)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "Alt Titles:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-            )
-            if (isCustomTitle) {
-                TextButton(onClick = resetClick) {
-                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
-                }
-            }
-        }
         val onChipColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = NekoColors.mediumAlphaHighContrast)
+
+
+        Text(
+            text = "Alt Titles:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+        )
+        Gap(4.dp)
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -247,8 +253,18 @@ private fun AltTitles(altTitles: List<String>, currentTitle: String, tagColor: C
                     }
                 },
             horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             item { Gap(8.dp) }
+
+            if (isCustomTitle) {
+                item {
+                    TextButton(onClick = resetClick) {
+                        Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                    }
+                }
+            }
+
             items(altTitles) { title ->
                 val currentlySelected = isCustomTitle && title == currentTitle
                 AssistChip(
@@ -280,11 +296,14 @@ private fun AltTitles(altTitles: List<String>, currentTitle: String, tagColor: C
 }
 
 @Composable
-fun Genres(genres: List<String>?, tagColor: Color, genreClick: (String) -> Unit, genreLongClick: (String) -> Unit) {
+private fun ColumnScope.Genres(genres: List<String>?, tagColor: Color, genreClick: (String) -> Unit, genreLongClick: (String) -> Unit) {
     genres ?: return
 
     val haptic = LocalHapticFeedback.current
-
+    Text(
+        text = "Tags:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+    )
+    Gap(4.dp)
     FlowRow(mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 12.dp, crossAxisSpacing = 12.dp) {
         genres.forEach { genre ->
             Chip(
