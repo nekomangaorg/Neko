@@ -16,6 +16,8 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.external.ExternalLink
+import eu.kanade.tachiyomi.data.library.LibraryServiceListener
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -25,6 +27,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
@@ -50,6 +53,10 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,7 +82,7 @@ class MangaComposePresenter(
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     val mangaRepository: MangaDetailsRepository = Injekt.get(),
-) : BaseCoroutinePresenter<MangaComposeController>(), DownloadQueue.DownloadListener {
+) : BaseCoroutinePresenter<MangaComposeController>(), DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)
     val manga: StateFlow<Manga> = _currentManga.asStateFlow()
@@ -163,10 +170,12 @@ class MangaComposePresenter(
     override fun onCreate() {
         super.onCreate()
         downloadManager.addListener(this)
+        LibraryUpdateService.setListener(this)
         if (!manga.value.initialized) {
             onRefresh()
         } else {
             updateAllFlows()
+            refreshTracking()
         }
     }
 
@@ -196,6 +205,7 @@ class MangaComposePresenter(
                     }
                     is MangaResult.Success -> {
                         updateAllFlows()
+                        refreshTracking()
                         _isRefreshing.value = false
                     }
                     is MangaResult.UpdatedManga -> {
@@ -322,6 +332,39 @@ class MangaComposePresenter(
         }
 
         updateTrackingService(track, trackDateChange.trackAndService.service)
+    }
+
+    /**
+     * Refresh tracking from trackers
+     */
+    private fun refreshTracking() {
+        presenterScope.launchIO {
+            //add a slight delay in case the tracking flow is slower
+            var count = 0
+            while (count < 5 && tracks.value.isEmpty()) {
+                delay(1000)
+                count++
+            }
+            val asyncList = tracks.value.map { track -> TrackingConstants.TrackItem(track, trackManager.services.find { it.id == track.sync_id }!!) }.map { item ->
+                async(Dispatchers.IO) {
+                    val trackItem = try {
+                        item.service.refresh(item.track!!)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    trackItem?.let {
+                        if (item.service.isMdList() && item.service.isLogged() && manga.value.favorite && preferences.addToLibraryAsPlannedToRead() && it.status == FollowStatus.UNFOLLOWED.int) {
+                            it.status = FollowStatus.PLAN_TO_READ.int
+                            updateTrackingService(it, item.service)
+                        } else {
+                            db.insertTrack(it).executeOnIO()
+                        }
+                    }
+                }
+            }
+            asyncList.awaitAll()
+            updateTrackingFlows()
+        }
     }
 
     /**
@@ -665,51 +708,51 @@ class MangaComposePresenter(
      */
     private fun updateTrackingFlows() {
         presenterScope.launchIO {
+            var refreshRequired = false
+
             _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
             _tracks.value = db.getTracks(manga.value).executeOnIO()
 
-            getSuggestedDate()
+            val autoAddTracker = preferences.autoAddTracker().get()
 
-            _trackServiceCount.value = _loggedInTrackingService.value.count { trackService ->
-                _tracks.value.any { track ->
-                    //return true if track matches and not MDList
-                    //or track matches and MDlist is anything but Unfollowed
-                    trackService.matchingTrack(track) &&
-                        (trackService.isMdList().not() ||
-                            (trackService.isMdList() && (trackService as MdList).isUnfollowed(track).not()))
+            //Always add the mdlist initial unfollowed tracker
+            _loggedInTrackingService.value.firstOrNull { it.isMdList() }?.let { mdList ->
+                mdList as MdList
+                if (!_tracks.value.any { mdList.matchingTrack(it) }) {
+                    val track = mdList.createInitialTracker(manga.value)
+                    db.insertTrack(track).executeOnIO()
+                    mdList.bind(track)
+                    refreshRequired = true
                 }
             }
 
-            withIOContext {
-                val autoAddTracker = preferences.autoAddTracker().get()
-                var refreshRequired = false
-
-                //Always add the mdlist initial unfollowed tracker
-                _loggedInTrackingService.value.firstOrNull { it.isMdList() }?.let { mdList ->
-                    mdList as MdList
-                    if (!_tracks.value.any { mdList.matchingTrack(it) }) {
-                        val track = mdList.createInitialTracker(manga.value)
-                        db.insertTrack(track).executeOnIO()
-                        mdList.bind(track)
-                        refreshRequired = true
-                    }
-                }
-
-                if (autoAddTracker.size > 1 && manga.value.favorite) {
-                    autoAddTracker.map { it.toInt() }.forEach { autoAddTrackerId ->
-                        _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
-                            val id = trackManager.getIdFromManga(trackService, manga.value)
-                            if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
-                                val trackResult = trackService.search("", manga.value, false)
-                                trackResult.firstOrNull()?.let { track ->
-                                    registerTracking(TrackAndService(track, trackService), true)
-                                    refreshRequired = true
-                                }
+            if (autoAddTracker.size > 1 && manga.value.favorite) {
+                autoAddTracker.map { it.toInt() }.forEach { autoAddTrackerId ->
+                    _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
+                        val id = trackManager.getIdFromManga(trackService, manga.value)
+                        if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
+                            val trackResult = trackService.search("", manga.value, false)
+                            trackResult.firstOrNull()?.let { track ->
+                                registerTracking(TrackAndService(track, trackService), true)
+                                refreshRequired = true
                             }
                         }
                     }
-                    if (refreshRequired) {
-                        updateTrackingFlows()
+                }
+            }
+
+            if (refreshRequired) {
+                updateTrackingFlows()
+            } else {
+                getSuggestedDate()
+
+                _trackServiceCount.value = _loggedInTrackingService.value.count { trackService ->
+                    _tracks.value.any { track ->
+                        //return true if track matches and not MDList
+                        //or track matches and MDlist is anything but Unfollowed
+                        trackService.matchingTrack(track) &&
+                            (trackService.isMdList().not() ||
+                                (trackService.isMdList() && (trackService as MdList).isUnfollowed(track).not()))
                     }
                 }
             }
@@ -1212,6 +1255,13 @@ class MangaComposePresenter(
     //callback from Downloader
     override fun updateDownloads() {
         presenterScope.launchIO {
+            updateChapterFlows()
+        }
+    }
+
+    //callback from library update listener
+    override fun onUpdateManga(manga: Manga?) {
+        if (manga?.id == mangaId) {
             updateChapterFlows()
         }
     }
