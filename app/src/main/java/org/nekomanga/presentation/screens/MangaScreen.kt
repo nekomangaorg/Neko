@@ -28,6 +28,7 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +65,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
@@ -94,7 +96,7 @@ import java.text.DateFormat
 fun MangaScreen(
     manga: Manga,
     currentTitle: State<String>,
-    errorSnackbar: SharedFlow<String>,
+    snackbar: SharedFlow<SnackbarState>,
     artwork: State<Artwork>,
     vibrantColor: State<Int?>,
     isRefreshing: State<Boolean>,
@@ -150,12 +152,27 @@ fun MangaScreen(
 
 
     LaunchedEffect(Unit) {
-        errorSnackbar.collect { error ->
+        snackbar.collect { state ->
             scope.launch {
-                snackbarHostState.showSnackbar(
-                    error,
+                val message = when {
+                    state.message != null -> state.message
+                    state.messageRes != null -> context.getString(state.messageRes)
+                    else -> ""
+                }
+                val actionLabel = when {
+                    state.actionLabel != null -> state.actionLabel
+                    state.actionLabelRes != null -> context.getString(state.actionLabelRes)
+                    else -> null
+                }
+
+                val result = snackbarHostState.showSnackbar(
+                    message = message,
+                    actionLabel = actionLabel,
                     withDismissAction = true,
                 )
+                if (actionLabel != null && result == SnackbarResult.ActionPerformed) {
+                    state.action?.invoke()
+                }
             }
         }
     }

@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
@@ -136,8 +137,8 @@ class MangaComposePresenter(
     private val _nextUnreadChapter = MutableStateFlow(NextUnreadChapter())
     val nextUnreadChapter: StateFlow<NextUnreadChapter> = _nextUnreadChapter.asStateFlow()
 
-    private val _snackbar = MutableSharedFlow<String>()
-    val snackbar: SharedFlow<String> = _snackbar.asSharedFlow()
+    private val _snackbarState = MutableSharedFlow<SnackbarState>()
+    val snackBarState: SharedFlow<SnackbarState> = _snackbarState.asSharedFlow()
 
     private var allChapterScanlators: Set<String> = emptySet()
 
@@ -182,7 +183,7 @@ class MangaComposePresenter(
             onRefresh()
         } else {
             updateAllFlows()
-            refreshTracking()
+            refreshTracking(false)
         }
     }
 
@@ -203,17 +204,17 @@ class MangaComposePresenter(
 
     fun onRefresh() {
         presenterScope.launchIO {
-            if (controller?.activity?.isOnline() != true) {
-                _snackbar.emit("Offline")
+            if (!isOnline()) {
+                _snackbarState.emit(SnackbarState(messageRes = R.string.no_network_connection))
                 return@launchIO
             }
 
             _isRefreshing.value = true
 
-            mangaRepository.update(manga.value, true, presenterScope).collect { result ->
+            mangaRepository.update(manga.value, presenterScope).collect { result ->
                 when (result) {
                     is MangaResult.Error -> {
-                        //send a toast
+                        _snackbarState.emit(SnackbarState(message = result.text, messageRes = result.id))
                         _isRefreshing.value = false
                     }
                     is MangaResult.Success -> {
@@ -236,7 +237,9 @@ class MangaComposePresenter(
                             when (preferences.deleteRemovedChapters().get()) {
                                 2 -> deleteChapters(removedChapters)
                                 1 -> {}
-                                else -> _removedChapters.value = removedChapters
+                                else -> {
+                                    _removedChapters.value = removedChapters
+                                }
                             }
                         }
                     }
@@ -352,8 +355,10 @@ class MangaComposePresenter(
      */
     private fun refreshTracking(showOfflineSnack: Boolean = false) {
         presenterScope.launchIO {
-            if (showOfflineSnack && controller?.activity?.isOnline() != true) {
-                _snackbar.emit("Offline")
+            if (!isOnline()) {
+                if (showOfflineSnack) {
+                    _snackbarState.emit(SnackbarState(messageRes = R.string.no_network_connection))
+                }
                 return@launchIO
             }
             //add a slight delay in case the tracking flow is slower
@@ -364,18 +369,9 @@ class MangaComposePresenter(
             }
             val asyncList = tracks.value.map { track -> TrackingConstants.TrackItem(track, trackManager.services.find { it.id == track.sync_id }!!) }.map { item ->
                 async(Dispatchers.IO) {
-                    val trackItem = try {
-                        item.service.refresh(item.track!!)
-                    } catch (e: Exception) {
-                        null
-                    }
-                    trackItem?.let {
-                        if (item.service.isMdList() && item.service.isLogged() && manga.value.favorite && preferences.addToLibraryAsPlannedToRead() && it.status == FollowStatus.UNFOLLOWED.int) {
-                            it.status = FollowStatus.PLAN_TO_READ.int
-                            updateTrackingService(it, item.service)
-                        } else {
-                            db.insertTrack(it).executeOnIO()
-                        }
+                    kotlin.runCatching { item.service.refresh(item.track!!) }.onFailure {
+                        XLog.e("error refreshing tracker", it)
+                        _snackbarState.emit(SnackbarState(message = "Error refreshing tracker"))
                     }
                 }
             }
@@ -387,15 +383,17 @@ class MangaComposePresenter(
     /**
      * Updates the remote tracking service with tracking changes
      */
-    private fun updateTrackingService(track: Track, service: TrackService) {
+    private fun updateTrackingService(track: Track, service: TrackService, updateTrackFlows: Boolean = true) {
         presenterScope.launchIO {
             runCatching {
                 val updatedTrack = service.update(track)
                 db.insertTrack(updatedTrack).executeOnIO()
-                updateTrackingFlows()
+                if (updateTrackFlows) {
+                    updateTrackingFlows()
+                }
             }.onFailure {
-                //trackError(e)
-                //TODO snackbar error the issue
+                XLog.e("error updating tracker", it)
+                _snackbarState.emit(SnackbarState(message = "Error updating tracker"))
             }
         }
     }
@@ -493,8 +491,8 @@ class MangaComposePresenter(
                 )
                 saveCover(directory, artwork)
             } catch (e: Exception) {
-                XLog.e("warn", e)
-                //toast
+                XLog.e("error saving cover", e)
+                _snackbarState.emit(SnackbarState("Error saving cover"))
             }
         }
     }
@@ -732,13 +730,25 @@ class MangaComposePresenter(
 
             val autoAddTracker = preferences.autoAddTracker().get()
 
-            //Always add the mdlist initial unfollowed tracker
+            //Always add the mdlist initial unfollowed tracker, also add it as PTR if need be
             _loggedInTrackingService.value.firstOrNull { it.isMdList() }?.let { mdList ->
                 mdList as MdList
-                if (!_tracks.value.any { mdList.matchingTrack(it) }) {
-                    val track = mdList.createInitialTracker(manga.value)
+
+                var track = _tracks.value.firstOrNull { mdList.matchingTrack(it) }
+
+                if (track == null) {
+                    track = mdList.createInitialTracker(manga.value)
                     db.insertTrack(track).executeOnIO()
-                    mdList.bind(track)
+                    if (isOnline()) {
+                        mdList.bind(track)
+                    }
+                    db.insertTrack(track).executeOnIO()
+                    refreshRequired = true
+                }
+                val shouldAddAsPlanToRead = manga.value.favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
+                if (shouldAddAsPlanToRead && isOnline()) {
+                    track.status = FollowStatus.PLAN_TO_READ.int
+                    updateTrackingService(track, trackManager.mdList, false)
                     refreshRequired = true
                 }
             }
@@ -748,10 +758,14 @@ class MangaComposePresenter(
                     _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
                         val id = trackManager.getIdFromManga(trackService, manga.value)
                         if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
-                            val trackResult = trackService.search("", manga.value, false)
-                            trackResult.firstOrNull()?.let { track ->
-                                registerTracking(TrackAndService(track, trackService), true)
-                                refreshRequired = true
+                            if (!isOnline()) {
+                                _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker"))
+                            } else {
+                                val trackResult = trackService.search("", manga.value, false)
+                                trackResult.firstOrNull()?.let { track ->
+                                    registerTracking(TrackAndService(track, trackService), true)
+                                    refreshRequired = true
+                                }
                             }
                         }
                     }
@@ -769,7 +783,7 @@ class MangaComposePresenter(
                         //or track matches and MDlist is anything but Unfollowed
                         trackService.matchingTrack(track) &&
                             (trackService.isMdList().not() ||
-                                (trackService.isMdList() && (trackService as MdList).isUnfollowed(track).not()))
+                                (trackService.isMdList() && !FollowStatus.isUnfollowed(track.status)))
                     }
                 }
             }
@@ -1102,18 +1116,18 @@ class MangaComposePresenter(
         val editManga = manga.value
         editManga.apply {
             favorite = !favorite
-            when (favorite) {
-                true -> {
-                    date_added = Date().time
-                    //TODO need to add to MDList as Plan to read if enabled see the other toggleFavorite in the detailsPResenter
-                }
-                false -> date_added = 0
+            date_added = when (favorite) {
+                true -> Date().time
+                false -> 0
             }
-
         }
 
         db.insertManga(editManga).executeAsBlocking()
         updateMangaFlow()
+        if (editManga.favorite) {
+            //this is called for the add as plan to read auto sync tracking
+            updateTrackingFlows()
+        }
         return editManga.favorite
     }
 
@@ -1281,6 +1295,13 @@ class MangaComposePresenter(
         if (manga?.id == mangaId) {
             updateChapterFlows()
         }
+    }
+
+    /**
+     * Check if can access internet
+     */
+    fun isOnline(): Boolean {
+        return controller?.activity?.isOnline() == true
     }
 
     /**

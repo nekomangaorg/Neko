@@ -43,17 +43,10 @@ class MangaDetailsRepository {
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
-    suspend fun update(manga: Manga, isOnline: Boolean, scope: CoroutineScope) = channelFlow {
-        var errorFromNetwork: Throwable? = null
-        var errorFromMerged: Throwable? = null
+    suspend fun update(manga: Manga, scope: CoroutineScope) = channelFlow {
 
         val mangaWasInitialized = manga.initialized
 
-
-        if (!isOnline) {
-            send(MangaResult.Error(R.string.no_network_connection))
-            return@channelFlow
-        }
         if (!mangaDex.checkIfUp()) {
             send(MangaResult.Error(R.string.site_down))
             return@channelFlow
@@ -174,7 +167,7 @@ class MangaDetailsRepository {
 }
 
 sealed class MangaResult {
-    class Error(val id: Int? = null, val text: String = "") : MangaResult()
+    class Error(val id: Int? = null, val text: String? = null) : MangaResult()
     object UpdatedManga : MangaResult()
     object UpdatedArtwork : MangaResult()
     object UpdatedChapters : MangaResult()

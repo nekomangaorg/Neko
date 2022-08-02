@@ -64,7 +64,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
     override fun ScreenContent() {
         MangaScreen(
             manga = presenter.manga.collectAsState().value,
-            errorSnackbar = presenter.snackbar,
+            snackbar = presenter.snackBarState,
             currentTitle = presenter.currentTitle.collectAsState(),
             artwork = presenter.currentArtwork.collectAsState(),
             vibrantColor = presenter.vibrantColor.collectAsState(),
@@ -275,7 +275,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             }
         }
     }
-
+    
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         if (presenter.isScopeInitialized) {
