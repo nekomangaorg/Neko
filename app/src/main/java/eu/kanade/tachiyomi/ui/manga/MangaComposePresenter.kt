@@ -51,14 +51,18 @@ import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
@@ -132,6 +136,9 @@ class MangaComposePresenter(
     private val _nextUnreadChapter = MutableStateFlow(NextUnreadChapter())
     val nextUnreadChapter: StateFlow<NextUnreadChapter> = _nextUnreadChapter.asStateFlow()
 
+    private val _snackbar = MutableSharedFlow<String>()
+    val snackbar: SharedFlow<String> = _snackbar.asSharedFlow()
+
     private var allChapterScanlators: Set<String> = emptySet()
 
     private val _currentArtwork = MutableStateFlow(
@@ -195,8 +202,14 @@ class MangaComposePresenter(
     }
 
     fun onRefresh() {
-        _isRefreshing.value = true
         presenterScope.launchIO {
+            if (controller?.activity?.isOnline() != true) {
+                _snackbar.emit("Offline")
+                return@launchIO
+            }
+
+            _isRefreshing.value = true
+
             mangaRepository.update(manga.value, true, presenterScope).collect { result ->
                 when (result) {
                     is MangaResult.Error -> {
@@ -337,8 +350,12 @@ class MangaComposePresenter(
     /**
      * Refresh tracking from trackers
      */
-    private fun refreshTracking() {
+    private fun refreshTracking(showOfflineSnack: Boolean = false) {
         presenterScope.launchIO {
+            if (showOfflineSnack && controller?.activity?.isOnline() != true) {
+                _snackbar.emit("Offline")
+                return@launchIO
+            }
             //add a slight delay in case the tracking flow is slower
             var count = 0
             while (count < 5 && tracks.value.isEmpty()) {

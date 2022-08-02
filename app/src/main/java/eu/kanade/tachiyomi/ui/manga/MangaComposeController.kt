@@ -64,6 +64,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
     override fun ScreenContent() {
         MangaScreen(
             manga = presenter.manga.collectAsState().value,
+            errorSnackbar = presenter.snackbar,
             currentTitle = presenter.currentTitle.collectAsState(),
             artwork = presenter.currentArtwork.collectAsState(),
             vibrantColor = presenter.vibrantColor.collectAsState(),

@@ -27,8 +27,10 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +70,7 @@ import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.Artwork
@@ -77,6 +80,7 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
+import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
@@ -90,6 +94,7 @@ import java.text.DateFormat
 fun MangaScreen(
     manga: Manga,
     currentTitle: State<String>,
+    errorSnackbar: SharedFlow<String>,
     artwork: State<Artwork>,
     vibrantColor: State<Int?>,
     isRefreshing: State<Boolean>,
@@ -141,6 +146,19 @@ fun MangaScreen(
     }
 
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+
+    LaunchedEffect(Unit) {
+        errorSnackbar.collect { error ->
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    error,
+                    withDismissAction = true,
+                )
+            }
+        }
+    }
 
     var inLibrary by remember { mutableStateOf(manga.favorite) }
     val hasRemovedChapters by remember { mutableStateOf(removedChapters.value) }
@@ -231,6 +249,7 @@ fun MangaScreen(
             title = "",
             themeColorState = themeColorState,
             onNavigationIconClicked = onBackPressed,
+            snackBarHost = snackbarHost(snackbarHostState),
             actions = {
                 OverflowOptions(chapterActions = chapterActions, chapters = chapters)
             },
