@@ -1200,12 +1200,11 @@ class MangaComposePresenter(
         presenterScope.launchIO {
             val currentChapters = activeChapters.value
             val index = currentChapters.indexOfFirst { it.chapter.id == download.chapter.id }
-            if (index > 0) {
-                currentChapters.toMutableList().apply {
-                    val item = removeAt(index).copy(downloadState = download.status, downloadProgress = download.progressFloat)
-                    add(index, item)
-                }
-                _activeChapters.value = currentChapters
+            if (index >= 0) {
+                val mutableChapters = currentChapters.toMutableList()
+                val updateChapter = currentChapters[index].copy(downloadState = download.status, downloadProgress = download.progressFloat)
+                mutableChapters[index] = updateChapter
+                _activeChapters.value = mutableChapters.toList()
             }
         }
     }
