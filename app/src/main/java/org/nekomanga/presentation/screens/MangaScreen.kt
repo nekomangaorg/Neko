@@ -41,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.ColorUtils
@@ -50,7 +49,6 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.presentation.components.VerticalDivider
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -62,7 +60,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
@@ -74,8 +71,6 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.components.AppBar
-import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
@@ -86,6 +81,7 @@ import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
+import org.nekomanga.presentation.screens.mangadetails.OverflowOptions
 import org.nekomanga.presentation.theme.Shapes
 import java.text.DateFormat
 
@@ -236,68 +232,7 @@ fun MangaScreen(
             themeColorState = themeColorState,
             onNavigationIconClicked = onBackPressed,
             actions = {
-                AppBarActions(
-                    actions = listOf(
-                        AppBar.OverflowAction(
-                            title = stringResource(R.string.download),
-                            children = listOf(
-                                AppBar.OverflowAction(
-                                    title = stringResource(id = R.string.next_unread),
-                                    children = listOf(
-                                        AppBar.OverflowAction(
-                                            title = stringResource(id = R.string.next_1_unread),
-                                            onClick = { chapterActions.download(emptyList(), DownloadAction.DownloadNextUnread(1)) },
-                                        ),
-                                        AppBar.OverflowAction(
-                                            title = stringResource(id = R.string.next_5_unread),
-                                            onClick = { chapterActions.download(emptyList(), DownloadAction.DownloadNextUnread(5)) },
-
-                                            ),
-                                        AppBar.OverflowAction(
-                                            title = stringResource(id = R.string.next_10_unread),
-                                            onClick = { chapterActions.download(emptyList(), DownloadAction.DownloadNextUnread(10)) },
-
-                                            ),
-                                    ),
-                                ),
-                                AppBar.OverflowAction(
-                                    title = stringResource(id = R.string.unread),
-                                    onClick = { chapterActions.download(emptyList(), DownloadAction.DownloadUnread) },
-                                ),
-                                AppBar.OverflowAction(
-                                    title = stringResource(id = R.string.all),
-                                    onClick = { chapterActions.download(emptyList(), DownloadAction.DownloadAll) },
-                                ),
-                            ),
-                        ),
-                        AppBar.OverflowAction(
-                            title = stringResource(R.string.remove_downloads),
-                            children = listOf(
-                                AppBar.OverflowAction(
-                                    title = stringResource(id = R.string.all),
-                                    onClick = { chapterActions.download(emptyList(), DownloadAction.RemoveAll) },
-                                ),
-                                AppBar.OverflowAction(
-                                    title = stringResource(id = R.string.unread),
-                                    onClick = { chapterActions.download(emptyList(), DownloadAction.RemoveRead) },
-                                ),
-                            ),
-                        ),
-                        AppBar.OverflowAction(
-                            title = stringResource(R.string.mark_all_as),
-                            children = listOf(
-                                AppBar.OverflowAction(
-                                    title = stringResource(id = R.string.read),
-                                    onClick = { chapterActions.markRead(chapters.value, true) },
-                                ),
-                                AppBar.OverflowAction(
-                                    title = stringResource(id = R.string.unread),
-                                    onClick = { chapterActions.markRead(chapters.value, false) },
-                                ),
-                            ),
-                        ),
-                    ),
-                )
+                OverflowOptions(chapterActions = chapterActions, chapters = chapters)
             },
         ) {
             SwipeRefresh(
