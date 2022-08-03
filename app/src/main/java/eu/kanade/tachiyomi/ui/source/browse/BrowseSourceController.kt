@@ -33,7 +33,7 @@ import eu.kanade.tachiyomi.ui.follows.FollowsController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.MangaComposeController
 import eu.kanade.tachiyomi.ui.source.latest.LatestController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
@@ -499,7 +499,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     fun goDirectlyForDeepLink(manga: Manga) {
-        router.replaceTopController(MangaDetailsController(manga, true).withFadeTransaction())
+        router.replaceTopController(MangaComposeController(manga.id!!).withFadeTransaction())
     }
 
     /**
@@ -699,7 +699,7 @@ open class BrowseSourceController(bundle: Bundle) :
      * opens a manga
      */
     private fun openManga(manga: Manga) {
-        router.pushController(MangaDetailsController(manga, true).withFadeTransaction())
+        router.pushController(MangaComposeController(manga.id!!).withFadeTransaction())
     }
 
     /**
