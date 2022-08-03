@@ -1153,6 +1153,7 @@ class MangaComposePresenter(
     fun downloadChapters(chapterItems: List<ChapterItem>, downloadAction: DownloadAction) {
         presenterScope.launchIO {
             when (downloadAction) {
+                is DownloadAction.ImmediateDownload -> downloadManager.startDownloadNow(chapterItems.first().chapter.toDbChapter())
                 is DownloadAction.DownloadAll -> downloadManager.downloadChapters(manga.value, activeChapters.value.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
                 is DownloadAction.Download -> downloadManager.downloadChapters(manga.value, chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
                 is DownloadAction.DownloadNextUnread -> {
@@ -1313,5 +1314,11 @@ class MangaComposePresenter(
             updateChapterFlows()
             updateTrackingFlows()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        downloadManager.removeListener(this)
+        LibraryUpdateService.removeListener(this)
     }
 }

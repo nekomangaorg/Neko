@@ -339,23 +339,35 @@ private fun ChapterInfo(
                 expanded = chapterDropdown,
                 themeColorState = themeColorState,
                 onDismiss = { chapterDropdown = false },
-                dropDownItems = listOf(
-                    SimpleDropDownItem.Action(
-                        text = stringResource(
-                            when (chapterItem.downloadState) {
-                                Download.State.DOWNLOADED -> R.string.remove
-                                else -> R.string.cancel
-                            },
-                        ),
-                        onClick = {
-                            val action = when (chapterItem.downloadState) {
-                                Download.State.DOWNLOADING -> DownloadAction.Cancel
-                                else -> DownloadAction.Remove
-                            }
-                            onDownload(action)
-                        },
-                    ),
-                ),
+                dropDownItems =
+                when (chapterItem.downloadState) {
+                    Download.State.DOWNLOADED -> {
+                        listOf(
+                            SimpleDropDownItem.Action(
+                                text = stringResource(R.string.remove),
+                                onClick = {
+                                    onDownload(DownloadAction.Remove)
+                                },
+                            ),
+                        )
+                    }
+                    else -> {
+                        listOf(
+                            SimpleDropDownItem.Action(
+                                text = stringResource(R.string.start_downloading_now),
+                                onClick = {
+                                    onDownload(DownloadAction.ImmediateDownload)
+                                },
+                            ),
+                            SimpleDropDownItem.Action(
+                                text = stringResource(R.string.cancel),
+                                onClick = {
+                                    onDownload(DownloadAction.Cancel)
+                                },
+                            ),
+                        )
+                    }
+                },
             )
         }
     }

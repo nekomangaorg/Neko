@@ -84,6 +84,7 @@ fun ArtworkSheet(
             val imageHeight = screenHeight * .7f
             val gradientHeight = (thumbnailSize / 2f)
 
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()

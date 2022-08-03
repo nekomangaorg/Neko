@@ -95,6 +95,7 @@ object MangaConstants {
         object DownloadAll : DownloadAction()
         object DownloadUnread : DownloadAction()
         object Download : DownloadAction()
+        object ImmediateDownload : DownloadAction()
         object Remove : DownloadAction()
         object RemoveRead : DownloadAction()
         object RemoveAll : DownloadAction()
