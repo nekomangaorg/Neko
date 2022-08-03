@@ -63,11 +63,11 @@ fun OverflowOptions(chapterActions: MangaConstants.ChapterActions, chapters: Sta
                 children = listOf(
                     AppBar.OverflowAction(
                         title = stringResource(id = R.string.read),
-                        onClick = { chapterActions.markRead(chapters.value, true) },
+                        onClick = { chapterActions.mark(chapters.value, MangaConstants.MarkAction.Read(true)) },
                     ),
                     AppBar.OverflowAction(
                         title = stringResource(id = R.string.unread),
-                        onClick = { chapterActions.markRead(chapters.value, false) },
+                        onClick = { chapterActions.mark(chapters.value, MangaConstants.MarkAction.Unread(true)) },
                     ),
                 ),
             ),

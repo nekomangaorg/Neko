@@ -133,11 +133,10 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
                 setAsGlobal = presenter::setGlobalOption,
             ),
             chapterActions = ChapterActions(
-                bookmark = presenter::bookmarkChapter,
+                mark = presenter::markChapters,
                 download = presenter::downloadChapters,
                 delete = presenter::deleteChapters,
                 clearRemoved = presenter::clearRemovedChapters,
-                markRead = presenter::markRead,
                 openNext = { context ->
                     presenter.nextUnreadChapter.value.simpleChapter?.let {
                         openChapter(context, it.toDbChapter())
@@ -275,7 +274,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             }
         }
     }
-    
+
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         if (presenter.isScopeInitialized) {

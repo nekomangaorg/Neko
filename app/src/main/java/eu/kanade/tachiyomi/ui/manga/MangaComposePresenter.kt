@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.getMissingCount
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -56,6 +57,7 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -202,6 +204,9 @@ class MangaComposePresenter(
         updateFilterFlow()
     }
 
+    /**
+     * Refresh manga info, and chapters
+     */
     fun onRefresh() {
         presenterScope.launchIO {
             if (!isOnline()) {
@@ -219,7 +224,6 @@ class MangaComposePresenter(
                     }
                     is MangaResult.Success -> {
                         updateAllFlows()
-                        refreshTracking()
                         _isRefreshing.value = false
                     }
                     is MangaResult.UpdatedManga -> {
@@ -627,7 +631,7 @@ class MangaComposePresenter(
                 merge_manga_url = mergeManga.url
                 merge_manga_image_url = merge_manga_image_url
             }
-            db.insertManga(editManga).executeAsBlocking()
+            db.insertManga(editManga).executeOnIO()
             updateMangaFlow()
             onRefresh()
         }
@@ -956,10 +960,7 @@ class MangaComposePresenter(
                 }
             }
 
-            XLog.e("ESCO ${manga.readFilter(preferences)}, ${manga.downloadedFilter(preferences)}, ${manga.bookmarkedFilter(preferences)}")
-
-
-            db.insertManga(manga).executeAsBlocking()
+            db.insertManga(manga).executeOnIO()
             updateMangaFlow()
             updateFilterFlow()
             updateChapterFlows()
@@ -1030,7 +1031,7 @@ class MangaComposePresenter(
             ) || !manga.value.usesLocalSort
     }
 
-    fun mangaFilterMatchesDefault(): Boolean {
+    private fun mangaFilterMatchesDefault(): Boolean {
         return (
             manga.value.readFilter == preferences.filterChapterByRead().get() &&
                 manga.value.downloadedFilter == preferences.filterChapterByDownloaded().get() &&
@@ -1192,10 +1193,93 @@ class MangaComposePresenter(
         }
     }
 
+    fun markChapters(chapterItems: List<ChapterItem>, markAction: MangaConstants.MarkAction) {
+        presenterScope.launchIO {
+            val (newChapterItems, nameRes) = when (markAction) {
+                is MangaConstants.MarkAction.Bookmark -> {
+                    chapterItems.map { it.chapter }.map { it.copy(bookmark = true) } to R.string.bookmarked
+                }
+                is MangaConstants.MarkAction.UnBookmark -> {
+                    chapterItems.map { it.chapter }.map { it.copy(bookmark = false) } to R.string.removed_bookmark
+                }
+                is MangaConstants.MarkAction.Read -> {
+                    chapterItems.map { it.chapter }.map { it.copy(read = true) } to R.string.marked_as_read
+                }
+
+                is MangaConstants.MarkAction.Unread -> {
+                    chapterItems.map { it.chapter }.map {
+                        it.copy(read = false, lastPageRead = markAction.lastRead ?: 0, pagesLeft = markAction.pagesLeft ?: 0)
+                    } to R.string.marked_as_unread
+                }
+            }
+
+            db.updateChaptersProgress(newChapterItems.map { it.toDbChapter() }).executeOnIO()
+            updateChapterFlows()
+
+
+            fun finalizeChapters() {
+                if (markAction is MangaConstants.MarkAction.Read) {
+                    if (preferences.removeAfterMarkedAsRead()) {
+                        //dont delete bookmarked chapters
+                        deleteChapters(newChapterItems.filter { !it.bookmark }.map { ChapterItem(chapter = it) }, newChapterItems.size == allChapters.value.size)
+                    }
+                    //get the highest chapter number and update tracking for it
+                    newChapterItems.maxByOrNull { it.chapterNumber.toInt() }?.let {
+                        updateTrackChapterMarkedAsRead(db, preferences, it.toDbChapter(), mangaId) {
+                            updateTrackingFlows()
+                        }
+                    }
+                }
+
+                //sync with dex if marked read or marked unread
+                val syncRead = when (markAction) {
+                    is MangaConstants.MarkAction.Read -> true
+                    is MangaConstants.MarkAction.Unread -> false
+                    else -> null
+                }
+
+                if (syncRead != null && preferences.readingSync()) {
+                    val chapterIds = newChapterItems.filter { !it.isMergedChapter() }.map { it.mangaDexChapterId }
+                    if (chapterIds.isNotEmpty()) {
+                        GlobalScope.launchIO {
+                            statusHandler.marksChaptersStatus(
+                                MdUtil.getMangaId(manga.value.url),
+                                chapterIds,
+                                syncRead,
+                            )
+                        }
+                    }
+                }
+            }
+
+
+
+            if (markAction.canUndo) {
+                _snackbarState.emit(
+                    SnackbarState(
+                        messageRes = nameRes, actionLabelRes = R.string.undo,
+                        action = {
+                            presenterScope.launch {
+                                val originalDbChapters = chapterItems.map { it.chapter }.map { it.toDbChapter() }
+                                db.updateChaptersProgress(originalDbChapters).executeOnIO()
+                                updateChapterFlows()
+                            }
+                        },
+                        dismissAction = {
+                            finalizeChapters()
+                        },
+                    ),
+                )
+            } else {
+                finalizeChapters()
+            }
+        }
+    }
+
     /**
      * Marks the given chapters read or unread
      */
-    fun markRead(chapterItems: List<ChapterItem>, read: Boolean) {
+    fun markRead(chapterItems: List<ChapterItem>, read: Boolean, canUndo: Boolean = false) {
         presenterScope.launchIO {
             val chapters = chapterItems.map { it.chapter.toDbChapter() }
             chapters.forEach {

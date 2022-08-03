@@ -81,6 +81,7 @@ object MangaConstants {
         val actionLabel: String? = null,
         @StringRes val actionLabelRes: Int? = null,
         val action: (() -> Unit)? = null,
+        val dismissAction: (() -> Unit)? = null,
     )
 
     class ChapterFilterActions(
@@ -105,9 +106,12 @@ object MangaConstants {
     data class DownloadActionHolder(val chapters: List<ChapterItem>, val downloadAction: DownloadAction)
 
     sealed class MarkAction {
-        class Bookmark(chapterItems: List<ChapterItem>) : MarkAction()
-        class Read(chapterItems: List<ChapterItem>) : MarkAction()
-        class Unread(chapterItems: List<ChapterItem>) : MarkAction()
+        abstract val canUndo: Boolean
+
+        data class Bookmark(override val canUndo: Boolean = false) : MarkAction()
+        data class UnBookmark(override val canUndo: Boolean = false) : MarkAction()
+        data class Read(override val canUndo: Boolean = false) : MarkAction()
+        data class Unread(override val canUndo: Boolean = false, val lastRead: Int? = null, val pagesLeft: Int? = null) : MarkAction()
     }
 
     class CategoryActions(
@@ -146,11 +150,10 @@ object MangaConstants {
     )
 
     class ChapterActions(
-        val bookmark: (ChapterItem) -> Unit,
+        val mark: (List<ChapterItem>, MarkAction) -> Unit,
         val clearRemoved: () -> Unit,
         val download: (List<ChapterItem>, DownloadAction) -> Unit,
         val delete: (List<ChapterItem>) -> Unit,
-        val markRead: (List<ChapterItem>, Boolean) -> Unit,
         val open: (Context, ChapterItem) -> Unit,
         val openNext: (Context) -> Unit,
     )

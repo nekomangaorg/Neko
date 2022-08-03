@@ -151,7 +151,7 @@ fun MangaScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(snackbarHostState.currentSnackbarData) {
         snackbar.collect { state ->
             scope.launch {
                 val message = when {
@@ -170,9 +170,11 @@ fun MangaScreen(
                     actionLabel = actionLabel,
                     withDismissAction = true,
                 )
-                if (actionLabel != null && result == SnackbarResult.ActionPerformed) {
-                    state.action?.invoke()
+                when (result) {
+                    SnackbarResult.ActionPerformed -> state.action?.invoke()
+                    SnackbarResult.Dismissed -> state.dismissAction?.invoke()
                 }
+
             }
         }
     }
@@ -356,20 +358,27 @@ fun MangaScreen(
                         themeColor = themeColorState,
                         chapterItem = chapter,
                         onClick = { chapterActions.open(context, chapter) },
-                        onBookmark = { chapterActions.bookmark(chapter) },
-                        onRead = {
-                            chapterActions.markRead(
-                                listOf(chapter),
-                                !chapter.chapter.read,
-                            )
+                        onBookmark = { chapterActions.mark(listOf(chapter), if (chapter.chapter.bookmark) MangaConstants.MarkAction.UnBookmark(true) else MangaConstants.MarkAction.Bookmark(true)) },
+                        onRead = { chapterActions.mark(
+                            listOf(chapter),
+                            if (chapter.chapter.read) MangaConstants.MarkAction.Unread(
+                                true,
+                                lastRead = chapter.chapter.lastPageRead,
+                                pagesLeft = chapter.chapter.pagesLeft,
+                            ) else MangaConstants.MarkAction.Read(true),
+                        )
                         },
                         onWebView = { context.asActivity().openInBrowser(chapter.chapter.fullUrl()) },
                         onDownload = { downloadAction ->
                             chapterActions.download(listOf(chapter), downloadAction)
                         },
                         markPrevious = { read ->
+                            val action = when (read) {
+                                true -> MangaConstants.MarkAction.Read()
+                                false -> MangaConstants.MarkAction.Unread()
+                            }
                             val chaptersToMark = chapters.value.subList(0, index)
-                            chapterActions.markRead(chaptersToMark, read)
+                            chapterActions.mark(chaptersToMark, action)
                         },
                     )
                 }
