@@ -186,6 +186,7 @@ class MangaComposePresenter(
         } else {
             updateAllFlows()
             refreshTracking(false)
+            syncChaptersReadStatus()
         }
     }
 
@@ -225,6 +226,10 @@ class MangaComposePresenter(
                     is MangaResult.Success -> {
                         updateAllFlows()
                         _isRefreshing.value = false
+                    }
+                    is MangaResult.UpdatedChapters -> {
+                        updateChapterFlows()
+                        syncChaptersReadStatus()
                     }
                     is MangaResult.UpdatedManga -> {
                         updateMangaFlow()
@@ -381,6 +386,20 @@ class MangaComposePresenter(
             }
             asyncList.awaitAll()
             updateTrackingFlows()
+        }
+    }
+
+    private fun syncChaptersReadStatus() {
+        presenterScope.launchIO {
+            if (!preferences.readingSync() || !sourceManager.getMangadex().isLogged() || !isOnline()) return@launchIO
+
+            statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.value.url)).collect { chapterIds ->
+                val chaptersToMarkRead = allChapters.value.asSequence().filter { !it.chapter.isMergedChapter() }
+                    .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
+                    .toList()
+                markChapters(chaptersToMarkRead, MangaConstants.MarkAction.Read(), skipSync = true)
+            }
+
         }
     }
 
@@ -1193,7 +1212,7 @@ class MangaComposePresenter(
         }
     }
 
-    fun markChapters(chapterItems: List<ChapterItem>, markAction: MangaConstants.MarkAction) {
+    fun markChapters(chapterItems: List<ChapterItem>, markAction: MangaConstants.MarkAction, skipSync: Boolean = false) {
         presenterScope.launchIO {
             val (newChapterItems, nameRes) = when (markAction) {
                 is MangaConstants.MarkAction.Bookmark -> {
@@ -1238,7 +1257,7 @@ class MangaComposePresenter(
                     else -> null
                 }
 
-                if (syncRead != null && preferences.readingSync()) {
+                if (syncRead != null && !skipSync && preferences.readingSync()) {
                     val chapterIds = newChapterItems.filter { !it.isMergedChapter() }.map { it.mangaDexChapterId }
                     if (chapterIds.isNotEmpty()) {
                         GlobalScope.launchIO {
@@ -1251,8 +1270,6 @@ class MangaComposePresenter(
                     }
                 }
             }
-
-
 
             if (markAction.canUndo) {
                 _snackbarState.emit(
