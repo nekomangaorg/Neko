@@ -268,7 +268,7 @@ fun MangaScreen(
             title = "",
             themeColorState = themeColorState,
             onNavigationIconClicked = onBackPressed,
-            snackBarHost = snackbarHost(snackbarHostState),
+            snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
             actions = {
                 OverflowOptions(chapterActions = chapterActions, chapters = chapters)
             },
@@ -359,14 +359,15 @@ fun MangaScreen(
                         chapterItem = chapter,
                         onClick = { chapterActions.open(context, chapter) },
                         onBookmark = { chapterActions.mark(listOf(chapter), if (chapter.chapter.bookmark) MangaConstants.MarkAction.UnBookmark(true) else MangaConstants.MarkAction.Bookmark(true)) },
-                        onRead = { chapterActions.mark(
-                            listOf(chapter),
-                            if (chapter.chapter.read) MangaConstants.MarkAction.Unread(
-                                true,
-                                lastRead = chapter.chapter.lastPageRead,
-                                pagesLeft = chapter.chapter.pagesLeft,
-                            ) else MangaConstants.MarkAction.Read(true),
-                        )
+                        onRead = {
+                            chapterActions.mark(
+                                listOf(chapter),
+                                if (chapter.chapter.read) MangaConstants.MarkAction.Unread(
+                                    true,
+                                    lastRead = chapter.chapter.lastPageRead,
+                                    pagesLeft = chapter.chapter.pagesLeft,
+                                ) else MangaConstants.MarkAction.Read(true),
+                            )
                         },
                         onWebView = { context.asActivity().openInBrowser(chapter.chapter.fullUrl()) },
                         onDownload = { downloadAction ->
@@ -374,8 +375,8 @@ fun MangaScreen(
                         },
                         markPrevious = { read ->
                             val action = when (read) {
-                                true -> MangaConstants.MarkAction.Read()
-                                false -> MangaConstants.MarkAction.Unread()
+                                true -> MangaConstants.MarkAction.Read(true)
+                                false -> MangaConstants.MarkAction.Unread(true)
                             }
                             val chaptersToMark = chapters.value.subList(0, index)
                             chapterActions.mark(chaptersToMark, action)

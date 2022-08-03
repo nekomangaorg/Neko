@@ -8,11 +8,13 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 
 @Composable
-fun snackbarHost(snackbarHostState: SnackbarHostState): @Composable () -> Unit {
+fun snackbarHost(snackbarHostState: SnackbarHostState, actionColor: Color? = null): @Composable () -> Unit {
     return {
         SwipeableSnackbarHost(snackbarHostState) { data, modifier ->
             Snackbar(
@@ -27,7 +29,8 @@ fun snackbarHost(snackbarHostState: SnackbarHostState): @Composable () -> Unit {
                         ) {
                             Text(
                                 text = data.visuals.actionLabel!!,
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = actionColor ?: MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
                             )
                         }
                     }
