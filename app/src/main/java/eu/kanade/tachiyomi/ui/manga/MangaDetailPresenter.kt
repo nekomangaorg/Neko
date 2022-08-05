@@ -1198,12 +1198,12 @@ class MangaDetailPresenter(
             author = m.author ?: "",
             currentDescription = getDescription(),
             currentTitle = m.title,
-            externalLinks = currentManga.getExternalLinks().toImmutableList(),
+            externalLinks = m.getExternalLinks().toImmutableList(),
             genres = (m.getGenres(true) ?: emptyList()).toImmutableList(),
             initialized = m.initialized,
             inLibrary = m.favorite,
             isMerged = when (m.isMerged()) {
-                true -> Yes(sourceManager.getMergeSource().baseUrl + currentManga.merge_manga_url!!, currentManga.title)
+                true -> Yes(sourceManager.getMergeSource().baseUrl + m.merge_manga_url!!, m.title)
                 false -> No
             },
             isPornographic = m.getContentRating()?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true) ?: false,
@@ -1590,7 +1590,7 @@ class MangaDetailPresenter(
                         }
                     },
 
-                ),
+                    ),
             )
         }
     }
