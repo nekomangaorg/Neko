@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.MergeSource
+import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -130,7 +130,7 @@ class DownloadCache(
             val ids = mangaFiles[manga.id]!!.second
             var count = files.size
             files.forEach {
-                if (!it.contains(MergeSource.name)) {
+                if (!it.contains(MangaLife.name)) {
                     val mangadexId = it.substringAfterLast("- ")
                     if (mangadexId.isNotBlank() && mangadexId.isDigitsOnly() && !ids.contains(
                             mangadexId,
@@ -230,7 +230,7 @@ class DownloadCache(
         val files = mangaFiles[id]
         val mangadexId = chapterDirName.substringAfterLast("- ")
 
-        val set = if (chapterDirName.contains(MergeSource.name)) {
+        val set = if (chapterDirName.contains(MangaLife.name)) {
             mutableSetOf()
         } else {
             mutableSetOf(mangadexId)
@@ -240,7 +240,7 @@ class DownloadCache(
             mangaFiles[id] = Pair(mutableSetOf(chapterDirName), set)
         } else {
             mangaFiles[id]?.first?.add(chapterDirName)
-            if (!chapterDirName.contains(MergeSource.name)) {
+            if (!chapterDirName.contains(MangaLife.name)) {
                 mangaFiles[id]?.second?.add(mangadexId)
             }
         }
@@ -277,7 +277,7 @@ class DownloadCache(
             if (chapter in mangaFiles[id]!!.first) {
                 mangaFiles[id]!!.first.remove(chapter)
             }
-            if (!chapter.contains(MergeSource.name)) {
+            if (!chapter.contains(MangaLife.name)) {
                 val mangadexId = chapter.substringAfterLast("- ")
                 mangaFiles[id]!!.second.remove(mangadexId)
             }

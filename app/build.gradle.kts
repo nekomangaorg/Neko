@@ -224,7 +224,7 @@ dependencies {
 
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
-    implementation(libs.stringsimilarity)
+    implementation(libs.fuzzysearch)
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
     implementation(libs.bundles.kahelpers)

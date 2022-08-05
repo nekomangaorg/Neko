@@ -96,7 +96,7 @@ aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose", versi
 
 leakcanary = "com.squareup.leakcanary:leakcanary-android:2.9.1"
 pastelplaceholders = "com.github.zedlabs:pastelPlaceholders:1.0.4"
-stringsimilarity = "info.debatty:java-string-similarity:2.0.0"
+fuzzysearch = "me.xdrop:fuzzywuzzy:1.4.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }

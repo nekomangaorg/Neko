@@ -23,7 +23,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.MergeSource
+import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -330,7 +330,7 @@ class Downloader(
         }
         val chapterDirname = provider.getChapterDirName(download.chapter)
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
-        val pagesToDownload = if (download.source is MergeSource) 3 else 6
+        val pagesToDownload = if (download.source is MangaLife) 3 else 6
 
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
