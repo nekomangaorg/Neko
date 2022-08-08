@@ -135,6 +135,7 @@
     <string name="remove_from_library_question">Remove from library?</string>
     <string name="manga_from_library">Manga from library</string>
     <string name="delete_downloads">Delete downloads</string>
+    <string name="deleted_downloads">Deleted downloads</string>
     <string name="delete_downloads_question">Delete downloaded chapters?</string>
 
 

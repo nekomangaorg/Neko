@@ -157,4 +157,6 @@ data class ChapterItem(
     val downloadProgress: Float = -1f,
 ) {
     val isDownloaded = downloadState == Download.State.DOWNLOADED
+
+    val isNotDefaultDownload = downloadState != Download.State.default
 }

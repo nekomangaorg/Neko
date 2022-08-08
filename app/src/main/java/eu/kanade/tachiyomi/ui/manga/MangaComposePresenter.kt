@@ -1134,6 +1134,7 @@ class MangaComposePresenter(
      * Toggle a manga as favorite
      */
     fun toggleFavorite(): Boolean {
+
         val editManga = manga.value
         editManga.apply {
             favorite = !favorite
@@ -1155,17 +1156,61 @@ class MangaComposePresenter(
     /**
      * Delete the list of chapters
      */
-    fun deleteChapters(chapterItems: List<ChapterItem>, isEverything: Boolean = false) {
-        //do on global scope cause we don't want exiting the manga to prevent the deletin
+    fun deleteChapters(chapterItems: List<ChapterItem>, isEverything: Boolean = false, canUndo: Boolean = false) {
+        //do on global scope cause we don't want exiting the manga to prevent the deleting
+
         launchIO {
-            if (isEverything) {
-                downloadManager.deleteManga(manga.value, sourceManager.getMangadex())
+            if (chapterItems.isNotEmpty()) {
+                val delete = {
+                    if (isEverything) {
+                        downloadManager.deleteManga(manga.value, sourceManager.getMangadex())
+                    } else {
+                        downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, manga.value, sourceManager.getMangadex())
+                    }
+                }
+                if (canUndo) {
+                    _snackbarState.emit(
+                        SnackbarState(
+                            messageRes = R.string.deleted_downloads, actionLabelRes = R.string.undo,
+                            action = {
+                            },
+                            dismissAction = {
+                                delete()
+                            },
+                        ),
+                    )
+                } else {
+                    delete()
+                }
             } else {
-                downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, manga.value, sourceManager.getMangadex())
+                _snackbarState.emit(
+                    SnackbarState(
+                        messageRes = R.string.no_chapters_to_delete,
+                    ),
+                )
             }
         }
 
         updateChapterFlows()
+    }
+
+    /**
+     * Checks if a manga is favorited, if not then snack action to add to library
+     */
+    private fun addToLibrarySnack() {
+        if (!manga.value.favorite) {
+            presenterScope.launch {
+                _snackbarState.emit(
+                    SnackbarState(
+                        messageRes = R.string.add_to_library,
+                        actionLabelRes = R.string.add,
+                        action = {
+                            toggleFavorite()
+                        },
+                    ),
+                )
+            }
+        }
     }
 
     /**
@@ -1174,9 +1219,18 @@ class MangaComposePresenter(
     fun downloadChapters(chapterItems: List<ChapterItem>, downloadAction: DownloadAction) {
         presenterScope.launchIO {
             when (downloadAction) {
-                is DownloadAction.ImmediateDownload -> downloadManager.startDownloadNow(chapterItems.first().chapter.toDbChapter())
-                is DownloadAction.DownloadAll -> downloadManager.downloadChapters(manga.value, activeChapters.value.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
-                is DownloadAction.Download -> downloadManager.downloadChapters(manga.value, chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+                is DownloadAction.ImmediateDownload -> {
+                    addToLibrarySnack()
+                    downloadManager.startDownloadNow(chapterItems.first().chapter.toDbChapter())
+                }
+                is DownloadAction.DownloadAll -> {
+                    addToLibrarySnack()
+                    downloadManager.downloadChapters(manga.value, activeChapters.value.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+                }
+                is DownloadAction.Download -> {
+                    addToLibrarySnack()
+                    downloadManager.downloadChapters(manga.value, chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+                }
                 is DownloadAction.DownloadNextUnread -> {
                     val filteredChapters =
                         activeChapters.value.filter { !it.chapter.read && !it.isDownloaded }.sortedWith(chapterSort.sortComparator(manga.value, true)).take(downloadAction.numberToDownload)
@@ -1189,27 +1243,13 @@ class MangaComposePresenter(
                     downloadManager.downloadChapters(manga.value, filteredChapters)
                 }
                 is DownloadAction.Remove -> deleteChapters(chapterItems, chapterItems.size == allChapters.value.size)
-                is DownloadAction.RemoveAll -> deleteChapters(activeChapters.value, activeChapters.value.size == allChapters.value.size)
+                is DownloadAction.RemoveAll -> deleteChapters(activeChapters.value.filter { it.isNotDefaultDownload }, activeChapters.value.size == allChapters.value.size, true)
                 is DownloadAction.RemoveRead -> {
                     val filteredChapters = activeChapters.value.filter { it.chapter.read && it.isDownloaded }
-                    deleteChapters(filteredChapters, filteredChapters.size == allChapters.value.size)
+                    deleteChapters(filteredChapters, filteredChapters.size == allChapters.value.size, true)
                 }
                 is DownloadAction.Cancel -> deleteChapters(chapterItems, chapterItems.size == allChapters.value.size)
             }
-        }
-    }
-
-    /**
-     * Flips the bookmark status for the chapter
-     */
-    fun bookmarkChapter(chapterItem: ChapterItem) {
-        presenterScope.launchIO {
-            val chapter = chapterItem.chapter.toDbChapter()
-            chapter.apply {
-                this.bookmark = !this.bookmark
-            }
-            db.updateChapterProgress(chapter).executeOnIO()
-            updateChapterFlows()
         }
     }
 
@@ -1291,32 +1331,6 @@ class MangaComposePresenter(
             } else {
                 finalizeChapters()
             }
-        }
-    }
-
-    /**
-     * Marks the given chapters read or unread
-     */
-    fun markRead(chapterItems: List<ChapterItem>, read: Boolean, canUndo: Boolean = false) {
-        presenterScope.launchIO {
-            val chapters = chapterItems.map { it.chapter.toDbChapter() }
-            chapters.forEach {
-                it.read = read
-                if (!read) {
-                    //TODO see if we need
-                    // lastRead: Int? = null,
-                    //         pagesLeft: Int? = null,
-                    // it.last_page_read = lastRead ?: 0
-                    // it.pages_left = pagesLeft ?: 0
-                }
-            }
-
-            //TODO rest of background stuff
-            db.updateChaptersProgress(chapters).executeAsBlocking()
-            updateChapterFlows()
-
-            //TODO do the rest of the background stuffv
-
         }
     }
 

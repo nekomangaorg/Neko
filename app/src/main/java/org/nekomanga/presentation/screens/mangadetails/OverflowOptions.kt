@@ -53,7 +53,7 @@ fun OverflowOptions(chapterActions: MangaConstants.ChapterActions, chapters: Sta
                         onClick = { chapterActions.download(emptyList(), MangaConstants.DownloadAction.RemoveAll) },
                     ),
                     AppBar.OverflowAction(
-                        title = stringResource(id = R.string.unread),
+                        title = stringResource(id = R.string.read),
                         onClick = { chapterActions.download(emptyList(), MangaConstants.DownloadAction.RemoveRead) },
                     ),
                 ),
