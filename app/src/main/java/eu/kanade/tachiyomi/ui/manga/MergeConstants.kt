@@ -5,7 +5,7 @@ import org.nekomanga.domain.manga.MergeManga
 object MergeConstants {
 
     sealed class IsMergedManga {
-        class Yes(val url: String) : IsMergedManga()
+        class Yes(val url: String, val title: String) : IsMergedManga()
         object No : IsMergedManga()
     }
 

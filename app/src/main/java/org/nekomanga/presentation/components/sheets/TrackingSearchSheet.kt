@@ -62,7 +62,7 @@ fun TrackingSearchSheet(
     service: TrackService,
     trackingRemoved: (Boolean, TrackService) -> Unit,
     searchTracker: (String) -> Unit,
-    openInBrowser: (String) -> Unit,
+    openInBrowser: (String, String) -> Unit,
     trackSearchItemClick: (TrackSearch) -> Unit,
 ) {
     val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
@@ -93,7 +93,7 @@ fun TrackingSearchSheet(
                         if (alreadySelectedTrack == null && trackSearchResult.trackSearchResult.size == 1) {
                             trackSearchItemClick(trackSearchResult.trackSearchResult.first())
                         }
-                        
+
                         items(trackSearchResult.trackSearchResult) { item: TrackSearch ->
                             TrackSearchItem(
                                 themeColorState = themeColorState,
@@ -156,7 +156,13 @@ private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: Tra
 }
 
 @Composable
-private fun TrackSearchItem(themeColorState: ThemeColorState, trackSearch: TrackSearch, alreadySelectedTrack: Track?, openInBrowser: (String) -> Unit, trackSearchItemClick: (TrackSearch) -> Unit) {
+private fun TrackSearchItem(
+    themeColorState: ThemeColorState,
+    trackSearch: TrackSearch,
+    alreadySelectedTrack: Track?,
+    openInBrowser: (String, String) -> Unit,
+    trackSearchItemClick: (TrackSearch) -> Unit,
+) {
 
     val isSelected = alreadySelectedTrack != null && alreadySelectedTrack.media_id != 0L && alreadySelectedTrack.media_id == trackSearch.media_id
 
@@ -193,7 +199,7 @@ private fun TrackSearchItem(themeColorState: ThemeColorState, trackSearch: Track
             ) {
 
                 IconButton(
-                    onClick = { openInBrowser(trackSearch.tracking_url) },
+                    onClick = { openInBrowser(trackSearch.tracking_url, trackSearch.title) },
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
                         .align(Alignment.TopEnd),

@@ -65,7 +65,7 @@ fun DetailsBottomSheet(
     alternativeArtwork: List<Artwork>,
     isMergedManga: MergeConstants.IsMergedManga,
     mergeSearchResult: MergeConstants.MergeSearchResult,
-    openInBrowser: (String) -> Unit,
+    openInWebView: (String, String) -> Unit,
     coverActions: MangaConstants.CoverActions,
     mergeActions: MangaConstants.MergeActions,
     chapterSortFilter: MangaConstants.SortFilter,
@@ -92,7 +92,7 @@ fun DetailsBottomSheet(
             services = loggedInTrackingServices,
             tracks = tracks,
             dateFormat = dateFormat,
-            onLogoClick = openInBrowser,
+            onLogoClick = openInWebView,
             onSearchTrackClick = { service, track ->
                 closeSheet()
                 openSheet(
@@ -133,7 +133,7 @@ fun DetailsBottomSheet(
                     openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
                 searchTracker = { query -> trackActions.search(query, currentScreen.trackingService) },
-                openInBrowser = openInBrowser,
+                openInBrowser = openInWebView,
                 trackingRemoved = trackActions.remove,
                 trackSearchItemClick = { trackSearch ->
                     closeSheet()
@@ -162,9 +162,9 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
                 themeColorState = themeColorState, externalLinks = externalLinks,
-                onLinkClick = { url ->
+                onLinkClick = { url, title ->
                     closeSheet()
-                    openInBrowser(url)
+                    openInWebView(url, title)
                 },
             )
         }
@@ -181,9 +181,9 @@ fun DetailsBottomSheet(
                 title = title,
                 altTitles = altTitles,
                 mergeSearchResults = mergeSearchResult,
-                openMergeSource = { url ->
+                openMergeSource = { url, title ->
                     closeSheet()
-                    openInBrowser(url)
+                    openInWebView(url, title)
                 },
                 removeMergeSource = {
                     closeSheet()

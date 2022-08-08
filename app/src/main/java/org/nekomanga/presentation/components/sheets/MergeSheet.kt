@@ -62,7 +62,7 @@ fun MergeSheet(
     isMergedManga: IsMergedManga,
     mergeSearchResults: MergeSearchResult,
     search: (String) -> Unit,
-    openMergeSource: (String) -> Unit,
+    openMergeSource: (String, String) -> Unit,
     removeMergeSource: () -> Unit,
     mergeMangaClick: (MergeManga) -> Unit,
     cancelClick: () -> Unit,
@@ -71,7 +71,7 @@ fun MergeSheet(
     if (isMergedManga is IsMergedManga.Yes) {
         BaseSheet(themeColor = themeColorState) {
 
-            TextButton(onClick = { openMergeSource(isMergedManga.url) }, modifier = Modifier.fillMaxWidth()) {
+            TextButton(onClick = { openMergeSource(isMergedManga.url, isMergedManga.title) }, modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(id = R.string.open_merged_in_webview), color = themeColorState.buttonColor)
             }
             Gap(8.dp)

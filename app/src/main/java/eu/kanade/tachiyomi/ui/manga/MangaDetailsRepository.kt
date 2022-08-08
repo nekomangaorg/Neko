@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.source.online.MergeSource
+import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -39,7 +39,7 @@ class MangaDetailsRepository {
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by lazy { Injekt.get() }
     private val mangaDex: MangaDex by lazy { sourceManager.getMangadex() }
-    private val mergedSource: MergeSource by lazy { sourceManager.getMergeSource() }
+    private val mergedSource: MangaLife by lazy { sourceManager.getMergeSource() }
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 

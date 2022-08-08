@@ -63,7 +63,7 @@ fun TrackingSheet(
     services: List<TrackService>,
     tracks: List<Track>,
     dateFormat: DateFormat,
-    onLogoClick: (String) -> Unit,
+    onLogoClick: (String, String) -> Unit,
     onSearchTrackClick: (TrackService, Track?) -> Unit,
     trackStatusChanged: (Int, TrackAndService) -> Unit,
     trackScoreChanged: (Int, TrackAndService) -> Unit,
@@ -184,7 +184,7 @@ private fun TrackingServiceItem(
     service: TrackService,
     trackAndService: TrackAndService?,
     dateFormat: DateFormat,
-    onLogoClick: (String) -> Unit,
+    onLogoClick: (String, String) -> Unit,
     onSearchTrackClick: (Track?) -> Unit,
     onRemoveTrackClick: () -> Unit,
     statusClick: () -> Unit,
@@ -223,7 +223,7 @@ private fun TrackingServiceItem(
 }
 
 @Composable
-private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoClick: (String) -> Unit, searchTrackerClick: () -> Unit) {
+private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoClick: (String, String) -> Unit, searchTrackerClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -236,7 +236,7 @@ private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoCl
 }
 
 @Composable
-private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: TrackService, onLogoClick: (String) -> Unit = {}, searchTrackerClick: (Track) -> Unit, onRemoveClick: () -> Unit) {
+private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: TrackService, onLogoClick: (String, String) -> Unit, searchTrackerClick: (Track) -> Unit, onRemoveClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -375,14 +375,14 @@ fun TrackRowThree(track: Track, dateFormat: DateFormat, startDateClick: () -> Un
 }
 
 @Composable
-private fun Logo(service: TrackService, track: Track?, onClick: (String) -> Unit = {}) {
+private fun Logo(service: TrackService, track: Track?, onClick: (String, String) -> Unit) {
     Box(
         modifier = Modifier
             .background(color = Color(service.getLogoColor()))
             .size(56.dp)
             .conditional(track != null) {
                 clickable {
-                    onClick(track!!.tracking_url)
+                    onClick(track!!.tracking_url, track.title)
                 }
             },
     ) {

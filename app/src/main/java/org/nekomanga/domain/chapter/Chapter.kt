@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.online.MergeSource
+import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 
@@ -31,7 +31,7 @@ data class SimpleChapter(
 ) {
     val isRecognizedNumber = chapterNumber >= 0f
 
-    fun isMergedChapter() = this.scanlator == MergeSource.name
+    fun isMergedChapter() = this.scanlator == MangaLife.name
 
     fun scanlatorList(): List<String> {
         return ChapterUtil.getScanlators(this.scanlator)

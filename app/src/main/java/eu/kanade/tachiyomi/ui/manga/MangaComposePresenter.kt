@@ -376,14 +376,15 @@ class MangaComposePresenter(
                 delay(1000)
                 count++
             }
-            val asyncList = tracks.value.map { track -> TrackingConstants.TrackItem(track, trackManager.services.find { it.id == track.sync_id }!!) }.map { item ->
-                async(Dispatchers.IO) {
-                    kotlin.runCatching { item.service.refresh(item.track!!) }.onFailure {
-                        XLog.e("error refreshing tracker", it)
-                        _snackbarState.emit(SnackbarState(message = "Error refreshing tracker"))
+            val asyncList = tracks.value.map { track -> TrackingConstants.TrackItem(track, trackManager.services.find { it.id == track.sync_id }!!) }
+                .filter { it.service.isLogged() }.map { item ->
+                    async(Dispatchers.IO) {
+                        kotlin.runCatching { item.service.refresh(item.track!!) }.onFailure {
+                            XLog.e("error refreshing tracker", it)
+                            _snackbarState.emit(SnackbarState(message = "Error refreshing tracker"))
+                        }
                     }
                 }
-            }
             asyncList.awaitAll()
             updateTrackingFlows()
         }
@@ -1064,7 +1065,7 @@ class MangaComposePresenter(
      */
     private fun getIsMergedManga(): IsMergedManga {
         return when (manga.value.isMerged()) {
-            true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!)
+            true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!, manga.value.title)
             false -> No
         }
     }

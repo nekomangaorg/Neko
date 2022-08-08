@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -340,6 +341,15 @@ fun Context.defaultBrowserPackageName(): String? {
     return packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
         ?.activityInfo?.packageName
         ?.takeUnless { it in DeviceUtil.invalidDefaultBrowsers }
+}
+
+fun Context.openInWebView(url: String, title: String = "") {
+    val intent = WebViewActivity.newIntent(
+        this.applicationContext,
+        url,
+        title,
+    )
+    startActivity(intent)
 }
 
 fun Context.openInBrowser(url: String, forceDefaultBrowser: Boolean = false) {

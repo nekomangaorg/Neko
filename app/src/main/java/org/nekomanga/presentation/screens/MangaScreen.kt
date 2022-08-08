@@ -72,6 +72,7 @@ import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.openInWebView
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
@@ -257,7 +258,7 @@ fun MangaScreen(
                         chapterFilter = chapterFilter.value,
                         scanlatorFilter = scanlatorFilter.value,
                         chapterFilterActions = chapterFilterActions,
-                        openInBrowser = { url -> context.asActivity().openInBrowser(url) },
+                        openInWebView = { url, title -> context.asActivity().openInWebView(url, title) },
                     ) { scope.launch { sheetState.hide() } }
                 }
             }

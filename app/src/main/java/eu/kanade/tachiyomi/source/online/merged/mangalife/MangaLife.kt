@@ -41,7 +41,7 @@ class MangaLife : ReducedHttpSource() {
             }
 
             //val searchResults =
-            val results = FuzzySearch.extractSorted(query, directory.keys, 85).mapNotNull {
+            val results = FuzzySearch.extractSorted(query, directory.keys, 88).mapNotNull {
                 directory[it.string]
             }
 

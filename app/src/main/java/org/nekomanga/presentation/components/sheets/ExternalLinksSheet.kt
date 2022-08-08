@@ -26,7 +26,7 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<ExternalLink>, onLinkClick: (String) -> Unit) {
+fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<ExternalLink>, onLinkClick: (String, String) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
         BaseSheet(themeColor = themeColorState) {
@@ -45,9 +45,9 @@ fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<Ext
 }
 
 @Composable
-private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String) -> Unit) {
+private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -> Unit) {
     OutlinedCard(
-        onClick = { onLinkClick(externalLink.getUrl()) },
+        onClick = { onLinkClick(externalLink.getUrl(), externalLink.name) },
         modifier = Modifier.height(48.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = Color(externalLink.logoColor)),
     ) {
