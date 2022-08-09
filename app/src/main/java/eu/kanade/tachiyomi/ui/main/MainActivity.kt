@@ -78,6 +78,7 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
+import eu.kanade.tachiyomi.ui.manga.MangaComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.more.AboutController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
@@ -798,7 +799,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
-                router.pushController(MangaDetailsController(extras).withFadeTransaction())
+                router.pushController(MangaComposeController(extras).withFadeTransaction())
             }
             SHORTCUT_UPDATE_NOTES -> {
                 val extras = intent.extras ?: return false

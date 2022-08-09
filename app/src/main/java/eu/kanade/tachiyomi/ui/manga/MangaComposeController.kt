@@ -46,7 +46,7 @@ import uy.kohesive.injekt.injectLazy
 
 class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaComposePresenter>() {
 
-    constructor(bundle: Bundle) : this(bundle.getLong(MangaDetailsController.MANGA_EXTRA)) {
+    constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)
         val context = applicationContext ?: return
         if (notificationId > -1) NotificationReceiver.dismissNotification(
@@ -280,5 +280,9 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
         if (presenter.isScopeInitialized) {
             presenter.resume()
         }
+    }
+
+    companion object {
+        const val MANGA_EXTRA = "manga"
     }
 }

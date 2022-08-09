@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.main.TabbedInterface
+import eu.kanade.tachiyomi.ui.manga.MangaComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
@@ -597,7 +598,7 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onCoverClick(position: Int) {
         val manga = (adapter.getItem(position) as? RecentMangaItem)?.mch?.manga ?: return
-        router.pushController(MangaDetailsController(manga).withFadeTransaction())
+        router.pushController(MangaComposeController(manga.id!!).withFadeTransaction())
     }
 
     override fun onRemoveHistoryClicked(position: Int) {

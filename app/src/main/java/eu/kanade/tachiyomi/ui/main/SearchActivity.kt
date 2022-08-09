@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.manga.MangaComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -172,7 +173,7 @@ class SearchActivity : MainActivity() {
                     SecureActivityDelegate.promptLockIfNeeded(this, true)
                 }
                 router.replaceTopController(
-                    RouterTransaction.with(MangaDetailsController(extras))
+                    RouterTransaction.with(MangaComposeController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())
                         .popChangeHandler(FadeChangeHandler()),
                 )
@@ -206,7 +207,7 @@ class SearchActivity : MainActivity() {
         )
             .apply {
                 action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
-                putExtra(MangaDetailsController.MANGA_EXTRA, id)
+                putExtra(MangaComposeController.MANGA_EXTRA, id)
             }
 
         fun openReaderSettings(context: Context) = Intent(

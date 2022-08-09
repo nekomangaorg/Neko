@@ -28,7 +28,7 @@ import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.MangaComposeController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
@@ -80,9 +80,8 @@ class SimilarController(bundle: Bundle? = null) :
 
         val mangaClicked: (Manga) -> Unit = { manga ->
             router.pushController(
-                MangaDetailsController(
-                    manga,
-                    true,
+                MangaComposeController(
+                    manga.id!!,
                 ).withFadeTransaction(),
             )
         }
@@ -102,11 +101,10 @@ class SimilarController(bundle: Bundle? = null) :
                 onRefresh = refreshing,
                 modifier = Modifier
                     .fillMaxSize(),
-                clipIndicatorToPadding = false,
                 indicator = { state, trigger ->
                     SwipeRefreshIndicator(
                         state = state,
-                        refreshingOffset = paddingValues.calculateTopPadding(),
+                        refreshingOffset = paddingValues.calculateTopPadding() + 16.dp,
                         refreshTriggerDistance = trigger,
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
