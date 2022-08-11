@@ -84,11 +84,11 @@ class MangaComposePresenter(
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
-    val chapterItemFilter: ChapterItemFilter = Injekt.get(),
+    chapterItemFilter: ChapterItemFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
-    val mangaRepository: MangaDetailsRepository = Injekt.get(),
+    private val mangaRepository: MangaUpdateCoordinator = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaComposeController>(), DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)

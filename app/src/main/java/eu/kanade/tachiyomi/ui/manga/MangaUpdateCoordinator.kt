@@ -33,7 +33,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class MangaDetailsRepository {
+/**
+ * Class that updates the database with the manga, chapter, information from the source
+ * returning a MangaResult at each stage of the process
+ */
+class MangaUpdateCoordinator {
     private val db: DatabaseHelper by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
     private val coverCache: CoverCache by injectLazy()
@@ -43,6 +47,9 @@ class MangaDetailsRepository {
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
+    /**
+     *  Channel flow for updating the Manga/Chapters in the given scope
+     */
     suspend fun update(manga: Manga, scope: CoroutineScope) = channelFlow {
 
         val mangaWasInitialized = manga.initialized
@@ -75,6 +82,9 @@ class MangaDetailsRepository {
 
     }.flowOn(Dispatchers.IO)
 
+    /**
+     * Starts the updating of manga from Dex
+     */
     private fun ProducerScope<MangaResult>.startMangaJob(scope: CoroutineScope, manga: Manga): Job {
         return scope.launchIO {
             runCatching {
@@ -106,6 +116,10 @@ class MangaDetailsRepository {
         }
     }
 
+    /**
+     * Starts the update chapter job for the main source, as well as merged source, diffs them compared to the existing info,
+     * downloads new ones if needed
+     */
     private fun ProducerScope<MangaResult>.startChapterJob(scope: CoroutineScope, manga: Manga, mangaWasAlreadyInitialized: Boolean): Job {
         return scope.launchIO {
 
@@ -115,7 +129,7 @@ class MangaDetailsRepository {
                 }.onFailure { e ->
                     XLog.e("error with mangadex getting chapters", e)
                     send(MangaResult.Error(text = "error with MangaDex: getting chapters "))
-                    this.cancel()
+                    cancel()
                 }.getOrNull()!!
             }
 
@@ -166,6 +180,9 @@ class MangaDetailsRepository {
     }
 }
 
+/**
+ * Types of Results that can be returned by the parent class
+ */
 sealed class MangaResult {
     class Error(val id: Int? = null, val text: String? = null) : MangaResult()
     object UpdatedManga : MangaResult()

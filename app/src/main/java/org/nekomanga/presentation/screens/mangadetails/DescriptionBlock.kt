@@ -61,7 +61,7 @@ import jp.wasabeef.gap.Gap
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.sheets.conditional
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable

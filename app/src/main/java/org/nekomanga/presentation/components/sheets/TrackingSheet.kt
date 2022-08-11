@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -53,6 +55,7 @@ import org.nekomanga.presentation.components.dialog.RemoveTrackingDialog
 import org.nekomanga.presentation.components.dialog.TrackingChapterDialog
 import org.nekomanga.presentation.components.dialog.TrackingScoreDialog
 import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 import java.text.DateFormat
@@ -149,7 +152,7 @@ fun TrackingSheet(
                     trackAndService = trackAndService,
                     dateFormat = dateFormat,
                     onLogoClick = onLogoClick,
-                    onSearchTrackClick = { track -> onSearchTrackClick(service, track) },
+                    onSearchTrackClick = { clickTracked -> onSearchTrackClick(service, clickTracked) },
                     onRemoveTrackClick = {
                         trackAndService?.run { removeTrackDialog = ShowDialog(trackAndService) }
                     },
@@ -239,7 +242,8 @@ private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoCl
 private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: TrackService, onLogoClick: (String, String) -> Unit, searchTrackerClick: (Track) -> Unit, onRemoveClick: () -> Unit) {
     Row(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .height(IntrinsicSize.Max)
             .conditional(!service.isMdList()) {
                 clickable { searchTrackerClick(track) }
             },
@@ -378,8 +382,10 @@ fun TrackRowThree(track: Track, dateFormat: DateFormat, startDateClick: () -> Un
 private fun Logo(service: TrackService, track: Track?, onClick: (String, String) -> Unit) {
     Box(
         modifier = Modifier
+            .clip(RoundedCornerShape(topStart = Shapes.sheetRadius))
+            .fillMaxHeight()
+            .padding(start = 2.dp, top = 2.dp)
             .background(color = Color(service.getLogoColor()))
-            .size(56.dp)
             .conditional(track != null) {
                 clickable {
                     onClick(track!!.tracking_url, track.title)
@@ -400,13 +406,5 @@ private fun RowScope.TrackingBox(clickable: () -> Unit, content: @Composable () 
         contentAlignment = Alignment.Center,
     ) {
         content()
-    }
-}
-
-fun Modifier.conditional(condition: Boolean, modifier: Modifier.() -> Modifier): Modifier {
-    return if (condition) {
-        modifier.invoke(this)
-    } else {
-        this
     }
 }
