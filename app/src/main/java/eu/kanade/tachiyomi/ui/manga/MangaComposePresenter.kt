@@ -191,7 +191,7 @@ class MangaComposePresenter(
     }
 
     /**
-     * Update all flows that dont require network
+     * Update all flows
      */
     private fun updateAllFlows() {
         updateMangaFlow()

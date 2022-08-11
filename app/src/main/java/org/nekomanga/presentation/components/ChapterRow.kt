@@ -114,7 +114,7 @@ fun ChapterRow(
                         }
                         Background(icon, Alignment.CenterStart, color, stringResource(id = text), themeColor.buttonColor)
                     }
-                    else -> {}
+                    else -> Unit
 
                 }
             },

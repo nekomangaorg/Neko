@@ -179,7 +179,7 @@ private fun BoxScope.NonSuccessResultsAndChips(themeColorState: ThemeColorState,
             is MergeSearchResult.Loading -> CircularProgressIndicator(color = themeColorState.buttonColor, modifier = Modifier.size(32.dp))
             is MergeSearchResult.NoResult -> Text(text = stringResource(id = R.string.no_results_found))
             is MergeSearchResult.Error -> Text(text = searchResults.errorMessage)
-            else -> {}
+            else -> Unit
         }
         Gap(16.dp)
         if (altTitles.isNotEmpty()) {

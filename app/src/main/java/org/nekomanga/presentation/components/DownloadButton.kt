@@ -72,7 +72,7 @@ fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: 
                     wasDownloading = false
                 }
             }
-            else -> {}
+            else -> Unit
         }
     }
 

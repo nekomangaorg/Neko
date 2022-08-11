@@ -149,7 +149,7 @@ private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: Tra
             is TrackSearchResult.Loading -> CircularProgressIndicator(color = themeColorState.buttonColor, modifier = Modifier.size(32.dp))
             is TrackSearchResult.NoResult -> Text(text = stringResource(id = R.string.no_results_found))
             is TrackSearchResult.Error -> Text(text = trackSearchResult.errorMessage)
-            else -> {}
+            else -> Unit
         }
 
     }
