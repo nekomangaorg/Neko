@@ -145,7 +145,7 @@ android {
 dependencies {
 
     implementation(kotlinx.bundles.kotlin)
-
+    
     // Modified dependencies
     implementation(libs.j2k.subsample) {
         exclude(module = "image-decoder")

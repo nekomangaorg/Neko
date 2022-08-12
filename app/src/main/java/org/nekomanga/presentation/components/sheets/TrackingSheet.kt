@@ -230,6 +230,7 @@ private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoCl
     Row(
         modifier = Modifier
             .fillMaxSize()
+            .height(48.dp)
             .clickable { searchTrackerClick() },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -384,7 +385,6 @@ private fun Logo(service: TrackService, track: Track?, onClick: (String, String)
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = Shapes.sheetRadius))
             .fillMaxHeight()
-            .padding(start = 2.dp, top = 2.dp)
             .background(color = Color(service.getLogoColor()))
             .conditional(track != null) {
                 clickable {
