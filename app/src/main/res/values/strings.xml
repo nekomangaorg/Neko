@@ -961,6 +961,7 @@
     <string name="exclude_">Exclude: %s</string>
     <string name="fast">Fast</string>
     <string name="filter">Filter</string>
+    <string name="filter_and_display">Filter &amp; Display</string>
     <string name="forward">Forward</string>
     <string name="free">Free</string>
     <string name="hide">Hide</string>

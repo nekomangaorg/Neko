@@ -133,6 +133,7 @@ fun MangaScreen(
     chapterSortFilter: State<MangaConstants.SortFilter>,
     chapterFilter: State<MangaConstants.Filter>,
     scanlatorFilter: State<MangaConstants.ScanlatorFilter>,
+    hideTitlesFilter: State<Boolean>,
     chapterFilterActions: ChapterFilterActions,
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
@@ -257,6 +258,7 @@ fun MangaScreen(
                         chapterSortFilter = chapterSortFilter.value,
                         chapterFilter = chapterFilter.value,
                         scanlatorFilter = scanlatorFilter.value,
+                        hideTitlesFilter = hideTitlesFilter.value,
                         chapterFilterActions = chapterFilterActions,
                         openInWebView = { url, title -> context.asActivity().openInWebView(url, title) },
                     ) { scope.launch { sheetState.hide() } }
@@ -358,6 +360,7 @@ fun MangaScreen(
                     ChapterRow(
                         themeColor = themeColorState,
                         chapterItem = chapter,
+                        shouldHideChapterTitles = hideTitlesFilter.value,
                         onClick = { chapterActions.open(context, chapter) },
                         onBookmark = { chapterActions.mark(listOf(chapter), if (chapter.chapter.bookmark) MangaConstants.MarkAction.UnBookmark(true) else MangaConstants.MarkAction.Bookmark(true)) },
                         onRead = {

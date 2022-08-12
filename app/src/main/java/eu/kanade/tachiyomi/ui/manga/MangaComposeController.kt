@@ -126,10 +126,12 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             chapterSortFilter = presenter.chapterSortFilter.collectAsState(),
             chapterFilter = presenter.chapterFilter.collectAsState(),
             scanlatorFilter = presenter.scanlatorFilter.collectAsState(),
+            hideTitlesFilter = presenter.hideTitlesFilter.collectAsState(),
             chapterFilterActions = ChapterFilterActions(
                 changeSort = presenter::changeSortOption,
                 changeFilter = presenter::changeFilterOption,
                 changeScanlator = presenter::changeScanlatorOption,
+                hideTitles = presenter::hideTitlesOption,
                 setAsGlobal = presenter::setGlobalOption,
             ),
             chapterActions = ChapterActions(
@@ -151,10 +153,11 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
         startActivity(ReaderActivity.newIntent(context, presenter.manga.value, chapter))
     }
 
+    /**
+     * Generate palette from the drawable
+     */
     private fun setPalette(drawable: Drawable) {
         val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return
-        // Generate the Palette on a background thread.
-
         Palette.from(bitmap).generate {
             it ?: return@generate
             viewScope.launchUI {
@@ -198,7 +201,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
     /**
      * Share the given manga
      */
-    fun shareManga(context: Context) {
+    private fun shareManga(context: Context) {
         viewScope.launch {
             val cover = presenter.shareMangaCover(context.sharedCacheDir(), presenter.currentArtwork.value)
             withUIContext {

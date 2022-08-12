@@ -71,6 +71,7 @@ fun DetailsBottomSheet(
     chapterSortFilter: MangaConstants.SortFilter,
     chapterFilter: MangaConstants.Filter,
     scanlatorFilter: MangaConstants.ScanlatorFilter,
+    hideTitlesFilter: Boolean,
     chapterFilterActions: MangaConstants.ChapterFilterActions,
     openSheet: (DetailsBottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
@@ -225,7 +226,9 @@ fun DetailsBottomSheet(
                 changeFilter = chapterFilterActions.changeFilter,
                 filter = chapterFilter,
                 scanlatorFilter = scanlatorFilter,
+                hideTitlesFilter = hideTitlesFilter,
                 changeScanlatorFilter = chapterFilterActions.changeScanlator,
+                changeHideTitles = chapterFilterActions.hideTitles,
                 setAsGlobal = chapterFilterActions.setAsGlobal,
             )
         }

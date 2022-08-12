@@ -46,9 +46,11 @@ fun FilterChapterSheet(
     sortFilter: MangaConstants.SortFilter,
     filter: MangaConstants.Filter,
     scanlatorFilter: MangaConstants.ScanlatorFilter,
+    hideTitlesFilter: Boolean,
     changeSort: (SortOption?) -> Unit,
     changeFilter: (MangaConstants.FilterOption?) -> Unit,
     changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit,
+    changeHideTitles: (Boolean) -> Unit,
     setAsGlobal: (MangaConstants.SetGlobal) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
@@ -65,7 +67,7 @@ fun FilterChapterSheet(
                     Sort(themeColorState = themeColorState, sortFilter, changeSort) { setAsGlobal(MangaConstants.SetGlobal.Sort) }
                 }
                 item {
-                    Filter(themeColorState = themeColorState, filter, changeFilter) { setAsGlobal(MangaConstants.SetGlobal.Filter) }
+                    Filter(themeColorState = themeColorState, filter, hideTitlesFilter, changeFilter, changeHideTitles) { setAsGlobal(MangaConstants.SetGlobal.Filter) }
                 }
 
                 item {
@@ -143,7 +145,14 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
 }
 
 @Composable
-private fun Filter(themeColorState: ThemeColorState, filter: MangaConstants.Filter, changeFilter: (MangaConstants.FilterOption?) -> Unit, setGlobal: () -> Unit) {
+private fun Filter(
+    themeColorState: ThemeColorState,
+    filter: MangaConstants.Filter,
+    hideTitlesFilter: Boolean,
+    changeFilter: (MangaConstants.FilterOption?) -> Unit,
+    changeHideTitles: (Boolean) -> Unit,
+    setGlobal: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -154,7 +163,7 @@ private fun Filter(themeColorState: ThemeColorState, filter: MangaConstants.Filt
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.filter), style = MaterialTheme.typography.labelMedium)
+            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.filter_and_display), style = MaterialTheme.typography.labelMedium)
 
             if (!filter.matchesGlobalDefaults) {
                 TextButton(onClick = setGlobal) {
@@ -165,7 +174,7 @@ private fun Filter(themeColorState: ThemeColorState, filter: MangaConstants.Filt
                 }
             }
         }
-        showAllFilterLine(
+        CheckboxLine(
             themeColorState = themeColorState,
             checked = filter.showAll,
             text = stringResource(id = R.string.show_all),
@@ -189,6 +198,10 @@ private fun Filter(themeColorState: ThemeColorState, filter: MangaConstants.Filt
             text = stringResource(id = R.string.show_bookmarked_chapters),
             changeFilter = changeFilter,
         )
+
+        CheckboxLine(themeColorState = themeColorState, checked = hideTitlesFilter, text = stringResource(id = R.string.hide_chapter_titles)) {
+            changeHideTitles(!hideTitlesFilter)
+        }
 
     }
 }
@@ -234,12 +247,12 @@ private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.F
 }
 
 @Composable
-private fun showAllFilterLine(themeColorState: ThemeColorState, checked: Boolean, text: String, onChecked: () -> Unit = {}) {
+private fun CheckboxLine(themeColorState: ThemeColorState, checked: Boolean, disabledOnChecked: Boolean = false, text: String, onChecked: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                if (!checked) {
+                if (!checked && disabledOnChecked) {
                     onChecked()
                 }
             },
@@ -249,7 +262,7 @@ private fun showAllFilterLine(themeColorState: ThemeColorState, checked: Boolean
             checked = checked,
             colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
             onCheckedChange = { onChecked() },
-            enabled = !checked,
+            enabled = if (disabledOnChecked) !checked else true,
         )
         Gap(width = 8.dp)
         Text(text = text, style = MaterialTheme.typography.bodyLarge)

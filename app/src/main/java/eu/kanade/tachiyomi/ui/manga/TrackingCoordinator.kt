@@ -136,7 +136,7 @@ class TrackingCoordinator {
     /**
      * Updates the remote tracking service with tracking changes
      */
-    private suspend fun updateTrackingService(track: Track, service: TrackService): TrackingUpdate {
+    suspend fun updateTrackingService(track: Track, service: TrackService): TrackingUpdate {
         return runCatching {
             val updatedTrack = service.update(track)
             db.insertTrack(updatedTrack).executeOnIO()

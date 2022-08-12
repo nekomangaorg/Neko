@@ -170,6 +170,9 @@ class MangaComposePresenter(
     private val _scanlatorFilter = MutableStateFlow(getScanlatorFilter())
     val scanlatorFilter: StateFlow<MangaConstants.ScanlatorFilter> = _scanlatorFilter.asStateFlow()
 
+    private val _hideTitlesFilter = MutableStateFlow(getHideTitlesFilter())
+    val hideTitlesFilter: StateFlow<Boolean> = _hideTitlesFilter.asStateFlow()
+
     private val _chapterFilterText = MutableStateFlow(getFilterText())
     val chapterFilterText: StateFlow<String> = _chapterFilterText.asStateFlow()
 
@@ -537,7 +540,6 @@ class MangaComposePresenter(
     fun setAltTitle(title: String?) {
         presenterScope.launchIO {
             _currentTitle.value = title ?: manga.value.originalTitle
-
             val manga = manga.value
             manga.user_title = title
             db.insertManga(manga).executeOnIO()
@@ -606,7 +608,6 @@ class MangaComposePresenter(
      */
     private fun updateCurrentArtworkFlow() {
         presenterScope.launchIO {
-
             _currentArtwork.value = Artwork(url = manga.value.user_cover ?: "", inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId)
         }
     }
@@ -716,7 +717,7 @@ class MangaComposePresenter(
                 val shouldAddAsPlanToRead = manga.value.favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
                 if (shouldAddAsPlanToRead && isOnline()) {
                     track.status = FollowStatus.PLAN_TO_READ.int
-                    updateTrackingService(track, trackManager.mdList, false)
+                    trackingCoordinator.updateTrackingService(track, trackManager.mdList)
                     refreshRequired = true
                 }
             }
@@ -815,7 +816,7 @@ class MangaComposePresenter(
     }
 
     /**
-     * Get current sort filter
+     * Get scanlator filter
      */
     private fun getScanlatorFilter(): MangaConstants.ScanlatorFilter {
         val filteredScanlators = ChapterUtil.getScanlators(manga.value.filtered_scanlators).toSet()
@@ -826,6 +827,13 @@ class MangaComposePresenter(
                 MangaConstants.ScanlatorOption(name = scanlator, disabled = filteredScanlators.contains(scanlator))
             }
         return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions)
+    }
+
+    /**
+     * Get hide titles
+     */
+    private fun getHideTitlesFilter(): Boolean {
+        return manga.value.hideChapterTitle(preferences)
     }
 
     private fun getFilterText(): String {
@@ -839,7 +847,6 @@ class MangaComposePresenter(
         filtersId.add(if (filter.bookmarked == ToggleableState.On) R.string.bookmarked else null)
         filtersId.add(if (filter.bookmarked == ToggleableState.Indeterminate) R.string.not_bookmarked else null)
         filtersId.add(if (hasDisabledScanlators) R.string.scanlators else null)
-        //filtersId.add(if (manga.filtered_scanlators?.isNotEmpty() == true) R.string.scanlators else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
 
@@ -955,7 +962,31 @@ class MangaComposePresenter(
                 ChapterUtil.getScanlatorString(newFilteredScanlators)
             }
 
+            manga.setFilterToLocal()
+            if (mangaFilterMatchesDefault()) {
+                manga.setFilterToGlobal()
+            }
             db.insertManga(manga).executeAsBlocking()
+            updateMangaFlow()
+            updateFilterFlow()
+            updateChapterFlows()
+
+        }
+    }
+
+    /**
+     * Hides/Shows the titles of the chapters
+     */
+    fun hideTitlesOption(hide: Boolean) {
+        presenterScope.launchIO {
+            val manga = manga.value
+
+            manga.displayMode = if (hide) Manga.CHAPTER_DISPLAY_NUMBER else Manga.CHAPTER_DISPLAY_NAME
+            manga.setFilterToLocal()
+            if (mangaFilterMatchesDefault()) {
+                manga.setFilterToGlobal()
+            }
+            db.updateChapterFlags(manga).executeAsBlocking()
             updateMangaFlow()
             updateFilterFlow()
             updateChapterFlows()
@@ -988,7 +1019,7 @@ class MangaComposePresenter(
         }
     }
 
-    fun mangaSortMatchesDefault(): Boolean {
+    private fun mangaSortMatchesDefault(): Boolean {
         return (
             manga.value.sortDescending == preferences.chaptersDescAsDefault().get() &&
                 manga.value.sorting == preferences.sortChapterOrder().get()
@@ -1069,6 +1100,7 @@ class MangaComposePresenter(
         presenterScope.launchIO {
             _chapterSortFilter.value = getSortFilter()
             _chapterFilter.value = getFilter()
+            _hideTitlesFilter.value = getHideTitlesFilter()
             _scanlatorFilter.value = getScanlatorFilter()
             _chapterFilterText.value = getFilterText()
         }

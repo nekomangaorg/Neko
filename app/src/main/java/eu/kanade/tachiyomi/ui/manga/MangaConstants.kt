@@ -71,6 +71,7 @@ object MangaConstants {
     }
 
     enum class SetGlobal {
+        HideTitles,
         Sort,
         Filter
     }
@@ -88,6 +89,7 @@ object MangaConstants {
         val changeSort: (sortOptions: SortOption?) -> Unit,
         val changeFilter: (filterOption: FilterOption?) -> Unit,
         val changeScanlator: (scanlatorOption: ScanlatorOption?) -> Unit,
+        val hideTitles: (Boolean) -> Unit,
         val setAsGlobal: (SetGlobal) -> Unit,
     )
 
