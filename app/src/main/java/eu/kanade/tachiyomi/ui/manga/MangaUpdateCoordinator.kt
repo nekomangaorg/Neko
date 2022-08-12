@@ -128,9 +128,9 @@ class MangaUpdateCoordinator {
                     mangaDex.fetchChapterList(manga)
                 }.onFailure { e ->
                     XLog.e("error with mangadex getting chapters", e)
-                    send(MangaResult.Error(text = "error with MangaDex: getting chapters "))
+                    send(MangaResult.Error(text = "error with MangaDex: getting chapters"))
                     cancel()
-                }.getOrNull()!!
+                }.getOrNull() ?: emptyList()
             }
 
             val deferredMergedChapters =
@@ -142,7 +142,7 @@ class MangaUpdateCoordinator {
                             XLog.e("error with mergedsource", e)
                             send(MangaResult.Error(text = "error with merged source: getting chapters "))
                             this.cancel()
-                        }.getOrNull()!!
+                        }.getOrNull() ?: emptyList()
                     } else {
                         emptyList()
                     }

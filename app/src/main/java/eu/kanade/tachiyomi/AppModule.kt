@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
+import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.latest.LatestRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
@@ -116,6 +117,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(SimilarRepository())
 
         addSingleton(MangaUpdateCoordinator())
+
+        addSingleton(TrackingCoordinator())
 
         addSingleton(LatestRepository())
 

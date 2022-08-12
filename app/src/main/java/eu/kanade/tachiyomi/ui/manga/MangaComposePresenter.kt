@@ -38,10 +38,8 @@ import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange.EditTrackingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
@@ -72,7 +70,6 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.MergeManga
-import org.threeten.bp.ZoneId
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -88,7 +85,8 @@ class MangaComposePresenter(
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
-    private val mangaRepository: MangaUpdateCoordinator = Injekt.get(),
+    private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
+    private val trackingCoordinator: TrackingCoordinator = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaComposeController>(), DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)
@@ -217,7 +215,7 @@ class MangaComposePresenter(
 
             _isRefreshing.value = true
 
-            mangaRepository.update(manga.value, presenterScope).collect { result ->
+            mangaUpdateCoordinator.update(manga.value, presenterScope).collect { result ->
                 when (result) {
                     is MangaResult.Error -> {
                         _snackbarState.emit(SnackbarState(message = result.text, messageRes = result.id))
@@ -245,7 +243,7 @@ class MangaComposePresenter(
                         if (removedChapters.isNotEmpty()) {
                             when (preferences.deleteRemovedChapters().get()) {
                                 2 -> deleteChapters(removedChapters)
-                                1 -> {}
+                                1 -> Unit
                                 else -> {
                                     _removedChapters.value = removedChapters
                                 }
@@ -285,13 +283,8 @@ class MangaComposePresenter(
      */
     fun updateTrackStatus(statusIndex: Int, trackAndService: TrackAndService) {
         presenterScope.launchIO {
-            val track = trackAndService.track.apply {
-                this.status = trackAndService.service.getStatusList()[statusIndex]
-            }
-            if (trackAndService.service.isCompletedStatus(statusIndex) && track.total_chapters > 0) {
-                track.last_chapter_read = track.total_chapters.toFloat()
-            }
-            updateTrackingService(track, trackAndService.service)
+            val trackingUpdate = trackingCoordinator.updateTrackStatus(statusIndex, trackAndService)
+            handleTrackingUpdate(trackingUpdate)
         }
     }
 
@@ -300,17 +293,34 @@ class MangaComposePresenter(
      */
     fun updateTrackScore(scoreIndex: Int, trackAndService: TrackAndService) {
         presenterScope.launchIO {
+            val trackingUpdate = trackingCoordinator.updateTrackScore(scoreIndex, trackAndService)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
 
-            val track = trackAndService.track.apply {
-                this.score = trackAndService.service.indexToScore(scoreIndex)
+    /**
+     * Update the tracker with the new chapter information
+     */
+    fun updateTrackChapter(newChapterNumber: Int, trackAndService: TrackAndService) {
+        presenterScope.launchIO {
+            val trackingUpdate = trackingCoordinator.updateTrackChapter(newChapterNumber, trackAndService)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
+
+    /**
+     * Handle the TrackingUpdate
+     */
+    private suspend fun handleTrackingUpdate(trackingUpdate: TrackingUpdate, updateTrackFlows: Boolean = true) {
+        when (trackingUpdate) {
+            is TrackingUpdate.Error -> {
+                XLog.e("Error", trackingUpdate.exception)
+                _snackbarState.emit(SnackbarState(message = trackingUpdate.message))
             }
-            if (trackAndService.service.isMdList()) {
-                runCatching {
-                    (trackAndService.service as MdList).updateScore(track)
+            is TrackingUpdate.Success -> {
+                if (updateTrackFlows) {
                     updateTrackingFlows()
                 }
-            } else {
-                updateTrackingService(track, trackAndService.service)
             }
         }
     }
@@ -329,34 +339,13 @@ class MangaComposePresenter(
     }
 
     /**
-     * Update the tracker with the new chapter information
-     */
-    fun updateTrackChapter(newChapterNumber: Int, trackAndService: TrackAndService) {
-        val track = trackAndService.track.apply {
-            this.last_chapter_read = newChapterNumber.toFloat()
-        }
-
-        updateTrackingService(track, trackAndService.service)
-    }
-
-    /**
      * Update the tracker with the start/finished date
      */
     fun updateTrackDate(trackDateChange: TrackDateChange) {
-        val date = when (trackDateChange) {
-            is EditTrackingDate -> {
-                trackDateChange.newDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-            }
-            else -> 0L
+        presenterScope.launchIO {
+            val trackingUpdate = trackingCoordinator.updateTrackDate(trackDateChange)
+            handleTrackingUpdate(trackingUpdate)
         }
-        val track = trackDateChange.trackAndService.track.apply {
-            when (trackDateChange.readingDate) {
-                ReadingDate.Start -> this.started_reading_date = date
-                ReadingDate.Finish -> this.finished_reading_date = date
-            }
-        }
-
-        updateTrackingService(track, trackDateChange.trackAndService.service)
     }
 
     /**
@@ -376,6 +365,7 @@ class MangaComposePresenter(
                 delay(1000)
                 count++
             }
+
             val asyncList = tracks.value.map { track -> TrackingConstants.TrackItem(track, trackManager.services.find { it.id == track.sync_id }!!) }
                 .filter { it.service.isLogged() }.map { item ->
                     async(Dispatchers.IO) {
@@ -405,61 +395,24 @@ class MangaComposePresenter(
     }
 
     /**
-     * Updates the remote tracking service with tracking changes
-     */
-    private fun updateTrackingService(track: Track, service: TrackService, updateTrackFlows: Boolean = true) {
-        presenterScope.launchIO {
-            runCatching {
-                val updatedTrack = service.update(track)
-                db.insertTrack(updatedTrack).executeOnIO()
-                if (updateTrackFlows) {
-                    updateTrackingFlows()
-                }
-            }.onFailure {
-                XLog.e("error updating tracker", it)
-                _snackbarState.emit(SnackbarState(message = "Error updating tracker"))
-            }
-        }
-    }
-
-    /**
      * Search Tracker
      */
     fun searchTracker(title: String, service: TrackService) {
         presenterScope.launchIO {
-            _trackSearchResult.value = TrackSearchResult.Loading
-            runCatching {
-                val previouslyTracked = _tracks.value.firstOrNull { service.matchingTrack(it) }
-                val results = service.search(title, manga.value, previouslyTracked != null)
-                _trackSearchResult.value = when (results.isEmpty()) {
-                    true -> TrackSearchResult.NoResult
-                    false -> TrackSearchResult.Success(results)
-                }
-            }.onFailure { e ->
-                _trackSearchResult.value = TrackSearchResult.Error(e.message ?: "Error searching tracker")
+            val previouslyTracked = _tracks.value.firstOrNull { service.matchingTrack(it) } != null
+            trackingCoordinator.searchTracker(title, service, manga.value, previouslyTracked).collect { result ->
+                _trackSearchResult.value = result
             }
         }
     }
 
     /**
-     * Register tracker
+     * Register tracker with service
      */
     fun registerTracking(trackAndService: TrackAndService, skipTrackFlowUpdate: Boolean = false) {
         presenterScope.launchIO {
-            runCatching {
-                val trackItem = trackAndService.track.apply {
-                    manga_id = mangaId
-                }
-
-                trackAndService.service.bind(trackItem)
-            }.onSuccess { track ->
-                db.insertTrack(track).executeOnIO()
-                if (!skipTrackFlowUpdate) {
-                    updateTrackingFlows()
-                }
-            }.onFailure { exception ->
-                //log the error and emit it to a snackbar
-            }
+            val trackingUpdate = trackingCoordinator.registerTracking(trackAndService, mangaId)
+            handleTrackingUpdate(trackingUpdate, !skipTrackFlowUpdate)
         }
     }
 
@@ -468,16 +421,8 @@ class MangaComposePresenter(
      */
     fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackService) {
         presenterScope.launchIO {
-            val tracks = db.getTracks(mangaId).executeOnIO().filter { it.sync_id == service.id }
-            db.deleteTrackForManga(mangaId, service).executeOnIO()
-            if (alsoRemoveFromTracker && service.canRemoveFromService()) {
-                launchIO {
-                    tracks.forEach {
-                        service.removeFromService(it)
-                    }
-                }
-            }
-            updateTrackingFlows()
+            val trackingUpdate = trackingCoordinator.removeTracking(alsoRemoveFromTracker, service, mangaId)
+            handleTrackingUpdate(trackingUpdate)
         }
     }
 
@@ -496,6 +441,7 @@ class MangaComposePresenter(
                     null
                 }
             } else {
+                //returns null because before Q, the share sheet can't show the cover
                 null
             }
 
@@ -566,7 +512,6 @@ class MangaComposePresenter(
             updateMangaFlow()
             updateCurrentArtworkFlow()
             updateAlternativeArtworkFlow()
-            updateVibrantColorFlow()
         }
     }
 
@@ -583,7 +528,6 @@ class MangaComposePresenter(
             updateMangaFlow()
             updateCurrentArtworkFlow()
             updateAlternativeArtworkFlow()
-            updateVibrantColorFlow()
         }
     }
 
