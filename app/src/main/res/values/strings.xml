@@ -521,6 +521,7 @@
     <string name="error_sharing_cover">Error sharing cover</string>
     <string name="custom_manga_info">Custom manga info</string>
     <string name="set_as_default">Set as default</string>
+    <string name="updated_title_to_">Title updated to %1$s</string>
     <plurals name="deleted_chapters">
         <item quantity="one">A chapter has been removed from the source:\n%2$s\nDelete
             its download?</item>

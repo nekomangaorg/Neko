@@ -157,6 +157,7 @@ fun MangaScreen(
         snackbar.collect { state ->
             scope.launch {
                 val message = when {
+                    state.message != null && state.messageRes != null -> context.getString(state.messageRes, state.message)
                     state.message != null -> state.message
                     state.messageRes != null -> context.getString(state.messageRes)
                     else -> ""
@@ -166,6 +167,8 @@ fun MangaScreen(
                     state.actionLabelRes != null -> context.getString(state.actionLabelRes)
                     else -> null
                 }
+
+                snackbarHostState.currentSnackbarData?.dismiss()
 
                 val result = snackbarHostState.showSnackbar(
                     message = message,

@@ -46,19 +46,6 @@ fun OverflowOptions(chapterActions: MangaConstants.ChapterActions, chapters: Sta
                 ),
             ),
             AppBar.OverflowAction(
-                title = stringResource(R.string.remove_downloads),
-                children = listOf(
-                    AppBar.OverflowAction(
-                        title = stringResource(id = R.string.all),
-                        onClick = { chapterActions.download(emptyList(), MangaConstants.DownloadAction.RemoveAll) },
-                    ),
-                    AppBar.OverflowAction(
-                        title = stringResource(id = R.string.read),
-                        onClick = { chapterActions.download(emptyList(), MangaConstants.DownloadAction.RemoveRead) },
-                    ),
-                ),
-            ),
-            AppBar.OverflowAction(
                 title = stringResource(R.string.mark_all_as),
                 children = listOf(
                     AppBar.OverflowAction(
@@ -68,6 +55,19 @@ fun OverflowOptions(chapterActions: MangaConstants.ChapterActions, chapters: Sta
                     AppBar.OverflowAction(
                         title = stringResource(id = R.string.unread),
                         onClick = { chapterActions.mark(chapters.value, MangaConstants.MarkAction.Unread(true)) },
+                    ),
+                ),
+            ),
+            AppBar.OverflowAction(
+                title = stringResource(R.string.remove_downloads),
+                children = listOf(
+                    AppBar.OverflowAction(
+                        title = stringResource(id = R.string.all),
+                        onClick = { chapterActions.download(emptyList(), MangaConstants.DownloadAction.RemoveAll) },
+                    ),
+                    AppBar.OverflowAction(
+                        title = stringResource(id = R.string.read),
+                        onClick = { chapterActions.download(emptyList(), MangaConstants.DownloadAction.RemoveRead) },
                     ),
                 ),
             ),

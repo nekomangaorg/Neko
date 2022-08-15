@@ -84,8 +84,14 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
             ),
             generatePalette = this::setPalette,
             themeBasedOffCover = preferences.themeMangaDetails(),
-            titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
-            creatorLongClick = { context, content -> copyToClipboard(context, content, R.string.creator) },
+            titleLongClick = { context, content ->
+                presenter.copiedToClipboard(context.getString(R.string.title))
+                copyToClipboard(context, content, R.string.title)
+            },
+            creatorLongClick = { context, content ->
+                presenter.copiedToClipboard(context.getString(R.string.creator))
+                copyToClipboard(context, content, R.string.creator)
+            },
             toggleFavorite = presenter::toggleFavorite,
             loggedInTrackingServices = presenter.loggedInTrackingService.collectAsState(),
             trackServiceCount = presenter.trackServiceCount.collectAsState(),

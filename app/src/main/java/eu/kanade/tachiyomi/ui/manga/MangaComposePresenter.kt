@@ -539,11 +539,23 @@ class MangaComposePresenter(
      */
     fun setAltTitle(title: String?) {
         presenterScope.launchIO {
+            val previousTitle = _currentTitle.value
             _currentTitle.value = title ?: manga.value.originalTitle
             val manga = manga.value
             manga.user_title = title
             db.insertManga(manga).executeOnIO()
             updateMangaFlow()
+
+            _snackbarState.emit(
+                SnackbarState(
+                    messageRes = R.string.updated_title_to_,
+                    message = _currentTitle.value,
+                    actionLabelRes = R.string.undo,
+                    action = {
+                        setAltTitle(previousTitle)
+                    },
+                ),
+            )
         }
     }
 
@@ -1387,6 +1399,12 @@ class MangaComposePresenter(
     override fun onUpdateManga(manga: Manga?) {
         if (manga?.id == mangaId) {
             updateChapterFlows()
+        }
+    }
+
+    fun copiedToClipboard(message: String) {
+        presenterScope.launchIO {
+            _snackbarState.emit(SnackbarState(messageRes = R.string._copied_to_clipboard, message = message))
         }
     }
 

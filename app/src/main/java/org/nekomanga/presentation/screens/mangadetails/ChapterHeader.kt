@@ -24,6 +24,9 @@ import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 
+/**
+ * Header that is shown above chapter list
+ */
 @Composable
 fun ChapterHeader(themeColor: ThemeColorState, numberOfChapters: Int, filterText: String = "", onClick: () -> Unit = {}) {
     Box(

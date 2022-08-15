@@ -64,6 +64,9 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.ThemeColorState
 
+/**
+ * Genre, alt titles, description
+ */
 @Composable
 fun DescriptionBlock(
     manga: Manga,

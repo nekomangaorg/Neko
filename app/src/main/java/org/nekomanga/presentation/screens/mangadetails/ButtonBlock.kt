@@ -42,6 +42,9 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 
+/**
+ * Block of buttons for the actions on the backdrop screen
+ */
 @Composable
 fun ButtonBlock(
     isMerged: Boolean,
