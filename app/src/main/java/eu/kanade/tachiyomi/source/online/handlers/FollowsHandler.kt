@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
@@ -168,9 +167,7 @@ class FollowsHandler {
                 authService.updateRating(mangaID, RatingDto(track.score.toInt()))
             }
 
-            response.onFailure {
-                XLog.e("error updating rating")
-            }.getOrNull()?.result == "ok"
+            response.getOrNull()?.result == "ok"
         }
     }
 

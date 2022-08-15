@@ -2,12 +2,10 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.content.res.ColorStateList
 import android.view.View
 import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.view.isVisible
-import androidx.core.widget.TextViewCompat
 import coil.load
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -17,7 +15,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getResourceColor
 
 class ChapterHolder(
     view: View,
@@ -29,7 +26,7 @@ class ChapterHolder(
 
     init {
         binding.downloadButton.downloadButton.setOnLongClickListener {
-            adapter.delegate.startDownloadRange(flexibleAdapterPosition)
+            // adapter.delegate.startDownloadRange(flexibleAdapterPosition)
             true
         }
     }
@@ -160,17 +157,17 @@ class ChapterHolder(
     }
 
     fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
-        adapter.delegate.accentColor()?.let {
-            binding.startView.backgroundTintList = ColorStateList.valueOf(it)
-            binding.bookmark.imageTintList = ColorStateList.valueOf(
-                context.getResourceColor(android.R.attr.textColorPrimaryInverse),
-            )
-            TextViewCompat.setCompoundDrawableTintList(
-                binding.chapterTitle,
-                ColorStateList.valueOf(it),
-            )
-            colorSecondary = it
-        }
+        /* adapter.delegate.accentColor()?.let {
+             binding.startView.backgroundTintList = ColorStateList.valueOf(it)
+             binding.bookmark.imageTintList = ColorStateList.valueOf(
+                 context.getResourceColor(android.R.attr.textColorPrimaryInverse),
+             )
+             TextViewCompat.setCompoundDrawableTintList(
+                 binding.chapterTitle,
+                 ColorStateList.valueOf(it),
+             )
+             colorSecondary = it
+         }*/
         if (locked) {
             isVisible = false
             return

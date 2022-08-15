@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.image.coil
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
-import androidx.palette.graphics.Palette
 import coil.ImageLoader
 import coil.imageLoader
 import coil.memory.MemoryCache
@@ -26,7 +25,7 @@ class LibraryMangaImageTarget(
         super.onError(error)
         if (manga.favorite) {
             launchIO {
-                val file = coverCache.getCoverFile(manga)
+                val file = coverCache.getCoverFile(manga.thumbnail_url, manga.favorite)
                 // if the file exists and the there was still an error then the file is corrupted
                 if (file.exists()) {
                     val options = BitmapFactory.Options()
@@ -57,21 +56,3 @@ inline fun ImageView.loadManga(
     return imageLoader.enqueue(request)
 }
 
-fun Palette.getBestColor(defaultColor: Int) = getBestColor() ?: defaultColor
-
-fun Palette.getBestColor(): Int? {
-    val vibPopulation = vibrantSwatch?.population ?: -1
-    val domLum = dominantSwatch?.hsl?.get(2) ?: -1f
-    val mutedPopulation = mutedSwatch?.population ?: -1
-    val mutedSaturationLimit = if (mutedPopulation > vibPopulation * 3f) 0.1f else 0.25f
-    return when {
-        (dominantSwatch?.hsl?.get(1) ?: 0f) >= .25f &&
-            domLum <= .8f && domLum > .2f -> dominantSwatch?.rgb
-        vibPopulation >= mutedPopulation * 0.75f -> vibrantSwatch?.rgb
-        mutedPopulation > vibPopulation * 1.5f &&
-            (mutedSwatch?.hsl?.get(1) ?: 0f) > mutedSaturationLimit -> mutedSwatch?.rgb
-        else -> arrayListOf(vibrantSwatch, lightVibrantSwatch, darkVibrantSwatch).maxByOrNull {
-            if (it === vibrantSwatch) (it?.population ?: -1) * 3 else it?.population ?: -1
-        }?.rgb
-    }
-}

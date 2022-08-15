@@ -25,6 +25,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun nameRes() = R.string.mdlist
 
+    override fun isAutoAddTracker() = true
+
     override fun getLogo(): Int {
         return R.drawable.ic_tracker_mangadex_logo
     }
@@ -50,6 +52,12 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         throw Exception("Not Used")
     }
 
+    suspend fun updateScore(track: Track) {
+        withContext(Dispatchers.IO) {
+            mdex.updateRating(track)
+        }
+    }
+
     override suspend fun update(track: Track, setToRead: Boolean): Track {
         return withContext(Dispatchers.IO) {
             try {
@@ -61,10 +69,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
                 manga.follow_status = followStatus
                 db.insertManga(manga).executeAsBlocking()
-
-                if (track.score.toInt() >= 0) {
-                    mdex.updateRating(track)
-                }
 
                 // mangadex wont update chapters if manga is not follows this prevents unneeded network call
 
@@ -140,7 +144,16 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         query: String,
         manga: Manga,
         wasPreviouslyTracked: Boolean,
-    ): List<TrackSearch> = throw Exception("not used")
+    ): List<TrackSearch> {
+        val track = TrackSearch.create(TrackManager.MDLIST).apply {
+            this.manga_id = manga.id!!
+            this.status = FollowStatus.UNFOLLOWED.int
+            this.tracking_url = MdUtil.baseUrl + manga.url
+            this.title = manga.title
+        }
+
+        return listOf(track)
+    }
 
     override suspend fun login(username: String, password: String): Boolean =
         throw Exception("not used")
@@ -151,4 +164,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun isLogged() = mdex.isLogged()
 
     override fun isMdList() = true
+
+    fun isUnfollowed(track: Track) = track.status == 0
 }

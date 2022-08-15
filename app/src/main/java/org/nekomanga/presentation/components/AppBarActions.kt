@@ -6,9 +6,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,20 +70,14 @@ fun AppBarActions(
             buttonClicked = { showMenu = !showMenu },
         )
 
-        DropdownMenu(
+        SimpleDropdownMenu(
             expanded = showMenu,
-            onDismissRequest = { showMenu = false },
-        ) {
-            overflowActions.map {
-                DropdownMenuItem(
-                    onClick = {
-                        it.onClick()
-                        showMenu = false
-                    },
-                    text = { Text(it.title) },
-                )
-            }
-        }
+            onDismiss = { showMenu = false },
+            dropDownItems =
+            overflowActions.map { appBarAction ->
+                appBarAction.toSimpleAction()
+            },
+        )
     }
 }
 
@@ -102,8 +93,18 @@ object AppBar {
 
     data class OverflowAction(
         val title: String,
-        val onClick: () -> Unit,
-    ) : AppBarAction
+        val onClick: (() -> Unit?)? = null,
+        val children: List<OverflowAction>? = null,
+    ) : AppBarAction {
+
+        fun toSimpleAction(): SimpleDropDownItem {
+            return if (children == null) {
+                SimpleDropDownItem.Action(title, onClick = { onClick?.invoke() })
+            } else {
+                SimpleDropDownItem.Parent(title, children = children.map { it.toSimpleAction() })
+            }
+        }
+    }
 
     object Empty : AppBarAction
 }

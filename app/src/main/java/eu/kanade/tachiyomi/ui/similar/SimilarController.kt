@@ -28,7 +28,7 @@ import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
@@ -39,7 +39,7 @@ import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.screens.Action
-import org.nekomanga.presentation.screens.EmptyScreen
+import org.nekomanga.presentation.screens.IconicsEmptyScreen
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -80,9 +80,8 @@ class SimilarController(bundle: Bundle? = null) :
 
         val mangaClicked: (Manga) -> Unit = { manga ->
             router.pushController(
-                MangaDetailsController(
-                    manga,
-                    true,
+                MangaDetailController(
+                    manga.id!!,
                 ).withFadeTransaction(),
             )
         }
@@ -102,11 +101,10 @@ class SimilarController(bundle: Bundle? = null) :
                 onRefresh = refreshing,
                 modifier = Modifier
                     .fillMaxSize(),
-                clipIndicatorToPadding = false,
                 indicator = { state, trigger ->
                     SwipeRefreshIndicator(
                         state = state,
-                        refreshingOffset = paddingValues.calculateTopPadding(),
+                        refreshingOffset = paddingValues.calculateTopPadding() + 16.dp,
                         refreshTriggerDistance = trigger,
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
@@ -141,10 +139,10 @@ class SimilarController(bundle: Bundle? = null) :
         )
         if (isRefreshing.not()) {
             if (groupedManga.isEmpty()) {
-                EmptyScreen(
+                IconicsEmptyScreen(
                     iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                     iconSize = 176.dp,
-                    message = R.string.no_results_found,
+                    message = stringResource(id = R.string.no_results_found),
                     actions = listOf(Action(R.string.retry, refreshing)),
                 )
             } else {

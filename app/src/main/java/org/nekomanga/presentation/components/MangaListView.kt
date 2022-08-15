@@ -169,7 +169,7 @@ fun MangaListWithHeader(
                 HeaderCard(text)
             }
             itemsIndexed(mangaList) { index, displayManga ->
-                CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+                CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
                     MangaRow(
                         displayManga = displayManga,
                         shouldOutlineCover,
@@ -229,7 +229,6 @@ fun MangaListPreview() {
                 Manga.create(0L).apply {
                     url = ""
                     title = "test 1"
-                    relationship = "doujinshi"
                 },
             ),
             DisplayManga(

@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,7 +47,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
-import org.nekomanga.presentation.screens.EmptyScreen
+import org.nekomanga.presentation.screens.IconicsEmptyScreen
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -115,10 +116,10 @@ fun PagingMangaGrid(
             }
             mangaListPagingItems.loadState.append is LoadState.Error && mangaListPagingItems.itemCount == 0 -> {
                 isLoading = false
-                EmptyScreen(
+                IconicsEmptyScreen(
                     iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                     iconSize = 176.dp,
-                    message = R.string.no_results_found,
+                    message = stringResource(id = R.string.no_results_found),
                 )
             }
             else -> {
@@ -211,7 +212,7 @@ private fun MangaGridItem(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+    CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
         Box {
             Box(
                 modifier = Modifier

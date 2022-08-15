@@ -12,6 +12,7 @@ import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ALT_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANILIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANIME_PLANET_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
@@ -43,6 +44,8 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_THUMBNAIL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_USERS
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_USER_COVER
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_USER_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_VIEWER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -73,7 +76,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_AUTHOR, obj.author)
         put(COL_DESCRIPTION, obj.description)
         put(COL_GENRE, obj.genre)
-        put(COL_TITLE, obj.title)
+        put(COL_TITLE, obj.originalTitle)
         put(COL_STATUS, obj.status)
         put(COL_THUMBNAIL_URL, obj.thumbnail_url)
         put(COL_FAVORITE, obj.favorite)
@@ -98,6 +101,9 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_MERGE_MANGA_URL, obj.merge_manga_url)
         put(COL_MANGA_LAST_CHAPTER, obj.last_chapter_number)
         put(COL_MERGE_MANGA_IMAGE_URL, obj.merge_manga_image_url)
+        put(COL_ALT_TITLE, obj.alt_titles)
+        put(COL_USER_COVER, obj.user_cover)
+        put(COL_USER_TITLE, obj.user_title)
     }
 }
 
@@ -136,6 +142,10 @@ interface BaseMangaGetResolver {
         follow_status =
             cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
         merge_manga_image_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_IMAGE_URL))
+        alt_titles = cursor.getString(cursor.getColumnIndex(COL_ALT_TITLE))
+        user_cover = cursor.getString(cursor.getColumnIndex(COL_USER_COVER))
+        user_title = cursor.getString(cursor.getColumnIndex(COL_USER_TITLE))
+
     }
 }
 

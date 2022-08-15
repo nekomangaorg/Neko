@@ -11,6 +11,7 @@ import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.source.Source
@@ -503,6 +504,8 @@ class PreferencesHelper(val context: Context) {
 
     fun coverColors() = flowPrefs.getStringSet(Keys.coverColors, emptySet())
 
+    fun coverVibrantColors() = flowPrefs.getStringSet(Keys.coverVibrantColors, emptySet())
+
     fun useStaggeredGrid() = flowPrefs.getBoolean("use_staggered_grid", false)
 
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
@@ -523,6 +526,10 @@ class PreferencesHelper(val context: Context) {
             Keys.contentRating,
             setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive),
         )!!
+
+    fun autoAddTracker() = flowPrefs.getStringSet(Keys.autoAddTracker, setOf(TrackManager.MDLIST.toString()))
+
+    fun setAutoAddTracker(trackersToAutoAdd: Set<String>) = prefs.edit().putStringSet(Keys.autoAddTracker, trackersToAutoAdd).apply()
 
     fun sessionToken() = prefs.getString(Keys.sessionToken, "")
 

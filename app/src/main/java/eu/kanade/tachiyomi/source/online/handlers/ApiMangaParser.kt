@@ -66,11 +66,7 @@ class ApiMangaParser {
                 }
             }
 
-            manga.description =
-                MdUtil.cleanDescription(
-                    mangaAttributesDto.description.asMdMap<String>()["en"]
-                        ?: "",
-                )
+            manga.description = mangaAttributesDto.description.asMdMap<String>()["en"]
 
             val authors = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
@@ -79,6 +75,9 @@ class ApiMangaParser {
             val artists = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.artist, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
+
+            val altTitles = mangaAttributesDto.altTitles?.map { it.asMdMap<String>().values }?.flatten()
+            manga.setAltTitles(altTitles)
 
             manga.author = authors.joinToString()
             manga.artist = artists.joinToString()
@@ -105,8 +104,6 @@ class ApiMangaParser {
             if (otherUrls.isNotEmpty()) {
                 manga.other_urls = otherUrls.joinToString("||")
             }
-
-            // val filteredChapters = filterChapterForChecking(networkApiManga)
 
             val tempStatus = parseStatus(mangaAttributesDto.status ?: "")
             val publishedOrCancelled =

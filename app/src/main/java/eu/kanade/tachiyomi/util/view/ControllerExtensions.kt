@@ -52,7 +52,6 @@ import eu.kanade.tachiyomi.ui.base.controller.OneWayFadeChangeHandler
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.TabbedInterface
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -329,7 +328,7 @@ fun Controller.scrollViewWith(
                 if (changeType.isEnter) {
                     activityBinding?.appBar?.hideBigView(
                         this@scrollViewWith is SmallToolbarInterface,
-                        setTitleAlpha = this@scrollViewWith !is MangaDetailsController,
+                        setTitleAlpha = true,
                     )
                     activityBinding?.appBar?.setToolbarModeBy(this@scrollViewWith)
                     activityBinding?.appBar?.useTabsInPreLayout = includeTabView
@@ -353,8 +352,7 @@ fun Controller.scrollViewWith(
                 } else {
                     if (!customPadding && lastY == 0f && (
                             (
-                                this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
-                                    ?.controller is MangaDetailsController
+                                this@scrollViewWith !is FloatingSearchInterface
                                 ) || includeTabView
                             )
                     ) {

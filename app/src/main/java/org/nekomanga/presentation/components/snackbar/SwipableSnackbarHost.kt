@@ -36,6 +36,7 @@ fun SwipeableSnackbarHost(
     if (hostState.currentSnackbarData == null) {
         return
     }
+
     var size by remember { mutableStateOf(Size.Zero) }
     val swipeableState = rememberSwipeableState(SwipeDirection.Initial)
     val width = remember(size) {

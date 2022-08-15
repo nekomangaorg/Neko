@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
@@ -37,6 +36,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
@@ -51,6 +52,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.chapter.toSimpleChapter
 import rx.Completable
 import rx.Observable
 import rx.Subscription
@@ -62,6 +64,7 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 
 /**
  * Presenter used by the activity to perform background operations.
@@ -73,6 +76,7 @@ class ReaderPresenter(
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
+    private val chapterItemFilter: ChapterItemFilter = Injekt.get(),
 ) : BasePresenter<ReaderActivity>() {
 
     /**
@@ -112,7 +116,6 @@ class ReaderPresenter(
      */
     private val isLoadingAdjacentChapterRelay = BehaviorRelay.create<Boolean>()
     private var finished = false
-
 
     /**
      * Chapter list for the active manga. It's retrieved lazily and should be accessed for the first
@@ -521,16 +524,17 @@ class ReaderPresenter(
         }
     }
 
-    private fun getNextUnreadChaptersSorted(includeCurrentChapter: Boolean): List<ChapterItem> {
+    private fun getNextUnreadChaptersSorted(includeCurrentChapter: Boolean): List<DomainChapterItem> {
         val currentChapterId = getCurrentChapter()?.chapter?.id
-        val chapterSort = ChapterSort(manga!!, chapterFilter, preferences)
+        val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
 
-        val chapters = chapterList.map { ChapterItem(it.chapter, manga!!) }
-            .filter { !it.read || it.id == currentChapterId }
-            .distinctBy { it.name }
-            .sortedWith(chapterSort.sortComparator(true))
+        val chapters = chapterList.asSequence()
+            .map { DomainChapterItem(it.chapter.toSimpleChapter()!!) }
+            .filter { !it.chapter.read || it.chapter.id == currentChapterId }
+            .distinctBy { it.chapter.name }
+            .sortedWith(chapterSort.sortComparator(manga!!, true)).toList()
 
-        val currentChapterIndex = chapters.indexOfFirst { it.id == currentChapterId }
+        val currentChapterIndex = chapters.indexOfFirst { it.chapter.id == currentChapterId }
         return chapters.takeLast(chapters.lastIndex - currentChapterIndex + includeCurrentChapter.toInt())
     }
 
@@ -538,8 +542,8 @@ class ReaderPresenter(
      * Downloads the given list of chapters with the manager.
      * @param chapters the list of chapters to download.
      */
-    private fun downloadChapters(chapters: List<ChapterItem>) {
-        downloadManager.downloadChapters(manga!!, chapters.filter { !it.isDownloaded })
+    private fun downloadChapters(chapters: List<DomainChapterItem>) {
+        downloadManager.downloadChapters(manga!!, chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
     }
 
     /**
@@ -645,18 +649,20 @@ class ReaderPresenter(
         db.updateViewerFlags(manga).executeAsBlocking()
 
         Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-            .subscribeFirst({ view, _ ->
-                val currChapters = viewerChaptersRelay.value
-                if (currChapters != null) {
-                    // Save current page
-                    val currChapter = currChapters.currChapter
-                    currChapter.requestedPage = currChapter.chapter.last_page_read
+            .subscribeFirst(
+                { view, _ ->
+                    val currChapters = viewerChaptersRelay.value
+                    if (currChapters != null) {
+                        // Save current page
+                        val currChapter = currChapters.currChapter
+                        currChapter.requestedPage = currChapter.chapter.last_page_read
 
-                    // Emit manga and chapters to the new viewer
-                    view.setManga(manga)
-                    view.setChapters(currChapters)
-                }
-            },)
+                        // Emit manga and chapters to the new viewer
+                        view.setManga(manga)
+                        view.setChapters(currChapters)
+                    }
+                },
+            )
     }
 
     /**
@@ -681,12 +687,14 @@ class ReaderPresenter(
         XLog.i("Manga orientation is ${manga.orientationType}")
 
         Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-            .subscribeFirst({ view, _ ->
-                val currChapters = viewerChaptersRelay.value
-                if (currChapters != null) {
-                    view.setOrientation(getMangaOrientationType())
-                }
-            },)
+            .subscribeFirst(
+                { view, _ ->
+                    val currChapters = viewerChaptersRelay.value
+                    if (currChapters != null) {
+                        view.setOrientation(getMangaOrientationType())
+                    }
+                },
+            )
     }
 
     /**

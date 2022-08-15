@@ -14,7 +14,14 @@ open class MangaImpl : Manga {
 
     override lateinit var url: String
 
-    override lateinit var title: String
+    override var title: String
+        get() = user_title ?: ogTitle
+        set(value) {
+            ogTitle = value
+        }
+
+    lateinit var ogTitle: String
+        private set
 
     override var artist: String? = null
 
@@ -72,7 +79,11 @@ open class MangaImpl : Manga {
 
     override var last_chapter_number: Int? = null
 
-    override var relationship: String? = null
+    override var alt_titles: String? = null
+
+    override var user_cover: String? = null
+
+    override var user_title: String? = null
 
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl &&

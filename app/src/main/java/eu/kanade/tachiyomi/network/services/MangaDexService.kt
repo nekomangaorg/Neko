@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
+import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
@@ -64,6 +65,14 @@ interface MangaDexService {
         @Query("translatedLanguage[]") translatedLanguages: List<String>,
         @Query("contentRating[]") contentRating: List<String>,
     ): ApiResponse<ChapterListDto>
+
+    @Headers("Cache-Control: no-cache")
+    @GET("${MdApi.cover}?order[volume]=desc")
+    suspend fun viewArtwork(
+        @Query("manga[]") mangaUUID: String,
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+    ): ApiResponse<RelationshipDtoList>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.chapter}/{id}")

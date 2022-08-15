@@ -19,5 +19,9 @@ enum class FollowStatus(val int: Int) {
 
         fun fromInt(value: Int): FollowStatus =
             values().firstOrNull { it.int == value } ?: UNFOLLOWED
+
+        fun isUnfollowed(value: Int): Boolean {
+            return value == UNFOLLOWED.int
+        }
     }
 }

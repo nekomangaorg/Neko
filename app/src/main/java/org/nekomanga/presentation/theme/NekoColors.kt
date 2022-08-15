@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components
 
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,10 +10,18 @@ import androidx.compose.ui.graphics.Color
 class NekoColors {
     companion object {
         val outline = Color(0xFF79747E)
+        const val highAlphaHighContrast = 1f
+        const val highAlphaLowContrast = .87f
+        const val mediumAlphaHighContrast = .74f
+        const val mediumAlphaLowContrast = .6f
+        const val disabledAlphaHighContrast = .38f
+        const val disabledAlphaLowContrast = .38f
+        const val veryLowContrast = .1f
     }
 }
 
-object CoverRippleTheme : RippleTheme {
+object PrimaryColorRippleTheme : RippleTheme {
+
     @Composable
     override fun defaultColor(): Color = MaterialTheme.colorScheme.primary
 
@@ -24,3 +33,23 @@ object CoverRippleTheme : RippleTheme {
         pressedAlpha = 0.9f,
     )
 }
+
+class DynamicRippleTheme(val color: Color) : RippleTheme {
+    @Composable
+    override fun defaultColor(): Color = color
+
+    @Composable
+    override fun rippleAlpha() = RippleAlpha(
+        draggedAlpha = 0.9f,
+        focusedAlpha = 0.9f,
+        hoveredAlpha = 0.9f,
+        pressedAlpha = 0.9f,
+    )
+}
+
+fun dynamicTextSelectionColor(color: Color) = TextSelectionColors(
+    handleColor = color,
+    backgroundColor = color.copy(alpha = NekoColors.disabledAlphaHighContrast),
+)
+
+

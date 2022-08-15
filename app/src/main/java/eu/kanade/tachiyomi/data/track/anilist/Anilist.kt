@@ -162,7 +162,9 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-    override fun canRemoveFromService(): Boolean = true
+    override fun canRemoveFromService() = true
+
+    override fun isAutoAddTracker() = preferences.autoAddTracker().get().contains(id.toString())
 
     override suspend fun removeFromService(track: Track): Boolean {
         return api.remove(track)

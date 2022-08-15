@@ -45,7 +45,7 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.main.TabbedInterface
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
@@ -597,7 +597,7 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onCoverClick(position: Int) {
         val manga = (adapter.getItem(position) as? RecentMangaItem)?.mch?.manga ?: return
-        router.pushController(MangaDetailsController(manga).withFadeTransaction())
+        router.pushController(MangaDetailController(manga.id!!).withFadeTransaction())
     }
 
     override fun onRemoveHistoryClicked(position: Int) {
@@ -704,7 +704,7 @@ class RecentsController(bundle: Bundle? = null) :
                                 presenter.deleteChapter(chapter, manga)
                             }
                             updateTrackChapterMarkedAsRead(db, preferences, chapter, manga.id) {
-                                (router.backstack.lastOrNull()?.controller as? MangaDetailsController)?.presenter?.fetchTracks()
+
                             }
                         }
                     }

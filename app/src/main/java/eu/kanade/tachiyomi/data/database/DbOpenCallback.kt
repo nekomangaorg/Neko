@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
+import eu.kanade.tachiyomi.data.database.tables.ArtworkTable
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
@@ -22,7 +23,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 30
+        const val DATABASE_VERSION = 31
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
@@ -33,7 +34,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         execSQL(MangaCategoryTable.createTableQuery)
         execSQL(HistoryTable.createTableQuery)
         execSQL(SimilarTable.createTableQuery)
-        execSQL(CachedMangaTable.createVirtualTableQuery)
+        execSQL(ArtworkTable.createTableQuery)
 
         // DB indexes
         execSQL(MangaTable.createUrlIndexQuery)
@@ -129,6 +130,13 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(TrackTable.createTableQuery)
             db.execSQL(TrackTable.insertFromTempTable)
             db.execSQL(TrackTable.dropTempTable)
+        }
+
+        if (oldVersion < 31) {
+            db.execSQL(MangaTable.addAltTitles)
+            db.execSQL(MangaTable.addUserCover)
+            db.execSQL(MangaTable.addUserTitle)
+            db.execSQL(ArtworkTable.createTableQuery)
         }
     }
 

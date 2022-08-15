@@ -83,6 +83,7 @@
     <string name="adding_category_to_queue">Adding %1$s to update queue</string>
     <string name="_already_in_queue">%1$s is already in queue</string>
     <string name="create_new_category">Create new category</string>
+    <string name="plus_new_category">+ New category</string>
     <string name="new_category">New category</string>
     <string name="category_is_empty">Category is empty</string>
     <string name="show_categories_while_filtering">Show empty categories while filtering</string>
@@ -105,7 +106,7 @@
         <item quantity="one">%d category</item>
         <item quantity="other">%d categories</item>
     </plurals>
-    <string name="category_with_name_exists">A category with that name already exists!</string>
+    <string name="category_with_name_exists">A category with that name already exists</string>
     <string name="category_cannot_be_blank">Category name cannot be blank</string>
     <string name="category_deleted">Category deleted</string>
     <string name="long_press_category">Press and hold to edit a category</string>
@@ -134,6 +135,7 @@
     <string name="remove_from_library_question">Remove from library?</string>
     <string name="manga_from_library">Manga from library</string>
     <string name="delete_downloads">Delete downloads</string>
+    <string name="deleted_downloads">Deleted downloads</string>
     <string name="delete_downloads_question">Delete downloaded chapters?</string>
 
 
@@ -519,6 +521,7 @@
     <string name="error_sharing_cover">Error sharing cover</string>
     <string name="custom_manga_info">Custom manga info</string>
     <string name="set_as_default">Set as default</string>
+    <string name="updated_title_to_">Title updated to %1$s</string>
     <plurals name="deleted_chapters">
         <item quantity="one">A chapter has been removed from the source:\n%2$s\nDelete
             its download?</item>
@@ -546,8 +549,8 @@
     <string name="rereading">Rereading</string>
     <string name="score">Score</string>
     <string name="status">Status</string>
-    <string name="started">Started</string>
-    <string name="type">Type</string>
+    <string name="started">Started:</string>
+    <string name="type">Type:</string>
     <string name="url_not_set_click_again">Manga URL not set, please click title and select manga again</string>
     <string name="refresh_tracking">Refresh tracking</string>
     <string name="add_tracking">Add tracking</string>
@@ -565,12 +568,16 @@
     <string name="kitsu" translatable="false">Kitsu</string>
     <string name="manga_updates" translatable="false">MangaUpdates</string>
     <string name="update_tracking_scoring_type">Update %1$s\'s scoring type</string>
+    <string name="auto_track">Automatically link tracking</string>
     <string name="scoring_type_updated">Scoring type updated</string>
     <string name="could_not_update_scoring_">Could not update scoring type: %1$s</string>
+    <string name="current_date_">Current date: %1$s</string>
     <string name="started_reading_date">Started reading date</string>
     <string name="finished_reading_date">Finished reading date</string>
     <string name="myanimelist_relogin">Please log in to MAL again</string>
     <string name="use_suggested_date">Use suggested date</string>
+    <string name="use_suggested_date_of_">Use suggested date of: %1$s</string>
+
 
     <!-- Migration -->
     <string name="select_sources">Select sources</string>
@@ -929,6 +936,7 @@
     <string name="back">Back</string>
     <string name="beta">BETA</string>
     <string name="bottom">Bottom</string>
+    <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="center">Center</string>
     <string name="change">Change</string>
@@ -954,6 +962,7 @@
     <string name="exclude_">Exclude: %s</string>
     <string name="fast">Fast</string>
     <string name="filter">Filter</string>
+    <string name="filter_and_display">Filter &amp; Display</string>
     <string name="forward">Forward</string>
     <string name="free">Free</string>
     <string name="hide">Hide</string>
@@ -991,7 +1000,8 @@
 
     <string name="open_log">Open log</string>
     <string name="open_in_webview">Open in WebView</string>
-    <string name="open_merged_in_webview">Open Merged Source</string>
+    <string name="open_merged_in_webview">Open Merged source in WebView</string>
+    <string name="remove_merged_source">Remove merged source</string>
     <string name="options">Options</string>
     <string name="pause">Pause</string>
     <string name="picture_saved">Picture saved</string>
@@ -1001,6 +1011,7 @@
     <string name="previous">Previous</string>
     <string name="refresh">Refresh</string>
     <string name="remove">Remove</string>
+    <string name="remove_date">Remove date</string>
     <string name="remove_from_">Remove from %1$s</string>
     <string name="reorder">Reorder</string>
     <string name="reset">Reset</string>
@@ -1012,6 +1023,7 @@
     <string name="default_orientation">Default orientation</string>
     <string name="orientation">Orientation</string>
     <string name="save">Save</string>
+    <string name="set">Set</string>
     <string name="search">Search</string>
     <string name="search_">Search %1$s</string>
     <string name="select_all">Select all</string>
@@ -1076,10 +1088,18 @@
 
 
     <!-- Manga Details-->
+    <string name="_tracked">%1$s Tracked</string>
+    <string name="artwork">Artwork</string>
+    <string name="similar_work">Similar Work</string>
+    <string name="is_merged">Merged</string>
+    <string name="is_not_merged">Merge</string>
+    <string name="links">Links</string>
     <string name="open_external">Open external links</string>
     <string name="comments">Comments</string>
     <string name="comments_unavailable">"Comments not available for merged chapters"</string>
     <string name="comments_unavailable_dex">"Comments not available on MangaDex at this time"</string>
+    <string name="remove_bookmark">Remove bookmark</string>
+    <string name="add_bookmark">Add bookmark</string>
     <string name="merge_other">Merge another source to fill potential missing chapters</string>
     <string name="start_reading_">Start reading %1$s</string>
     <string name="continue_reading_">Continue reading %1$s</string>
@@ -1094,6 +1114,9 @@
     <string name="missing_chapters">%1$s missing chapters</string>
 
     <string name="using_cached_source_cant_open">Using cached source, can\'t open this chapter</string>
+    <string name="site_down">MangaDex appears to be down, or under heavy load</string>
+    <string name="v3_manga">Cannot refresh this is a V3 manga entry</string>
+
 
     <!-- Reader -->
     <string name="try_similar">Don\'t forget to try looking for \nSimilar Manga. Click the </string>

@@ -23,7 +23,7 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getLogo(): Int = R.drawable.ic_tracker_manga_updates_logo
 
-    override fun getLogoColor(): Int = Color.rgb(146, 160, 173)
+    override fun getLogoColor(): Int = Color.rgb(137, 164, 195)
 
     override fun getStatusList(): List<Int> {
         return listOf(READING_LIST, COMPLETE_LIST, ON_HOLD_LIST, UNFINISHED_LIST, WISH_LIST)
@@ -90,14 +90,12 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-
     override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
         return api.search(query, manga, wasPreviouslyTracked)
             .map {
                 it.toTrackSearch(id)
             }
     }
-
 
     override suspend fun refresh(track: Track): Track {
         val (series, rating) = api.getSeriesListItem(track)

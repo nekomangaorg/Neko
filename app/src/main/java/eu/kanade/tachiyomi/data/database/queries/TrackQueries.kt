@@ -39,12 +39,14 @@ interface TrackQueries : DbProvider {
 
     fun insertTracks(tracks: List<Track>) = db.put().objects(tracks).prepare()
 
-    fun deleteTrackForManga(manga: Manga, sync: TrackService) = db.delete()
+    fun deleteTrackForManga(manga: Manga, sync: TrackService) = deleteTrackForManga(manga.id, sync)
+
+    fun deleteTrackForManga(mangaId: Long?, sync: TrackService) = db.delete()
         .byQuery(
             DeleteQuery.builder()
                 .table(TrackTable.TABLE)
                 .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
-                .whereArgs(manga.id, sync.id)
+                .whereArgs(mangaId, sync.id)
                 .build(),
         )
         .prepare()

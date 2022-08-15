@@ -39,7 +39,7 @@ fun ToolTipIconButton(
     painter: Painter? = null,
     isEnabled: Boolean = true,
     tint: Color = LocalContentColor.current,
-    buttonClicked: () -> Unit,
+    buttonClicked: () -> Unit = {},
 ) {
     require(icon != null || painter != null)
 

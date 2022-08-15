@@ -52,7 +52,6 @@ object EstimatedItemHeight {
             R.layout.recent_chapters_section_item -> 32.dpToPx
             R.layout.chapters_item -> 60.dpToPx
             R.layout.manga_header_item -> 500.dpToPx
-            R.layout.chapter_header_item -> 47.dpToPx
             R.layout.manga_grid_item -> 222.dpToPx
             R.layout.manga_list_item -> 52.dpToPx
             else -> 0

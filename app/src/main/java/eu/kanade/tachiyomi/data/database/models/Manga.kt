@@ -22,7 +22,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
-import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
+import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import tachiyomi.source.model.MangaInfo
 import java.util.Locale
 
@@ -45,6 +45,10 @@ interface Manga : SManga {
     var chapter_flags: Int
 
     var filtered_scanlators: String?
+
+    var user_cover: String?
+
+    var user_title: String?
 
     fun isBlank() = id == Long.MIN_VALUE
 
@@ -171,7 +175,11 @@ interface Manga : SManga {
     }
 
     fun key(): String {
-        return "manga-id-$id"
+        return id!!.toMangaCacheKey()
+    }
+
+    fun getAltTitles(): List<String> {
+        return alt_titles?.split("|~|") ?: emptyList()
     }
 
     fun getExternalLinks(): List<ExternalLink> {
@@ -243,19 +251,6 @@ interface Manga : SManga {
         get() = viewer_flags and OrientationType.MASK
         set(rotationType) = setViewerFlags(rotationType, OrientationType.MASK)
 
-    var vibrantCoverColor: Int?
-        get() = vibrantCoverColorMap[id]
-        set(value) {
-            id?.let { vibrantCoverColorMap[it] = value }
-        }
-
-    var dominantCoverColors: Pair<Int, Int>?
-        get() = MangaCoverMetadata.getColors(this)
-        set(value) {
-            value ?: return
-            MangaCoverMetadata.addCoverColor(this, value.first, value.second)
-        }
-
     companion object {
 
         // Generic filter that does not filter anything
@@ -297,8 +292,6 @@ interface Manga : SManga {
         const val TYPE_MANHUA = 3
         const val TYPE_COMIC = 4
         const val TYPE_WEBTOON = 5
-
-        private val vibrantCoverColorMap: HashMap<Long, Int?> = hashMapOf()
 
         fun create(source: Long): Manga = MangaImpl().apply {
             this.source = source

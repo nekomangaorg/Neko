@@ -101,5 +101,13 @@ open class WebViewActivity : AppCompatActivity() {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }
+
+        fun newIntent(context: Context, url: String, title: String?): Intent {
+            val intent = Intent(context, WebViewActivity::class.java)
+            intent.putExtra(URL_KEY, url)
+            intent.putExtra(TITLE_KEY, title)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            return intent
+        }
     }
 }

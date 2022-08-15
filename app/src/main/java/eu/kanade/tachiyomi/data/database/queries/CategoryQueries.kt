@@ -19,12 +19,14 @@ interface CategoryQueries : DbProvider {
         )
         .prepare()
 
-    fun getCategoriesForManga(manga: Manga) = db.get()
+    fun getCategoriesForManga(manga: Manga) = getCategoriesForManga(manga.id)
+
+    fun getCategoriesForManga(mangaId: Long?) = db.get()
         .listOfObjects(Category::class.java)
         .withQuery(
             RawQuery.builder()
                 .query(getCategoriesForMangaQuery())
-                .args(manga.id)
+                .args(mangaId)
                 .build(),
         )
         .prepare()

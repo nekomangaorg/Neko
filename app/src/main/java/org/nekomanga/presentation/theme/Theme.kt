@@ -15,6 +15,7 @@ fun NekoTheme(
     val (colorScheme) = createMdc3Theme(
         context = context,
         setTextColors = true,
+        readTypography = false,
     )
 
     MaterialTheme(

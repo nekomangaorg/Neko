@@ -47,6 +47,6 @@ class ChapterItem(chapter: Chapter, val manga: Manga) :
         position: Int,
     ) {
         super.unbindViewHolder(adapter, holder, position)
-        (adapter as MangaDetailsAdapter).controller.dismissPopup(position)
+        // (adapter as MangaDetailsAdapter).controller.dismissPopup(position)
     }
 }

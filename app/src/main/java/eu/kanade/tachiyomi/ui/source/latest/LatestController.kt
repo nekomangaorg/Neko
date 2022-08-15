@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.components.ListGridActionButton
@@ -39,9 +39,8 @@ class LatestController(bundle: Bundle? = null) :
 
         val mangaClicked: (Manga) -> Unit = { manga ->
             router.pushController(
-                MangaDetailsController(
-                    manga,
-                    true,
+                MangaDetailController(
+                    manga.id!!,
                 ).withFadeTransaction(),
             )
         }

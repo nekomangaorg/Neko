@@ -44,7 +44,7 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
 fun Manga.moveCategories(
     db: DatabaseHelper,
     activity: Activity,
-    onMangaMoved: () -> Unit,
+    onMangaMoved: () -> Unit = {},
 ) {
     val categories = db.getCategories().executeAsBlocking()
     val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()

@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 object Configs {
     const val applicationId = "tachiyomi.mangadex"
-    const val compileSdkVersion = 31
+    const val compileSdkVersion = 32
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -145,7 +145,7 @@ android {
 dependencies {
 
     implementation(kotlinx.bundles.kotlin)
-
+    
     // Modified dependencies
     implementation(libs.j2k.subsample) {
         exclude(module = "image-decoder")
@@ -176,7 +176,7 @@ dependencies {
     implementation(libs.bundles.iconics)
     implementation("br.com.devsrsouza.compose.icons.android:simple-icons:1.0.0")
 
-    //requrired outside bundle cause toml doesnt work with aar
+    //required outside bundle cause toml doesnt work with aar
     implementation("com.mikepenz:community-material-typeface:6.4.95.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
@@ -186,9 +186,6 @@ dependencies {
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
     implementation("com.github.requery:sqlite-android:3.36.0")
-
-    //markdown
-    implementation(libs.markdown)
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)
@@ -214,12 +211,15 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
-    implementation("me.saket.cascade:cascade:1.3.0")
+    implementation("me.saket.cascade:cascade:2.0.0-beta1")
+    implementation("me.saket.cascade:cascade-compose:2.0.0-beta1")
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
 
     //Compose
     implementation(compose.bundles.compose)
     implementation(compose.gap)
     implementation(compose.bundles.accompanist)
+    implementation(compose.number.picker)
 
 
     implementation(libs.pastelplaceholders)
@@ -243,6 +243,8 @@ tasks {
             "-opt-in=kotlin.Experimental",
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+            "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+            "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
             "-opt-in=kotlin.time.ExperimentalTime",
             "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",

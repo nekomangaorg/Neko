@@ -5,8 +5,8 @@ import androidx.annotation.ColorInt
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.getBestColor
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap
 object MangaCoverMetadata {
     private var coverRatioMap = ConcurrentHashMap<Long, Float>()
     private var coverColorMap = ConcurrentHashMap<Long, Pair<Int, Int>>()
+    private var coverVibrantColorMap = ConcurrentHashMap<Long, Int>()
+
     private val preferences by injectLazy<PreferencesHelper>()
     private val coverCache by injectLazy<CoverCache>()
 
@@ -46,19 +48,42 @@ object MangaCoverMetadata {
                 }
             }.toMap(),
         )
+
+        val vibrantColors = preferences.coverVibrantColors().get()
+        coverVibrantColorMap = ConcurrentHashMap(
+            vibrantColors.mapNotNull {
+                val splits = it.split("|")
+                val id = splits.firstOrNull()?.toLongOrNull()
+                val color = splits.lastOrNull()?.toIntOrNull()
+                if (id != null && color != null) {
+                    id to color
+                } else {
+                    null
+                }
+            }.toMap(),
+        )
     }
 
-    fun setRatioAndColors(manga: Manga, ogFile: File? = null, force: Boolean = false) {
-        if (!manga.favorite) {
-            remove(manga)
+    fun setRatioAndColors(mangaId: Long, originalThumbnailUrl: String?, inLibrary: Boolean, ogFile: File? = null, force: Boolean = false) {
+        if (inLibrary.not()) {
+            remove(mangaId)
         }
-        if (manga.vibrantCoverColor != null && !manga.favorite) return
-        val file = ogFile ?: coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga)
+
+        val vibrantColor = getVibrantColor(mangaId)
+        val dominantColors = getColors(mangaId)
+
+        if (vibrantColor != null && inLibrary.not()) return
+
+        val file = ogFile ?: coverCache.getCustomCoverFile(mangaId).takeIf { it.exists() } ?: coverCache.getCoverFile(originalThumbnailUrl, inLibrary)
         // if the file exists and the there was still an error then the file is corrupted
         if (file.exists()) {
             val options = BitmapFactory.Options()
-            val hasVibrantColor = if (manga.favorite) manga.vibrantCoverColor != null else true
-            if (manga.dominantCoverColors != null && hasVibrantColor && !force) {
+            val hasVibrantColor = when (inLibrary) {
+                true -> vibrantColor != null
+                false -> true
+            }
+
+            if (dominantColors != null && hasVibrantColor && !force) {
                 options.inJustDecodeBounds = true
             } else {
                 options.inSampleSize = 4
@@ -67,43 +92,59 @@ object MangaCoverMetadata {
             if (bitmap != null) {
                 Palette.from(bitmap).generate {
                     if (it == null) return@generate
-                    if (manga.favorite) {
+                    if (inLibrary) {
                         it.dominantSwatch?.let { swatch ->
-                            manga.dominantCoverColors = swatch.rgb to swatch.titleTextColor
+                            addCoverColor(mangaId, swatch.rgb, swatch.titleTextColor)
                         }
                     }
                     val color = it.getBestColor() ?: return@generate
-                    manga.vibrantCoverColor = color
+                    addVibrantColor(mangaId, color)
                 }
             }
-            if (manga.favorite && !(options.outWidth == -1 || options.outHeight == -1)) {
-                addCoverRatio(manga, options.outWidth / options.outHeight.toFloat())
+            if (inLibrary && !(options.outWidth == -1 || options.outHeight == -1)) {
+                addCoverRatio(mangaId, options.outWidth / options.outHeight.toFloat())
             }
         }
     }
 
+    fun setRatioAndColors(manga: Manga, ogFile: File? = null, force: Boolean = false) {
+        manga.id ?: return
+        setRatioAndColors(manga.id!!, manga.thumbnail_url, manga.favorite, ogFile, force)
+    }
+
     fun remove(manga: Manga) {
         val id = manga.id ?: return
-        coverRatioMap.remove(id)
-        coverColorMap.remove(id)
+        remove(id)
     }
 
-    fun addCoverRatio(manga: Manga, ratio: Float) {
-        val id = manga.id ?: return
-        coverRatioMap[id] = ratio
+    fun remove(mangaId: Long) {
+        coverRatioMap.remove(mangaId)
+        coverColorMap.remove(mangaId)
+        coverVibrantColorMap.remove(mangaId)
     }
 
-    fun addCoverColor(manga: Manga, @ColorInt color: Int, @ColorInt textColor: Int) {
-        val id = manga.id ?: return
-        coverColorMap[id] = color to textColor
+    fun addCoverRatio(mangaId: Long, ratio: Float) {
+        coverRatioMap[mangaId] = ratio
     }
 
-    fun getColors(manga: Manga): Pair<Int, Int>? {
-        return coverColorMap[manga.id]
+    fun addCoverColor(mangaId: Long, @ColorInt color: Int, @ColorInt textColor: Int) {
+        coverColorMap[mangaId] = color to textColor
+    }
+
+    fun addVibrantColor(mangaId: Long, @ColorInt color: Int) {
+        coverVibrantColorMap[mangaId] = color
+    }
+
+    fun getColors(mangaId: Long): Pair<Int, Int>? {
+        return coverColorMap[mangaId]
     }
 
     fun getRatio(manga: Manga): Float? {
         return coverRatioMap[manga.id]
+    }
+
+    fun getVibrantColor(mangaId: Long): Int? {
+        return coverVibrantColorMap[mangaId]
     }
 
     fun savePrefs() {
@@ -111,5 +152,7 @@ object MangaCoverMetadata {
         preferences.coverRatios().set(mapCopy.map { "${it.key}|${it.value}" }.toSet())
         val mapColorCopy = coverColorMap.toMap()
         preferences.coverColors().set(mapColorCopy.map { "${it.key}|${it.value.first}|${it.value.second}" }.toSet())
+        val vibrantColorCopy = coverVibrantColorMap.toMap()
+        preferences.coverVibrantColors().set(vibrantColorCopy.map { "${it.key}|${it.value}" }.toSet())
     }
 }

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnFailure
 import com.skydoves.sandwich.suspendOnSuccess
+import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -10,6 +11,7 @@ import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.ArtworkHandler
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
@@ -37,6 +39,8 @@ open class MangaDex : HttpSource() {
 
     private val followsHandler: FollowsHandler by injectLazy()
 
+    val artworkHandler: ArtworkHandler by injectLazy()
+
     private val mangaHandler: MangaHandler by injectLazy()
 
     private val searchHandler: SearchHandler by injectLazy()
@@ -63,6 +67,10 @@ open class MangaDex : HttpSource() {
                     emit(null)
                 }
         }.flowOn(Dispatchers.IO)
+    }
+
+    suspend fun getArtwork(mangaId: Long, mangaUUID: String): List<ArtworkImpl> {
+        return artworkHandler.getArtwork(mangaId, mangaUUID)
     }
 
     suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {

@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
@@ -152,7 +152,7 @@ class SearchActivity : MainActivity() {
             SHORTCUT_MANGA, SHORTCUT_MANGA_BACK -> {
                 val extras = intent.extras ?: return false
                 if (intent.action == SHORTCUT_MANGA_BACK && preferences.openChapterInShortcuts()) {
-                    val mangaId = extras.getLong(MangaDetailsController.MANGA_EXTRA)
+                    val mangaId = extras.getLong(MangaDetailController.MANGA_EXTRA)
                     if (mangaId != 0L) {
                         val db = Injekt.get<DatabaseHelper>()
                         val chapters = db.getChapters(mangaId).executeAsBlocking()
@@ -172,7 +172,7 @@ class SearchActivity : MainActivity() {
                     SecureActivityDelegate.promptLockIfNeeded(this, true)
                 }
                 router.replaceTopController(
-                    RouterTransaction.with(MangaDetailsController(extras))
+                    RouterTransaction.with(MangaDetailController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())
                         .popChangeHandler(FadeChangeHandler()),
                 )
@@ -206,7 +206,7 @@ class SearchActivity : MainActivity() {
         )
             .apply {
                 action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
-                putExtra(MangaDetailsController.MANGA_EXTRA, id)
+                putExtra(MangaDetailController.MANGA_EXTRA, id)
             }
 
         fun openReaderSettings(context: Context) = Intent(

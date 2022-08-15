@@ -24,6 +24,13 @@ class ChapterUtil {
             }
         }
 
+        fun relativeDate(chapterDate: Long): String? {
+            return when (chapterDate > 0) {
+                true -> chapterDate.timeSpanFromNow
+                false -> null
+            }
+        }
+
         fun setTextViewForChapter(
             textView: TextView,
             chapter: Chapter,
@@ -152,7 +159,7 @@ class ChapterUtil {
             if (scanlators.isNullOrBlank()) return emptyList()
             return scanlators.split(scanlatorSeparator).distinct()
         }
-
+        
         fun getScanlatorString(scanlators: Set<String>): String {
             return scanlators.toList().sorted().joinToString(scanlatorSeparator)
         }

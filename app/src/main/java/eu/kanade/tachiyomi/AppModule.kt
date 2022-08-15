@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
+import eu.kanade.tachiyomi.source.online.handlers.ArtworkHandler
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
@@ -29,9 +30,12 @@ import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
+import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
+import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.latest.LatestRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
@@ -64,6 +68,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { ChapterFilter() }
 
+        addSingletonFactory { ChapterItemFilter() }
+
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 
         addSingletonFactory { MangaMappings(app.applicationContext) }
@@ -71,6 +77,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(FilterHandler())
 
         addSingleton(FollowsHandler())
+
+        addSingleton(ArtworkHandler())
 
         addSingleton(MangaHandler())
 
@@ -107,6 +115,10 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(TrackingSyncService())
 
         addSingleton(SimilarRepository())
+
+        addSingleton(MangaUpdateCoordinator())
+
+        addSingleton(TrackingCoordinator())
 
         addSingleton(LatestRepository())
 

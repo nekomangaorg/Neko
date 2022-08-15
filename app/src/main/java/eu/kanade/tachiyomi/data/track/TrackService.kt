@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.track
 
 import androidx.annotation.CallSuper
+import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -19,6 +20,7 @@ abstract class TrackService(val id: Int) {
     val networkService: NetworkHelper by injectLazy()
     val db: DatabaseHelper by injectLazy()
     open fun canRemoveFromService() = false
+    open fun isAutoAddTracker() = false
     open val client: OkHttpClient
         get() = networkService.client
 
@@ -32,6 +34,7 @@ abstract class TrackService(val id: Int) {
     @DrawableRes
     abstract fun getLogo(): Int
 
+    @ColorInt
     abstract fun getLogoColor(): Int
 
     abstract fun getStatusList(): List<Int>
@@ -106,6 +109,10 @@ abstract class TrackService(val id: Int) {
     fun saveCredentials(username: String, password: String) {
         preferences.setTrackCredentials(this, username, password)
     }
+}
+
+fun TrackService.matchingTrack(track: Track): Boolean {
+    return track.sync_id == this.id
 }
 
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {

@@ -8,7 +8,6 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.toast
@@ -156,7 +155,17 @@ class CoverCache(val context: Context) {
      * @return cover image.
      */
     fun getCustomCoverFile(manga: Manga): File {
-        return File(customCoverCacheDir, DiskUtil.hashKeyForDisk(manga.id.toString()))
+        return getCustomCoverFile(manga.id ?: 0)
+    }
+
+    /**
+     * Returns the custom cover from cache.
+     *
+     * @param manga the manga.
+     * @return cover image.
+     */
+    fun getCustomCoverFile(mangaId: Long): File {
+        return File(customCoverCacheDir, DiskUtil.hashKeyForDisk(mangaId.toString()))
     }
 
     /**
@@ -171,6 +180,23 @@ class CoverCache(val context: Context) {
         getCustomCoverFile(manga).outputStream().use {
             inputStream.copyTo(it)
             context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
+        }
+    }
+
+    /**
+     * Saves the  given url as the manga's custom cover to cache.
+     *
+     * @param manga the manga.
+     * @param inputStream the stream to copy.
+     * @throws IOException if there's any error.
+     */
+    @Throws(IOException::class)
+    fun setCustomCoverToCache(manga: Manga, url: String) {
+        getCoverFile(url).inputStream().use { inputStream ->
+            getCustomCoverFile(manga).outputStream().use {
+                inputStream.copyTo(it)
+                context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
+            }
         }
     }
 
@@ -194,18 +220,18 @@ class CoverCache(val context: Context) {
      * @param thumbnailUrl the thumbnail url.
      * @return cover image.
      */
-    fun getCoverFile(manga: Manga): File {
-        val hashKey = DiskUtil.hashKeyForDisk((manga.thumbnail_url.orEmpty()))
-        return if (manga.favorite) {
+    fun getCoverFile(url: String?, inLibrary: Boolean = false): File {
+        val hashKey = DiskUtil.hashKeyForDisk((url.orEmpty()))
+        return if (inLibrary) {
             File(cacheDir, hashKey)
         } else {
             File(onlineCoverDirectory, hashKey)
         }
     }
 
-    fun deleteFromCache(name: String?) {
+    fun deleteFromCache(name: String?, inLibrary: Boolean) {
         if (name.isNullOrEmpty()) return
-        val file = getCoverFile(MangaImpl().apply { thumbnail_url = name })
+        val file = getCoverFile(name, inLibrary)
         context.imageLoader.memoryCache?.remove(MemoryCache.Key(file.name))
         if (file.exists()) file.delete()
     }
@@ -224,7 +250,7 @@ class CoverCache(val context: Context) {
         if (manga.thumbnail_url.isNullOrEmpty()) return
 
         // Remove file
-        val file = getCoverFile(manga)
+        val file = getCoverFile(manga.thumbnail_url, manga.favorite)
         if (deleteCustom) deleteCustomCover(manga)
         if (file.exists()) {
             context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
