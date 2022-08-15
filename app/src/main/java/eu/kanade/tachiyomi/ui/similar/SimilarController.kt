@@ -28,7 +28,7 @@ import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.manga.MangaComposeController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
@@ -80,7 +80,7 @@ class SimilarController(bundle: Bundle? = null) :
 
         val mangaClicked: (Manga) -> Unit = { manga ->
             router.pushController(
-                MangaComposeController(
+                MangaDetailController(
                     manga.id!!,
                 ).withFadeTransaction(),
             )

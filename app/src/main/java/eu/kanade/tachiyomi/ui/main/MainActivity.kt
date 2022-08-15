@@ -78,7 +78,7 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
-import eu.kanade.tachiyomi.ui.manga.MangaComposeController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.more.AboutController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.more.OverflowDialog
@@ -777,7 +777,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
-                router.pushController(MangaComposeController(extras).withFadeTransaction())
+                router.pushController(MangaDetailController(extras).withFadeTransaction())
             }
             SHORTCUT_UPDATE_NOTES -> {
                 val extras = intent.extras ?: return false
@@ -808,7 +808,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
         when (val controller = router.backstack.lastOrNull()?.controller) {
-            is MangaComposeController -> {
+            is MangaDetailController -> {
                 val url = try {
                     (source as HttpSource).mangaDetailsRequest(controller.presenter.manga.value).url.toString()
                 } catch (e: Exception) {

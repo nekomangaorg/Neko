@@ -44,7 +44,7 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy
 
-class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaComposePresenter>() {
+class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDetailPresenter>() {
 
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)
@@ -56,7 +56,7 @@ class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaCom
         )
     }
 
-    override val presenter = MangaComposePresenter(mangaId)
+    override val presenter = MangaDetailPresenter(mangaId)
 
     private val preferences: PreferencesHelper by injectLazy()
 
