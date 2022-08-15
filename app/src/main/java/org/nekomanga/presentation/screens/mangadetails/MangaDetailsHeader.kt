@@ -124,12 +124,13 @@ fun MangaDetailsHeader(
                         trackServiceCount = trackServiceCount,
                         themeColorState = themeColorState,
                         favoriteClick = {
-                            if (inLibrary.not()) {
+                            if (!inLibrary) {
                                 toggleFavorite()
                             } else {
                                 favoriteExpanded = true
                             }
                         },
+
                         trackingClick = trackingClick,
                         artworkClick = artworkClick,
                         similarClick = similarClick,
@@ -139,7 +140,6 @@ fun MangaDetailsHeader(
                     )
                     FavoriteDropDown(
                         favoriteExpanded = favoriteExpanded,
-                        categories = categories,
                         moveCategories = moveCategories,
                         toggleFavorite = toggleFavorite,
                         onDismiss = { favoriteExpanded = false },
@@ -197,7 +197,7 @@ private fun ColumnScope.quickReadButton(
 }
 
 @Composable
-private fun FavoriteDropDown(favoriteExpanded: Boolean, categories: List<Category>, moveCategories: () -> Unit, toggleFavorite: () -> Unit, onDismiss: () -> Unit) {
+private fun FavoriteDropDown(favoriteExpanded: Boolean, moveCategories: () -> Unit, toggleFavorite: () -> Unit, onDismiss: () -> Unit) {
     CascadeDropdownMenu(
         expanded = favoriteExpanded,
         offset = DpOffset(8.dp, 0.dp),
@@ -216,20 +216,18 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, categories: List<Categor
                 onDismiss()
             },
         )
-        if (categories.isNotEmpty()) {
-            androidx.compose.material3.DropdownMenuItem(
-                text = {
-                    androidx.compose.material.Text(
-                        text = stringResource(R.string.edit_categories),
-                        style = style,
-                    )
-                },
-                onClick = {
-                    moveCategories()
-                    onDismiss()
-                },
-            )
-        }
+        androidx.compose.material3.DropdownMenuItem(
+            text = {
+                androidx.compose.material.Text(
+                    text = stringResource(R.string.edit_categories),
+                    style = style,
+                )
+            },
+            onClick = {
+                moveCategories()
+                onDismiss()
+            },
+        )
     }
 }
 

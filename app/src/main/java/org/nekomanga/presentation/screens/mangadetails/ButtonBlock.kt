@@ -82,6 +82,7 @@ fun ButtonBlock(
             false -> ButtonConfig(icon = Icons.Filled.FavoriteBorder, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.add_to_library))
         }
 
+
         OutlinedButton(
             colors = favConfig.buttonColors,
             onClick = favoriteClick, border = favConfig.borderStroke, contentPadding = padding,

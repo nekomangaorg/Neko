@@ -75,7 +75,7 @@ import uy.kohesive.injekt.api.get
 import java.io.File
 import java.util.Date
 
-class MangaComposePresenter(
+class MangaDetailPresenter(
     private val mangaId: Long,
     val preferences: PreferencesHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
@@ -87,7 +87,7 @@ class MangaComposePresenter(
     private val trackManager: TrackManager = Injekt.get(),
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
     private val trackingCoordinator: TrackingCoordinator = Injekt.get(),
-) : BaseCoroutinePresenter<MangaComposeController>(), DownloadQueue.DownloadListener, LibraryServiceListener {
+) : BaseCoroutinePresenter<MangaDetailController>(), DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)
     val manga: StateFlow<Manga> = _currentManga.asStateFlow()
@@ -1411,7 +1411,7 @@ class MangaComposePresenter(
     /**
      * Check if can access internet
      */
-    fun isOnline(): Boolean {
+    private fun isOnline(): Boolean {
         return controller?.activity?.isOnline() == true
     }
 

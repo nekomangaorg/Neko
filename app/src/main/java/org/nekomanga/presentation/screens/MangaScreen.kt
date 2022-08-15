@@ -317,7 +317,7 @@ fun MangaScreen(
                         loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
                         trackServiceCount = trackServiceCount.value,
                         toggleFavorite = {
-                            if (inLibrary.not()) {
+                            if (inLibrary.not() && categories.value.isNotEmpty()) {
                                 openSheet(
                                     DetailsBottomSheetScreen.CategoriesSheet(
                                         addingToLibrary = true,
