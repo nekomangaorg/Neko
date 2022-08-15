@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -87,7 +88,8 @@ fun ArtworkSheet(
 
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .fillMaxHeight(.95f)
                     .background(MaterialTheme.colorScheme.surface)
                     .statusBarsPadding()
                     .navigationBarsPadding(),
@@ -105,13 +107,34 @@ fun ArtworkSheet(
                         .padding(horizontal = 8.dp),
                 )
 
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp),
+                    Arrangement.spacedBy(4.dp),
+                ) {
+
+                    ArtworkButton(text = stringResource(id = R.string.save), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
+                        saveClick(currentImage)
+                    }
+                    if (inLibrary) {
+                        ArtworkButton(text = stringResource(id = R.string.set), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
+                            setClick(currentImage)
+                        }
+                        ArtworkButton(text = stringResource(id = R.string.reset), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
+                            resetClick()
+                        }
+                    }
+                    ArtworkButton(text = stringResource(id = R.string.share), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
+                        shareClick(currentImage)
+                    }
+                }
                 if (currentImage.description.isNotBlank()) {
                     Text(text = currentImage.description, modifier = Modifier.padding(horizontal = 8.dp), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelMedium)
-                    Gap(height = 8.dp)
                 }
-
-                Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Bottom)) {
-                    if (alternativeArtwork.size > 1) {
+                Gap(height = 8.dp)
+                if (alternativeArtwork.size > 1) {
+                    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Bottom)) {
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             items(alternativeArtwork) { artwork ->
                                 Box {
@@ -130,29 +153,7 @@ fun ArtworkSheet(
                             }
                         }
                     }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(4.dp),
-                        Arrangement.spacedBy(4.dp),
-                    ) {
-
-                        ArtworkButton(text = stringResource(id = R.string.save), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
-                            saveClick(currentImage)
-                        }
-                        if (inLibrary) {
-                            ArtworkButton(text = stringResource(id = R.string.set), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
-                                setClick(currentImage)
-                            }
-                            ArtworkButton(text = stringResource(id = R.string.reset), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
-                                resetClick()
-                            }
-                        }
-                        ArtworkButton(text = stringResource(id = R.string.share), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
-                            shareClick(currentImage)
-                        }
-                    }
+                    Gap(8.dp)
                 }
             }
         }

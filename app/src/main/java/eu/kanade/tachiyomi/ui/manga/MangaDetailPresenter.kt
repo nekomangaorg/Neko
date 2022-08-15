@@ -53,6 +53,8 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -463,9 +465,14 @@ class MangaDetailPresenter(
                         File.separator + preferences.context.getString(R.string.app_name),
                 )
                 saveCover(directory, artwork)
+                launchUI {
+                    controller?.applicationContext?.toast(R.string.cover_saved)
+                }
             } catch (e: Exception) {
                 XLog.e("error saving cover", e)
-                _snackbarState.emit(SnackbarState("Error saving cover"))
+                launchUI {
+                    controller?.applicationContext?.toast("Error saving cover")
+                }
             }
         }
     }
