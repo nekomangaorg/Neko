@@ -53,7 +53,6 @@ import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
@@ -72,6 +71,7 @@ import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
@@ -79,7 +79,6 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaComposeController
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.more.AboutController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.more.OverflowDialog
@@ -122,7 +121,6 @@ import me.saket.cascade.overrideAllPopupMenus
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import kotlin.collections.set
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToLong
@@ -201,26 +199,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set up shared element transition and disable overlay so views don't show above system bars
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        setExitSharedElementCallback(
-            object : MaterialContainerTransformSharedElementCallback() {
-                override fun onMapSharedElements(
-                    names: MutableList<String>,
-                    sharedElements: MutableMap<String, View>,
-                ) {
-                    val mangaController =
-                        router.backstack.lastOrNull()?.controller as? MangaDetailsController
-                    if (mangaController == null || chapterIdToExitTo == 0L) {
-                        super.onMapSharedElements(names, sharedElements)
-                        return
-                    }
-                    val recyclerView = mangaController.binding.recycler
-                    val selectedViewHolder =
-                        recyclerView.findViewHolderForItemId(chapterIdToExitTo) ?: return
-                    sharedElements[names[0]] = selectedViewHolder.itemView
-                    chapterIdToExitTo = 0L
-                }
-            },
-        )
         window.sharedElementsUseOverlay = false
 
         super.onCreate(savedInstanceState)
@@ -830,10 +808,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
         when (val controller = router.backstack.lastOrNull()?.controller) {
-            is MangaDetailsController -> {
-                val source = controller.presenter.source
+            is MangaComposeController -> {
                 val url = try {
-                    source.mangaDetailsRequest(controller.presenter.manga).url.toString()
+                    (source as HttpSource).mangaDetailsRequest(controller.presenter.manga.value).url.toString()
                 } catch (e: Exception) {
                     return
                 }

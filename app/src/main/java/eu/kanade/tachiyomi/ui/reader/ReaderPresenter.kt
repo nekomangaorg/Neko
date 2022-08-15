@@ -113,7 +113,6 @@ class ReaderPresenter(
     private val isLoadingAdjacentChapterRelay = BehaviorRelay.create<Boolean>()
     private var finished = false
 
-
     /**
      * Chapter list for the active manga. It's retrieved lazily and should be accessed for the first
      * time in a background thread to avoid blocking the UI.
@@ -645,18 +644,20 @@ class ReaderPresenter(
         db.updateViewerFlags(manga).executeAsBlocking()
 
         Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-            .subscribeFirst({ view, _ ->
-                val currChapters = viewerChaptersRelay.value
-                if (currChapters != null) {
-                    // Save current page
-                    val currChapter = currChapters.currChapter
-                    currChapter.requestedPage = currChapter.chapter.last_page_read
+            .subscribeFirst(
+                { view, _ ->
+                    val currChapters = viewerChaptersRelay.value
+                    if (currChapters != null) {
+                        // Save current page
+                        val currChapter = currChapters.currChapter
+                        currChapter.requestedPage = currChapter.chapter.last_page_read
 
-                    // Emit manga and chapters to the new viewer
-                    view.setManga(manga)
-                    view.setChapters(currChapters)
-                }
-            },)
+                        // Emit manga and chapters to the new viewer
+                        view.setManga(manga)
+                        view.setChapters(currChapters)
+                    }
+                },
+            )
     }
 
     /**
@@ -681,12 +682,14 @@ class ReaderPresenter(
         XLog.i("Manga orientation is ${manga.orientationType}")
 
         Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-            .subscribeFirst({ view, _ ->
-                val currChapters = viewerChaptersRelay.value
-                if (currChapters != null) {
-                    view.setOrientation(getMangaOrientationType())
-                }
-            },)
+            .subscribeFirst(
+                { view, _ ->
+                    val currChapters = viewerChaptersRelay.value
+                    if (currChapters != null) {
+                        view.setOrientation(getMangaOrientationType())
+                    }
+                },
+            )
     }
 
     /**
