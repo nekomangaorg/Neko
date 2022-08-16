@@ -532,7 +532,7 @@ class Downloader(
         return try {
             ImageUtil.splitTallImage(imageFile, imageFilePath)
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             false
         }
     }

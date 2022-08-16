@@ -513,7 +513,7 @@ object ImageUtil {
             return false
         }
 
-        Timber.d(
+        XLog.d(
             "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split",
         )
 
@@ -528,7 +528,7 @@ object ImageUtil {
                     splitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                     splitBitmap.recycle()
                 }
-                Timber.d(
+                XLog.d(
                     "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} height=${splitData.outputImageHeight} bottomOffset=${splitData.bottomOffset}",
                 )
             }
