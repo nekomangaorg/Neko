@@ -64,8 +64,10 @@ class PageHandler {
                             return@withContext comikeyHandler.fetchPageList(externalUrl)
                         }*/
                         "bilibili comics".equals(chapter.scanlator, true) -> {
-                            if (chapterDateNewer) {
+                            if (chapterAttributesDto.pages > 0) {
                                 return@withContext bilibiliHandler.fetchPageList(externalUrl)
+                            } else {
+                                throw Exception("This chapter is currently unavailable on MangaDex, try reading with webview")
                             }
                         }
                         else -> throw Exception("${chapter.scanlator} not supported, try webview")
