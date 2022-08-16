@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
@@ -47,7 +45,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.ColorUtils
 import androidx.core.text.isDigitsOnly
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -62,6 +59,7 @@ import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 
 /**
@@ -82,12 +80,7 @@ fun DescriptionBlock(
     altTitleResetClick: () -> Unit = {},
 ) {
 
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-    val isDarkTheme = isSystemInDarkTheme()
-    val tagColor = remember {
-        generateTagColor(surfaceColor, secondaryColor, themeColorState.buttonColor, isDarkTheme)
-    }
+    val tagColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 16.dp)
 
     val noDescription = stringResource(R.string.no_description)
     var description by remember { mutableStateOf(noDescription) }
@@ -343,38 +336,6 @@ private fun markdownTypography() =
         body1 = MaterialTheme.typography.bodyLarge,
         body2 = MaterialTheme.typography.bodySmall,
     )
-
-/**
- * Generates the container color for the tag, changes depending on if if the button color is the secondary color or is based off the cover
- */
-private fun generateTagColor(surfaceColor: Color, secondaryColor: Color, buttonColor: Color, isDarkTheme: Boolean): Color {
-    val buttonColorArray = FloatArray(3)
-    val bgArray = FloatArray(3)
-
-    ColorUtils.colorToHSL(surfaceColor.toArgb(), bgArray)
-    ColorUtils.colorToHSL(buttonColor.toArgb(), buttonColorArray)
-
-    return Color(
-        ColorUtils.setAlphaComponent(
-            ColorUtils.HSLToColor(
-                floatArrayOf(
-                    when (buttonColor == secondaryColor) {
-                        true -> bgArray[0]
-                        false -> buttonColorArray[0]
-                    },
-                    bgArray[1],
-                    (
-                        when {
-                            isDarkTheme -> 0.225f
-                            else -> 0.85f
-                        }
-                        ),
-                ),
-            ),
-            199,
-        ),
-    )
-}
 
 fun TimeInterpolator.toEasing() = Easing { x ->
     getInterpolation(x)
