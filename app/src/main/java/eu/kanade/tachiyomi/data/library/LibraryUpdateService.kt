@@ -100,11 +100,7 @@ class LibraryUpdateService(
 
     val count = AtomicInteger(0)
     val jobCount = AtomicInteger(0)
-
-    // List containing categories that get included in downloads.
-    private val categoriesToDownload =
-        preferences.downloadNewChaptersInCategories().get().map(String::toInt)
-
+    
     // Boolean to determine if user wants to automatically download new chapters.
     private val downloadNew: Boolean = preferences.downloadNewChapters().get()
 
@@ -435,6 +431,15 @@ class LibraryUpdateService(
             }
             db.insertManga(manga).executeOnIO()
             // add mdlist tracker if manga in library has it missing
+
+            withIOContext {
+                runCatching {
+                    val artwork = source.getArtwork(manga.id!!, MdUtil.getMangaId(manga.url))
+                    db.deleteArtworkForManga(manga).executeOnIO()
+                    db.insertArtWorkList(artwork).executeOnIO()
+                }
+            }
+
             withIOContext {
                 val tracks = db.getTracks(manga).executeOnIO().toMutableList()
 
@@ -548,6 +553,38 @@ class LibraryUpdateService(
             db.insertManga(manga).executeOnIO()
         }
         return manga
+    }
+
+    suspend fun updateArtwork(mangaList: List<LibraryManga>?) {
+        XLog.d("Attempting to update reading statuses")
+        if (mangaList.isNullOrEmpty()) return
+        if (sourceManager.getMangadex().isLogged() && job?.isCancelled == false) {
+            runCatching {
+                val readingStatus = statusHandler.fetchReadingStatusForAllManga()
+                if (readingStatus.isNotEmpty()) {
+                    XLog.d("Updating follow statuses")
+                    mangaList.map { libraryManga ->
+                        runCatching {
+                            db.getTracks(libraryManga).executeOnIO()
+                                .toMutableList()
+                                .firstOrNull { it.sync_id == trackManager.mdList.id }
+                                ?.apply {
+                                    val result =
+                                        readingStatus[MdUtil.getMangaId(libraryManga.url)]
+                                    if (this.status != FollowStatus.fromDex(result).int) {
+                                        this.status = FollowStatus.fromDex(result).int
+                                        db.insertTrack(this).executeOnIO()
+                                    }
+                                }
+                        }.onFailure {
+                            XLog.e("Error refreshing tracking", it)
+                        }
+                    }
+                }
+            }.onFailure {
+                XLog.e("error getting reading status", it)
+            }
+        }
     }
 
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) {
