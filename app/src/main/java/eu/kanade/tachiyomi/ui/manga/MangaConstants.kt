@@ -113,6 +113,8 @@ object MangaConstants {
 
         data class Bookmark(override val canUndo: Boolean = false) : MarkAction()
         data class UnBookmark(override val canUndo: Boolean = false) : MarkAction()
+        data class PreviousRead(override val canUndo: Boolean, val altChapters: List<ChapterItem>) : MarkAction()
+        data class PreviousUnread(override val canUndo: Boolean, val altChapters: List<ChapterItem>) : MarkAction()
         data class Read(override val canUndo: Boolean = false) : MarkAction()
         data class Unread(override val canUndo: Boolean = false, val lastRead: Int? = null, val pagesLeft: Int? = null) : MarkAction()
     }

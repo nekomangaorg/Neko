@@ -1252,19 +1252,38 @@ class MangaDetailPresenter(
 
     fun markChapters(chapterItems: List<ChapterItem>, markAction: MangaConstants.MarkAction, skipSync: Boolean = false) {
         presenterScope.launchIO {
+
+            val initialChapterItems = if (markAction is MangaConstants.MarkAction.PreviousRead || markAction is MangaConstants.MarkAction.PreviousUnread) {
+                when (manga.value.sortDescending(preferences)) {
+                    true -> (markAction as? MangaConstants.MarkAction.PreviousRead)?.altChapters ?: (markAction as MangaConstants.MarkAction.PreviousUnread).altChapters
+                    false -> chapterItems
+                }
+            } else {
+                chapterItems
+            }
+
+
             val (newChapterItems, nameRes) = when (markAction) {
                 is MangaConstants.MarkAction.Bookmark -> {
-                    chapterItems.map { it.chapter }.map { it.copy(bookmark = true) } to R.string.bookmarked
+                    initialChapterItems.map { it.chapter }.map { it.copy(bookmark = true) } to R.string.bookmarked
                 }
                 is MangaConstants.MarkAction.UnBookmark -> {
-                    chapterItems.map { it.chapter }.map { it.copy(bookmark = false) } to R.string.removed_bookmark
+                    initialChapterItems.map { it.chapter }.map { it.copy(bookmark = false) } to R.string.removed_bookmark
                 }
                 is MangaConstants.MarkAction.Read -> {
-                    chapterItems.map { it.chapter }.map { it.copy(read = true) } to R.string.marked_as_read
+                    initialChapterItems.map { it.chapter }.map { it.copy(read = true) } to R.string.marked_as_read
                 }
 
+                is MangaConstants.MarkAction.PreviousRead -> {
+                    initialChapterItems.map { it.chapter }.map { it.copy(read = true) } to R.string.marked_as_read
+                }
+                is MangaConstants.MarkAction.PreviousUnread -> {
+                    initialChapterItems.map { it.chapter }.map {
+                        it.copy(read = false, lastPageRead = 0, pagesLeft = 0)
+                    } to R.string.marked_as_unread
+                }
                 is MangaConstants.MarkAction.Unread -> {
-                    chapterItems.map { it.chapter }.map {
+                    initialChapterItems.map { it.chapter }.map {
                         it.copy(read = false, lastPageRead = markAction.lastRead ?: 0, pagesLeft = markAction.pagesLeft ?: 0)
                     } to R.string.marked_as_unread
                 }
@@ -1315,7 +1334,7 @@ class MangaDetailPresenter(
                         messageRes = nameRes, actionLabelRes = R.string.undo,
                         action = {
                             presenterScope.launch {
-                                val originalDbChapters = chapterItems.map { it.chapter }.map { it.toDbChapter() }
+                                val originalDbChapters = initialChapterItems.map { it.chapter }.map { it.toDbChapter() }
                                 db.updateChaptersProgress(originalDbChapters).executeOnIO()
                                 updateChapterFlows()
                             }

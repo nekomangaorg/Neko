@@ -380,11 +380,18 @@ fun MangaScreen(
                             chapterActions.download(listOf(chapter), downloadAction)
                         },
                         markPrevious = { read ->
-                            val action = when (read) {
-                                true -> MangaConstants.MarkAction.Read(true)
-                                false -> MangaConstants.MarkAction.Unread(true)
-                            }
+
                             val chaptersToMark = chapters.value.subList(0, index)
+                            val lastIndex = chapters.value.lastIndex
+                            val altChapters = if (index == lastIndex) {
+                                emptyList()
+                            } else {
+                                chapters.value.slice(IntRange(index + 1, lastIndex))
+                            }
+                            val action = when (read) {
+                                true -> MangaConstants.MarkAction.PreviousRead(true, altChapters)
+                                false -> MangaConstants.MarkAction.PreviousUnread(true, altChapters)
+                            }
                             chapterActions.mark(chaptersToMark, action)
                         },
                     )
