@@ -185,7 +185,6 @@ fun MangaScreen(
     }
 
     var inLibrary by remember { mutableStateOf(manga.favorite) }
-    val hasRemovedChapters by remember { mutableStateOf(removedChapters.value) }
 
     var currentBottomSheet: DetailsBottomSheetScreen? by remember {
         mutableStateOf(null)
@@ -406,14 +405,14 @@ fun MangaScreen(
                         NonTablet(contentPadding = contentPadding, details = details(), chapterHeader = chapterHeader(), chapters = chapters, chapterRow = chapterRow())
                     }
 
-                    if (hasRemovedChapters.isNotEmpty()) {
+                    if (removedChapters.value.isNotEmpty()) {
                         RemovedChaptersDialog(
-                            themeColorState = themeColorState, chapters = hasRemovedChapters,
-                            onConfirm = { removeDeleted ->
-                                if (removeDeleted) {
-                                    chapterActions.delete(hasRemovedChapters)
-                                    chapterActions.clearRemoved
-                                }
+                            themeColorState = themeColorState,
+                            chapters = removedChapters.value,
+                            onConfirm = {
+                                chapterActions.delete(removedChapters.value)
+                                chapterActions.clearRemoved
+
                             },
                             onDismiss = chapterActions.clearRemoved,
                         )
