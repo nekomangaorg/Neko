@@ -259,7 +259,7 @@ private fun ChapterInfo(
                     Icon(
                         imageVector = Icons.Filled.Bookmark, contentDescription = null,
                         modifier = Modifier
-                            .size(16.dp)
+                            .size(12.dp)
                             .align(Alignment.CenterVertically),
                         tint = themeColorState.buttonColor,
                     )
@@ -267,7 +267,7 @@ private fun ChapterInfo(
                 }
                 Text(
                     text = titleText,
-                    style = MaterialTheme.typography.bodyLarge.copy(color = textColor, fontWeight = FontWeight.Medium, letterSpacing = (-.6).sp),
+                    style = MaterialTheme.typography.bodyMedium.copy(color = textColor, fontWeight = FontWeight.Medium, letterSpacing = (-.6).sp),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -316,7 +316,7 @@ private fun ChapterInfo(
                             Image(
                                 painter = rememberDrawablePainter(drawable = drawable),
                                 modifier = Modifier
-                                    .height(16.dp)
+                                    .height(12.dp)
                                     .clip(RoundedCornerShape(4.dp)),
                                 contentDescription = "flag",
                             )
