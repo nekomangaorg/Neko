@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -117,7 +116,7 @@ fun MangaDetailsHeader(
                         titleLongClick = titleLongClick,
                         creatorLongClicked = creatorLongClick,
                     )
-                    Gap(height = 24.dp)
+                    Gap(height = 16.dp)
                     ButtonBlock(
                         hideButtonText = hideButtonText,
                         isMerged = isMerged,
@@ -151,7 +150,7 @@ fun MangaDetailsHeader(
             if (isTablet && quickReadText.text.isNotEmpty() && quickReadText.id != null) {
                 quickReadButton(quickReadText, themeColorState, quickReadClick)
             }
-            Gap(16.dp)
+            Gap(8.dp)
             DescriptionBlock(
                 manga = manga,
                 title = title,
@@ -182,14 +181,13 @@ private fun ColumnScope.quickReadButton(
     quickReadClick: () -> Unit,
 ) {
     if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
-        Gap(16.dp)
+        Gap(8.dp)
         CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)) {
             ElevatedButton(
                 onClick = quickReadClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
                 colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
             ) {
                 Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)
