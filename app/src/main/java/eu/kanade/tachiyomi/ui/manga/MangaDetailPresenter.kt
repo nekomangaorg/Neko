@@ -393,7 +393,9 @@ class MangaDetailPresenter(
                 val chaptersToMarkRead = allChapters.value.asSequence().filter { !it.chapter.isMergedChapter() }
                     .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
                     .toList()
-                markChapters(chaptersToMarkRead, MangaConstants.MarkAction.Read(), skipSync = true)
+                if (chaptersToMarkRead.isNotEmpty()) {
+                    markChapters(chaptersToMarkRead, MangaConstants.MarkAction.Read(), skipSync = true)
+                }
             }
 
         }
