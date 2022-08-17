@@ -79,6 +79,7 @@ object MangaConstants {
     data class SnackbarState(
         val message: String? = null,
         @StringRes val messageRes: Int? = null,
+        @StringRes val fieldRes: Int? = null,
         val actionLabel: String? = null,
         @StringRes val actionLabelRes: Int? = null,
         val action: (() -> Unit)? = null,

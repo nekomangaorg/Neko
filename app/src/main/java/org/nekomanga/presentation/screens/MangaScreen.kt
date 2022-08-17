@@ -157,7 +157,9 @@ fun MangaScreen(
         snackbar.collect { state ->
             scope.launch {
                 val message = when {
+                    state.message != null && state.messageRes != null && state.fieldRes != null -> context.getString(state.messageRes, context.getString(state.fieldRes)) + state.message
                     state.message != null && state.messageRes != null -> context.getString(state.messageRes, state.message)
+                    state.messageRes != null && state.fieldRes != null -> context.getString(state.messageRes, context.getString(state.fieldRes))
                     state.message != null -> state.message
                     state.messageRes != null -> context.getString(state.messageRes)
                     else -> ""
