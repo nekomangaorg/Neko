@@ -371,7 +371,16 @@ class MangaDetailPresenter(
                 count++
             }
 
-            val asyncList = tracks.value.map { track -> TrackingConstants.TrackItem(track, trackManager.services.find { it.id == track.sync_id }!!) }
+            val asyncList = tracks.value.asSequence()
+                .mapNotNull { track ->
+                    val service = trackManager.services.find { it.id == track.sync_id }
+                    if (service == null) {
+                        XLog.e("Error finding track service for track.sync_id ${track.sync_id}")
+                        null
+                    } else {
+                        TrackingConstants.TrackItem(track, service)
+                    }
+                }
                 .filter { it.service.isLogged() }.map { item ->
                     async(Dispatchers.IO) {
                         kotlin.runCatching { item.service.refresh(item.track!!) }.onFailure {
