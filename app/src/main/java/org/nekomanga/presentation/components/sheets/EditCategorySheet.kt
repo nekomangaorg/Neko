@@ -59,7 +59,7 @@ fun EditCategorySheet(
 
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
 
-        BaseSheet(themeColor = themeColorState) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
 
             if (showAddCategoryDialog) {
                 AddCategoryDialog(themeColorState = themeColorState, currentCategories = categories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
