@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.source.online.utils
 
 import eu.kanade.tachiyomi.R
 
-enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int = 0) {
+enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int) {
     ARABIC("ar", "Arabic", R.drawable.ic_flag_sa),
     AZERBAIJANI("az", "Azerbaijani", R.drawable.ic_flag_az),
     BENGALI("bn", "Bengali", R.drawable.ic_flag_bd),
     BULGARIAN("bg", "Bulgarian", R.drawable.ic_flag_bg),
     BURMESE("my", "Burmese", R.drawable.ic_flag_mm),
-    CATALAN("ca", "Catalan"),
+    CATALAN("ca", "Catalan", R.drawable.ic_flag_ca),
     CHINESE_SIMPLIFIED("zh", "Chinese (Simp)", R.drawable.ic_flag_cn),
     CHINESE_TRAD("zh-hk", "Chinese (Trad)", R.drawable.ic_flag_hk),
     CZECH("cs", "Czech", R.drawable.ic_flag_cz),
@@ -46,7 +46,7 @@ enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int 
     TURKISH("tr", "Turkish", R.drawable.ic_flag_tr),
     UKRAINIAN("uk", "Ukrainian", R.drawable.ic_flag_ua),
     VIETNAMESE("vi", "Vietnamese", R.drawable.ic_flag_vn),
-    OTHER("NULL", "Other");
+    OTHER("NULL", "Other", R.drawable.ic_flag_other);
 
     companion object {
         fun fromIsoCode(isoCode: String): MdLang? =
