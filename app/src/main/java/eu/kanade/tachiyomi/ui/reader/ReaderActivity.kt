@@ -1146,8 +1146,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     override fun onPause() {
-        presenter.saveProgress()
+        presenter.saveCurrentChapterReadingProgress()
         super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.setReadStartTime()
     }
 
     fun reloadChapters(doublePages: Boolean, force: Boolean = false) {
