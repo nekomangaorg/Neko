@@ -398,7 +398,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             if (!preferences.readingSync() || !sourceManager.getMangadex().isLogged() || !isOnline()) return@launchIO
 
-            statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.value.url)).collect { chapterIds ->
+            statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.value.url)).collect { chapterIds ->
                 val chaptersToMarkRead = allChapters.value.asSequence().filter { !it.chapter.isMergedChapter() }
                     .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
                     .toList()
@@ -506,7 +506,7 @@ class MangaDetailPresenter(
         val fileNameNoExtension = listOfNotNull(
             manga.value.title,
             artwork.volume.ifEmpty { null },
-            MdUtil.getMangaId(manga.value.url),
+            MdUtil.getMangaUUID(manga.value.url),
         ).joinToString("-")
 
         val filename = DiskUtil.buildValidFilename("${fileNameNoExtension}.${type.extension}")
@@ -1097,7 +1097,7 @@ class MangaDetailPresenter(
      */
     private fun updateAlternativeArtworkFlow() {
         presenterScope.launchIO {
-            val uuid = MdUtil.getMangaId(manga.value.url)
+            val uuid = MdUtil.getMangaUUID(manga.value.url)
             val quality = preferences.thumbnailQuality()
             val currentUsed = currentArtwork.value
 
@@ -1328,7 +1328,7 @@ class MangaDetailPresenter(
                     if (chapterIds.isNotEmpty()) {
                         GlobalScope.launchIO {
                             statusHandler.marksChaptersStatus(
-                                MdUtil.getMangaId(manga.value.url),
+                                MdUtil.getMangaUUID(manga.value.url),
                                 chapterIds,
                                 syncRead,
                             )

@@ -59,7 +59,7 @@ class V5MigrationService(
             progressNotification(manga.title, index + 1, totalManga)
 
             // Get the id and check if it is a number
-            val oldMangaId = MdUtil.getMangaId(manga.url)
+            val oldMangaId = MdUtil.getMangaUUID(manga.url)
             val isNumericId = oldMangaId.isDigitsOnly()
 
             // Get the new id for this manga

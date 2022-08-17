@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
-import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
+import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -160,7 +160,7 @@ class FollowsHandler {
 
     suspend fun updateRating(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
-            val mangaID = getMangaId(track.tracking_url)
+            val mangaID = getMangaUUID(track.tracking_url)
             val response = if (track.score == 0f) {
                 authService.removeRating(mangaID)
             } else {
@@ -180,28 +180,26 @@ class FollowsHandler {
 
     suspend fun fetchTrackingInfo(url: String): Track {
         return withContext(Dispatchers.IO) {
-            val mangaId = getMangaId(url)
-            val readingStatusResponse = authService.readingStatusForManga(mangaId)
-            val ratingResponse = authService.retrieveRating(mangaId)
+            val mangaUUID = getMangaUUID(url)
+            val readingStatusResponse = authService.readingStatusForManga(mangaUUID)
+            val ratingResponse = authService.retrieveRating(mangaUUID)
 
-            when (readingStatusResponse) {
-                is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*> -> {
-                    readingStatusResponse.log("trying to fetch tracking info")
-                    throw Exception("error trying to get tracking info")
-                }
-                else -> {
-                    val followStatus =
-                        FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
-                    val rating =
-                        ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaId]
-                    val track = Track.create(TrackManager.MDLIST).apply {
-                        status = followStatus.int
-                        tracking_url = "$baseUrl/title/$mangaId"
-                        score = rating?.rating?.toFloat() ?: 0f
-                    }
-                    return@withContext track
-                }
+            readingStatusResponse.onFailure {
+                this.log("trying to fetch reading status for $mangaUUID")
+                throw Exception("error trying to get tracking info")
+
             }
+            val followStatus =
+                FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
+            val rating =
+                ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaUUID]
+            val track = Track.create(TrackManager.MDLIST).apply {
+                status = followStatus.int
+                tracking_url = "$baseUrl/title/$mangaUUID"
+                score = rating?.rating?.toFloat() ?: 0f
+            }
+            return@withContext track
+
         }
     }
 }

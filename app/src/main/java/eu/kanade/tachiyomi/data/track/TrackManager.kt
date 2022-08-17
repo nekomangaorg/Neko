@@ -34,10 +34,10 @@ class TrackManager(context: Context) {
     fun getService(id: Int) = services.find { it.id == id }
 
     fun hasLoggedServices() = services.any { it.isLogged() }
-    
+
     fun getIdFromManga(trackService: TrackService, manga: Manga): String? {
         return when (trackService.id) {
-            MDLIST -> MdUtil.getMangaId(manga.url)
+            MDLIST -> MdUtil.getMangaUUID(manga.url)
             MYANIMELIST -> manga.my_anime_list_id
             ANILIST -> manga.anilist_id
             KITSU -> manga.kitsu_id

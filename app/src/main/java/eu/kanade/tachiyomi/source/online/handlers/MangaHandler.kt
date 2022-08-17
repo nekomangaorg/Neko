@@ -61,10 +61,10 @@ class MangaHandler {
     suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             logTimeTaken("Manga Detail for  ${manga.title}") {
-                val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
+                val response = network.service.viewManga(MdUtil.getMangaUUID(manga.url))
                     .onFailure {
                         val type =
-                            "trying to view manga ${manga.title} with id: ${MdUtil.getMangaId(manga.url)}"
+                            "trying to view manga ${manga.title} with id: ${MdUtil.getMangaUUID(manga.url)}"
                         this.log(type)
                         this.throws(type)
                     }.getOrThrow()
@@ -80,7 +80,7 @@ class MangaHandler {
                 val langs = MdUtil.getLangsToShow(preferencesHelper)
 
                 val chapterListDto = logTimeTaken("fetching chapters from Dex") {
-                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0)
+                    network.service.viewChapters(MdUtil.getMangaUUID(manga.url), langs, 0)
                         .onFailure {
                             val type = "trying to view chapters"
                             this.log(type)
@@ -98,7 +98,7 @@ class MangaHandler {
 
                 while (hasMoreResults) {
                     offset += limit
-                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, offset)
+                    network.service.viewChapters(MdUtil.getMangaUUID(manga.url), langs, offset)
                         .onFailure {
                             this.log("trying to get more results")
                             hasMoreResults = false

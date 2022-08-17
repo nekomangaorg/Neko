@@ -1144,7 +1144,7 @@ class LibraryPresenter(
                 if (nonMergedChapterIds.isNotEmpty()) {
                     presenterScope.launch {
                         statusHandler.marksChaptersStatus(
-                            MdUtil.getMangaId(entry.key.url),
+                            MdUtil.getMangaUUID(entry.key.url),
                             nonMergedChapterIds,
                             markRead,
                         )

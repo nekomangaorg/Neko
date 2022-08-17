@@ -164,16 +164,15 @@ class MdUtil {
             if (lowQuality) {
                 ext = ".thumb$ext"
             }
-            return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ext
+            return cdnUrl + "/images/manga/" + getMangaUUID(mangaUrl) + ext
         }
 
         // Get the ID from the manga url
-        fun getMangaId(url: String): String {
-            val id = url.trimEnd('/').substringAfterLast("/")
-            return id
+        fun getMangaUUID(url: String): String {
+            return url.trimEnd('/').substringAfterLast("/")
         }
 
-        fun getChapterId(url: String) = url.substringAfterLast("/")
+        fun getChapterUUID(url: String) = url.substringAfterLast("/")
 
         fun cleanString(string: String): String {
             var cleanedString = string

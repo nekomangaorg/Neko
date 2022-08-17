@@ -85,7 +85,7 @@ fun DescriptionBlock(
     val noDescription = stringResource(R.string.no_description)
     var description by remember { mutableStateOf(noDescription) }
 
-    if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+    if (MdUtil.getMangaUUID(manga.url).isDigitsOnly()) {
         LaunchedEffect(key1 = 1) {
             description = "THIS MANGA IS NOT MIGRATED TO V5"
         }

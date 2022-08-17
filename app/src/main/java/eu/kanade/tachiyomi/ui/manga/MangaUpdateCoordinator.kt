@@ -59,7 +59,7 @@ class MangaUpdateCoordinator {
             return@channelFlow
         }
 
-        val mangaUUID = MdUtil.getMangaId(manga.url)
+        val mangaUUID = MdUtil.getMangaUUID(manga.url)
 
         if (mangaUUID.isDigitsOnly()) {
             send(MangaResult.Error(R.string.v3_manga))
@@ -89,7 +89,7 @@ class MangaUpdateCoordinator {
         return scope.launchIO {
             runCatching {
                 withIOContext {
-                    val artwork = mangaDex.getArtwork(manga.id!!, MdUtil.getMangaId(manga.url))
+                    val artwork = mangaDex.getArtwork(manga.id!!, MdUtil.getMangaUUID(manga.url))
                     db.deleteArtworkForManga(manga).executeOnIO()
                     db.insertArtWorkList(artwork).executeOnIO()
                     send(MangaResult.UpdatedArtwork)

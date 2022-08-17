@@ -72,7 +72,7 @@ class FullRestore(val context: Context, val job: Job?) {
             restoreCategories(backup.backupCategories)
         }
 
-        dexManga.groupBy { MdUtil.getMangaId(it.url) }.forEach { (_, mangaList) ->
+        dexManga.groupBy { MdUtil.getMangaUUID(it.url) }.forEach { (_, mangaList) ->
             restoreManga(mangaList.first().title, mangaList, backup.backupCategories)
         }
 

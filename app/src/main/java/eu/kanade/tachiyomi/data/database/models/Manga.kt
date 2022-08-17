@@ -184,8 +184,8 @@ interface Manga : SManga {
 
     fun getExternalLinks(): List<ExternalLink> {
         val list = mutableListOf<ExternalLink>()
-        list.add(Dex(MdUtil.getMangaId(url)))
-        list.add(DexApi(MdUtil.getMangaId(url)))
+        list.add(Dex(MdUtil.getMangaUUID(url)))
+        list.add(DexApi(MdUtil.getMangaUUID(url)))
 
         kitsu_id?.let {
             list.add(Kitsu(it))

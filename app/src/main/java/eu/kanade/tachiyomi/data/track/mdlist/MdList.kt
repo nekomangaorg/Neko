@@ -66,7 +66,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 val followStatus = FollowStatus.fromInt(track.status)
 
                 // allow follow status to update
-                mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
+                mdex.updateFollowStatus(MdUtil.getMangaUUID(track.tracking_url), followStatus)
                 manga.follow_status = followStatus
                 db.insertManga(manga).executeAsBlocking()
 
@@ -76,7 +76,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                     if (track.total_chapters != 0 && track.last_chapter_read.toInt() == track.total_chapters) {
                         track.status = FollowStatus.COMPLETED.int
                         mdex.updateFollowStatus(
-                            MdUtil.getMangaId(track.tracking_url),
+                            MdUtil.getMangaUUID(track.tracking_url),
                             FollowStatus.COMPLETED,
                         )
                     }
@@ -84,7 +84,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                         val newFollowStatus = FollowStatus.READING
                         track.status = FollowStatus.READING.int
                         mdex.updateFollowStatus(
-                            MdUtil.getMangaId(track.tracking_url),
+                            MdUtil.getMangaUUID(track.tracking_url),
                             newFollowStatus,
                         )
                         manga.follow_status = newFollowStatus
@@ -111,7 +111,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun planningStatus() = FollowStatus.PLAN_TO_READ.int
 
     override suspend fun bind(track: Track): Track {
-        if (MdUtil.getMangaId(track.tracking_url).isDigitsOnly()) {
+        if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
             XLog.i("v3 tracking ${track.tracking_url} skipping bind")
             return track
         }
@@ -121,7 +121,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun refresh(track: Track): Track {
-        if (MdUtil.getMangaId(track.tracking_url).isDigitsOnly()) {
+        if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
             XLog.i("v3 tracking ${track.tracking_url} skipping bind")
             return track
         }

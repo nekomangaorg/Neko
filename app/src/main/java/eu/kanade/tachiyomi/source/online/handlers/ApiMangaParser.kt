@@ -259,7 +259,7 @@ class ApiMangaParser {
 
         chapter.scanlator = MdUtil.cleanString(ChapterUtil.getScanlatorString(scanlatorName))
 
-        chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)
+        chapter.mangadex_chapter_id = MdUtil.getChapterUUID(chapter.url)
 
         chapter.language = attributes.translatedLanguage
 

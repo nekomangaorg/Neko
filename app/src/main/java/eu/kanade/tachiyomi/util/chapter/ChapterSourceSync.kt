@@ -55,7 +55,7 @@ fun syncChaptersWithSource(
                 it.url == sourceChapter.url
             } else if (sourceChapter.isMergedChapter().not() && it.isMergedChapter().not()) {
                 (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
-                    MdUtil.getChapterId(it.url) == sourceChapter.mangadex_chapter_id
+                    MdUtil.getChapterUUID(it.url) == sourceChapter.mangadex_chapter_id
             } else {
                 false
             }

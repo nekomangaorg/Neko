@@ -100,7 +100,7 @@ class LibraryUpdateService(
 
     val count = AtomicInteger(0)
     val jobCount = AtomicInteger(0)
-    
+
     // Boolean to determine if user wants to automatically download new chapters.
     private val downloadNew: Boolean = preferences.downloadNewChapters().get()
 
@@ -356,7 +356,7 @@ class LibraryUpdateService(
             val manga = mangaToUpdateMap[source]!![currentCount]
             val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
             logTimeTaken("library manga ${manga.title}") {
-                if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+                if (MdUtil.getMangaUUID(manga.url).isDigitsOnly()) {
                     XLog.i("Manga : ${manga.title} is not migrated to v5 skipping")
                 } else if (updateMangaChapters(manga, this.count.andIncrement, shouldDownload)) {
                     hasDownloads = true
@@ -434,7 +434,7 @@ class LibraryUpdateService(
 
             withIOContext {
                 runCatching {
-                    val artwork = source.getArtwork(manga.id!!, MdUtil.getMangaId(manga.url))
+                    val artwork = source.getArtwork(manga.id!!, MdUtil.getMangaUUID(manga.url))
                     db.deleteArtworkForManga(manga).executeOnIO()
                     db.insertArtWorkList(artwork).executeOnIO()
                 }
@@ -488,7 +488,7 @@ class LibraryUpdateService(
                 )
                 if (preferences.readingSync() && source.isLogged()) {
                     val dbChapters = db.getChapters(manga).executeAsBlocking()
-                    statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.url))
+                    statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.url))
                         .collect { chapterIds ->
                             val markRead =
                                 dbChapters.asSequence().filter { it.isMergedChapter().not() }
@@ -570,7 +570,7 @@ class LibraryUpdateService(
                                 .firstOrNull { it.sync_id == trackManager.mdList.id }
                                 ?.apply {
                                     val result =
-                                        readingStatus[MdUtil.getMangaId(libraryManga.url)]
+                                        readingStatus[MdUtil.getMangaUUID(libraryManga.url)]
                                     if (this.status != FollowStatus.fromDex(result).int) {
                                         this.status = FollowStatus.fromDex(result).int
                                         db.insertTrack(this).executeOnIO()
@@ -602,7 +602,7 @@ class LibraryUpdateService(
                                 .firstOrNull { it.sync_id == trackManager.mdList.id }
                                 ?.apply {
                                     val result =
-                                        readingStatus[MdUtil.getMangaId(libraryManga.url)]
+                                        readingStatus[MdUtil.getMangaUUID(libraryManga.url)]
                                     if (this.status != FollowStatus.fromDex(result).int) {
                                         this.status = FollowStatus.fromDex(result).int
                                         db.insertTrack(this).executeOnIO()

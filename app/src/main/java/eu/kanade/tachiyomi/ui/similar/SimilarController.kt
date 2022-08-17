@@ -50,7 +50,7 @@ class SimilarController(bundle: Bundle? = null) :
 
     constructor(manga: Manga) : this(
         Bundle().apply {
-            putString(BrowseSourceController.MANGA_ID, MdUtil.getMangaId(manga.url))
+            putString(BrowseSourceController.MANGA_ID, MdUtil.getMangaUUID(manga.url))
         },
     )
 

@@ -122,7 +122,7 @@ class FollowsSyncService {
                 if (trackItem.track!!.status == FollowStatus.UNFOLLOWED.int) {
                     withIOContext {
                         followsHandler.updateFollowStatus(
-                            MdUtil.getMangaId(manga.url),
+                            MdUtil.getMangaUUID(manga.url),
                             FollowStatus.READING,
                         )
 

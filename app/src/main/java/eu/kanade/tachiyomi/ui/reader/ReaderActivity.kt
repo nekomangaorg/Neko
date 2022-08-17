@@ -1557,7 +1557,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 toast(R.string.comments_unavailable_dex, duration = Toast.LENGTH_SHORT)
             }
         } else {
-            var url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url)
+            var url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterUUID(currentChapter.chapter.url)
             if (isComments) {
                 url += "/comments"
             }

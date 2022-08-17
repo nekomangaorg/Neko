@@ -386,7 +386,7 @@ class FullBackupManager(val context: Context) {
                     chapter.bookmark = dbChapter.bookmark
                 }
             } else {
-                chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)
+                chapter.mangadex_chapter_id = MdUtil.getChapterUUID(chapter.url)
             }
             chapter.manga_id = manga.id
         }
