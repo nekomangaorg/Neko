@@ -240,7 +240,8 @@ private fun ColumnScope.AltTitles(altTitles: List<String>, currentTitle: String,
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(
                         constraints.copy(
-                            maxWidth = constraints.maxWidth + 32.dp.roundToPx(), //add the end padding 16.dp
+                            minWidth = constraints.maxWidth + 24.dp.roundToPx(),
+                            maxWidth = constraints.maxWidth + 24.dp.roundToPx(),
                         ),
                     )
                     layout(placeable.width, placeable.height) {
@@ -250,8 +251,9 @@ private fun ColumnScope.AltTitles(altTitles: List<String>, currentTitle: String,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            item { Gap(8.dp) }
-
+            item {
+                Gap(8.dp)
+            }
             if (isCustomTitle) {
                 item {
                     TextButton(onClick = resetClick) {
