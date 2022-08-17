@@ -1468,4 +1468,8 @@ class MangaDetailPresenter(
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
     }
+
+    fun hideButtonText(): Boolean {
+        return preferences.hideButtonText().get()
+    }
 }

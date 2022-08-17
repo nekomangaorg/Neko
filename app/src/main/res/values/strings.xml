@@ -1109,6 +1109,7 @@
     <string name="filter_groups_title">Scanlator groups to show</string>
     <string name="scanlator_groups">Scanlator groups</string>
     <string name="reset_group_filter">Reset to all</string>
+    <string name="hide_button_text">Hide Backdrop button text</string>
 
     <string name="mdlist">MDList</string>
 

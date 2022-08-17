@@ -117,6 +117,12 @@ class SettingsAppearanceController : SettingsController() {
                 titleRes = R.string.theme_buttons_based_on_cover
                 defaultValue = true
             }
+
+            switchPreference {
+                key = Keys.hideMangaDetailButtonText
+                titleRes = R.string.hide_button_text
+                defaultValue = false
+            }
         }
 
         preferenceCategory {

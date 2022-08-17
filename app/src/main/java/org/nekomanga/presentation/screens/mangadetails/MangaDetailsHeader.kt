@@ -46,6 +46,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
 fun MangaDetailsHeader(
     manga: Manga,
     title: String,
+    hideButtonText: Boolean,
     artwork: Artwork,
     showBackdrop: Boolean = true,
     isMerged: Boolean = true,
@@ -118,6 +119,7 @@ fun MangaDetailsHeader(
                     )
                     Gap(height = 24.dp)
                     ButtonBlock(
+                        hideButtonText = hideButtonText,
                         isMerged = isMerged,
                         inLibrary = inLibrary,
                         loggedIntoTrackers = loggedIntoTrackers,

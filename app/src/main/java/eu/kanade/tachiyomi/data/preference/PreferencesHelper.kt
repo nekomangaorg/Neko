@@ -439,6 +439,8 @@ class PreferencesHelper(val context: Context) {
 
     fun hideHopper() = flowPrefs.getBoolean("hide_hopper", false)
 
+    fun hideButtonText() = flowPrefs.getBoolean(Keys.hideMangaDetailButtonText, false)
+
     fun autohideHopper() = flowPrefs.getBoolean(Keys.autoHideHopper, true)
 
     fun groupLibraryBy() = flowPrefs.getInt("group_library_by", 0)

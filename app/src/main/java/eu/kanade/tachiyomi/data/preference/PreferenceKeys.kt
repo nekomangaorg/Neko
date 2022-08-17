@@ -241,6 +241,8 @@ object PreferenceKeys {
 
     const val themeMangaDetails = "theme_manga_details"
 
+    const val hideMangaDetailButtonText = "hide_manga_detail_button_text"
+
     const val incognitoMode = "incognito_mode"
 
     const val sideNavMode = "side_nav_mode"

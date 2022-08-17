@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Check
@@ -24,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -47,6 +50,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
  */
 @Composable
 fun ButtonBlock(
+    hideButtonText: Boolean,
     isMerged: Boolean,
     inLibrary: Boolean,
     loggedIntoTrackers: Boolean,
@@ -67,14 +71,18 @@ fun ButtonBlock(
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
     val uncheckedBorderStroke = BorderStroke(1.dp, NekoColors.outline.copy(alpha = .3f))
     val gapBetweenButtons = 8.dp
-    val padding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-    val iconicsPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+    val (padding, iconicsPadding, buttonModifier) = when (hideButtonText) {
+        true -> Triple(PaddingValues(0.dp), PaddingValues(0.dp), Modifier.size(48.dp))
+        false -> Triple(PaddingValues(horizontal = 12.dp, vertical = 8.dp), PaddingValues(horizontal = 12.dp, vertical = 4.dp), Modifier.height(48.dp))
+    }
+
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
 
         val favConfig = when (inLibrary) {
@@ -82,12 +90,15 @@ fun ButtonBlock(
             false -> ButtonConfig(icon = Icons.Filled.FavoriteBorder, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.add_to_library))
         }
 
-
         OutlinedButton(
             colors = favConfig.buttonColors,
-            onClick = favoriteClick, border = favConfig.borderStroke, contentPadding = padding,
+            modifier = Modifier.size(48.dp),
+            shape = CircleShape,
+            onClick = favoriteClick,
+            border = favConfig.borderStroke,
+            contentPadding = PaddingValues(0.dp),
         ) {
-            ButtonContent(favConfig.icon!!, color = themeColorState.buttonColor, text = favConfig.text)
+            Icon(imageVector = favConfig.icon!!, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColorState.buttonColor)
         }
 
         if (loggedIntoTrackers) {
@@ -104,22 +115,62 @@ fun ButtonBlock(
             }
 
 
-            OutlinedButton(onClick = trackingClick, colors = trackerConfig.buttonColors, border = trackerConfig.borderStroke, contentPadding = padding) {
-                ButtonContent(trackerConfig.icon!!, color = themeColorState.buttonColor, text = trackerConfig.text)
+            OutlinedButton(
+                onClick = trackingClick,
+                modifier = buttonModifier,
+                shape = CircleShape,
+                colors = trackerConfig.buttonColors,
+                border = trackerConfig.borderStroke,
+                contentPadding = padding,
+            ) {
+                if (trackServiceCount > 0 && hideButtonText) {
+                    val icon = when (trackServiceCount) {
+                        1 -> CommunityMaterial.Icon3.cmd_numeric_1_box_outline
+                        2 -> CommunityMaterial.Icon3.cmd_numeric_2_box_outline
+                        3 -> CommunityMaterial.Icon3.cmd_numeric_3_box_outline
+                        4 -> CommunityMaterial.Icon3.cmd_numeric_4_box_outline
+                        else -> CommunityMaterial.Icon3.cmd_traffic_cone
+                    }
+                    IconicsButtonContent(
+                        iIcon = icon,
+                        color = themeColorState.buttonColor,
+                        hideText = hideButtonText,
+                        text = "",
+                        iconicsSize = 28.dp,
+                    )
+                } else {
+                    ButtonContent(trackerConfig.icon!!, color = themeColorState.buttonColor, hideText = hideButtonText, text = trackerConfig.text)
+                }
             }
         }
 
         Gap(gapBetweenButtons)
 
-
-        OutlinedButton(onClick = artworkClick, border = uncheckedBorderStroke, contentPadding = iconicsPadding) {
-            IconicsButtonContent(iIcon = MaterialDesignDx.Icon.gmf_art_track, color = themeColorState.buttonColor, text = stringResource(id = R.string.artwork), iconicsSize = 32.dp)
+        OutlinedButton(
+            onClick = artworkClick,
+            modifier = buttonModifier,
+            shape = CircleShape,
+            border = uncheckedBorderStroke,
+            contentPadding = iconicsPadding,
+        ) {
+            IconicsButtonContent(
+                iIcon = MaterialDesignDx.Icon.gmf_art_track,
+                color = themeColorState.buttonColor,
+                hideText = hideButtonText,
+                text = stringResource(id = R.string.artwork),
+                iconicsSize = 32.dp,
+            )
         }
 
         Gap(gapBetweenButtons)
 
-        OutlinedButton(onClick = similarClick, border = uncheckedBorderStroke, contentPadding = padding) {
-            ButtonContent(Icons.Filled.AccountTree, color = themeColorState.buttonColor, text = stringResource(R.string.similar_work))
+        OutlinedButton(
+            onClick = similarClick, modifier = buttonModifier,
+            shape = CircleShape,
+            border = uncheckedBorderStroke,
+            contentPadding = padding,
+        ) {
+            ButtonContent(Icons.Filled.AccountTree, color = themeColorState.buttonColor, hideText = hideButtonText, text = stringResource(R.string.similar_work))
         }
 
         Gap(gapBetweenButtons)
@@ -139,21 +190,39 @@ fun ButtonBlock(
             )
         }
 
-        OutlinedButton(onClick = mergeClick, colors = mergeConfig.buttonColors, border = mergeConfig.borderStroke, contentPadding = iconicsPadding) {
-            IconicsButtonContent(iIcon = mergeConfig.iIcon!!, color = themeColorState.buttonColor, text = mergeConfig.text, iconicsSize = 28.dp)
+        OutlinedButton(
+            onClick = mergeClick,
+            modifier = buttonModifier,
+            shape = CircleShape,
+            colors = mergeConfig.buttonColors,
+            border = mergeConfig.borderStroke,
+            contentPadding = iconicsPadding,
+        ) {
+            IconicsButtonContent(iIcon = mergeConfig.iIcon!!, color = themeColorState.buttonColor, hideText = hideButtonText, text = mergeConfig.text, iconicsSize = 28.dp)
         }
-
 
         Gap(gapBetweenButtons)
 
-        OutlinedButton(onClick = linksClick, border = uncheckedBorderStroke, contentPadding = padding) {
-            ButtonContent(icon = Icons.Filled.OpenInBrowser, color = themeColorState.buttonColor, text = stringResource(R.string.links))
+        OutlinedButton(
+            onClick = linksClick,
+            modifier = buttonModifier,
+            shape = CircleShape,
+            border = uncheckedBorderStroke,
+            contentPadding = padding,
+        ) {
+            ButtonContent(icon = Icons.Filled.OpenInBrowser, color = themeColorState.buttonColor, hideText = hideButtonText, text = stringResource(R.string.links))
         }
 
         Gap(gapBetweenButtons)
 
-        OutlinedButton(onClick = shareClick, border = uncheckedBorderStroke, contentPadding = padding) {
-            ButtonContent(icon = Icons.Filled.Share, color = themeColorState.buttonColor, text = stringResource(R.string.share))
+        OutlinedButton(
+            onClick = shareClick,
+            modifier = buttonModifier,
+            shape = CircleShape,
+            border = uncheckedBorderStroke,
+            contentPadding = padding,
+        ) {
+            ButtonContent(icon = Icons.Filled.Share, color = themeColorState.buttonColor, hideText = hideButtonText, text = stringResource(R.string.share))
         }
     }
 }
@@ -163,20 +232,26 @@ private fun RowScope.IconicsButtonContent(
     iIcon: IIcon,
     color: Color = MaterialTheme.colorScheme.primary,
     text: String,
+    hideText: Boolean,
     iconicsSize: Dp = 24.dp,
 ) {
     Image(asset = iIcon, contentDescription = null, modifier = Modifier.size(iconicsSize), colorFilter = ColorFilter.tint(color = color))
-    ButtonText(text = text, color = color)
+    if (!hideText) {
+        ButtonText(text = text, color = color)
+    }
 }
 
 @Composable
 private fun RowScope.ButtonContent(
     icon: ImageVector,
     text: String,
+    hideText: Boolean,
     color: Color = MaterialTheme.colorScheme.primary,
 ) {
     Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = color)
-    ButtonText(text = text, color = color)
+    if (!hideText) {
+        ButtonText(text = text, color = color)
+    }
 }
 
 @Composable
