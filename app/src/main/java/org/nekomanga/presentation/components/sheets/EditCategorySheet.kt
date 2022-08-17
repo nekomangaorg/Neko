@@ -57,7 +57,7 @@ fun EditCategorySheet(
 
         var showAddCategoryDialog by remember { mutableStateOf(false) }
 
-        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
+        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .4
 
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
 
@@ -86,11 +86,18 @@ fun EditCategorySheet(
                 items(categories) { category: Category ->
                     var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
 
+
                     Row(
                         modifier = paddingModifier
                             .fillMaxWidth()
                             .clickable {
                                 state = !state
+                                if (state) {
+                                    enabledCategories[category.id!!] = category
+                                } else {
+                                    enabledCategories.remove(category.id)
+                                }
+                                acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
                             },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
