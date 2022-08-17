@@ -371,7 +371,7 @@ class MangaDetailPresenter(
                 count++
             }
 
-            val asyncList = tracks.value.asSequence()
+            val asyncList = tracks.value
                 .mapNotNull { track ->
                     val service = trackManager.services.find { it.id == track.sync_id }
                     if (service == null) {
