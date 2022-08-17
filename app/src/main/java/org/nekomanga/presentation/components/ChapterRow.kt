@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
+import com.elvishew.xlog.XLog
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -295,14 +296,33 @@ private fun ChapterInfo(
 
             Row {
                 if (chapter.language.isNotNullOrEmpty() && chapter.language.equals("en", true).not()) {
-                    val drawable = AppCompatResources.getDrawable(LocalContext.current, MdLang.fromIsoCode(chapter.language)?.iconResId!!)
-                    Image(
-                        painter = rememberDrawablePainter(drawable = drawable),
-                        modifier = Modifier
-                            .height(16.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        contentDescription = "flag",
-                    )
+
+                    val iconRes = MdLang.fromIsoCode(chapter.language)?.iconResId
+
+                    when (iconRes == null) {
+                        true -> {
+                            XLog.e("Missing flag for ${chapter.language}")
+                            Text(
+                                text = chapter.language + " • ",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    color = secondaryTextColor,
+                                    fontWeight = FontWeight.Medium,
+                                    letterSpacing = (-.6).sp,
+                                ),
+                            )
+                        }
+                        false -> {
+                            val drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes)
+                            Image(
+                                painter = rememberDrawablePainter(drawable = drawable),
+                                modifier = Modifier
+                                    .height(16.dp)
+                                    .clip(RoundedCornerShape(4.dp)),
+                                contentDescription = "flag",
+                            )
+                            Gap(4.dp)
+                        }
+                    }
                 }
                 Text(
                     text = statuses.joinToString(" • "),
