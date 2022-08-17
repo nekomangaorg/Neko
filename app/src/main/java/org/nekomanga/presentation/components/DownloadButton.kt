@@ -13,7 +13,7 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ProgressIndicatorDefaults
@@ -41,7 +41,8 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 
-private const val size = 28
+private const val size = 24
+private const val iconSize = 20
 private const val borderSize = 2.5
 
 @Composable
@@ -151,9 +152,7 @@ private fun DownloadIcon(color: Color, icon: Painter, alpha: Float) {
     Icon(
         painter = icon,
         contentDescription = null,
-        modifier = Modifier
-            .size(size.dp)
-            .background(Color.Transparent),
+        modifier = Modifier.requiredSize(iconSize.dp),
         tint = color.copy(alpha = alpha),
     )
 }

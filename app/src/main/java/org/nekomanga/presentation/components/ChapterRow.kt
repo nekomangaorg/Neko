@@ -294,7 +294,7 @@ private fun ChapterInfo(
                 statuses.add(chapter.scanlator)
             }
 
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 if (chapter.language.isNotNullOrEmpty() && chapter.language.equals("en", true).not()) {
 
                     val iconRes = MdLang.fromIsoCode(chapter.language)?.iconResId
