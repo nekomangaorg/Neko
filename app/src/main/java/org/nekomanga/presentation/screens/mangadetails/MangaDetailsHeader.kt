@@ -112,7 +112,7 @@ fun MangaDetailsHeader(
                             .statusBarsPadding()
                             .padding(top = 70.dp),
                         isExpanded = isExpanded.value,
-                        isMerged = isMerged,
+                        showMergedIcon = isMerged && !hideButtonText,
                         titleLongClick = titleLongClick,
                         creatorLongClicked = creatorLongClick,
                     )

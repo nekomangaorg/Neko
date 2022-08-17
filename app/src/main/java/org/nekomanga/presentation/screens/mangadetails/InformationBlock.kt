@@ -47,7 +47,7 @@ fun InformationBlock(
     title: String,
     modifier: Modifier = Modifier,
     isExpanded: Boolean = true,
-    isMerged: Boolean = true,
+    showMergedIcon: Boolean = true,
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
 ) {
@@ -177,7 +177,7 @@ fun InformationBlock(
                 }
             }
 
-            if (isMerged) {
+            if (showMergedIcon) {
                 Row {
                     Gap(8.dp)
                     com.mikepenz.iconics.compose.Image(asset = CommunityMaterial.Icon.cmd_check_decagram, colorFilter = ColorFilter.tint(mediumAlpha))
