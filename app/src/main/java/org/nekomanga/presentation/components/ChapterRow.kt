@@ -17,8 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissState
 import androidx.compose.material.DismissValue
-import androidx.compose.material.FractionalThreshold
-import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkAdd
@@ -85,15 +83,10 @@ fun ChapterRow(
     val scope = rememberCoroutineScope()
     CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
         val dismissState = rememberDismissState(initialValue = DismissValue.Default)
-        SwipeToDismiss(
+        NekoSwipeToDismiss(
             state = dismissState,
             modifier = Modifier
                 .padding(vertical = Dp(1f)),
-            directions = setOf(
-                DismissDirection.EndToStart,
-                DismissDirection.StartToEnd,
-            ),
-            dismissThresholds = { FractionalThreshold(.8f) },
             background = {
                 val color = when (dismissState.dismissDirection) {
                     null -> MaterialTheme.colorScheme.surface
@@ -312,9 +305,10 @@ private fun ChapterInfo(
                             )
                         }
                         false -> {
-                            val drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes)
+
+                            val painter = rememberDrawablePainter(drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes))
                             Image(
-                                painter = rememberDrawablePainter(drawable = drawable),
+                                painter = painter,
                                 modifier = Modifier
                                     .height(16.dp)
                                     .clip(RoundedCornerShape(4.dp)),
