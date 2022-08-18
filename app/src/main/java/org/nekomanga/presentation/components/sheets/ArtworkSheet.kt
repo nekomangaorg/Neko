@@ -164,6 +164,7 @@ fun ArtworkSheet(
 private fun ArtworkButton(text: String, color: Color, modifier: Modifier, onClick: () -> Unit) {
     FilledIconButton(
         onClick = onClick,
+        shape = RoundedCornerShape(35),
         modifier = modifier,
         colors = IconButtonDefaults.filledIconButtonColors(containerColor = color),
     ) {
