@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.snack
@@ -39,6 +40,24 @@ class SettingsTrackingController :
             titleRes = R.string.update_tracking_marked_read
             defaultValue = false
         }
+        multiSelectListPreferenceMat(activity) {
+            key = eu.kanade.tachiyomi.data.preference.PreferenceKeys.autoTrackContentRating
+            titleRes = R.string.auto_track_content_rating_title
+            summaryRes = R.string.auto_track_content_rating_summary
+            entriesRes = arrayOf(
+                R.string.content_rating_safe,
+                R.string.content_rating_suggestive,
+                R.string.content_rating_erotica,
+                R.string.content_rating_pornographic,
+            )
+            entryValues = listOf(
+                MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic,
+            )
+
+            defValue = setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic)
+
+            defaultValue = listOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic)
+        }
         preferenceCategory {
             titleRes = R.string.services
 
@@ -46,7 +65,7 @@ class SettingsTrackingController :
                 activity?.openInBrowser(MyAnimeListApi.authUrl())
             }
             switchPreference {
-                isPersistent = false
+                isPersistent = true
                 isIconSpaceReserved = true
                 title = context.getString(
                     R.string.auto_track,
@@ -69,7 +88,7 @@ class SettingsTrackingController :
             }
             preference {
                 key = "update_anilist_scoring"
-                isPersistent = false
+                isPersistent = true
                 isIconSpaceReserved = true
                 title = context.getString(
                     R.string.update_tracking_scoring_type,
@@ -98,7 +117,7 @@ class SettingsTrackingController :
                 }
             }
             switchPreference {
-                isPersistent = false
+                isPersistent = true
                 isIconSpaceReserved = true
                 title = context.getString(
                     R.string.auto_track,
@@ -122,7 +141,7 @@ class SettingsTrackingController :
             }
             switchPreference {
                 key = "auto_add_kitsu"
-                isPersistent = false
+                isPersistent = true
                 isIconSpaceReserved = true
                 title = context.getString(
                     R.string.auto_track,

@@ -529,6 +529,12 @@ class PreferencesHelper(val context: Context) {
             setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive),
         )!!
 
+    fun autoTrackContentRatingSelections(): MutableSet<String> =
+        prefs.getStringSet(
+            Keys.autoTrackContentRating,
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic),
+        )!!
+
     fun autoAddTracker() = flowPrefs.getStringSet(Keys.autoAddTracker, setOf(TrackManager.MDLIST.toString()))
 
     fun setAutoAddTracker(trackersToAutoAdd: Set<String>) = prefs.edit().putStringSet(Keys.autoAddTracker, trackersToAutoAdd).apply()

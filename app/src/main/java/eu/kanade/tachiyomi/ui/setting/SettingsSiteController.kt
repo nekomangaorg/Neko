@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -80,15 +81,12 @@ class SettingsSiteController :
                 R.string.content_rating_pornographic,
             )
             entryValues = listOf(
-                "safe",
-                "suggestive",
-                "erotica",
-                "pornographic",
+                MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic,
             )
 
-            defValue = setOf("safe", "suggestive")
+            defValue = setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
 
-            defaultValue = listOf("safe", "suggestive")
+            defaultValue = listOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
         }
 
         switchPreference {

@@ -123,6 +123,10 @@ interface Manga : SManga {
             ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
     }
 
+    fun getContentRating(): String? {
+        return getGenres()?.firstOrNull { it.startsWith("Content rating: ") }?.substringAfter("Content rating: ")
+    }
+
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */

@@ -291,6 +291,8 @@ object PreferenceKeys {
 
     const val contentRating = "content_rating_options"
 
+    const val autoTrackContentRating = "auto_track_content_rating_options"
+
     const val coverQuality = "coverQuality"
 
     const val dataSaver = "data_saver_bool"

@@ -756,17 +756,21 @@ class MangaDetailPresenter(
             }
 
             if (autoAddTracker.size > 1 && manga.value.favorite) {
-                autoAddTracker.map { it.toInt() }.forEach { autoAddTrackerId ->
-                    _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
-                        val id = trackManager.getIdFromManga(trackService, manga.value)
-                        if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
-                            if (!isOnline()) {
-                                _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker"))
-                            } else {
-                                val trackResult = trackService.search("", manga.value, false)
-                                trackResult.firstOrNull()?.let { track ->
-                                    registerTracking(TrackAndService(track, trackService), true)
-                                    refreshRequired = true
+                val validContentRatings = preferences.autoTrackContentRatingSelections()
+                val contentRating = manga.value.getContentRating()
+                if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
+                    autoAddTracker.map { it.toInt() }.forEach { autoAddTrackerId ->
+                        _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
+                            val id = trackManager.getIdFromManga(trackService, manga.value)
+                            if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
+                                if (!isOnline()) {
+                                    _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker"))
+                                } else {
+                                    val trackResult = trackService.search("", manga.value, false)
+                                    trackResult.firstOrNull()?.let { track ->
+                                        registerTracking(TrackAndService(track, trackService), true)
+                                        refreshRequired = true
+                                    }
                                 }
                             }
                         }
