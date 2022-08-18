@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -194,7 +195,7 @@ fun MangaScreen(
     }
 
     val isDarkTheme = isSystemInDarkTheme()
-    val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
+    val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp && LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val surfaceColor = MaterialTheme.colorScheme.surface
 
