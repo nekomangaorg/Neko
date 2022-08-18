@@ -14,9 +14,10 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -147,7 +149,7 @@ private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: Tra
     ) {
         when (trackSearchResult) {
             is TrackSearchResult.Loading -> CircularProgressIndicator(color = themeColorState.buttonColor, modifier = Modifier.size(32.dp))
-            is TrackSearchResult.NoResult -> Text(text = stringResource(id = R.string.no_results_found))
+            is TrackSearchResult.NoResult -> Text(text = stringResource(id = R.string.no_results_found), color = MaterialTheme.colorScheme.onSurface)
             is TrackSearchResult.Error -> Text(text = trackSearchResult.errorMessage)
             else -> Unit
         }
@@ -220,11 +222,16 @@ private fun TrackSearchItem(
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                         modifier = Modifier
                             .fillMaxWidth(.9f),
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
 
                     if (trackSearch.publishing_type.isNotEmpty()) {
                         Row {
-                            Text(text = stringResource(id = R.string.type), style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium))
+                            Text(
+                                text = stringResource(id = R.string.type),
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
                             Gap(4.dp)
                             Text(
                                 text = trackSearch.publishing_type,
@@ -263,15 +270,22 @@ private fun TrackSearchItem(
             }
 
             if (isSelected) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle, contentDescription = null,
+                Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(4.dp)
+                        .padding(8.dp)
                         .size(24.dp)
-                        .background(color = MaterialTheme.colorScheme.surface),
-                    tint = outlineColor,
-                )
+                        .clip(CircleShape)
+                        .background(color = outlineColor),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.surface,
+                    )
+                }
             }
         }
     }
