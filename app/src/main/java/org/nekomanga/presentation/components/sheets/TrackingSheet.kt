@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -257,7 +256,7 @@ private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: Trac
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         } else {
@@ -265,8 +264,8 @@ private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: Trac
                 text = track.title, color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .padding(8.dp)
-                    .fillMaxSize(.85f),
-                maxLines = 2,
+                    .fillMaxWidth(.85f),
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             IconButton(onClick = onRemoveClick) {
@@ -384,8 +383,9 @@ fun TrackRowThree(track: Track, dateFormat: DateFormat, startDateClick: () -> Un
 private fun Logo(service: TrackService, track: Track?, onClick: (String, String) -> Unit) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(topStart = Shapes.sheetRadius))
-            .fillMaxHeight()
+            .size(56.dp)
+            .padding(start = 1.dp, top = 1.dp)
+            .clip(RoundedCornerShape(topStart = 15.dp))
             .background(color = Color(service.getLogoColor()))
             .conditional(track != null) {
                 clickable {
