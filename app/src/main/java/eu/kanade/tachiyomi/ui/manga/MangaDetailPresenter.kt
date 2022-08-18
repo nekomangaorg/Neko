@@ -1322,9 +1322,17 @@ class MangaDetailPresenter(
                     }
                     //get the highest chapter number and update tracking for it
                     newChapterItems.maxByOrNull { it.chapterNumber.toInt() }?.let {
-                        updateTrackChapterMarkedAsRead(db, preferences, it.toDbChapter(), mangaId) {
-                            updateTrackingFlows()
+                        kotlin.runCatching {
+                            updateTrackChapterMarkedAsRead(db, preferences, it.toDbChapter(), mangaId) {
+                                updateTrackingFlows()
+                            }
+                        }.onFailure {
+                            XLog.e("Failed to update track chapter marked as read", it)
+                            presenterScope.launch {
+                                _snackbarState.emit(SnackbarState("Error trying to update tracked chapter marked as read ${it.message}"))
+                            }
                         }
+
                     }
                 }
 
