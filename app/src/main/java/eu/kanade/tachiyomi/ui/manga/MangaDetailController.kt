@@ -67,6 +67,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             hideButtonText = presenter.hideButtonText(),
             snackbar = presenter.snackBarState,
             currentTitle = presenter.currentTitle.collectAsState(),
+            description = presenter.description.collectAsState(),
             artwork = presenter.currentArtwork.collectAsState(),
             vibrantColor = presenter.vibrantColor.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),

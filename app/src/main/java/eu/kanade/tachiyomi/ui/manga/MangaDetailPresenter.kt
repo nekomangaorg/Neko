@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.os.Build
 import android.os.Environment
 import androidx.compose.ui.state.ToggleableState
+import androidx.core.text.isDigitsOnly
 import com.crazylegend.string.isNotNullOrEmpty
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
@@ -96,6 +97,9 @@ class MangaDetailPresenter(
 
     private val _currentTitle = MutableStateFlow(manga.value.title)
     val currentTitle: StateFlow<String> = _currentTitle.asStateFlow()
+
+    private val _description = MutableStateFlow(getDescription())
+    val description: StateFlow<String> = _description.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -806,6 +810,17 @@ class MangaDetailPresenter(
     }
 
     /**
+     * Get Manga Description
+     */
+    private fun getDescription(): String {
+        return when {
+            MdUtil.getMangaUUID(manga.value.url).isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
+            manga.value.description.isNotNullOrEmpty() -> manga.value.description!!
+            else -> "No description"
+        }
+    }
+
+    /**
      * Get current sort filter
      */
     private fun getSortFilter(): MangaConstants.SortFilter {
@@ -1037,6 +1052,7 @@ class MangaDetailPresenter(
                     preferences.filterChapterByBookmarked().set(manga.bookmarkedFilter)
                     manga.setFilterToGlobal()
                 }
+                else -> Unit
             }
             db.insertManga(manga).executeAsBlocking()
             updateMangaFlow()
@@ -1115,6 +1131,7 @@ class MangaDetailPresenter(
     private fun updateMangaFlow() {
         presenterScope.launchIO {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
+            _description.value = getDescription()
         }
     }
 

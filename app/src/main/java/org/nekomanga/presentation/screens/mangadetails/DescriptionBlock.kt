@@ -29,11 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -45,7 +41,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.text.isDigitsOnly
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.markdown.Markdown
@@ -53,7 +48,6 @@ import com.mikepenz.markdown.MarkdownColors
 import com.mikepenz.markdown.MarkdownDefaults
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import jp.wasabeef.gap.Gap
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
@@ -69,6 +63,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
 fun DescriptionBlock(
     manga: Manga,
     title: String,
+    description: String,
     themeColorState: ThemeColorState,
     isExpanded: Boolean,
     isTablet: Boolean,
@@ -81,19 +76,6 @@ fun DescriptionBlock(
 ) {
 
     val tagColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 16.dp)
-
-    val noDescription = stringResource(R.string.no_description)
-    var description by remember { mutableStateOf(noDescription) }
-
-    if (MdUtil.getMangaUUID(manga.url).isDigitsOnly()) {
-        LaunchedEffect(key1 = 1) {
-            description = "THIS MANGA IS NOT MIGRATED TO V5"
-        }
-    } else if (manga.description != null) {
-        LaunchedEffect(key1 = 1) {
-            description = manga.description!!
-        }
-    }
 
     val interactionSource = remember { MutableInteractionSource() }
 

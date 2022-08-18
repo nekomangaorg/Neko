@@ -99,6 +99,7 @@ fun MangaScreen(
     manga: Manga,
     hideButtonText: Boolean,
     currentTitle: State<String>,
+    description: State<String>,
     snackbar: SharedFlow<SnackbarState>,
     artwork: State<Artwork>,
     vibrantColor: State<Int?>,
@@ -315,6 +316,7 @@ fun MangaScreen(
                     MangaDetailsHeader(
                         manga = manga,
                         title = currentTitle.value,
+                        description = description.value,
                         artwork = artwork.value,
                         showBackdrop = themeBasedOffCover,
                         hideButtonText = hideButtonText,
