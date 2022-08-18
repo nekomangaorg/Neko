@@ -104,7 +104,6 @@ fun AboutScreen(
                             snackbarHostState.showSnackbar(
                                 context.getString(R.string._copied_to_clipboard, "Build information"),
                                 withDismissAction = true,
-                                actionLabel = "Test",
                             )
                         }
                     },
