@@ -8,6 +8,7 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.CoilDiskCache
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.toast
@@ -81,6 +82,7 @@ class CoverCache(val context: Context) {
                 file.delete()
             }
         }
+
         withUIContext {
             context.toast(
                 context.getString(
@@ -113,6 +115,7 @@ class CoverCache(val context: Context) {
             )
         }
         context.imageLoader.memoryCache?.clear()
+        CoilDiskCache.get(context).clear()
 
         lastClean = System.currentTimeMillis()
     }
