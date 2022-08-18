@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
@@ -58,6 +60,7 @@ fun MangaDetailsHeader(
     loggedIntoTrackers: Boolean,
     trackServiceCount: Int,
     toggleFavorite: () -> Unit = {},
+    categories: List<Category> = emptyList(),
     moveCategories: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
@@ -185,6 +188,7 @@ private fun ColumnScope.quickReadButton(
         CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)) {
             ElevatedButton(
                 onClick = quickReadClick,
+                shape = RoundedCornerShape(35),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),

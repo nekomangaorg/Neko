@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Check
@@ -42,7 +42,6 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 
 /**
@@ -65,11 +64,13 @@ fun ButtonBlock(
     shareClick: () -> Unit = {},
 ) {
 
+    val shape = RoundedCornerShape(35)
+
     val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.altContainerColor)
     val checkedBorderStroke = BorderStroke(1.dp, Color.Transparent)
 
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
-    val uncheckedBorderStroke = BorderStroke(1.dp, NekoColors.outline.copy(alpha = .3f))
+    val uncheckedBorderStroke = BorderStroke(1.dp, themeColorState.altContainerColor.copy(alpha = .8f))
     val gapBetweenButtons = 8.dp
     val (padding, iconicsPadding, buttonModifier) = when (hideButtonText) {
         true -> Triple(PaddingValues(0.dp), PaddingValues(0.dp), Modifier.size(48.dp))
@@ -93,7 +94,7 @@ fun ButtonBlock(
         OutlinedButton(
             colors = favConfig.buttonColors,
             modifier = Modifier.size(48.dp),
-            shape = CircleShape,
+            shape = shape,
             onClick = favoriteClick,
             border = favConfig.borderStroke,
             contentPadding = PaddingValues(0.dp),
@@ -118,7 +119,7 @@ fun ButtonBlock(
             OutlinedButton(
                 onClick = trackingClick,
                 modifier = buttonModifier,
-                shape = CircleShape,
+                shape = shape,
                 colors = trackerConfig.buttonColors,
                 border = trackerConfig.borderStroke,
                 contentPadding = padding,
@@ -149,7 +150,7 @@ fun ButtonBlock(
         OutlinedButton(
             onClick = artworkClick,
             modifier = buttonModifier,
-            shape = CircleShape,
+            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = iconicsPadding,
         ) {
@@ -166,7 +167,7 @@ fun ButtonBlock(
 
         OutlinedButton(
             onClick = similarClick, modifier = buttonModifier,
-            shape = CircleShape,
+            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
@@ -193,7 +194,7 @@ fun ButtonBlock(
         OutlinedButton(
             onClick = mergeClick,
             modifier = buttonModifier,
-            shape = CircleShape,
+            shape = shape,
             colors = mergeConfig.buttonColors,
             border = mergeConfig.borderStroke,
             contentPadding = iconicsPadding,
@@ -206,7 +207,7 @@ fun ButtonBlock(
         OutlinedButton(
             onClick = linksClick,
             modifier = buttonModifier,
-            shape = CircleShape,
+            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
@@ -218,7 +219,7 @@ fun ButtonBlock(
         OutlinedButton(
             onClick = shareClick,
             modifier = buttonModifier,
-            shape = CircleShape,
+            shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
