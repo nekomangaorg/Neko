@@ -295,6 +295,7 @@ private fun TrackRowTwo(track: Track, service: TrackService, statusClick: () -> 
             Text(
                 service.getStatus(track.status),
                 style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
@@ -318,7 +319,7 @@ private fun TrackRowTwo(track: Track, service: TrackService, statusClick: () -> 
                     else -> stringResource(R.string.not_started)
                 }
 
-                Text(text = chapterText, style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-.3f).sp))
+                Text(text = chapterText, style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-.3f).sp), color = MaterialTheme.colorScheme.onSurface)
 
             }
             VerticalDivider()
@@ -341,7 +342,7 @@ private fun TrackRowTwo(track: Track, service: TrackService, statusClick: () -> 
                         )
                     }
                 }
-                else -> Text(service.displayScore(track))
+                else -> Text(service.displayScore(track), color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }
