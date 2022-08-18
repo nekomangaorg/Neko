@@ -50,12 +50,6 @@ class SimilarController(bundle: Bundle? = null) :
         },
     )
 
-    constructor(mangaUuid: String) : this(
-        Bundle().apply {
-            putString(BrowseSourceController.MANGA_ID, mangaUuid)
-        },
-    )
-
     override var presenter =
         SimilarPresenter(bundle!!.getString(BrowseSourceController.MANGA_ID) ?: "")
 

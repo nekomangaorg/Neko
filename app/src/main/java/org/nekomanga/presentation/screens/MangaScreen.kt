@@ -280,7 +280,7 @@ fun MangaScreen(
             actions = {
                 OverflowOptions(chapterActions = chapterActions, chapters = chapters)
             },
-        ) {
+        ) { incomingPaddingValues ->
             SwipeRefresh(
                 state = rememberSwipeRefreshState(isRefreshing = isRefreshing.value),
                 modifier = Modifier.fillMaxSize(),
@@ -288,7 +288,7 @@ fun MangaScreen(
                 indicator = { state, trigger ->
                     SwipeRefreshIndicator(
                         state = state,
-                        refreshingOffset = it.calculateTopPadding(),
+                        refreshingOffset = incomingPaddingValues.calculateTopPadding(),
                         refreshTriggerDistance = trigger,
                         backgroundColor = themeColorState.buttonColor,
                         contentColor = MaterialTheme.colorScheme.surface,
@@ -297,10 +297,17 @@ fun MangaScreen(
                 },
             ) {
 
-                val contentPadding =
+                val mangaDetailContentPadding =
                     PaddingValues(
                         bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
                             .asPaddingValues().calculateBottomPadding(),
+                    )
+
+                val chapterContentPadding =
+                    PaddingValues(
+                        bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                            .asPaddingValues().calculateBottomPadding(),
+                        top = incomingPaddingValues.calculateTopPadding(),
                     )
 
                 fun details() = @Composable {
@@ -406,14 +413,15 @@ fun MangaScreen(
 
                     if (isTablet) {
                         TabletLayout(
-                            contentPadding = contentPadding,
+                            mangaDetailContentPadding = mangaDetailContentPadding,
+                            chapterContentPadding = chapterContentPadding,
                             details = details(),
                             chapterHeader = chapterHeader(),
                             chapters = chapters.value,
                             chapterRow = chapterRow(),
                         )
                     } else {
-                        NonTablet(contentPadding = contentPadding, details = details(), chapterHeader = chapterHeader(), chapters = chapters, chapterRow = chapterRow())
+                        NonTablet(contentPadding = mangaDetailContentPadding, details = details(), chapterHeader = chapterHeader(), chapters = chapters, chapterRow = chapterRow())
                     }
 
                     if (removedChapters.value.isNotEmpty()) {
@@ -459,7 +467,8 @@ private fun NonTablet(
 
 @Composable
 private fun TabletLayout(
-    contentPadding: PaddingValues,
+    mangaDetailContentPadding: PaddingValues,
+    chapterContentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
     chapters: List<ChapterItem>,
@@ -473,7 +482,7 @@ private fun TabletLayout(
             modifier = Modifier
                 .fillMaxWidth(.5f)
                 .fillMaxHeight(),
-            contentPadding = contentPadding,
+            contentPadding = mangaDetailContentPadding,
         ) {
             item { details() }
         }
@@ -490,7 +499,7 @@ private fun TabletLayout(
                 .fillMaxWidth(.5f)
                 .fillMaxHeight()
                 .zIndex(0f),
-            contentPadding = contentPadding,
+            contentPadding = chapterContentPadding,
         ) {
             item { chapterHeader() }
             itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
