@@ -87,7 +87,7 @@ fun MangaDetailsHeader(
             Box {
                 BackDrop(
                     themeColorState = themeColorState,
-                    artwork = artwork,
+                    artworkProvider = { artwork },
                     showBackdrop = showBackdrop,
                     modifier = Modifier
                         .fillMaxWidth()

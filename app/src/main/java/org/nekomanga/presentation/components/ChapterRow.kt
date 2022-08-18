@@ -62,7 +62,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import java.text.DecimalFormat
@@ -71,7 +70,17 @@ import java.text.DecimalFormatSymbols
 @Composable
 fun ChapterRow(
     themeColor: ThemeColorState,
-    chapterItem: ChapterItem,
+    title: String,
+    scanlator: String,
+    language: String?,
+    chapterNumber: Double,
+    dateUploaded: Long,
+    lastPageRead: Int,
+    pagesLeft: Int,
+    read: Boolean,
+    bookmark: Boolean,
+    downloadStateProvider: () -> Download.State,
+    downloadProgressProvider: () -> Float,
     shouldHideChapterTitles: Boolean = false,
     onClick: () -> Unit,
     onBookmark: () -> Unit,
@@ -95,14 +104,14 @@ fun ChapterRow(
 
                 when (dismissState.dismissDirection) {
                     DismissDirection.EndToStart -> {
-                        val (icon, text) = when (chapterItem.chapter.read) {
+                        val (icon, text) = when (read) {
                             true -> Icons.Default.VisibilityOff to R.string.mark_as_unread
                             false -> Icons.Default.Visibility to R.string.mark_as_read
                         }
                         Background(icon, Alignment.CenterEnd, color, stringResource(id = text), themeColor.buttonColor)
                     }
                     DismissDirection.StartToEnd -> {
-                        val (icon, text) = when (chapterItem.chapter.bookmark) {
+                        val (icon, text) = when (bookmark) {
                             true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
                             false -> Icons.Default.BookmarkAdd to R.string.add_bookmark
                         }
@@ -116,7 +125,17 @@ fun ChapterRow(
                 ChapterInfo(
                     themeColorState = themeColor,
                     shouldHideChapterTitles = shouldHideChapterTitles,
-                    chapterItem = chapterItem,
+                    title = title,
+                    scanlator = scanlator,
+                    language = language,
+                    chapterNumber = chapterNumber,
+                    dateUploaded = dateUploaded,
+                    lastPageRead = lastPageRead,
+                    pagesLeft = pagesLeft,
+                    read = read,
+                    bookmark = bookmark,
+                    downloadStateProvider = downloadStateProvider,
+                    downloadProgressProvider = downloadProgressProvider,
                     onClick = onClick,
                     onWebView = onWebView,
                     onDownload = onDownload,
@@ -172,20 +191,29 @@ private fun Background(icon: ImageVector, alignment: Alignment, color: Color, te
 private fun ChapterInfo(
     themeColorState: ThemeColorState,
     shouldHideChapterTitles: Boolean,
-    chapterItem: ChapterItem,
+    title: String,
+    scanlator: String,
+    language: String?,
+    chapterNumber: Double,
+    dateUploaded: Long,
+    lastPageRead: Int,
+    pagesLeft: Int,
+    read: Boolean,
+    bookmark: Boolean,
+    downloadStateProvider: () -> Download.State,
+    downloadProgressProvider: () -> Float,
     onClick: () -> Unit,
     onWebView: () -> Unit,
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
 ) {
-    val chapter = chapterItem.chapter
     var dropdown by remember { mutableStateOf(false) }
     var chapterDropdown by remember { mutableStateOf(false) }
 
     val haptic = LocalHapticFeedback.current
 
     val lowContrast = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)
-    val (textColor, secondaryTextColor) = when (chapter.read) {
+    val (textColor, secondaryTextColor) = when (read) {
         true -> lowContrast to lowContrast
         false -> MaterialTheme.colorScheme.onSurface to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
     }
@@ -243,12 +271,12 @@ private fun ChapterInfo(
         ) {
 
             val titleText = when (shouldHideChapterTitles) {
-                true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapter.chapterNumber.toDouble()))
-                false -> chapter.name
+                true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapterNumber))
+                false -> title
             }
 
             Row {
-                if (chapter.bookmark) {
+                if (bookmark) {
                     Icon(
                         imageVector = Icons.Filled.Bookmark, contentDescription = null,
                         modifier = Modifier
@@ -268,35 +296,35 @@ private fun ChapterInfo(
 
             val statuses = mutableListOf<String>()
 
-            ChapterUtil.relativeDate(chapter.dateUpload)?.let { statuses.add(it) }
+            ChapterUtil.relativeDate(dateUploaded)?.let { statuses.add(it) }
 
-            val showPagesLeft = !chapter.read && chapter.lastPageRead > 0
+            val showPagesLeft = !read && lastPageRead > 0
             val resources = LocalContext.current.resources
 
-            if (showPagesLeft && chapter.pagesLeft > 0) {
+            if (showPagesLeft && pagesLeft > 0) {
                 statuses.add(
-                    resources.getQuantityString(R.plurals.pages_left, chapter.pagesLeft, chapter.pagesLeft),
+                    resources.getQuantityString(R.plurals.pages_left, pagesLeft, pagesLeft),
                 )
             } else if (showPagesLeft) {
                 statuses.add(
-                    stringResource(id = R.string.page_, chapter.lastPageRead + 1),
+                    stringResource(id = R.string.page_, lastPageRead + 1),
                 )
             }
 
-            if (chapter.scanlator.isNotBlank()) {
-                statuses.add(chapter.scanlator)
+            if (scanlator.isNotBlank()) {
+                statuses.add(scanlator)
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (chapter.language.isNotNullOrEmpty() && chapter.language.equals("en", true).not()) {
+                if (language.isNotNullOrEmpty() && language.equals("en", true).not()) {
 
-                    val iconRes = MdLang.fromIsoCode(chapter.language)?.iconResId
+                    val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
 
                     when (iconRes == null) {
                         true -> {
-                            XLog.e("Missing flag for ${chapter.language}")
+                            XLog.e("Missing flag for $language")
                             Text(
-                                text = chapter.language + " • ",
+                                text = "$language • ",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = secondaryTextColor,
                                     fontWeight = FontWeight.Medium,
@@ -337,11 +365,11 @@ private fun ChapterInfo(
         Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
 
             DownloadButton(
-                themeColorState.buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
+                themeColorState.buttonColor, downloadStateProvider, downloadProgressProvider,
                 Modifier
                     .combinedClickable(
                         onClick = {
-                            when (chapterItem.downloadState) {
+                            when (downloadStateProvider()) {
                                 Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
                                 else -> chapterDropdown = true
                             }
@@ -354,7 +382,7 @@ private fun ChapterInfo(
                 themeColorState = themeColorState,
                 onDismiss = { chapterDropdown = false },
                 dropDownItems =
-                when (chapterItem.downloadState) {
+                when (downloadStateProvider()) {
                     Download.State.DOWNLOADED -> {
                         listOf(
                             SimpleDropDownItem.Action(

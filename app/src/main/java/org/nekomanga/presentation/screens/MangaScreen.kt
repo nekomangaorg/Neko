@@ -372,26 +372,41 @@ fun MangaScreen(
                     )
                 }
 
-                fun chapterRow() = @Composable { index: Int, chapter: ChapterItem ->
+                fun chapterRow() = @Composable { index: Int, chapterItem: ChapterItem ->
                     ChapterRow(
                         themeColor = themeColorState,
-                        chapterItem = chapter,
+                        title = chapterItem.chapter.name,
+                        scanlator = chapterItem.chapter.scanlator,
+                        language = chapterItem.chapter.language,
+                        chapterNumber = chapterItem.chapter.chapterNumber.toDouble(),
+                        dateUploaded = chapterItem.chapter.dateUpload,
+                        lastPageRead = chapterItem.chapter.lastPageRead,
+                        pagesLeft = chapterItem.chapter.pagesLeft,
+                        read = chapterItem.chapter.read,
+                        bookmark = chapterItem.chapter.bookmark,
+                        downloadStateProvider = { chapterItem.downloadState },
+                        downloadProgressProvider = { chapterItem.downloadProgress },
                         shouldHideChapterTitles = hideTitlesFilter.value,
-                        onClick = { chapterActions.open(context, chapter) },
-                        onBookmark = { chapterActions.mark(listOf(chapter), if (chapter.chapter.bookmark) MangaConstants.MarkAction.UnBookmark(true) else MangaConstants.MarkAction.Bookmark(true)) },
+                        onClick = { chapterActions.open(context, chapterItem) },
+                        onBookmark = {
+                            chapterActions.mark(
+                                listOf(chapterItem),
+                                if (chapterItem.chapter.bookmark) MangaConstants.MarkAction.UnBookmark(true) else MangaConstants.MarkAction.Bookmark(true),
+                            )
+                        },
                         onRead = {
                             chapterActions.mark(
-                                listOf(chapter),
-                                if (chapter.chapter.read) MangaConstants.MarkAction.Unread(
+                                listOf(chapterItem),
+                                if (chapterItem.chapter.read) MangaConstants.MarkAction.Unread(
                                     true,
-                                    lastRead = chapter.chapter.lastPageRead,
-                                    pagesLeft = chapter.chapter.pagesLeft,
+                                    lastRead = chapterItem.chapter.lastPageRead,
+                                    pagesLeft = chapterItem.chapter.pagesLeft,
                                 ) else MangaConstants.MarkAction.Read(true),
                             )
                         },
-                        onWebView = { context.asActivity().openInBrowser(chapter.chapter.fullUrl()) },
+                        onWebView = { context.asActivity().openInBrowser(chapterItem.chapter.fullUrl()) },
                         onDownload = { downloadAction ->
-                            chapterActions.download(listOf(chapter), downloadAction)
+                            chapterActions.download(listOf(chapterItem), downloadAction)
                         },
                         markPrevious = { read ->
 

@@ -46,22 +46,22 @@ private const val iconSize = 20
 private const val borderSize = 2.5
 
 @Composable
-fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: Float, modifier: Modifier = Modifier) {
+fun DownloadButton(buttonColor: Color, downloadStateProvider: () -> Download.State, downloadProgressProvider: () -> Float, modifier: Modifier = Modifier) {
     val disabledColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
     val veryLowContrast = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.veryLowContrast)
     val errorColor = MaterialTheme.colorScheme.errorContainer
     val errorIconColor = MaterialTheme.colorScheme.onErrorContainer
 
     val animatedProgress = animateFloatAsState(
-        targetValue = downloadProgress,
+        targetValue = downloadProgressProvider(),
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
     ).value
 
     var downloadComplete by remember { mutableStateOf(false) }
     var wasDownloading by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state) {
-        when (state) {
+    LaunchedEffect(downloadStateProvider()) {
+        when (downloadStateProvider()) {
             //this reset download complete in case you remove the chapter and want to redownload it
             Download.State.NOT_DOWNLOADED -> downloadComplete = false
             //this signals its downloading, so a future downloaded state triggers the animation
@@ -83,7 +83,7 @@ fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: 
     )
 
     val infinitePulse = rememberInfiniteTransition()
-    val (initialState, finalState) = when (state.isActive() && downloadProgress != 1f) {
+    val (initialState, finalState) = when (downloadStateProvider().isActive() && downloadProgressProvider() != 1f) {
         true -> 0f to NekoColors.disabledAlphaLowContrast
         false -> 1f to 1f
     }
@@ -100,23 +100,25 @@ fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: 
             .clip(CircleShape)
             .then(modifier),
     ) {
-
-        val download = when (state) {
-            Download.State.CHECKED -> DownloadHolder(Icons.Filled.Check, MaterialTheme.colorScheme.surface, buttonColor, Color.Transparent)
-            Download.State.ERROR -> DownloadHolder(Icons.Filled.Cancel, errorIconColor, errorColor, Color.Transparent)
-            Download.State.QUEUE -> DownloadHolder(Icons.Filled.ArrowDownward, disabledColor, Color.Transparent, disabledColor)
-            Download.State.DOWNLOADED -> DownloadHolder(Icons.Filled.ArrowDownward, MaterialTheme.colorScheme.surface, buttonColor, Color.Transparent)
-            Download.State.DOWNLOADING -> {
-                if (downloadProgress >= 1f) {
-                    DownloadHolder(Icons.Filled.ArrowDownward, MaterialTheme.colorScheme.surface, buttonColor, Color.Transparent)
-                } else {
-                    DownloadHolder(Icons.Filled.ArrowDownward, disabledColor, Color.Transparent, buttonColor)
+        val surfaceColor = MaterialTheme.colorScheme.surface
+        val download = remember(downloadStateProvider(), downloadProgressProvider()) {
+            when (downloadStateProvider()) {
+                Download.State.CHECKED -> DownloadHolder(Icons.Filled.Check, surfaceColor, buttonColor, Color.Transparent)
+                Download.State.ERROR -> DownloadHolder(Icons.Filled.Cancel, errorIconColor, errorColor, Color.Transparent)
+                Download.State.QUEUE -> DownloadHolder(Icons.Filled.ArrowDownward, disabledColor, Color.Transparent, disabledColor)
+                Download.State.DOWNLOADED -> DownloadHolder(Icons.Filled.ArrowDownward, surfaceColor, buttonColor, Color.Transparent)
+                Download.State.DOWNLOADING -> {
+                    if (downloadProgressProvider() >= 1f) {
+                        DownloadHolder(Icons.Filled.ArrowDownward, surfaceColor, buttonColor, Color.Transparent)
+                    } else {
+                        DownloadHolder(Icons.Filled.ArrowDownward, disabledColor, Color.Transparent, buttonColor)
+                    }
                 }
+                Download.State.NOT_DOWNLOADED -> DownloadHolder(Icons.Filled.ArrowDownward, buttonColor, Color.Transparent, Color.Transparent)
             }
-            Download.State.NOT_DOWNLOADED -> DownloadHolder(Icons.Filled.ArrowDownward, buttonColor, Color.Transparent, Color.Transparent)
         }
 
-        val borderStroke = when (state == Download.State.NOT_DOWNLOADED) {
+        val borderStroke = when (downloadStateProvider() == Download.State.NOT_DOWNLOADED) {
             true -> BorderStroke(borderSize.dp, buttonColor)
             false -> null
         }
@@ -124,9 +126,9 @@ fun DownloadButton(buttonColor: Color, state: Download.State, downloadProgress: 
 
         Background(color = backgroundColor, borderStroke = borderStroke) {
             DownloadIcon(color = download.iconColor, alpha = alpha.value, icon = if (!downloadComplete) rememberVectorPainter(image = download.icon) else downloadCompletePainter)
-            if (state == Download.State.QUEUE) {
+            if (downloadStateProvider() == Download.State.QUEUE) {
                 DownloadProgress(color = download.progressColor)
-            } else if (state == Download.State.DOWNLOADING) {
+            } else if (downloadStateProvider() == Download.State.DOWNLOADING) {
                 DownloadProgress(determinate = true, color = veryLowContrast, progress = 1f)
                 DownloadProgress(determinate = true, color = download.progressColor, progress = animatedProgress)
             }
