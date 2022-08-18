@@ -91,7 +91,7 @@ private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.So
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.sort), style = MaterialTheme.typography.labelMedium)
+            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.sort), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
             if (!sortFilter.matchesGlobalDefaults) {
                 TextButton(onClick = setGlobal) {
                     Text(text = stringResource(id = R.string.set_as_default), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
@@ -139,7 +139,7 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
                 Gap(24.dp)
             }
         }
-        Text(text = text, style = MaterialTheme.typography.bodyLarge)
+        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
 
     }
 }
@@ -163,7 +163,12 @@ private fun Filter(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.filter_and_display), style = MaterialTheme.typography.labelMedium)
+            Text(
+                modifier = Modifier.padding(vertical = 16.dp),
+                text = stringResource(id = R.string.filter_and_display),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
 
             if (!filter.matchesGlobalDefaults) {
                 TextButton(onClick = setGlobal) {
@@ -241,7 +246,7 @@ private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.F
             },
         )
         Gap(width = 8.dp)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge)
+        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
 
     }
 }
@@ -265,7 +270,7 @@ private fun CheckboxLine(themeColorState: ThemeColorState, checked: Boolean, dis
             enabled = if (disabledOnChecked) !checked else true,
         )
         Gap(width = 8.dp)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge)
+        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
 
     }
 }
@@ -284,7 +289,12 @@ private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaCo
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.filter_groups), style = MaterialTheme.typography.labelMedium)
+            Text(
+                modifier = Modifier.padding(vertical = 16.dp),
+                text = stringResource(id = R.string.filter_groups),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
             if (scanlatorFilter.scanlators.any { it.disabled }) {
                 TextButton(onClick = { changeScanlatorFilter(null) }) {
                     Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
@@ -315,7 +325,7 @@ private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: Man
             onClick = changeScanlatorFilter,
         )
         Gap(width = 8.dp)
-        Text(text = scanlatorOption.name, style = MaterialTheme.typography.bodyLarge)
+        Text(text = scanlatorOption.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
 
     }
 }
