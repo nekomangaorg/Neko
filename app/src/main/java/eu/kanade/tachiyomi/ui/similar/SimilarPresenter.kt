@@ -1,11 +1,13 @@
 package eu.kanade.tachiyomi.ui.manga.similar
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -17,19 +19,28 @@ class SimilarPresenter(
     private val repo: SimilarRepository = Injekt.get(),
 ) : BaseCoroutinePresenter<SimilarController>() {
 
-    private val _isRefreshing = MutableLiveData(false)
-    val isRefreshing: LiveData<Boolean> = _isRefreshing
+    private val _isRefreshing = MutableStateFlow(true)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    private val _mangaMap = MutableLiveData(emptyMap<Int, List<DisplayManga>>())
-    val mangaMap: LiveData<Map<Int, List<DisplayManga>>> = _mangaMap
+    private val _mangaMap = MutableStateFlow(emptyMap<Int, List<DisplayManga>>())
+    val mangaMap: StateFlow<Map<Int, List<DisplayManga>>> = _mangaMap.asStateFlow()
 
-    suspend fun getSimilarManga(forceRefresh: Boolean = false) {
-        _isRefreshing.value = true
-        _mangaMap.value = emptyMap()
-        if (mangaId.isNotEmpty()) {
-            val list = repo.fetchSimilar(mangaId, forceRefresh)
-            _mangaMap.value = list.associate { it.type to it.manga }
+    override fun onCreate() {
+        super.onCreate()
+        presenterScope.launch {
+            getSimilarManga()
         }
-        _isRefreshing.value = false
+    }
+
+    fun getSimilarManga(forceRefresh: Boolean = false) {
+        presenterScope.launch {
+            _isRefreshing.value = true
+            _mangaMap.value = emptyMap()
+            if (mangaId.isNotEmpty()) {
+                val list = repo.fetchSimilar(mangaId, forceRefresh)
+                _mangaMap.value = list.associate { it.type to it.manga }
+            }
+            _isRefreshing.value = false
+        }
     }
 }

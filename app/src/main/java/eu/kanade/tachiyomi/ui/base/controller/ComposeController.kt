@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.base.controller
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.databinding.EmptyComposeControllerBinding
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -14,6 +15,7 @@ abstract class BaseComposeController<PS : BaseCoroutinePresenter<*>>(bundle: Bun
     override fun onViewCreated(view: View) {
         hideToolbar()
         super.onViewCreated(view)
+        binding.root.consumeWindowInsets = false
         binding.root.setContent {
             NekoTheme {
                 ScreenContent()
@@ -35,7 +37,7 @@ abstract class BasicComposeController : BaseController<EmptyComposeControllerBin
 
     override fun createBinding(inflater: LayoutInflater): EmptyComposeControllerBinding =
         EmptyComposeControllerBinding.inflate(inflater)
-    
+
     override fun onViewCreated(view: View) {
         hideToolbar()
         super.onViewCreated(view)

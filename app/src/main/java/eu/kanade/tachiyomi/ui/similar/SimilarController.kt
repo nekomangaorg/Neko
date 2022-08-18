@@ -10,11 +10,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,7 +30,6 @@ import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.coroutines.launch
 import org.nekomanga.presentation.components.ListGridActionButton
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
@@ -43,7 +39,7 @@ import org.nekomanga.presentation.screens.IconicsEmptyScreen
 import uy.kohesive.injekt.injectLazy
 
 /**
- * Controller that shows the latest manga from the catalogue. Inherit [BrowseCatalogueController].
+ * Controller that shows the similar/related manga
  */
 class SimilarController(bundle: Bundle? = null) :
     BaseComposeController<SimilarPresenter>(bundle) {
@@ -54,6 +50,12 @@ class SimilarController(bundle: Bundle? = null) :
         },
     )
 
+    constructor(mangaUuid: String) : this(
+        Bundle().apply {
+            putString(BrowseSourceController.MANGA_ID, mangaUuid)
+        },
+    )
+
     override var presenter =
         SimilarPresenter(bundle!!.getString(BrowseSourceController.MANGA_ID) ?: "")
 
@@ -61,20 +63,7 @@ class SimilarController(bundle: Bundle? = null) :
 
     @Composable
     override fun ScreenContent() {
-        val scope = rememberCoroutineScope()
-        LaunchedEffect(key1 = Unit) {
-            scope.launch {
-                presenter.getSimilarManga()
-            }
-        }
 
-        val refreshing: () -> Unit = {
-            viewScope.launch {
-                presenter.getSimilarManga(true)
-            }
-        }
-
-        val isRefreshing by presenter.isRefreshing.observeAsState(initial = true)
         val isList by preferences.browseAsList().asFlow()
             .collectAsState(preferences.browseAsList().get())
 
@@ -96,9 +85,10 @@ class SimilarController(bundle: Bundle? = null) :
                 )
             },
         ) { paddingValues ->
+            val isRefreshing = presenter.isRefreshing.collectAsState()
             SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing),
-                onRefresh = refreshing,
+                state = rememberSwipeRefreshState(isRefreshing.value),
+                onRefresh = { presenter.getSimilarManga(true) },
                 modifier = Modifier
                     .fillMaxSize(),
                 indicator = { state, trigger ->
@@ -113,12 +103,12 @@ class SimilarController(bundle: Bundle? = null) :
                 },
                 content = {
                     SimilarContent(
-                        isRefreshing,
-                        isList,
-                        preferences.libraryLayout().get() == 2,
+                        isRefreshing = isRefreshing.value,
+                        isList = isList,
+                        isComfortable = preferences.libraryLayout().get() == 2,
                         paddingValues = paddingValues,
-                        refreshing,
-                        mangaClicked,
+                        refreshing = { presenter.getSimilarManga(true) },
+                        mangaClicked = mangaClicked,
                     )
                 },
             )
@@ -134,9 +124,7 @@ class SimilarController(bundle: Bundle? = null) :
         refreshing: () -> Unit,
         mangaClicked: (Manga) -> Unit,
     ) {
-        val groupedManga: Map<Int, List<DisplayManga>> by presenter.mangaMap.observeAsState(
-            emptyMap(),
-        )
+        val groupedManga: Map<Int, List<DisplayManga>> by presenter.mangaMap.collectAsState()
         if (isRefreshing.not()) {
             if (groupedManga.isEmpty()) {
                 IconicsEmptyScreen(
