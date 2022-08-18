@@ -692,6 +692,9 @@ class MangaDetailPresenter(
         }
     }
 
+    /**
+     * Updates the filtered scanlators
+     */
     private fun updateMangaScanlator(filteredScanlators: Set<String>) {
         presenterScope.launchIO {
             val manga = manga.value
@@ -986,19 +989,7 @@ class MangaDetailPresenter(
                 emptySet()
             }
 
-            manga.filtered_scanlators = if (newFilteredScanlators.isEmpty()) {
-                null
-            } else {
-                ChapterUtil.getScanlatorString(newFilteredScanlators)
-            }
-
-            manga.setFilterToLocal()
-            if (mangaFilterMatchesDefault()) {
-                manga.setFilterToGlobal()
-            }
-            db.insertManga(manga).executeAsBlocking()
-            updateMangaFlow()
-            updateFilterFlow()
+            updateMangaScanlator(newFilteredScanlators)
             updateChapterFlows()
 
         }
