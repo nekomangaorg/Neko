@@ -397,11 +397,10 @@ fun MangaScreen(
                         onRead = {
                             chapterActions.mark(
                                 listOf(chapterItem),
-                                if (chapterItem.chapter.read) MangaConstants.MarkAction.Unread(
-                                    true,
-                                    lastRead = chapterItem.chapter.lastPageRead,
-                                    pagesLeft = chapterItem.chapter.pagesLeft,
-                                ) else MangaConstants.MarkAction.Read(true),
+                                when (chapterItem.chapter.read) {
+                                    true -> MangaConstants.MarkAction.Unread(true)
+                                    false -> MangaConstants.MarkAction.Read(true)
+                                },
                             )
                         },
                         onWebView = { context.asActivity().openInBrowser(chapterItem.chapter.fullUrl()) },
