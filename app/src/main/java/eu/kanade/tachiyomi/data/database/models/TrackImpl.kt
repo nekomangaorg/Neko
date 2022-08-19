@@ -36,7 +36,8 @@ class TrackImpl : Track {
 
         if (manga_id != other.manga_id) return false
         if (sync_id != other.sync_id) return false
-        return media_id == other.media_id
+        if (media_id != other.media_id) return false
+        return last_chapter_read == other.last_chapter_read
     }
 
     override fun hashCode(): Int {
