@@ -101,6 +101,9 @@ class MangaDetailPresenter(
     private val _description = MutableStateFlow(getDescription())
     val description: StateFlow<String> = _description.asStateFlow()
 
+    private val _hasDefaultCategory = MutableStateFlow(hasDefaultCategory())
+    val hasDefaultCategory: StateFlow<Boolean> = _hasDefaultCategory.asStateFlow()
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -831,6 +834,13 @@ class MangaDetailPresenter(
     }
 
     /**
+     * Get default categories
+     */
+    private fun hasDefaultCategory(): Boolean {
+        return preferences.defaultCategory() != -1
+    }
+
+    /**
      * Get current sort filter
      */
     private fun getSortFilter(): MangaConstants.SortFilter {
@@ -1160,8 +1170,9 @@ class MangaDetailPresenter(
 
     /**
      * Toggle a manga as favorite
+     * TODO rework this
      */
-    fun toggleFavorite(): Boolean {
+    fun toggleFavorite(shouldAddToDefaultCategory: Boolean): Boolean {
 
         val editManga = manga.value
         editManga.apply {
@@ -1171,13 +1182,22 @@ class MangaDetailPresenter(
                 false -> 0
             }
         }
-
-        db.insertManga(editManga).executeAsBlocking()
-        updateMangaFlow()
-        if (editManga.favorite) {
-            //this is called for the add as plan to read auto sync tracking
-            updateTrackingFlows()
+        presenterScope.launch {
+            db.insertManga(editManga).executeAsBlocking()
+            updateMangaFlow()
+            //add to the default category if it exists and the user has the option set
+            if (shouldAddToDefaultCategory && hasDefaultCategory.value) {
+                val defaultCategoryId = preferences.defaultCategory()
+                _allCategories.value.firstOrNull { defaultCategoryId == it.id }?.let {
+                    updateMangaCategories(listOf(it))
+                }
+            }
+            if (editManga.favorite) {
+                //this is called for the add as plan to read auto sync tracking
+                updateTrackingFlows()
+            }
         }
+
         return editManga.favorite
     }
 
@@ -1233,7 +1253,7 @@ class MangaDetailPresenter(
                         messageRes = R.string.add_to_library,
                         actionLabelRes = R.string.add,
                         action = {
-                            toggleFavorite()
+                            toggleFavorite(true)
                         },
                     ),
                 )
