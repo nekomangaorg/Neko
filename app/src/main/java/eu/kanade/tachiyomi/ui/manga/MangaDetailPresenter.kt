@@ -389,6 +389,7 @@ class MangaDetailPresenter(
                     async(Dispatchers.IO) {
                         kotlin.runCatching { item.service.refresh(item.track!!) }.onFailure {
                             XLog.e("error refreshing tracker", it)
+                            delay(3000)
                             _snackbarState.emit(SnackbarState(message = it.message, fieldRes = item.service.nameRes(), messageRes = R.string.error_refreshing_))
                         }
                     }
