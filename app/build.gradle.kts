@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 148
-    const val versionName = "2.10.0.1"
+    const val versionCode = 149
+    const val versionName = "2.10.0.2"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -32,12 +32,13 @@ plugins {
     id("kotlin-parcelize")
     id("com.mikepenz.aboutlibraries.plugin")
     id("com.google.gms.google-services") apply false
-    id("com.google.firebase.crashlytics")
+    id("com.google.firebase.crashlytics") apply false
 
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
     apply(mapOf("plugin" to "com.google.gms.google-services"))
+    apply(mapOf("plugin" to "com.google.firebase.crashlytics"))
 }
 
 val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86")
@@ -92,19 +93,13 @@ android {
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
-            /* isShrinkResources = true
-             isMinifyEnabled = true
-
-             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
-             configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
-                 mappingFileUploadEnabled = false
-             }*/
         }
         getByName("release") {
             isShrinkResources = true
             isMinifyEnabled = true
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
+
     }
 
     buildFeatures {
@@ -158,6 +153,7 @@ dependencies {
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)
     implementation(libs.bundles.google)
+    implementation(libs.bundles.firebase)
     implementation(libs.bundles.rx)
     implementation(libs.flowprefs)
     implementation(libs.bundles.ok)
@@ -241,7 +237,6 @@ dependencies {
 }
 
 tasks {
-// See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api(-markers)
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.freeCompilerArgs += listOf(
             "-opt-in=kotlin.Experimental",
@@ -259,6 +254,17 @@ tasks {
             "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
             "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
         )
+
+        /* kotlinOptions.freeCompilerArgs += listOf(
+             "-P",
+             "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" + project.buildDir.absolutePath + "/compose_metrics",
+         )
+
+         kotlinOptions.freeCompilerArgs += listOf(
+             "-P",
+             "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" + project.buildDir.absolutePath + "/compose_metrics",
+         )*/
+
     }
 
     preBuild {
