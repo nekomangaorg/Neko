@@ -101,7 +101,7 @@ fun DownloadButton(buttonColor: Color, downloadStateProvider: () -> Download.Sta
             .then(modifier),
     ) {
         val surfaceColor = MaterialTheme.colorScheme.surface
-        val download = remember(downloadStateProvider(), downloadProgressProvider()) {
+        val download = remember(downloadStateProvider(), downloadProgressProvider(), buttonColor) {
             when (downloadStateProvider()) {
                 Download.State.CHECKED -> DownloadHolder(Icons.Filled.Check, surfaceColor, buttonColor, Color.Transparent)
                 Download.State.ERROR -> DownloadHolder(Icons.Filled.Cancel, errorIconColor, errorColor, Color.Transparent)
