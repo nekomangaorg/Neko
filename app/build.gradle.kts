@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 object Configs {
     const val applicationId = "tachiyomi.mangadex"
-    const val compileSdkVersion = 32
+    const val compileSdkVersion = 33
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -110,9 +110,13 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
+        // Disable some unused things
+        aidl = false
+        renderScript = false
+        shaders = false
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.compose.version.get()
+        kotlinCompilerExtensionVersion = compose.versions.compose.compiler.version.get()
     }
 
     flavorDimensions.add("default")
@@ -249,11 +253,11 @@ tasks {
             "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
             "-opt-in=coil.annotation.ExperimentalCoilApi",
-            "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
-            "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
-            "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
-            "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi",
+            "-opt-in=kotlin.ExperimentalStdlibApi",
+            "-opt-in=kotlinx.coroutines.FlowPreview",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
+            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
         )
     }
 

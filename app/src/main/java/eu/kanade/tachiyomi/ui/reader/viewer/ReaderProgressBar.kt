@@ -166,22 +166,22 @@ class ReaderProgressBar @JvmOverloads constructor(
      * Hides this progress bar with an optional fade out if [animate] is true.
      */
     fun hide(animate: Boolean = false) {
-        if (visibility == View.GONE) return
+        if (visibility == GONE) return
 
         if (!animate) {
-            visibility = View.GONE
+            visibility = GONE
         } else {
             ObjectAnimator.ofFloat(this, "alpha", 1f, 0f).apply {
                 interpolator = DecelerateInterpolator()
                 duration = 1000
                 addListener(
                     object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
-                            visibility = View.GONE
+                        override fun onAnimationEnd(animation: Animator) {
+                            visibility = GONE
                             alpha = 1f
                         }
 
-                        override fun onAnimationCancel(animation: Animator?) {
+                        override fun onAnimationCancel(animation: Animator) {
                             alpha = 1f
                         }
                     },

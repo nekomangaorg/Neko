@@ -1,5 +1,5 @@
 [versions]
-agp_version = "7.2.1"
+agp_version = "7.2.2"
 lifecycle_version = "2.5.0"
 
 [libraries]
@@ -18,7 +18,6 @@ constraintlayout = "androidx.constraintlayout:constraintlayout:2.1.4"
 multidex = "androidx.multidex:multidex:2.0.1"
 work = "androidx.work:work-runtime-ktx:2.7.1"
 
-#kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle_version" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle_version" }
 lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle_version" }

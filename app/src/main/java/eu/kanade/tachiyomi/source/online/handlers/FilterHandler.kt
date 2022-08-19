@@ -102,7 +102,7 @@ class FilterHandler {
         Pair("Manga info updated", "updatedAt"),
         Pair("Title", "title"),
         Pair("Rating", "rating"),
-        )
+    )
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(1, false))
 
@@ -175,6 +175,7 @@ class FilterHandler {
                     queryMap["excludedTagsMode"] =
                         filter.values[filter.state].uppercase(Locale.US)
                 }
+                else -> Unit
             }
         }
         if (originalLanguageList.isNotEmpty()) {

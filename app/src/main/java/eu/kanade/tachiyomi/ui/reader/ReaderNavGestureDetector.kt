@@ -19,14 +19,14 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
     }
 
     override fun onScroll(
-        e1: MotionEvent?,
-        e2: MotionEvent?,
+        e1: MotionEvent,
+        e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
-        val newDistanceX = (e1?.rawX ?: 0f) - (e2?.rawX ?: 0f)
-        val newDistanceY = (e1?.rawY ?: 0f) - (e2?.rawY ?: 0f)
-        if ((!hasScrollHorizontal || lockVertical) && e2 != null) {
+        val newDistanceX = e1.rawX - e2.rawX
+        val newDistanceY = e1.rawY - e2.rawY
+        if ((!hasScrollHorizontal || lockVertical)) {
             hasScrollHorizontal = abs(newDistanceX) > abs(newDistanceY) && abs(newDistanceX) > 40
             if (!lockVertical) {
                 lockVertical = abs(newDistanceX) < abs(newDistanceY) && abs(newDistanceY) > 150

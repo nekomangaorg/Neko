@@ -370,7 +370,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         binding.searchToolbar.searchItem?.setOnActionExpandListener(
             object : MenuItem.OnActionExpandListener {
-                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                     val controller = router.backstack.lastOrNull()?.controller
                     binding.appBar.compactSearchMode =
                         binding.appBar.useLargeToolbar && resources.configuration.screenHeightDp < 600
@@ -389,7 +389,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     return true
                 }
 
-                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
                     val controller = router.backstack.lastOrNull()?.controller
                     binding.appBar.compactSearchMode = false
                     controller?.mainRecyclerView?.requestApplyInsets()
@@ -1003,13 +1003,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private fun updateSubMenu(oldMenuItem: MenuItem, menuItem: MenuItem) {
         if (oldMenuItem.hasSubMenu()) {
             val oldSubMenu = oldMenuItem.subMenu
-            val newMenuIds = oldSubMenu.children.toList().map { it.itemId }
-            val currentItemsId = menuItem.subMenu.children.toList().map { it.itemId }
+            val newMenuIds = oldSubMenu!!.children.toList().map { it.itemId }
+            val currentItemsId = menuItem.subMenu!!.children.toList().map { it.itemId }
             var isExclusiveCheckable = false
             var isCheckable = false
             oldSubMenu.children.toList().forEachIndexed { index, oldSubMenuItem ->
                 val isSubVisible = oldSubMenuItem.isVisible
-                addOrUpdateMenuItem(oldSubMenuItem, menuItem.subMenu, isSubVisible, currentItemsId, index)
+                addOrUpdateMenuItem(oldSubMenuItem, menuItem.subMenu!!, isSubVisible, currentItemsId, index)
                 if (!isExclusiveCheckable) {
                     isExclusiveCheckable = (oldSubMenuItem as? MenuItemImpl)?.isExclusiveCheckable ?: false
                 }
@@ -1017,10 +1017,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     isCheckable = oldSubMenuItem.isCheckable
                 }
             }
-            menuItem.subMenu.setGroupCheckable(oldSubMenu.children.first().groupId, isCheckable, isExclusiveCheckable)
-            menuItem.subMenu.children.toList().forEach {
+            menuItem.subMenu!!.setGroupCheckable(oldSubMenu.children.first().groupId, isCheckable, isExclusiveCheckable)
+            menuItem.subMenu!!.children.toList().forEach {
                 if (!newMenuIds.contains(it.itemId)) {
-                    menuItem.subMenu.removeItem(it.itemId)
+                    menuItem.subMenu!!.removeItem(it.itemId)
                 }
             }
         }

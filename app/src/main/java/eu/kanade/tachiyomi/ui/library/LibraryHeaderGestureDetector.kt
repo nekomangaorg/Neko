@@ -18,19 +18,19 @@ class LibraryHeaderGestureDetector(
 ) : GestureDetector.SimpleOnGestureListener() {
 
     var vibrated = false
-    override fun onDown(e: MotionEvent?): Boolean {
+    override fun onDown(e: MotionEvent): Boolean {
         vibrated = false
         return super.onDown(e)
     }
 
     override fun onScroll(
-        e1: MotionEvent?,
-        e2: MotionEvent?,
+        e1: MotionEvent,
+        e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
         if (binding == null || header == null) return false
-        val distance = ((e1?.rawX ?: 0f) - (e2?.rawX ?: 0f))
+        val distance = (e1.rawX - e2.rawX)
         val poa = 0.75f
         binding.categoryHeaderLayout.translationX = abs(distance).pow(poa) * -sign(distance)
         binding.rearView.isVisible = distance != 0f

@@ -18,19 +18,15 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
     }
 
     override fun onScroll(
-        e1: MotionEvent?,
-        e2: MotionEvent?,
+        e1: MotionEvent,
+        e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
-        val distance = ((e1?.rawX ?: 0f) - (e2?.rawX ?: 0f)) / 50
+        val distance = (e1.rawX - e2.rawX) / 50
         val poa = 1.7f
         controller.binding.categoryHopperFrame.translationX = abs(distance).pow(poa) * -sign(distance)
         return super.onScroll(e1, e2, distanceX, distanceY)
-    }
-
-    override fun onSingleTapUp(e: MotionEvent?): Boolean {
-        return super.onSingleTapUp(e)
     }
 
     @SuppressLint("RtlHardcoded")
@@ -71,14 +67,14 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
                     hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =
                             Gravity.TOP or (
-                            if (gravity == Gravity.TOP or Gravity.RIGHT) {
-                                controller.preferences.hopperGravity().set(1)
-                                Gravity.CENTER
-                            } else {
-                                controller.preferences.hopperGravity().set(0)
-                                Gravity.LEFT
-                            }
-                            )
+                                if (gravity == Gravity.TOP or Gravity.RIGHT) {
+                                    controller.preferences.hopperGravity().set(1)
+                                    Gravity.CENTER
+                                } else {
+                                    controller.preferences.hopperGravity().set(0)
+                                    Gravity.LEFT
+                                }
+                                )
                     }
                     savePrefs()
                 }
@@ -90,14 +86,14 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
                     hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =
                             Gravity.TOP or (
-                            if (gravity == Gravity.TOP or Gravity.LEFT) {
-                                controller.preferences.hopperGravity().set(1)
-                                Gravity.CENTER
-                            } else {
-                                controller.preferences.hopperGravity().set(2)
-                                Gravity.RIGHT
-                            }
-                            )
+                                if (gravity == Gravity.TOP or Gravity.LEFT) {
+                                    controller.preferences.hopperGravity().set(1)
+                                    Gravity.CENTER
+                                } else {
+                                    controller.preferences.hopperGravity().set(2)
+                                    Gravity.RIGHT
+                                }
+                                )
                     }
                     savePrefs()
                 }
