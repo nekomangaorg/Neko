@@ -129,10 +129,10 @@ open class MangaDex : HttpSource() {
     }
 
     override fun isLogged(): Boolean {
-        return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(
-            this,
-        ).isNullOrBlank().not() && preferences.sessionToken().isNullOrBlank().not() &&
-            preferences.refreshToken().isNullOrBlank().not()
+        return !preferences.sourceUsername(this).isNullOrBlank()
+            && !preferences.sourcePassword(this).isNullOrBlank()
+            && !preferences.sessionToken().isNullOrBlank()
+            && !preferences.refreshToken().isNullOrBlank()
     }
 
     override suspend fun login(

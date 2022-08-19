@@ -402,13 +402,22 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             if (!preferences.readingSync() || !sourceManager.getMangadex().isLogged() || !isOnline()) return@launchIO
 
-            statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.value.url)).collect { chapterIds ->
-                val chaptersToMarkRead = allChapters.value.asSequence().filter { !it.chapter.isMergedChapter() }
-                    .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
-                    .toList()
-                if (chaptersToMarkRead.isNotEmpty()) {
-                    markChapters(chaptersToMarkRead, MangaConstants.MarkAction.Read(), skipSync = true)
+            runCatching {
+                statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.value.url)).collect { chapterIds ->
+                    val chaptersToMarkRead = allChapters.value.asSequence().filter { !it.chapter.isMergedChapter() }
+                        .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
+                        .toList()
+                    if (chaptersToMarkRead.isNotEmpty()) {
+                        markChapters(chaptersToMarkRead, MangaConstants.MarkAction.Read(), skipSync = true)
+                    }
                 }
+            }.onFailure {
+                XLog.e("Error trying to mark chapters read from MangaDex", it)
+                presenterScope.launch {
+                    delay(3000)
+                    _snackbarState.emit(SnackbarState("Error trying to mark chapters read from MangaDex $it"))
+                }
+
             }
 
         }
