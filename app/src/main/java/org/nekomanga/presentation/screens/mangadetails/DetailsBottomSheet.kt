@@ -90,6 +90,7 @@ fun DetailsBottomSheet(
         )
         is DetailsBottomSheetScreen.TrackingSheet -> TrackingSheet(
             themeColor = themeColorState,
+            inLibrary = inLibrary,
             services = loggedInTrackingServices,
             tracks = tracks,
             dateFormat = dateFormat,

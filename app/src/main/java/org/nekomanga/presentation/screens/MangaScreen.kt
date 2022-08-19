@@ -109,7 +109,8 @@ fun MangaScreen(
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (Context, String) -> Unit,
     creatorLongClick: (Context, String) -> Unit,
-    toggleFavorite: () -> Boolean = { true },
+    toggleFavorite: (Boolean) -> Boolean = { true },
+    hasDefaultCategory: State<Boolean>,
     categoryActions: CategoryActions,
     categories: State<List<Category>>,
     mangaCategories: State<List<Category>>,
@@ -330,16 +331,20 @@ fun MangaScreen(
                         loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
                         trackServiceCount = trackServiceCount.value,
                         toggleFavorite = {
-                            if (inLibrary.not() && categories.value.isNotEmpty()) {
-                                openSheet(
-                                    DetailsBottomSheetScreen.CategoriesSheet(
-                                        addingToLibrary = true,
-                                        setCategories = categoryActions.set,
-                                        addToLibraryClick = { inLibrary = toggleFavorite() },
-                                    ),
-                                )
+                            if (!inLibrary && categories.value.isNotEmpty()) {
+                                if (hasDefaultCategory.value) {
+                                    inLibrary = toggleFavorite(true)
+                                } else {
+                                    openSheet(
+                                        DetailsBottomSheetScreen.CategoriesSheet(
+                                            addingToLibrary = true,
+                                            setCategories = categoryActions.set,
+                                            addToLibraryClick = { inLibrary = toggleFavorite(false) },
+                                        ),
+                                    )
+                                }
                             } else {
-                                inLibrary = toggleFavorite()
+                                inLibrary = toggleFavorite(false)
                             }
                         },
                         categories = categories.value,

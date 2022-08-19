@@ -60,7 +60,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import jp.wasabeef.gap.Gap
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -89,7 +88,6 @@ fun ChapterRow(
     markPrevious: (Boolean) -> Unit,
     onDownload: (DownloadAction) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
         val dismissState = rememberDismissState(initialValue = DismissValue.Default)
         NekoSwipeToDismiss(
@@ -144,15 +142,16 @@ fun ChapterRow(
             },
         )
         when {
-            dismissState.isDismissed(DismissDirection.EndToStart) -> Reset(scope = scope, dismissState = dismissState, action = onRead)
-            dismissState.isDismissed(DismissDirection.StartToEnd) -> Reset(scope = scope, dismissState = dismissState, action = onBookmark)
+            dismissState.isDismissed(DismissDirection.EndToStart) -> Reset(dismissState = dismissState, action = onRead)
+            dismissState.isDismissed(DismissDirection.StartToEnd) -> Reset(dismissState = dismissState, action = onBookmark)
         }
 
     }
 }
 
 @Composable
-private fun Reset(scope: CoroutineScope, dismissState: DismissState, action: () -> Unit) {
+private fun Reset(dismissState: DismissState, action: () -> Unit) {
+    val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = dismissState.dismissDirection) {
         scope.launch {
             dismissState.reset()

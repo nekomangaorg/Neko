@@ -62,6 +62,7 @@ import java.text.DateFormat
 @Composable
 fun TrackingSheet(
     themeColor: ThemeColorState,
+    inLibrary: Boolean,
     services: List<TrackService>,
     tracks: List<Track>,
     dateFormat: DateFormat,
@@ -147,6 +148,7 @@ fun TrackingSheet(
                 }
                 TrackingServiceItem(
                     themeColor = themeColor,
+                    inLibrary = inLibrary,
                     service = service,
                     trackAndService = trackAndService,
                     dateFormat = dateFormat,
@@ -183,6 +185,7 @@ private class ShowDialog(val trackAndService: TrackAndService) : Dialog()
 @Composable
 private fun TrackingServiceItem(
     themeColor: ThemeColorState,
+    inLibrary: Boolean,
     service: TrackService,
     trackAndService: TrackAndService?,
     dateFormat: DateFormat,
@@ -207,6 +210,7 @@ private fun TrackingServiceItem(
             } else {
                 TrackRowOne(
                     themeColor = themeColor,
+                    inLibrary = inLibrary,
                     track = trackAndService.track,
                     service = trackAndService.service,
                     onLogoClick = onLogoClick,
@@ -239,7 +243,15 @@ private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoCl
 }
 
 @Composable
-private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: TrackService, onLogoClick: (String, String) -> Unit, searchTrackerClick: (Track) -> Unit, onRemoveClick: () -> Unit) {
+private fun TrackRowOne(
+    themeColor: ThemeColorState,
+    inLibrary: Boolean,
+    track: Track,
+    service: TrackService,
+    onLogoClick: (String, String) -> Unit,
+    searchTrackerClick: (Track) -> Unit,
+    onRemoveClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -250,7 +262,7 @@ private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: Trac
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Logo(service = service, track = track, onClick = onLogoClick)
-        if (service.isAutoAddTracker()) {
+        if (service.isAutoAddTracker() && inLibrary) {
             Text(
                 text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Start,
                 modifier = Modifier

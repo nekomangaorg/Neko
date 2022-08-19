@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -87,6 +88,7 @@ private fun Item(modifier: Modifier, text: String, style: TextStyle, onClick: ()
     )
 }
 
+@Immutable
 sealed class SimpleDropDownItem {
     data class Action(val text: String, val onClick: () -> Unit) : SimpleDropDownItem()
     data class Parent(val text: String, val children: List<SimpleDropDownItem>) : SimpleDropDownItem()
