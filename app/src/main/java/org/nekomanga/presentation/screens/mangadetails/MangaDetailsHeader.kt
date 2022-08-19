@@ -150,7 +150,7 @@ fun MangaDetailsHeader(
                 }
             }
             if (isTablet && quickReadText.text.isNotEmpty() && quickReadText.id != null) {
-                quickReadButton(quickReadText, themeColorState, quickReadClick)
+                QuickReadButton(quickReadText, themeColorState, quickReadClick)
             }
             Gap(8.dp)
             DescriptionBlock(
@@ -170,7 +170,7 @@ fun MangaDetailsHeader(
                 altTitleResetClick = descriptionActions.altTitleResetClick,
             )
             if (!isTablet && quickReadText.text.isNotEmpty() && quickReadText.id != null) {
-                quickReadButton(quickReadText, themeColorState, quickReadClick)
+                QuickReadButton(quickReadText, themeColorState, quickReadClick)
                 Gap(8.dp)
             }
         }
@@ -178,7 +178,7 @@ fun MangaDetailsHeader(
 }
 
 @Composable
-private fun ColumnScope.quickReadButton(
+private fun ColumnScope.QuickReadButton(
     quickReadText: NextUnreadChapter,
     themeColorState: ThemeColorState,
     quickReadClick: () -> Unit,
@@ -191,7 +191,7 @@ private fun ColumnScope.quickReadButton(
                 shape = RoundedCornerShape(35),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(8.dp),
                 colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
             ) {
                 Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)

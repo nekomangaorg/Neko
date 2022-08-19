@@ -133,8 +133,8 @@ fun DescriptionBlock(
                 AltTitles(
                     altTitles = manga.getAltTitles(),
                     currentTitle = title,
-                    themeColorState = themeColorState,
                     tagColor = tagColor,
+                    themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
                     resetClick = altTitleResetClick,
                 )
@@ -158,8 +158,8 @@ fun DescriptionBlock(
                 AltTitles(
                     altTitles = manga.getAltTitles(),
                     currentTitle = title,
-                    themeColorState = themeColorState,
                     tagColor = tagColor,
+                    themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
                     resetClick = altTitleResetClick,
                 )
@@ -207,7 +207,7 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
 }
 
 @Composable
-private fun ColumnScope.AltTitles(altTitles: List<String>, currentTitle: String, tagColor: Color, themeColorState: ThemeColorState, altTitleClick: (String) -> Unit, resetClick: () -> Unit) {
+private fun AltTitles(altTitles: List<String>, currentTitle: String, tagColor: Color, themeColorState: ThemeColorState, altTitleClick: (String) -> Unit, resetClick: () -> Unit) {
     if (altTitles.isNotEmpty()) {
         val isCustomTitle = altTitles.contains(currentTitle)
         val onChipColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = NekoColors.mediumAlphaHighContrast)
@@ -222,8 +222,8 @@ private fun ColumnScope.AltTitles(altTitles: List<String>, currentTitle: String,
                 .layout { measurable, constraints ->
                     val placeable = measurable.measure(
                         constraints.copy(
-                            minWidth = constraints.maxWidth + 24.dp.roundToPx(),
-                            maxWidth = constraints.maxWidth + 24.dp.roundToPx(),
+                            minWidth = constraints.maxWidth + 16.dp.roundToPx(),
+                            maxWidth = constraints.maxWidth + 16.dp.roundToPx(),
                         ),
                     )
                     layout(placeable.width, placeable.height) {
@@ -233,9 +233,6 @@ private fun ColumnScope.AltTitles(altTitles: List<String>, currentTitle: String,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            item {
-                Gap(8.dp)
-            }
             if (isCustomTitle) {
                 item {
                     TextButton(onClick = resetClick) {
@@ -283,7 +280,20 @@ private fun ColumnScope.Genres(genres: List<String>?, tagColor: Color, genreClic
         text = "Tags:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
     )
     Gap(8.dp)
-    FlowRow(mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 12.dp, crossAxisSpacing = 12.dp) {
+    FlowRow(
+        modifier = Modifier.layout { measurable, constraints ->
+            val placeable = measurable.measure(
+                constraints.copy(
+                    minWidth = constraints.maxWidth + 16.dp.roundToPx(),
+                    maxWidth = constraints.maxWidth + 16.dp.roundToPx(),
+                ),
+            )
+            layout(placeable.width, placeable.height) {
+                placeable.place(0, 0)
+            }
+        },
+        mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 12.dp, crossAxisSpacing = 12.dp,
+    ) {
         genres.forEach { genre ->
             Chip(
                 label = genre, containerColor = tagColor,
