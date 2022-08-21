@@ -15,7 +15,7 @@ import uy.kohesive.injekt.injectLazy
 object ThemeUtil {
 
     /** Migration method */
-    fun convertTheme(preferences: PreferencesHelper, theme: Int) {
+    fun convertNewThemes(preferences: PreferencesHelper, theme: Int) {
         preferences.nightMode().set(
             when (theme) {
                 0, 1 -> AppCompatDelegate.MODE_NIGHT_NO
@@ -53,10 +53,6 @@ object ThemeUtil {
         }
     }
 
-    fun isColoredTheme(theme: Themes): Boolean {
-        return false
-    }
-
     fun isPitchBlack(context: Context): Boolean {
         val preferences: PreferencesHelper by injectLazy()
         return context.isInNightMode() && preferences.themeDarkAmoled().get()
@@ -71,19 +67,10 @@ object ThemeUtil {
 }
 
 fun AppCompatActivity.setThemeByPref(preferences: PreferencesHelper) {
-    if (preferences.nightMode().isNotSet() && preferences.oldTheme().isSet()) {
-        ThemeUtil.convertTheme(preferences, preferences.oldTheme().get())
-        preferences.oldTheme().delete()
-    }
-    val theme = getPrefTheme(preferences)
-    setTheme(theme.styleRes)
+    setTheme(getPrefTheme(preferences).styleRes)
 }
 
-fun AppCompatActivity.getThemeWithExtras(
-    theme: Resources.Theme,
-    preferences: PreferencesHelper,
-    oldTheme: Resources.Theme?,
-): Resources.Theme {
+fun AppCompatActivity.getThemeWithExtras(theme: Resources.Theme, preferences: PreferencesHelper, oldTheme: Resources.Theme?): Resources.Theme {
     val useAmoled =
         (isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
             preferences.themeDarkAmoled().get()
@@ -96,9 +83,6 @@ fun AppCompatActivity.getThemeWithExtras(
     }
     if (useAmoled) {
         theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_Amoled, true)
-        val prefTheme = getPrefTheme(preferences)
-        if (ThemeUtil.isColoredTheme(prefTheme)) {
-        }
     }
     return theme
 }
@@ -107,10 +91,7 @@ fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
     // Using a try catch in case I start to remove themes
     return try {
         (
-            if ((
-                applicationContext.isInNightMode() || preferences.nightMode()
-                    .get() == AppCompatDelegate.MODE_NIGHT_YES
-                ) &&
+            if ((applicationContext.isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
                 preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
             ) preferences.darkTheme() else preferences.lightTheme()
             ).get()
