@@ -1,49 +1,50 @@
 package eu.kanade.tachiyomi.data.track.myanimelist
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import eu.kanade.tachiyomi.network.parseAs
 import okhttp3.Interceptor
 import okhttp3.Response
-import uy.kohesive.injekt.injectLazy
+import okhttp3.internal.closeQuietly
+import java.io.IOException
 
 class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var token: String?) : Interceptor {
 
-    val scope = CoroutineScope(Job() + Dispatchers.Main)
-
-    private val json: Json by injectLazy()
-
     private var oauth: OAuth? = null
-        set(value) {
-            field = value?.copy(expires_in = System.currentTimeMillis() + (value.expires_in * 1000))
-        }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
         if (token.isNullOrEmpty()) {
-            throw Exception("Not authenticated with MyAnimeList")
+            throw IOException("Not authenticated with MyAnimeList")
         }
         if (oauth == null) {
             oauth = myanimelist.loadOAuth()
         }
-        // Refresh access token if null or expired.
-        if (oauth!!.isExpired()) {
-            chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!.refresh_token)).use {
-                if (it.isSuccessful) {
-                    setAuth(json.decodeFromString(it.body!!.string()))
+        // Refresh access token if expired or created_at is freshly set
+        if (oauth != null &&
+            (oauth!!.isExpired() || oauth!!.created_at == System.currentTimeMillis())
+        ) {
+            val newOauth = runCatching {
+                val oauthResponse = chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!))
+
+                if (oauthResponse.isSuccessful) {
+                    oauthResponse.parseAs<OAuth>()
+                } else {
+                    oauthResponse.closeQuietly()
+                    null
                 }
             }
-        }
 
-        // Throw on null auth.
+            if (newOauth.getOrNull() == null) {
+                throw IOException("Failed to refresh the access token")
+            }
+
+            setAuth(newOauth.getOrNull())
+        }
         if (oauth == null) {
-            throw Exception("No authentication token")
+            throw IOException("No authentication token")
         }
 
-        // Add the authorization header to the original request.
+        // Add the authorization header to the original request
         val authRequest = originalRequest.newBuilder()
             .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
             .build()
