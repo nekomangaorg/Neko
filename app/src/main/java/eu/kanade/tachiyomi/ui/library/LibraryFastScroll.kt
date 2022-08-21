@@ -15,7 +15,11 @@ class LibraryFastScroll @JvmOverloads constructor(context: Context, attrs: Attri
 
     private var currentX = 0f
 
+    private val isSingleCategory: Boolean
+        get() = (recyclerView.adapter as? LibraryCategoryAdapter)?.isSingleCategory ?: true
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (isSingleCategory) return super.onTouchEvent(event)
         val oldFastScroll = categoryFastScroll
         currentX = event.x
         if (categoryFastScroll != oldFastScroll && canScroll) {
@@ -49,7 +53,7 @@ class LibraryFastScroll @JvmOverloads constructor(context: Context, attrs: Attri
 
     override fun setBubbleAndHandlePosition(y: Float) {
         super.setBubbleAndHandlePosition(y)
-        if (bubbleEnabled) {
+        if (bubbleEnabled && !isSingleCategory) {
             bubble.translationX =
                 if (categoryFastScroll) {
                 250f * (if (resources.isLTR) -1 else 1)
