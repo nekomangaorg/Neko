@@ -197,6 +197,7 @@
         <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>
         <item name="colorPrimaryInverse">@color/primaryInverseStrawberry</item>
         <item name="colorOnPrimary">@color/onPrimaryStrawberry</item>
+        <item name="colorSurface">@color/backgroundStrawberries</item>
         <item name="colorSecondary">@color/secondaryStrawberry</item>
         <item name="colorControlHighlight">@color/rippleColorStrawberry</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
