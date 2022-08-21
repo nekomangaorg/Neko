@@ -151,6 +151,11 @@ val Float.dpToPxEnd: Float
             if (Resources.getSystem().isLTR) 1 else -1
         )
 
+/** Converts to px and takes into account LTR/RTL layout */
+fun Float.dpToPxEnd(resources: Resources): Float {
+    return this * resources.displayMetrics.density * if (resources.isLTR) 1 else -1
+}
+
 val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
