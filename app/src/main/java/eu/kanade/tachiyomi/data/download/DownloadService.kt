@@ -89,6 +89,9 @@ class DownloadService : Service() {
         fun isRunning(context: Context): Boolean {
             return context.isServiceRunning(DownloadService::class.java)
         }
+
+        private const val STOP_REASON_NO_WIFI = 1
+        private const val STOP_REASON_NO_INTERNET = 2
     }
 
     /**
@@ -112,6 +115,8 @@ class DownloadService : Service() {
      * Subscriptions to store while the service is running.
      */
     private lateinit var subscriptions: CompositeSubscription
+
+    private var stopReason: Int? = null
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -153,7 +158,13 @@ class DownloadService : Service() {
         runningRelay.call(false)
         subscriptions.unsubscribe()
         connectivityManager.unregisterNetworkCallback(networkCallback)
-        downloadManager.stopDownloads()
+        downloadManager.stopDownloads(
+            when (stopReason) {
+                STOP_REASON_NO_INTERNET -> getString(R.string.no_network_connection)
+                STOP_REASON_NO_WIFI -> getString(R.string.no_wifi_connection)
+                else -> null
+            },
+        )
         callListeners(false)
         wakeLock.releaseIfNeeded()
         super.onDestroy()
@@ -193,12 +204,15 @@ class DownloadService : Service() {
         val manager = connectivityManager
         val networkCapabilities = manager.getNetworkCapabilities(manager.activeNetwork)
         if (networkCapabilities == null || !isOnline()) {
-            downloadManager.stopDownloads(getString(R.string.no_network_connection))
+            stopReason = STOP_REASON_NO_INTERNET
+            stopSelf()
             return
         }
         if (preferences.downloadOnlyOverWifi() && !isConnectedToWifi()) {
-            downloadManager.stopDownloads(getString(R.string.no_wifi_connection))
+            stopReason = STOP_REASON_NO_WIFI
+            stopSelf()
         } else {
+            stopReason = null
             val started = downloadManager.startDownloads()
             if (!started) stopSelf()
         }
