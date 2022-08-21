@@ -901,8 +901,8 @@
     <string name="always_delete">Always delete</string>
     <string name="automatic_removal">Automatic removal</string>
     <string name="save_chapters_as_cbz">Save as CBZ archive</string>
-    <string name="split_tall_images">Auto split tall images</string>
-    <string name="split_tall_images_summary">Improves reader performance by splitting tall downloaded images.</string>
+    <string name="split_tall_images">Split tall images</string>
+    <string name="split_tall_images_summary">Improves reader performance</string>
 
     <!-- Time -->
     <string name="manual">Manual</string>
