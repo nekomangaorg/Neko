@@ -276,6 +276,7 @@
 
     <style name="Widget.Tachiyomi.CompoundButton.CheckBox" parent="Base.Widget.Material3.CompoundButton.CheckBox">
         <item name="buttonTint">@null</item>
+        <item name="buttonIconTint">@null</item>
     </style>
 
     <style name="Widget.Tachiyomi.CompoundButton.RadioButton" parent="Base.Widget.Material3.CompoundButton.RadioButton">
