@@ -114,7 +114,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
     fun update(isRunning: Boolean) {
         presenter.getItems()
         onQueueStatusChange(isRunning)
-        binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
+        if (binding.downloadFab.isInvisible != presenter.downloadQueue.isEmpty()) {
+            binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
+        }
         prepareMenu()
     }
 
@@ -135,7 +137,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
     private fun onQueueStatusChange(running: Boolean) {
         val oldRunning = isRunning
         isRunning = running
-        binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
+        if (binding.downloadFab.isInvisible != presenter.downloadQueue.isEmpty()) {
+            binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
+        }
         updateFab()
         if (oldRunning != running) {
             prepareMenu()
