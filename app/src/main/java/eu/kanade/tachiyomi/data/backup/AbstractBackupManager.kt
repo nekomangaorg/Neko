@@ -59,6 +59,9 @@ abstract class AbstractBackupManager(protected val context: Context) {
     protected fun getFavoriteManga(): List<Manga> =
         databaseHelper.getFavoriteMangaList().executeAsBlocking()
 
+    protected fun getReadManga(): List<Manga> =
+        databaseHelper.getReadNotInLibraryMangas().executeAsBlocking()
+
     /**
      * Inserts manga and returns id
      *

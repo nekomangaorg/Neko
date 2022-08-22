@@ -522,6 +522,7 @@
     <string name="error_refreshing_">Error refreshing %1$s: </string>
     <string name="error_sharing_cover">Error sharing cover</string>
     <string name="custom_manga_info">Custom manga info</string>
+    <string name="all_read_manga">All read manga</string>
     <string name="set_as_default">Set as default</string>
     <string name="updated_title_to_">Title updated to %1$s</string>
     <plurals name="deleted_chapters">

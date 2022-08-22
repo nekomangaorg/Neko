@@ -37,7 +37,6 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
@@ -192,8 +191,6 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         setTheme(prefTheme.styleRes)
         if (!lightMode && preferences.themeDarkAmoled().get()) {
             setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
-            if (ThemeUtil.isColoredTheme(prefTheme)) {
-            }
         }
         val themeValue = TypedValue()
         theme.resolveAttribute(android.R.attr.windowLightStatusBar, themeValue, true)

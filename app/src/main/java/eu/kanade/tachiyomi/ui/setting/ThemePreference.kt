@@ -52,6 +52,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
     lateinit var binding: ThemesPreferenceBinding
     private val managerLight = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
     private val managerDark = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
     init {
         layoutResource = R.layout.themes_preference
         fastAdapterLight = FastAdapter.with(itemAdapterLight)
@@ -89,14 +90,14 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                 if (!selected) {
                     preferences.nightMode().set(nightMode)
                 } else if (preferences.nightMode()
-                    .get() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                        .get() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 ) {
                     preferences.nightMode().set(nightMode)
                 }
                 if ((
-                    preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
-                        nightMode != context.appDelegateNightMode()
-                    ) ||
+                        preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                            nightMode != context.appDelegateNightMode()
+                        ) ||
                     (!selected && nightMode == context.appDelegateNightMode())
                 ) {
                     fastAdapterLight.notifyDataSetChanged()
@@ -118,13 +119,14 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
         binding.themeRecycler.adapter = fastAdapterLight
 
-        binding.themeRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                lastScrollPostionLight =
-                    recyclerView.computeHorizontalScrollOffset()
-            }
-        },
+        binding.themeRecycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    lastScrollPostionLight =
+                        recyclerView.computeHorizontalScrollOffset()
+                }
+            },
         )
 
         binding.themeRecyclerDark.setHasFixedSize(true)
@@ -132,13 +134,14 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
         binding.themeRecyclerDark.adapter = fastAdapterDark
 
-        binding.themeRecyclerDark.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                lastScrollPostionDark =
-                    recyclerView.computeHorizontalScrollOffset()
-            }
-        },
+        binding.themeRecyclerDark.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    lastScrollPostionDark =
+                        recyclerView.computeHorizontalScrollOffset()
+                }
+            },
         )
 
         if (lastScrollPostionLight != null) {
@@ -262,10 +265,6 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                 binding.themeLayout.setBackgroundColor(background)
                 if (item.isDarkTheme && preferences.themeDarkAmoled().get()) {
                     binding.themeLayout.setBackgroundColor(Color.BLACK)
-                    if (!ThemeUtil.isColoredTheme(item.theme)) {
-                        binding.themeBottomBar.setBackgroundColor(Color.BLACK)
-                        binding.themeToolbar.setBackgroundColor(Color.BLACK)
-                    }
                 }
             }
 

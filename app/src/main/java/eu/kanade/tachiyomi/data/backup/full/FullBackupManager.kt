@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CHAPTER
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CHAPTER_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_HISTORY
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_HISTORY_MASK
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_READ_MANGA
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_READ_MANGA_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK_MASK
 import eu.kanade.tachiyomi.data.backup.full.models.Backup
@@ -47,7 +49,7 @@ class FullBackupManager(val context: Context) {
     internal val databaseHelper: DatabaseHelper by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
-    protected val preferences: PreferencesHelper by injectLazy()
+    private val preferences: PreferencesHelper by injectLazy()
 
     val parser = ProtoBuf
 
@@ -62,8 +64,11 @@ class FullBackupManager(val context: Context) {
         var backup: Backup? = null
 
         databaseHelper.inTransaction {
-            val databaseManga = databaseHelper.getFavoriteMangaList().executeAsBlocking()
-
+            val databaseManga = getFavoriteManga() + if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA) {
+                getReadManga()
+            } else {
+                emptyList()
+            }
             backup = Backup(
                 backupManga(databaseManga, flags),
                 backupCategories(),
@@ -399,4 +404,10 @@ class FullBackupManager(val context: Context) {
 
     internal fun insertManga(manga: Manga): Long? =
         databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
+
+    internal fun getFavoriteManga(): List<Manga> =
+        databaseHelper.getFavoriteMangaList().executeAsBlocking()
+
+    internal fun getReadManga(): List<Manga> =
+        databaseHelper.getReadNotInLibraryMangas().executeAsBlocking()
 }
