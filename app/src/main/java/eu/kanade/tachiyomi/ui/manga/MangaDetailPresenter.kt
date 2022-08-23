@@ -208,7 +208,7 @@ class MangaDetailPresenter(
         updateCurrentArtworkFlow()
         updateChapterFlows()
         updateCategoryFlows()
-        updateTrackingFlows()
+        updateTrackingFlows(true)
         updateExternalFlows()
         updateMergeFlow()
         updateAlternativeArtworkFlow()
@@ -372,6 +372,7 @@ class MangaDetailPresenter(
                 return@launchIO
             }
             //add a slight delay in case the tracking flow is slower
+
             var count = 0
             while (count < 5 && tracks.value.isEmpty()) {
                 delay(1000)
@@ -398,7 +399,8 @@ class MangaDetailPresenter(
                     }
                 }
             asyncList.awaitAll()
-            updateTrackingFlows()
+            updateTrackingFlows(false)
+
         }
     }
 
@@ -740,74 +742,72 @@ class MangaDetailPresenter(
     /**
      * Update flows for tracking
      */
-    private fun updateTrackingFlows() {
+    private fun updateTrackingFlows(checkForMissingTrackers: Boolean = false) {
         presenterScope.launchIO {
-            var refreshRequired = false
 
             _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
-            _tracks.value = db.getTracks(manga.value).executeOnIO()
+            _tracks.value = db.getTracks(manga.value).executeAsBlocking()
 
-            val autoAddTracker = preferences.autoAddTracker().get()
+            if (checkForMissingTrackers) {
+                val autoAddTracker = preferences.autoAddTracker().get()
 
-            //Always add the mdlist initial unfollowed tracker, also add it as PTR if need be
-            _loggedInTrackingService.value.firstOrNull { it.isMdList() }?.let { mdList ->
-                mdList as MdList
+                //Always add the mdlist initial unfollowed tracker, also add it as PTR if need be
+                _loggedInTrackingService.value.firstOrNull { it.isMdList() }?.let { mdList ->
+                    mdList as MdList
 
-                var track = _tracks.value.firstOrNull { mdList.matchingTrack(it) }
+                    var track = _tracks.value.firstOrNull { mdList.matchingTrack(it) }
 
-                if (track == null) {
-                    track = mdList.createInitialTracker(manga.value)
-                    db.insertTrack(track).executeOnIO()
-                    if (isOnline()) {
-                        mdList.bind(track)
+                    if (track == null) {
+                        track = mdList.createInitialTracker(manga.value)
+                        db.insertTrack(track).executeOnIO()
+                        if (isOnline()) {
+                            mdList.bind(track)
+                        }
+                        db.insertTrack(track).executeOnIO()
                     }
-                    db.insertTrack(track).executeOnIO()
-                    refreshRequired = true
+                    val shouldAddAsPlanToRead = manga.value.favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
+                    if (shouldAddAsPlanToRead && isOnline()) {
+                        track.status = FollowStatus.PLAN_TO_READ.int
+                        trackingCoordinator.updateTrackingService(track, trackManager.mdList)
+                    }
                 }
-                val shouldAddAsPlanToRead = manga.value.favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
-                if (shouldAddAsPlanToRead && isOnline()) {
-                    track.status = FollowStatus.PLAN_TO_READ.int
-                    trackingCoordinator.updateTrackingService(track, trackManager.mdList)
-                    refreshRequired = true
-                }
-            }
 
-            if (autoAddTracker.size > 1 && manga.value.favorite) {
-                val validContentRatings = preferences.autoTrackContentRatingSelections()
-                val contentRating = manga.value.getContentRating()
-                if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
-                    autoAddTracker.map { it.toInt() }.forEach { autoAddTrackerId ->
-                        _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
-                            val id = trackManager.getIdFromManga(trackService, manga.value)
-                            if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
-                                if (!isOnline()) {
-                                    _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker"))
-                                } else {
-                                    val trackResult = trackService.search("", manga.value, false)
-                                    trackResult.firstOrNull()?.let { track ->
-                                        registerTracking(TrackAndService(track, trackService), true)
-                                        refreshRequired = true
+                if (autoAddTracker.size > 1 && manga.value.favorite) {
+                    val validContentRatings = preferences.autoTrackContentRatingSelections()
+                    val contentRating = manga.value.getContentRating()
+                    if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
+                        autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->
+                            async {
+                                _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
+                                    val id = trackManager.getIdFromManga(trackService, manga.value)
+                                    if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
+                                        if (!isOnline()) {
+                                            launchUI { _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker")) }
+                                        } else {
+                                            val trackResult = trackService.search("", manga.value, false)
+                                            trackResult.firstOrNull()?.let { track ->
+                                                val trackingUpdate = trackingCoordinator.registerTracking(TrackAndService(track, trackService), mangaId)
+                                                handleTrackingUpdate(trackingUpdate, false)
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
+                        }.awaitAll()
                     }
                 }
+                //update the tracks incase they were updated above
+                _tracks.value = db.getTracks(manga.value).executeAsBlocking()
             }
 
-            if (refreshRequired) {
-                updateTrackingFlows()
-            } else {
-                getSuggestedDate()
-
-                _trackServiceCount.value = _loggedInTrackingService.value.count { trackService ->
-                    _tracks.value.any { track ->
-                        //return true if track matches and not MDList
-                        //or track matches and MDlist is anything but Unfollowed
-                        trackService.matchingTrack(track) &&
-                            (trackService.isMdList().not() ||
-                                (trackService.isMdList() && !FollowStatus.isUnfollowed(track.status)))
-                    }
+            getSuggestedDate()
+            _trackServiceCount.value = _loggedInTrackingService.value.count { trackService ->
+                _tracks.value.any { track ->
+                    //return true if track matches and not MDList
+                    //or track matches and MDlist is anything but Unfollowed
+                    trackService.matchingTrack(track) &&
+                        (trackService.isMdList().not() ||
+                            (trackService.isMdList() && !FollowStatus.isUnfollowed(track.status)))
                 }
             }
         }
@@ -1193,8 +1193,8 @@ class MangaDetailPresenter(
                 }
             }
             if (editManga.favorite) {
-                //this is called for the add as plan to read auto sync tracking
-                updateTrackingFlows()
+                //this is called for the add as plan to read/auto sync tracking,
+                updateTrackingFlows(true)
             }
         }
 

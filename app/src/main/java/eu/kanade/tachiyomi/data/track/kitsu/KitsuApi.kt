@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
-import androidx.core.text.isDigitsOnly
 import com.elvishew.xlog.XLog
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -22,6 +21,7 @@ import kotlinx.serialization.json.putJsonObject
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -34,7 +34,6 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import kotlin.math.min
 
 class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
 
@@ -107,11 +106,11 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                 put("id", track.media_id)
                 putJsonObject("attributes") {
                     put("status", track.toKitsuStatus())
-                        val chapterCount = listOfNotNull(
-                            track.total_chapters.takeIf { it > 0 },
-                            track.last_chapter_read.toInt(),
-                        )
-                        put("progress", chapterCount.minOrNull())
+                    val chapterCount = listOfNotNull(
+                        track.total_chapters.takeIf { it > 0 },
+                        track.last_chapter_read.toInt(),
+                    )
+                    put("progress", chapterCount.minOrNull())
                     put("ratingTwenty", track.toKitsuScore())
                     put("startedAt", KitsuDateHelper.convert(track.started_reading_date))
                     put("finishedAt", KitsuDateHelper.convert(track.finished_reading_date))
@@ -155,9 +154,8 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         manga: Manga,
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
-        if (manga.kitsu_id.isNullOrBlank()
-                .not() && !wasPreviouslyTracked && manga.kitsu_id!!.isDigitsOnly()
-        ) {
+
+        if (!wasPreviouslyTracked && !manga.kitsu_id.isNullOrBlank()) {
             client.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!)))
                 .await().parseAs<JsonObject>().let {
                     val id = it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive
@@ -238,7 +236,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         @DELETE("library-entries/{id}")
         suspend fun deleteLibManga(
             @Path("id") remoteId: Long,
-        ): JsonObject
+        ): Response<Unit>
 
         @Headers("Content-Type: application/vnd.api+json")
         @PATCH("library-entries/{id}")
@@ -312,8 +310,8 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             return baseMangaUrl + remoteId
         }
 
-        fun apiMangaUrl(remoteId: String): String {
-            return "$baseUrl/manga?filter[slug]=$remoteId"
+        fun apiMangaUrl(remoteSlug: String): String {
+            return "${baseUrl}manga?filter[slug]=$remoteSlug"
         }
 
         fun refreshTokenRequest(token: String) = POST(
