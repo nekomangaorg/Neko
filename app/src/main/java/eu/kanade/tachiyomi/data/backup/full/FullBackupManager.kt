@@ -196,8 +196,8 @@ class FullBackupManager(val context: Context) {
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
         manga.initialized = false
-        manga.favorite = true
-        databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
+        manga.favorite = dbManga.favorite || manga.favorite
+        databaseHelper.insertManga(manga).executeAsBlocking()
     }
 
     /**

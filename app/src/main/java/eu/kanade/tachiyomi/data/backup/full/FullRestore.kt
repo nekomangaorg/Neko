@@ -72,6 +72,7 @@ class FullRestore(val context: Context, val job: Job?) {
             restoreCategories(backup.backupCategories)
         }
 
+
         dexManga.groupBy { MdUtil.getMangaUUID(it.url) }.forEach { (_, mangaList) ->
             restoreManga(mangaList.first().title, mangaList, backup.backupCategories)
         }
@@ -151,7 +152,6 @@ class FullRestore(val context: Context, val job: Job?) {
                 backupManager.restoreMangaNoFetch(manga, dbManga!!)
             } else {
                 manga.initialized = false
-                manga.favorite = true
                 manga.id = backupManager.insertManga(manga)
             }
             backupManager.restoreChaptersForMangaOffline(manga, chapters)
