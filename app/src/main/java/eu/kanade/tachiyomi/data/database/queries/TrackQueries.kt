@@ -50,4 +50,12 @@ interface TrackQueries : DbProvider {
                 .build(),
         )
         .prepare()
+
+    fun deleteTracks() = db.delete()
+        .byQuery(
+            DeleteQuery.builder()
+                .table(TrackTable.TABLE)
+                .build(),
+        )
+        .prepare()
 }

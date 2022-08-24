@@ -148,6 +148,7 @@ class FullRestore(val context: Context, val job: Job?) {
             val dbManga = backupManager.getMangaFromDatabase(manga)
             val dbMangaExists = dbManga != null
 
+
             if (dbMangaExists) {
                 backupManager.restoreMangaNoFetch(manga, dbManga!!)
             } else {

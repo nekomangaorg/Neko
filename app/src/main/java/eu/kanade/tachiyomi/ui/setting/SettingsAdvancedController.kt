@@ -328,6 +328,15 @@ class SettingsAdvancedController : SettingsController() {
                     }
                 }
             }
+            preference {
+                title = "Clear all trackers"
+                onClick {
+                    launchIO {
+                        val db = Injekt.get<DatabaseHelper>()
+                        db.deleteTracks().executeOnIO()
+                    }
+                }
+            }
         }
     }
 

@@ -746,7 +746,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
 
             _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
-            _tracks.value = db.getTracks(manga.value).executeAsBlocking()
+            _tracks.value = db.getTracks(mangaId).executeAsBlocking()
 
             if (checkForMissingTrackers) {
                 val autoAddTracker = preferences.autoAddTracker().get()

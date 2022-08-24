@@ -320,16 +320,11 @@ class FullBackupManager(val context: Context) {
      */
     internal fun restoreTrackForManga(manga: Manga, tracks: List<Track>) {
         // Fix foreign keys with the current manga id
+        val needToUpdate = tracks.any { it.manga_id != manga.id!! }
+
         tracks.map { it.manga_id = manga.id!! }
 
-        val validTracks =
-            tracks.filter { it.sync_id == TrackManager.MYANIMELIST || it.sync_id == TrackManager.ANILIST || it.sync_id == TrackManager.KITSU }
-
-        if (validTracks.isEmpty()) {
-            // always create an mdlist tracker
-            val track = trackManager.mdList.createInitialTracker(manga)
-            databaseHelper.insertTrack(track).executeAsBlocking()
-        }
+        val validTracks = tracks.filter { TrackManager.isValidTracker(it.sync_id) }
 
         // Get tracks from database
         val dbTracks = databaseHelper.getTracks(manga).executeAsBlocking()
@@ -337,7 +332,7 @@ class FullBackupManager(val context: Context) {
 
         validTracks.forEach { track ->
             val service = trackManager.getService(track.sync_id)
-            if (service != null && service.isLogged()) {
+            if (service != null) {
                 var isInDatabase = false
                 for (dbTrack in dbTracks) {
                     if (track.sync_id == dbTrack.sync_id) {
@@ -363,8 +358,9 @@ class FullBackupManager(val context: Context) {
             }
         }
         // Update database
-        if (trackToUpdate.isNotEmpty()) {
+        if (trackToUpdate.isNotEmpty() || needToUpdate) {
             databaseHelper.insertTracks(trackToUpdate).executeAsBlocking()
+            databaseHelper.getTracks(manga).executeAsBlocking()
         }
     }
 

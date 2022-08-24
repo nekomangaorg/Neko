@@ -17,6 +17,10 @@ class TrackManager(context: Context) {
         const val ANILIST = 2
         const val KITSU = 3
         const val MANGA_UPDATES = 7
+
+        fun isValidTracker(id: Int): Boolean {
+            return arrayOf(MDLIST, MYANIMELIST, ANILIST, KITSU, MANGA_UPDATES).contains(id)
+        }
     }
 
     val mdList = MdList(context, MDLIST)
