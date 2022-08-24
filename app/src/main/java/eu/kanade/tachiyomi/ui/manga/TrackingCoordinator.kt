@@ -102,7 +102,6 @@ class TrackingCoordinator {
      */
     suspend fun registerTracking(trackAndService: TrackingConstants.TrackAndService, mangaId: Long): TrackingUpdate {
         return runCatching {
-            XLog.e("ESCO tracking called for ${trackAndService.service.id} for track ${trackAndService.track.id}")
             val trackItem = trackAndService.track.apply {
                 manga_id = mangaId
             }
