@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
@@ -34,10 +35,14 @@ import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.system.disableItems
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
@@ -281,6 +286,47 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick {
                 FirebaseAnalytics.getInstance(context).logEvent("test_event", Bundle().apply { this.putString("test", "test") })
+            }
+        }
+        if (BuildConfig.DEBUG) {
+            preference {
+                title = "Unfollow all library manga"
+                onClick {
+                    launchIO {
+                        val db = Injekt.get<DatabaseHelper>()
+                        val followsHandler = Injekt.get<FollowsHandler>()
+                        val trackManager: TrackManager = Injekt.get()
+                        db.getLibraryMangaList().executeAsBlocking().forEach {
+                            followsHandler.updateFollowStatus(
+                                MdUtil.getMangaUUID(it.url),
+                                FollowStatus.UNFOLLOWED,
+                            )
+                            db.getMDList(it).executeOnIO()?.let { _ ->
+                                db.deleteTrackForManga(it, trackManager.mdList)
+                                    .executeAsBlocking()
+                            }
+                        }
+                    }
+                }
+            }
+            preference {
+                title = "Clear all Manga"
+                onClick {
+                    launchIO {
+                        val db = Injekt.get<DatabaseHelper>()
+                        db.deleteMangaList().executeOnIO()
+                    }
+                }
+            }
+            preference {
+                title = "Clear all categories"
+                onClick {
+                    launchIO {
+                        val db = Injekt.get<DatabaseHelper>()
+                        val categories = db.getCategories().executeAsBlocking()
+                        db.deleteCategories(categories).executeOnIO()
+                    }
+                }
             }
         }
     }

@@ -4,24 +4,16 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
@@ -169,29 +161,7 @@ class SettingsSiteController :
                 StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
             }
         }
-
-        if (BuildConfig.DEBUG) {
-            preference {
-                title = "Unfollow all library manga"
-                onClick {
-                    launchIO {
-                        val db = Injekt.get<DatabaseHelper>()
-                        val followsHandler = Injekt.get<FollowsHandler>()
-                        val trackManager: TrackManager = Injekt.get()
-                        db.getLibraryMangaList().executeAsBlocking().forEach {
-                            followsHandler.updateFollowStatus(
-                                MdUtil.getMangaUUID(it.url),
-                                FollowStatus.UNFOLLOWED,
-                            )
-                            db.getMDList(it).executeOnIO()?.let { _ ->
-                                db.deleteTrackForManga(it, trackManager.mdList)
-                                    .executeAsBlocking()
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        
 
         switchPreference {
             key = PreferenceKeys.addToLibraryAsPlannedToRead
