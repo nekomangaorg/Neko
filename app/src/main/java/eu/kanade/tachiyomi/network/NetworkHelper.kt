@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
+import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.SimilarService
@@ -26,7 +27,6 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
-import org.isomorphism.util.TokenBuckets
 import retrofit2.Retrofit
 import uy.kohesive.injekt.injectLazy
 import java.io.File
@@ -43,14 +43,6 @@ class NetworkHelper(val context: Context) {
     private val cacheSize = 5L * 1024 * 1024 // 5 MiB
 
     val cookieManager = AndroidCookieJar()
-
-    private val bucket = TokenBuckets.builder().withCapacity(5)
-        .withFixedIntervalRefillStrategy(5, 1, TimeUnit.SECONDS).build()
-
-    private val rateLimitInterceptor = Interceptor {
-        bucket.consume()
-        it.proceed(it.request())
-    }
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -123,7 +115,7 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildRateLimitedClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
+        return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).build()
     }
 
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
