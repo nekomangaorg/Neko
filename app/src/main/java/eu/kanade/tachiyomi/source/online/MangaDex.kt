@@ -39,7 +39,7 @@ open class MangaDex : HttpSource() {
 
     private val followsHandler: FollowsHandler by injectLazy()
 
-    val artworkHandler: ArtworkHandler by injectLazy()
+    private val artworkHandler: ArtworkHandler by injectLazy()
 
     private val mangaHandler: MangaHandler by injectLazy()
 

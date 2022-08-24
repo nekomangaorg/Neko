@@ -378,6 +378,7 @@ class LibraryUpdateService(
     ):
         Boolean {
         return runCatching {
+
             var hasDownloads = false
             if (job?.isCancelled == true) {
                 return@runCatching false
