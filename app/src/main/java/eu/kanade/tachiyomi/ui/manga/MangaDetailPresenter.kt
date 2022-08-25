@@ -57,6 +57,8 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -127,9 +129,6 @@ class MangaDetailPresenter(
 
     private val _externalLinks = MutableStateFlow(emptyList<ExternalLink>())
     val externalLinks: StateFlow<List<ExternalLink>> = _externalLinks.asStateFlow()
-
-    private val _alternativeArtwork = MutableStateFlow(emptyList<Artwork>())
-    val alternativeArtwork: StateFlow<List<Artwork>> = _alternativeArtwork.asStateFlow()
 
     private val _isMerged = MutableStateFlow(getIsMergedManga())
     val isMerged: StateFlow<IsMergedManga> = _isMerged.asStateFlow()
@@ -1123,7 +1122,7 @@ class MangaDetailPresenter(
             val quality = preferences.thumbnailQuality()
             val currentUsed = mangaScreenState.value.currentArtwork
 
-            _alternativeArtwork.value = db.getArtwork(manga.value).executeAsBlocking().map { aw ->
+            val altArtwork = db.getArtwork(manga.value).executeAsBlocking().map { aw ->
                 Artwork(
                     mangaId = aw.mangaId,
                     url = MdUtil.cdnCoverUrl(uuid, aw.fileName, quality),
@@ -1132,6 +1131,8 @@ class MangaDetailPresenter(
                     active = currentUsed.url.contains(aw.fileName) || (currentUsed.url.isBlank() && currentUsed.originalArtwork.contains(aw.fileName)),
                 )
             }
+
+            _mangaScreenState.value = _mangaScreenState.value.copy(alternativeArtwork = altArtwork.toImmutableList())
 
         }
     }
@@ -1477,7 +1478,7 @@ class MangaDetailPresenter(
                 inLibrary = manga.favorite,
                 originalArtwork = manga.thumbnail_url ?: "",
             ),
-
+            alternativeArtwork = persistentListOf(),
             hideButtonText = preferences.hideButtonText().get(),
         )
     }

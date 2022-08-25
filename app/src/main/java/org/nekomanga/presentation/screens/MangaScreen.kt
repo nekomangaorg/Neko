@@ -78,7 +78,6 @@ import eu.kanade.tachiyomi.util.system.openInWebView
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
-import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
@@ -123,7 +122,6 @@ fun MangaScreen(
     externalLinks: State<List<ExternalLink>>,
     isMergedManga: State<IsMergedManga>,
     mergeSearchResult: State<MergeSearchResult>,
-    alternativeArtwork: State<List<Artwork>>,
     coverActions: CoverActions,
     mergeActions: MergeActions,
     shareClick: (Context) -> Unit,
@@ -257,7 +255,7 @@ fun MangaScreen(
                         trackSuggestedDates = trackSuggestedDates.value,
                         externalLinks = externalLinks.value,
                         isMergedManga = isMergedManga.value,
-                        alternativeArtwork = alternativeArtwork.value,
+                        alternativeArtwork = mangaScreenState.value.alternativeArtwork,
                         coverActions = coverActions,
                         mergeActions = mergeActions,
                         mergeSearchResult = mergeSearchResult.value,

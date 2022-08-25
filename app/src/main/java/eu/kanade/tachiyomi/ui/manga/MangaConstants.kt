@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
+import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
@@ -16,6 +17,7 @@ object MangaConstants {
         val currentTitle: String,
         val currentDescription: String,
         val currentArtwork: Artwork,
+        val alternativeArtwork: ImmutableList<Artwork>,
         val hideButtonText: Boolean,
     )
 

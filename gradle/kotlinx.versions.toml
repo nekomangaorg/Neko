@@ -15,9 +15,11 @@ serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-jso
 serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization_version" }
 serialization-gradle = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin_version" }
 
+immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5"
+
 [bundles]
 
-kotlin = ["stdlib", "reflect", "coroutines-core", "coroutines-android", "serialization-json", "serialization-protobuf"]
+kotlin = ["stdlib", "reflect", "coroutines-core", "coroutines-android", "serialization-json", "serialization-protobuf", "immutables"]
 
 [plugins]
 
