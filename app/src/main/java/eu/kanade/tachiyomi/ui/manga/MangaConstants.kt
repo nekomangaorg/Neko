@@ -14,13 +14,14 @@ import org.nekomanga.domain.manga.MergeManga
 object MangaConstants {
 
     data class MangaScreenState(
-        val currentTitle: String,
-        val currentDescription: String,
-        val currentArtwork: Artwork,
-        val vibrantColor: Int?,
         val alternativeArtwork: ImmutableList<Artwork>,
-        val hideButtonText: Boolean,
+        val currentArtwork: Artwork,
+        val currentDescription: String,
+        val currentTitle: String,
         val hasDefaultCategory: Boolean,
+        val hideButtonText: Boolean,
+        val trackServiceCount: Int,
+        val vibrantColor: Int?,
     )
 
     /**

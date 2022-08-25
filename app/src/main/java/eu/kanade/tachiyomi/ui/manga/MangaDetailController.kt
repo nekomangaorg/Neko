@@ -97,7 +97,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             },
             toggleFavorite = presenter::toggleFavorite,
             loggedInTrackingServices = presenter.loggedInTrackingService.collectAsState(),
-            trackServiceCount = presenter.trackServiceCount.collectAsState(),
             tracks = presenter.tracks.collectAsState(),
             trackSuggestedDates = presenter.trackSuggestedDates.collectAsState(),
             dateFormat = preferences.dateFormat(),

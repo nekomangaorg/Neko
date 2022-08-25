@@ -110,7 +110,6 @@ fun MangaScreen(
     categories: State<List<Category>>,
     mangaCategories: State<List<Category>>,
     loggedInTrackingServices: State<List<TrackService>>,
-    trackServiceCount: State<Int>,
     tracks: State<List<Track>>,
     trackSuggestedDates: State<TrackingSuggestedDates?>,
     dateFormat: DateFormat,
@@ -323,7 +322,7 @@ fun MangaScreen(
                         themeColorState = themeColorState,
                         generatePalette = generatePalette,
                         loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
-                        trackServiceCount = trackServiceCount.value,
+                        trackServiceCount = mangaScreenState.value.trackServiceCount,
                         toggleFavorite = {
                             if (!inLibrary && categories.value.isNotEmpty()) {
                                 if (mangaScreenState.value.hasDefaultCategory) {

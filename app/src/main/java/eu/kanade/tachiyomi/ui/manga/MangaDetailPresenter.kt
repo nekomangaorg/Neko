@@ -112,9 +112,6 @@ class MangaDetailPresenter(
     private val _loggedInTrackingService = MutableStateFlow(emptyList<TrackService>())
     val loggedInTrackingService: StateFlow<List<TrackService>> = _loggedInTrackingService.asStateFlow()
 
-    private val _trackServiceCount = MutableStateFlow(0)
-    val trackServiceCount: StateFlow<Int> = _trackServiceCount.asStateFlow()
-
     private val _tracks = MutableStateFlow(emptyList<Track>())
     val tracks: StateFlow<List<Track>> = _tracks.asStateFlow()
 
@@ -785,7 +782,8 @@ class MangaDetailPresenter(
             }
 
             getSuggestedDate()
-            _trackServiceCount.value = _loggedInTrackingService.value.count { trackService ->
+
+            val trackCount = _loggedInTrackingService.value.count { trackService ->
                 _tracks.value.any { track ->
                     //return true if track matches and not MDList
                     //or track matches and MDlist is anything but Unfollowed
@@ -794,6 +792,8 @@ class MangaDetailPresenter(
                             (trackService.isMdList() && !FollowStatus.isUnfollowed(track.status)))
                 }
             }
+
+            _mangaScreenState.value = mangaScreenState.value.copy(trackServiceCount = trackCount)
         }
     }
 
@@ -1468,6 +1468,7 @@ class MangaDetailPresenter(
             currentTitle = manga.title,
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
+            trackServiceCount = 0,
             vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
         )
     }
