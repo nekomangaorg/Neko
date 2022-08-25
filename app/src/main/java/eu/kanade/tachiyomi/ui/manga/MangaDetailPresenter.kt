@@ -1097,9 +1097,22 @@ class MangaDetailPresenter(
      */
     private fun updateMangaFlow() {
         presenterScope.launchIO {
-            _currentManga.value = db.getManga(mangaId).executeOnIO()!!
+            val m = db.getManga(mangaId).executeOnIO()!!
+            _currentManga.value = m
             _mangaScreenState.value =
-                mangaScreenState.value.copy(currentTitle = manga.value.title, alternativeTitles = manga.value.getAltTitles().toImmutableList(), currentDescription = getDescription())
+                mangaScreenState.value.copy(
+                    currentTitle = m.title,
+                    alternativeTitles = m.getAltTitles().toImmutableList(),
+                    currentDescription = getDescription(),
+                    mangaAuthor = m.author ?: "",
+                    mangaArtist = m.artist ?: "",
+                    mangaStatus = m.status,
+                    mangaGenres = (m.getGenres() ?: emptyList()).toImmutableList(),
+                    mangaIsPornographic = m.genre?.contains("pornographic") ?: false,
+                    mangaRating = m.rating,
+                    mangaUsers = m.users,
+                    mangaLangFlag = m.lang_flag,
+                )
         }
     }
 
@@ -1125,17 +1138,20 @@ class MangaDetailPresenter(
      * Toggle a manga as favorite
      * TODO rework this
      */
-    fun toggleFavorite(shouldAddToDefaultCategory: Boolean): Boolean {
-
-        val editManga = manga.value
-        editManga.apply {
-            favorite = !favorite
-            date_added = when (favorite) {
-                true -> Date().time
-                false -> 0
-            }
-        }
+    fun toggleFavorite(shouldAddToDefaultCategory: Boolean) {
         presenterScope.launch {
+
+            val editManga = manga.value
+            editManga.apply {
+                favorite = !favorite
+                date_added = when (favorite) {
+                    true -> Date().time
+                    false -> 0
+                }
+            }
+
+            _mangaScreenState.value = mangaScreenState.value.copy(inLibrary = editManga.favorite)
+
             db.insertManga(editManga).executeAsBlocking()
             updateMangaFlow()
             //add to the default category if it exists and the user has the option set
@@ -1149,9 +1165,8 @@ class MangaDetailPresenter(
                 //this is called for the add as plan to read/auto sync tracking,
                 updateTrackingFlows(true)
             }
-        }
 
-        return editManga.favorite
+        }
     }
 
     /**
@@ -1452,6 +1467,7 @@ class MangaDetailPresenter(
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
             hideChapterTitles = getHideTitlesFilter(),
+            inLibrary = manga.favorite,
             isMergedManga = getIsMergedManga(),
             originalTitle = manga.originalTitle,
             vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),

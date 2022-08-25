@@ -64,7 +64,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
     @Composable
     override fun ScreenContent() {
         MangaScreen(
-            manga = presenter.manga.collectAsState().value,
             mangaScreenState = presenter.mangaScreenState.collectAsState(),
             snackbar = presenter.snackBarState,
             onRefresh = presenter::onRefresh,

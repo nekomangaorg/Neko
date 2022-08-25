@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.crazylegend.common.ifTrue
 import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
@@ -32,7 +31,6 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
@@ -43,8 +41,15 @@ import kotlin.math.roundToInt
 
 @Composable
 fun InformationBlock(
-    manga: Manga,
     title: String,
+    author: String,
+    artist: String,
+    rating: String?,
+    users: String?,
+    langFlag: String?,
+    status: Int,
+    isPornographic: Boolean,
+    missingChapters: String?,
     modifier: Modifier = Modifier,
     isExpanded: Boolean = true,
     showMergedIcon: Boolean = true,
@@ -71,12 +76,12 @@ fun InformationBlock(
             )
         }
 
-        if (manga.author.isNotNullOrEmpty() || manga.artist.isNotNullOrEmpty()) {
+        if (author.isNotEmpty() || artist.isNotEmpty()) {
             val creator =
-                when (manga.author == manga.artist) {
-                    true -> manga.author ?: "".trim()
+                when (author == artist) {
+                    true -> author.trim()
                     false -> {
-                        listOfNotNull(manga.author?.trim(), manga.artist?.trim())
+                        listOfNotNull(author.trim(), artist.trim())
                             .joinToString(", ")
                     }
                 }
@@ -90,9 +95,9 @@ fun InformationBlock(
                 color = mediumAlpha,
             )
         }
-        if (manga.status != 0) {
+        if (status != 0) {
             Gap(4.dp)
-            val status = when (manga.status) {
+            val statusRes = when (status) {
                 SManga.ONGOING -> R.string.ongoing
                 SManga.COMPLETED -> R.string.completed
                 SManga.LICENSED -> R.string.licensed
@@ -103,12 +108,12 @@ fun InformationBlock(
             }
 
             NoRippleText(
-                text = stringResource(id = status),
+                text = stringResource(id = statusRes),
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
         }
-        if (manga.rating != null || manga.users != null || manga.lang_flag != null) {
+        if (rating != null || users != null || langFlag != null) {
             Gap(8.dp)
         }
         FlowRow(
@@ -118,8 +123,8 @@ fun InformationBlock(
             crossAxisAlignment = FlowCrossAxisAlignment.Center,
 
             ) {
-            if (manga.lang_flag != null) {
-                val flag = when (manga.lang_flag?.lowercase(Locale.US)) {
+            if (langFlag != null) {
+                val flag = when (langFlag.lowercase(Locale.US)) {
                     "zh-hk" -> R.drawable.ic_flag_hk
                     "zh" -> R.drawable.ic_flag_cn
                     "ko" -> R.drawable.ic_flag_kr
@@ -138,14 +143,14 @@ fun InformationBlock(
                 }
             }
 
-            manga.genre?.contains("pornographic", true)?.ifTrue {
+            if (isPornographic) {
                 Row {
                     Gap(8.dp)
                     Image(imageVector = Icons.Outlined._18UpRating, modifier = Modifier.size(32.dp), contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
                 }
             }
 
-            manga.rating?.let { rating ->
+            rating?.let { rating ->
                 val formattedRating = ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
 
                 Row {
@@ -160,7 +165,7 @@ fun InformationBlock(
                 }
             }
 
-            manga.users?.let { unformattedNumberOfUsers ->
+            users?.let { unformattedNumberOfUsers ->
                 val numberOfUsers = runCatching {
                     NumberFormat.getNumberInstance(Locale.US).format(unformattedNumberOfUsers.toInt())
                 }.getOrDefault(0).toString()
@@ -186,7 +191,7 @@ fun InformationBlock(
 
         }
 
-        manga.missing_chapters?.let { numberOfMissingChapters ->
+        missingChapters?.let { numberOfMissingChapters ->
             Gap(4.dp)
             NoRippleText(
                 text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters), style = MaterialTheme.typography.bodyLarge,

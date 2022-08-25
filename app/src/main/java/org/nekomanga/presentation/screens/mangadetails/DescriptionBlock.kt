@@ -47,7 +47,6 @@ import com.mikepenz.markdown.Markdown
 import com.mikepenz.markdown.MarkdownColors
 import com.mikepenz.markdown.MarkdownDefaults
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
@@ -61,10 +60,10 @@ import org.nekomanga.presentation.screens.ThemeColorState
  */
 @Composable
 fun DescriptionBlock(
-    manga: Manga,
     title: String,
     description: String,
     altTitles: List<String>,
+    genres: List<String>,
     themeColorState: ThemeColorState,
     isExpanded: Boolean,
     isTablet: Boolean,
@@ -140,7 +139,7 @@ fun DescriptionBlock(
                     resetClick = altTitleResetClick,
                 )
                 Gap(8.dp)
-                Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
+                Genres(genres, tagColor, genreClick, genreLongClick)
                 Gap(16.dp)
             }
             val text = description.trim()
@@ -165,7 +164,7 @@ fun DescriptionBlock(
                     resetClick = altTitleResetClick,
                 )
                 Gap(16.dp)
-                Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
+                Genres(genres, tagColor, genreClick, genreLongClick)
                 Gap(16.dp)
                 MoreLessButton(
                     buttonColor = themeColorState.buttonColor,

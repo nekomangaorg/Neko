@@ -53,7 +53,6 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.presentation.components.VerticalDivider
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
@@ -92,7 +91,6 @@ import java.text.DateFormat
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MangaScreen(
-    manga: Manga,
     mangaScreenState: State<MangaScreenState>,
     snackbar: SharedFlow<SnackbarState>,
     onRefresh: () -> Unit,
@@ -100,7 +98,7 @@ fun MangaScreen(
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (Context, String) -> Unit,
     creatorLongClick: (Context, String) -> Unit,
-    toggleFavorite: (Boolean) -> Boolean = { true },
+    toggleFavorite: (Boolean) -> Unit,
     categoryActions: CategoryActions,
     loggedInTrackingServices: State<List<TrackService>>,
     tracks: State<List<Track>>,
@@ -165,8 +163,6 @@ fun MangaScreen(
         }
     }
 
-    var inLibrary by remember { mutableStateOf(manga.favorite) }
-
     var currentBottomSheet: DetailsBottomSheetScreen? by remember {
         mutableStateOf(null)
     }
@@ -219,7 +215,7 @@ fun MangaScreen(
                     DetailsBottomSheet(
                         currentScreen = currentSheet,
                         themeColorState = themeColorState,
-                        inLibrary = inLibrary,
+                        inLibrary = mangaScreenState.value.inLibrary,
                         addNewCategory = categoryActions.addNew,
                         allCategories = mangaScreenState.value.allCategories,
                         mangaCategories = mangaScreenState.value.currentCategories,
@@ -290,15 +286,23 @@ fun MangaScreen(
 
                 fun details() = @Composable {
                     MangaDetailsHeader(
-                        manga = manga,
                         title = mangaScreenState.value.currentTitle,
+                        author = mangaScreenState.value.mangaAuthor,
+                        artist = mangaScreenState.value.mangaArtist,
+                        rating = mangaScreenState.value.mangaRating,
+                        users = mangaScreenState.value.mangaUsers,
+                        langFlag = mangaScreenState.value.mangaLangFlag,
+                        status = mangaScreenState.value.mangaStatus,
+                        isPornographic = mangaScreenState.value.mangaIsPornographic,
+                        missingChapters = mangaScreenState.value.mangaMissingChapters,
                         description = mangaScreenState.value.currentDescription,
                         altTitles = mangaScreenState.value.alternativeTitles,
+                        genres = mangaScreenState.value.mangaGenres,
                         artwork = mangaScreenState.value.currentArtwork,
                         showBackdrop = themeBasedOffCover,
                         hideButtonText = mangaScreenState.value.hideButtonText,
                         isMerged = mangaScreenState.value.isMergedManga is IsMergedManga.Yes,
-                        inLibrary = inLibrary,
+                        inLibrary = mangaScreenState.value.inLibrary,
                         isTablet = isTablet,
                         titleLongClick = { title: String -> titleLongClick(context, title) },
                         creatorLongClick = { creator: String -> creatorLongClick(context, creator) },
@@ -307,20 +311,20 @@ fun MangaScreen(
                         loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
                         trackServiceCount = mangaScreenState.value.trackServiceCount,
                         toggleFavorite = {
-                            if (!inLibrary && mangaScreenState.value.allCategories.isNotEmpty()) {
+                            if (!mangaScreenState.value.inLibrary && mangaScreenState.value.allCategories.isNotEmpty()) {
                                 if (mangaScreenState.value.hasDefaultCategory) {
-                                    inLibrary = toggleFavorite(true)
+                                    toggleFavorite(true)
                                 } else {
                                     openSheet(
                                         DetailsBottomSheetScreen.CategoriesSheet(
                                             addingToLibrary = true,
                                             setCategories = categoryActions.set,
-                                            addToLibraryClick = { inLibrary = toggleFavorite(false) },
+                                            addToLibraryClick = { toggleFavorite(false) },
                                         ),
                                     )
                                 }
                             } else {
-                                inLibrary = toggleFavorite(false)
+                                toggleFavorite(false)
                             }
                         },
                         moveCategories = {

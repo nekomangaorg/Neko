@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import jp.wasabeef.gap.Gap
@@ -43,10 +42,18 @@ import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun MangaDetailsHeader(
-    manga: Manga,
     title: String,
+    author: String,
+    artist: String,
+    rating: String?,
+    users: String?,
+    langFlag: String?,
+    status: Int,
+    isPornographic: Boolean,
+    missingChapters: String?,
     description: String,
     altTitles: List<String>,
+    genres: List<String>,
     hideButtonText: Boolean,
     artwork: Artwork,
     showBackdrop: Boolean = true,
@@ -77,7 +84,7 @@ fun MangaDetailsHeader(
 
         val isExpanded = rememberSaveable {
             when (isTablet) {
-                false -> mutableStateOf(!manga.favorite)
+                false -> mutableStateOf(!inLibrary)
                 true -> mutableStateOf(true)
             }
         }
@@ -107,8 +114,15 @@ fun MangaDetailsHeader(
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
-                        manga = manga,
                         title = title,
+                        author = author,
+                        artist = artist,
+                        rating = rating,
+                        users = users,
+                        langFlag = langFlag,
+                        status = status,
+                        isPornographic = isPornographic,
+                        missingChapters = missingChapters,
                         modifier = Modifier
                             .statusBarsPadding()
                             .padding(top = 70.dp),
@@ -153,10 +167,10 @@ fun MangaDetailsHeader(
             }
             Gap(8.dp)
             DescriptionBlock(
-                manga = manga,
                 title = title,
                 description = description,
                 altTitles = altTitles,
+                genres = genres,
                 themeColorState = themeColorState,
                 isExpanded = isExpanded.value,
                 isTablet = isTablet,
