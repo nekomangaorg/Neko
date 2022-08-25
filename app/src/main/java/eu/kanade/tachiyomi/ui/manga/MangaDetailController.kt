@@ -66,6 +66,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
         MangaScreen(
             mangaScreenState = presenter.mangaScreenState.collectAsState(),
             snackbar = presenter.snackBarState,
+            isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
             categoryActions = CategoryActions(
                 set = { enabledCategories -> presenter.updateMangaCategories(enabledCategories) },

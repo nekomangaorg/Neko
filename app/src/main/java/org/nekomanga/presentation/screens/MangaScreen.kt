@@ -93,6 +93,7 @@ import java.text.DateFormat
 fun MangaScreen(
     mangaScreenState: State<MangaScreenState>,
     snackbar: SharedFlow<SnackbarState>,
+    isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
     themeBasedOffCover: Boolean = true,
     generatePalette: (Drawable) -> Unit = {},
@@ -256,7 +257,7 @@ fun MangaScreen(
             },
         ) { incomingPaddingValues ->
             SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing = mangaScreenState.value.isRefreshing),
+                state = rememberSwipeRefreshState(isRefreshing = isRefreshing.value),
                 modifier = Modifier.fillMaxSize(),
                 onRefresh = onRefresh,
                 indicator = { state, trigger ->

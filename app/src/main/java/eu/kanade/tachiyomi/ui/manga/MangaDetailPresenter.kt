@@ -103,6 +103,9 @@ class MangaDetailPresenter(
     private val _mangaScreenState = MutableStateFlow(getInitialMangaScreenState())
     val mangaScreenState: StateFlow<MangaConstants.MangaScreenState> = _mangaScreenState.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _loggedInTrackingService = MutableStateFlow(emptyList<TrackService>())
     val loggedInTrackingService: StateFlow<List<TrackService>> = _loggedInTrackingService.asStateFlow()
 
@@ -158,17 +161,17 @@ class MangaDetailPresenter(
                 return@launchIO
             }
 
-            _mangaScreenState.value = mangaScreenState.value.copy(isRefreshing = true)
+            _isRefreshing.value = true
 
             mangaUpdateCoordinator.update(manga.value, presenterScope).collect { result ->
                 when (result) {
                     is MangaResult.Error -> {
                         _snackbarState.emit(SnackbarState(message = result.text, messageRes = result.id))
-                        _mangaScreenState.value = mangaScreenState.value.copy(isRefreshing = false)
+                        _isRefreshing.value = false
                     }
                     is MangaResult.Success -> {
                         updateAllFlows()
-                        _mangaScreenState.value = mangaScreenState.value.copy(isRefreshing = false)
+                        _isRefreshing.value = false
                     }
                     is MangaResult.UpdatedChapters -> {
                         updateChapterFlows()

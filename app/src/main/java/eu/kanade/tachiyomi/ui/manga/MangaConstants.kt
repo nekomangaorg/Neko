@@ -38,7 +38,6 @@ object MangaConstants {
         val hideChapterTitles: Boolean,
         val inLibrary: Boolean,
         val isMergedManga: MergeConstants.IsMergedManga,
-        val isRefreshing: Boolean = false,
         val mangaAuthor: String = "",
         val mangaArtist: String = "",
         val mangaStatus: Int = 0,
