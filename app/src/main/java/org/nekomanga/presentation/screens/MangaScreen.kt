@@ -294,6 +294,7 @@ fun MangaScreen(
                         users = mangaScreenState.value.mangaUsers,
                         langFlag = mangaScreenState.value.mangaLangFlag,
                         status = mangaScreenState.value.mangaStatus,
+                        isInitialized = mangaScreenState.value.mangaInitialized,
                         isPornographic = mangaScreenState.value.mangaIsPornographic,
                         missingChapters = mangaScreenState.value.mangaMissingChapters,
                         description = mangaScreenState.value.currentDescription,

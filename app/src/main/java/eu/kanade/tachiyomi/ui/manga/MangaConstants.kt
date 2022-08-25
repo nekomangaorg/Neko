@@ -41,6 +41,7 @@ object MangaConstants {
         val mangaAuthor: String = "",
         val mangaArtist: String = "",
         val mangaStatus: Int = 0,
+        val mangaInitialized: Boolean = false,
         val mangaMissingChapters: String? = null,
         val mangaIsPornographic: Boolean = false,
         val mangaGenres: ImmutableList<String> = persistentListOf(),

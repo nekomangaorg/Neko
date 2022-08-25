@@ -52,6 +52,7 @@ fun MangaDetailsHeader(
     isPornographic: Boolean,
     missingChapters: String?,
     description: String,
+    isInitialized: Boolean,
     altTitles: List<String>,
     genres: List<String>,
     hideButtonText: Boolean,
@@ -169,6 +170,7 @@ fun MangaDetailsHeader(
             DescriptionBlock(
                 title = title,
                 description = description,
+                isInitialized = isInitialized,
                 altTitles = altTitles,
                 genres = genres,
                 themeColorState = themeColorState,

@@ -62,6 +62,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
 fun DescriptionBlock(
     title: String,
     description: String,
+    isInitialized: Boolean,
     altTitles: List<String>,
     genres: List<String>,
     themeColorState: ThemeColorState,
@@ -74,6 +75,7 @@ fun DescriptionBlock(
     altTitleClick: (String) -> Unit = {},
     altTitleResetClick: () -> Unit = {},
 ) {
+    if (!isInitialized) return
 
     val tagColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 16.dp)
 
@@ -272,8 +274,8 @@ private fun AltTitles(altTitles: List<String>, currentTitle: String, tagColor: C
 }
 
 @Composable
-private fun ColumnScope.Genres(genres: List<String>?, tagColor: Color, genreClick: (String) -> Unit, genreLongClick: (String) -> Unit) {
-    genres ?: return
+private fun ColumnScope.Genres(genres: List<String>, tagColor: Color, genreClick: (String) -> Unit, genreLongClick: (String) -> Unit) {
+    if (genres.isEmpty()) return
 
     val haptic = LocalHapticFeedback.current
     Text(

@@ -785,6 +785,7 @@ class MangaDetailPresenter(
         return when {
             MdUtil.getMangaUUID(manga.value.url).isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
             manga.value.description.isNotNullOrEmpty() -> manga.value.description!!
+            !manga.value.initialized -> ""
             else -> "No description"
         }
     }
@@ -1112,9 +1113,11 @@ class MangaDetailPresenter(
                     mangaStatus = m.status,
                     mangaGenres = (m.getGenres() ?: emptyList()).toImmutableList(),
                     mangaIsPornographic = m.genre?.contains("pornographic") ?: false,
+                    mangaMissingChapters = m.missing_chapters,
                     mangaRating = m.rating,
                     mangaUsers = m.users,
                     mangaLangFlag = m.lang_flag,
+                    mangaInitialized = m.initialized,
                 )
         }
     }
