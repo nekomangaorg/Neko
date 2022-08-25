@@ -98,9 +98,6 @@ class MangaDetailPresenter(
     private val _mangaScreenState = MutableStateFlow(getInitialMangaScreenState())
     val mangaScreenState: StateFlow<MangaConstants.MangaScreenState> = _mangaScreenState.asStateFlow()
 
-    private val _description = MutableStateFlow(getDescription())
-    val description: StateFlow<String> = _description.asStateFlow()
-
     private val _hasDefaultCategory = MutableStateFlow(hasDefaultCategory())
     val hasDefaultCategory: StateFlow<Boolean> = _hasDefaultCategory.asStateFlow()
 
@@ -1153,8 +1150,7 @@ class MangaDetailPresenter(
     private fun updateMangaFlow() {
         presenterScope.launchIO {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
-            _description.value = getDescription()
-            _mangaScreenState.value = _mangaScreenState.value.copy(currentTitle = manga.value.title)
+            _mangaScreenState.value = _mangaScreenState.value.copy(currentTitle = manga.value.title, currentDescription = getDescription())
         }
     }
 
@@ -1482,6 +1478,7 @@ class MangaDetailPresenter(
         val manga = manga.value
         return MangaConstants.MangaScreenState(
             currentTitle = manga.title,
+            currentDescription = getDescription(),
             hideButtonText = preferences.hideButtonText().get(),
         )
     }

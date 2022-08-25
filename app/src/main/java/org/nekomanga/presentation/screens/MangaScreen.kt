@@ -99,7 +99,6 @@ import java.text.DateFormat
 fun MangaScreen(
     manga: Manga,
     mangaScreenState: State<MangaScreenState>,
-    description: State<String>,
     snackbar: SharedFlow<SnackbarState>,
     artwork: State<Artwork>,
     vibrantColor: State<Int?>,
@@ -317,7 +316,7 @@ fun MangaScreen(
                     MangaDetailsHeader(
                         manga = manga,
                         title = mangaScreenState.value.currentTitle,
-                        description = description.value,
+                        description = mangaScreenState.value.currentDescription,
                         artwork = artwork.value,
                         showBackdrop = themeBasedOffCover,
                         hideButtonText = mangaScreenState.value.hideButtonText,

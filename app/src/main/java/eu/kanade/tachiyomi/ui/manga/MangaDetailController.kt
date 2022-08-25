@@ -67,7 +67,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             manga = presenter.manga.collectAsState().value,
             mangaScreenState = presenter.mangaScreenState.collectAsState(),
             snackbar = presenter.snackBarState,
-            description = presenter.description.collectAsState(),
             hasDefaultCategory = presenter.hasDefaultCategory.collectAsState(),
             artwork = presenter.currentArtwork.collectAsState(),
             vibrantColor = presenter.vibrantColor.collectAsState(),
