@@ -100,9 +100,6 @@ class MangaDetailPresenter(
     private val _mangaScreenState = MutableStateFlow(getInitialMangaScreenState())
     val mangaScreenState: StateFlow<MangaConstants.MangaScreenState> = _mangaScreenState.asStateFlow()
 
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
-
     private val _allCategories = MutableStateFlow(emptyList<Category>())
     val allCategories: StateFlow<List<Category>> = _allCategories.asStateFlow()
 
@@ -196,17 +193,17 @@ class MangaDetailPresenter(
                 return@launchIO
             }
 
-            _isRefreshing.value = true
+            _mangaScreenState.value = mangaScreenState.value.copy(isRefreshing = true)
 
             mangaUpdateCoordinator.update(manga.value, presenterScope).collect { result ->
                 when (result) {
                     is MangaResult.Error -> {
                         _snackbarState.emit(SnackbarState(message = result.text, messageRes = result.id))
-                        _isRefreshing.value = false
+                        _mangaScreenState.value = mangaScreenState.value.copy(isRefreshing = false)
                     }
                     is MangaResult.Success -> {
                         updateAllFlows()
-                        _isRefreshing.value = false
+                        _mangaScreenState.value = mangaScreenState.value.copy(isRefreshing = false)
                     }
                     is MangaResult.UpdatedChapters -> {
                         updateChapterFlows()
@@ -1467,6 +1464,7 @@ class MangaDetailPresenter(
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
             isMergedManga = getIsMergedManga(),
+            isRefreshing = false,
             originalTitle = manga.originalTitle,
             alternativeTitles = manga.getAltTitles().toImmutableList(),
             trackServiceCount = 0,

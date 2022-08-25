@@ -98,7 +98,6 @@ fun MangaScreen(
     manga: Manga,
     mangaScreenState: State<MangaScreenState>,
     snackbar: SharedFlow<SnackbarState>,
-    isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
     themeBasedOffCover: Boolean = true,
     generatePalette: (Drawable) -> Unit = {},
@@ -275,7 +274,7 @@ fun MangaScreen(
             },
         ) { incomingPaddingValues ->
             SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing = isRefreshing.value),
+                state = rememberSwipeRefreshState(isRefreshing = mangaScreenState.value.isRefreshing),
                 modifier = Modifier.fillMaxSize(),
                 onRefresh = onRefresh,
                 indicator = { state, trigger ->
