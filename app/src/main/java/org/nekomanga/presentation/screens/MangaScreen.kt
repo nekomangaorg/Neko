@@ -99,7 +99,6 @@ fun MangaScreen(
     manga: Manga,
     mangaScreenState: State<MangaScreenState>,
     snackbar: SharedFlow<SnackbarState>,
-    vibrantColor: State<Int?>,
     isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
     themeBasedOffCover: Boolean = true,
@@ -209,8 +208,8 @@ fun MangaScreen(
         )
     }
 
-    if (themeBasedOffCover && vibrantColor.value != null) {
-        val color = getButtonThemeColor(Color(vibrantColor.value!!), isDarkTheme)
+    if (themeBasedOffCover && mangaScreenState.value.vibrantColor != null) {
+        val color = getButtonThemeColor(Color(mangaScreenState.value.vibrantColor!!), isDarkTheme)
         themeColorState = ThemeColorState(
             buttonColor = color,
             rippleTheme = DynamicRippleTheme(color),

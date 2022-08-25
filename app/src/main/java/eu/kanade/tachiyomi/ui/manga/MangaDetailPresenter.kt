@@ -144,9 +144,6 @@ class MangaDetailPresenter(
 
     private var allChapterScanlators: Set<String> = emptySet()
 
-    private val _vibrantColor = MutableStateFlow(MangaCoverMetadata.getVibrantColor(mangaId))
-    val vibrantColor: StateFlow<Int?> = _vibrantColor.asStateFlow()
-
     private val _allChapters = MutableStateFlow<List<ChapterItem>>(emptyList())
     val allChapters: StateFlow<List<ChapterItem>> = _allChapters.asStateFlow()
 
@@ -649,8 +646,8 @@ class MangaDetailPresenter(
     }
 
     private fun updateVibrantColorFlow() {
-        presenterScope.launchIO {
-            _vibrantColor.value = MangaCoverMetadata.getVibrantColor(mangaId)
+        presenterScope.launch {
+            _mangaScreenState.value = mangaScreenState.value.copy(vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId))
         }
     }
 
@@ -1460,17 +1457,18 @@ class MangaDetailPresenter(
     private fun getInitialMangaScreenState(): MangaConstants.MangaScreenState {
         val manga = manga.value
         return MangaConstants.MangaScreenState(
-            currentTitle = manga.title,
-            currentDescription = getDescription(),
+            alternativeArtwork = persistentListOf(),
             currentArtwork = Artwork(
                 url = manga.user_cover ?: "",
                 mangaId = mangaId,
                 inLibrary = manga.favorite,
                 originalArtwork = manga.thumbnail_url ?: "",
             ),
+            currentDescription = getDescription(),
+            currentTitle = manga.title,
             hasDefaultCategory = preferences.defaultCategory() != -1,
-            alternativeArtwork = persistentListOf(),
             hideButtonText = preferences.hideButtonText().get(),
+            vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
         )
     }
 

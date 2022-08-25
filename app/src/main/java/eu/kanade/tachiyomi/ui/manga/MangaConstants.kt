@@ -17,6 +17,7 @@ object MangaConstants {
         val currentTitle: String,
         val currentDescription: String,
         val currentArtwork: Artwork,
+        val vibrantColor: Int?,
         val alternativeArtwork: ImmutableList<Artwork>,
         val hideButtonText: Boolean,
         val hasDefaultCategory: Boolean,

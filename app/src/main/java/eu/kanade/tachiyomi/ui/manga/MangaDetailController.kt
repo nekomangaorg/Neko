@@ -67,7 +67,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             manga = presenter.manga.collectAsState().value,
             mangaScreenState = presenter.mangaScreenState.collectAsState(),
             snackbar = presenter.snackBarState,
-            vibrantColor = presenter.vibrantColor.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
             categories = presenter.allCategories.collectAsState(),
