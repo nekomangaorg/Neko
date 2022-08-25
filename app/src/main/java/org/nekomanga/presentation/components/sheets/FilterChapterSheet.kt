@@ -182,6 +182,7 @@ private fun Filter(
         CheckboxLine(
             themeColorState = themeColorState,
             checked = filter.showAll,
+            disabledOnChecked = true,
             text = stringResource(id = R.string.show_all),
             onChecked = { changeFilter(MangaConstants.FilterOption(filterType = MangaConstants.FilterType.All, filterState = ToggleableState(!filter.showAll))) },
         )
@@ -257,7 +258,7 @@ private fun CheckboxLine(themeColorState: ThemeColorState, checked: Boolean, dis
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                if (!checked && disabledOnChecked) {
+                if (!(disabledOnChecked && checked)) {
                     onChecked()
                 }
             },
