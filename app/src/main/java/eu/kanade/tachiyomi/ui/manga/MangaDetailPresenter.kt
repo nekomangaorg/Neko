@@ -57,7 +57,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.Dispatchers
@@ -1439,15 +1438,6 @@ class MangaDetailPresenter(
         val manga = manga.value
 
         return MangaConstants.MangaScreenState(
-            activeChapters = persistentListOf(),
-            allChapters = persistentListOf(),
-            allScanlators = persistentSetOf(),
-            alternativeArtwork = persistentListOf(),
-            alternativeTitles = persistentListOf(),
-            chapterFilter = MangaConstants.Filter(),
-            chapterFilterText = "",
-            chapterSortFilter = MangaConstants.SortFilter(),
-            chapterScanlatorFilter = MangaConstants.ScanlatorFilter(persistentListOf()),
             currentArtwork = Artwork(
                 url = manga.user_cover ?: "",
                 mangaId = mangaId,
@@ -1456,17 +1446,11 @@ class MangaDetailPresenter(
             ),
             currentDescription = getDescription(),
             currentTitle = manga.title,
-            externalLinks = persistentListOf(),
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
             hideChapterTitles = getHideTitlesFilter(),
             isMergedManga = getIsMergedManga(),
-            isRefreshing = false,
-            nextUnreadChapter = NextUnreadChapter(),
             originalTitle = manga.originalTitle,
-            removedChapters = persistentListOf(),
-            trackServiceCount = 0,
-            trackingSuggestedDates = null,
             vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
         )
     }

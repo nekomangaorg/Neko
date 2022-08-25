@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
@@ -16,16 +18,16 @@ import org.nekomanga.domain.manga.MergeManga
 object MangaConstants {
 
     data class MangaScreenState(
-        val activeChapters: ImmutableList<ChapterItem>,
-        val allChapters: ImmutableList<ChapterItem>,
-        val allScanlators: ImmutableSet<String>,
-        val alternativeArtwork: ImmutableList<Artwork>,
-        val alternativeTitles: ImmutableList<String>,
-        val externalLinks: ImmutableList<ExternalLink>,
-        val chapterFilter: Filter,
-        val chapterFilterText: String,
-        val chapterSortFilter: SortFilter,
-        val chapterScanlatorFilter: ScanlatorFilter,
+        val activeChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val allScanlators: ImmutableSet<String> = persistentSetOf(),
+        val alternativeArtwork: ImmutableList<Artwork> = persistentListOf(),
+        val alternativeTitles: ImmutableList<String> = persistentListOf(),
+        val externalLinks: ImmutableList<ExternalLink> = persistentListOf(),
+        val chapterFilter: Filter = Filter(),
+        val chapterFilterText: String = "",
+        val chapterSortFilter: SortFilter = SortFilter(),
+        val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
         val currentArtwork: Artwork,
         val currentDescription: String,
         val currentTitle: String,
@@ -33,12 +35,12 @@ object MangaConstants {
         val hideButtonText: Boolean,
         val hideChapterTitles: Boolean,
         val isMergedManga: MergeConstants.IsMergedManga,
-        val isRefreshing: Boolean,
-        val nextUnreadChapter: NextUnreadChapter,
+        val isRefreshing: Boolean = false,
+        val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val originalTitle: String,
-        val removedChapters: ImmutableList<ChapterItem>,
-        val trackServiceCount: Int,
-        val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates?,
+        val removedChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val trackServiceCount: Int = 0,
+        val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
         val vibrantColor: Int?,
     )
 
