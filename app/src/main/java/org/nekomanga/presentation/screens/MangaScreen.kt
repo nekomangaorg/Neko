@@ -121,7 +121,6 @@ fun MangaScreen(
     descriptionActions: DescriptionActions,
     quickReadText: State<NextUnreadChapter>,
     chapterFilterText: State<String>,
-    chapters: State<List<ChapterItem>>,
     chapterSortFilter: State<MangaConstants.SortFilter>,
     chapterFilter: State<MangaConstants.Filter>,
     scanlatorFilter: State<MangaConstants.ScanlatorFilter>,
@@ -269,7 +268,7 @@ fun MangaScreen(
             onNavigationIconClicked = onBackPressed,
             snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
             actions = {
-                OverflowOptions(chapterActions = chapterActions, chapters = chapters)
+                OverflowOptions(chapterActions = chapterActions, chapters = mangaScreenState.value.activeChapters)
             },
         ) { incomingPaddingValues ->
             SwipeRefresh(
@@ -360,7 +359,7 @@ fun MangaScreen(
                 fun chapterHeader() = @Composable {
                     ChapterHeader(
                         themeColor = themeColorState,
-                        numberOfChapters = chapters.value.size,
+                        numberOfChapters = mangaScreenState.value.activeChapters.size,
                         filterText = chapterFilterText.value,
                         onClick = { openSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
                     )
@@ -403,12 +402,12 @@ fun MangaScreen(
                         },
                         markPrevious = { read ->
 
-                            val chaptersToMark = chapters.value.subList(0, index)
-                            val lastIndex = chapters.value.lastIndex
+                            val chaptersToMark = mangaScreenState.value.activeChapters.subList(0, index)
+                            val lastIndex = mangaScreenState.value.activeChapters.lastIndex
                             val altChapters = if (index == lastIndex) {
                                 emptyList()
                             } else {
-                                chapters.value.slice(IntRange(index + 1, lastIndex))
+                                mangaScreenState.value.activeChapters.slice(IntRange(index + 1, lastIndex))
                             }
                             val action = when (read) {
                                 true -> MangaConstants.MarkAction.PreviousRead(true, altChapters)
@@ -428,11 +427,17 @@ fun MangaScreen(
                             chapterContentPadding = chapterContentPadding,
                             details = details(),
                             chapterHeader = chapterHeader(),
-                            chapters = chapters.value,
+                            chapters = mangaScreenState.value.activeChapters,
                             chapterRow = chapterRow(),
                         )
                     } else {
-                        NonTablet(contentPadding = mangaDetailContentPadding, details = details(), chapterHeader = chapterHeader(), chapters = chapters, chapterRow = chapterRow())
+                        NonTablet(
+                            contentPadding = mangaDetailContentPadding,
+                            details = details(),
+                            chapterHeader = chapterHeader(),
+                            chapters = mangaScreenState.value.activeChapters,
+                            chapterRow = chapterRow(),
+                        )
                     }
 
                     if (mangaScreenState.value.removedChapters.isNotEmpty()) {
@@ -458,7 +463,7 @@ private fun NonTablet(
     contentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
-    chapters: State<List<ChapterItem>>,
+    chapters: List<ChapterItem>,
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
@@ -470,7 +475,7 @@ private fun NonTablet(
             chapterHeader()
         }
 
-        itemsIndexed(items = chapters.value, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
+        itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
             chapterRow(index, chapter)
         }
     }

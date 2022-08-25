@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
@@ -10,7 +9,7 @@ import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 
 @Composable
-fun OverflowOptions(chapterActions: MangaConstants.ChapterActions, chapters: State<List<ChapterItem>>) {
+fun OverflowOptions(chapterActions: MangaConstants.ChapterActions, chapters: List<ChapterItem>) {
     AppBarActions(
         actions = listOf(
             AppBar.OverflowAction(
@@ -50,11 +49,11 @@ fun OverflowOptions(chapterActions: MangaConstants.ChapterActions, chapters: Sta
                 children = listOf(
                     AppBar.OverflowAction(
                         title = stringResource(id = R.string.read),
-                        onClick = { chapterActions.mark(chapters.value, MangaConstants.MarkAction.Read(true)) },
+                        onClick = { chapterActions.mark(chapters, MangaConstants.MarkAction.Read(true)) },
                     ),
                     AppBar.OverflowAction(
                         title = stringResource(id = R.string.unread),
-                        onClick = { chapterActions.mark(chapters.value, MangaConstants.MarkAction.Unread(true)) },
+                        onClick = { chapterActions.mark(chapters, MangaConstants.MarkAction.Unread(true)) },
                     ),
                 ),
             ),

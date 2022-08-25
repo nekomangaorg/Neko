@@ -14,6 +14,8 @@ import org.nekomanga.domain.manga.MergeManga
 object MangaConstants {
 
     data class MangaScreenState(
+        val activeChapters: ImmutableList<ChapterItem>,
+        val allChapters: ImmutableList<ChapterItem>,
         val alternativeArtwork: ImmutableList<Artwork>,
         val alternativeTitles: ImmutableList<String>,
         val currentArtwork: Artwork,
