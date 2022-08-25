@@ -106,6 +106,12 @@ class MangaUpdateCoordinator {
                 resultingManga.let { networkManga ->
                     manga.copyFrom(networkManga)
                     manga.initialized = true
+                    //This clears custom titles from j2k/sy and if MangaDex removes the title
+                    manga.user_title?.let { customTitle ->
+                        if (customTitle != manga.originalTitle && customTitle !in manga.getAltTitles()) {
+                            manga.user_title = null
+                        }
+                    }
                     if (networkManga.thumbnail_url != null && networkManga.thumbnail_url != originalThumbnail) {
                         coverCache.deleteFromCache(originalThumbnail, manga.favorite)
                     }

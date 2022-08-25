@@ -1152,6 +1152,8 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
             _description.value = getDescription()
+            _currentTitle.value = manga.value.title
+
         }
     }
 

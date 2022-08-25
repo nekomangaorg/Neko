@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.backup.full
+package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
@@ -15,13 +15,13 @@ import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_READ_MANGA
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_READ_MANGA_MASK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK_MASK
-import eu.kanade.tachiyomi.data.backup.full.models.Backup
-import eu.kanade.tachiyomi.data.backup.full.models.BackupCategory
-import eu.kanade.tachiyomi.data.backup.full.models.BackupChapter
-import eu.kanade.tachiyomi.data.backup.full.models.BackupHistory
-import eu.kanade.tachiyomi.data.backup.full.models.BackupManga
-import eu.kanade.tachiyomi.data.backup.full.models.BackupSerializer
-import eu.kanade.tachiyomi.data.backup.full.models.BackupTracking
+import eu.kanade.tachiyomi.data.backup.models.Backup
+import eu.kanade.tachiyomi.data.backup.models.BackupCategory
+import eu.kanade.tachiyomi.data.backup.models.BackupChapter
+import eu.kanade.tachiyomi.data.backup.models.BackupHistory
+import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
+import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
@@ -44,7 +44,7 @@ import uy.kohesive.injekt.injectLazy
 import java.io.FileOutputStream
 import kotlin.math.max
 
-class FullBackupManager(val context: Context) {
+class BackupManager(val context: Context) {
 
     internal val databaseHelper: DatabaseHelper by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
@@ -93,7 +93,7 @@ class FullBackupManager(val context: Context) {
                         .forEach { it.delete() }
 
                     // Create new file to place backup
-                    dir.createFile(BackupFull.getDefaultFilename())
+                    dir.createFile(Backup.getBackupFilename())
                 } else {
                     UniFile.fromUri(context, uri)
                 }
@@ -116,7 +116,7 @@ class FullBackupManager(val context: Context) {
             val fileUri = file.uri
 
             // Make sure it's a valid backup file
-            FullBackupRestoreValidator().validate(context, fileUri)
+            BackupFileValidator().validate(context, fileUri)
 
             return fileUri.toString()
         } catch (e: Exception) {

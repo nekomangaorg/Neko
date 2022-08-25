@@ -1,18 +1,19 @@
-package eu.kanade.tachiyomi.data.backup.full
+package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
 import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.data.backup.RestoreHelper
-import eu.kanade.tachiyomi.data.backup.full.models.BackupCategory
-import eu.kanade.tachiyomi.data.backup.full.models.BackupManga
-import eu.kanade.tachiyomi.data.backup.full.models.BackupSerializer
+import eu.kanade.tachiyomi.data.backup.models.BackupCategory
+import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.Job
 import okio.buffer
@@ -20,9 +21,9 @@ import okio.gzip
 import okio.source
 import uy.kohesive.injekt.injectLazy
 
-class FullRestore(val context: Context, val job: Job?) {
+class BackupRestorer(val context: Context, val job: Job?) {
 
-    lateinit var backupManager: FullBackupManager
+    lateinit var backupManager: BackupManager
     val restoreHelper = RestoreHelper(context)
 
     /**
@@ -48,9 +49,10 @@ class FullRestore(val context: Context, val job: Job?) {
 
     private val db: DatabaseHelper by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
+    val coverCache: CoverCache by injectLazy()
 
     suspend fun restoreBackup(uri: Uri) {
-        backupManager = FullBackupManager(context)
+        backupManager = BackupManager(context)
 
         val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer()
             .use { it.readByteArray() }
@@ -154,6 +156,10 @@ class FullRestore(val context: Context, val job: Job?) {
             } else {
                 manga.initialized = false
                 manga.id = backupManager.insertManga(manga)
+            }
+            manga.user_cover?.let {
+                coverCache.setCustomCoverToCache(manga, manga.user_cover!!)
+                MangaCoverMetadata.remove(manga.id!!)
             }
             backupManager.restoreChaptersForMangaOffline(manga, chapters)
             backupManager.restoreCategoriesForManga(manga, categories, backupCategories)

@@ -19,9 +19,9 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
+import eu.kanade.tachiyomi.data.backup.BackupFileValidator
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
-import eu.kanade.tachiyomi.data.backup.full.FullBackupRestoreValidator
-import eu.kanade.tachiyomi.data.backup.full.models.BackupFull
+import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.disableItems
@@ -199,7 +199,7 @@ class SettingsBackupController : SettingsController() {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .setType("application/*")
-                .putExtra(Intent.EXTRA_TITLE, BackupFull.getDefaultFilename())
+                .putExtra(Intent.EXTRA_TITLE, Backup.getBackupFilename())
 
             startActivityForResult(intent, CODE_BACKUP_CREATE)
         } catch (e: ActivityNotFoundException) {
@@ -216,7 +216,6 @@ class SettingsBackupController : SettingsController() {
                 R.string.chapters,
                 R.string.tracking,
                 R.string.history,
-                R.string.custom_manga_info,
                 R.string.all_read_manga,
             )
                 .map { activity.getString(it) }
@@ -242,8 +241,7 @@ class SettingsBackupController : SettingsController() {
                                 2 -> flags = flags or BackupConst.BACKUP_CHAPTER
                                 3 -> flags = flags or BackupConst.BACKUP_TRACK
                                 4 -> flags = flags or BackupConst.BACKUP_HISTORY
-                                5 -> flags = flags or BackupConst.BACKUP_CUSTOM_INFO
-                                6 -> flags = flags or BackupConst.BACKUP_READ_MANGA
+                                5 -> flags = flags or BackupConst.BACKUP_READ_MANGA
                             }
                         }
                     }
@@ -267,18 +265,18 @@ class SettingsBackupController : SettingsController() {
 
             return try {
                 val type = BackupConst.BACKUP_TYPE_FULL
-                val results = FullBackupRestoreValidator().validate(activity, uri)
+                val results = BackupFileValidator().validate(activity, uri)
 
                 var message = activity.getString(R.string.restore_neko)
 
-                if (results.missingSources.isNotEmpty()) {
-                    message += "\n\n${activity.getString(R.string.restore_missing_sources)}\n${
-                    results.missingSources.joinToString("\n") { "- $it" }
-                    }"
+
+                if (results.missingMangaDexEntries) {
+                    message += "\n\nNo MangaDex manga found in the backup."
                 }
+
                 if (results.missingTrackers.isNotEmpty()) {
                     message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${
-                    results.missingTrackers.joinToString("\n") { "- $it" }
+                        results.missingTrackers.joinToString("\n") { "- $it" }
                     }"
                 }
 

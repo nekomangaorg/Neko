@@ -8,7 +8,6 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.content.ContextCompat
 import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.data.backup.full.FullRestore
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
@@ -83,7 +82,7 @@ class BackupRestoreService : Service() {
             stopSelf(startId)
         }
         job = GlobalScope.launch(handler) {
-            FullRestore(
+            BackupRestorer(
                 this@BackupRestoreService,
                 job,
             ).restoreBackup(uri)

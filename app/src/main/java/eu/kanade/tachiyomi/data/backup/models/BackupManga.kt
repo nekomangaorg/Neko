@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.backup.full.models
+package eu.kanade.tachiyomi.data.backup.models
 
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -37,11 +37,16 @@ data class BackupManga(
     @ProtoNumber(103) var viewer_flags: Int? = null,
     @ProtoNumber(104) var history: List<BackupHistory> = emptyList(),
 
+    // J2K specific values
+    @ProtoNumber(800) var customTitle: String? = null,
+
     // Neko Values
     @ProtoNumber(900) var mergedMangaUrl: String? = null,
-    @ProtoNumber(902) var mergedMangaImageUrl: String? = null,
     @ProtoNumber(901) var scanlatorFilter: String? = null,
-) {
+    @ProtoNumber(902) var mergedMangaImageUrl: String? = null,
+    @ProtoNumber(903) var alternativeArtwork: String? = null,
+
+    ) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
             url = this@BackupManga.url.replace(
@@ -67,6 +72,8 @@ data class BackupManga(
             merge_manga_url = this@BackupManga.mergedMangaUrl
             merge_manga_image_url = this@BackupManga.mergedMangaImageUrl
             filtered_scanlators = this@BackupManga.scanlatorFilter
+            user_title = this@BackupManga.customTitle
+            user_cover = this@BackupManga.alternativeArtwork
         }
     }
 
@@ -102,6 +109,8 @@ data class BackupManga(
                 mergedMangaUrl = manga.merge_manga_url,
                 mergedMangaImageUrl = manga.merge_manga_image_url,
                 scanlatorFilter = manga.filtered_scanlators,
+                customTitle = manga.user_title,
+                alternativeArtwork = manga.user_cover,
             )
         }
     }
