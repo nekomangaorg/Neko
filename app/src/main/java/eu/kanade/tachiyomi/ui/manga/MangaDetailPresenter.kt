@@ -57,7 +57,9 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -119,23 +121,6 @@ class MangaDetailPresenter(
 
     private val _snackbarState = MutableSharedFlow<SnackbarState>()
     val snackBarState: SharedFlow<SnackbarState> = _snackbarState.asSharedFlow()
-
-    private var allChapterScanlators: Set<String> = emptySet()
-
-    private val _chapterSortFilter = MutableStateFlow(getSortFilter())
-    val chapterSortFilter: StateFlow<MangaConstants.SortFilter> = _chapterSortFilter.asStateFlow()
-
-    private val _chapterFilter = MutableStateFlow(getFilter())
-    val chapterFilter: StateFlow<MangaConstants.Filter> = _chapterFilter.asStateFlow()
-
-    private val _scanlatorFilter = MutableStateFlow(getScanlatorFilter())
-    val scanlatorFilter: StateFlow<MangaConstants.ScanlatorFilter> = _scanlatorFilter.asStateFlow()
-
-    private val _hideTitlesFilter = MutableStateFlow(getHideTitlesFilter())
-    val hideTitlesFilter: StateFlow<Boolean> = _hideTitlesFilter.asStateFlow()
-
-    private val _chapterFilterText = MutableStateFlow(getFilterText())
-    val chapterFilterText: StateFlow<String> = _chapterFilterText.asStateFlow()
 
     private val chapterSort = ChapterItemSort(chapterItemFilter, preferences)
 
@@ -651,18 +636,22 @@ class MangaDetailPresenter(
             }
             _mangaScreenState.value = mangaScreenState.value.copy(allChapters = allChapters.toImmutableList())
 
-            val needToRefreshFilters = allChapterScanlators.isEmpty()
+            val needToRefreshFilters = mangaScreenState.value.allScanlators.isEmpty()
 
-            allChapterScanlators = allChapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
+            val allChapterScanlators = allChapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
             if (allChapterScanlators.size == 1 && manga.value.filtered_scanlators.isNotNullOrEmpty()) {
                 updateMangaScanlator(emptySet())
             }
+
+            _mangaScreenState.value = mangaScreenState.value.copy(
+                activeChapters = chapterSort.getChaptersSorted(manga.value, allChapters).toImmutableList(),
+                allChapters = allChapters.toImmutableList(), allScanlators = allChapterScanlators.toImmutableSet(),
+            )
+
             //this is only really needed on initial load since all chapter scanlators is empty and the scanlator filter sheet would be also
             if (needToRefreshFilters) {
                 updateFilterFlow()
             }
-
-            _mangaScreenState.value = mangaScreenState.value.copy(activeChapters = chapterSort.getChaptersSorted(manga.value, allChapters).toImmutableList())
 
             //do this after so the texts gets updated
             updateNextUnreadChapter()
@@ -847,13 +836,13 @@ class MangaDetailPresenter(
      */
     private fun getScanlatorFilter(): MangaConstants.ScanlatorFilter {
         val filteredScanlators = ChapterUtil.getScanlators(manga.value.filtered_scanlators).toSet()
-        val scanlatorOptions = allChapterScanlators.sortedWith(
+        val scanlatorOptions = mangaScreenState.value.allScanlators.sortedWith(
             compareBy(String.CASE_INSENSITIVE_ORDER) { it },
         )
             .map { scanlator ->
                 MangaConstants.ScanlatorOption(name = scanlator, disabled = filteredScanlators.contains(scanlator))
             }
-        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions)
+        return MangaConstants.ScanlatorFilter(scanlators = scanlatorOptions.toImmutableList())
     }
 
     /**
@@ -863,9 +852,8 @@ class MangaDetailPresenter(
         return manga.value.hideChapterTitle(preferences)
     }
 
-    private fun getFilterText(): String {
-        val filter = _chapterFilter.value
-        val hasDisabledScanlators = _scanlatorFilter.value.scanlators.any { it.disabled }
+    private fun getFilterText(filter: MangaConstants.Filter, chapterScanlatorFilter: MangaConstants.ScanlatorFilter): String {
+        val hasDisabledScanlators = chapterScanlatorFilter.scanlators.any { it.disabled }
         val filtersId = mutableListOf<Int?>()
         filtersId.add(if (filter.unread == ToggleableState.Indeterminate) R.string.read else null)
         filtersId.add(if (filter.unread == ToggleableState.On) R.string.unread else null)
@@ -1118,11 +1106,16 @@ class MangaDetailPresenter(
      */
     private fun updateFilterFlow() {
         presenterScope.launchIO {
-            _chapterSortFilter.value = getSortFilter()
-            _chapterFilter.value = getFilter()
-            _hideTitlesFilter.value = getHideTitlesFilter()
-            _scanlatorFilter.value = getScanlatorFilter()
-            _chapterFilterText.value = getFilterText()
+            val filter = getFilter()
+            val scanlatorFilter = getScanlatorFilter()
+
+            _mangaScreenState.value = mangaScreenState.value.copy(
+                chapterSortFilter = getSortFilter(),
+                chapterFilter = filter,
+                hideChapterTitles = getHideTitlesFilter(),
+                chapterFilterText = getFilterText(filter, scanlatorFilter),
+                chapterScanlatorFilter = scanlatorFilter,
+            )
         }
     }
 
@@ -1444,11 +1437,17 @@ class MangaDetailPresenter(
 
     private fun getInitialMangaScreenState(): MangaConstants.MangaScreenState {
         val manga = manga.value
+
         return MangaConstants.MangaScreenState(
             activeChapters = persistentListOf(),
             allChapters = persistentListOf(),
+            allScanlators = persistentSetOf(),
             alternativeArtwork = persistentListOf(),
-            alternativeTitles = manga.getAltTitles().toImmutableList(),
+            alternativeTitles = persistentListOf(),
+            chapterFilter = MangaConstants.Filter(),
+            chapterFilterText = "",
+            chapterSortFilter = MangaConstants.SortFilter(),
+            chapterScanlatorFilter = MangaConstants.ScanlatorFilter(persistentListOf()),
             currentArtwork = Artwork(
                 url = manga.user_cover ?: "",
                 mangaId = mangaId,
@@ -1460,6 +1459,7 @@ class MangaDetailPresenter(
             externalLinks = persistentListOf(),
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
+            hideChapterTitles = getHideTitlesFilter(),
             isMergedManga = getIsMergedManga(),
             isRefreshing = false,
             nextUnreadChapter = NextUnreadChapter(),

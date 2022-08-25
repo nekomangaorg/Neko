@@ -116,11 +116,6 @@ fun MangaScreen(
     mergeActions: MergeActions,
     shareClick: (Context) -> Unit,
     descriptionActions: DescriptionActions,
-    chapterFilterText: State<String>,
-    chapterSortFilter: State<MangaConstants.SortFilter>,
-    chapterFilter: State<MangaConstants.Filter>,
-    scanlatorFilter: State<MangaConstants.ScanlatorFilter>,
-    hideTitlesFilter: State<Boolean>,
     chapterFilterActions: ChapterFilterActions,
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
@@ -246,10 +241,10 @@ fun MangaScreen(
                         coverActions = coverActions,
                         mergeActions = mergeActions,
                         mergeSearchResult = mergeSearchResult.value,
-                        chapterSortFilter = chapterSortFilter.value,
-                        chapterFilter = chapterFilter.value,
-                        scanlatorFilter = scanlatorFilter.value,
-                        hideTitlesFilter = hideTitlesFilter.value,
+                        chapterSortFilter = mangaScreenState.value.chapterSortFilter,
+                        chapterFilter = mangaScreenState.value.chapterFilter,
+                        scanlatorFilter = mangaScreenState.value.chapterScanlatorFilter,
+                        hideTitlesFilter = mangaScreenState.value.hideChapterTitles,
                         chapterFilterActions = chapterFilterActions,
                         openInWebView = { url, title -> context.asActivity().openInWebView(url, title) },
                     ) { scope.launch { sheetState.hide() } }
@@ -356,7 +351,7 @@ fun MangaScreen(
                     ChapterHeader(
                         themeColor = themeColorState,
                         numberOfChapters = mangaScreenState.value.activeChapters.size,
-                        filterText = chapterFilterText.value,
+                        filterText = mangaScreenState.value.chapterFilterText,
                         onClick = { openSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
                     )
                 }
@@ -375,7 +370,7 @@ fun MangaScreen(
                         bookmark = chapterItem.chapter.bookmark,
                         downloadStateProvider = { chapterItem.downloadState },
                         downloadProgressProvider = { chapterItem.downloadProgress },
-                        shouldHideChapterTitles = hideTitlesFilter.value,
+                        shouldHideChapterTitles = mangaScreenState.value.hideChapterTitles,
                         onClick = { chapterActions.open(context, chapterItem) },
                         onBookmark = {
                             chapterActions.mark(

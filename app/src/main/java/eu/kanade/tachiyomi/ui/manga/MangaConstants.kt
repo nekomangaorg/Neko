@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
@@ -17,14 +18,20 @@ object MangaConstants {
     data class MangaScreenState(
         val activeChapters: ImmutableList<ChapterItem>,
         val allChapters: ImmutableList<ChapterItem>,
+        val allScanlators: ImmutableSet<String>,
         val alternativeArtwork: ImmutableList<Artwork>,
         val alternativeTitles: ImmutableList<String>,
         val externalLinks: ImmutableList<ExternalLink>,
+        val chapterFilter: Filter,
+        val chapterFilterText: String,
+        val chapterSortFilter: SortFilter,
+        val chapterScanlatorFilter: ScanlatorFilter,
         val currentArtwork: Artwork,
         val currentDescription: String,
         val currentTitle: String,
         val hasDefaultCategory: Boolean,
         val hideButtonText: Boolean,
+        val hideChapterTitles: Boolean,
         val isMergedManga: MergeConstants.IsMergedManga,
         val isRefreshing: Boolean,
         val nextUnreadChapter: NextUnreadChapter,
@@ -53,7 +60,7 @@ object MangaConstants {
     )
 
     data class ScanlatorFilter(
-        val scanlators: List<ScanlatorOption>,
+        val scanlators: ImmutableList<ScanlatorOption>,
     )
 
     data class ScanlatorOption(
@@ -129,8 +136,6 @@ object MangaConstants {
         object RemoveAll : DownloadAction()
         object Cancel : DownloadAction()
     }
-
-    data class DownloadActionHolder(val chapters: List<ChapterItem>, val downloadAction: DownloadAction)
 
     sealed class MarkAction {
         abstract val canUndo: Boolean

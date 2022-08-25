@@ -122,11 +122,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 save = presenter::saveCover,
                 reset = presenter::resetCover,
             ),
-            chapterFilterText = presenter.chapterFilterText.collectAsState(),
-            chapterSortFilter = presenter.chapterSortFilter.collectAsState(),
-            chapterFilter = presenter.chapterFilter.collectAsState(),
-            scanlatorFilter = presenter.scanlatorFilter.collectAsState(),
-            hideTitlesFilter = presenter.hideTitlesFilter.collectAsState(),
             chapterFilterActions = ChapterFilterActions(
                 changeSort = presenter::changeSortOption,
                 changeFilter = presenter::changeFilterOption,
