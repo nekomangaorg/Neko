@@ -64,7 +64,8 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
     @Composable
     override fun ScreenContent() {
         MangaScreen(
-            mangaScreenState = presenter.mangaScreenState.collectAsState(),
+            generalState = presenter.generalState.collectAsState(),
+            mangaState = presenter.mangaState.collectAsState(),
             snackbar = presenter.snackBarState,
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
@@ -133,7 +134,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 delete = presenter::deleteChapters,
                 clearRemoved = presenter::clearRemovedChapters,
                 openNext = { context ->
-                    presenter.mangaScreenState.value.nextUnreadChapter.simpleChapter?.let {
+                    presenter.generalState.value.nextUnreadChapter.simpleChapter?.let {
                         openChapter(context, it.toDbChapter())
                     }
                 },
@@ -196,7 +197,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
      */
     private fun shareManga(context: Context) {
         viewScope.launch {
-            val cover = presenter.shareMangaCover(context.sharedCacheDir(), presenter.mangaScreenState.value.currentArtwork)
+            val cover = presenter.shareMangaCover(context.sharedCacheDir(), presenter.mangaState.value.currentArtwork)
             withUIContext {
                 val stream = cover?.getUriCompat(context)
                 try {

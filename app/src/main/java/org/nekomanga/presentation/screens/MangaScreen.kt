@@ -61,11 +61,10 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenState
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenGeneralState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
-import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -91,7 +90,8 @@ import java.text.DateFormat
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MangaScreen(
-    mangaScreenState: State<MangaScreenState>,
+    generalState: State<MangaScreenGeneralState>,
+    mangaState: State<MangaConstants.MangaScreenMangaState>,
     snackbar: SharedFlow<SnackbarState>,
     isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
@@ -186,8 +186,8 @@ fun MangaScreen(
         )
     }
 
-    if (themeBasedOffCover && mangaScreenState.value.vibrantColor != null) {
-        val color = getButtonThemeColor(Color(mangaScreenState.value.vibrantColor!!), isDarkTheme)
+    if (themeBasedOffCover && generalState.value.vibrantColor != null) {
+        val color = getButtonThemeColor(Color(generalState.value.vibrantColor!!), isDarkTheme)
         themeColorState = ThemeColorState(
             buttonColor = color,
             rippleTheme = DynamicRippleTheme(color),
@@ -216,29 +216,29 @@ fun MangaScreen(
                     DetailsBottomSheet(
                         currentScreen = currentSheet,
                         themeColorState = themeColorState,
-                        inLibrary = mangaScreenState.value.inLibrary,
+                        inLibrary = mangaState.value.inLibrary,
                         addNewCategory = categoryActions.addNew,
-                        allCategories = mangaScreenState.value.allCategories,
-                        mangaCategories = mangaScreenState.value.currentCategories,
+                        allCategories = generalState.value.allCategories,
+                        mangaCategories = mangaState.value.currentCategories,
                         loggedInTrackingServices = loggedInTrackingServices.value,
                         tracks = tracks.value,
                         dateFormat = dateFormat,
                         openSheet = openSheet,
                         trackActions = trackActions,
-                        title = mangaScreenState.value.originalTitle,
-                        altTitles = mangaScreenState.value.alternativeTitles,
+                        title = mangaState.value.originalTitle,
+                        altTitles = mangaState.value.alternativeTitles,
                         trackSearchResult = trackSearchResult.value,
-                        trackSuggestedDates = mangaScreenState.value.trackingSuggestedDates,
-                        externalLinks = mangaScreenState.value.externalLinks,
-                        isMergedManga = mangaScreenState.value.isMergedManga,
-                        alternativeArtwork = mangaScreenState.value.alternativeArtwork,
+                        trackSuggestedDates = generalState.value.trackingSuggestedDates,
+                        externalLinks = generalState.value.externalLinks,
+                        isMergedManga = mangaState.value.isMerged,
+                        alternativeArtwork = mangaState.value.alternativeArtwork,
                         coverActions = coverActions,
                         mergeActions = mergeActions,
                         mergeSearchResult = mergeSearchResult.value,
-                        chapterSortFilter = mangaScreenState.value.chapterSortFilter,
-                        chapterFilter = mangaScreenState.value.chapterFilter,
-                        scanlatorFilter = mangaScreenState.value.chapterScanlatorFilter,
-                        hideTitlesFilter = mangaScreenState.value.hideChapterTitles,
+                        chapterSortFilter = generalState.value.chapterSortFilter,
+                        chapterFilter = generalState.value.chapterFilter,
+                        scanlatorFilter = generalState.value.chapterScanlatorFilter,
+                        hideTitlesFilter = generalState.value.hideChapterTitles,
                         chapterFilterActions = chapterFilterActions,
                         openInWebView = { url, title -> context.asActivity().openInWebView(url, title) },
                     ) { scope.launch { sheetState.hide() } }
@@ -253,7 +253,7 @@ fun MangaScreen(
             onNavigationIconClicked = onBackPressed,
             snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
             actions = {
-                OverflowOptions(chapterActions = chapterActions, chapters = mangaScreenState.value.activeChapters)
+                OverflowOptions(chapterActions = chapterActions, chapters = generalState.value.activeChapters)
             },
         ) { incomingPaddingValues ->
             SwipeRefresh(
@@ -287,34 +287,19 @@ fun MangaScreen(
 
                 fun details() = @Composable {
                     MangaDetailsHeader(
-                        title = mangaScreenState.value.currentTitle,
-                        author = mangaScreenState.value.mangaAuthor,
-                        artist = mangaScreenState.value.mangaArtist,
-                        rating = mangaScreenState.value.mangaRating,
-                        users = mangaScreenState.value.mangaUsers,
-                        langFlag = mangaScreenState.value.mangaLangFlag,
-                        status = mangaScreenState.value.mangaStatus,
-                        isInitialized = mangaScreenState.value.mangaInitialized,
-                        isPornographic = mangaScreenState.value.mangaIsPornographic,
-                        missingChapters = mangaScreenState.value.mangaMissingChapters,
-                        description = mangaScreenState.value.currentDescription,
-                        altTitles = mangaScreenState.value.alternativeTitles,
-                        genres = mangaScreenState.value.mangaGenres,
-                        artwork = mangaScreenState.value.currentArtwork,
+                        mangaState = mangaState,
                         showBackdrop = themeBasedOffCover,
-                        hideButtonText = mangaScreenState.value.hideButtonText,
-                        isMerged = mangaScreenState.value.isMergedManga is IsMergedManga.Yes,
-                        inLibrary = mangaScreenState.value.inLibrary,
+                        hideButtonText = generalState.value.hideButtonText,
                         isTablet = isTablet,
                         titleLongClick = { title: String -> titleLongClick(context, title) },
                         creatorLongClick = { creator: String -> creatorLongClick(context, creator) },
                         themeColorState = themeColorState,
                         generatePalette = generatePalette,
                         loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
-                        trackServiceCount = mangaScreenState.value.trackServiceCount,
+                        trackServiceCount = generalState.value.trackServiceCount,
                         toggleFavorite = {
-                            if (!mangaScreenState.value.inLibrary && mangaScreenState.value.allCategories.isNotEmpty()) {
-                                if (mangaScreenState.value.hasDefaultCategory) {
+                            if (!mangaState.value.inLibrary && generalState.value.allCategories.isNotEmpty()) {
+                                if (generalState.value.hasDefaultCategory) {
                                     toggleFavorite(true)
                                 } else {
                                     openSheet(
@@ -345,15 +330,15 @@ fun MangaScreen(
                         shareClick = { shareClick(context) },
                         descriptionActions = descriptionActions,
                         quickReadClick = { chapterActions.openNext(context) },
-                        quickReadText = mangaScreenState.value.nextUnreadChapter,
+                        quickReadText = generalState.value.nextUnreadChapter,
                     )
                 }
 
                 fun chapterHeader() = @Composable {
                     ChapterHeader(
                         themeColor = themeColorState,
-                        numberOfChapters = mangaScreenState.value.activeChapters.size,
-                        filterText = mangaScreenState.value.chapterFilterText,
+                        numberOfChapters = generalState.value.activeChapters.size,
+                        filterText = generalState.value.chapterFilterText,
                         onClick = { openSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
                     )
                 }
@@ -372,7 +357,7 @@ fun MangaScreen(
                         bookmark = chapterItem.chapter.bookmark,
                         downloadStateProvider = { chapterItem.downloadState },
                         downloadProgressProvider = { chapterItem.downloadProgress },
-                        shouldHideChapterTitles = mangaScreenState.value.hideChapterTitles,
+                        shouldHideChapterTitles = generalState.value.hideChapterTitles,
                         onClick = { chapterActions.open(context, chapterItem) },
                         onBookmark = {
                             chapterActions.mark(
@@ -395,12 +380,12 @@ fun MangaScreen(
                         },
                         markPrevious = { read ->
 
-                            val chaptersToMark = mangaScreenState.value.activeChapters.subList(0, index)
-                            val lastIndex = mangaScreenState.value.activeChapters.lastIndex
+                            val chaptersToMark = generalState.value.activeChapters.subList(0, index)
+                            val lastIndex = generalState.value.activeChapters.lastIndex
                             val altChapters = if (index == lastIndex) {
                                 emptyList()
                             } else {
-                                mangaScreenState.value.activeChapters.slice(IntRange(index + 1, lastIndex))
+                                generalState.value.activeChapters.slice(IntRange(index + 1, lastIndex))
                             }
                             val action = when (read) {
                                 true -> MangaConstants.MarkAction.PreviousRead(true, altChapters)
@@ -420,7 +405,7 @@ fun MangaScreen(
                             chapterContentPadding = chapterContentPadding,
                             details = details(),
                             chapterHeader = chapterHeader(),
-                            chapters = mangaScreenState.value.activeChapters,
+                            chapters = generalState.value.activeChapters,
                             chapterRow = chapterRow(),
                         )
                     } else {
@@ -428,17 +413,17 @@ fun MangaScreen(
                             contentPadding = mangaDetailContentPadding,
                             details = details(),
                             chapterHeader = chapterHeader(),
-                            chapters = mangaScreenState.value.activeChapters,
+                            chapters = generalState.value.activeChapters,
                             chapterRow = chapterRow(),
                         )
                     }
 
-                    if (mangaScreenState.value.removedChapters.isNotEmpty()) {
+                    if (generalState.value.removedChapters.isNotEmpty()) {
                         RemovedChaptersDialog(
                             themeColorState = themeColorState,
-                            chapters = mangaScreenState.value.removedChapters,
+                            chapters = generalState.value.removedChapters,
                             onConfirm = {
-                                chapterActions.delete(mangaScreenState.value.removedChapters)
+                                chapterActions.delete(generalState.value.removedChapters)
                                 chapterActions.clearRemoved
 
                             },

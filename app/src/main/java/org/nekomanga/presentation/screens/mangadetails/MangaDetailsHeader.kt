@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,34 +33,20 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
+import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
 import me.saket.cascade.CascadeDropdownMenu
-import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun MangaDetailsHeader(
-    title: String,
-    author: String,
-    artist: String,
-    rating: String?,
-    users: String?,
-    langFlag: String?,
-    status: Int,
-    isPornographic: Boolean,
-    missingChapters: String?,
-    description: String,
-    isInitialized: Boolean,
-    altTitles: List<String>,
-    genres: List<String>,
+    mangaState: State<MangaConstants.MangaScreenMangaState>,
     hideButtonText: Boolean,
-    artwork: Artwork,
     showBackdrop: Boolean = true,
-    isMerged: Boolean = true,
-    inLibrary: Boolean = true,
     isTablet: Boolean = false,
     themeColorState: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
@@ -85,7 +72,7 @@ fun MangaDetailsHeader(
 
         val isExpanded = rememberSaveable {
             when (isTablet) {
-                false -> mutableStateOf(!inLibrary)
+                false -> mutableStateOf(!mangaState.value.inLibrary)
                 true -> mutableStateOf(true)
             }
         }
@@ -94,7 +81,7 @@ fun MangaDetailsHeader(
             Box {
                 BackDrop(
                     themeColorState = themeColorState,
-                    artworkProvider = { artwork },
+                    artworkProvider = { mangaState.value.currentArtwork },
                     showBackdrop = showBackdrop,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -115,33 +102,33 @@ fun MangaDetailsHeader(
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
-                        title = title,
-                        author = author,
-                        artist = artist,
-                        rating = rating,
-                        users = users,
-                        langFlag = langFlag,
-                        status = status,
-                        isPornographic = isPornographic,
-                        missingChapters = missingChapters,
+                        title = mangaState.value.currentTitle,
+                        author = mangaState.value.author,
+                        artist = mangaState.value.artist,
+                        rating = mangaState.value.rating,
+                        users = mangaState.value.users,
+                        langFlag = mangaState.value.langFlag,
+                        status = mangaState.value.status,
+                        isPornographic = mangaState.value.isPornographic,
+                        missingChapters = mangaState.value.missingChapters,
                         modifier = Modifier
                             .statusBarsPadding()
                             .padding(top = 70.dp),
                         isExpanded = isExpanded.value,
-                        showMergedIcon = isMerged && !hideButtonText,
+                        showMergedIcon = mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes && !hideButtonText,
                         titleLongClick = titleLongClick,
                         creatorLongClicked = creatorLongClick,
                     )
                     Gap(height = 16.dp)
                     ButtonBlock(
                         hideButtonText = hideButtonText,
-                        isMerged = isMerged,
-                        inLibrary = inLibrary,
+                        isMerged = mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes,
+                        inLibrary = mangaState.value.inLibrary,
                         loggedIntoTrackers = loggedIntoTrackers,
                         trackServiceCount = trackServiceCount,
                         themeColorState = themeColorState,
                         favoriteClick = {
-                            if (!inLibrary) {
+                            if (!mangaState.value.inLibrary) {
                                 toggleFavorite()
                             } else {
                                 favoriteExpanded = true
@@ -168,11 +155,11 @@ fun MangaDetailsHeader(
             }
             Gap(8.dp)
             DescriptionBlock(
-                title = title,
-                description = description,
-                isInitialized = isInitialized,
-                altTitles = altTitles,
-                genres = genres,
+                title = mangaState.value.currentTitle,
+                description = mangaState.value.currentDescription,
+                isInitialized = mangaState.value.initialized,
+                altTitles = mangaState.value.alternativeTitles,
+                genres = mangaState.value.genres,
                 themeColorState = themeColorState,
                 isExpanded = isExpanded.value,
                 isTablet = isTablet,
