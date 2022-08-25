@@ -65,9 +65,9 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
     override fun ScreenContent() {
         MangaScreen(
             manga = presenter.manga.collectAsState().value,
+            mangaScreenState = presenter.mangaScreenState.collectAsState(),
             hideButtonText = presenter.hideButtonText(),
             snackbar = presenter.snackBarState,
-            currentTitle = presenter.currentTitle.collectAsState(),
             description = presenter.description.collectAsState(),
             hasDefaultCategory = presenter.hasDefaultCategory.collectAsState(),
             artwork = presenter.currentArtwork.collectAsState(),

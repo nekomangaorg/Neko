@@ -95,8 +95,8 @@ class MangaDetailPresenter(
     private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)
     val manga: StateFlow<Manga> = _currentManga.asStateFlow()
 
-    private val _currentTitle = MutableStateFlow(manga.value.title)
-    val currentTitle: StateFlow<String> = _currentTitle.asStateFlow()
+    private val _mangaScreenState = MutableStateFlow(getInitialMangaScreenState())
+    val mangaScreenState: StateFlow<MangaConstants.MangaScreenState> = _mangaScreenState.asStateFlow()
 
     private val _description = MutableStateFlow(getDescription())
     val description: StateFlow<String> = _description.asStateFlow()
@@ -576,8 +576,10 @@ class MangaDetailPresenter(
      */
     fun setAltTitle(title: String?) {
         presenterScope.launchIO {
-            val previousTitle = _currentTitle.value
-            _currentTitle.value = title ?: manga.value.originalTitle
+            val previousTitle = _mangaScreenState.value.currentTitle
+            val newTitle = title ?: manga.value.originalTitle
+            _mangaScreenState.value = _mangaScreenState.value.copy(currentTitle = newTitle)
+
             val manga = manga.value
             manga.user_title = title
             db.insertManga(manga).executeOnIO()
@@ -586,7 +588,7 @@ class MangaDetailPresenter(
             _snackbarState.emit(
                 SnackbarState(
                     messageRes = R.string.updated_title_to_,
-                    message = _currentTitle.value,
+                    message = newTitle,
                     actionLabelRes = R.string.undo,
                     action = {
                         setAltTitle(previousTitle)
@@ -1152,8 +1154,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
             _description.value = getDescription()
-            _currentTitle.value = manga.value.title
-
+            _mangaScreenState.value = _mangaScreenState.value.copy(currentTitle = manga.value.title)
         }
     }
 
@@ -1475,6 +1476,13 @@ class MangaDetailPresenter(
                 _activeChapters.value = mutableChapters.toList()
             }
         }
+    }
+
+    private fun getInitialMangaScreenState(): MangaConstants.MangaScreenState {
+        val manga = manga.value
+        return MangaConstants.MangaScreenState(
+            currentTitle = manga.title,
+        )
     }
 
     //callback from Downloader

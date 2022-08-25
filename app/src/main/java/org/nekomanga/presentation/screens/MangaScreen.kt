@@ -64,6 +64,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
@@ -98,7 +99,7 @@ import java.text.DateFormat
 fun MangaScreen(
     manga: Manga,
     hideButtonText: Boolean,
-    currentTitle: State<String>,
+    mangaScreenState: State<MangaScreenState>,
     description: State<String>,
     snackbar: SharedFlow<SnackbarState>,
     artwork: State<Artwork>,
@@ -316,7 +317,7 @@ fun MangaScreen(
                 fun details() = @Composable {
                     MangaDetailsHeader(
                         manga = manga,
-                        title = currentTitle.value,
+                        title = mangaScreenState.value.currentTitle,
                         description = description.value,
                         artwork = artwork.value,
                         showBackdrop = themeBasedOffCover,

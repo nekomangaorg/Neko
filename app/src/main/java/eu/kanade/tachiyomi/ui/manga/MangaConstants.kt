@@ -12,6 +12,10 @@ import org.nekomanga.domain.manga.MergeManga
 
 object MangaConstants {
 
+    data class MangaScreenState(
+        val currentTitle: String,
+    )
+
     /**
      * Holds the next unread chapter and the text to display for the quick read button.
      */
