@@ -24,6 +24,7 @@ object MangaConstants {
         val isMergedManga: MergeConstants.IsMergedManga,
         val isRefreshing: Boolean,
         val originalTitle: String,
+        val removedChapters: ImmutableList<ChapterItem>,
         val trackServiceCount: Int,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates?,
         val vibrantColor: Int?,

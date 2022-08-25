@@ -121,9 +121,6 @@ class MangaDetailPresenter(
     private val _mergeSearchResult = MutableStateFlow<MergeSearchResult>(MergeSearchResult.Loading)
     val mergeSearchResult: StateFlow<MergeSearchResult> = _mergeSearchResult.asStateFlow()
 
-    private val _removedChapters = MutableStateFlow(emptyList<ChapterItem>())
-    val removedChapters: StateFlow<List<ChapterItem>> = _removedChapters.asStateFlow()
-
     private val _nextUnreadChapter = MutableStateFlow(NextUnreadChapter())
     val nextUnreadChapter: StateFlow<NextUnreadChapter> = _nextUnreadChapter.asStateFlow()
 
@@ -225,7 +222,7 @@ class MangaDetailPresenter(
                                 2 -> deleteChapters(removedChapters)
                                 1 -> Unit
                                 else -> {
-                                    _removedChapters.value = removedChapters
+                                    _mangaScreenState.value = mangaScreenState.value.copy(removedChapters = removedChapters.toImmutableList())
                                 }
                             }
                         }
@@ -1387,7 +1384,7 @@ class MangaDetailPresenter(
      * clears the removedChapter flow
      */
     fun clearRemovedChapters() {
-        _removedChapters.value = emptyList()
+        _mangaScreenState.value = mangaScreenState.value.copy(removedChapters = persistentListOf())
     }
 
     /**
@@ -1453,6 +1450,7 @@ class MangaDetailPresenter(
         val manga = manga.value
         return MangaConstants.MangaScreenState(
             alternativeArtwork = persistentListOf(),
+            alternativeTitles = manga.getAltTitles().toImmutableList(),
             currentArtwork = Artwork(
                 url = manga.user_cover ?: "",
                 mangaId = mangaId,
@@ -1466,7 +1464,7 @@ class MangaDetailPresenter(
             isMergedManga = getIsMergedManga(),
             isRefreshing = false,
             originalTitle = manga.originalTitle,
-            alternativeTitles = manga.getAltTitles().toImmutableList(),
+            removedChapters = persistentListOf(),
             trackServiceCount = 0,
             trackingSuggestedDates = null,
             vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),

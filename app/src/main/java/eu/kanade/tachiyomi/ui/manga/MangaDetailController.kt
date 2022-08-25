@@ -126,7 +126,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             quickReadText = presenter.nextUnreadChapter.collectAsState(),
             chapterFilterText = presenter.chapterFilterText.collectAsState(),
             chapters = presenter.activeChapters.collectAsState(),
-            removedChapters = presenter.removedChapters.collectAsState(),
             chapterSortFilter = presenter.chapterSortFilter.collectAsState(),
             chapterFilter = presenter.chapterFilter.collectAsState(),
             scanlatorFilter = presenter.scanlatorFilter.collectAsState(),

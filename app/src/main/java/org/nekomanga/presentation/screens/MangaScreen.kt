@@ -122,7 +122,6 @@ fun MangaScreen(
     quickReadText: State<NextUnreadChapter>,
     chapterFilterText: State<String>,
     chapters: State<List<ChapterItem>>,
-    removedChapters: State<List<ChapterItem>>,
     chapterSortFilter: State<MangaConstants.SortFilter>,
     chapterFilter: State<MangaConstants.Filter>,
     scanlatorFilter: State<MangaConstants.ScanlatorFilter>,
@@ -436,12 +435,12 @@ fun MangaScreen(
                         NonTablet(contentPadding = mangaDetailContentPadding, details = details(), chapterHeader = chapterHeader(), chapters = chapters, chapterRow = chapterRow())
                     }
 
-                    if (removedChapters.value.isNotEmpty()) {
+                    if (mangaScreenState.value.removedChapters.isNotEmpty()) {
                         RemovedChaptersDialog(
                             themeColorState = themeColorState,
-                            chapters = removedChapters.value,
+                            chapters = mangaScreenState.value.removedChapters,
                             onConfirm = {
-                                chapterActions.delete(removedChapters.value)
+                                chapterActions.delete(mangaScreenState.value.removedChapters)
                                 chapterActions.clearRemoved
 
                             },
