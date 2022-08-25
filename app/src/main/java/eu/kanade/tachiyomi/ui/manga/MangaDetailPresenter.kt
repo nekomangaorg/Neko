@@ -100,9 +100,6 @@ class MangaDetailPresenter(
     private val _mangaScreenState = MutableStateFlow(getInitialMangaScreenState())
     val mangaScreenState: StateFlow<MangaConstants.MangaScreenState> = _mangaScreenState.asStateFlow()
 
-    private val _hasDefaultCategory = MutableStateFlow(hasDefaultCategory())
-    val hasDefaultCategory: StateFlow<Boolean> = _hasDefaultCategory.asStateFlow()
-
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -562,9 +559,9 @@ class MangaDetailPresenter(
      */
     fun setAltTitle(title: String?) {
         presenterScope.launchIO {
-            val previousTitle = _mangaScreenState.value.currentTitle
+            val previousTitle = mangaScreenState.value.currentTitle
             val newTitle = title ?: manga.value.originalTitle
-            _mangaScreenState.value = _mangaScreenState.value.copy(currentTitle = newTitle)
+            _mangaScreenState.value = mangaScreenState.value.copy(currentTitle = newTitle)
 
             val manga = manga.value
             manga.user_title = title
@@ -645,7 +642,7 @@ class MangaDetailPresenter(
      */
     private fun updateCurrentArtworkFlow() {
         presenterScope.launchIO {
-            _mangaScreenState.value = _mangaScreenState.value.copy(
+            _mangaScreenState.value = mangaScreenState.value.copy(
                 currentArtwork = Artwork(url = manga.value.user_cover ?: "", inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId),
             )
         }
@@ -821,13 +818,6 @@ class MangaDetailPresenter(
             manga.value.description.isNotNullOrEmpty() -> manga.value.description!!
             else -> "No description"
         }
-    }
-
-    /**
-     * Get default categories
-     */
-    private fun hasDefaultCategory(): Boolean {
-        return preferences.defaultCategory() != -1
     }
 
     /**
@@ -1132,7 +1122,7 @@ class MangaDetailPresenter(
                 )
             }
 
-            _mangaScreenState.value = _mangaScreenState.value.copy(alternativeArtwork = altArtwork.toImmutableList())
+            _mangaScreenState.value = mangaScreenState.value.copy(alternativeArtwork = altArtwork.toImmutableList())
 
         }
     }
@@ -1143,7 +1133,7 @@ class MangaDetailPresenter(
     private fun updateMangaFlow() {
         presenterScope.launchIO {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
-            _mangaScreenState.value = _mangaScreenState.value.copy(currentTitle = manga.value.title, currentDescription = getDescription())
+            _mangaScreenState.value = mangaScreenState.value.copy(currentTitle = manga.value.title, currentDescription = getDescription())
         }
     }
 
@@ -1178,7 +1168,7 @@ class MangaDetailPresenter(
             db.insertManga(editManga).executeAsBlocking()
             updateMangaFlow()
             //add to the default category if it exists and the user has the option set
-            if (shouldAddToDefaultCategory && hasDefaultCategory.value) {
+            if (shouldAddToDefaultCategory && mangaScreenState.value.hasDefaultCategory) {
                 val defaultCategoryId = preferences.defaultCategory()
                 _allCategories.value.firstOrNull { defaultCategoryId == it.id }?.let {
                     updateMangaCategories(listOf(it))
@@ -1478,6 +1468,7 @@ class MangaDetailPresenter(
                 inLibrary = manga.favorite,
                 originalArtwork = manga.thumbnail_url ?: "",
             ),
+            hasDefaultCategory = preferences.defaultCategory() != -1,
             alternativeArtwork = persistentListOf(),
             hideButtonText = preferences.hideButtonText().get(),
         )

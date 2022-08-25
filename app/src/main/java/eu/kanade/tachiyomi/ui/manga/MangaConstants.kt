@@ -19,6 +19,7 @@ object MangaConstants {
         val currentArtwork: Artwork,
         val alternativeArtwork: ImmutableList<Artwork>,
         val hideButtonText: Boolean,
+        val hasDefaultCategory: Boolean,
     )
 
     /**

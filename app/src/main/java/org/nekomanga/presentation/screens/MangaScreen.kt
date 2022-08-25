@@ -107,7 +107,6 @@ fun MangaScreen(
     titleLongClick: (Context, String) -> Unit,
     creatorLongClick: (Context, String) -> Unit,
     toggleFavorite: (Boolean) -> Boolean = { true },
-    hasDefaultCategory: State<Boolean>,
     categoryActions: CategoryActions,
     categories: State<List<Category>>,
     mangaCategories: State<List<Category>>,
@@ -328,7 +327,7 @@ fun MangaScreen(
                         trackServiceCount = trackServiceCount.value,
                         toggleFavorite = {
                             if (!inLibrary && categories.value.isNotEmpty()) {
-                                if (hasDefaultCategory.value) {
+                                if (mangaScreenState.value.hasDefaultCategory) {
                                     inLibrary = toggleFavorite(true)
                                 } else {
                                     openSheet(
