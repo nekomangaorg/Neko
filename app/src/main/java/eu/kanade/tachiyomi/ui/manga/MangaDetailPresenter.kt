@@ -121,9 +121,6 @@ class MangaDetailPresenter(
     private val _externalLinks = MutableStateFlow(emptyList<ExternalLink>())
     val externalLinks: StateFlow<List<ExternalLink>> = _externalLinks.asStateFlow()
 
-    private val _isMerged = MutableStateFlow(getIsMergedManga())
-    val isMerged: StateFlow<IsMergedManga> = _isMerged.asStateFlow()
-
     private val _mergeSearchResult = MutableStateFlow<MergeSearchResult>(MergeSearchResult.Loading)
     val mergeSearchResult: StateFlow<MergeSearchResult> = _mergeSearchResult.asStateFlow()
 
@@ -1087,8 +1084,8 @@ class MangaDetailPresenter(
      * Update flows for merge
      */
     private fun updateMergeFlow() {
-        presenterScope.launchIO {
-            _isMerged.value = getIsMergedManga()
+        presenterScope.launch {
+            _mangaScreenState.value = mangaScreenState.value.copy(isMergedManga = getIsMergedManga())
         }
     }
 
@@ -1469,6 +1466,7 @@ class MangaDetailPresenter(
             currentTitle = manga.title,
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
+            isMergedManga = getIsMergedManga(),
             originalTitle = manga.originalTitle,
             alternativeTitles = manga.getAltTitles().toImmutableList(),
             trackServiceCount = 0,

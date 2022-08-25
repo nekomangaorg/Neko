@@ -109,7 +109,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 dateChange = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
             ),
             trackSearchResult = presenter.trackSearchResult.collectAsState(),
-            isMergedManga = presenter.isMerged.collectAsState(),
             mergeActions = MergeActions(
                 remove = presenter::removeMergedManga,
                 search = presenter::searchMergedManga,

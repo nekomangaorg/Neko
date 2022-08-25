@@ -21,6 +21,7 @@ object MangaConstants {
         val currentTitle: String,
         val hasDefaultCategory: Boolean,
         val hideButtonText: Boolean,
+        val isMergedManga: MergeConstants.IsMergedManga,
         val originalTitle: String,
         val trackServiceCount: Int,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates?,
