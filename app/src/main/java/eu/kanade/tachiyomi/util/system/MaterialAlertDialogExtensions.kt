@@ -63,7 +63,11 @@ fun AlertDialog.disableItems(items: Array<String>) {
 fun MaterialAlertDialogBuilder.setCustomTitleAndMessage(title: Int, message: String): MaterialAlertDialogBuilder {
     return setCustomTitle(
         (CustomDialogTitleMessageBinding.inflate(LayoutInflater.from(context))).apply {
-            alertTitle.text = context.getString(title)
+            if (title != 0) {
+                alertTitle.text = context.getString(title)
+            } else {
+                alertTitle.isVisible = false
+            }
             this.message.text = message
         }.root,
     )

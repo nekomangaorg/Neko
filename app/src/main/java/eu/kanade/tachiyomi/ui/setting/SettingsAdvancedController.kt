@@ -50,6 +50,7 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
@@ -326,7 +327,7 @@ class SettingsAdvancedController : SettingsController() {
                 onClick {
                     launchIO {
                         val db = Injekt.get<DatabaseHelper>()
-                        db.deleteMangaList().executeOnIO()
+                        db.deleteAllManga().executeOnIO()
                     }
                 }
             }
@@ -463,18 +464,27 @@ class SettingsAdvancedController : SettingsController() {
 
     class ClearDatabaseDialogController : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+            val item = arrayOf(activity!!.getString(R.string.clear_db_exclude_read))
+            val selected = booleanArrayOf(false)
             return activity!!.materialAlertDialog()
-                .setMessage(R.string.clear_database_confirmation)
+                .setCustomTitleAndMessage(R.string.clear_database_confirmation_title, activity!!.getString(R.string.clear_database_confirmation))
+                .setMultiChoiceItems(item, selected) { _, which, checked ->
+                    selected[which] = checked
+                }
                 .setPositiveButton(android.R.string.ok) { _, _ ->
-                    (targetController as? SettingsAdvancedController)?.clearDatabase()
+                    (targetController as? SettingsAdvancedController)?.clearDatabase(selected.last())
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
         }
     }
 
-    private fun clearDatabase() {
-        db.deleteMangaListNotInLibrary().executeAsBlocking()
+    private fun clearDatabase(keepRead: Boolean) {
+        if (keepRead) {
+            db.deleteAllMangaNotInLibraryAndNotRead().executeAsBlocking()
+        } else {
+            db.deleteAllMangaNotInLibrary().executeAsBlocking()
+        }
         db.deleteHistoryNoLastRead().executeAsBlocking()
         activity?.toast(R.string.clear_database_completed)
     }

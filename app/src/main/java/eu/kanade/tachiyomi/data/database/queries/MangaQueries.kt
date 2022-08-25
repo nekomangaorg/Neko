@@ -160,7 +160,7 @@ interface MangaQueries : DbProvider {
 
     fun deleteManga(mangaList: List<Manga>) = db.delete().objects(mangaList).prepare()
 
-    fun deleteMangaListNotInLibrary() = db.delete()
+    fun deleteAllMangaNotInLibrary() = db.delete()
         .byQuery(
             DeleteQuery.builder()
                 .table(MangaTable.TABLE)
@@ -170,7 +170,23 @@ interface MangaQueries : DbProvider {
         )
         .prepare()
 
-    fun deleteMangaList() = db.delete()
+    fun deleteAllMangaNotInLibraryAndNotRead() = db.delete()
+        .byQuery(
+            DeleteQuery.builder()
+                .table(MangaTable.TABLE)
+                .where(
+                    """
+                    ${MangaTable.COL_FAVORITE} = ? AND ${MangaTable.COL_ID} NOT IN (
+                        SELECT ${ChapterTable.COL_MANGA_ID} FROM ${ChapterTable.TABLE} WHERE ${ChapterTable.COL_READ} = 1 OR ${ChapterTable.COL_LAST_PAGE_READ} != 0
+                    )
+                    """.trimIndent(),
+                )
+                .whereArgs(0)
+                .build(),
+        )
+        .prepare()
+
+    fun deleteAllManga() = db.delete()
         .byQuery(
             DeleteQuery.builder()
                 .table(MangaTable.TABLE)

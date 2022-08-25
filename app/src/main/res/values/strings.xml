@@ -782,7 +782,10 @@
     <string name="webview_data_deleted">WebView data cleared</string>
     <string name="clear_database">Clear database</string>
     <string name="clear_database_summary">Delete manga and chapters that are not in your library</string>
-    <string name="clear_database_confirmation">Are you sure? Read chapters and progress of non-library manga will be lost</string>
+    <string name="clear_database_confirmation_title">Clear database of manga and chapters NOT in Library</string>
+    <string name="clear_database_confirmation">This is not reversible and the read chapters (unless checked below) and the progress will be lost.</string>
+    <string name="clear_db_exclude_read">Keep manga with read chapters</string>
+
     <string name="clear_database_completed">Entries deleted</string>
     <string name="refresh_library_metadata">Refresh library metadata</string>
     <string name="updates_covers_genres_desc">Updates covers, genres, description and manga status information</string>
