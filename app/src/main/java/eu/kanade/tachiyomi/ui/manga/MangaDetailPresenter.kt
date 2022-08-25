@@ -118,9 +118,6 @@ class MangaDetailPresenter(
     private val _trackSearchResult = MutableStateFlow<TrackSearchResult>(TrackSearchResult.Loading)
     val trackSearchResult: StateFlow<TrackSearchResult> = _trackSearchResult.asStateFlow()
 
-    private val _trackSuggestedDates = MutableStateFlow<TrackingSuggestedDates?>(null)
-    val trackSuggestedDates: StateFlow<TrackingSuggestedDates?> = _trackSuggestedDates.asStateFlow()
-
     private val _externalLinks = MutableStateFlow(emptyList<ExternalLink>())
     val externalLinks: StateFlow<List<ExternalLink>> = _externalLinks.asStateFlow()
 
@@ -320,10 +317,13 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val chapters = db.getHistoryByMangaId(mangaId).executeOnIO()
 
-            _trackSuggestedDates.value = TrackingSuggestedDates(
-                startDate = chapters.minOfOrNull { it.last_read } ?: 0L,
-                finishedDate = chapters.maxOfOrNull { it.last_read } ?: 0L,
+            _mangaScreenState.value = mangaScreenState.value.copy(
+                trackingSuggestedDates = TrackingSuggestedDates(
+                    startDate = chapters.minOfOrNull { it.last_read } ?: 0L,
+                    finishedDate = chapters.maxOfOrNull { it.last_read } ?: 0L,
+                ),
             )
+
         }
     }
 
@@ -1469,6 +1469,7 @@ class MangaDetailPresenter(
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
             trackServiceCount = 0,
+            trackingSuggestedDates = null,
             vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
         )
     }

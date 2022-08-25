@@ -21,6 +21,7 @@ object MangaConstants {
         val hasDefaultCategory: Boolean,
         val hideButtonText: Boolean,
         val trackServiceCount: Int,
+        val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates?,
         val vibrantColor: Int?,
     )
 

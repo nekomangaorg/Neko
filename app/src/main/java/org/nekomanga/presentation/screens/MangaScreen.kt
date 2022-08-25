@@ -72,7 +72,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInWebView
 import kotlinx.coroutines.flow.SharedFlow
@@ -111,7 +110,6 @@ fun MangaScreen(
     mangaCategories: State<List<Category>>,
     loggedInTrackingServices: State<List<TrackService>>,
     tracks: State<List<Track>>,
-    trackSuggestedDates: State<TrackingSuggestedDates?>,
     dateFormat: DateFormat,
     trackActions: TrackActions,
     trackSearchResult: State<TrackSearchResult>,
@@ -249,7 +247,7 @@ fun MangaScreen(
                         title = manga.originalTitle,
                         altTitles = manga.getAltTitles(),
                         trackSearchResult = trackSearchResult.value,
-                        trackSuggestedDates = trackSuggestedDates.value,
+                        trackSuggestedDates = mangaScreenState.value.trackingSuggestedDates,
                         externalLinks = externalLinks.value,
                         isMergedManga = isMergedManga.value,
                         alternativeArtwork = mangaScreenState.value.alternativeArtwork,
