@@ -98,7 +98,6 @@ import java.text.DateFormat
 @Composable
 fun MangaScreen(
     manga: Manga,
-    hideButtonText: Boolean,
     mangaScreenState: State<MangaScreenState>,
     description: State<String>,
     snackbar: SharedFlow<SnackbarState>,
@@ -321,7 +320,7 @@ fun MangaScreen(
                         description = description.value,
                         artwork = artwork.value,
                         showBackdrop = themeBasedOffCover,
-                        hideButtonText = hideButtonText,
+                        hideButtonText = mangaScreenState.value.hideButtonText,
                         isMerged = isMergedManga.value is IsMergedManga.Yes,
                         inLibrary = inLibrary,
                         isTablet = isTablet,

@@ -1482,6 +1482,7 @@ class MangaDetailPresenter(
         val manga = manga.value
         return MangaConstants.MangaScreenState(
             currentTitle = manga.title,
+            hideButtonText = preferences.hideButtonText().get(),
         )
     }
 
@@ -1527,9 +1528,5 @@ class MangaDetailPresenter(
         super.onDestroy()
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
-    }
-
-    fun hideButtonText(): Boolean {
-        return preferences.hideButtonText().get()
     }
 }

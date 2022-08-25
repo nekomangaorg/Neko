@@ -14,6 +14,8 @@ object MangaConstants {
 
     data class MangaScreenState(
         val currentTitle: String,
+
+        val hideButtonText: Boolean,
     )
 
     /**

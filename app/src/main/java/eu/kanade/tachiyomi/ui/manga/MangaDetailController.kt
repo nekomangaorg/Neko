@@ -66,7 +66,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
         MangaScreen(
             manga = presenter.manga.collectAsState().value,
             mangaScreenState = presenter.mangaScreenState.collectAsState(),
-            hideButtonText = presenter.hideButtonText(),
             snackbar = presenter.snackBarState,
             description = presenter.description.collectAsState(),
             hasDefaultCategory = presenter.hasDefaultCategory.collectAsState(),
