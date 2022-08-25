@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.chapter.ChapterItem
@@ -18,6 +19,7 @@ object MangaConstants {
         val allChapters: ImmutableList<ChapterItem>,
         val alternativeArtwork: ImmutableList<Artwork>,
         val alternativeTitles: ImmutableList<String>,
+        val externalLinks: ImmutableList<ExternalLink>,
         val currentArtwork: Artwork,
         val currentDescription: String,
         val currentTitle: String,

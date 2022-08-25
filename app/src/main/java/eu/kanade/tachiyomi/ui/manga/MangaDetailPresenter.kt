@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
-import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -114,9 +113,6 @@ class MangaDetailPresenter(
 
     private val _trackSearchResult = MutableStateFlow<TrackSearchResult>(TrackSearchResult.Loading)
     val trackSearchResult: StateFlow<TrackSearchResult> = _trackSearchResult.asStateFlow()
-
-    private val _externalLinks = MutableStateFlow(emptyList<ExternalLink>())
-    val externalLinks: StateFlow<List<ExternalLink>> = _externalLinks.asStateFlow()
 
     private val _mergeSearchResult = MutableStateFlow<MergeSearchResult>(MergeSearchResult.Loading)
     val mergeSearchResult: StateFlow<MergeSearchResult> = _mergeSearchResult.asStateFlow()
@@ -787,7 +783,7 @@ class MangaDetailPresenter(
      */
     private fun updateExternalFlows() {
         presenterScope.launchIO {
-            _externalLinks.value = manga.value.getExternalLinks()
+            _mangaScreenState.value = mangaScreenState.value.copy(externalLinks = manga.value.getExternalLinks().toImmutableList())
         }
     }
 
@@ -1461,6 +1457,7 @@ class MangaDetailPresenter(
             ),
             currentDescription = getDescription(),
             currentTitle = manga.title,
+            externalLinks = persistentListOf(),
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
             isMergedManga = getIsMergedManga(),

@@ -56,7 +56,6 @@ import eu.kanade.presentation.components.VerticalDivider
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
@@ -113,7 +112,6 @@ fun MangaScreen(
     trackActions: TrackActions,
     trackSearchResult: State<TrackSearchResult>,
     similarClick: () -> Unit = {},
-    externalLinks: State<List<ExternalLink>>,
     mergeSearchResult: State<MergeSearchResult>,
     coverActions: CoverActions,
     mergeActions: MergeActions,
@@ -244,7 +242,7 @@ fun MangaScreen(
                         altTitles = mangaScreenState.value.alternativeTitles,
                         trackSearchResult = trackSearchResult.value,
                         trackSuggestedDates = mangaScreenState.value.trackingSuggestedDates,
-                        externalLinks = externalLinks.value,
+                        externalLinks = mangaScreenState.value.externalLinks,
                         isMergedManga = mangaScreenState.value.isMergedManga,
                         alternativeArtwork = mangaScreenState.value.alternativeArtwork,
                         coverActions = coverActions,

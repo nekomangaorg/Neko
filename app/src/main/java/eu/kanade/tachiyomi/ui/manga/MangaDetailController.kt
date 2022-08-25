@@ -115,7 +115,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             ),
             mergeSearchResult = presenter.mergeSearchResult.collectAsState(),
             similarClick = { router.pushController(SimilarController(presenter.manga.value).withFadeTransaction()) },
-            externalLinks = presenter.externalLinks.collectAsState(),
             shareClick = this::shareManga,
             coverActions = CoverActions(
                 share = this::shareCover,
