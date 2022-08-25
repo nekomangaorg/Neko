@@ -107,7 +107,7 @@ mockk = "io.mockk:mockk:1.12.4"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.3.2"
 
 [plugins]
-kotlinter = { id = "org.jmailen.kotlinter", version = "3.9.0" }
+kotlinter = { id = "org.jmailen.kotlinter", version = "3.11.1" }
 
 [bundles]
 coil = ["coil", "coil-gif", "coil-svg", "coil-compose"]
