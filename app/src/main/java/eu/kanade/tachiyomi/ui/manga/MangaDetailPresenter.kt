@@ -148,16 +148,6 @@ class MangaDetailPresenter(
 
     private var allChapterScanlators: Set<String> = emptySet()
 
-    private val _currentArtwork = MutableStateFlow(
-        Artwork(
-            url = manga.value.user_cover ?: "",
-            mangaId = mangaId,
-            inLibrary = manga.value.favorite,
-            originalArtwork = manga.value.thumbnail_url ?: "",
-        ),
-    )
-    val currentArtwork: StateFlow<Artwork> = _currentArtwork.asStateFlow()
-
     private val _vibrantColor = MutableStateFlow(MangaCoverMetadata.getVibrantColor(mangaId))
     val vibrantColor: StateFlow<Int?> = _vibrantColor.asStateFlow()
 
@@ -656,7 +646,9 @@ class MangaDetailPresenter(
      */
     private fun updateCurrentArtworkFlow() {
         presenterScope.launchIO {
-            _currentArtwork.value = Artwork(url = manga.value.user_cover ?: "", inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId)
+            _mangaScreenState.value = _mangaScreenState.value.copy(
+                currentArtwork = Artwork(url = manga.value.user_cover ?: "", inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId),
+            )
         }
     }
 
@@ -1129,7 +1121,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val uuid = MdUtil.getMangaUUID(manga.value.url)
             val quality = preferences.thumbnailQuality()
-            val currentUsed = currentArtwork.value
+            val currentUsed = mangaScreenState.value.currentArtwork
 
             _alternativeArtwork.value = db.getArtwork(manga.value).executeAsBlocking().map { aw ->
                 Artwork(
@@ -1479,6 +1471,13 @@ class MangaDetailPresenter(
         return MangaConstants.MangaScreenState(
             currentTitle = manga.title,
             currentDescription = getDescription(),
+            currentArtwork = Artwork(
+                url = manga.user_cover ?: "",
+                mangaId = mangaId,
+                inLibrary = manga.favorite,
+                originalArtwork = manga.thumbnail_url ?: "",
+            ),
+
             hideButtonText = preferences.hideButtonText().get(),
         )
     }

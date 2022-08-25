@@ -68,7 +68,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             mangaScreenState = presenter.mangaScreenState.collectAsState(),
             snackbar = presenter.snackBarState,
             hasDefaultCategory = presenter.hasDefaultCategory.collectAsState(),
-            artwork = presenter.currentArtwork.collectAsState(),
             vibrantColor = presenter.vibrantColor.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
@@ -215,7 +214,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
      */
     private fun shareManga(context: Context) {
         viewScope.launch {
-            val cover = presenter.shareMangaCover(context.sharedCacheDir(), presenter.currentArtwork.value)
+            val cover = presenter.shareMangaCover(context.sharedCacheDir(), presenter.mangaScreenState.value.currentArtwork)
             withUIContext {
                 val stream = cover?.getUriCompat(context)
                 try {
