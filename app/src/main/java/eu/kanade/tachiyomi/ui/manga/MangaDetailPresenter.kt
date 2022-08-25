@@ -117,9 +117,6 @@ class MangaDetailPresenter(
     private val _mergeSearchResult = MutableStateFlow<MergeSearchResult>(MergeSearchResult.Loading)
     val mergeSearchResult: StateFlow<MergeSearchResult> = _mergeSearchResult.asStateFlow()
 
-    private val _nextUnreadChapter = MutableStateFlow(NextUnreadChapter())
-    val nextUnreadChapter: StateFlow<NextUnreadChapter> = _nextUnreadChapter.asStateFlow()
-
     private val _snackbarState = MutableSharedFlow<SnackbarState>()
     val snackBarState: SharedFlow<SnackbarState> = _snackbarState.asSharedFlow()
 
@@ -1389,25 +1386,28 @@ class MangaDetailPresenter(
     private fun updateNextUnreadChapter() {
         presenterScope.launchIO {
             val nextChapter = chapterSort.getNextUnreadChapter(manga.value, mangaScreenState.value.activeChapters)?.chapter
-            _nextUnreadChapter.value = when (nextChapter == null) {
-                true -> NextUnreadChapter()
-                false -> {
-                    val id = when (nextChapter.lastPageRead > 0) {
-                        true -> R.string.continue_reading_
-                        false -> R.string.start_reading_
-                    }
-                    val readTxt =
-                        if (nextChapter.isMergedChapter() || (nextChapter.volume.isEmpty() && nextChapter.chapterText.isEmpty())) {
-                            nextChapter.name
-                        } else if (nextChapter.volume.isNotEmpty()) {
-                            "Vol. " + nextChapter.volume + " " + nextChapter.chapterText
-                        } else {
-                            nextChapter.chapterText
+            _mangaScreenState.value = mangaScreenState.value.copy(
+                nextUnreadChapter =
+                when (nextChapter == null) {
+                    true -> NextUnreadChapter()
+                    false -> {
+                        val id = when (nextChapter.lastPageRead > 0) {
+                            true -> R.string.continue_reading_
+                            false -> R.string.start_reading_
                         }
+                        val readTxt =
+                            if (nextChapter.isMergedChapter() || (nextChapter.volume.isEmpty() && nextChapter.chapterText.isEmpty())) {
+                                nextChapter.name
+                            } else if (nextChapter.volume.isNotEmpty()) {
+                                "Vol. " + nextChapter.volume + " " + nextChapter.chapterText
+                            } else {
+                                nextChapter.chapterText
+                            }
 
-                    NextUnreadChapter(id, readTxt, nextChapter)
-                }
-            }
+                        NextUnreadChapter(id, readTxt, nextChapter)
+                    }
+                },
+            )
         }
     }
 
@@ -1462,6 +1462,7 @@ class MangaDetailPresenter(
             hideButtonText = preferences.hideButtonText().get(),
             isMergedManga = getIsMergedManga(),
             isRefreshing = false,
+            nextUnreadChapter = NextUnreadChapter(),
             originalTitle = manga.originalTitle,
             removedChapters = persistentListOf(),
             trackServiceCount = 0,

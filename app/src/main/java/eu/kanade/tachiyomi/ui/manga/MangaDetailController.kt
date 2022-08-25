@@ -122,7 +122,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 save = presenter::saveCover,
                 reset = presenter::resetCover,
             ),
-            quickReadText = presenter.nextUnreadChapter.collectAsState(),
             chapterFilterText = presenter.chapterFilterText.collectAsState(),
             chapterSortFilter = presenter.chapterSortFilter.collectAsState(),
             chapterFilter = presenter.chapterFilter.collectAsState(),
@@ -141,7 +140,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 delete = presenter::deleteChapters,
                 clearRemoved = presenter::clearRemovedChapters,
                 openNext = { context ->
-                    presenter.nextUnreadChapter.value.simpleChapter?.let {
+                    presenter.mangaScreenState.value.nextUnreadChapter.simpleChapter?.let {
                         openChapter(context, it.toDbChapter())
                     }
                 },

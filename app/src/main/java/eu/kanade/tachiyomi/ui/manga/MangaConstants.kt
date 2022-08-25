@@ -27,6 +27,7 @@ object MangaConstants {
         val hideButtonText: Boolean,
         val isMergedManga: MergeConstants.IsMergedManga,
         val isRefreshing: Boolean,
+        val nextUnreadChapter: NextUnreadChapter,
         val originalTitle: String,
         val removedChapters: ImmutableList<ChapterItem>,
         val trackServiceCount: Int,
