@@ -71,6 +71,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.category.toCategoryItem
+import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
@@ -99,12 +102,6 @@ class MangaDetailPresenter(
 
     private val _mangaScreenState = MutableStateFlow(getInitialMangaScreenState())
     val mangaScreenState: StateFlow<MangaConstants.MangaScreenState> = _mangaScreenState.asStateFlow()
-
-    private val _allCategories = MutableStateFlow(emptyList<Category>())
-    val allCategories: StateFlow<List<Category>> = _allCategories.asStateFlow()
-
-    private val _mangaCategories = MutableStateFlow(emptyList<Category>())
-    val mangaCategories: StateFlow<List<Category>> = _mangaCategories.asStateFlow()
 
     private val _loggedInTrackingService = MutableStateFlow(emptyList<TrackService>())
     val loggedInTrackingService: StateFlow<List<TrackService>> = _loggedInTrackingService.asStateFlow()
@@ -207,9 +204,9 @@ class MangaDetailPresenter(
     /**
      * Updates the database with categories for the manga
      */
-    fun updateMangaCategories(enabledCategories: List<Category>) {
+    fun updateMangaCategories(enabledCategories: List<CategoryItem>) {
         presenterScope.launchIO {
-            val categories = enabledCategories.map { MangaCategory.create(manga.value, it) }
+            val categories = enabledCategories.map { MangaCategory.create(manga.value, it.toDbCategory()) }
             db.setMangaCategories(categories, listOf(manga.value))
             updateCategoryFlows()
         }
@@ -681,8 +678,14 @@ class MangaDetailPresenter(
      */
     private fun updateCategoryFlows() {
         presenterScope.launchIO {
-            _allCategories.value = db.getCategories().executeOnIO()
-            _mangaCategories.value = db.getCategoriesForManga(mangaId).executeOnIO()
+            val categories = db.getCategories().executeAsBlocking()
+            val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
+
+            _mangaScreenState.value = mangaScreenState.value.copy(
+                allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
+                currentCategories = mangaCategories.map { it.toCategoryItem() }.toImmutableList(),
+            )
+
         }
     }
 
@@ -1138,7 +1141,7 @@ class MangaDetailPresenter(
             //add to the default category if it exists and the user has the option set
             if (shouldAddToDefaultCategory && mangaScreenState.value.hasDefaultCategory) {
                 val defaultCategoryId = preferences.defaultCategory()
-                _allCategories.value.firstOrNull { defaultCategoryId == it.id }?.let {
+                mangaScreenState.value.allCategories.firstOrNull { defaultCategoryId == it.id }?.let {
                     updateMangaCategories(listOf(it))
                 }
             }

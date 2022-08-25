@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
@@ -61,7 +60,6 @@ fun MangaDetailsHeader(
     loggedIntoTrackers: Boolean,
     trackServiceCount: Int,
     toggleFavorite: () -> Unit = {},
-    categories: List<Category> = emptyList(),
     moveCategories: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},

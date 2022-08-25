@@ -3,13 +3,13 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
@@ -19,6 +19,7 @@ object MangaConstants {
 
     data class MangaScreenState(
         val activeChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
         val alternativeArtwork: ImmutableList<Artwork> = persistentListOf(),
@@ -29,6 +30,7 @@ object MangaConstants {
         val chapterSortFilter: SortFilter = SortFilter(),
         val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
         val currentArtwork: Artwork,
+        val currentCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val currentDescription: String,
         val currentTitle: String,
         val hasDefaultCategory: Boolean,
@@ -151,7 +153,7 @@ object MangaConstants {
     }
 
     class CategoryActions(
-        val set: (List<Category>) -> Unit = {},
+        val set: (List<CategoryItem>) -> Unit = {},
         val addNew: (String) -> Unit = {},
     )
 

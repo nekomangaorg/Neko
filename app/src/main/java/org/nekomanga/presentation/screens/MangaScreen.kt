@@ -53,7 +53,6 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.presentation.components.VerticalDivider
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -103,8 +102,6 @@ fun MangaScreen(
     creatorLongClick: (Context, String) -> Unit,
     toggleFavorite: (Boolean) -> Boolean = { true },
     categoryActions: CategoryActions,
-    categories: State<List<Category>>,
-    mangaCategories: State<List<Category>>,
     loggedInTrackingServices: State<List<TrackService>>,
     tracks: State<List<Track>>,
     dateFormat: DateFormat,
@@ -224,8 +221,8 @@ fun MangaScreen(
                         themeColorState = themeColorState,
                         inLibrary = inLibrary,
                         addNewCategory = categoryActions.addNew,
-                        allCategories = categories.value,
-                        mangaCategories = mangaCategories.value,
+                        allCategories = mangaScreenState.value.allCategories,
+                        mangaCategories = mangaScreenState.value.currentCategories,
                         loggedInTrackingServices = loggedInTrackingServices.value,
                         tracks = tracks.value,
                         dateFormat = dateFormat,
@@ -310,7 +307,7 @@ fun MangaScreen(
                         loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
                         trackServiceCount = mangaScreenState.value.trackServiceCount,
                         toggleFavorite = {
-                            if (!inLibrary && categories.value.isNotEmpty()) {
+                            if (!inLibrary && mangaScreenState.value.allCategories.isNotEmpty()) {
                                 if (mangaScreenState.value.hasDefaultCategory) {
                                     inLibrary = toggleFavorite(true)
                                 } else {
@@ -326,7 +323,6 @@ fun MangaScreen(
                                 inLibrary = toggleFavorite(false)
                             }
                         },
-                        categories = categories.value,
                         moveCategories = {
                             openSheet(
                                 DetailsBottomSheetScreen.CategoriesSheet(

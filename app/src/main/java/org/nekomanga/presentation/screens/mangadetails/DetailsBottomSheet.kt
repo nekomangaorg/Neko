@@ -3,13 +3,13 @@ package org.nekomanga.presentation.screens.mangadetails
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
+import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.sheets.ArtworkSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
@@ -28,7 +28,7 @@ import java.text.DateFormat
 sealed class DetailsBottomSheetScreen {
     class CategoriesSheet(
         val addingToLibrary: Boolean = false,
-        val setCategories: (List<Category>) -> Unit,
+        val setCategories: (List<CategoryItem>) -> Unit,
         val addToLibraryClick: () -> Unit = {},
     ) : DetailsBottomSheetScreen()
 
@@ -50,8 +50,8 @@ fun DetailsBottomSheet(
     currentScreen: DetailsBottomSheetScreen,
     themeColorState: ThemeColorState,
     inLibrary: Boolean,
-    allCategories: List<Category>,
-    mangaCategories: List<Category>,
+    allCategories: List<CategoryItem>,
+    mangaCategories: List<CategoryItem>,
     addNewCategory: (String) -> Unit,
     loggedInTrackingServices: List<TrackService>,
     tracks: List<Track>,

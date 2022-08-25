@@ -21,15 +21,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Category
 import jp.wasabeef.gap.Gap
+import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.screens.ThemeColorState
 
 /**
  * Simple Dialog to add a new category
  */
 @Composable
-fun AddCategoryDialog(themeColorState: ThemeColorState, currentCategories: List<Category>, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun AddCategoryDialog(themeColorState: ThemeColorState, currentCategories: List<CategoryItem>, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     val context = LocalContext.current
     var categoryText by remember { mutableStateOf("") }
     var saveEnabled by remember { mutableStateOf(false) }
