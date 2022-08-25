@@ -64,6 +64,7 @@ fun DescriptionBlock(
     manga: Manga,
     title: String,
     description: String,
+    altTitles: List<String>,
     themeColorState: ThemeColorState,
     isExpanded: Boolean,
     isTablet: Boolean,
@@ -131,7 +132,7 @@ fun DescriptionBlock(
         } else {
             if (isTablet) {
                 AltTitles(
-                    altTitles = manga.getAltTitles(),
+                    altTitles = altTitles,
                     currentTitle = title,
                     tagColor = tagColor,
                     themeColorState = themeColorState,
@@ -156,7 +157,7 @@ fun DescriptionBlock(
             if (!isTablet) {
                 Gap(8.dp)
                 AltTitles(
-                    altTitles = manga.getAltTitles(),
+                    altTitles = altTitles,
                     currentTitle = title,
                     tagColor = tagColor,
                     themeColorState = themeColorState,

@@ -1130,7 +1130,8 @@ class MangaDetailPresenter(
     private fun updateMangaFlow() {
         presenterScope.launchIO {
             _currentManga.value = db.getManga(mangaId).executeOnIO()!!
-            _mangaScreenState.value = mangaScreenState.value.copy(currentTitle = manga.value.title, currentDescription = getDescription())
+            _mangaScreenState.value =
+                mangaScreenState.value.copy(currentTitle = manga.value.title, alternativeTitles = manga.value.getAltTitles().toImmutableList(), currentDescription = getDescription())
         }
     }
 
@@ -1468,6 +1469,8 @@ class MangaDetailPresenter(
             currentTitle = manga.title,
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
+            originalTitle = manga.originalTitle,
+            alternativeTitles = manga.getAltTitles().toImmutableList(),
             trackServiceCount = 0,
             trackingSuggestedDates = null,
             vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),

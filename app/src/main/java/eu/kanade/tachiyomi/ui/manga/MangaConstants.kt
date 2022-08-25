@@ -15,11 +15,13 @@ object MangaConstants {
 
     data class MangaScreenState(
         val alternativeArtwork: ImmutableList<Artwork>,
+        val alternativeTitles: ImmutableList<String>,
         val currentArtwork: Artwork,
         val currentDescription: String,
         val currentTitle: String,
         val hasDefaultCategory: Boolean,
         val hideButtonText: Boolean,
+        val originalTitle: String,
         val trackServiceCount: Int,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates?,
         val vibrantColor: Int?,
