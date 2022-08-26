@@ -1,22 +1,19 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.mdlist.MdList
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
-import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import org.nekomanga.domain.track.TrackItem
+import org.nekomanga.domain.track.TrackServiceItem
+import org.nekomanga.domain.track.toDbTrack
+import org.nekomanga.domain.track.toTrackSearchItem
 import org.threeten.bp.ZoneId
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -27,23 +24,17 @@ import uy.kohesive.injekt.injectLazy
  */
 class TrackingCoordinator {
     private val db: DatabaseHelper by injectLazy()
-    private val preferences: PreferencesHelper by injectLazy()
-    private val coverCache: CoverCache by injectLazy()
+    private val trackManager: TrackManager = Injekt.get()
     private val sourceManager: SourceManager by lazy { Injekt.get() }
-    private val mangaDex: MangaDex by lazy { sourceManager.getMangadex() }
-    private val mergedSource: MangaLife by lazy { sourceManager.getMergeSource() }
-    private val downloadManager: DownloadManager by injectLazy()
-    private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
     /**
      * Update tracker with new status
      */
     suspend fun updateTrackStatus(statusIndex: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
-        val track = trackAndService.track.apply {
-            this.status = trackAndService.service.getStatusList()[statusIndex]
-        }
-        if (trackAndService.service.isCompletedStatus(statusIndex) && track.total_chapters > 0) {
-            track.last_chapter_read = track.total_chapters.toFloat()
+        var track = trackAndService.track.copy(status = trackAndService.service.statusList[statusIndex])
+
+        if (trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) && track.totalChapters > 0) {
+            track = track.copy(lastChapterRead = track.totalChapters.toFloat())
         }
         return updateTrackingService(track, trackAndService.service)
     }
@@ -52,18 +43,20 @@ class TrackingCoordinator {
      * Update tracker with new score
      */
     suspend fun updateTrackScore(scoreIndex: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
-        val track = trackAndService.track.apply {
-            this.score = trackAndService.service.indexToScore(scoreIndex)
-        }
-        return if (trackAndService.service.isMdList()) {
+
+        val trackItem = trackAndService.track.copy(
+            score = trackAndService.service.indexToScore(scoreIndex),
+        )
+
+        return if (trackAndService.service.isMdList) {
             runCatching {
-                (trackAndService.service as MdList).updateScore(track)
+                trackManager.mdList.updateScore(trackItem.toDbTrack())
                 TrackingUpdate.Success
             }.getOrElse {
                 TrackingUpdate.Error("Error updating MangaDex Score", it)
             }
         } else {
-            updateTrackingService(track, trackAndService.service)
+            updateTrackingService(trackItem, trackAndService.service)
         }
     }
 
@@ -71,9 +64,7 @@ class TrackingCoordinator {
      * Update the tracker with the new chapter information
      */
     suspend fun updateTrackChapter(newChapterNumber: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
-        val track = trackAndService.track.apply {
-            this.last_chapter_read = newChapterNumber.toFloat()
-        }
+        val track = trackAndService.track.copy(lastChapterRead = newChapterNumber.toFloat())
         return updateTrackingService(track, trackAndService.service)
     }
 
@@ -87,12 +78,11 @@ class TrackingCoordinator {
             }
             else -> 0L
         }
-        val track = trackDateChange.trackAndService.track.apply {
+        val track =
             when (trackDateChange.readingDate) {
-                TrackingConstants.ReadingDate.Start -> this.started_reading_date = date
-                TrackingConstants.ReadingDate.Finish -> this.finished_reading_date = date
+                TrackingConstants.ReadingDate.Start -> trackDateChange.trackAndService.track.copy(startedReadingDate = date)
+                TrackingConstants.ReadingDate.Finish -> trackDateChange.trackAndService.track.copy(finishedReadingDate = date)
             }
-        }
 
         return updateTrackingService(track, trackDateChange.trackAndService.service)
     }
@@ -102,10 +92,11 @@ class TrackingCoordinator {
      */
     suspend fun registerTracking(trackAndService: TrackingConstants.TrackAndService, mangaId: Long): TrackingUpdate {
         return runCatching {
-            val trackItem = trackAndService.track.apply {
-                manga_id = mangaId
-            }
-            val track = trackAndService.service.bind(trackItem)
+            val trackItem = trackAndService.track.copy(
+                mangaId = mangaId,
+            )
+
+            val track = trackManager.getService(trackAndService.service.id)!!.bind(trackItem.toDbTrack())
             db.insertTrack(track).executeOnIO()
             TrackingUpdate.Success
         }.getOrElse { exception ->
@@ -116,7 +107,8 @@ class TrackingCoordinator {
     /**
      * Remove a tracker with an option to remove it from the tracking service
      */
-    suspend fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackService, mangaId: Long): TrackingUpdate {
+    suspend fun removeTracking(alsoRemoveFromTracker: Boolean, serviceItem: TrackServiceItem, mangaId: Long): TrackingUpdate {
+        val service = trackManager.getService(serviceItem.id)!!
         val tracks = db.getTracks(mangaId).executeOnIO().filter { it.sync_id == service.id }
         db.deleteTrackForManga(mangaId, service).executeOnIO()
         if (alsoRemoveFromTracker && service.canRemoveFromService()) {
@@ -136,9 +128,9 @@ class TrackingCoordinator {
     /**
      * Updates the remote tracking service with tracking changes
      */
-    suspend fun updateTrackingService(track: Track, service: TrackService): TrackingUpdate {
+    suspend fun updateTrackingService(track: TrackItem, service: TrackServiceItem): TrackingUpdate {
         return runCatching {
-            val updatedTrack = service.update(track)
+            val updatedTrack = trackManager.getService(service.id)!!.update(track.toDbTrack())
             db.insertTrack(updatedTrack).executeOnIO()
             TrackingUpdate.Success
         }.getOrElse {
@@ -149,17 +141,18 @@ class TrackingCoordinator {
     /**
      * Search Tracker
      */
-    suspend fun searchTracker(title: String, service: TrackService, manga: Manga, previouslyTracker: Boolean) = flow {
+    suspend fun searchTracker(title: String, service: TrackServiceItem, manga: Manga, previouslyTracker: Boolean) = flow {
         emit(TrackingConstants.TrackSearchResult.Loading)
-        val results = service.search(title, manga, previouslyTracker)
+        val results = trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
         emit(
             when (results.isEmpty()) {
                 true -> TrackingConstants.TrackSearchResult.NoResult
-                false -> TrackingConstants.TrackSearchResult.Success(results)
+                false -> TrackingConstants.TrackSearchResult.Success(results.map { it.toTrackSearchItem() }.toImmutableList())
             },
         )
 
     }.catch {
+        XLog.e("error searching tracker", it)
         emit(TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker"))
     }
 }

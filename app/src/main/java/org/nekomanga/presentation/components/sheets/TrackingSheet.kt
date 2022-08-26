@@ -44,11 +44,12 @@ import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.presentation.components.VerticalDivider
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
+import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.domain.track.TrackItem
+import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.dialog.RemoveTrackingDialog
 import org.nekomanga.presentation.components.dialog.TrackingChapterDialog
@@ -63,15 +64,15 @@ import java.text.DateFormat
 fun TrackingSheet(
     themeColor: ThemeColorState,
     inLibrary: Boolean,
-    services: List<TrackService>,
-    tracks: List<Track>,
+    servicesProvider: () -> ImmutableList<TrackServiceItem>,
+    tracksProvider: () -> ImmutableList<TrackItem>,
     dateFormat: DateFormat,
     onLogoClick: (String, String) -> Unit,
-    onSearchTrackClick: (TrackService, Track?) -> Unit,
+    onSearchTrackClick: (TrackServiceItem, TrackItem?) -> Unit,
     trackStatusChanged: (Int, TrackAndService) -> Unit,
     trackScoreChanged: (Int, TrackAndService) -> Unit,
     trackChapterChanged: (Int, TrackAndService) -> Unit,
-    trackingRemoved: (Boolean, TrackService) -> Unit,
+    trackingRemoved: (Boolean, TrackServiceItem) -> Unit,
     trackingStartDateClick: (TrackAndService, TrackingDate) -> Unit,
     trackingFinishDateClick: (TrackAndService, TrackingDate) -> Unit,
 ) {
@@ -108,8 +109,8 @@ fun TrackingSheet(
             val trackAndService = (removeTrackDialog as ShowDialog).trackAndService
             RemoveTrackingDialog(
                 themeColorState = themeColor,
-                name = stringResource(id = trackAndService.service.nameRes()),
-                canRemoveFromTracker = trackAndService.service.canRemoveFromService(),
+                name = stringResource(id = trackAndService.service.nameRes),
+                canRemoveFromTracker = trackAndService.service.canRemoveFromService,
                 onConfirm = { alsoRemoveFromTracker ->
                     trackingRemoved(alsoRemoveFromTracker, trackAndService.service)
                 },
@@ -129,18 +130,18 @@ fun TrackingSheet(
             val trackAndService = (calendarStartTrackDialog as ShowDialog).trackAndService
             trackingStartDateClick(
                 trackAndService,
-                TrackingDate(readingDate = ReadingDate.Start, currentDate = trackAndService.track.started_reading_date, dateFormat = dateFormat),
+                TrackingDate(readingDate = ReadingDate.Start, currentDate = trackAndService.track.startedReadingDate, dateFormat = dateFormat),
             )
         } else if (calendarFinishedTrackDialog is ShowDialog) {
             val trackAndService = (calendarFinishedTrackDialog as ShowDialog).trackAndService
-            trackingFinishDateClick(trackAndService, TrackingDate(readingDate = ReadingDate.Finish, trackAndService.track.finished_reading_date, dateFormat = dateFormat))
+            trackingFinishDateClick(trackAndService, TrackingDate(readingDate = ReadingDate.Finish, trackAndService.track.finishedReadingDate, dateFormat = dateFormat))
         }
 
 
 
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(services) { service ->
-                val track = tracks.firstOrNull { it.sync_id == service.id }
+            items(servicesProvider()) { service ->
+                val track = tracksProvider().firstOrNull { it.trackServiceId == service.id }
 
                 val trackAndService = when (track != null) {
                     true -> TrackAndService(track, service)
@@ -186,11 +187,11 @@ private class ShowDialog(val trackAndService: TrackAndService) : Dialog()
 private fun TrackingServiceItem(
     themeColor: ThemeColorState,
     inLibrary: Boolean,
-    service: TrackService,
+    service: TrackServiceItem,
     trackAndService: TrackAndService?,
     dateFormat: DateFormat,
     onLogoClick: (String, String) -> Unit,
-    onSearchTrackClick: (Track?) -> Unit,
+    onSearchTrackClick: (TrackItem?) -> Unit,
     onRemoveTrackClick: () -> Unit,
     statusClick: () -> Unit,
     scoreClick: () -> Unit,
@@ -229,7 +230,7 @@ private fun TrackingServiceItem(
 }
 
 @Composable
-private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoClick: (String, String) -> Unit, searchTrackerClick: () -> Unit) {
+private fun NoTrack(themeColor: ThemeColorState, service: TrackServiceItem, onLogoClick: (String, String) -> Unit, searchTrackerClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -246,23 +247,23 @@ private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoCl
 private fun TrackRowOne(
     themeColor: ThemeColorState,
     inLibrary: Boolean,
-    track: Track,
-    service: TrackService,
+    track: TrackItem,
+    service: TrackServiceItem,
     onLogoClick: (String, String) -> Unit,
-    searchTrackerClick: (Track) -> Unit,
+    searchTrackerClick: (TrackItem) -> Unit,
     onRemoveClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
-            .conditional(!service.isMdList()) {
+            .conditional(!service.isMdList) {
                 clickable { searchTrackerClick(track) }
             },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Logo(service = service, track = track, onClick = onLogoClick)
-        if (service.isAutoAddTracker() && inLibrary) {
+        if (service.isAutoAddTracker && inLibrary) {
             Text(
                 text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Start,
                 modifier = Modifier
@@ -294,7 +295,7 @@ private fun TrackRowOne(
 }
 
 @Composable
-private fun TrackRowTwo(track: Track, service: TrackService, statusClick: () -> Unit, scoreClick: () -> Unit, chapterClick: () -> Unit) {
+private fun TrackRowTwo(track: TrackItem, service: TrackServiceItem, statusClick: () -> Unit, scoreClick: () -> Unit, chapterClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -304,7 +305,7 @@ private fun TrackRowTwo(track: Track, service: TrackService, statusClick: () -> 
     ) {
         TrackingBox(clickable = statusClick) {
             Text(
-                service.getStatus(track.status),
+                service.status(track.status),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -312,20 +313,20 @@ private fun TrackRowTwo(track: Track, service: TrackService, statusClick: () -> 
 
         VerticalDivider()
 
-        if (service.isMdList().not()) {
+        if (!service.isMdList) {
             TrackingBox(clickable = chapterClick) {
                 val chapterText = when {
-                    track.total_chapters > 0 && track.last_chapter_read.toInt() == track.total_chapters -> stringResource(
+                    track.totalChapters > 0 && track.lastChapterRead.toInt() == track.totalChapters -> stringResource(
                         R.string.all_chapters_read,
                     )
-                    track.total_chapters > 0 -> stringResource(
+                    track.totalChapters > 0 -> stringResource(
                         R.string.chapter_x_of_y,
-                        track.last_chapter_read.toInt(),
-                        track.total_chapters,
+                        track.lastChapterRead.toInt(),
+                        track.totalChapters,
                     )
-                    track.last_chapter_read > 0 -> stringResource(
+                    track.lastChapterRead > 0 -> stringResource(
                         R.string.chapter_,
-                        track.last_chapter_read.toInt().toString(),
+                        track.lastChapterRead.toInt().toString(),
                     )
                     else -> stringResource(R.string.not_started)
                 }
@@ -360,7 +361,7 @@ private fun TrackRowTwo(track: Track, service: TrackService, statusClick: () -> 
 }
 
 @Composable
-fun TrackRowThree(track: Track, dateFormat: DateFormat, startDateClick: () -> Unit = {}, finishDateClick: () -> Unit = {}) {
+fun TrackRowThree(track: TrackItem, dateFormat: DateFormat, startDateClick: () -> Unit = {}, finishDateClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -370,8 +371,8 @@ fun TrackRowThree(track: Track, dateFormat: DateFormat, startDateClick: () -> Un
     ) {
 
         TrackingBox(clickable = startDateClick) {
-            val (startText, startColor) = when (track.started_reading_date != 0L) {
-                true -> dateFormat.format(track.started_reading_date) to MaterialTheme.colorScheme.onSurface
+            val (startText, startColor) = when (track.startedReadingDate != 0L) {
+                true -> dateFormat.format(track.startedReadingDate) to MaterialTheme.colorScheme.onSurface
                 false -> stringResource(id = R.string.started_reading_date) to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
             }
             Text(text = startText, color = startColor, style = MaterialTheme.typography.bodyMedium)
@@ -381,8 +382,8 @@ fun TrackRowThree(track: Track, dateFormat: DateFormat, startDateClick: () -> Un
 
         TrackingBox(clickable = finishDateClick) {
 
-            val (endText, endColor) = when (track.finished_reading_date != 0L) {
-                true -> dateFormat.format(track.finished_reading_date) to MaterialTheme.colorScheme.onSurface
+            val (endText, endColor) = when (track.finishedReadingDate != 0L) {
+                true -> dateFormat.format(track.finishedReadingDate) to MaterialTheme.colorScheme.onSurface
                 false -> stringResource(id = R.string.finished_reading_date) to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
             }
             Text(text = endText, color = endColor, style = MaterialTheme.typography.bodyMedium)
@@ -392,20 +393,20 @@ fun TrackRowThree(track: Track, dateFormat: DateFormat, startDateClick: () -> Un
 }
 
 @Composable
-private fun Logo(service: TrackService, track: Track?, onClick: (String, String) -> Unit) {
+private fun Logo(service: TrackServiceItem, track: TrackItem?, onClick: (String, String) -> Unit) {
     Box(
         modifier = Modifier
             .size(56.dp)
             .padding(start = 1.dp, top = 1.dp)
             .clip(RoundedCornerShape(topStart = 15.dp))
-            .background(color = Color(service.getLogoColor()))
+            .background(color = Color(service.logoColor))
             .conditional(track != null) {
                 clickable {
-                    onClick(track!!.tracking_url, track.title)
+                    onClick(track!!.trackingUrl, track.title)
                 }
             },
     ) {
-        Image(painter = painterResource(id = service.getLogo()), contentDescription = null, modifier = Modifier.align(Alignment.Center))
+        Image(painter = painterResource(id = service.logoRes), contentDescription = null, modifier = Modifier.align(Alignment.Center))
     }
 }
 

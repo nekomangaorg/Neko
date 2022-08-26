@@ -44,11 +44,11 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import jp.wasabeef.gap.Gap
+import org.nekomanga.domain.track.TrackItem
+import org.nekomanga.domain.track.TrackSearchItem
+import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.dialog.TrackingSwitchDialog
@@ -57,19 +57,19 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun TrackingSearchSheet(
     themeColorState: ThemeColorState,
-    alreadySelectedTrack: Track? = null,
+    alreadySelectedTrack: TrackItem? = null,
     cancelClick: () -> Unit,
     title: String,
     trackSearchResult: TrackSearchResult,
-    service: TrackService,
-    trackingRemoved: (Boolean, TrackService) -> Unit,
+    service: TrackServiceItem,
+    trackingRemoved: (Boolean, TrackServiceItem) -> Unit,
     searchTracker: (String) -> Unit,
     openInBrowser: (String, String) -> Unit,
-    trackSearchItemClick: (TrackSearch) -> Unit,
+    trackSearchItemClick: (TrackSearchItem) -> Unit,
 ) {
     val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
 
-    var trackSearchItem by remember { mutableStateOf<TrackSearch?>(null) }
+    var trackSearchItem by remember { mutableStateOf<TrackSearchItem?>(null) }
 
 
     BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
@@ -96,7 +96,7 @@ fun TrackingSearchSheet(
                             trackSearchItemClick(trackSearchResult.trackSearchResult.first())
                         }
 
-                        items(trackSearchResult.trackSearchResult) { item: TrackSearch ->
+                        items(trackSearchResult.trackSearchResult) { item: TrackSearchItem ->
                             TrackSearchItem(
                                 themeColorState = themeColorState,
                                 trackSearch = item,
@@ -114,9 +114,9 @@ fun TrackingSearchSheet(
                             if (trackSearchItem != null) {
                                 TrackingSwitchDialog(
                                     themeColorState = themeColorState,
-                                    name = stringResource(id = service.nameRes()),
+                                    name = stringResource(id = service.nameRes),
                                     oldName = alreadySelectedTrack?.title ?: "",
-                                    newName = trackSearchItem!!.title,
+                                    newName = trackSearchItem!!.trackItem.title,
                                     onConfirm = { alsoRemoveFromTracker ->
                                         trackingRemoved(alsoRemoveFromTracker, service)
                                         trackSearchItemClick(trackSearchItem!!)
@@ -126,6 +126,7 @@ fun TrackingSearchSheet(
                                 )
                             }
                         }
+
                         item {
                             Gap(8.dp)
                         }
@@ -160,13 +161,13 @@ private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: Tra
 @Composable
 private fun TrackSearchItem(
     themeColorState: ThemeColorState,
-    trackSearch: TrackSearch,
-    alreadySelectedTrack: Track?,
+    trackSearch: TrackSearchItem,
+    alreadySelectedTrack: TrackItem?,
     openInBrowser: (String, String) -> Unit,
-    trackSearchItemClick: (TrackSearch) -> Unit,
+    trackSearchItemClick: (TrackSearchItem) -> Unit,
 ) {
 
-    val isSelected = alreadySelectedTrack != null && alreadySelectedTrack.media_id != 0L && alreadySelectedTrack.media_id == trackSearch.media_id
+    val isSelected = alreadySelectedTrack != null && alreadySelectedTrack.mediaId != 0L && alreadySelectedTrack.mediaId == trackSearch.trackItem.mediaId
 
     val (backdropColor, outlineColor) = if (isSelected) {
         themeColorState.altContainerColor to themeColorState.buttonColor
@@ -187,7 +188,7 @@ private fun TrackSearchItem(
                 .height(IntrinsicSize.Min),
         ) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current).data(trackSearch.cover_url).build(),
+                model = ImageRequest.Builder(LocalContext.current).data(trackSearch.coverUrl).build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
@@ -201,7 +202,7 @@ private fun TrackSearchItem(
             ) {
 
                 IconButton(
-                    onClick = { openInBrowser(trackSearch.tracking_url, trackSearch.title) },
+                    onClick = { openInBrowser(trackSearch.trackItem.trackingUrl, trackSearch.trackItem.title) },
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
                         .align(Alignment.TopEnd),
@@ -218,14 +219,14 @@ private fun TrackSearchItem(
                         .padding(8.dp),
                 ) {
                     Text(
-                        text = trackSearch.title,
+                        text = trackSearch.trackItem.title,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                         modifier = Modifier
                             .fillMaxWidth(.9f),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
 
-                    if (trackSearch.publishing_type.isNotEmpty()) {
+                    if (trackSearch.publishingType.isNotEmpty()) {
                         Row {
                             Text(
                                 text = stringResource(id = R.string.type),
@@ -234,19 +235,19 @@ private fun TrackSearchItem(
                             )
                             Gap(4.dp)
                             Text(
-                                text = trackSearch.publishing_type,
+                                text = trackSearch.publishingType,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                         }
                     }
 
-                    if (trackSearch.start_date.isNotEmpty()) {
+                    if (trackSearch.startDate.isNotEmpty()) {
                         Row {
                             Text(text = stringResource(id = R.string.started), style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium))
                             Gap(4.dp)
                             Text(
-                                text = trackSearch.start_date,
+                                text = trackSearch.startDate,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast),
                                 style = MaterialTheme.typography.bodyLarge,
                             )

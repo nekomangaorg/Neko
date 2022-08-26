@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.external.ExternalLink
-import eu.kanade.tachiyomi.data.track.TrackService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
@@ -14,6 +13,8 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.MergeManga
+import org.nekomanga.domain.track.TrackItem
+import org.nekomanga.domain.track.TrackServiceItem
 
 object MangaConstants {
 
@@ -58,6 +59,13 @@ object MangaConstants {
         val users: String? = null,
         val langFlag: String? = null,
         val originalTitle: String = "",
+    )
+
+    data class MangaScreenTrackMergeState(
+        val loggedInTrackService: ImmutableList<TrackServiceItem> = persistentListOf(),
+        val tracks: ImmutableList<TrackItem> = persistentListOf(),
+        val trackSearchResult: TrackingConstants.TrackSearchResult = TrackingConstants.TrackSearchResult.Loading,
+        val mergeSearchResult: MergeConstants.MergeSearchResult = MergeConstants.MergeSearchResult.Loading,
     )
 
     /**
@@ -183,9 +191,9 @@ object MangaConstants {
         val scoreChange: (Int, TrackingConstants.TrackAndService) -> Unit,
         val chapterChange: (Int, TrackingConstants.TrackAndService) -> Unit,
         val dateChange: (TrackingConstants.TrackDateChange) -> Unit,
-        val search: (String, TrackService) -> Unit,
+        val search: (String, TrackServiceItem) -> Unit,
         val searchItemClick: (TrackingConstants.TrackAndService) -> Unit,
-        val remove: (Boolean, TrackService) -> Unit,
+        val remove: (Boolean, TrackServiceItem) -> Unit,
     )
 
     class CoverActions(

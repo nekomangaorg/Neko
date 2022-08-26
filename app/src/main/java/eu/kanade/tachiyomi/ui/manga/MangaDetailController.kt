@@ -68,6 +68,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
         MangaScreen(
             generalState = presenter.generalState.collectAsState(),
             mangaState = presenter.mangaState.collectAsState(),
+            trackMergeState = presenter.trackMergeState.collectAsState(),
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
             isRefreshing = presenter.isRefreshing.collectAsState(),
@@ -96,8 +97,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 copyToClipboard(context, content, R.string.creator)
             },
             toggleFavorite = presenter::toggleFavorite,
-            loggedInTrackingServices = presenter.loggedInTrackingService.collectAsState(),
-            tracks = presenter.tracks.collectAsState(),
             dateFormat = preferences.dateFormat(),
             trackActions = TrackActions(
                 statusChange = { statusIndex, trackAndService -> presenter.updateTrackStatus(statusIndex, trackAndService) },
@@ -108,13 +107,11 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 remove = { alsoRemoveFromTracker, service -> presenter.removeTracking(alsoRemoveFromTracker, service) },
                 dateChange = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
             ),
-            trackSearchResult = presenter.trackSearchResult.collectAsState(),
             mergeActions = MergeActions(
                 remove = presenter::removeMergedManga,
                 search = presenter::searchMergedManga,
                 add = presenter::addMergedManga,
             ),
-            mergeSearchResult = presenter.mergeSearchResult.collectAsState(),
             similarClick = { router.pushController(SimilarController(presenter.manga.value).withFadeTransaction()) },
             shareClick = this::shareManga,
             coverActions = CoverActions(

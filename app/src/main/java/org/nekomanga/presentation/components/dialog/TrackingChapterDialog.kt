@@ -23,17 +23,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.NumberPicker
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Track
+import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun TrackingChapterDialog(themeColorState: ThemeColorState, track: Track, onDismiss: () -> Unit, trackChapterChanged: (Int) -> Unit) {
+fun TrackingChapterDialog(themeColorState: ThemeColorState, track: TrackItem, onDismiss: () -> Unit, trackChapterChanged: (Int) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
 
-        var currentChapter by remember { mutableStateOf(track.last_chapter_read.toInt()) }
+        var currentChapter by remember { mutableStateOf(track.lastChapterRead.toInt()) }
 
-        val range = when (track.total_chapters > 0) {
-            true -> track.total_chapters
+        val range = when (track.totalChapters > 0) {
+            true -> track.totalChapters
             false -> 10000
         }
 

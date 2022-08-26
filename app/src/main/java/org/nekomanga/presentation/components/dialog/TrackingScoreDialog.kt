@@ -33,7 +33,7 @@ fun TrackingScoreDialog(themeColorState: ThemeColorState, trackAndService: Track
         val displayedScore = trackAndService.service.displayScore(trackAndService.track)
         val index = when {
             displayedScore == "-" -> 0
-            trackAndService.service.getScoreList().indexOf(displayedScore) != -1 -> trackAndService.service.getScoreList().indexOf(displayedScore)
+            trackAndService.service.scoreList.indexOf(displayedScore) != -1 -> trackAndService.service.scoreList.indexOf(displayedScore)
             else -> 0
         }
 
@@ -53,11 +53,11 @@ fun TrackingScoreDialog(themeColorState: ThemeColorState, trackAndService: Track
                 ) {
                     ListItemPicker(
                         modifier = Modifier.fillMaxWidth(.4f),
-                        value = trackAndService.service.getScoreList()[currentIndex],
+                        value = trackAndService.service.scoreList[currentIndex],
                         onValueChange = { newScore ->
-                            currentIndex = trackAndService.service.getScoreList().indexOf(newScore)
+                            currentIndex = trackAndService.service.scoreList.indexOf(newScore)
                         },
-                        list = trackAndService.service.getScoreList(),
+                        list = trackAndService.service.scoreList,
                         dividersColor = themeColorState.buttonColor,
                         textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     )

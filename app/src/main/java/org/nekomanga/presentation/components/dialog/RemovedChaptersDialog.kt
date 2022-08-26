@@ -11,11 +11,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.R
+import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun RemovedChaptersDialog(themeColorState: ThemeColorState, chapters: List<ChapterItem>, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun RemovedChaptersDialog(themeColorState: ThemeColorState, chapters: ImmutableList<ChapterItem>, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
         val context = LocalContext.current
 

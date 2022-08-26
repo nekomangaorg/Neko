@@ -53,8 +53,6 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.presentation.components.VerticalDivider
-import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -65,8 +63,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenGeneralState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
-import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInWebView
 import kotlinx.collections.immutable.ImmutableList
@@ -93,6 +89,7 @@ import java.text.DateFormat
 fun MangaScreen(
     generalState: State<MangaScreenGeneralState>,
     mangaState: State<MangaConstants.MangaScreenMangaState>,
+    trackMergeState: State<MangaConstants.MangaScreenTrackMergeState>,
     windowSizeClass: WindowSizeClass,
     snackbar: SharedFlow<SnackbarState>,
     isRefreshing: State<Boolean>,
@@ -102,13 +99,9 @@ fun MangaScreen(
     creatorLongClick: (Context, String) -> Unit,
     toggleFavorite: (Boolean) -> Unit,
     categoryActions: CategoryActions,
-    loggedInTrackingServices: State<List<TrackService>>,
-    tracks: State<List<Track>>,
     dateFormat: DateFormat,
     trackActions: TrackActions,
-    trackSearchResult: State<TrackSearchResult>,
     similarClick: () -> Unit = {},
-    mergeSearchResult: State<MergeSearchResult>,
     coverActions: CoverActions,
     mergeActions: MergeActions,
     shareClick: (Context) -> Unit,
@@ -218,16 +211,13 @@ fun MangaScreen(
                         themeColorState = themeColorState,
                         generalState = generalState,
                         mangaState = mangaState,
+                        trackMergeState = trackMergeState,
                         addNewCategory = categoryActions.addNew,
-                        loggedInTrackingServices = loggedInTrackingServices.value,
-                        tracks = tracks.value,
                         dateFormat = dateFormat,
                         openSheet = openSheet,
                         trackActions = trackActions,
-                        trackSearchResult = trackSearchResult.value,
                         coverActions = coverActions,
                         mergeActions = mergeActions,
-                        mergeSearchResult = mergeSearchResult.value,
                         chapterFilterActions = chapterFilterActions,
                         openInWebView = { url, title -> context.asActivity().openInWebView(url, title) },
                     ) { scope.launch { sheetState.hide() } }
@@ -283,7 +273,7 @@ fun MangaScreen(
                         creatorLongClick = { creator: String -> creatorLongClick(context, creator) },
                         themeColorState = themeColorState,
                         generatePalette = generatePalette,
-                        isLoggedIntoTrackersProvider = { loggedInTrackingServices.value.isNotEmpty() },
+                        isLoggedIntoTrackersProvider = { trackMergeState.value.loggedInTrackService.isNotEmpty() },
                         toggleFavorite = {
                             if (!mangaState.value.inLibrary && generalState.value.allCategories.isNotEmpty()) {
                                 if (generalState.value.hasDefaultCategory) {

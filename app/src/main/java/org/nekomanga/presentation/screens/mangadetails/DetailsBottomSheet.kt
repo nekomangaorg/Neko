@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
-import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.track.TrackItem
+import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.components.sheets.ArtworkSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.ExternalLinksSheet
@@ -36,7 +36,7 @@ sealed class DetailsBottomSheetScreen {
     object MergeSheet : DetailsBottomSheetScreen()
     object ArtworkSheet : DetailsBottomSheetScreen()
     object FilterChapterSheet : DetailsBottomSheetScreen()
-    class TrackingSearchSheet(val trackingService: TrackService, val alreadySelectedTrack: Track?) : DetailsBottomSheetScreen()
+    class TrackingSearchSheet(val trackingService: TrackServiceItem, val alreadySelectedTrack: TrackItem?) : DetailsBottomSheetScreen()
     class TrackingDateSheet(
         val trackAndService: TrackingConstants.TrackAndService,
         val trackingDate: TrackingConstants.TrackingDate,
@@ -50,13 +50,10 @@ fun DetailsBottomSheet(
     themeColorState: ThemeColorState,
     generalState: State<MangaConstants.MangaScreenGeneralState>,
     mangaState: State<MangaConstants.MangaScreenMangaState>,
+    trackMergeState: State<MangaConstants.MangaScreenTrackMergeState>,
     addNewCategory: (String) -> Unit,
-    loggedInTrackingServices: List<TrackService>,
-    tracks: List<Track>,
     dateFormat: DateFormat,
     trackActions: MangaConstants.TrackActions,
-    trackSearchResult: TrackingConstants.TrackSearchResult,
-    mergeSearchResult: MergeConstants.MergeSearchResult,
     openInWebView: (String, String) -> Unit,
     coverActions: MangaConstants.CoverActions,
     mergeActions: MangaConstants.MergeActions,
@@ -79,8 +76,8 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.TrackingSheet -> TrackingSheet(
             themeColor = themeColorState,
             inLibrary = mangaState.value.inLibrary,
-            services = loggedInTrackingServices,
-            tracks = tracks,
+            servicesProvider = { trackMergeState.value.loggedInTrackService },
+            tracksProvider = { trackMergeState.value.tracks },
             dateFormat = dateFormat,
             onLogoClick = openInWebView,
             onSearchTrackClick = { service, track ->
@@ -115,7 +112,7 @@ fun DetailsBottomSheet(
             TrackingSearchSheet(
                 themeColorState = themeColorState,
                 title = mangaState.value.originalTitle,
-                trackSearchResult = trackSearchResult,
+                trackSearchResult = trackMergeState.value.trackSearchResult,
                 alreadySelectedTrack = currentScreen.alreadySelectedTrack,
                 service = currentScreen.trackingService,
                 cancelClick = {
@@ -127,7 +124,7 @@ fun DetailsBottomSheet(
                 trackingRemoved = trackActions.remove,
                 trackSearchItemClick = { trackSearch ->
                     closeSheet()
-                    trackActions.searchItemClick(TrackingConstants.TrackAndService(trackSearch, currentScreen.trackingService))
+                    trackActions.searchItemClick(TrackingConstants.TrackAndService(trackSearch.trackItem, currentScreen.trackingService))
                     openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
             )
@@ -170,7 +167,7 @@ fun DetailsBottomSheet(
                 isMergedManga = mangaState.value.isMerged,
                 title = mangaState.value.originalTitle,
                 altTitles = mangaState.value.alternativeTitles,
-                mergeSearchResults = mergeSearchResult,
+                mergeSearchResults = trackMergeState.value.mergeSearchResult,
                 openMergeSource = { url, title ->
                     closeSheet()
                     openInWebView(url, title)

@@ -100,7 +100,7 @@ open class BrowseSourcePresenter(
      */
     private var nextPageJob: Job? = null
 
-    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged() } }
+    private val loggedServices by lazy { Injekt.get<TrackManager>().services.values.filter { it.isLogged() } }
 
     init {
         query = searchQuery

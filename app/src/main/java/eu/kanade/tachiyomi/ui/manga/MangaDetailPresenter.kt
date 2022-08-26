@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
@@ -20,9 +19,7 @@ import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.matchingTrack
-import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -40,7 +37,6 @@ import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
@@ -78,6 +74,10 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.MergeManga
+import org.nekomanga.domain.track.TrackServiceItem
+import org.nekomanga.domain.track.toDbTrack
+import org.nekomanga.domain.track.toTrackItem
+import org.nekomanga.domain.track.toTrackServiceItem
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -114,20 +114,11 @@ class MangaDetailPresenter(
     private val _mangaState = MutableStateFlow(MangaConstants.MangaScreenMangaState(currentArtwork = Artwork(mangaId = mangaId)))
     val mangaState: StateFlow<MangaConstants.MangaScreenMangaState> = _mangaState.asStateFlow()
 
+    private val _trackMergeState = MutableStateFlow(MangaConstants.MangaScreenTrackMergeState())
+    val trackMergeState: StateFlow<MangaConstants.MangaScreenTrackMergeState> = _trackMergeState.asStateFlow()
+
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
-
-    private val _loggedInTrackingService = MutableStateFlow(emptyList<TrackService>())
-    val loggedInTrackingService: StateFlow<List<TrackService>> = _loggedInTrackingService.asStateFlow()
-
-    private val _tracks = MutableStateFlow(emptyList<Track>())
-    val tracks: StateFlow<List<Track>> = _tracks.asStateFlow()
-
-    private val _trackSearchResult = MutableStateFlow<TrackSearchResult>(TrackSearchResult.Loading)
-    val trackSearchResult: StateFlow<TrackSearchResult> = _trackSearchResult.asStateFlow()
-
-    private val _mergeSearchResult = MutableStateFlow<MergeSearchResult>(MergeSearchResult.Loading)
-    val mergeSearchResult: StateFlow<MergeSearchResult> = _mergeSearchResult.asStateFlow()
 
     private val _snackbarState = MutableSharedFlow<SnackbarState>()
     val snackBarState: SharedFlow<SnackbarState> = _snackbarState.asSharedFlow()
@@ -326,30 +317,25 @@ class MangaDetailPresenter(
             //add a slight delay in case the tracking flow is slower
 
             var count = 0
-            while (count < 5 && tracks.value.isEmpty()) {
+            while (count < 5 && trackMergeState.value.tracks.isEmpty()) {
                 delay(1000)
                 count++
             }
 
-            val asyncList = tracks.value
-                .mapNotNull { track ->
-                    val service = trackManager.services.find { it.id == track.sync_id }
-                    if (service == null) {
-                        XLog.e("Error finding track service for track.sync_id ${track.sync_id}")
-                        null
-                    } else {
-                        TrackingConstants.TrackItem(track, service)
-                    }
-                }
-                .filter { it.service.isLogged() }.map { item ->
+            val asyncList = trackMergeState.value.tracks
+                .filter { trackManager.getService(it.trackServiceId) != null }
+                .filter { trackManager.getService(it.trackServiceId)!!.isLogged() }
+                .map { trackItem ->
+                    val service = trackManager.getService(trackItem.trackServiceId)!!
                     async(Dispatchers.IO) {
-                        kotlin.runCatching { item.service.refresh(item.track!!) }.onFailure {
+                        kotlin.runCatching { service.refresh(trackItem.toDbTrack()) }.onFailure {
                             XLog.e("error refreshing tracker", it)
                             delay(3000)
-                            _snackbarState.emit(SnackbarState(message = it.message, fieldRes = item.service.nameRes(), messageRes = R.string.error_refreshing_))
+                            _snackbarState.emit(SnackbarState(message = it.message, fieldRes = service.nameRes(), messageRes = R.string.error_refreshing_))
                         }
                     }
                 }
+
             asyncList.awaitAll()
             updateTrackingFlows(false)
 
@@ -384,11 +370,11 @@ class MangaDetailPresenter(
     /**
      * Search Tracker
      */
-    fun searchTracker(title: String, service: TrackService) {
+    fun searchTracker(title: String, service: TrackServiceItem) {
         presenterScope.launchIO {
-            val previouslyTracked = _tracks.value.firstOrNull { service.matchingTrack(it) } != null
+            val previouslyTracked = trackMergeState.value.tracks.firstOrNull { service.id == it.trackServiceId } != null
             trackingCoordinator.searchTracker(title, service, manga.value, previouslyTracked).collect { result ->
-                _trackSearchResult.value = result
+                _trackMergeState.value = trackMergeState.value.copy(trackSearchResult = result)
             }
         }
     }
@@ -406,7 +392,7 @@ class MangaDetailPresenter(
     /**
      * Remove a tracker with an option to remove it from the tracking service
      */
-    fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackService) {
+    fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackServiceItem) {
         presenterScope.launchIO {
             val trackingUpdate = trackingCoordinator.removeTracking(alsoRemoveFromTracker, service, mangaId)
             handleTrackingUpdate(trackingUpdate)
@@ -574,18 +560,18 @@ class MangaDetailPresenter(
 
     fun searchMergedManga(query: String) {
         presenterScope.launchIO {
-            _mergeSearchResult.value = MergeSearchResult.Loading
+            _trackMergeState.value = trackMergeState.value.copy(mergeSearchResult = MergeSearchResult.Loading)
 
             runCatching {
                 val mergedMangaResults = sourceManager.getMergeSource()
                     .searchManga(query)
                     .map { MergeManga(thumbnail = it.thumbnail_url ?: "", title = it.title, url = it.url) }
-                _mergeSearchResult.value = when (mergedMangaResults.isEmpty()) {
-                    true -> MergeSearchResult.NoResult
-                    false -> MergeSearchResult.Success(mergedMangaResults)
+                _trackMergeState.value = when (mergedMangaResults.isEmpty()) {
+                    true -> trackMergeState.value.copy(mergeSearchResult = MergeSearchResult.NoResult)
+                    false -> trackMergeState.value.copy(mergeSearchResult = MergeSearchResult.Success(mergedMangaResults))
                 }
             }.getOrElse {
-                _mergeSearchResult.value = MergeSearchResult.Error(it.message ?: "Error looking up information")
+                _trackMergeState.value = trackMergeState.value.copy(mergeSearchResult = MergeSearchResult.Error(it.message ?: "Error looking up information"))
             }
         }
     }
@@ -715,17 +701,19 @@ class MangaDetailPresenter(
     private fun updateTrackingFlows(checkForMissingTrackers: Boolean = false) {
         presenterScope.launchIO {
 
-            _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
-            _tracks.value = db.getTracks(mangaId).executeAsBlocking()
+            _trackMergeState.value = trackMergeState.value.copy(
+                loggedInTrackService = trackManager.services.filter { it.value.isLogged() }.map { it.value.toTrackServiceItem() }.toImmutableList(),
+                tracks = db.getTracks(mangaId).executeAsBlocking().map { it.toTrackItem() }.toImmutableList(),
+            )
 
             if (checkForMissingTrackers) {
                 val autoAddTracker = preferences.autoAddTracker().get()
 
                 //Always add the mdlist initial unfollowed tracker, also add it as PTR if need be
-                _loggedInTrackingService.value.firstOrNull { it.isMdList() }?.let { mdList ->
-                    mdList as MdList
+                trackMergeState.value.loggedInTrackService.firstOrNull { it.isMdList }?.let { _ ->
+                    val mdList = trackManager.mdList
 
-                    var track = _tracks.value.firstOrNull { mdList.matchingTrack(it) }
+                    var track = trackMergeState.value.tracks.firstOrNull { mdList.matchingTrack(it) }?.toDbTrack()
 
                     if (track == null) {
                         track = mdList.createInitialTracker(manga.value)
@@ -738,7 +726,7 @@ class MangaDetailPresenter(
                     val shouldAddAsPlanToRead = manga.value.favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
                     if (shouldAddAsPlanToRead && isOnline()) {
                         track.status = FollowStatus.PLAN_TO_READ.int
-                        trackingCoordinator.updateTrackingService(track, trackManager.mdList)
+                        trackingCoordinator.updateTrackingService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem())
                     }
                 }
 
@@ -748,32 +736,34 @@ class MangaDetailPresenter(
                     if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
                         autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->
                             async {
-                                _loggedInTrackingService.value.firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
-                                    val id = trackManager.getIdFromManga(trackService, manga.value)
-                                    if (id != null && !_tracks.value.any { trackService.matchingTrack(it) }) {
-                                        if (!isOnline()) {
-                                            launchUI { _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker")) }
-                                        } else {
-                                            val trackResult = trackService.search("", manga.value, false)
-                                            trackResult.firstOrNull()?.let { track ->
-                                                val trackingUpdate = trackingCoordinator.registerTracking(TrackAndService(track, trackService), mangaId)
-                                                handleTrackingUpdate(trackingUpdate, false)
+                                trackMergeState.value.loggedInTrackService
+                                    .firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
+                                        val id = trackManager.getIdFromManga(trackService, manga.value)
+                                        if (id != null && !trackMergeState.value.tracks.any { trackService.id == it.trackServiceId }) {
+                                            if (!isOnline()) {
+                                                launchUI { _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker")) }
+                                            } else {
+                                                val trackResult = trackManager.getService(trackService.id)!!.search("", manga.value, false)
+                                                trackResult.firstOrNull()?.let { track ->
+                                                    val trackingUpdate = trackingCoordinator.registerTracking(TrackAndService(track.toTrackItem(), trackService), mangaId)
+                                                    handleTrackingUpdate(trackingUpdate, false)
+                                                }
                                             }
                                         }
                                     }
-                                }
                             }
                         }.awaitAll()
                     }
                 }
                 //update the tracks incase they were updated above
-                _tracks.value = db.getTracks(manga.value).executeAsBlocking()
+                _trackMergeState.value = trackMergeState.value.copy(tracks = db.getTracks(mangaId).executeAsBlocking().map { it.toTrackItem() }.toImmutableList())
             }
 
             getSuggestedDate()
 
-            val trackCount = _loggedInTrackingService.value.count { trackService ->
-                _tracks.value.any { track ->
+            val trackCount = trackMergeState.value.loggedInTrackService.count { trackServiceItem ->
+                val trackService = trackManager.getService(trackServiceItem.id)!!
+                trackMergeState.value.tracks.any { track ->
                     //return true if track matches and not MDList
                     //or track matches and MDlist is anything but Unfollowed
                     trackService.matchingTrack(track) &&

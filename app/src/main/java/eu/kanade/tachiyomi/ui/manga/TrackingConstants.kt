@@ -1,15 +1,15 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.domain.track.TrackItem
+import org.nekomanga.domain.track.TrackSearchItem
+import org.nekomanga.domain.track.TrackServiceItem
 import org.threeten.bp.LocalDate
 import java.text.DateFormat
 
 object TrackingConstants {
-    data class TrackItem(val track: Track?, val service: TrackService)
 
-    data class TrackAndService(val track: Track, val service: TrackService)
+    data class TrackAndService(val track: TrackItem, val service: TrackServiceItem)
 
     data class TrackingDate(val readingDate: ReadingDate, val currentDate: Long, val dateFormat: DateFormat)
 
@@ -23,7 +23,7 @@ object TrackingConstants {
     sealed class TrackSearchResult {
         object Loading : TrackSearchResult()
         object NoResult : TrackSearchResult()
-        class Success(val trackSearchResult: List<TrackSearch>) : TrackSearchResult()
+        class Success(val trackSearchResult: ImmutableList<TrackSearchItem>) : TrackSearchResult()
         class Error(val errorMessage: String) : TrackSearchResult()
     }
 

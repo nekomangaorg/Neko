@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import org.nekomanga.domain.track.TrackServiceItem
 
 class TrackManager(context: Context) {
 
@@ -33,13 +34,13 @@ class TrackManager(context: Context) {
 
     val mangaUpdates = MangaUpdates(context, MANGA_UPDATES)
 
-    val services = listOf(mdList, myAnimeList, aniList, kitsu, mangaUpdates)
+    val services = hashMapOf(mdList.id to mdList, myAnimeList.id to myAnimeList, aniList.id to aniList, kitsu.id to kitsu, mangaUpdates.id to mangaUpdates)
 
-    fun getService(id: Int) = services.find { it.id == id }
+    fun getService(id: Int) = services[id]
 
-    fun hasLoggedServices() = services.any { it.isLogged() }
+    fun hasLoggedServices() = services.values.any { it.isLogged() }
 
-    fun getIdFromManga(trackService: TrackService, manga: Manga): String? {
+    fun getIdFromManga(trackService: TrackServiceItem, manga: Manga): String? {
         return when (trackService.id) {
             MDLIST -> MdUtil.getMangaUUID(manga.url)
             MYANIMELIST -> manga.my_anime_list_id

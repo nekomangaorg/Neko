@@ -74,7 +74,7 @@ class LibraryPresenter(
 
     private val context = preferences.context
 
-    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged() || it.isMdList() } }
+    private val loggedServices by lazy { Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() } }
 
     private val statusHandler: StatusHandler by injectLazy()
 

@@ -26,7 +26,7 @@ class TrackingSyncService {
     ) {
         var count = 0
         val librayMangaList = db.getLibraryMangaList().executeAsBlocking()
-        val loggedServices = trackManager.services.filter { it.isLogged() }
+        val loggedServices = trackManager.services.values.filter { it.isLogged() }
 
         librayMangaList.forEach { manga ->
             updateNotification(manga.title, count++, librayMangaList.size)

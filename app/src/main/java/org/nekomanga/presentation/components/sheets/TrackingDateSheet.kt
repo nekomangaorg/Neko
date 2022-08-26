@@ -31,8 +31,8 @@ import com.lanars.compose.datetextfield.DateTextField
 import com.lanars.compose.datetextfield.Format
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange.EditTrackingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange.RemoveTrackingDate
@@ -53,7 +53,7 @@ import java.text.SimpleDateFormat
 @Composable
 fun TrackingDateSheet(
     themeColorState: ThemeColorState,
-    trackAndService: TrackAndService,
+    trackAndService: TrackingConstants.TrackAndService,
     trackingDate: TrackingDate,
     trackSuggestedDates: TrackingSuggestedDates?,
     onDismiss: () -> Unit,

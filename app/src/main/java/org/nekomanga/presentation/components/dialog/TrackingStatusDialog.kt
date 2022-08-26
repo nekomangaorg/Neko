@@ -26,14 +26,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.track.TrackService
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, service: TrackService, onDismiss: () -> Unit, trackStatusChange: (Int) -> Unit) {
+fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, service: TrackServiceItem, onDismiss: () -> Unit, trackStatusChange: (Int) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
 
         var selectedStatus by remember { mutableStateOf(initialStatus) }
@@ -44,7 +44,7 @@ fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, s
             },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    service.getStatusList().forEachIndexed { index, status ->
+                    service.statusList.forEachIndexed { index, status ->
 
                         val clicked = {
                             selectedStatus = status
@@ -76,7 +76,7 @@ fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, s
                                 colors = RadioButtonDefaults.colors(selectedColor = themeColorState.buttonColor),
                             )
                             Gap(width = 8.dp)
-                            Text(text = service.getStatus(status), style = MaterialTheme.typography.titleMedium)
+                            Text(text = service.status(status), style = MaterialTheme.typography.titleMedium)
                         }
                     }
                 }

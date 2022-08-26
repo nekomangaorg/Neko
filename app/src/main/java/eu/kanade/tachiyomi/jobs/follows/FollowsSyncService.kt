@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackItem
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
@@ -117,17 +116,15 @@ class FollowsSyncService {
                     db.insertTrack(mdListTrack).executeAsBlocking()
                 }
 
-                val trackItem = TrackItem(mdListTrack, trackManager.mdList)
-
-                if (trackItem.track!!.status == FollowStatus.UNFOLLOWED.int) {
+                if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {
                     withIOContext {
                         followsHandler.updateFollowStatus(
                             MdUtil.getMangaUUID(manga.url),
                             FollowStatus.READING,
                         )
 
-                        trackItem.track.status = FollowStatus.READING.int
-                        val returnedTracker = trackItem.service.update(trackItem.track)
+                        mdListTrack.status = FollowStatus.READING.int
+                        val returnedTracker = trackManager.mdList.update(mdListTrack)
                         db.insertTrack(returnedTracker).executeOnIO()
                     }
                     countNew.incrementAndGet()

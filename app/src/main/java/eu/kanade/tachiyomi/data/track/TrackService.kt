@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import okhttp3.OkHttpClient
+import org.nekomanga.domain.track.TrackItem
 import uy.kohesive.injekt.injectLazy
 
 abstract class TrackService(val id: Int) {
@@ -111,8 +112,8 @@ abstract class TrackService(val id: Int) {
     }
 }
 
-fun TrackService.matchingTrack(track: Track): Boolean {
-    return track.sync_id == this.id
+fun TrackService.matchingTrack(track: TrackItem): Boolean {
+    return track.trackServiceId == this.id
 }
 
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
