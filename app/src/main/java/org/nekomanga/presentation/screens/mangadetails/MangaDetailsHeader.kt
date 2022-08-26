@@ -29,31 +29,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
-import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.presentation.components.DynamicRippleTheme
+import org.nekomanga.presentation.components.SimpleDropDownItem
+import org.nekomanga.presentation.components.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun MangaDetailsHeader(
+    generalState: State<MangaConstants.MangaScreenGeneralState>,
     mangaState: State<MangaConstants.MangaScreenMangaState>,
-    hideButtonText: Boolean,
-    showBackdrop: Boolean = true,
+    isLoggedIntoTrackersProvider: () -> Boolean,
     isTablet: Boolean = false,
     themeColorState: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},
-    loggedIntoTrackers: Boolean,
-    trackServiceCount: Int,
     toggleFavorite: () -> Unit = {},
     moveCategories: () -> Unit = {},
     trackingClick: () -> Unit = {},
@@ -63,7 +60,6 @@ fun MangaDetailsHeader(
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
     descriptionActions: DescriptionActions,
-    quickReadText: NextUnreadChapter,
     quickReadClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
@@ -82,7 +78,7 @@ fun MangaDetailsHeader(
                 BackDrop(
                     themeColorState = themeColorState,
                     artworkProvider = { mangaState.value.currentArtwork },
-                    showBackdrop = showBackdrop,
+                    showBackdropProvider = { generalState.value.themeBasedOffCovers },
                     modifier = Modifier
                         .fillMaxWidth()
                         .requiredHeightIn(250.dp, 400.dp),
@@ -102,30 +98,30 @@ fun MangaDetailsHeader(
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
-                        title = mangaState.value.currentTitle,
-                        author = mangaState.value.author,
-                        artist = mangaState.value.artist,
-                        rating = mangaState.value.rating,
-                        users = mangaState.value.users,
-                        langFlag = mangaState.value.langFlag,
-                        status = mangaState.value.status,
-                        isPornographic = mangaState.value.isPornographic,
-                        missingChapters = mangaState.value.missingChapters,
+                        titleProvider = { mangaState.value.currentTitle },
+                        authorProvider = { mangaState.value.author },
+                        artistProvider = { mangaState.value.artist },
+                        ratingProvider = { mangaState.value.rating },
+                        usersProvider = { mangaState.value.users },
+                        langFlagProvider = { mangaState.value.langFlag },
+                        statusProvider = { mangaState.value.status },
+                        isPornographicProvider = { mangaState.value.isPornographic },
+                        missingChaptersProvider = { mangaState.value.missingChapters },
                         modifier = Modifier
                             .statusBarsPadding()
                             .padding(top = 70.dp),
-                        isExpanded = isExpanded.value,
-                        showMergedIcon = mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes && !hideButtonText,
+                        isExpandedProvider = { isExpanded.value },
+                        showMergedIconProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes && !generalState.value.hideButtonText },
                         titleLongClick = titleLongClick,
                         creatorLongClicked = creatorLongClick,
                     )
                     Gap(height = 16.dp)
                     ButtonBlock(
-                        hideButtonText = hideButtonText,
-                        isMerged = mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes,
-                        inLibrary = mangaState.value.inLibrary,
-                        loggedIntoTrackers = loggedIntoTrackers,
-                        trackServiceCount = trackServiceCount,
+                        hideButtonTextProvider = { generalState.value.hideButtonText },
+                        isMergedProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes },
+                        inLibraryProvider = { mangaState.value.inLibrary },
+                        loggedIntoTrackersProvider = isLoggedIntoTrackersProvider,
+                        trackServiceCountProvider = { generalState.value.trackServiceCount },
                         themeColorState = themeColorState,
                         favoriteClick = {
                             if (!mangaState.value.inLibrary) {
@@ -144,22 +140,23 @@ fun MangaDetailsHeader(
                     )
                     FavoriteDropDown(
                         favoriteExpanded = favoriteExpanded,
+                        themeColorState = themeColorState,
                         moveCategories = moveCategories,
                         toggleFavorite = toggleFavorite,
                         onDismiss = { favoriteExpanded = false },
                     )
                 }
             }
-            if (isTablet && quickReadText.text.isNotEmpty() && quickReadText.id != null) {
-                QuickReadButton(quickReadText, themeColorState, quickReadClick)
+            if (isTablet) {
+                QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
             }
             Gap(8.dp)
             DescriptionBlock(
-                title = mangaState.value.currentTitle,
-                description = mangaState.value.currentDescription,
-                isInitialized = mangaState.value.initialized,
-                altTitles = mangaState.value.alternativeTitles,
-                genres = mangaState.value.genres,
+                titleProvider = { mangaState.value.currentTitle },
+                descriptionProvider = { mangaState.value.currentDescription },
+                isInitializedProvider = { mangaState.value.initialized },
+                altTitlesProvider = { mangaState.value.alternativeTitles },
+                genresProvider = { mangaState.value.genres },
                 themeColorState = themeColorState,
                 isExpanded = isExpanded.value,
                 isTablet = isTablet,
@@ -172,8 +169,8 @@ fun MangaDetailsHeader(
                 altTitleClick = descriptionActions.altTitleClick,
                 altTitleResetClick = descriptionActions.altTitleResetClick,
             )
-            if (!isTablet && quickReadText.text.isNotEmpty() && quickReadText.id != null) {
-                QuickReadButton(quickReadText, themeColorState, quickReadClick)
+            if (!isTablet) {
+                QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
                 Gap(8.dp)
             }
         }
@@ -182,11 +179,11 @@ fun MangaDetailsHeader(
 
 @Composable
 private fun ColumnScope.QuickReadButton(
-    quickReadText: NextUnreadChapter,
+    quickReadTextProvider: () -> NextUnreadChapter,
     themeColorState: ThemeColorState,
     quickReadClick: () -> Unit,
 ) {
-    if (quickReadText.text.isNotEmpty() && quickReadText.id != null) {
+    if (quickReadTextProvider().text.isNotEmpty() && quickReadTextProvider().id != null) {
         Gap(8.dp)
         CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)) {
             ElevatedButton(
@@ -197,44 +194,29 @@ private fun ColumnScope.QuickReadButton(
                     .padding(8.dp),
                 colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
             ) {
-                Text(text = stringResource(id = quickReadText.id, quickReadText.text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)
+                Text(text = stringResource(id = quickReadTextProvider().id!!, quickReadTextProvider().text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)
             }
         }
     }
 }
 
 @Composable
-private fun FavoriteDropDown(favoriteExpanded: Boolean, moveCategories: () -> Unit, toggleFavorite: () -> Unit, onDismiss: () -> Unit) {
-    CascadeDropdownMenu(
+private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeColorState, moveCategories: () -> Unit, toggleFavorite: () -> Unit, onDismiss: () -> Unit) {
+    SimpleDropdownMenu(
         expanded = favoriteExpanded,
-        offset = DpOffset(8.dp, 0.dp),
-        onDismissRequest = onDismiss,
-    ) {
-        val style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
-        androidx.compose.material3.DropdownMenuItem(
-            text = {
-                androidx.compose.material.Text(
-                    text = stringResource(R.string.remove_from_library),
-                    style = style,
-                )
-            },
-            onClick = {
-                toggleFavorite()
-                onDismiss()
-            },
+        themeColorState = themeColorState,
+        onDismiss = onDismiss,
+        dropDownItems = listOf(
+            SimpleDropDownItem.Action(
+                text = stringResource(R.string.remove_from_library),
+                onClick = { toggleFavorite() },
+            ),
+            SimpleDropDownItem.Action(
+                text = stringResource(R.string.edit_categories),
+                onClick = { moveCategories() },
+            ),
+        ),
+
         )
-        androidx.compose.material3.DropdownMenuItem(
-            text = {
-                androidx.compose.material.Text(
-                    text = stringResource(R.string.edit_categories),
-                    style = style,
-                )
-            },
-            onClick = {
-                moveCategories()
-                onDismiss()
-            },
-        )
-    }
 }
 

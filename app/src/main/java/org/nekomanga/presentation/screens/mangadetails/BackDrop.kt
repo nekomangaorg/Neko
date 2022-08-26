@@ -15,9 +15,9 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun BackDrop(themeColorState: ThemeColorState, artworkProvider: () -> Artwork, showBackdrop: Boolean, modifier: Modifier = Modifier, generatePalette: (drawable: Drawable) -> Unit = {}) {
+fun BackDrop(themeColorState: ThemeColorState, artworkProvider: () -> Artwork, showBackdropProvider: () -> Boolean, modifier: Modifier = Modifier, generatePalette: (drawable: Drawable) -> Unit = {}) {
     Box {
-        if (showBackdrop) {
+        if (showBackdropProvider()) {
             Box(
                 modifier = Modifier
                     .matchParentSize()

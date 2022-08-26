@@ -105,6 +105,7 @@ class MangaDetailPresenter(
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
             hideChapterTitles = getHideTitlesFilter(),
+            themeBasedOffCovers = preferences.themeMangaDetails(),
             vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
         ),
     )
@@ -1124,6 +1125,7 @@ class MangaDetailPresenter(
                     currentTitle = m.title,
                     alternativeTitles = m.getAltTitles().toImmutableList(),
                     currentDescription = getDescription(),
+                    inLibrary = m.favorite,
                     author = m.author ?: "",
                     artist = m.artist ?: "",
                     status = m.status,

@@ -80,7 +80,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 altTitleResetClick = { presenter.setAltTitle(null) },
             ),
             generatePalette = this::setPalette,
-            themeBasedOffCover = preferences.themeMangaDetails(),
             titleLongClick = { context, content ->
                 if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
                     presenter.copiedToClipboard(context.getString(R.string.title))

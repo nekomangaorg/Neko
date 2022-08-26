@@ -32,6 +32,7 @@ object MangaConstants {
         val hideChapterTitles: Boolean,
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val removedChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val themeBasedOffCovers: Boolean,
         val trackServiceCount: Int = 0,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
         val vibrantColor: Int?,

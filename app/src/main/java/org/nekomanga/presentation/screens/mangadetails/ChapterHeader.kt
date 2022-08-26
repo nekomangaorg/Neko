@@ -28,7 +28,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
  * Header that is shown above chapter list
  */
 @Composable
-fun ChapterHeader(themeColor: ThemeColorState, numberOfChapters: Int, filterText: String = "", onClick: () -> Unit = {}) {
+fun ChapterHeader(themeColor: ThemeColorState, numberOfChaptersProvider: () -> Int, filterTextProvider: () -> String, onClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,7 +36,7 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChapters: Int, filterText
             .padding(horizontal = 8.dp, vertical = 12.dp),
     ) {
         ChapterText(
-            numberOfChapters,
+            numberOfChaptersProvider(),
             modifier = Modifier
                 .align(Alignment.CenterStart),
         )
@@ -48,9 +48,9 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChapters: Int, filterText
             horizontalArrangement = Arrangement.End,
         ) {
 
-            if (filterText.isNotBlank()) {
+            if (filterTextProvider().isNotBlank()) {
                 Text(
-                    text = filterText,
+                    text = filterTextProvider(),
                     style =
                     MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)),
                     modifier = Modifier

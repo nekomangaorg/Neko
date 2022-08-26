@@ -41,18 +41,18 @@ import kotlin.math.roundToInt
 
 @Composable
 fun InformationBlock(
-    title: String,
-    author: String,
-    artist: String,
-    rating: String?,
-    users: String?,
-    langFlag: String?,
-    status: Int,
-    isPornographic: Boolean,
-    missingChapters: String?,
+    titleProvider: () -> String,
+    authorProvider: () -> String,
+    artistProvider: () -> String,
+    ratingProvider: () -> String?,
+    usersProvider: () -> String?,
+    langFlagProvider: () -> String?,
+    statusProvider: () -> Int,
+    isPornographicProvider: () -> Boolean,
+    missingChaptersProvider: () -> String?,
     modifier: Modifier = Modifier,
-    isExpanded: Boolean = true,
-    showMergedIcon: Boolean = true,
+    isExpandedProvider: () -> Boolean,
+    showMergedIconProvider: () -> Boolean,
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
 ) {
@@ -66,22 +66,22 @@ fun InformationBlock(
             .fillMaxHeight()
             .padding(horizontal = 8.dp),
     ) {
-        if (title.isNotNullOrEmpty()) {
+        if (titleProvider().isNotNullOrEmpty()) {
             NoRippleText(
-                text = title,
-                maxLines = if (isExpanded) Integer.MAX_VALUE else 4,
+                text = titleProvider(),
+                maxLines = if (isExpandedProvider()) Integer.MAX_VALUE else 4,
                 onLongClick = titleLongClick,
                 style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium),
                 color = highAlpha,
             )
         }
 
-        if (author.isNotEmpty() || artist.isNotEmpty()) {
+        if (authorProvider().isNotEmpty() || artistProvider().isNotEmpty()) {
             val creator =
-                when (author == artist) {
-                    true -> author.trim()
+                when (authorProvider() == artistProvider()) {
+                    true -> authorProvider().trim()
                     false -> {
-                        listOfNotNull(author.trim(), artist.trim())
+                        listOfNotNull(authorProvider().trim(), artistProvider().trim())
                             .joinToString(", ")
                     }
                 }
@@ -90,14 +90,14 @@ fun InformationBlock(
             NoRippleText(
                 text = creator,
                 onLongClick = creatorLongClicked,
-                maxLines = if (isExpanded) Integer.MAX_VALUE else 2,
+                maxLines = if (isExpandedProvider()) 5 else 2,
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
         }
-        if (status != 0) {
+        if (statusProvider() != 0) {
             Gap(4.dp)
-            val statusRes = when (status) {
+            val statusRes = when (statusProvider()) {
                 SManga.ONGOING -> R.string.ongoing
                 SManga.COMPLETED -> R.string.completed
                 SManga.LICENSED -> R.string.licensed
@@ -113,7 +113,7 @@ fun InformationBlock(
                 color = mediumAlpha,
             )
         }
-        if (rating != null || users != null || langFlag != null) {
+        if (ratingProvider() != null || usersProvider() != null || langFlagProvider() != null) {
             Gap(8.dp)
         }
         FlowRow(
@@ -123,8 +123,8 @@ fun InformationBlock(
             crossAxisAlignment = FlowCrossAxisAlignment.Center,
 
             ) {
-            if (langFlag != null) {
-                val flag = when (langFlag.lowercase(Locale.US)) {
+            if (langFlagProvider() != null) {
+                val flag = when (langFlagProvider()!!.lowercase(Locale.US)) {
                     "zh-hk" -> R.drawable.ic_flag_hk
                     "zh" -> R.drawable.ic_flag_cn
                     "ko" -> R.drawable.ic_flag_kr
@@ -143,14 +143,14 @@ fun InformationBlock(
                 }
             }
 
-            if (isPornographic) {
+            if (isPornographicProvider()) {
                 Row {
                     Gap(8.dp)
                     Image(imageVector = Icons.Outlined._18UpRating, modifier = Modifier.size(32.dp), contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
                 }
             }
 
-            rating?.let { rating ->
+            ratingProvider()?.let { rating ->
                 val formattedRating = ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
 
                 Row {
@@ -165,7 +165,7 @@ fun InformationBlock(
                 }
             }
 
-            users?.let { unformattedNumberOfUsers ->
+            usersProvider()?.let { unformattedNumberOfUsers ->
                 val numberOfUsers = runCatching {
                     NumberFormat.getNumberInstance(Locale.US).format(unformattedNumberOfUsers.toInt())
                 }.getOrDefault(0).toString()
@@ -182,7 +182,7 @@ fun InformationBlock(
                 }
             }
 
-            if (showMergedIcon) {
+            if (showMergedIconProvider()) {
                 Row {
                     Gap(8.dp)
                     com.mikepenz.iconics.compose.Image(asset = CommunityMaterial.Icon.cmd_check_decagram, colorFilter = ColorFilter.tint(mediumAlpha))
@@ -191,7 +191,7 @@ fun InformationBlock(
 
         }
 
-        missingChapters?.let { numberOfMissingChapters ->
+        missingChaptersProvider()?.let { numberOfMissingChapters ->
             Gap(4.dp)
             NoRippleText(
                 text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters), style = MaterialTheme.typography.bodyLarge,

@@ -2,15 +2,14 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import org.nekomanga.domain.category.CategoryItem
-import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.sheets.ArtworkSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.ExternalLinksSheet
@@ -49,29 +48,18 @@ sealed class DetailsBottomSheetScreen {
 fun DetailsBottomSheet(
     currentScreen: DetailsBottomSheetScreen,
     themeColorState: ThemeColorState,
-    inLibrary: Boolean,
-    allCategories: List<CategoryItem>,
-    mangaCategories: List<CategoryItem>,
+    generalState: State<MangaConstants.MangaScreenGeneralState>,
+    mangaState: State<MangaConstants.MangaScreenMangaState>,
     addNewCategory: (String) -> Unit,
     loggedInTrackingServices: List<TrackService>,
     tracks: List<Track>,
     dateFormat: DateFormat,
-    title: String,
-    altTitles: List<String>,
     trackActions: MangaConstants.TrackActions,
     trackSearchResult: TrackingConstants.TrackSearchResult,
-    trackSuggestedDates: TrackingConstants.TrackingSuggestedDates?,
-    externalLinks: List<ExternalLink>,
-    alternativeArtwork: List<Artwork>,
-    isMergedManga: MergeConstants.IsMergedManga,
     mergeSearchResult: MergeConstants.MergeSearchResult,
     openInWebView: (String, String) -> Unit,
     coverActions: MangaConstants.CoverActions,
     mergeActions: MangaConstants.MergeActions,
-    chapterSortFilter: MangaConstants.SortFilter,
-    chapterFilter: MangaConstants.Filter,
-    scanlatorFilter: MangaConstants.ScanlatorFilter,
-    hideTitlesFilter: Boolean,
     chapterFilterActions: MangaConstants.ChapterFilterActions,
     openSheet: (DetailsBottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
@@ -80,8 +68,8 @@ fun DetailsBottomSheet(
     when (currentScreen) {
         is DetailsBottomSheetScreen.CategoriesSheet -> EditCategorySheet(
             addingToLibrary = currentScreen.addingToLibrary,
-            categories = allCategories,
-            mangaCategories = mangaCategories,
+            categories = generalState.value.allCategories,
+            mangaCategories = mangaState.value.currentCategories,
             themeColorState = themeColorState,
             cancelClick = closeSheet,
             addNewCategory = addNewCategory,
@@ -90,7 +78,7 @@ fun DetailsBottomSheet(
         )
         is DetailsBottomSheetScreen.TrackingSheet -> TrackingSheet(
             themeColor = themeColorState,
-            inLibrary = inLibrary,
+            inLibrary = mangaState.value.inLibrary,
             services = loggedInTrackingServices,
             tracks = tracks,
             dateFormat = dateFormat,
@@ -108,25 +96,25 @@ fun DetailsBottomSheet(
             trackingStartDateClick = { trackAndService, trackingDate ->
                 closeSheet()
                 openSheet(
-                    DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, trackSuggestedDates),
+                    DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, generalState.value.trackingSuggestedDates),
                 )
             },
             trackingFinishDateClick = { trackAndService, trackingDate ->
                 closeSheet()
                 openSheet(
-                    DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, trackSuggestedDates),
+                    DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, generalState.value.trackingSuggestedDates),
                 )
             },
         )
         is DetailsBottomSheetScreen.TrackingSearchSheet -> {
             //do the initial search this way we dont need to "reset" the state after the sheet closes
             LaunchedEffect(key1 = currentScreen.trackingService.id) {
-                trackActions.search(title, currentScreen.trackingService)
+                trackActions.search(mangaState.value.originalTitle, currentScreen.trackingService)
             }
 
             TrackingSearchSheet(
                 themeColorState = themeColorState,
-                title = title,
+                title = mangaState.value.originalTitle,
                 trackSearchResult = trackSearchResult,
                 alreadySelectedTrack = currentScreen.alreadySelectedTrack,
                 service = currentScreen.trackingService,
@@ -163,7 +151,7 @@ fun DetailsBottomSheet(
         }
         is DetailsBottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
-                themeColorState = themeColorState, externalLinks = externalLinks,
+                themeColorState = themeColorState, externalLinks = generalState.value.externalLinks,
                 onLinkClick = { url, title ->
                     closeSheet()
                     openInWebView(url, title)
@@ -172,16 +160,16 @@ fun DetailsBottomSheet(
         }
 
         is DetailsBottomSheetScreen.MergeSheet -> {
-            if (isMergedManga is MergeConstants.IsMergedManga.No) {
+            if (mangaState.value.isMerged is MergeConstants.IsMergedManga.No) {
                 LaunchedEffect(key1 = 1) {
-                    mergeActions.search(title)
+                    mergeActions.search(mangaState.value.originalTitle)
                 }
             }
             MergeSheet(
                 themeColorState = themeColorState,
-                isMergedManga = isMergedManga,
-                title = title,
-                altTitles = altTitles,
+                isMergedManga = mangaState.value.isMerged,
+                title = mangaState.value.originalTitle,
+                altTitles = mangaState.value.alternativeTitles,
                 mergeSearchResults = mergeSearchResult,
                 openMergeSource = { url, title ->
                     closeSheet()
@@ -205,8 +193,8 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.ArtworkSheet -> {
             ArtworkSheet(
                 themeColorState = themeColorState,
-                alternativeArtwork = alternativeArtwork,
-                inLibrary = inLibrary,
+                alternativeArtwork = mangaState.value.alternativeArtwork,
+                inLibrary = mangaState.value.inLibrary,
                 saveClick = coverActions.save,
                 shareClick = { url -> coverActions.share(context, url) },
                 setClick = { url ->
@@ -222,12 +210,12 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.FilterChapterSheet -> {
             FilterChapterSheet(
                 themeColorState = themeColorState,
-                sortFilter = chapterSortFilter,
+                sortFilter = generalState.value.chapterSortFilter,
                 changeSort = chapterFilterActions.changeSort,
                 changeFilter = chapterFilterActions.changeFilter,
-                filter = chapterFilter,
-                scanlatorFilter = scanlatorFilter,
-                hideTitlesFilter = hideTitlesFilter,
+                filter = generalState.value.chapterFilter,
+                scanlatorFilter = generalState.value.chapterScanlatorFilter,
+                hideTitlesFilter = generalState.value.hideChapterTitles,
                 changeScanlatorFilter = chapterFilterActions.changeScanlator,
                 changeHideTitles = chapterFilterActions.hideTitles,
                 setAsGlobal = chapterFilterActions.setAsGlobal,
