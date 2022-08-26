@@ -28,6 +28,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -61,6 +63,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
  */
 @Composable
 fun DescriptionBlock(
+    windowSizeClass: WindowSizeClass,
     titleProvider: () -> String,
     descriptionProvider: () -> String,
     isInitializedProvider: () -> Boolean,
@@ -68,8 +71,6 @@ fun DescriptionBlock(
     genresProvider: () -> ImmutableList<String>,
     themeColorState: ThemeColorState,
     isExpanded: Boolean,
-    isTablet: Boolean,
-    canExpandCollapse: Boolean,
     expandCollapseClick: () -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
@@ -82,7 +83,7 @@ fun DescriptionBlock(
 
     val interactionSource = remember { MutableInteractionSource() }
 
-    val clickable = Modifier.conditional(canExpandCollapse) {
+    val clickable = Modifier.conditional(windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
         this.clickable(
             interactionSource = interactionSource,
             indication = null,
@@ -132,7 +133,7 @@ fun DescriptionBlock(
                 }
             }
         } else {
-            if (isTablet) {
+            if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                 AltTitles(
                     altTitles = altTitlesProvider(),
                     currentTitle = titleProvider(),
@@ -156,7 +157,7 @@ fun DescriptionBlock(
                 )
             }
 
-            if (!isTablet) {
+            if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
                 Gap(8.dp)
                 AltTitles(
                     altTitles = altTitlesProvider(),

@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens
 
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -30,6 +29,8 @@ import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -43,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -93,6 +93,7 @@ import java.text.DateFormat
 fun MangaScreen(
     generalState: State<MangaScreenGeneralState>,
     mangaState: State<MangaConstants.MangaScreenMangaState>,
+    windowSizeClass: WindowSizeClass,
     snackbar: SharedFlow<SnackbarState>,
     isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
@@ -169,7 +170,6 @@ fun MangaScreen(
     }
 
     val isDarkTheme = isSystemInDarkTheme()
-    val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp && LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val surfaceColor = MaterialTheme.colorScheme.surface
 
@@ -278,7 +278,7 @@ fun MangaScreen(
                     MangaDetailsHeader(
                         mangaState = mangaState,
                         generalState = generalState,
-                        isTablet = isTablet,
+                        windowSizeClass = windowSizeClass,
                         titleLongClick = { title: String -> titleLongClick(context, title) },
                         creatorLongClick = { creator: String -> creatorLongClick(context, creator) },
                         themeColorState = themeColorState,
@@ -384,9 +384,8 @@ fun MangaScreen(
 
 
                 CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-
-                    if (isTablet) {
-                        TabletLayout(
+                    if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
+                        ExpandedLayout(
                             mangaDetailContentPadding = mangaDetailContentPadding,
                             chapterContentPadding = chapterContentPadding,
                             details = details(),
@@ -395,7 +394,7 @@ fun MangaScreen(
                             chapterRow = chapterRow(),
                         )
                     } else {
-                        NonTablet(
+                        NormalLayout(
                             contentPadding = mangaDetailContentPadding,
                             details = details(),
                             chapterHeader = chapterHeader(),
@@ -423,7 +422,7 @@ fun MangaScreen(
 }
 
 @Composable
-private fun NonTablet(
+private fun NormalLayout(
     contentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
@@ -446,7 +445,7 @@ private fun NonTablet(
 }
 
 @Composable
-private fun TabletLayout(
+private fun ExpandedLayout(
     mangaDetailContentPadding: PaddingValues,
     chapterContentPadding: PaddingValues,
     details: @Composable () -> Unit,

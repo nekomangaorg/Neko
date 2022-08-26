@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import androidx.annotation.StringRes
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.core.content.getSystemService
@@ -63,10 +64,12 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
 
     @Composable
     override fun ScreenContent() {
+        val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         MangaScreen(
             generalState = presenter.generalState.collectAsState(),
             mangaState = presenter.mangaState.collectAsState(),
             snackbar = presenter.snackBarState,
+            windowSizeClass = windowSizeClass,
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
             categoryActions = CategoryActions(

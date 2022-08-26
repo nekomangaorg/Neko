@@ -17,6 +17,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
@@ -45,8 +48,8 @@ import org.nekomanga.presentation.screens.ThemeColorState
 fun MangaDetailsHeader(
     generalState: State<MangaConstants.MangaScreenGeneralState>,
     mangaState: State<MangaConstants.MangaScreenMangaState>,
+    windowSizeClass: WindowSizeClass,
     isLoggedIntoTrackersProvider: () -> Boolean,
-    isTablet: Boolean = false,
     themeColorState: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (String) -> Unit = {},
@@ -67,10 +70,15 @@ fun MangaDetailsHeader(
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
         val isExpanded = rememberSaveable {
-            when (isTablet) {
+            when (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                 false -> mutableStateOf(!mangaState.value.inLibrary)
                 true -> mutableStateOf(true)
             }
+        }
+
+        val height = when (windowSizeClass.heightSizeClass == WindowHeightSizeClass.Expanded) {
+            true -> 800.dp
+            else -> 400.dp
         }
 
         Column {
@@ -81,7 +89,7 @@ fun MangaDetailsHeader(
                     showBackdropProvider = { generalState.value.themeBasedOffCovers },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .requiredHeightIn(250.dp, 400.dp),
+                        .requiredHeightIn(250.dp, height),
                     generatePalette = generatePalette,
                 )
                 Box(
@@ -147,11 +155,12 @@ fun MangaDetailsHeader(
                     )
                 }
             }
-            if (isTablet) {
+            if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                 QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
             }
             Gap(8.dp)
             DescriptionBlock(
+                windowSizeClass = windowSizeClass,
                 titleProvider = { mangaState.value.currentTitle },
                 descriptionProvider = { mangaState.value.currentDescription },
                 isInitializedProvider = { mangaState.value.initialized },
@@ -159,8 +168,6 @@ fun MangaDetailsHeader(
                 genresProvider = { mangaState.value.genres },
                 themeColorState = themeColorState,
                 isExpanded = isExpanded.value,
-                isTablet = isTablet,
-                canExpandCollapse = !isTablet,
                 expandCollapseClick = {
                     isExpanded.value = !isExpanded.value
                 },
@@ -169,7 +176,7 @@ fun MangaDetailsHeader(
                 altTitleClick = descriptionActions.altTitleClick,
                 altTitleResetClick = descriptionActions.altTitleResetClick,
             )
-            if (!isTablet) {
+            if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
                 QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
                 Gap(8.dp)
             }
