@@ -12,7 +12,7 @@ accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-dra
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist_version" }
 accompainist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
 
-paging = "androidx.paging:paging-compose:1.0.0-alpha14"
+paging = "androidx.paging:paging-compose:1.0.0-alpha16"
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
