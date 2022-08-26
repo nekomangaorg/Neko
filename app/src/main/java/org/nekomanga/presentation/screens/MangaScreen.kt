@@ -53,10 +53,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.presentation.components.VerticalDivider
-import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
@@ -64,20 +61,18 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenGeneralState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
-import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInWebView
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
-import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
@@ -96,48 +91,27 @@ import java.text.DateFormat
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MangaScreen(
-    manga: Manga,
-    hideButtonText: Boolean,
-    currentTitle: State<String>,
-    description: State<String>,
+    generalState: State<MangaScreenGeneralState>,
+    mangaState: State<MangaConstants.MangaScreenMangaState>,
     snackbar: SharedFlow<SnackbarState>,
-    artwork: State<Artwork>,
-    vibrantColor: State<Int?>,
     isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
-    themeBasedOffCover: Boolean = true,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (Context, String) -> Unit,
     creatorLongClick: (Context, String) -> Unit,
-    toggleFavorite: (Boolean) -> Boolean = { true },
-    hasDefaultCategory: State<Boolean>,
+    toggleFavorite: (Boolean) -> Unit,
     categoryActions: CategoryActions,
-    categories: State<List<Category>>,
-    mangaCategories: State<List<Category>>,
     loggedInTrackingServices: State<List<TrackService>>,
-    trackServiceCount: State<Int>,
     tracks: State<List<Track>>,
-    trackSuggestedDates: State<TrackingSuggestedDates?>,
     dateFormat: DateFormat,
     trackActions: TrackActions,
     trackSearchResult: State<TrackSearchResult>,
     similarClick: () -> Unit = {},
-    externalLinks: State<List<ExternalLink>>,
-    isMergedManga: State<IsMergedManga>,
     mergeSearchResult: State<MergeSearchResult>,
-    alternativeArtwork: State<List<Artwork>>,
     coverActions: CoverActions,
     mergeActions: MergeActions,
     shareClick: (Context) -> Unit,
     descriptionActions: DescriptionActions,
-    quickReadText: State<NextUnreadChapter>,
-    chapterFilterText: State<String>,
-    chapters: State<List<ChapterItem>>,
-    removedChapters: State<List<ChapterItem>>,
-    chapterSortFilter: State<MangaConstants.SortFilter>,
-    chapterFilter: State<MangaConstants.Filter>,
-    scanlatorFilter: State<MangaConstants.ScanlatorFilter>,
-    hideTitlesFilter: State<Boolean>,
     chapterFilterActions: ChapterFilterActions,
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
@@ -190,8 +164,6 @@ fun MangaScreen(
         }
     }
 
-    var inLibrary by remember { mutableStateOf(manga.favorite) }
-
     var currentBottomSheet: DetailsBottomSheetScreen? by remember {
         mutableStateOf(null)
     }
@@ -214,8 +186,8 @@ fun MangaScreen(
         )
     }
 
-    if (themeBasedOffCover && vibrantColor.value != null) {
-        val color = getButtonThemeColor(Color(vibrantColor.value!!), isDarkTheme)
+    if (generalState.value.themeBasedOffCovers && generalState.value.vibrantColor != null) {
+        val color = getButtonThemeColor(Color(generalState.value.vibrantColor!!), isDarkTheme)
         themeColorState = ThemeColorState(
             buttonColor = color,
             rippleTheme = DynamicRippleTheme(color),
@@ -244,29 +216,18 @@ fun MangaScreen(
                     DetailsBottomSheet(
                         currentScreen = currentSheet,
                         themeColorState = themeColorState,
-                        inLibrary = inLibrary,
+                        generalState = generalState,
+                        mangaState = mangaState,
                         addNewCategory = categoryActions.addNew,
-                        allCategories = categories.value,
-                        mangaCategories = mangaCategories.value,
                         loggedInTrackingServices = loggedInTrackingServices.value,
                         tracks = tracks.value,
                         dateFormat = dateFormat,
                         openSheet = openSheet,
                         trackActions = trackActions,
-                        title = manga.originalTitle,
-                        altTitles = manga.getAltTitles(),
                         trackSearchResult = trackSearchResult.value,
-                        trackSuggestedDates = trackSuggestedDates.value,
-                        externalLinks = externalLinks.value,
-                        isMergedManga = isMergedManga.value,
-                        alternativeArtwork = alternativeArtwork.value,
                         coverActions = coverActions,
                         mergeActions = mergeActions,
                         mergeSearchResult = mergeSearchResult.value,
-                        chapterSortFilter = chapterSortFilter.value,
-                        chapterFilter = chapterFilter.value,
-                        scanlatorFilter = scanlatorFilter.value,
-                        hideTitlesFilter = hideTitlesFilter.value,
                         chapterFilterActions = chapterFilterActions,
                         openInWebView = { url, title -> context.asActivity().openInWebView(url, title) },
                     ) { scope.launch { sheetState.hide() } }
@@ -281,7 +242,7 @@ fun MangaScreen(
             onNavigationIconClicked = onBackPressed,
             snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
             actions = {
-                OverflowOptions(chapterActions = chapterActions, chapters = chapters)
+                OverflowOptions(chapterActions = chapterActions, chaptersProvider = { generalState.value.activeChapters })
             },
         ) { incomingPaddingValues ->
             SwipeRefresh(
@@ -315,39 +276,31 @@ fun MangaScreen(
 
                 fun details() = @Composable {
                     MangaDetailsHeader(
-                        manga = manga,
-                        title = currentTitle.value,
-                        description = description.value,
-                        artwork = artwork.value,
-                        showBackdrop = themeBasedOffCover,
-                        hideButtonText = hideButtonText,
-                        isMerged = isMergedManga.value is IsMergedManga.Yes,
-                        inLibrary = inLibrary,
+                        mangaState = mangaState,
+                        generalState = generalState,
                         isTablet = isTablet,
                         titleLongClick = { title: String -> titleLongClick(context, title) },
                         creatorLongClick = { creator: String -> creatorLongClick(context, creator) },
                         themeColorState = themeColorState,
                         generatePalette = generatePalette,
-                        loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
-                        trackServiceCount = trackServiceCount.value,
+                        isLoggedIntoTrackersProvider = { loggedInTrackingServices.value.isNotEmpty() },
                         toggleFavorite = {
-                            if (!inLibrary && categories.value.isNotEmpty()) {
-                                if (hasDefaultCategory.value) {
-                                    inLibrary = toggleFavorite(true)
+                            if (!mangaState.value.inLibrary && generalState.value.allCategories.isNotEmpty()) {
+                                if (generalState.value.hasDefaultCategory) {
+                                    toggleFavorite(true)
                                 } else {
                                     openSheet(
                                         DetailsBottomSheetScreen.CategoriesSheet(
                                             addingToLibrary = true,
                                             setCategories = categoryActions.set,
-                                            addToLibraryClick = { inLibrary = toggleFavorite(false) },
+                                            addToLibraryClick = { toggleFavorite(false) },
                                         ),
                                     )
                                 }
                             } else {
-                                inLibrary = toggleFavorite(false)
+                                toggleFavorite(false)
                             }
                         },
-                        categories = categories.value,
                         moveCategories = {
                             openSheet(
                                 DetailsBottomSheetScreen.CategoriesSheet(
@@ -364,15 +317,14 @@ fun MangaScreen(
                         shareClick = { shareClick(context) },
                         descriptionActions = descriptionActions,
                         quickReadClick = { chapterActions.openNext(context) },
-                        quickReadText = quickReadText.value,
                     )
                 }
 
                 fun chapterHeader() = @Composable {
                     ChapterHeader(
                         themeColor = themeColorState,
-                        numberOfChapters = chapters.value.size,
-                        filterText = chapterFilterText.value,
+                        numberOfChaptersProvider = { generalState.value.activeChapters.size },
+                        filterTextProvider = { generalState.value.chapterFilterText },
                         onClick = { openSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
                     )
                 }
@@ -391,7 +343,7 @@ fun MangaScreen(
                         bookmark = chapterItem.chapter.bookmark,
                         downloadStateProvider = { chapterItem.downloadState },
                         downloadProgressProvider = { chapterItem.downloadProgress },
-                        shouldHideChapterTitles = hideTitlesFilter.value,
+                        shouldHideChapterTitles = generalState.value.hideChapterTitles,
                         onClick = { chapterActions.open(context, chapterItem) },
                         onBookmark = {
                             chapterActions.mark(
@@ -414,12 +366,12 @@ fun MangaScreen(
                         },
                         markPrevious = { read ->
 
-                            val chaptersToMark = chapters.value.subList(0, index)
-                            val lastIndex = chapters.value.lastIndex
+                            val chaptersToMark = generalState.value.activeChapters.subList(0, index)
+                            val lastIndex = generalState.value.activeChapters.lastIndex
                             val altChapters = if (index == lastIndex) {
                                 emptyList()
                             } else {
-                                chapters.value.slice(IntRange(index + 1, lastIndex))
+                                generalState.value.activeChapters.slice(IntRange(index + 1, lastIndex))
                             }
                             val action = when (read) {
                                 true -> MangaConstants.MarkAction.PreviousRead(true, altChapters)
@@ -439,19 +391,25 @@ fun MangaScreen(
                             chapterContentPadding = chapterContentPadding,
                             details = details(),
                             chapterHeader = chapterHeader(),
-                            chapters = chapters.value,
+                            chaptersProvider = { generalState.value.activeChapters },
                             chapterRow = chapterRow(),
                         )
                     } else {
-                        NonTablet(contentPadding = mangaDetailContentPadding, details = details(), chapterHeader = chapterHeader(), chapters = chapters, chapterRow = chapterRow())
+                        NonTablet(
+                            contentPadding = mangaDetailContentPadding,
+                            details = details(),
+                            chapterHeader = chapterHeader(),
+                            chaptersProvider = { generalState.value.activeChapters },
+                            chapterRow = chapterRow(),
+                        )
                     }
 
-                    if (removedChapters.value.isNotEmpty()) {
+                    if (generalState.value.removedChapters.isNotEmpty()) {
                         RemovedChaptersDialog(
                             themeColorState = themeColorState,
-                            chapters = removedChapters.value,
+                            chapters = generalState.value.removedChapters,
                             onConfirm = {
-                                chapterActions.delete(removedChapters.value)
+                                chapterActions.delete(generalState.value.removedChapters)
                                 chapterActions.clearRemoved
 
                             },
@@ -469,7 +427,7 @@ private fun NonTablet(
     contentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
-    chapters: State<List<ChapterItem>>,
+    chaptersProvider: () -> ImmutableList<ChapterItem>,
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
@@ -481,7 +439,7 @@ private fun NonTablet(
             chapterHeader()
         }
 
-        itemsIndexed(items = chapters.value, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
+        itemsIndexed(items = chaptersProvider(), key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
             chapterRow(index, chapter)
         }
     }
@@ -493,7 +451,7 @@ private fun TabletLayout(
     chapterContentPadding: PaddingValues,
     details: @Composable () -> Unit,
     chapterHeader: @Composable () -> Unit,
-    chapters: List<ChapterItem>,
+    chaptersProvider: () -> ImmutableList<ChapterItem>,
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     Box(
@@ -524,7 +482,7 @@ private fun TabletLayout(
             contentPadding = chapterContentPadding,
         ) {
             item { chapterHeader() }
-            itemsIndexed(items = chapters, key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
+            itemsIndexed(items = chaptersProvider(), key = { _, chapter -> chapter.chapter.id }) { index, chapter ->
                 chapterRow(index, chapter)
             }
         }

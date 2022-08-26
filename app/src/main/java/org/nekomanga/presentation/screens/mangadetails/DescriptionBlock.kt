@@ -47,8 +47,8 @@ import com.mikepenz.markdown.Markdown
 import com.mikepenz.markdown.MarkdownColors
 import com.mikepenz.markdown.MarkdownDefaults
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.ImmutableList
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
@@ -61,9 +61,11 @@ import org.nekomanga.presentation.screens.ThemeColorState
  */
 @Composable
 fun DescriptionBlock(
-    manga: Manga,
-    title: String,
-    description: String,
+    titleProvider: () -> String,
+    descriptionProvider: () -> String,
+    isInitializedProvider: () -> Boolean,
+    altTitlesProvider: () -> ImmutableList<String>,
+    genresProvider: () -> ImmutableList<String>,
     themeColorState: ThemeColorState,
     isExpanded: Boolean,
     isTablet: Boolean,
@@ -74,6 +76,7 @@ fun DescriptionBlock(
     altTitleClick: (String) -> Unit = {},
     altTitleResetClick: () -> Unit = {},
 ) {
+    if (!isInitializedProvider()) return
 
     val tagColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 16.dp)
 
@@ -95,7 +98,7 @@ fun DescriptionBlock(
     ) {
 
         if (!isExpanded) {
-            val text = description.replace(
+            val text = descriptionProvider().replace(
                 Regex(
                     "[\\r\\n\\s*]{2,}",
                     setOf(RegexOption.MULTILINE),
@@ -131,18 +134,18 @@ fun DescriptionBlock(
         } else {
             if (isTablet) {
                 AltTitles(
-                    altTitles = manga.getAltTitles(),
-                    currentTitle = title,
+                    altTitles = altTitlesProvider(),
+                    currentTitle = titleProvider(),
                     tagColor = tagColor,
                     themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
                     resetClick = altTitleResetClick,
                 )
                 Gap(8.dp)
-                Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
+                Genres(genresProvider(), tagColor, genreClick, genreLongClick)
                 Gap(16.dp)
             }
-            val text = description.trim()
+            val text = descriptionProvider().trim()
             SelectionContainer {
                 Markdown(
                     content = text,
@@ -156,15 +159,15 @@ fun DescriptionBlock(
             if (!isTablet) {
                 Gap(8.dp)
                 AltTitles(
-                    altTitles = manga.getAltTitles(),
-                    currentTitle = title,
+                    altTitles = altTitlesProvider(),
+                    currentTitle = titleProvider(),
                     tagColor = tagColor,
                     themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
                     resetClick = altTitleResetClick,
                 )
                 Gap(16.dp)
-                Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
+                Genres(genresProvider(), tagColor, genreClick, genreLongClick)
                 Gap(16.dp)
                 MoreLessButton(
                     buttonColor = themeColorState.buttonColor,
@@ -207,7 +210,7 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
 }
 
 @Composable
-private fun AltTitles(altTitles: List<String>, currentTitle: String, tagColor: Color, themeColorState: ThemeColorState, altTitleClick: (String) -> Unit, resetClick: () -> Unit) {
+private fun AltTitles(altTitles: ImmutableList<String>, currentTitle: String, tagColor: Color, themeColorState: ThemeColorState, altTitleClick: (String) -> Unit, resetClick: () -> Unit) {
     if (altTitles.isNotEmpty()) {
         val isCustomTitle = altTitles.contains(currentTitle)
         val onChipColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = NekoColors.mediumAlphaHighContrast)
@@ -272,8 +275,8 @@ private fun AltTitles(altTitles: List<String>, currentTitle: String, tagColor: C
 }
 
 @Composable
-private fun ColumnScope.Genres(genres: List<String>?, tagColor: Color, genreClick: (String) -> Unit, genreLongClick: (String) -> Unit) {
-    genres ?: return
+private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, genreClick: (String) -> Unit, genreLongClick: (String) -> Unit) {
+    if (genres.isEmpty()) return
 
     val haptic = LocalHapticFeedback.current
     Text(

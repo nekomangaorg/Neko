@@ -19,7 +19,7 @@ data class MangaItem(
 data class MergeManga(val thumbnail: String, val url: String, val title: String)
 
 data class Artwork(
-    val url: String,
+    val url: String = "",
     val mangaId: Long,
     val inLibrary: Boolean = false,
     val originalArtwork: String = "",

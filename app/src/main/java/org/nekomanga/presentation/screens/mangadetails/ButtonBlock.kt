@@ -49,11 +49,11 @@ import org.nekomanga.presentation.screens.ThemeColorState
  */
 @Composable
 fun ButtonBlock(
-    hideButtonText: Boolean,
-    isMerged: Boolean,
-    inLibrary: Boolean,
-    loggedIntoTrackers: Boolean,
-    trackServiceCount: Int,
+    hideButtonTextProvider: () -> Boolean,
+    isMergedProvider: () -> Boolean,
+    inLibraryProvider: () -> Boolean,
+    loggedIntoTrackersProvider: () -> Boolean,
+    trackServiceCountProvider: () -> Int,
     themeColorState: ThemeColorState,
     favoriteClick: () -> Unit = {},
     trackingClick: () -> Unit = {},
@@ -72,7 +72,7 @@ fun ButtonBlock(
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
     val uncheckedBorderStroke = BorderStroke(1.dp, themeColorState.altContainerColor.copy(alpha = .8f))
     val gapBetweenButtons = 8.dp
-    val (padding, iconicsPadding, buttonModifier) = when (hideButtonText) {
+    val (padding, iconicsPadding, buttonModifier) = when (hideButtonTextProvider()) {
         true -> Triple(PaddingValues(0.dp), PaddingValues(0.dp), Modifier.size(48.dp))
         false -> Triple(PaddingValues(horizontal = 12.dp, vertical = 8.dp), PaddingValues(horizontal = 12.dp, vertical = 4.dp), Modifier.height(48.dp))
     }
@@ -86,7 +86,7 @@ fun ButtonBlock(
         verticalAlignment = Alignment.CenterVertically,
     ) {
 
-        val favConfig = when (inLibrary) {
+        val favConfig = when (inLibraryProvider()) {
             true -> ButtonConfig(icon = Icons.Filled.Favorite, buttonColors = checkedButtonColors, borderStroke = checkedBorderStroke, text = stringResource(R.string.in_library))
             false -> ButtonConfig(icon = Icons.Filled.FavoriteBorder, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.add_to_library))
         }
@@ -102,15 +102,15 @@ fun ButtonBlock(
             Icon(imageVector = favConfig.icon!!, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColorState.buttonColor)
         }
 
-        if (loggedIntoTrackers) {
+        if (loggedIntoTrackersProvider()) {
             Gap(gapBetweenButtons)
 
             val trackerConfig = when {
-                trackServiceCount > 0 -> ButtonConfig(
+                trackServiceCountProvider() > 0 -> ButtonConfig(
                     icon = Icons.Filled.Check,
                     buttonColors = checkedButtonColors,
                     borderStroke = checkedBorderStroke,
-                    text = stringResource(R.string._tracked, trackServiceCount),
+                    text = stringResource(R.string._tracked, trackServiceCountProvider()),
                 )
                 else -> ButtonConfig(icon = Icons.Filled.Sync, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.tracking))
             }
@@ -124,8 +124,8 @@ fun ButtonBlock(
                 border = trackerConfig.borderStroke,
                 contentPadding = padding,
             ) {
-                if (trackServiceCount > 0 && hideButtonText) {
-                    val icon = when (trackServiceCount) {
+                if (trackServiceCountProvider() > 0 && hideButtonTextProvider()) {
+                    val icon = when (trackServiceCountProvider()) {
                         1 -> CommunityMaterial.Icon3.cmd_numeric_1_box_outline
                         2 -> CommunityMaterial.Icon3.cmd_numeric_2_box_outline
                         3 -> CommunityMaterial.Icon3.cmd_numeric_3_box_outline
@@ -135,12 +135,12 @@ fun ButtonBlock(
                     IconicsButtonContent(
                         iIcon = icon,
                         color = themeColorState.buttonColor,
-                        hideText = hideButtonText,
+                        hideText = hideButtonTextProvider(),
                         text = "",
                         iconicsSize = 28.dp,
                     )
                 } else {
-                    ButtonContent(trackerConfig.icon!!, color = themeColorState.buttonColor, hideText = hideButtonText, text = trackerConfig.text)
+                    ButtonContent(trackerConfig.icon!!, color = themeColorState.buttonColor, hideText = hideButtonTextProvider(), text = trackerConfig.text)
                 }
             }
         }
@@ -157,7 +157,7 @@ fun ButtonBlock(
             IconicsButtonContent(
                 iIcon = MaterialDesignDx.Icon.gmf_art_track,
                 color = themeColorState.buttonColor,
-                hideText = hideButtonText,
+                hideText = hideButtonTextProvider(),
                 text = stringResource(id = R.string.artwork),
                 iconicsSize = 32.dp,
             )
@@ -171,12 +171,12 @@ fun ButtonBlock(
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
-            ButtonContent(Icons.Filled.AccountTree, color = themeColorState.buttonColor, hideText = hideButtonText, text = stringResource(R.string.similar_work))
+            ButtonContent(Icons.Filled.AccountTree, color = themeColorState.buttonColor, hideText = hideButtonTextProvider(), text = stringResource(R.string.similar_work))
         }
 
         Gap(gapBetweenButtons)
 
-        val mergeConfig = when (isMerged) {
+        val mergeConfig = when (isMergedProvider()) {
             true -> ButtonConfig(
                 iIcon = CommunityMaterial.Icon.cmd_check_decagram,
                 buttonColors = checkedButtonColors,
@@ -199,7 +199,7 @@ fun ButtonBlock(
             border = mergeConfig.borderStroke,
             contentPadding = iconicsPadding,
         ) {
-            IconicsButtonContent(iIcon = mergeConfig.iIcon!!, color = themeColorState.buttonColor, hideText = hideButtonText, text = mergeConfig.text, iconicsSize = 28.dp)
+            IconicsButtonContent(iIcon = mergeConfig.iIcon!!, color = themeColorState.buttonColor, hideText = hideButtonTextProvider(), text = mergeConfig.text, iconicsSize = 28.dp)
         }
 
         Gap(gapBetweenButtons)
@@ -211,7 +211,7 @@ fun ButtonBlock(
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
-            ButtonContent(icon = Icons.Filled.OpenInBrowser, color = themeColorState.buttonColor, hideText = hideButtonText, text = stringResource(R.string.links))
+            ButtonContent(icon = Icons.Filled.OpenInBrowser, color = themeColorState.buttonColor, hideText = hideButtonTextProvider(), text = stringResource(R.string.links))
         }
 
         Gap(gapBetweenButtons)
@@ -223,7 +223,7 @@ fun ButtonBlock(
             border = uncheckedBorderStroke,
             contentPadding = padding,
         ) {
-            ButtonContent(icon = Icons.Filled.Share, color = themeColorState.buttonColor, hideText = hideButtonText, text = stringResource(R.string.share))
+            ButtonContent(icon = Icons.Filled.Share, color = themeColorState.buttonColor, hideText = hideButtonTextProvider(), text = stringResource(R.string.share))
         }
     }
 }

@@ -31,8 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Category
 import jp.wasabeef.gap.Gap
+import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 import java.util.Locale
@@ -40,19 +40,19 @@ import java.util.Locale
 @Composable
 fun EditCategorySheet(
     addingToLibrary: Boolean,
-    categories: List<Category>,
-    mangaCategories: List<Category>,
+    categories: List<CategoryItem>,
+    mangaCategories: List<CategoryItem>,
     themeColorState: ThemeColorState,
     cancelClick: () -> Unit,
     addNewCategory: (String) -> Unit,
-    confirmClicked: (List<Category>) -> Unit,
+    confirmClicked: (List<CategoryItem>) -> Unit,
     addToLibraryClick: () -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
         val context = LocalContext.current
 
-        val enabledCategories = remember { mangaCategories.associateBy { it.id!! }.toMutableMap() }
+        val enabledCategories = remember { mangaCategories.associateBy { it.id }.toMutableMap() }
         val acceptText = remember { mutableStateOf(calculateText(context, mangaCategories, enabledCategories, addingToLibrary)) }
 
         var showAddCategoryDialog by remember { mutableStateOf(false) }
@@ -83,9 +83,8 @@ fun EditCategorySheet(
                     .fillMaxWidth()
                     .requiredHeightIn(0.dp, maxLazyHeight.dp),
             ) {
-                items(categories) { category: Category ->
+                items(categories) { category: CategoryItem ->
                     var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
-
 
                     Row(
                         modifier = paddingModifier
@@ -93,7 +92,7 @@ fun EditCategorySheet(
                             .clickable {
                                 state = !state
                                 if (state) {
-                                    enabledCategories[category.id!!] = category
+                                    enabledCategories[category.id] = category
                                 } else {
                                     enabledCategories.remove(category.id)
                                 }
@@ -105,7 +104,7 @@ fun EditCategorySheet(
                             checked = state,
                             onCheckedChange = {
                                 if (it) {
-                                    enabledCategories[category.id!!] = category
+                                    enabledCategories[category.id] = category
                                 } else {
                                     enabledCategories.remove(category.id)
                                 }
@@ -144,8 +143,8 @@ fun EditCategorySheet(
     }
 }
 
-private fun calculateText(context: Context, initialMangaCategories: List<Category>, currentlySelectedCategories: Map<Int, Category>, addingToLibrary: Boolean): String {
-    val initialIds = initialMangaCategories.map { it.id!! }.toSet()
+private fun calculateText(context: Context, initialMangaCategories: List<CategoryItem>, currentlySelectedCategories: Map<Int, CategoryItem>, addingToLibrary: Boolean): String {
+    val initialIds = initialMangaCategories.map { it.id }.toSet()
     val same = currentlySelectedCategories.filter { initialIds.contains(it.key) }.values.toList()
     val difference = currentlySelectedCategories.filterNot { initialIds.contains(it.key) }.values.toList()
 

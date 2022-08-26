@@ -64,18 +64,11 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
     @Composable
     override fun ScreenContent() {
         MangaScreen(
-            manga = presenter.manga.collectAsState().value,
-            hideButtonText = presenter.hideButtonText(),
+            generalState = presenter.generalState.collectAsState(),
+            mangaState = presenter.mangaState.collectAsState(),
             snackbar = presenter.snackBarState,
-            currentTitle = presenter.currentTitle.collectAsState(),
-            description = presenter.description.collectAsState(),
-            hasDefaultCategory = presenter.hasDefaultCategory.collectAsState(),
-            artwork = presenter.currentArtwork.collectAsState(),
-            vibrantColor = presenter.vibrantColor.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
-            categories = presenter.allCategories.collectAsState(),
-            mangaCategories = presenter.mangaCategories.collectAsState(),
             categoryActions = CategoryActions(
                 set = { enabledCategories -> presenter.updateMangaCategories(enabledCategories) },
                 addNew = { newCategory -> presenter.addNewCategory(newCategory) },
@@ -87,7 +80,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 altTitleResetClick = { presenter.setAltTitle(null) },
             ),
             generatePalette = this::setPalette,
-            themeBasedOffCover = preferences.themeMangaDetails(),
             titleLongClick = { context, content ->
                 if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
                     presenter.copiedToClipboard(context.getString(R.string.title))
@@ -102,9 +94,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             },
             toggleFavorite = presenter::toggleFavorite,
             loggedInTrackingServices = presenter.loggedInTrackingService.collectAsState(),
-            trackServiceCount = presenter.trackServiceCount.collectAsState(),
             tracks = presenter.tracks.collectAsState(),
-            trackSuggestedDates = presenter.trackSuggestedDates.collectAsState(),
             dateFormat = preferences.dateFormat(),
             trackActions = TrackActions(
                 statusChange = { statusIndex, trackAndService -> presenter.updateTrackStatus(statusIndex, trackAndService) },
@@ -116,8 +106,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 dateChange = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
             ),
             trackSearchResult = presenter.trackSearchResult.collectAsState(),
-            alternativeArtwork = presenter.alternativeArtwork.collectAsState(),
-            isMergedManga = presenter.isMerged.collectAsState(),
             mergeActions = MergeActions(
                 remove = presenter::removeMergedManga,
                 search = presenter::searchMergedManga,
@@ -125,7 +113,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             ),
             mergeSearchResult = presenter.mergeSearchResult.collectAsState(),
             similarClick = { router.pushController(SimilarController(presenter.manga.value).withFadeTransaction()) },
-            externalLinks = presenter.externalLinks.collectAsState(),
             shareClick = this::shareManga,
             coverActions = CoverActions(
                 share = this::shareCover,
@@ -133,14 +120,6 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 save = presenter::saveCover,
                 reset = presenter::resetCover,
             ),
-            quickReadText = presenter.nextUnreadChapter.collectAsState(),
-            chapterFilterText = presenter.chapterFilterText.collectAsState(),
-            chapters = presenter.activeChapters.collectAsState(),
-            removedChapters = presenter.removedChapters.collectAsState(),
-            chapterSortFilter = presenter.chapterSortFilter.collectAsState(),
-            chapterFilter = presenter.chapterFilter.collectAsState(),
-            scanlatorFilter = presenter.scanlatorFilter.collectAsState(),
-            hideTitlesFilter = presenter.hideTitlesFilter.collectAsState(),
             chapterFilterActions = ChapterFilterActions(
                 changeSort = presenter::changeSortOption,
                 changeFilter = presenter::changeFilterOption,
@@ -154,7 +133,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 delete = presenter::deleteChapters,
                 clearRemoved = presenter::clearRemovedChapters,
                 openNext = { context ->
-                    presenter.nextUnreadChapter.value.simpleChapter?.let {
+                    presenter.generalState.value.nextUnreadChapter.simpleChapter?.let {
                         openChapter(context, it.toDbChapter())
                     }
                 },
@@ -217,7 +196,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
      */
     private fun shareManga(context: Context) {
         viewScope.launch {
-            val cover = presenter.shareMangaCover(context.sharedCacheDir(), presenter.currentArtwork.value)
+            val cover = presenter.shareMangaCover(context.sharedCacheDir(), presenter.mangaState.value.currentArtwork)
             withUIContext {
                 val stream = cover?.getUriCompat(context)
                 try {

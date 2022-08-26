@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.ChapterNumber
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.SourceOrder
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.UploadDate
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -303,25 +304,34 @@ private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaCo
             }
         }
 
+        val enabled = scanlatorFilter.scanlators.size > 1
+
         scanlatorFilter.scanlators.forEach { scanlatorOption ->
-            ScanlatorLine(themeColorState = themeColorState, scanlatorOption = scanlatorOption) { changeScanlatorFilter(scanlatorOption.copy(disabled = !scanlatorOption.disabled)) }
+            ScanlatorLine(
+                themeColorState = themeColorState,
+                enabledButton = enabled,
+                scanlatorOption = scanlatorOption,
+            ) { changeScanlatorFilter(scanlatorOption.copy(disabled = !scanlatorOption.disabled)) }
         }
     }
 }
 
 @Composable
-private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: MangaConstants.ScanlatorOption, changeScanlatorFilter: () -> Unit) {
+private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: MangaConstants.ScanlatorOption, enabledButton: Boolean, changeScanlatorFilter: () -> Unit) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                changeScanlatorFilter()
+            .conditional(enabledButton) {
+                this.clickable {
+                    changeScanlatorFilter()
+                }
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TriStateCheckbox(
             state = if (scanlatorOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
+            enabled = enabledButton,
             colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
             onClick = changeScanlatorFilter,
         )

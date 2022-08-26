@@ -3,14 +3,62 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
-import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
+import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.MergeManga
 
 object MangaConstants {
+
+    data class MangaScreenGeneralState(
+        val activeChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
+        val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val allScanlators: ImmutableSet<String> = persistentSetOf(),
+        val externalLinks: ImmutableList<ExternalLink> = persistentListOf(),
+        val chapterFilter: Filter = Filter(),
+        val chapterFilterText: String = "",
+        val chapterSortFilter: SortFilter = SortFilter(),
+        val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
+        val hasDefaultCategory: Boolean,
+        val hideButtonText: Boolean,
+        val hideChapterTitles: Boolean,
+        val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
+        val removedChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val themeBasedOffCovers: Boolean,
+        val trackServiceCount: Int = 0,
+        val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
+        val vibrantColor: Int?,
+    )
+
+    data class MangaScreenMangaState(
+        val alternativeTitles: ImmutableList<String> = persistentListOf(),
+        val alternativeArtwork: ImmutableList<Artwork> = persistentListOf(),
+        val currentArtwork: Artwork,
+        val currentCategories: ImmutableList<CategoryItem> = persistentListOf(),
+        val currentDescription: String = "",
+        val currentTitle: String = "",
+        val inLibrary: Boolean = false,
+        val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
+        val author: String = "",
+        val artist: String = "",
+        val status: Int = 0,
+        val initialized: Boolean = false,
+        val missingChapters: String? = null,
+        val isPornographic: Boolean = false,
+        val genres: ImmutableList<String> = persistentListOf(),
+        val rating: String? = null,
+        val users: String? = null,
+        val langFlag: String? = null,
+        val originalTitle: String = "",
+    )
 
     /**
      * Holds the next unread chapter and the text to display for the quick read button.
@@ -30,7 +78,7 @@ object MangaConstants {
     )
 
     data class ScanlatorFilter(
-        val scanlators: List<ScanlatorOption>,
+        val scanlators: ImmutableList<ScanlatorOption>,
     )
 
     data class ScanlatorOption(
@@ -107,8 +155,6 @@ object MangaConstants {
         object Cancel : DownloadAction()
     }
 
-    data class DownloadActionHolder(val chapters: List<ChapterItem>, val downloadAction: DownloadAction)
-
     sealed class MarkAction {
         abstract val canUndo: Boolean
 
@@ -121,7 +167,7 @@ object MangaConstants {
     }
 
     class CategoryActions(
-        val set: (List<Category>) -> Unit = {},
+        val set: (List<CategoryItem>) -> Unit = {},
         val addNew: (String) -> Unit = {},
     )
 
