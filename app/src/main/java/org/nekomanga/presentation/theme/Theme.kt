@@ -3,6 +3,7 @@ package org.nekomanga.presentation.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.LayoutDirection
 import com.google.android.material.composethemeadapter3.createMdc3Theme
 import org.nekomanga.presentation.theme.Typefaces.appTypography
 
@@ -14,6 +15,7 @@ fun NekoTheme(
 
     val (colorScheme) = createMdc3Theme(
         context = context,
+        layoutDirection = LayoutDirection.Ltr,
         setTextColors = true,
         readTypography = false,
     )
