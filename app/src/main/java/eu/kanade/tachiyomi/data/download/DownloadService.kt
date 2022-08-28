@@ -107,9 +107,7 @@ class DownloadService : Service() {
     /**
      * Wake lock to prevent the device to enter sleep mode.
      */
-    private val wakeLock by lazy {
-        acquireWakeLock(javaClass.name)
-    }
+    private lateinit var wakeLock: PowerManager.WakeLock
 
     /**
      * Subscriptions to store while the service is running.
@@ -145,6 +143,7 @@ class DownloadService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForeground(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS, getPlaceholderNotification())
+        wakeLock = acquireWakeLock(javaClass.name)
         runningRelay.call(true)
         subscriptions = CompositeSubscription()
         listenDownloaderState()
@@ -222,13 +221,15 @@ class DownloadService : Service() {
      * Listens to downloader status. Enables or disables the wake lock depending on the status.
      */
     private fun listenDownloaderState() {
-        subscriptions += downloadManager.runningRelay.subscribe { running ->
-            if (running) {
-                wakeLock.acquireIfNeeded()
-            } else {
-                wakeLock.releaseIfNeeded()
+        subscriptions += downloadManager.runningRelay
+            .doOnError { /* Swallow wakelock error */ }
+            .subscribe { running ->
+                if (running) {
+                    wakeLock.acquireIfNeeded()
+                } else {
+                    wakeLock.releaseIfNeeded()
+                }
             }
-        }
     }
 
     /**
