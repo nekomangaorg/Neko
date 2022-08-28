@@ -17,9 +17,9 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsAppearanceController : SettingsController() {
 
-    var lastThemeXLight: Int? = null
-    var lastThemeXDark: Int? = null
-    var themePreference: ThemePreference? = null
+    private var lastThemeXLight: Int? = null
+    private var lastThemeXDark: Int? = null
+    private var themePreference: ThemePreference? = null
 
     @SuppressLint("NotifyDataSetChanged")
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
@@ -61,35 +61,7 @@ class SettingsAppearanceController : SettingsController() {
             }
 
         }
-/*
-        preferenceCategory {
-            switchPreference {
-                bindTo(preferences.useLargeToolbar())
-                titleRes = R.string.expanded_toolbar
-                summaryRes = R.string.show_larger_toolbar
 
-                onChange {
-                    val useLarge = it as Boolean
-                    activityBinding?.appBar?.setToolbarModeBy(this@SettingsAppearanceController, !useLarge)
-                    activityBinding?.appBar?.hideBigView(!useLarge, !useLarge)
-                    activityBinding?.toolbar?.alpha = 1f
-                    activityBinding?.toolbar?.translationY = 0f
-                    activityBinding?.toolbar?.isVisible = true
-                    activityBinding?.appBar?.doOnNextLayout {
-                        listView.requestApplyInsets()
-                        listView.post {
-                            if (useLarge) {
-                                moveRecyclerViewUp(true)
-                            } else {
-                                activityBinding?.appBar?.updateAppBarAfterY(listView)
-                            }
-                        }
-                    }
-                    true
-                }
-            }
-        }
-    */
         preferenceCategory {
             titleRes = R.string.details_page
             switchPreference {
@@ -101,6 +73,12 @@ class SettingsAppearanceController : SettingsController() {
             switchPreference {
                 key = Keys.hideMangaDetailButtonText
                 titleRes = R.string.hide_button_text
+                defaultValue = false
+            }
+
+            switchPreference {
+                key = Keys.extraLargeBackdrop
+                titleRes = R.string.extra_large_backdrop
                 defaultValue = false
             }
         }

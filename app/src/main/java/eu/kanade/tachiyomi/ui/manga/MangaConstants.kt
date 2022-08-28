@@ -32,6 +32,7 @@ object MangaConstants {
         val chapterLanguageFilter: LanguageFilter = LanguageFilter(persistentListOf()),
         val hasDefaultCategory: Boolean,
         val hideButtonText: Boolean,
+        val extraLargeBackdrop: Boolean,
         val hideChapterTitles: Boolean,
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val removedChapters: ImmutableList<ChapterItem> = persistentListOf(),

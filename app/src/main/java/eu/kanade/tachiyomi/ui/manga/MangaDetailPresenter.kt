@@ -103,6 +103,7 @@ class MangaDetailPresenter(
         MangaConstants.MangaScreenGeneralState(
             hasDefaultCategory = preferences.defaultCategory() != -1,
             hideButtonText = preferences.hideButtonText().get(),
+            extraLargeBackdrop = preferences.extraLargeBackdrop().get(),
             hideChapterTitles = getHideTitlesFilter(),
             themeBasedOffCovers = preferences.themeMangaDetails(),
             vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),

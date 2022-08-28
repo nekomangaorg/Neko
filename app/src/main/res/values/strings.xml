@@ -1120,6 +1120,8 @@
     <string name="scanlator_groups">Scanlator groups</string>
     <string name="reset_group_filter">Reset to all</string>
     <string name="hide_button_text">Hide Backdrop button text</string>
+    <string name="extra_large_backdrop">Make the backdrop cover extra large</string>
+
 
     <string name="mdlist">MDList</string>
 

@@ -106,7 +106,7 @@ class PreferencesHelper(val context: Context) {
     fun clear() = prefs.edit().clear().apply()
 
     fun nightMode() = flowPrefs.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-    
+
     private val supportsDynamic = DynamicColors.isDynamicColorAvailable()
     fun lightTheme() =
         flowPrefs.getEnum(Keys.lightTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
@@ -436,6 +436,8 @@ class PreferencesHelper(val context: Context) {
     fun hideHopper() = flowPrefs.getBoolean("hide_hopper", false)
 
     fun hideButtonText() = flowPrefs.getBoolean(Keys.hideMangaDetailButtonText, false)
+
+    fun extraLargeBackdrop() = flowPrefs.getBoolean(Keys.extraLargeBackdrop, false)
 
     fun autohideHopper() = flowPrefs.getBoolean(Keys.autoHideHopper, true)
 

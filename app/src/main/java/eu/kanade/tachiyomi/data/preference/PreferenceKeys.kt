@@ -243,6 +243,8 @@ object PreferenceKeys {
 
     const val hideMangaDetailButtonText = "hide_manga_detail_button_text"
 
+    const val extraLargeBackdrop = "extra_large_backdrop"
+
     const val incognitoMode = "incognito_mode"
 
     const val sideNavMode = "side_nav_mode"

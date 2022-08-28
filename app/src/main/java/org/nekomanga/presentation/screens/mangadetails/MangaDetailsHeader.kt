@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -76,9 +77,18 @@ fun MangaDetailsHeader(
             }
         }
 
-        val height = when (windowSizeClass.heightSizeClass == WindowHeightSizeClass.Expanded) {
-            true -> 800.dp
-            else -> 400.dp
+        val modifier = when (generalState.value.extraLargeBackdrop) {
+            true -> Modifier.fillMaxSize()
+            false -> {
+                when (windowSizeClass.heightSizeClass == WindowHeightSizeClass.Expanded) {
+                    true -> Modifier
+                        .fillMaxWidth()
+                        .requiredHeightIn(250.dp, 600.dp)
+                    else -> Modifier
+                        .fillMaxWidth()
+                        .requiredHeightIn(250.dp, 400.dp)
+                }
+            }
         }
 
         Column {
@@ -87,9 +97,7 @@ fun MangaDetailsHeader(
                     themeColorState = themeColorState,
                     artworkProvider = { mangaState.value.currentArtwork },
                     showBackdropProvider = { generalState.value.themeBasedOffCovers },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredHeightIn(250.dp, height),
+                    modifier = modifier,
                     generatePalette = generatePalette,
                 )
                 Box(
