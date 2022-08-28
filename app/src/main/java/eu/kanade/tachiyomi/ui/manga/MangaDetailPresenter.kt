@@ -31,7 +31,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
-import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
@@ -150,7 +149,6 @@ class MangaDetailPresenter(
         updateCategoryFlows()
         updateTrackingFlows(true)
         updateExternalFlows()
-        updateMergeFlow()
         updateAlternativeArtworkFlow()
         updateFilterFlow()
     }
@@ -1053,25 +1051,6 @@ class MangaDetailPresenter(
     }
 
     /**
-     * Get current merge result
-     */
-    private fun getIsMergedManga(): IsMergedManga {
-        return when (manga.value.isMerged()) {
-            true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!, manga.value.title)
-            false -> No
-        }
-    }
-
-    /**
-     * Update flows for merge
-     */
-    private fun updateMergeFlow() {
-        presenterScope.launch {
-            _mangaState.value = mangaState.value.copy(isMerged = getIsMergedManga())
-        }
-    }
-
-    /**
      * Update the current artwork with the vibrant color
      */
     fun updateMangaColor(vibrantColor: Int) {
@@ -1080,7 +1059,7 @@ class MangaDetailPresenter(
     }
 
     /**
-     * Update flows for merge
+     * Update flows for alternative artwork
      */
     private fun updateAlternativeArtworkFlow() {
         presenterScope.launchIO {
@@ -1112,20 +1091,25 @@ class MangaDetailPresenter(
             _currentManga.value = m
             _mangaState.value =
                 mangaState.value.copy(
-                    currentTitle = m.title,
                     alternativeTitles = m.getAltTitles().toImmutableList(),
-                    currentDescription = getDescription(),
-                    inLibrary = m.favorite,
-                    author = m.author ?: "",
                     artist = m.artist ?: "",
-                    status = m.status,
+                    author = m.author ?: "",
+                    currentDescription = getDescription(),
+                    currentTitle = m.title,
                     genres = (m.getGenres() ?: emptyList()).toImmutableList(),
-                    isPornographic = m.genre?.contains("pornographic") ?: false,
-                    missingChapters = m.missing_chapters,
-                    rating = m.rating,
-                    users = m.users,
-                    langFlag = m.lang_flag,
                     initialized = m.initialized,
+                    inLibrary = m.favorite,
+                    isMerged = when (m.isMerged()) {
+                        true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!, manga.value.title)
+                        false -> No
+                    },
+                    isPornographic = m.genre?.contains("pornographic") ?: false,
+                    langFlag = m.lang_flag,
+                    missingChapters = m.missing_chapters,
+                    originalTitle = m.originalTitle,
+                    rating = m.rating,
+                    status = m.status,
+                    users = m.users,
                 )
         }
     }

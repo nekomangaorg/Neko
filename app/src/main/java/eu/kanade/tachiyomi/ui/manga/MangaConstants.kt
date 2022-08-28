@@ -40,25 +40,25 @@ object MangaConstants {
     )
 
     data class MangaScreenMangaState(
-        val alternativeTitles: ImmutableList<String> = persistentListOf(),
         val alternativeArtwork: ImmutableList<Artwork> = persistentListOf(),
+        val alternativeTitles: ImmutableList<String> = persistentListOf(),
+        val artist: String = "",
+        val author: String = "",
         val currentArtwork: Artwork,
         val currentCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val currentDescription: String = "",
         val currentTitle: String = "",
+        val genres: ImmutableList<String> = persistentListOf(),
+        val initialized: Boolean = false,
         val inLibrary: Boolean = false,
         val isMerged: MergeConstants.IsMergedManga = MergeConstants.IsMergedManga.No,
-        val author: String = "",
-        val artist: String = "",
-        val status: Int = 0,
-        val initialized: Boolean = false,
-        val missingChapters: String? = null,
         val isPornographic: Boolean = false,
-        val genres: ImmutableList<String> = persistentListOf(),
-        val rating: String? = null,
-        val users: String? = null,
         val langFlag: String? = null,
+        val missingChapters: String? = null,
         val originalTitle: String = "",
+        val rating: String? = null,
+        val status: Int = 0,
+        val users: String? = null,
     )
 
     data class MangaScreenTrackMergeState(
