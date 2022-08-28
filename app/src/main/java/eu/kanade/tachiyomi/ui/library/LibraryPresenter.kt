@@ -106,7 +106,7 @@ class LibraryPresenter(
     private var hiddenLibraryItems: List<LibraryItem> = emptyList()
     var forceShowAllCategories = false
     val showAllCategories
-        get() = preferences.showAllCategories().get()
+        get() = forceShowAllCategories || preferences.showAllCategories().get()
 
     private val libraryIsGrouped
         get() = groupType != UNGROUPED

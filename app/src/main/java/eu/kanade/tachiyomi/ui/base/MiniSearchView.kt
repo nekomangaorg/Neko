@@ -66,4 +66,16 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
         requestLayout()
     }
+
+    fun addSearchModifierIcon(imageViewFactory: (Context) -> ImageView): ImageView? {
+        return findViewById<LinearLayout>(androidx.appcompat.R.id.search_plate)?.let { searchPlateView ->
+            val imageView = imageViewFactory(searchPlateView.context)
+            val clearButton = findViewById<ImageView>(androidx.appcompat.R.id.search_close_btn)
+            imageView.layoutParams = clearButton?.layoutParams
+            searchPlateView.addView(imageView, 1)
+            return imageView
+        }
+    }
+
+    fun removeSearchModifierIcon(view: ImageView) = findViewById<LinearLayout>(androidx.appcompat.R.id.search_plate)?.removeView(view)
 }
