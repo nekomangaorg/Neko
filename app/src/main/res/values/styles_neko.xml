@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Neko.Iconics" parent="">
-        <item name="iiv_size">24dp</item>
-        <item name="iiv_color">?attr/colorSecondary</item>
-        <item name="iiv_checked_color">?attr/colorSecondary</item>
-        <item name="iiv_unchecked_color">?attr/colorSecondary</item>
-        <item name="iiv_checked_size">24dp</item>
-        <item name="iiv_unchecked_size">24dp</item>
-        <item name="android:background">@drawable/round_ripple</item>
-    </style>
 
     <style name="Neko.Preference" parent="PreferenceThemeOverlay">
         <item name="fontFamily">@font/montserrat_medium</item>
@@ -26,14 +17,6 @@
         <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
-    <style name="Neko.Button.Rounded.Alternative" parent="Theme.Widget.Button.Primary">
-        <item name="android:letterSpacing">-0.02</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="fontFamily">@font/montserrat_medium</item>
-        <item name="backgroundTint">@color/mtrl_btn_bg_color_selector_alternative</item>
-        <item name="android:textColor">?attr/colorOnUnreadBadge</item>
-        <item name="cornerRadius">20dp</item>
-    </style>
 
     <style name="chipText" parent="TextAppearance.MaterialComponents.Chip">
         <item name="fontFamily">@font/montserrat_medium</item>
