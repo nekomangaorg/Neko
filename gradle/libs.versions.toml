@@ -103,7 +103,7 @@ retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serializati
 
 #test libs
 junit = "junit:junit:4.13.2"
-mockk = "io.mockk:mockk:1.12.4"
+mockk = "io.mockk:mockk:1.12.7"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.3.2"
 
 [plugins]
