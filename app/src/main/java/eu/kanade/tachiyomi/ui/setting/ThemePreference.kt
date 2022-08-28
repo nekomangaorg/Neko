@@ -6,7 +6,6 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
@@ -263,9 +262,6 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                 binding.themeItem3.imageTintList =
                     ColorStateList.valueOf(inactiveTab)
                 binding.themeLayout.setBackgroundColor(background)
-                if (item.isDarkTheme && preferences.themeDarkAmoled().get()) {
-                    binding.themeLayout.setBackgroundColor(Color.BLACK)
-                }
             }
 
             override fun unbindView(item: ThemeItem) {

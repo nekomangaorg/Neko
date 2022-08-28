@@ -1,16 +1,13 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import uy.kohesive.injekt.injectLazy
 
 object ThemeUtil {
 
@@ -53,11 +50,6 @@ object ThemeUtil {
         }
     }
 
-    fun isPitchBlack(context: Context): Boolean {
-        val preferences: PreferencesHelper by injectLazy()
-        return context.isInNightMode() && preferences.themeDarkAmoled().get()
-    }
-
     fun readerBackgroundColor(theme: Int): Int {
         return when (theme) {
             1 -> Color.BLACK
@@ -68,23 +60,6 @@ object ThemeUtil {
 
 fun AppCompatActivity.setThemeByPref(preferences: PreferencesHelper) {
     setTheme(getPrefTheme(preferences).styleRes)
-}
-
-fun AppCompatActivity.getThemeWithExtras(theme: Resources.Theme, preferences: PreferencesHelper, oldTheme: Resources.Theme?): Resources.Theme {
-    val useAmoled =
-        (isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
-            preferences.themeDarkAmoled().get()
-    if (oldTheme != null && useAmoled) {
-        val array = oldTheme.obtainStyledAttributes(intArrayOf(R.attr.background))
-        val bg = array.getColor(0, 0)
-        if (bg == Color.BLACK) {
-            return oldTheme
-        }
-    }
-    if (useAmoled) {
-        theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_Amoled, true)
-    }
-    return theme
 }
 
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {

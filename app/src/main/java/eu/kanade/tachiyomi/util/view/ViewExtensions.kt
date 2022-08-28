@@ -13,7 +13,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.content.res.Resources
-import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.RenderEffect
@@ -29,7 +28,6 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.Window
 import android.view.WindowInsets
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.Dimension
@@ -69,7 +67,6 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.tintText
-import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
@@ -107,15 +104,6 @@ fun View.snack(
     val snack = Snackbar.make(this, message, length)
     if (f != null) {
         snack.f()
-    }
-    if (ThemeUtil.isPitchBlack(context)) {
-        val textView: TextView =
-            snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
-        val button: Button? =
-            snack.view.findViewById(com.google.android.material.R.id.snackbar_action)
-        textView.setTextColor(Color.WHITE)
-        button?.setTextColor(Color.WHITE)
-        snack.view.backgroundTintList = ColorStateList.valueOf(Color.DKGRAY)
     }
     snack.show()
     return snack

@@ -189,9 +189,6 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         val lightMode = !isInNightMode()
         val prefTheme = getPrefTheme(preferences)
         setTheme(prefTheme.styleRes)
-        if (!lightMode && preferences.themeDarkAmoled().get()) {
-            setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
-        }
         val themeValue = TypedValue()
         theme.resolveAttribute(android.R.attr.windowLightStatusBar, themeValue, true)
 
