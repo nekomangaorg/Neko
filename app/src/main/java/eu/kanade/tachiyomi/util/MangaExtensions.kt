@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.util
 
 import android.app.Activity
+import android.content.Context
+import android.content.DialogInterface
 import android.view.View
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -257,4 +259,31 @@ fun SManga.getSlug(): String {
     }
 
     return slug.joinToString("-")
+}
+
+fun Context.mapStatus(status: Int): String {
+    return getString(
+        when (status) {
+            SManga.ONGOING -> R.string.ongoing
+            SManga.COMPLETED -> R.string.completed
+            SManga.LICENSED -> R.string.licensed
+            SManga.PUBLISHING_FINISHED -> R.string.publishing_finished
+            SManga.CANCELLED -> R.string.cancelled
+            SManga.ON_HIATUS -> R.string.on_hiatus
+            else -> R.string.unknown
+        },
+    )
+}
+
+fun Context.mapSeriesType(seriesType: Int): String {
+    return getString(
+        when (seriesType) {
+            Manga.TYPE_MANGA -> R.string.manga
+            Manga.TYPE_MANHWA -> R.string.manhwa
+            Manga.TYPE_MANHUA -> R.string.manhua
+            Manga.TYPE_COMIC -> R.string.comic
+            Manga.TYPE_WEBTOON -> R.string.webtoon
+            else -> R.string.unknown
+        },
+    )
 }
