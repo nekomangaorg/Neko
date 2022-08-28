@@ -27,6 +27,6 @@ jobs:
           java-version: 11
 
       - name: Build app
-        uses: eskatos/gradle-command-action@v2.2.2
+        uses: eskatos/gradle-command-action@v2.2.5
         with:
           arguments: assembleDebug
