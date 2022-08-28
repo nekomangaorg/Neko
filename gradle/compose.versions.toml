@@ -16,7 +16,7 @@ paging = "androidx.paging:paging-compose:1.0.0-alpha14"
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
-material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.10"
+material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.17"
 
 activity = "androidx.activity:activity-compose:1.6.0-alpha03"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
