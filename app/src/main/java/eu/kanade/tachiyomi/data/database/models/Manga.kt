@@ -46,6 +46,8 @@ interface Manga : SManga {
 
     var filtered_scanlators: String?
 
+    var filtered_language: String?
+
     var user_cover: String?
 
     var user_title: String?

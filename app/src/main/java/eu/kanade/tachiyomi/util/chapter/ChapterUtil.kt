@@ -159,9 +159,18 @@ class ChapterUtil {
             if (scanlators.isNullOrBlank()) return emptyList()
             return scanlators.split(scanlatorSeparator).distinct()
         }
-        
+
         fun getScanlatorString(scanlators: Set<String>): String {
             return scanlators.toList().sorted().joinToString(scanlatorSeparator)
+        }
+
+        fun getLanguages(language: String?): List<String> {
+            if (language.isNullOrBlank()) return emptyList()
+            return language.split(scanlatorSeparator).distinct()
+        }
+
+        fun getLanguageString(languages: Set<String>): String {
+            return languages.toList().sorted().joinToString(scanlatorSeparator)
         }
     }
 }

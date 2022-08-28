@@ -23,11 +23,13 @@ object MangaConstants {
         val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
+        val allLanguages: ImmutableSet<String> = persistentSetOf(),
         val externalLinks: ImmutableList<ExternalLink> = persistentListOf(),
         val chapterFilter: Filter = Filter(),
         val chapterFilterText: String = "",
         val chapterSortFilter: SortFilter = SortFilter(),
         val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
+        val chapterLanguageFilter: LanguageFilter = LanguageFilter(persistentListOf()),
         val hasDefaultCategory: Boolean,
         val hideButtonText: Boolean,
         val hideChapterTitles: Boolean,
@@ -94,6 +96,15 @@ object MangaConstants {
         val disabled: Boolean = false,
     )
 
+    data class LanguageFilter(
+        val languages: ImmutableList<LanguageOption>,
+    )
+
+    data class LanguageOption(
+        val name: String,
+        val disabled: Boolean = false,
+    )
+
     data class Filter(
         val showAll: Boolean = false,
         val unread: ToggleableState = ToggleableState.Off,
@@ -146,6 +157,7 @@ object MangaConstants {
         val changeSort: (sortOptions: SortOption?) -> Unit,
         val changeFilter: (filterOption: FilterOption?) -> Unit,
         val changeScanlator: (scanlatorOption: ScanlatorOption?) -> Unit,
+        val changeLanguage: (languageOption: LanguageOption?) -> Unit,
         val hideTitles: (Boolean) -> Unit,
         val setAsGlobal: (SetGlobal) -> Unit,
     )

@@ -24,7 +24,7 @@ class ChapterItemFilter(
             manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
 
         // if none of the filters are enabled skip the filtering of them
-        val filteredChapters = filterChaptersByScanlators(chapters, manga)
+        val filteredChapters = filterChaptersByLanguage(filterChaptersByScanlators(chapters, manga), manga)
         return if (readEnabled || unreadEnabled || downloadEnabled || notDownloadEnabled || bookmarkEnabled || notBookmarkEnabled) {
             filteredChapters.filter { chapterItem ->
                 val chapter = chapterItem.chapter
@@ -82,6 +82,17 @@ class ChapterItemFilter(
             chapters.filter {
                 ChapterUtil.getScanlators(it.chapter.scanlator)
                     .none { group -> filteredScanlators.contains(group) }
+            }
+        } ?: chapters
+    }
+
+    /** filters chapters for language */
+    fun <T : ChapterItem> filterChaptersByLanguage(chapters: List<T>, manga: Manga): List<T> {
+        return manga.filtered_language?.let { filteredLanguageString ->
+            val filteredLanguages = ChapterUtil.getLanguages(filteredLanguageString)
+            chapters.filter {
+                ChapterUtil.getLanguages(it.chapter.language)
+                    .none { lang -> filteredLanguages.contains(lang) }
             }
         } ?: chapters
     }

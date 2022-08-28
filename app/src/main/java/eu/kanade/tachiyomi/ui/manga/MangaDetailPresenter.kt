@@ -639,9 +639,13 @@ class MangaDetailPresenter(
                 updateMangaScanlator(emptySet())
             }
 
+            val allLanguages = allChapters.flatMap { ChapterUtil.getLanguages(it.chapter.language) }.toSet()
+
             _generalState.value = generalState.value.copy(
                 activeChapters = chapterSort.getChaptersSorted(manga.value, allChapters).toImmutableList(),
-                allChapters = allChapters.toImmutableList(), allScanlators = allChapterScanlators.toImmutableSet(),
+                allChapters = allChapters.toImmutableList(),
+                allScanlators = allChapterScanlators.toImmutableSet(),
+                allLanguages = allLanguages.toImmutableSet(),
             )
 
             //this is only really needed on initial load since all chapter scanlators is empty and the scanlator filter sheet would be also
@@ -656,7 +660,7 @@ class MangaDetailPresenter(
     }
 
     /**
-     * Updates the filtered scanlators
+     * Updates the filtered languages
      */
     private fun updateMangaScanlator(filteredScanlators: Set<String>) {
         presenterScope.launchIO {
@@ -664,6 +668,24 @@ class MangaDetailPresenter(
             manga.filtered_scanlators = when (filteredScanlators.isEmpty()) {
                 true -> null
                 false -> ChapterUtil.getScanlatorString(filteredScanlators)
+            }
+
+            db.insertManga(manga).executeOnIO()
+            updateMangaFlow()
+            updateFilterFlow()
+
+        }
+    }
+
+    /**
+     * Updates the filtered scanlators
+     */
+    private fun updateMangaFilteredLanguages(filteredLanguages: Set<String>) {
+        presenterScope.launchIO {
+            val manga = manga.value
+            manga.filtered_language = when (filteredLanguages.isEmpty()) {
+                true -> null
+                false -> ChapterUtil.getLanguageString(filteredLanguages)
             }
 
             db.insertManga(manga).executeOnIO()
@@ -861,6 +883,20 @@ class MangaDetailPresenter(
     }
 
     /**
+     * Get scanlator filter
+     */
+    private fun getLangaugeFilter(): MangaConstants.LanguageFilter {
+        val filteredLanguages = ChapterUtil.getLanguages(manga.value.filtered_language).toSet()
+        val languageOptions = generalState.value.allLanguages.sortedWith(
+            compareBy(String.CASE_INSENSITIVE_ORDER) { it },
+        )
+            .map { language ->
+                MangaConstants.LanguageOption(name = language, disabled = filteredLanguages.contains(language))
+            }
+        return MangaConstants.LanguageFilter(languages = languageOptions.toImmutableList())
+    }
+
+    /**
      * Get hide titles
      */
     private fun getHideTitlesFilter(): Boolean {
@@ -987,6 +1023,30 @@ class MangaDetailPresenter(
             }
 
             updateMangaScanlator(newFilteredScanlators)
+            updateChapterFlows()
+
+        }
+    }
+
+    /**
+     * Changes the filtered scanlators, if null then it resets the scanlator filter
+     */
+    fun changeLanguageOption(languageOptions: MangaConstants.LanguageOption?) {
+        presenterScope.launchIO {
+            val manga = manga.value
+
+            val newFilteredLanguages = if (languageOptions != null) {
+                val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toMutableSet()
+                when (languageOptions.disabled) {
+                    true -> filteredLanguages.add(languageOptions.name)
+                    false -> filteredLanguages.remove(languageOptions.name)
+                }
+                filteredLanguages
+            } else {
+                emptySet()
+            }
+
+            updateMangaFilteredLanguages(newFilteredLanguages)
             updateChapterFlows()
 
         }
@@ -1125,6 +1185,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val filter = getFilter()
             val scanlatorFilter = getScanlatorFilter()
+            val languageFilter = getLangaugeFilter()
 
             _generalState.value = generalState.value.copy(
                 chapterSortFilter = getSortFilter(),
@@ -1132,6 +1193,7 @@ class MangaDetailPresenter(
                 hideChapterTitles = getHideTitlesFilter(),
                 chapterFilterText = getFilterText(filter, scanlatorFilter),
                 chapterScanlatorFilter = scanlatorFilter,
+                chapterLanguageFilter = languageFilter,
             )
         }
     }

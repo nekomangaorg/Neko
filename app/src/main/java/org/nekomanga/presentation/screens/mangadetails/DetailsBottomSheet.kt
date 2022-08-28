@@ -212,8 +212,10 @@ fun DetailsBottomSheet(
                 changeFilter = chapterFilterActions.changeFilter,
                 filter = generalState.value.chapterFilter,
                 scanlatorFilter = generalState.value.chapterScanlatorFilter,
+                languageFilter = generalState.value.chapterLanguageFilter,
                 hideTitlesFilter = generalState.value.hideChapterTitles,
                 changeScanlatorFilter = chapterFilterActions.changeScanlator,
+                changeLanguageFilter = chapterFilterActions.changeLanguage,
                 changeHideTitles = chapterFilterActions.hideTitles,
                 setAsGlobal = chapterFilterActions.setAsGlobal,
             )

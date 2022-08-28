@@ -62,6 +62,8 @@ object MangaTable {
 
     const val COL_SCANLATOR_FILTER_FLAG = "scanlator_filter_flag"
 
+    const val COL_LANGUAGE_FILTER_FLAG = "language_filter_flag"
+
     const val COL_MISSING_CHAPTERS = "missing_chapters"
 
     const val COL_RATING = "rating"
@@ -108,6 +110,7 @@ object MangaTable {
             $COL_ANIME_PLANET_ID TEXT,
             $COL_MANGA_UPDATES_ID TEXT,
             $COL_SCANLATOR_FILTER_FLAG TEXT,
+            $COL_LANGUAGE_FILTER_FLAG TEXT,
             $COL_MISSING_CHAPTERS TEXT,
             $COL_RATING TEXT,
             $COL_USERS TEXT,
@@ -190,4 +193,7 @@ object MangaTable {
 
     val clearScanlators: String
         get() = "UPDATE ${MangaTable.TABLE} SET ${MangaTable.COL_SCANLATOR_FILTER_FLAG} = NULL where _id in (select _id from ${MangaTable.TABLE} where ${MangaTable.COL_SCANLATOR_FILTER_FLAG} IS NOT NULL)"
+
+    val addLanguageFilterFlag: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_LANGUAGE_FILTER_FLAG} TEXT DEFAULT NULL"
 }

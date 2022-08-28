@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortState.Ascending
@@ -47,10 +48,12 @@ fun FilterChapterSheet(
     sortFilter: MangaConstants.SortFilter,
     filter: MangaConstants.Filter,
     scanlatorFilter: MangaConstants.ScanlatorFilter,
+    languageFilter: MangaConstants.LanguageFilter,
     hideTitlesFilter: Boolean,
     changeSort: (SortOption?) -> Unit,
     changeFilter: (MangaConstants.FilterOption?) -> Unit,
     changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit,
+    changeLanguageFilter: (MangaConstants.LanguageOption?) -> Unit,
     changeHideTitles: (Boolean) -> Unit,
     setAsGlobal: (MangaConstants.SetGlobal) -> Unit,
 ) {
@@ -74,7 +77,9 @@ fun FilterChapterSheet(
                 item {
                     Scanlator(themeColorState = themeColorState, scanlatorFilter, changeScanlatorFilter)
                 }
-
+                item {
+                    Language(themeColorState = themeColorState, languageFilter, changeLanguageFilter)
+                }
             }
         }
     }
@@ -337,6 +342,70 @@ private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: Man
         )
         Gap(width = 8.dp)
         Text(text = scanlatorOption.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+
+    }
+}
+
+@Composable
+private fun Language(themeColorState: ThemeColorState, languageFilter: MangaConstants.LanguageFilter, changeLanguageFilter: (MangaConstants.LanguageOption?) -> Unit) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier.padding(vertical = 16.dp),
+                text = stringResource(id = R.string.filter_languages),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (languageFilter.languages.any { it.disabled }) {
+                TextButton(onClick = { changeLanguageFilter(null) }) {
+                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                }
+            }
+        }
+
+        val enabled = languageFilter.languages.size > 1
+
+        languageFilter.languages.forEach { languageOption ->
+            LanguageLine(
+                themeColorState = themeColorState,
+                enabledButton = enabled,
+                languageOption = languageOption,
+            ) { changeLanguageFilter(languageOption.copy(disabled = !languageOption.disabled)) }
+        }
+    }
+}
+
+@Composable
+private fun LanguageLine(themeColorState: ThemeColorState, languageOption: MangaConstants.LanguageOption, enabledButton: Boolean, changeLanguageFilter: () -> Unit) {
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .conditional(enabledButton) {
+                this.clickable {
+                    changeLanguageFilter()
+                }
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TriStateCheckbox(
+            state = if (languageOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
+            enabled = enabledButton,
+            colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
+            onClick = changeLanguageFilter,
+        )
+        Gap(width = 8.dp)
+        Text(text = MdLang.fromIsoCode(languageOption.name)?.prettyPrint ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
 
     }
 }

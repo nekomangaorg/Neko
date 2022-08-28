@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_GENRE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_INITIALIZED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_KITSU_ID
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANGUAGE_FILTER_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_LAST_CHAPTER
@@ -104,6 +105,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_ALT_TITLE, obj.alt_titles)
         put(COL_USER_COVER, obj.user_cover)
         put(COL_USER_TITLE, obj.user_title)
+        put(COL_LANGUAGE_FILTER_FLAG, obj.filtered_language)
     }
 }
 
@@ -145,6 +147,7 @@ interface BaseMangaGetResolver {
         alt_titles = cursor.getString(cursor.getColumnIndex(COL_ALT_TITLE))
         user_cover = cursor.getString(cursor.getColumnIndex(COL_USER_COVER))
         user_title = cursor.getString(cursor.getColumnIndex(COL_USER_TITLE))
+        filtered_language = cursor.getString(cursor.getColumnIndex(COL_LANGUAGE_FILTER_FLAG))
 
     }
 }
