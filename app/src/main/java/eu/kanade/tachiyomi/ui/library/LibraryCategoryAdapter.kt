@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.system.withDefContext
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
+import kotlin.math.roundToInt
 
 /**
  * Adapter storing a list of manga in a certain category.
@@ -198,6 +199,10 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                             if (preferences.removeArticles().get()) title.removeArticles().chop(15)
                             else title.take(10)
                         }
+                    }
+                    LibrarySort.Rating -> {
+                        item.manga.rating ?: return "N/A"
+                        ((item.manga.rating!!.toDouble() * 100).roundToInt() / 100.0).toString()
                     }
                     LibrarySort.DateFetched -> {
                         val id = item.manga.id ?: return ""

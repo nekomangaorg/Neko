@@ -28,7 +28,8 @@ enum class LibrarySort(
         7,
         R.string.category,
         R.drawable.ic_label_outline_24dp,
-    )
+    ),
+    Rating(8, R.string.rating, R.drawable.ic_poll_24dp)
     ;
 
     val categoryValue: Char

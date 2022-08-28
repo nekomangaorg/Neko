@@ -58,6 +58,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
@@ -505,6 +506,19 @@ class LibraryPresenter(
                                 val manga2LastRead =
                                     lastFetchedManga[i2.manga.id!!] ?: lastFetchedManga.size
                                 manga1LastRead.compareTo(manga2LastRead)
+                            }
+                            LibrarySort.Rating -> {
+                                if (i2.manga.rating == null && i1.manga.rating != null) {
+                                    -1
+                                } else if (i2.manga.rating != null && i1.manga.rating == null) {
+                                    1
+                                } else if (i2.manga.rating == null && i1.manga.rating == null) {
+                                    0
+                                } else {
+                                    val i2Rating = ((i2.manga.rating!!.toDouble() * 100).roundToInt() / 100.0)
+                                    val i1Rating = ((i1.manga.rating!!.toDouble() * 100).roundToInt() / 100.0)
+                                    i2Rating.compareTo(i1Rating)
+                                }
                             }
                             LibrarySort.DateAdded -> i2.manga.date_added.compareTo(i1.manga.date_added)
                             LibrarySort.DragAndDrop -> {
