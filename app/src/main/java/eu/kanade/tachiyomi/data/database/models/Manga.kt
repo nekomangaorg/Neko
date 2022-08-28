@@ -183,7 +183,7 @@ interface Manga : SManga {
     }
 
     fun getAltTitles(): List<String> {
-        return alt_titles?.split("|~|")?.filter { it.isNotBlank() } ?: emptyList()
+        return alt_titles?.split("|~|")?.filter { it.isNotBlank() }?.filter { it != originalTitle } ?: emptyList()
     }
 
     fun getExternalLinks(): List<ExternalLink> {
