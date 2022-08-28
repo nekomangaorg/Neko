@@ -741,10 +741,14 @@ class MangaDetailPresenter(
                                             if (!isOnline()) {
                                                 launchUI { _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker")) }
                                             } else {
-                                                val trackResult = trackManager.getService(trackService.id)!!.search("", manga.value, false)
-                                                trackResult.firstOrNull()?.let { track ->
-                                                    val trackingUpdate = trackingCoordinator.registerTracking(TrackAndService(track.toTrackItem(), trackService), mangaId)
+                                                val trackResult = trackingCoordinator.searchTrackerNonFlow("", trackManager.getService(trackService.id)!!.toTrackServiceItem(), manga.value, false)
+
+                                                if (trackResult is TrackingConstants.TrackSearchResult.Success) {
+                                                    val trackSearchItem = trackResult.trackSearchResult[0]
+                                                    val trackingUpdate = trackingCoordinator.registerTracking(TrackAndService(trackSearchItem.trackItem, trackService), mangaId)
                                                     handleTrackingUpdate(trackingUpdate, false)
+                                                } else if (trackResult is TrackingConstants.TrackSearchResult.Error) {
+                                                    launchUI { _snackbarState.emit(SnackbarState(message = "Error trying to autolinking tracker.  ${trackResult.errorMessage}")) }
                                                 }
                                             }
                                         }

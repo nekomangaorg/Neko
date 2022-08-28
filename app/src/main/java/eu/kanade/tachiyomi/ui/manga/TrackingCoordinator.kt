@@ -155,6 +155,22 @@ class TrackingCoordinator {
         XLog.e("error searching tracker", it)
         emit(TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker"))
     }
+
+    /**
+     * Search Tracker
+     */
+    suspend fun searchTrackerNonFlow(title: String, service: TrackServiceItem, manga: Manga, previouslyTracker: Boolean): TrackingConstants.TrackSearchResult {
+        return kotlin.runCatching {
+            val results = trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
+            when (results.isEmpty()) {
+                true -> TrackingConstants.TrackSearchResult.NoResult
+                false -> TrackingConstants.TrackSearchResult.Success(results.map { it.toTrackSearchItem() }.toImmutableList())
+            }
+        }.getOrElse {
+            XLog.e("error searching tracker", it)
+            TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker")
+        }
+    }
 }
 
 sealed class TrackingUpdate {
