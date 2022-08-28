@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.math.max
 
 object Migrations {
 
@@ -120,7 +121,13 @@ object Migrations {
                     preferences.navigationModeWebtoon().set(5)
                 }
             }
-            
+            if (oldVersion < 151) {
+                val oldDLAfterReading = prefs.getInt("auto_download_after_reading", 0)
+                if (oldDLAfterReading > 0) {
+                    preferences.autoDownloadWhileReading().set(max(2, oldDLAfterReading))
+                }
+            }
+
             return true
         }
         return false
