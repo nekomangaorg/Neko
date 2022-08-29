@@ -86,13 +86,13 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
             ),
             generatePalette = this::setPalette,
             titleLongClick = { context, content ->
-                if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
+                if (Build.VERSION.SDK_INT + Build.VERSION.SDK_INT < 33) {
                     presenter.copiedToClipboard(context.getString(R.string.title))
                 }
                 copyToClipboard(context, content, R.string.title)
             },
             creatorLongClick = { context, content ->
-                if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
+                if (Build.VERSION.SDK_INT + Build.VERSION.SDK_INT < 33) {
                     presenter.copiedToClipboard(context.getString(R.string.creator))
                 }
                 copyToClipboard(context, content, R.string.creator)
