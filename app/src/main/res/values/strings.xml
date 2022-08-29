@@ -913,6 +913,7 @@
     <string name="split_tall_images_summary">Improves reader performance</string>
 
     <!-- Stats -->
+    <string name="stat">Stat</string>
     <string name="stats">Stats</string>
     <string name="statistics">Statistics</string>
     <string name="statistics_details">Statistics details</string>

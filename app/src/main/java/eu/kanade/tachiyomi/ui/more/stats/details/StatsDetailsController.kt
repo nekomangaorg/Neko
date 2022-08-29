@@ -121,20 +121,23 @@ class StatsDetailsController :
 
             chipStat.setOnClickListener {
                 searchView.clearFocus()
-                activity?.materialAlertDialog()?.setSingleChoiceItems(
-                    presenter.getStatsArray(),
-                    Stats.values().indexOf(presenter.selectedStat),
-                ) { dialog, which ->
-                    val newSelection = Stats.values()[which]
-                    if (newSelection == presenter.selectedStat) return@setSingleChoiceItems
-                    chipStat.text = activity?.getString(newSelection.resourceId)
-                    presenter.selectedStat = newSelection
-                    chipStat.setColors((presenter.selectedStat != defaultStat).toInt())
+                activity?.materialAlertDialog()
+                    ?.setTitle(R.string.stat)
+                    ?.setSingleChoiceItems(
+                        presenter.getStatsArray(),
+                        Stats.values().indexOf(presenter.selectedStat),
+                    ) { dialog, which ->
+                        val newSelection = Stats.values()[which]
+                        if (newSelection == presenter.selectedStat) return@setSingleChoiceItems
+                        chipStat.text = activity?.getString(newSelection.resourceId)
+                        presenter.selectedStat = newSelection
+                        chipStat.setColors((presenter.selectedStat != defaultStat).toInt())
 
-                    dialog.dismiss()
-                    searchItem.collapseActionView()
-                    resetAndSetup()
-                }
+                        dialog.dismiss()
+                        searchItem.collapseActionView()
+                        resetAndSetup()
+                    }
+                    ?.setNegativeButton(android.R.string.cancel, null)
                     ?.show()
             }
             chipStat.setOnCloseIconClickListener {
@@ -216,7 +219,9 @@ class StatsDetailsController :
             }
             chipSort.setOnClickListener {
                 searchView.clearFocus()
-                activity!!.materialAlertDialog().setSingleChoiceItems(
+                activity!!.materialAlertDialog()
+                    .setTitle(R.string.sort_by)
+                    .setSingleChoiceItems(
                     presenter.getSortDataArray(),
                     StatsSort.values().indexOf(presenter.selectedStatsSort),
                 ) { dialog, which ->
@@ -370,24 +375,29 @@ class StatsDetailsController :
         resourceIdPlural: Int,
     ) {
         val isCategory = statsList.isArrayOf<Category>()
-        val items = statsList.map { if (isCategory) (it as Category).name else it.toString() }.toTypedArray()
+        val items = statsList.map { if (isCategory) (it as Category).name else it.toString() }
+            .toTypedArray()
         searchView.clearFocus()
-        activity!!.materialAlertDialog().setMultiChoiceItems(
-            items,
-            statsList.map { it in selectedValues }.toBooleanArray(),
-        ) { _, which, checked ->
-            val newSelection = statsList[which]
-            if (checked) {
-                selectedValues.add(newSelection)
-            } else {
-                selectedValues.remove(newSelection)
+        activity!!.materialAlertDialog()
+            .setTitle(resourceId)
+            .setMultiChoiceItems(
+                items,
+                statsList.map { it in selectedValues }.toBooleanArray(),
+            ) { _, which, checked ->
+                val newSelection = statsList[which]
+                if (checked) {
+                    selectedValues.add(newSelection)
+                } else {
+                    selectedValues.remove(newSelection)
+                }
             }
-            setState(selectedValues, resourceId, resourceIdPlural, isCategory)
-            updateChipsVisibility()
-        }.setOnDismissListener {
-            binding.progress.isVisible = true
-            resetAndSetup(updateChipsVisibility = false)
-        }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                setState(selectedValues, resourceId, resourceIdPlural, isCategory)
+                updateChipsVisibility()
+                binding.progress.isVisible = true
+                resetAndSetup(updateChipsVisibility = false)
+            }
             .show()
     }
 
