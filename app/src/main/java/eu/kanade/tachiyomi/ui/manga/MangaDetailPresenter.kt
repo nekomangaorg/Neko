@@ -146,11 +146,18 @@ class MangaDetailPresenter(
      * Update all flows
      */
     private fun updateAllFlows() {
-        updateMangaFlow(true)
-        updateChapterFlows()
+        presenterScope.launchIO {
+            val m = db.getManga(mangaId).executeAsBlocking()!!
+            _currentManga.value = m
+            val mangaState = getMangaStateCopyForCategories(getMangaStateCopyFromManga(m))
+            val currentArtwork = createCurrentArtwork(m)
+            val altArtwork = createAltArtwork(m, currentArtwork)
+            _mangaState.value = mangaState.copy(currentArtwork = currentArtwork, alternativeArtwork = altArtwork)
+            _generalState.value = getGeneralStateCopyForCategories(generalState.value)
+            updateChapterFlows()
+            updateFilterFlow()
+        }
         updateTrackingFlows(true)
-        updateFilterFlow()
-        updateCategoryFlows()
     }
 
     /**
@@ -172,7 +179,9 @@ class MangaDetailPresenter(
                         _isRefreshing.value = false
                     }
                     is MangaResult.Success -> {
-                        updateAllFlows()
+                        updateArtworkFlow()
+                        updateFilterFlow()
+                        updateTrackingFlows(true)
                         _isRefreshing.value = false
                     }
                     is MangaResult.UpdatedChapters -> {
@@ -719,19 +728,24 @@ class MangaDetailPresenter(
      */
     private fun updateCategoryFlows() {
         presenterScope.launchIO {
-            val categories = db.getCategories().executeAsBlocking()
-
-            _generalState.value = generalState.value.copy(
-                allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
-            )
-
-            val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
-
-            _mangaState.value = mangaState.value.copy(
-                currentCategories = mangaCategories.map { it.toCategoryItem() }.toImmutableList(),
-            )
+            _generalState.value = getGeneralStateCopyForCategories(generalState.value)
+            _mangaState.value = getMangaStateCopyForCategories(mangaState.value)
 
         }
+    }
+
+    private fun getGeneralStateCopyForCategories(generalState: MangaConstants.MangaScreenGeneralState): MangaConstants.MangaScreenGeneralState {
+        val categories = db.getCategories().executeAsBlocking()
+        return generalState.copy(
+            allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
+        )
+    }
+
+    private fun getMangaStateCopyForCategories(mangaState: MangaConstants.MangaScreenMangaState): MangaConstants.MangaScreenMangaState {
+        val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
+        return mangaState.copy(
+            currentCategories = mangaCategories.map { it.toCategoryItem() }.toImmutableList(),
+        )
     }
 
     /**
@@ -1135,40 +1149,38 @@ class MangaDetailPresenter(
     /**
      * Update flows for manga
      */
-    private fun updateMangaFlow(initial: Boolean = false) {
+    private fun updateMangaFlow() {
         presenterScope.launch {
             val m = db.getManga(mangaId).executeOnIO()!!
             _currentManga.value = m
-
-            val currentArtwork = if (initial) createCurrentArtwork(m) else mangaState.value.currentArtwork
-            val altArtwork = if (initial) createAltArtwork(m, currentArtwork) else mangaState.value.alternativeArtwork
-
-            _mangaState.value = mangaState.value.copy(
-                alternativeTitles = m.getAltTitles().toImmutableList(),
-                alternativeArtwork = altArtwork,
-                artist = m.artist ?: "",
-                author = m.author ?: "",
-                currentArtwork = if (initial) createCurrentArtwork(m) else mangaState.value.currentArtwork,
-                currentDescription = getDescription(),
-                currentTitle = m.title,
-                externalLinks = manga.value.getExternalLinks().toImmutableList(),
-                genres = (m.getGenres() ?: emptyList()).toImmutableList(),
-                initialized = m.initialized,
-                inLibrary = m.favorite,
-                isMerged = when (m.isMerged()) {
-                    true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!, manga.value.title)
-                    false -> No
-                },
-                isPornographic = m.genre?.contains("pornographic") ?: false,
-                langFlag = m.lang_flag,
-                missingChapters = m.missing_chapters,
-                originalTitle = m.originalTitle,
-                rating = m.rating,
-                status = m.status,
-                users = m.users,
-            )
+            _mangaState.value = getMangaStateCopyFromManga(_currentManga.value)
 
         }
+    }
+
+    private fun getMangaStateCopyFromManga(m: Manga): MangaConstants.MangaScreenMangaState {
+        return mangaState.value.copy(
+            alternativeTitles = m.getAltTitles().toImmutableList(),
+            artist = m.artist ?: "",
+            author = m.author ?: "",
+            currentDescription = getDescription(),
+            currentTitle = m.title,
+            externalLinks = manga.value.getExternalLinks().toImmutableList(),
+            genres = (m.getGenres() ?: emptyList()).toImmutableList(),
+            initialized = m.initialized,
+            inLibrary = m.favorite,
+            isMerged = when (m.isMerged()) {
+                true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!, manga.value.title)
+                false -> No
+            },
+            isPornographic = m.genre?.contains("pornographic") ?: false,
+            langFlag = m.lang_flag,
+            missingChapters = m.missing_chapters,
+            originalTitle = m.originalTitle,
+            rating = m.rating,
+            status = m.status,
+            users = m.users,
+        )
     }
 
     /**
