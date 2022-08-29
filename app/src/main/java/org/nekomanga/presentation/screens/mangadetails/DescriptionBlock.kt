@@ -100,7 +100,7 @@ fun DescriptionBlock(
     ) {
 
         if (!isExpanded) {
-            val text = descriptionProvider().split("\n").take(3).joinToString("\n")
+            val text = descriptionProvider().split("\n").take(2).joinToString("\n")
 
             val lineHeight = with(LocalDensity.current) {
                 MaterialTheme.typography.bodyLarge.fontSize.toDp() + 8.dp

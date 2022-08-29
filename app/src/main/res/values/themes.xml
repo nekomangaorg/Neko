@@ -41,7 +41,7 @@
         <item name="colorBackgroundFloating">?colorSurface</item>
 
         <item name="colorTertiary">@color/md_black_1000</item>
-        <item name="colorOnTertiary">@color/black</item>
+        <item name="colorOnTertiary">@android:color/black</item>
 
         <item name="readerBackground">@color/primaryVariantTachiyomi</item>
         <item name="android:listSelector">?attr/colorSecondary</item>

@@ -7,7 +7,7 @@
         <item name="colorSecondary">@android:color/system_accent1_600</item>
         <item name="colorControlHighlight">@color/secondary_highlight</item>
         <item name="colorTertiary">@android:color/system_accent3_300</item>
-        <item name="colorOnTertiary">@color/black</item>
+        <item name="colorOnTertiary">@android:color/black</item>
         <item name="colorSecondaryVariant">@android:color/system_accent2_900</item>
         <item name="colorPrimaryVariant">@android:color/system_neutral2_100</item>
         <item name="colorSurface">@android:color/system_neutral1_50</item>

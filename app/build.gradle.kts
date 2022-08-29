@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 152
-    const val versionName = "2.10.5"
+    const val versionCode = 153
+    const val versionName = "2.10.6"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -200,14 +200,13 @@ dependencies {
     implementation("com.elvishew:xlog:1.11.0")
 
     // UI
-    //implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
-    implementation("com.github.leandroBorgesFerreira:LoadingButtonAndroid:2.2.0")
     implementation(libs.bundles.fastadapter)
+    implementation("com.github.leandroBorgesFerreira:LoadingButtonAndroid:2.2.0")
+
 
     implementation(libs.bundles.flexibleadapter)
 
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
-    implementation("com.github.sephiroth74:NumberSlidingPicker:1.0.3")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
