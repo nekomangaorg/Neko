@@ -439,6 +439,8 @@ class PreferencesHelper(val context: Context) {
 
     fun extraLargeBackdrop() = flowPrefs.getBoolean(Keys.extraLargeBackdrop, false)
 
+    fun fasterLibraryUpdates() = flowPrefs.getBoolean(Keys.fasterLibraryUpdates, false)
+
     fun autohideHopper() = flowPrefs.getBoolean(Keys.autoHideHopper, true)
 
     fun groupLibraryBy() = flowPrefs.getInt("group_library_by", 0)

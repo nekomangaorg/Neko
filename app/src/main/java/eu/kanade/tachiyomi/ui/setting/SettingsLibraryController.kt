@@ -157,6 +157,12 @@ class SettingsLibraryController : SettingsController() {
                 defaultValue = false
             }
 
+            switchPreference {
+                key = Keys.fasterLibraryUpdates
+                titleRes = R.string.faster_library_update
+                defaultValue = false
+            }
+
             intListPreference(activity) {
                 key = Keys.libraryUpdatePrioritization
                 titleRes = R.string.library_update_order

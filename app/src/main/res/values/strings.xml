@@ -231,6 +231,7 @@
     <string name="library_update_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
     <string name="only_update_ongoing">Only update ongoing manga</string>
+    <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
