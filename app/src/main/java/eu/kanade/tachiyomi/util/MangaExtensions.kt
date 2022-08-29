@@ -72,11 +72,11 @@ fun List<Manga>.moveCategories(
     if (this.isEmpty()) return
     val categories = db.getCategories().executeAsBlocking()
     val commonCategories = map { db.getCategoriesForManga(it).executeAsBlocking() }
-        .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+        .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2.toSet()).toMutableList() }
         .toTypedArray()
     val mangaCategories = map { db.getCategoriesForManga(it).executeAsBlocking() }
-    val common = mangaCategories.reduce { set1, set2 -> set1.intersect(set2).toMutableList() }
-    val mixedCategories = mangaCategories.flatten().distinct().subtract(common).toMutableList()
+    val common = mangaCategories.reduce { set1, set2 -> set1.intersect(set2.toSet()).toMutableList() }
+    val mixedCategories = mangaCategories.flatten().distinct().subtract(common.toSet()).toMutableList()
     SetCategoriesSheet(
         activity,
         this,
