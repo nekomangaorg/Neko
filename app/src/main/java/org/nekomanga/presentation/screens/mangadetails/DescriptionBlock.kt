@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -108,21 +109,31 @@ fun DescriptionBlock(
             )
 
             val lineHeight = with(LocalDensity.current) {
-                MaterialTheme.typography.bodyLarge.fontSize.toDp() + 5.dp
+                MaterialTheme.typography.bodyLarge.fontSize.toDp() + 8.dp
+            }
+
+            val descriptionHeight = with(LocalDensity.current) {
+                MaterialTheme.typography.bodyLarge.fontSize.toDp() * 3
             }
 
             Box {
-                Text(
-                    modifier = Modifier.align(Alignment.TopStart),
-                    text = text,
-                    maxLines = 3,
-                    style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)),
+                Markdown(
+                    content = text,
+                    colors = markdownColors(),
+                    typography = markdownTypography(),
+                    flavour = CommonMarkFlavourDescriptor(),
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .heightIn(0.dp, descriptionHeight)
+                        .then(clickable),
                 )
+
                 Box(
                     modifier = Modifier
                         .height(lineHeight)
                         .align(Alignment.BottomEnd)
-                        .width(150.dp)
+                        .width(175.dp)
+                        .then(clickable)
                         .background(
                             Brush.horizontalGradient(
                                 colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface.copy(alpha = .8f), MaterialTheme.colorScheme.surface),
@@ -147,6 +158,7 @@ fun DescriptionBlock(
                 Gap(16.dp)
             }
             val text = descriptionProvider().trim()
+
             SelectionContainer {
                 Markdown(
                     content = text,
