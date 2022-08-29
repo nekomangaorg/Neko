@@ -131,7 +131,7 @@ class MangaDetailPresenter(
         LibraryUpdateService.setListener(this)
         if (!manga.value.initialized) {
             updateMangaFlow()
-            updateCurrentArtworkFlow()
+            updateArtworkFlow()
             onRefresh()
         } else {
             updateAllFlows()
@@ -145,13 +145,11 @@ class MangaDetailPresenter(
      */
     private fun updateAllFlows() {
         updateMangaFlow()
-        updateCurrentArtworkFlow()
         updateChapterFlows()
         updateCategoryFlows()
         updateTrackingFlows(true)
-        updateExternalFlows()
-        updateAlternativeArtworkFlow()
         updateFilterFlow()
+        updateArtworkFlow()
     }
 
     /**
@@ -184,7 +182,7 @@ class MangaDetailPresenter(
                         updateMangaFlow()
                     }
                     is MangaResult.UpdatedArtwork -> {
-                        updateAlternativeArtworkFlow()
+                        updateArtworkFlow()
                     }
                     is MangaResult.ChaptersRemoved -> {
                         val removedChapters = generalState.value.allChapters.filter {
@@ -487,8 +485,7 @@ class MangaDetailPresenter(
             manga.user_cover = artwork.url
             db.insertManga(manga).executeOnIO()
             updateMangaFlow()
-            updateCurrentArtworkFlow()
-            updateAlternativeArtworkFlow()
+            updateArtworkFlow()
         }
     }
 
@@ -503,8 +500,7 @@ class MangaDetailPresenter(
             manga.user_cover = null
             db.insertManga(manga).executeOnIO()
             updateMangaFlow()
-            updateCurrentArtworkFlow()
-            updateAlternativeArtworkFlow()
+            updateArtworkFlow()
         }
     }
 
@@ -594,11 +590,25 @@ class MangaDetailPresenter(
     /**
      * Updates the artwork flow
      */
-    private fun updateCurrentArtworkFlow() {
+    private fun updateArtworkFlow() {
         presenterScope.launchIO {
-            _mangaState.value = mangaState.value.copy(
-                currentArtwork = Artwork(url = manga.value.user_cover ?: "", inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId),
-            )
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            val currentArtwork = Artwork(url = dbManga.user_cover ?: "", inLibrary = dbManga.favorite, originalArtwork = dbManga.thumbnail_url ?: "", mangaId = mangaId)
+            val uuid = MdUtil.getMangaUUID(manga.value.url)
+            val quality = preferences.thumbnailQuality()
+
+            val altArtwork = db.getArtwork(mangaId).executeAsBlocking().map { aw ->
+                Artwork(
+                    mangaId = aw.mangaId,
+                    url = MdUtil.cdnCoverUrl(uuid, aw.fileName, quality),
+                    volume = aw.volume,
+                    description = aw.description,
+                    active = currentArtwork.url.contains(aw.fileName) || (currentArtwork.url.isBlank() && currentArtwork.originalArtwork.contains(aw.fileName)),
+                )
+            }
+
+            _mangaState.value = mangaState.value.copy(alternativeArtwork = altArtwork.toImmutableList(), currentArtwork = currentArtwork)
+
         }
     }
 
@@ -798,15 +808,6 @@ class MangaDetailPresenter(
             }
 
             _generalState.value = generalState.value.copy(trackServiceCount = trackCount)
-        }
-    }
-
-    /**
-     * Update flows for external links
-     */
-    private fun updateExternalFlows() {
-        presenterScope.launchIO {
-            _generalState.value = generalState.value.copy(externalLinks = manga.value.getExternalLinks().toImmutableList())
         }
     }
 
@@ -1124,36 +1125,13 @@ class MangaDetailPresenter(
     }
 
     /**
-     * Update flows for alternative artwork
-     */
-    private fun updateAlternativeArtworkFlow() {
-        presenterScope.launchIO {
-            val uuid = MdUtil.getMangaUUID(manga.value.url)
-            val quality = preferences.thumbnailQuality()
-            val currentUsed = mangaState.value.currentArtwork
-
-            val altArtwork = db.getArtwork(manga.value).executeAsBlocking().map { aw ->
-                Artwork(
-                    mangaId = aw.mangaId,
-                    url = MdUtil.cdnCoverUrl(uuid, aw.fileName, quality),
-                    volume = aw.volume,
-                    description = aw.description,
-                    active = currentUsed.url.contains(aw.fileName) || (currentUsed.url.isBlank() && currentUsed.originalArtwork.contains(aw.fileName)),
-                )
-            }
-
-            _mangaState.value = mangaState.value.copy(alternativeArtwork = altArtwork.toImmutableList())
-
-        }
-    }
-
-    /**
      * Update flows for manga
      */
     private fun updateMangaFlow() {
-        presenterScope.launchIO {
+        presenterScope.launch {
             val m = db.getManga(mangaId).executeOnIO()!!
             _currentManga.value = m
+
             _mangaState.value =
                 mangaState.value.copy(
                     alternativeTitles = m.getAltTitles().toImmutableList(),
@@ -1161,6 +1139,7 @@ class MangaDetailPresenter(
                     author = m.author ?: "",
                     currentDescription = getDescription(),
                     currentTitle = m.title,
+                    externalLinks = manga.value.getExternalLinks().toImmutableList(),
                     genres = (m.getGenres() ?: emptyList()).toImmutableList(),
                     initialized = m.initialized,
                     inLibrary = m.favorite,

@@ -22,6 +22,17 @@ interface ArtworkQueries : DbProvider {
         )
         .prepare()
 
+    fun getArtwork(mangaId: Long) = db.get()
+        .listOfObjects(ArtworkImpl::class.java)
+        .withQuery(
+            Query.builder()
+                .table(ArtworkTable.TABLE)
+                .where("${ArtworkTable.COL_MANGA_ID} = ?")
+                .whereArgs(mangaId)
+                .build(),
+        )
+        .prepare()
+
     fun deleteArtworkForManga(manga: Manga) = db.delete()
         .byQuery(
             DeleteQuery.builder()

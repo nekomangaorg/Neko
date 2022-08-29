@@ -31,6 +31,8 @@ fun BackDrop(themeColorState: ThemeColorState, artworkProvider: () -> Artwork, s
                 .data(artworkProvider())
                 .memoryCacheKey(artworkProvider().mangaId.toMangaCacheKey())
                 .allowHardware(false)
+                .crossfade(true)
+                .crossfade(500)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,

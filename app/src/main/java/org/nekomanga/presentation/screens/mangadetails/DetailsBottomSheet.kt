@@ -148,7 +148,7 @@ fun DetailsBottomSheet(
         }
         is DetailsBottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
-                themeColorState = themeColorState, externalLinks = generalState.value.externalLinks,
+                themeColorState = themeColorState, externalLinks = mangaState.value.externalLinks,
                 onLinkClick = { url, title ->
                     closeSheet()
                     openInWebView(url, title)
