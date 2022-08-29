@@ -10,14 +10,11 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper
-import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.mapSeriesType
 import eu.kanade.tachiyomi.util.mapStatus
-import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -76,15 +73,13 @@ class StatsDetailsPresenter(
         context.getString(R.string.ongoing),
         context.getString(R.string.completed),
         context.getString(R.string.licensed),
-        context.getString(R.string.publishing_finished),
+        context.getString(R.string.publication_complete),
         context.getString(R.string.cancelled),
-        context.getString(R.string.on_hiatus),
+        context.getString(R.string.hiatus),
     )
     private val defaultCategory =
         if (libraryMangas.any { it.category == 0 }) arrayOf(Category.createDefault(context)) else emptyArray()
     val categoriesStats = defaultCategory + getCategories().toTypedArray()
-    val languagesStats = prefs.enabledLanguages().get().map { lang -> LocaleHelper.getSourceDisplayName(lang, context) }
-        .sorted().toTypedArray()
 
     private val pieColorList = StatsHelper.PIE_CHART_COLOR_LIST
 
@@ -221,7 +216,7 @@ class StatsDetailsPresenter(
         val libraryFormat = mangasDistinct.filterByChip()
             .map { it to getTracks(it).ifEmpty { listOf(null) } }
             .flatMap { it.second.map { track -> it.first to track } }
-        val loggedServices = trackManager.services.filter { it.isLogged }
+        val loggedServices = trackManager.services.values.filter { it.isLogged() }
 
         val serviceWithTrackedManga = libraryFormat.groupBy { it.second?.sync_id }
 
@@ -417,18 +412,6 @@ class StatsDetailsPresenter(
     }
 
     /**
-     * Get language name of a manga
-     */
-    private fun LibraryManga.getLanguage(): String {
-        val code = if (isLocal()) {
-            LocalSource.getMangaLang(this, context)
-        } else {
-            sourceManager.get(source)?.lang
-        } ?: return context.getString(R.string.unknown)
-        return LocaleHelper.getDisplayName(code)
-    }
-
-    /**
      * Get mean score rounded to two decimal of a list of manga
      */
     private fun List<LibraryManga>.getMeanScoreRounded(): Double? {
@@ -493,7 +476,7 @@ class StatsDetailsPresenter(
     }
 
     fun getLibrary(): MutableList<LibraryManga> {
-        return db.getLibraryMangas().executeAsBlocking()
+        return db.getLibraryMangaList().executeAsBlocking()
     }
 
     private fun getCategories(): MutableList<Category> {

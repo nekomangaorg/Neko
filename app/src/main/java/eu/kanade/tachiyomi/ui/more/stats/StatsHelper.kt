@@ -21,9 +21,9 @@ object StatsHelper {
         Pair(SManga.ONGOING, STATUS_COLOR_LIST[0]),
         Pair(SManga.COMPLETED, STATUS_COLOR_LIST[1]),
         Pair(SManga.LICENSED, STATUS_COLOR_LIST[2]),
-        Pair(SManga.PUBLISHING_FINISHED, STATUS_COLOR_LIST[3]),
+        Pair(SManga.PUBLICATION_COMPLETE, STATUS_COLOR_LIST[3]),
         Pair(SManga.CANCELLED, STATUS_COLOR_LIST[4]),
-        Pair(SManga.ON_HIATUS, STATUS_COLOR_LIST[5]),
+        Pair(SManga.HIATUS, STATUS_COLOR_LIST[5]),
         Pair(SManga.UNKNOWN, STATUS_COLOR_LIST[6]),
     )
 

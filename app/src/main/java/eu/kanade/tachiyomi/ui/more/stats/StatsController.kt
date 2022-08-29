@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.more.stats.details.StatsDetailsController
-import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.mapStatus
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
@@ -73,9 +72,7 @@ class StatsController : BaseController<StatsControllerBinding>(), SmallToolbarIn
             statsTrackedMangaText.text = mangaTracks.count { it.second.isNotEmpty() }.toString()
             statsChaptersDownloadedText.text = mangaDistinct.sumOf { presenter.getDownloadCount(it) }.toString()
             statsTotalTagsText.text = mangaDistinct.flatMap { it.getTags() }.distinct().count().toString()
-            statsMangaLocalText.text = mangaDistinct.count { it.isLocal() }.toString()
             statsGlobalUpdateMangaText.text = presenter.getGlobalUpdateManga().count().toString()
-            statsSourcesText.text = presenter.getSources().count().toString()
             statsTrackersText.text = presenter.getLoggedTrackers().count().toString()
             statsReadDurationText.text = presenter.getReadDuration()
         }
