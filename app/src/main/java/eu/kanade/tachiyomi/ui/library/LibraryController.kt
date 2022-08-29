@@ -92,6 +92,7 @@ import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.getResourceDrawable
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -1180,7 +1181,7 @@ class LibraryController(
             showMiniBar()
         }
         updateHopperAlpha()
-        val isSingleCategory = !presenter.showAllCategories || presenter.forceShowAllCategories
+        val isSingleCategory = !presenter.showAllCategories && !presenter.forceShowAllCategories
         val context = binding.roundedCategoryHopper.root.context
         binding.roundedCategoryHopper.upCategory.setImageDrawable(
             context.contextCompatDrawable(
@@ -1823,7 +1824,10 @@ class LibraryController(
                     presenter.getLibrary()
                     isSelected = presenter.forceShowAllCategories
                 }
+                val pad = 12.dpToPx
+                setPadding(pad, 0, pad, 0)
                 setImageResource(R.drawable.ic_show_all_categories_24dp)
+                background = context.getResourceDrawable(R.attr.selectableItemBackgroundBorderless)
                 imageTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.actionBarTintColor))
                 compatToolTipText = resources?.getText(R.string.show_all_categories)
             }

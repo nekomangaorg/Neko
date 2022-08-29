@@ -105,6 +105,13 @@ fun Context.getResourceColor(@AttrRes resource: Int): Int {
     return attrValue
 }
 
+fun Context.getResourceDrawable(@AttrRes resource: Int): Drawable? {
+    val typedArray = obtainStyledAttributes(intArrayOf(resource))
+    val attrValue = typedArray.getDrawable(0)
+    typedArray.recycle()
+    return attrValue
+}
+
 /**
  * Returns the color from ContextCompat
  *
