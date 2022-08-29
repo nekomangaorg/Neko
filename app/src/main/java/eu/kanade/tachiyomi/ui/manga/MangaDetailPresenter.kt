@@ -51,6 +51,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
@@ -144,12 +145,11 @@ class MangaDetailPresenter(
      * Update all flows
      */
     private fun updateAllFlows() {
-        updateMangaFlow()
+        updateMangaFlow(true)
         updateChapterFlows()
-        updateCategoryFlows()
         updateTrackingFlows(true)
         updateFilterFlow()
-        updateArtworkFlow()
+        updateCategoryFlows()
     }
 
     /**
@@ -593,23 +593,31 @@ class MangaDetailPresenter(
     private fun updateArtworkFlow() {
         presenterScope.launchIO {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
-            val currentArtwork = Artwork(url = dbManga.user_cover ?: "", inLibrary = dbManga.favorite, originalArtwork = dbManga.thumbnail_url ?: "", mangaId = mangaId)
-            val uuid = MdUtil.getMangaUUID(manga.value.url)
-            val quality = preferences.thumbnailQuality()
+            val currentArtwork = createCurrentArtwork(dbManga)
 
-            val altArtwork = db.getArtwork(mangaId).executeAsBlocking().map { aw ->
-                Artwork(
-                    mangaId = aw.mangaId,
-                    url = MdUtil.cdnCoverUrl(uuid, aw.fileName, quality),
-                    volume = aw.volume,
-                    description = aw.description,
-                    active = currentArtwork.url.contains(aw.fileName) || (currentArtwork.url.isBlank() && currentArtwork.originalArtwork.contains(aw.fileName)),
-                )
-            }
-
+            val altArtwork = createAltArtwork(manga.value, currentArtwork)
             _mangaState.value = mangaState.value.copy(alternativeArtwork = altArtwork.toImmutableList(), currentArtwork = currentArtwork)
 
         }
+    }
+
+    private fun createCurrentArtwork(manga: Manga): Artwork {
+        return Artwork(url = manga.user_cover ?: "", inLibrary = manga.favorite, originalArtwork = manga.thumbnail_url ?: "", mangaId = mangaId)
+    }
+
+    private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): ImmutableList<Artwork> {
+        val uuid = MdUtil.getMangaUUID(manga.url)
+        val quality = preferences.thumbnailQuality()
+
+        return db.getArtwork(mangaId).executeAsBlocking().map { aw ->
+            Artwork(
+                mangaId = aw.mangaId,
+                url = MdUtil.cdnCoverUrl(uuid, aw.fileName, quality),
+                volume = aw.volume,
+                description = aw.description,
+                active = currentArtwork.url.contains(aw.fileName) || (currentArtwork.url.isBlank() && currentArtwork.originalArtwork.contains(aw.fileName)),
+            )
+        }.toImmutableList()
     }
 
     private fun updateVibrantColorFlow() {
@@ -1127,34 +1135,39 @@ class MangaDetailPresenter(
     /**
      * Update flows for manga
      */
-    private fun updateMangaFlow() {
+    private fun updateMangaFlow(initial: Boolean = false) {
         presenterScope.launch {
             val m = db.getManga(mangaId).executeOnIO()!!
             _currentManga.value = m
 
-            _mangaState.value =
-                mangaState.value.copy(
-                    alternativeTitles = m.getAltTitles().toImmutableList(),
-                    artist = m.artist ?: "",
-                    author = m.author ?: "",
-                    currentDescription = getDescription(),
-                    currentTitle = m.title,
-                    externalLinks = manga.value.getExternalLinks().toImmutableList(),
-                    genres = (m.getGenres() ?: emptyList()).toImmutableList(),
-                    initialized = m.initialized,
-                    inLibrary = m.favorite,
-                    isMerged = when (m.isMerged()) {
-                        true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!, manga.value.title)
-                        false -> No
-                    },
-                    isPornographic = m.genre?.contains("pornographic") ?: false,
-                    langFlag = m.lang_flag,
-                    missingChapters = m.missing_chapters,
-                    originalTitle = m.originalTitle,
-                    rating = m.rating,
-                    status = m.status,
-                    users = m.users,
-                )
+            val currentArtwork = if (initial) createCurrentArtwork(m) else mangaState.value.currentArtwork
+            val altArtwork = if (initial) createAltArtwork(m, currentArtwork) else mangaState.value.alternativeArtwork
+
+            _mangaState.value = mangaState.value.copy(
+                alternativeTitles = m.getAltTitles().toImmutableList(),
+                alternativeArtwork = altArtwork,
+                artist = m.artist ?: "",
+                author = m.author ?: "",
+                currentArtwork = if (initial) createCurrentArtwork(m) else mangaState.value.currentArtwork,
+                currentDescription = getDescription(),
+                currentTitle = m.title,
+                externalLinks = manga.value.getExternalLinks().toImmutableList(),
+                genres = (m.getGenres() ?: emptyList()).toImmutableList(),
+                initialized = m.initialized,
+                inLibrary = m.favorite,
+                isMerged = when (m.isMerged()) {
+                    true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!, manga.value.title)
+                    false -> No
+                },
+                isPornographic = m.genre?.contains("pornographic") ?: false,
+                langFlag = m.lang_flag,
+                missingChapters = m.missing_chapters,
+                originalTitle = m.originalTitle,
+                rating = m.rating,
+                status = m.status,
+                users = m.users,
+            )
+
         }
     }
 
