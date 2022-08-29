@@ -100,13 +100,7 @@ fun DescriptionBlock(
     ) {
 
         if (!isExpanded) {
-            val text = descriptionProvider().replace(
-                Regex(
-                    "[\\r\\n\\s*]{2,}",
-                    setOf(RegexOption.MULTILINE),
-                ),
-                "\n",
-            )
+            val text = descriptionProvider().split("\n").take(3).joinToString("\n")
 
             val lineHeight = with(LocalDensity.current) {
                 MaterialTheme.typography.bodyLarge.fontSize.toDp() + 8.dp
