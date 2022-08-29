@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
+import androidx.annotation.PluralsRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -50,6 +51,7 @@ import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
 import timber.log.Timber
 import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
@@ -147,7 +149,7 @@ class StatsDetailsController :
                     presenter.seriesTypeStats,
                     presenter.selectedSeriesType,
                     R.string.series_type,
-                    R.string.series_types,
+                    R.plurals._series_types,
                 )
             }
             chipSeriesType.setOnCloseIconClickListener {
@@ -161,7 +163,7 @@ class StatsDetailsController :
                     presenter.sources.toTypedArray(),
                     presenter.selectedSource,
                     R.string.source,
-                    R.string.sources,
+                    R.plurals._sources,
                 )
             }
             chipSource.setOnCloseIconClickListener {
@@ -175,7 +177,7 @@ class StatsDetailsController :
                     presenter.statusStats,
                     presenter.selectedStatus,
                     R.string.status,
-                    R.string.status,
+                    R.plurals._statuses,
                 )
             }
             chipStatus.setOnCloseIconClickListener {
@@ -189,7 +191,7 @@ class StatsDetailsController :
                     presenter.languagesStats,
                     presenter.selectedLanguage,
                     R.string.language,
-                    R.string.languages,
+                    R.plurals._languages,
                 )
             }
             chipLanguage.setOnCloseIconClickListener {
@@ -203,7 +205,7 @@ class StatsDetailsController :
                     presenter.categoriesStats,
                     presenter.selectedCategory,
                     R.string.category,
-                    R.string.categories,
+                    R.plurals.category_plural,
                 )
             }
             chipCategory.setOnCloseIconClickListener {
@@ -268,13 +270,12 @@ class StatsDetailsController :
         with(binding) {
             chipStat.text = activity?.getString(presenter.selectedStat?.resourceId ?: defaultStat.resourceId)
             chipStat.setColors((presenter.selectedStat != defaultStat).toInt())
-            chipSeriesType.setState(presenter.selectedSeriesType, R.string.series_type, R.string.series_type)
-            chipSource.setState(presenter.selectedSource, R.string.source, R.string.sources)
-            chipStatus.setState(presenter.selectedStatus, R.string.status, R.string.status)
-            chipLanguage.setState(presenter.selectedLanguage, R.string.language, R.string.languages)
-            chipCategory.setState(presenter.selectedCategory, R.string.category, R.string.categories, true)
-            chipSort.text = activity?.getString(presenter.selectedStatsSort?.resourceId ?: defaultSort.resourceId)
-            chipSort.setColors((presenter.selectedStatsSort != defaultSort).toInt())
+            chipSeriesType.setState(presenter.selectedSeriesType, R.string.series_type, R.plurals._series_types)
+            chipSource.setState(presenter.selectedSource, R.string.source, R.plurals._sources)
+            chipStatus.setState(presenter.selectedStatus, R.string.status, R.plurals._statuses)
+            chipLanguage.setState(presenter.selectedLanguage, R.string.language, R.plurals._languages)
+            chipCategory.setState(presenter.selectedCategory, R.string.category, R.plurals.category_plural, true)
+            statSort.text = activity?.getString(presenter.selectedStatsSort?.resourceId ?: defaultSort.resourceId)
         }
     }
 
@@ -330,7 +331,7 @@ class StatsDetailsController :
         inflater.inflate(R.menu.stats_bar, menu)
         searchItem = menu.findItem(R.id.action_search)
         searchView = searchItem.actionView as SearchView
-        searchView.queryHint = activity?.getString(R.string.search_statistics)
+        searchView.queryHint = activity?.getString(R.string.search_, activity?.getString(R.string.statistics)?.lowercase(Locale.ROOT))
         if (query.isNotBlank() && (!searchItem.isActionViewExpanded || searchView.query != query)) {
             searchItem.expandActionView()
             setSearchViewListener(searchView)
@@ -365,6 +366,7 @@ class StatsDetailsController :
         statsList: Array<T>,
         selectedValues: MutableSet<T>,
         resourceId: Int,
+        @PluralsRes
         resourceIdPlural: Int,
     ) {
         val isCategory = statsList.isArrayOf<Category>()
@@ -479,6 +481,7 @@ class StatsDetailsController :
     private fun <T> Chip.setState(
         selectedValues: MutableSet<T>,
         resourceId: Int,
+        @PluralsRes
         resourceIdPlural: Int,
         isCategory: Boolean = false,
     ) {
@@ -486,7 +489,7 @@ class StatsDetailsController :
         this.text = when (selectedValues.size) {
             0 -> activity?.getString(resourceId)
             1 -> if (isCategory) (selectedValues.first() as Category).name else selectedValues.first().toString()
-            else -> "${selectedValues.size} ${activity?.getString(resourceIdPlural)}"
+            else -> activity?.resources?.getQuantityString(resourceIdPlural, selectedValues.size, selectedValues.size)
         }
     }
 

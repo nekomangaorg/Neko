@@ -160,7 +160,6 @@
 
     <string name="read_progress">Read progress</string>
     <string name="series_type">Series type</string>
-    <string name="series_types">Series types</string>
     <string name="series">Series</string>
     <string name="group_library_by">Group library by…</string>
     <string name="tracking_status">Tracking status</string>
@@ -917,7 +916,6 @@
     <string name="stats">Stats</string>
     <string name="statistics">Statistics</string>
     <string name="statistics_details">Statistics details</string>
-    <string name="search_statistics">Search statistics</string>
     <string name="total_manga">Total manga</string>
     <string name="chapters_read">Read chapters</string>
     <string name="mean_score">Mean score</string>
@@ -940,6 +938,18 @@
     <string name="title_count">Title count</string>
     <string name="no_data_for_filters">No data found for your current filters</string>
     <string name="read_duration_week">Read duration week</string>
+    <plurals name="_series_types">
+        <item quantity="other">%d series types</item>
+    </plurals>
+    <plurals name="_sources">
+        <item quantity="other">%d sources</item>
+    </plurals>
+    <plurals name="_statuses">
+        <item quantity="other">%d statuses</item>
+    </plurals>
+    <plurals name="_languages">
+        <item quantity="other">%d languages</item>
+    </plurals>
 
     <!-- Time -->
     <string name="manual">Manual</string>
@@ -1035,7 +1045,6 @@
     <string name="recently_updated">Recently updated</string>
     <string name="recently_installed">Recently installed</string>
     <string name="language">Language</string>
-    <string name="languages">Languages</string>
     <string name="never">Never</string>
     <string name="newest">Newest</string>
     <string name="next">Next</string>
