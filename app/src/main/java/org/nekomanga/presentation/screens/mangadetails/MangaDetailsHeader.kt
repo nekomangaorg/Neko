@@ -3,9 +3,9 @@ package org.nekomanga.presentation.screens.mangadetails
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,7 +18,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
@@ -77,27 +77,21 @@ fun MangaDetailsHeader(
             }
         }
 
-        val modifier = when (generalState.value.extraLargeBackdrop) {
-            true -> Modifier.fillMaxSize()
-            false -> {
-                when (windowSizeClass.heightSizeClass == WindowHeightSizeClass.Expanded) {
-                    true -> Modifier
-                        .fillMaxWidth()
-                        .requiredHeightIn(250.dp, 600.dp)
-                    else -> Modifier
-                        .fillMaxWidth()
-                        .requiredHeightIn(250.dp, 400.dp)
-                }
-            }
+        val backdropHeight = when (generalState.value.extraLargeBackdrop) {
+            true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
+            false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
         }
 
+
         Column {
-            Box {
+            BoxWithConstraints {
                 BackDrop(
                     themeColorState = themeColorState,
                     artworkProvider = { mangaState.value.currentArtwork },
                     showBackdropProvider = { generalState.value.themeBasedOffCovers },
-                    modifier = modifier,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeightIn(250.dp, maxOf(250.dp, backdropHeight)),
                     generatePalette = generatePalette,
                 )
                 Box(

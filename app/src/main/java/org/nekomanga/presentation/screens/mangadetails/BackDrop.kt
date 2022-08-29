@@ -37,7 +37,9 @@ fun BackDrop(themeColorState: ThemeColorState, artworkProvider: () -> Artwork, s
             modifier = modifier
                 .alpha(.2f),
 
-            onSuccess = { generatePalette(it.result.drawable) },
+            onSuccess = {
+                generatePalette(it.result.drawable)
+            },
         )
 
     }
