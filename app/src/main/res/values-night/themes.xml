@@ -5,7 +5,7 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
         <item name="colorOnSurface">@color/md_white_1000</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorOnPrimary">@color/background</item>
         <item name="colorOnBackground">@color/md_white_1000</item>
         <item name="colorSecondaryVariant">@color/neko_green</item>
         <item name="unreadBadgeColor">@color/neko_green</item>
