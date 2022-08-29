@@ -118,6 +118,7 @@ fun DescriptionBlock(
                     flavour = CommonMarkFlavourDescriptor(),
                     modifier = Modifier
                         .align(Alignment.TopStart)
+                        .fillMaxWidth()
                         .heightIn(0.dp, descriptionHeight)
                         .then(clickable),
                 )
