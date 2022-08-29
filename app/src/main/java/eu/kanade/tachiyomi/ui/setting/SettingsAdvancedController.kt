@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
@@ -41,7 +42,6 @@ import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.log.XLogLevel
@@ -62,7 +62,6 @@ import kotlinx.coroutines.launch
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -311,7 +310,7 @@ class SettingsAdvancedController : SettingsController() {
                         val trackManager: TrackManager = Injekt.get()
                         db.getLibraryMangaList().executeAsBlocking().forEach {
                             followsHandler.updateFollowStatus(
-                                MdUtil.getMangaUUID(it.url),
+                                it.uuid(),
                                 FollowStatus.UNFOLLOWED,
                             )
                             db.getMDList(it).executeOnIO()?.let { _ ->

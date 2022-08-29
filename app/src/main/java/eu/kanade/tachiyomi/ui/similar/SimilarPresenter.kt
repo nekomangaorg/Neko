@@ -15,11 +15,11 @@ import uy.kohesive.injekt.api.get
  * Presenter of [SimilarController]
  */
 class SimilarPresenter(
-    val mangaId: String = "",
+    private val mangaUUID: String,
     private val repo: SimilarRepository = Injekt.get(),
 ) : BaseCoroutinePresenter<SimilarController>() {
 
-    private val _isRefreshing = MutableStateFlow(true)
+    private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     private val _mangaMap = MutableStateFlow(emptyMap<Int, List<DisplayManga>>())
@@ -27,17 +27,19 @@ class SimilarPresenter(
 
     override fun onCreate() {
         super.onCreate()
-        presenterScope.launch {
-            getSimilarManga()
-        }
+        getSimilarManga()
     }
 
-    fun getSimilarManga(forceRefresh: Boolean = false) {
+    fun refresh() {
+        getSimilarManga(true)
+    }
+
+    private fun getSimilarManga(forceRefresh: Boolean = false) {
         presenterScope.launch {
             _isRefreshing.value = true
             _mangaMap.value = emptyMap()
-            if (mangaId.isNotEmpty()) {
-                val list = repo.fetchSimilar(mangaId, forceRefresh)
+            if (mangaUUID.isNotEmpty()) {
+                val list = repo.fetchSimilar(mangaUUID, forceRefresh)
                 _mangaMap.value = list.associate { it.type to it.manga }
             }
             _isRefreshing.value = false

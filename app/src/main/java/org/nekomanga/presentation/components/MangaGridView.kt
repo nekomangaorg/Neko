@@ -34,7 +34,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.paging.LoadState
@@ -44,9 +43,9 @@ import coil.request.ImageRequest
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
+import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import org.nekomanga.presentation.screens.IconicsEmptyScreen
 import org.nekomanga.presentation.theme.Shapes
 
@@ -58,8 +57,8 @@ fun MangaGridWithHeader(
     modifier: Modifier = Modifier,
     isComfortable: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
-    onClick: (Manga) -> Unit = {},
-    onLongClick: (Manga) -> Unit = {},
+    onClick: (Long) -> Unit = {},
+    onLongClick: (Long) -> Unit = {},
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -81,8 +80,8 @@ fun MangaGridWithHeader(
                     displayManga = displayManga,
                     shouldOutlineCover = shouldOutlineCover,
                     isComfortable = isComfortable,
-                    onClick = { onClick(displayManga.manga) },
-                    onLongClick = { onLongClick(displayManga.manga) },
+                    onClick = { onClick(displayManga.mangaId) },
+                    onLongClick = { onLongClick(displayManga.mangaId) },
                 )
             }
         }
@@ -96,8 +95,8 @@ fun PagingMangaGrid(
     columns: Int,
     contentPadding: PaddingValues = PaddingValues(),
     isComfortable: Boolean = true,
-    onClick: (Manga) -> Unit = {},
-    onLongClick: (Manga) -> Unit = {},
+    onClick: (Long) -> Unit = {},
+    onLongClick: (Long) -> Unit = {},
 ) {
     val cells = GridCells.Fixed(columns)
 
@@ -153,8 +152,8 @@ fun PagingMangaGrid(
                         displayManga = displayManga,
                         shouldOutlineCover = shouldOutlineCover,
                         isComfortable = isComfortable,
-                        onClick = { onClick(displayManga.manga) },
-                        onLongClick = { onLongClick(displayManga.manga) },
+                        onClick = { onClick(displayManga.mangaId) },
+                        onLongClick = { onLongClick(displayManga.mangaId) },
                     )
                 }
             }
@@ -180,7 +179,7 @@ fun MangaGrid(
     columns: Int,
     contentPadding: PaddingValues = PaddingValues(),
     isComfortable: Boolean = true,
-    onClick: (Manga) -> Unit = {},
+    onClick: (Long) -> Unit = {},
 ) {
     val cells = GridCells.Fixed(columns)
 
@@ -198,7 +197,7 @@ fun MangaGrid(
                 displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
                 isComfortable = isComfortable,
-                onClick = { onClick(displayManga.manga) },
+                onClick = { onClick(displayManga.mangaId) },
             )
         }
     }
@@ -225,20 +224,20 @@ private fun MangaGridItem(
             ) {
                 if (isComfortable) {
                     ComfortableGridItem(
-                        displayManga.manga,
+                        displayManga,
                         displayManga.displayText,
                         shouldOutlineCover,
                     )
                 } else {
                     CompactGridItem(
-                        displayManga.manga,
+                        displayManga,
                         displayManga.displayText,
                         shouldOutlineCover,
                     )
                 }
             }
 
-            if (displayManga.manga.favorite) {
+            if (displayManga.inLibrary) {
                 val offset = (-6).dp
                 Favorited(offset)
             }
@@ -248,7 +247,7 @@ private fun MangaGridItem(
 
 @Composable
 private fun ComfortableGridItem(
-    manga: Manga,
+    manga: DisplayManga,
     displayText: String,
     shouldOutlineCover: Boolean,
 ) {
@@ -283,7 +282,7 @@ private fun ComfortableGridItem(
 
 @Composable
 private fun CompactGridItem(
-    manga: Manga,
+    manga: DisplayManga,
     displayText: String,
     shouldOutlineCover: Boolean,
 ) {
@@ -334,7 +333,7 @@ private fun CompactGridItem(
 }
 
 @Composable
-private fun GridCover(manga: Manga, shouldOutlineCover: Boolean) {
+private fun GridCover(manga: DisplayManga, shouldOutlineCover: Boolean) {
     val outlineModifier = when (shouldOutlineCover) {
         true -> Modifier.border(
             .75.dp, NekoColors.outline,
@@ -345,7 +344,8 @@ private fun GridCover(manga: Manga, shouldOutlineCover: Boolean) {
     val color by remember { mutableStateOf(Pastel.getColorLight()) }
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
-            .data(manga)
+            .data(manga.currentArtwork)
+            .memoryCacheKey(manga.mangaId.toMangaCacheKey())
             .placeholder(color)
             .setParameter(MangaCoverFetcher.useCustomCover, false)
             .build(),
@@ -358,79 +358,3 @@ private fun GridCover(manga: Manga, shouldOutlineCover: Boolean) {
     )
 }
 
-@Preview
-@Composable
-private fun MangaGridHeaderPreview() {
-    val manga = Manga.create("test", "One Piece", 1L)
-    val mangaList = listOf(
-        DisplayManga(manga, "related"),
-        DisplayManga(manga, "Sequel"),
-        DisplayManga(manga),
-        DisplayManga(manga),
-        DisplayManga(manga),
-    )
-    val mangaMap = mapOf("Test" to mangaList)
-    MangaGridWithHeader(groupedManga = mangaMap, shouldOutlineCover = true, columns = 2)
-}
-
-@Preview
-@Composable
-private fun MangaComfotableGridPreview() {
-    val manga = Manga.create("test", "One Piece", 1L)
-    val mangaList = listOf(
-        DisplayManga(manga, "related"),
-        DisplayManga(manga, "Sequel"),
-        DisplayManga(manga),
-        DisplayManga(manga),
-        DisplayManga(manga),
-    )
-    MangaGrid(mangaList = mangaList, shouldOutlineCover = true, columns = 2, isComfortable = false)
-}
-
-@Preview
-@Composable
-private fun MangaCompactGridPreview() {
-    val manga = Manga.create("test", "One Piece", 1L)
-    val mangaList = listOf(
-        DisplayManga(manga, "related"),
-        DisplayManga(manga, "Sequel"),
-        DisplayManga(manga),
-        DisplayManga(manga),
-        DisplayManga(manga),
-    )
-    MangaGrid(mangaList = mangaList, shouldOutlineCover = true, columns = 2)
-}
-
-@Preview
-@Composable
-private fun MangaGridPreviewLongTitles() {
-    val manga = Manga.create(
-        "test",
-        "Really Really Long Title Really Really Long Title Really Really Long Title Really Really Long TitleReally Really Long Title",
-        1L,
-    )
-    val mangaList = listOf(
-        DisplayManga(manga),
-        DisplayManga(manga.apply { favorite = true }, "Sequel"),
-        DisplayManga(manga, "Sequel"),
-        DisplayManga(manga.apply { favorite = true }),
-        DisplayManga(manga),
-    )
-    MangaGrid(mangaList = mangaList, shouldOutlineCover = true, columns = 4)
-}
-
-@Preview
-@Composable
-private fun MangaGridItemPreviewLongTitleWithOtherText() {
-    MangaGridItem(
-        displayManga = DisplayManga(
-            Manga.create(
-                "test",
-                "Really Really Long Title Really Really Long Title Really Really Long Title Really Really Long TitleReally Really Long Title",
-                1L,
-            ).apply { favorite = true },
-            "Sequel",
-        ),
-        true,
-    )
-}

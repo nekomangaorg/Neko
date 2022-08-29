@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
@@ -344,7 +345,7 @@ class MangaDetailPresenter(
             if (!preferences.readingSync() || !sourceManager.getMangadex().isLogged() || !isOnline()) return@launchIO
 
             runCatching {
-                statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.value.url)).collect { chapterIds ->
+                statusHandler.getReadChapterIds(manga.value.uuid()).collect { chapterIds ->
                     val chaptersToMarkRead = generalState.value.allChapters.asSequence().filter { !it.chapter.isMergedChapter() }
                         .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
                         .toList()
@@ -460,7 +461,7 @@ class MangaDetailPresenter(
         val fileNameNoExtension = listOfNotNull(
             manga.value.title,
             artwork.volume.ifEmpty { null },
-            MdUtil.getMangaUUID(manga.value.url),
+            manga.value.uuid(),
         ).joinToString("-")
 
         val filename = DiskUtil.buildValidFilename("${fileNameNoExtension}.${type.extension}")
@@ -606,13 +607,12 @@ class MangaDetailPresenter(
     }
 
     private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): ImmutableList<Artwork> {
-        val uuid = MdUtil.getMangaUUID(manga.url)
         val quality = preferences.thumbnailQuality()
 
         return db.getArtwork(mangaId).executeAsBlocking().map { aw ->
             Artwork(
                 mangaId = aw.mangaId,
-                url = MdUtil.cdnCoverUrl(uuid, aw.fileName, quality),
+                url = MdUtil.cdnCoverUrl(manga.uuid(), aw.fileName, quality),
                 volume = aw.volume,
                 description = aw.description,
                 active = currentArtwork.url.contains(aw.fileName) || (currentArtwork.url.isBlank() && currentArtwork.originalArtwork.contains(aw.fileName)),
@@ -824,7 +824,7 @@ class MangaDetailPresenter(
      */
     private fun getDescription(): String {
         return when {
-            MdUtil.getMangaUUID(manga.value.url).isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
+            manga.value.uuid().isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
             manga.value.description.isNotNullOrEmpty() -> manga.value.description!!
             !manga.value.initialized -> ""
             else -> "No description"
@@ -1408,7 +1408,7 @@ class MangaDetailPresenter(
                     if (chapterIds.isNotEmpty()) {
                         GlobalScope.launchIO {
                             statusHandler.marksChaptersStatus(
-                                MdUtil.getMangaUUID(manga.value.url),
+                                manga.value.uuid(),
                                 chapterIds,
                                 syncRead,
                             )

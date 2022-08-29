@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -35,9 +34,9 @@ import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
+import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -48,13 +47,13 @@ fun MangaRow(
 ) {
     Row(modifier = modifier.padding(4.dp)) {
         MangaCover(
-            displayManga.manga,
+            displayManga,
             shouldOutlineCover,
             Modifier.align(alignment = Alignment.CenterVertically),
         )
         if (displayManga.displayText.isBlank()) {
             MangaTitle(
-                title = displayManga.manga.title,
+                title = displayManga.title,
                 modifier = Modifier.align(
                     alignment = Alignment.CenterVertically,
                 ),
@@ -69,7 +68,7 @@ fun MangaRow(
                     ),
             ) {
                 MangaTitle(
-                    title = displayManga.manga.title,
+                    title = displayManga.title,
                     maxLines = 1,
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                 )
@@ -87,13 +86,13 @@ fun PagingListManga(
     mangaListPagingItems: LazyPagingItems<DisplayManga>,
     shouldOutlineCover: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
-    onClick: (manga: Manga) -> Unit = {},
+    onClick: (Long) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
     ) {
-        items(mangaListPagingItems) { displayManga ->
+        items(mangaListPagingItems, key = { display -> display.mangaId }) { displayManga ->
             displayManga?.let {
                 MangaRow(
                     displayManga = displayManga,
@@ -102,7 +101,7 @@ fun PagingListManga(
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .clickable {
-                            onClick(displayManga.manga)
+                            onClick(displayManga.mangaId)
                         },
                 )
             }
@@ -129,13 +128,13 @@ fun MangaList(
     mangaList: List<DisplayManga>,
     shouldOutlineCover: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
-    onClick: (manga: Manga) -> Unit = {},
+    onClick: (Long) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
     ) {
-        itemsIndexed(mangaList) { index, displayManga ->
+        itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
             MangaRow(
                 displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
@@ -143,7 +142,7 @@ fun MangaList(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .clickable {
-                        onClick(displayManga.manga)
+                        onClick(displayManga.mangaId)
                     },
             )
         }
@@ -156,8 +155,8 @@ fun MangaListWithHeader(
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    onClick: (Manga) -> Unit = {},
-    onLongClick: (Manga) -> Unit = {},
+    onClick: (Long) -> Unit = {},
+    onLongClick: (Long) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier
@@ -168,7 +167,7 @@ fun MangaListWithHeader(
             stickyHeader {
                 HeaderCard(text)
             }
-            itemsIndexed(mangaList) { index, displayManga ->
+            itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
                 CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
                     MangaRow(
                         displayManga = displayManga,
@@ -177,8 +176,8 @@ fun MangaListWithHeader(
                             .fillMaxWidth()
                             .wrapContentHeight()
                             .combinedClickable(
-                                onClick = { onClick(displayManga.manga) },
-                                onLongClick = { onLongClick(displayManga.manga) },
+                                onClick = { onClick(displayManga.mangaId) },
+                                onLongClick = { onLongClick(displayManga.mangaId) },
                             ),
                     )
                 }
@@ -188,7 +187,7 @@ fun MangaListWithHeader(
 }
 
 @Composable
-private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modifier = Modifier) {
+private fun MangaCover(manga: DisplayManga, shouldOutlineCover: Boolean, modifier: Modifier = Modifier) {
     Box {
         val outlineModifier = when (shouldOutlineCover) {
             true -> Modifier.border(
@@ -200,7 +199,8 @@ private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modi
         val color by remember { mutableStateOf(Pastel.getColorLight()) }
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(manga)
+                .data(manga.currentArtwork)
+                .memoryCacheKey(manga.mangaId.toMangaCacheKey())
                 .placeholder(color)
                 .setParameter(MangaCoverFetcher.useCustomCover, false)
                 .build(),
@@ -213,71 +213,9 @@ private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modi
                 .then(outlineModifier),
         )
 
-        if (manga.favorite) {
+        if (manga.inLibrary) {
             val offset = (-4).dp
             Favorited(offset)
         }
     }
-}
-
-@Preview
-@Composable
-fun MangaListPreview() {
-    MangaList(
-        listOf(
-            DisplayManga(
-                Manga.create(0L).apply {
-                    url = ""
-                    title = "test 1"
-                },
-            ),
-            DisplayManga(
-                Manga.create(0L).apply {
-                    url = ""
-                    title =
-                        "This is a very very very very very very very very long text that ellipses because its too long"
-                },
-            ),
-        ),
-        true, onClick = { },
-    )
-}
-
-@Preview
-@Composable
-fun MangaHeaderPreview() {
-    MangaListWithHeader(
-        mapOf(
-            "abc" to listOf(
-                DisplayManga(
-                    Manga.create(0L).apply {
-                        url = ""
-                        title = "test 1"
-                    },
-                ),
-                DisplayManga(
-                    Manga.create(0L).apply {
-                        url = ""
-                        title =
-                            "This is a very very very very very very very very long text that ellipses because its too long"
-                    },
-                    "doujinshi",
-                ),
-            ),
-        ),
-        true,
-    )
-}
-
-@Preview
-@Composable
-private fun MangaCoverPreview() {
-    MangaCover(
-        manga = Manga.create(
-            "test",
-            "Title",
-            1L,
-        ).apply { favorite = true },
-        true,
-    )
 }

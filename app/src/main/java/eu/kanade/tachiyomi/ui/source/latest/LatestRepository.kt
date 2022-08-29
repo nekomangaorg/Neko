@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.toLocalManga
+import eu.kanade.tachiyomi.util.toDisplayManga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -15,11 +15,8 @@ class LatestRepository(
 
     suspend fun getPage(page: Int): Pair<Boolean, List<DisplayManga>> {
         val results = mangaDex.latestChapters(page)
-        val displayMangaList = results.displayManga.map {
-            DisplayManga(
-                it.sManga.toLocalManga(db, mangaDex.id),
-                it.displayText,
-            )
+        val displayMangaList = results.displayManga.map { sourceManga ->
+            sourceManga.toDisplayManga(db, mangaDex.id)
         }
 
         return results.hasNextPage to displayMangaList

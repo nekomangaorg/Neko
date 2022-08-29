@@ -325,3 +325,7 @@ fun Manga.toMangaInfo(): MangaInfo {
         title = this.title,
     )
 }
+
+fun Manga.uuid(): String {
+    return MdUtil.getMangaUUID(this.url)
+}

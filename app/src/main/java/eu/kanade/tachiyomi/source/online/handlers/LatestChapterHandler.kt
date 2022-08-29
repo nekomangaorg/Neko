@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
-import eu.kanade.tachiyomi.data.models.DisplaySManga
+import eu.kanade.tachiyomi.data.models.SourceManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
@@ -83,7 +83,13 @@ class LatestChapterHandler {
         val thumbQuality = preferencesHelper.thumbnailQuality()
         val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }.map {
             it.toBasicManga(thumbQuality)
-        }.map { DisplaySManga(it) }
+        }.map {
+            SourceManga(
+                title = it.originalTitle,
+                url = it.url,
+                currentThumbnail = it.thumbnail_url ?: MdConstants.noCoverUrl,
+            )
+        }
 
         return MangaListPage(displayManga = mangaList, hasNextPage = hasMoreResults)
     }

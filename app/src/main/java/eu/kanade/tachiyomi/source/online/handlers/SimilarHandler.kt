@@ -8,11 +8,10 @@ import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
-import eu.kanade.tachiyomi.data.models.DisplaySManga
+import eu.kanade.tachiyomi.data.models.SourceManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.AnilistMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.models.dto.MalMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
@@ -40,7 +39,7 @@ class SimilarHandler {
     suspend fun fetchRelated(
         dexId: String,
         forceRefresh: Boolean,
-    ): List<DisplaySManga> {
+    ): List<SourceManga> {
         if (forceRefresh) {
             val related = withIOContext {
                 network.service.relatedManga(dexId)
@@ -73,7 +72,7 @@ class SimilarHandler {
 
         val dbDto = getDbDto(db.getSimilar(dexId).executeAsBlocking())
         return dbDto.relatedManga?.map {
-            it.toDisplaySManga()
+            it.toSourceManga()
         } ?: emptyList()
     }
 
@@ -101,13 +100,11 @@ class SimilarHandler {
         }
     }
 
-    private fun RelatedMangaDto.toDisplaySManga() = DisplaySManga(
-        sManga = SManga.create().apply {
-            this.url = this@toDisplaySManga.url
-            this.thumbnail_url = this@toDisplaySManga.thumbnail
-            this.title = this@toDisplaySManga.title
-        },
-        displayText = this@toDisplaySManga.relation,
+    private fun RelatedMangaDto.toSourceManga() = SourceManga(
+        url = this.url,
+        currentThumbnail = this.thumbnail,
+        title = this.title,
+        displayText = this.relation,
     )
 
     private fun MangaDataDto.toRelatedMangaDto(
@@ -129,7 +126,7 @@ class SimilarHandler {
     suspend fun fetchSimilar(
         dexId: String,
         forceRefresh: Boolean,
-    ): List<DisplaySManga> {
+    ): List<SourceManga> {
         if (forceRefresh) {
             val response = network.similarService.getSimilarManga(dexId)
                 .onFailure {
@@ -142,8 +139,8 @@ class SimilarHandler {
         val mangaDb = db.getSimilar(dexId).executeAsBlocking()
         val dbDto = getDbDto(mangaDb)
         // Get data from db
-        return dbDto.similarManga?.map { it.toDisplaySManga() }?.sortedByDescending {
-            it.displayText.split("%").get(0).toDouble()
+        return dbDto.similarManga?.map { it.toSourceManga() }?.sortedByDescending {
+            it.displayText.split("%")[0].toDouble()
         } ?: emptyList()
     }
 
@@ -180,7 +177,7 @@ class SimilarHandler {
     suspend fun fetchAnilist(
         dexId: String,
         forceRefresh: Boolean,
-    ): List<DisplaySManga> {
+    ): List<SourceManga> {
         // See if we have a valid mapping for our Anlist service
         val anilistId = mappings.getExternalID(dexId, "al") ?: return emptyList()
 
@@ -202,8 +199,8 @@ class SimilarHandler {
         val mangaDb = db.getSimilar(dexId).executeAsBlocking()
         val dbDto = getDbDto(mangaDb)
         // Get data from db
-        return dbDto.aniListManga?.map { it.toDisplaySManga() }?.sortedByDescending {
-            it.displayText.split(" ").get(0).toDouble()
+        return dbDto.aniListManga?.map { it.toSourceManga() }?.sortedByDescending {
+            it.displayText.split(" ")[0].toDouble()
         } ?: emptyList()
     }
 
@@ -248,7 +245,7 @@ class SimilarHandler {
     suspend fun fetchSimilarExternalMalManga(
         dexId: String,
         forceRefresh: Boolean,
-    ): List<DisplaySManga> {
+    ): List<SourceManga> {
         // See if we have a valid mapping for our MAL service
         val malId = mappings.getExternalID(dexId, "mal")
             ?: return emptyList()
@@ -267,8 +264,8 @@ class SimilarHandler {
         val mangaDb = db.getSimilar(dexId).executeAsBlocking()
         val dbDto = getDbDto(mangaDb)
         // Get data from db
-        return dbDto.myAnimeListManga?.map { it.toDisplaySManga() }?.sortedByDescending {
-            it.displayText.split(" ").get(0).toDouble()
+        return dbDto.myAnimeListManga?.map { it.toSourceManga() }?.sortedByDescending {
+            it.displayText.split(" ")[0].toDouble()
         } ?: emptyList()
     }
 
@@ -280,11 +277,11 @@ class SimilarHandler {
         similarDto ?: return
 
         // Get our page of mangaList
-        val idPairs = similarDto.recommendations.mapNotNull {
+        val idPairs = similarDto.recommendations.associate {
             val id = mappings.getMangadexID(it.mal_id.toString(), "mal")
             val text = it.recommendation_count.toString() + " user votes"
             id to text
-        }.toMap()
+        }
         val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key })
 
         // Convert to lookup array

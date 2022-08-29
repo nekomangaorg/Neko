@@ -5,13 +5,12 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.models.DisplayManga
-import eu.kanade.tachiyomi.data.models.DisplaySManga
+import eu.kanade.tachiyomi.data.models.SourceManga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.logTimeTaken
-import eu.kanade.tachiyomi.util.toLocalManga
+import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -94,17 +93,14 @@ class SimilarRepository {
         }
     }
 
-    private fun createGroup(@StringRes id: Int, manga: List<DisplaySManga>): SimilarMangaGroup? {
+    private fun createGroup(@StringRes id: Int, manga: List<SourceManga>): SimilarMangaGroup? {
         return if (manga.isEmpty()) {
             null
         } else {
             SimilarMangaGroup(
                 id,
                 manga.map {
-                    DisplayManga(
-                        it.sManga.toLocalManga(db, mangaDex.id),
-                        it.displayText.replace("_", " ").capitalizeWords(),
-                    )
+                    it.toDisplayManga(db, mangaDex.id)
                 },
             )
         }

@@ -9,11 +9,15 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.models.DisplayManga
+import eu.kanade.tachiyomi.data.models.SourceManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
+import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import org.nekomanga.domain.manga.Artwork
 import java.util.Date
 
 fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper): Boolean {
@@ -204,6 +208,38 @@ fun SManga.toLocalManga(db: DatabaseHelper, sourceId: Long): Manga {
         db.insertManga(localManga).executeAsBlocking()
     }
     return localManga
+}
+
+/**
+ * Takes a SourceManga and converts to a display manga
+ */
+
+fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga {
+    var localManga = db.getManga(this.url, sourceId).executeAsBlocking()
+    if (localManga == null) {
+        val newManga = Manga.create(this.url, this.title, sourceId)
+        newManga.apply {
+            this.thumbnail_url = currentThumbnail
+        }
+        val result = db.insertManga(newManga).executeAsBlocking()
+        newManga.id = result.insertedId()
+        localManga = newManga
+    } else if (localManga.title.isBlank()) {
+        localManga.title = this.title
+        db.insertManga(localManga).executeAsBlocking()
+    }
+    return localManga.toDisplayManga(this.displayText)
+}
+
+fun Manga.toDisplayManga(displayText: String = ""): DisplayManga {
+    return DisplayManga(
+        mangaId = this.id!!,
+        url = this.url,
+        title = this.title,
+        inLibrary = this.favorite,
+        displayText = displayText.replace("_", " ").capitalizeWords(),
+        currentArtwork = Artwork(mangaId = this.id!!, originalArtwork = this.thumbnail_url!!),
+    )
 }
 
 fun SManga.getSlug(): String {

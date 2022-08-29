@@ -17,6 +17,7 @@ import androidx.core.content.getSystemService
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -112,7 +113,7 @@ class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDeta
                 search = presenter::searchMergedManga,
                 add = presenter::addMergedManga,
             ),
-            similarClick = { router.pushController(SimilarController(presenter.manga.value).withFadeTransaction()) },
+            similarClick = { router.pushController(SimilarController(presenter.manga.value.uuid()).withFadeTransaction()) },
             shareClick = this::shareManga,
             coverActions = CoverActions(
                 share = this::shareCover,

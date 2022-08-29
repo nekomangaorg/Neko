@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.paging.compose.collectAsLazyPagingItems
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
@@ -36,14 +35,6 @@ class LatestController(bundle: Bundle? = null) :
     override fun ScreenContent() {
         val isList by preferences.browseAsList().asFlow()
             .collectAsState(preferences.browseAsList().get())
-
-        val mangaClicked: (Manga) -> Unit = { manga ->
-            router.pushController(
-                MangaDetailController(
-                    manga.id!!,
-                ).withFadeTransaction(),
-            )
-        }
 
         NekoScaffold(
             title = stringResource(id = R.string.latest),
@@ -70,7 +61,11 @@ class LatestController(bundle: Bundle? = null) :
                     shouldOutlineCover = preferences.outlineOnCovers()
                         .get(),
                     contentPadding = contentPadding,
-                    onClick = mangaClicked,
+                    onClick = { mangaId ->
+                        router.pushController(
+                            MangaDetailController(mangaId).withFadeTransaction(),
+                        )
+                    },
                 )
             } else {
                 val columns =
@@ -85,7 +80,11 @@ class LatestController(bundle: Bundle? = null) :
                     columns = columns,
                     isComfortable = preferences.libraryLayout().get() == 2,
                     contentPadding = contentPadding,
-                    onClick = mangaClicked,
+                    onClick = { mangaId ->
+                        router.pushController(
+                            MangaDetailController(mangaId).withFadeTransaction(),
+                        )
+                    },
                 )
             }
         }

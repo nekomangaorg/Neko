@@ -6,13 +6,13 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -59,7 +59,7 @@ class MangaUpdateCoordinator {
             return@channelFlow
         }
 
-        val mangaUUID = MdUtil.getMangaUUID(manga.url)
+        val mangaUUID = manga.uuid()
 
         if (mangaUUID.isDigitsOnly()) {
             send(MangaResult.Error(R.string.v3_manga))
@@ -89,7 +89,7 @@ class MangaUpdateCoordinator {
         return scope.launchIO {
             runCatching {
                 withIOContext {
-                    val artwork = mangaDex.getArtwork(manga.id!!, MdUtil.getMangaUUID(manga.url))
+                    val artwork = mangaDex.getArtwork(manga.id!!, manga.uuid())
                     db.deleteArtworkForManga(manga).executeOnIO()
                     db.insertArtWorkList(artwork).executeOnIO()
                     send(MangaResult.UpdatedArtwork)

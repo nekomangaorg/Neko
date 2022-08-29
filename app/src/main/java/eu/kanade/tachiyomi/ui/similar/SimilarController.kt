@@ -20,14 +20,11 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
-import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.components.ListGridActionButton
@@ -41,17 +38,11 @@ import uy.kohesive.injekt.injectLazy
 /**
  * Controller that shows the similar/related manga
  */
-class SimilarController(bundle: Bundle? = null) :
-    BaseComposeController<SimilarPresenter>(bundle) {
+class SimilarController(mangaUUID: String) : BaseComposeController<SimilarPresenter>() {
 
-    constructor(manga: Manga) : this(
-        Bundle().apply {
-            putString(BrowseSourceController.MANGA_ID, MdUtil.getMangaUUID(manga.url))
-        },
-    )
+    constructor(bundle: Bundle) : this(bundle.getString(MANGA_EXTRA) ?: "")
 
-    override var presenter =
-        SimilarPresenter(bundle!!.getString(BrowseSourceController.MANGA_ID) ?: "")
+    override var presenter = SimilarPresenter(mangaUUID)
 
     private val preferences: PreferencesHelper by injectLazy()
 
@@ -61,13 +52,6 @@ class SimilarController(bundle: Bundle? = null) :
         val isList by preferences.browseAsList().asFlow()
             .collectAsState(preferences.browseAsList().get())
 
-        val mangaClicked: (Manga) -> Unit = { manga ->
-            router.pushController(
-                MangaDetailController(
-                    manga.id!!,
-                ).withFadeTransaction(),
-            )
-        }
 
         NekoScaffold(
             title = stringResource(id = R.string.similar),
@@ -78,34 +62,37 @@ class SimilarController(bundle: Bundle? = null) :
                     buttonClicked = { preferences.browseAsList().set(isList.not()) },
                 )
             },
-        ) { paddingValues ->
+        ) { incomingPaddingValues ->
             val isRefreshing = presenter.isRefreshing.collectAsState()
             SwipeRefresh(
                 state = rememberSwipeRefreshState(isRefreshing.value),
-                onRefresh = { presenter.getSimilarManga(true) },
-                modifier = Modifier
-                    .fillMaxSize(),
+                onRefresh = presenter::refresh,
+                modifier = Modifier.fillMaxSize(),
                 indicator = { state, trigger ->
                     SwipeRefreshIndicator(
                         state = state,
-                        refreshingOffset = paddingValues.calculateTopPadding() + 16.dp,
                         refreshTriggerDistance = trigger,
+                        refreshingOffset = (incomingPaddingValues.calculateTopPadding() * 2),
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
 
                         )
                 },
-                content = {
-                    SimilarContent(
-                        isRefreshing = isRefreshing.value,
-                        isList = isList,
-                        isComfortable = preferences.libraryLayout().get() == 2,
-                        paddingValues = paddingValues,
-                        refreshing = { presenter.getSimilarManga(true) },
-                        mangaClicked = mangaClicked,
-                    )
-                },
-            )
+            ) {
+                SimilarContent(
+                    isRefreshing = isRefreshing.value,
+                    isList = isList,
+                    isComfortable = preferences.libraryLayout().get() == 2,
+                    paddingValues = incomingPaddingValues,
+                    refreshing = presenter::refresh,
+                    mangaClicked = { mangaId ->
+                        router.pushController(
+                            MangaDetailController(mangaId).withFadeTransaction(),
+                        )
+                    },
+                )
+            }
+
         }
     }
 
@@ -116,7 +103,7 @@ class SimilarController(bundle: Bundle? = null) :
         isComfortable: Boolean,
         paddingValues: PaddingValues = PaddingValues(),
         refreshing: () -> Unit,
-        mangaClicked: (Manga) -> Unit,
+        mangaClicked: (Long) -> Unit,
     ) {
         val groupedManga: Map<Int, List<DisplayManga>> by presenter.mangaMap.collectAsState()
         if (isRefreshing.not()) {
@@ -165,4 +152,9 @@ class SimilarController(bundle: Bundle? = null) :
             }
         }
     }
+
+    companion object {
+        const val MANGA_EXTRA = "manga"
+    }
 }
+
