@@ -675,7 +675,6 @@
     <string name="white_theme">Neko Pure</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Recents)</string>
-    <string name="language">Language</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
     <string name="manage_notifications">Manage notifications</string>
@@ -913,6 +912,49 @@
     <string name="split_tall_images">Split tall images</string>
     <string name="split_tall_images_summary">Improves reader performance</string>
 
+    <!-- Stats -->
+    <string name="stat">Stat</string>
+    <string name="stats">Stats</string>
+    <string name="statistics">Statistics</string>
+    <string name="statistics_details">Statistics details</string>
+    <string name="total_manga">Total manga</string>
+    <string name="chapters_read">Read chapters</string>
+    <string name="average_score">Average manga score</string>
+    <string name="mean_score">Average user score</string>
+    <string name="manga_tracked">Tracked manga</string>
+    <string name="chapters_downloaded">Downloaded chapters</string>
+    <string name="tags">Total tags</string>
+    <string name="manga_local">Local manga</string>
+    <string name="global_update_manga">Globally updated manga</string>
+    <string name="trackers">Logged in trackers</string>
+    <string name="n_a">N/A</string>
+    <string name="read_duration">Read duration</string>
+    <string name="last_library_update">Last library update</string>
+    <string name="manga_status_distribution">Status distribution</string>
+    <string name="manga_score_distribution">Score distribution</string>
+    <string name="view_detailed_statistics">View detailed statistics</string>
+    <string name="count">Count</string>
+    <string name="not_rated">Not rated</string>
+    <string name="source">Source</string>
+    <string name="tracker">Tracker</string>
+    <string name="length">Length</string>
+    <string name="start_year">Start year</string>
+    <string name="title_count">Title count</string>
+    <string name="no_data_for_filters">No data found for your current filters</string>
+    <string name="read_duration_week">Read duration week</string>
+    <plurals name="_series_types">
+        <item quantity="other">%d series types</item>
+    </plurals>
+    <plurals name="_sources">
+        <item quantity="other">%d sources</item>
+    </plurals>
+    <plurals name="_statuses">
+        <item quantity="other">%d statuses</item>
+    </plurals>
+    <plurals name="_languages">
+        <item quantity="other">%d languages</item>
+    </plurals>
+
     <!-- Time -->
     <string name="manual">Manual</string>
     <string name="hourly">Hourly</string>
@@ -1003,6 +1045,10 @@
     <string name="move_to_top">Move to top</string>
     <string name="move_to_">Move to %1$s</string>
     <string name="moved_to_">Moved to %1$s</string>
+    <string name="name">Name</string>
+    <string name="recently_updated">Recently updated</string>
+    <string name="recently_installed">Recently installed</string>
+    <string name="language">Language</string>
     <string name="never">Never</string>
     <string name="newest">Newest</string>
     <string name="next">Next</string>
@@ -1094,6 +1140,7 @@
 
     <!-- Library Sort -->
     <string name="rating">Site rating</string>
+
     <string name="next_updated">Next expected update</string>
 
 

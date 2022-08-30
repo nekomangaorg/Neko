@@ -54,6 +54,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -296,6 +297,8 @@ class LibraryUpdateService(
 
     private suspend fun updateChaptersJob(mangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
+
+        preferences.libraryUpdateLastTimestamp().set(Date().time)
 
         mangaToUpdate.addAll(mangaToAdd)
 

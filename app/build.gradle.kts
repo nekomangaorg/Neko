@@ -220,6 +220,7 @@ dependencies {
     implementation(compose.bundles.accompanist)
     implementation(compose.number.picker)
 
+    // implementation(compose.bundles.charting)
 
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
@@ -232,6 +233,8 @@ dependencies {
     debugImplementation(libs.leakcanary)
 
     testImplementation(libs.bundles.tests)
+
+    //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }
 

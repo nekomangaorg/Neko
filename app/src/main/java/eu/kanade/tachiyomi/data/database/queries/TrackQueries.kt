@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.database.queries
 
+import com.pushtorefresh.storio.Queries
 import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.Query
 import eu.kanade.tachiyomi.data.database.DbProvider
@@ -20,6 +21,17 @@ interface TrackQueries : DbProvider {
                 .table(TrackTable.TABLE)
                 .where("${TrackTable.COL_MANGA_ID} = ?")
                 .whereArgs(mangaId)
+                .build(),
+        )
+        .prepare()
+
+    fun getTracks(mangaIds: List<Long>) = db.get()
+        .listOfObjects(Track::class.java)
+        .withQuery(
+            Query.builder()
+                .table(TrackTable.TABLE)
+                .where("${TrackTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})")
+                .whereArgs(*mangaIds.toTypedArray())
                 .build(),
         )
         .prepare()

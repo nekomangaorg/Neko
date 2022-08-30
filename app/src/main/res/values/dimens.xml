@@ -33,4 +33,10 @@
     <dimen name="material_component_lists_single_line_with_avatar_height">56dp</dimen>
     <dimen name="material_component_lists_padding_above_list">8dp</dimen>
 
+    <!-- Stats -->
+    <dimen name="marginPage">28dp</dimen>
+    <dimen name="marginClose">4dp</dimen>
+    <dimen name="marginSmall">8dp</dimen>
+    <dimen name="marginNormal">12dp</dimen>
+    <dimen name="marginFar">56dp</dimen>
 </resources>

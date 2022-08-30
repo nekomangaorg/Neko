@@ -290,6 +290,8 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryUpdateInterval() = flowPrefs.getInt(Keys.libraryUpdateInterval, 24)
 
+    fun libraryUpdateLastTimestamp() = flowPrefs.getLong("library_update_last_timestamp", 0L)
+
     fun libraryUpdateDeviceRestriction() =
         flowPrefs.getStringSet(Keys.libraryUpdateDeviceRestriction, emptySet())
 
