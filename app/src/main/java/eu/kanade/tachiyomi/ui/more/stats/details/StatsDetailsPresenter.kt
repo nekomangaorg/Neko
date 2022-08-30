@@ -1,3 +1,4 @@
+/*
 package eu.kanade.tachiyomi.ui.more.stats.details
 
 import eu.kanade.tachiyomi.R
@@ -83,9 +84,11 @@ class StatsDetailsPresenter(
 
     private val pieColorList = StatsHelper.PIE_CHART_COLOR_LIST
 
-    /**
-     * Get the data of the selected stat
-     */
+    */
+/**
+ * Get the data of the selected stat
+ *//*
+
     fun getStatisticData() {
         if (selectedStat == null || selectedStatsSort == null) {
             return
@@ -170,18 +173,18 @@ class StatsDetailsPresenter(
 
     private fun setupLanguages() {
         currentStats = ArrayList()
-        val libraryFormat = mangasDistinct.filterByChip().groupBy { it.getLanguage() }
+        val libraryFormat = mangasDistinct.filterByChip()
 
-        libraryFormat.forEach { (language, mangaList) ->
+        libraryFormat.forEach { it ->
             currentStats?.add(
                 StatsData(
                     color = pieColorList[currentStats?.size!! % 12],
-                    count = mangaList.count(),
-                    meanScore = mangaList.getMeanScoreRounded(),
-                    chaptersRead = mangaList.sumOf { it.read },
-                    totalChapters = mangaList.sumOf { it.totalChapters },
-                    label = language.uppercase(),
-                    readDuration = mangaList.getReadDuration(),
+                    count = libraryFormat.count(),
+                    meanScore = libraryFormat.getMeanScoreRounded(),
+                    chaptersRead = libraryFormat.sumOf { it.read },
+                    totalChapters = libraryFormat.sumOf { it.totalChapters },
+                    label = "EN",
+                    readDuration = libraryFormat.getReadDuration(),
                 ),
             )
         }
@@ -348,13 +351,14 @@ class StatsDetailsPresenter(
         currentStats?.sortByDescending { it.readDuration }
     }
 
-    /**
-     * Filter the stat data according to the chips selected
-     */
+    */
+/**
+ * Filter the stat data according to the chips selected
+ *//*
+
     private fun List<LibraryManga>.filterByChip(): List<LibraryManga> {
         return this.filterBySeriesType(selectedStat == Stats.SERIES_TYPE)
             .filterByStatus(selectedStat == Stats.STATUS)
-            .filterByLanguage(selectedStat == Stats.LANGUAGE || (selectedStat != Stats.SOURCE && selectedSource.isNotEmpty()))
             .filterBySource(selectedStat in listOf(Stats.SOURCE, Stats.LANGUAGE) || selectedLanguage.isNotEmpty())
             .filterByCategory(selectedStat == Stats.CATEGORY)
     }
@@ -368,12 +372,6 @@ class StatsDetailsPresenter(
     private fun List<LibraryManga>.filterByStatus(noFilter: Boolean = false): List<LibraryManga> {
         return if (noFilter || selectedStatus.isEmpty()) this else filter { manga ->
             context.mapStatus(manga.status) in selectedStatus
-        }
-    }
-
-    private fun List<LibraryManga>.filterByLanguage(noFilter: Boolean = false): List<LibraryManga> {
-        return if (noFilter || selectedLanguage.isEmpty()) this else filter { manga ->
-            manga.getLanguage() in selectedLanguage
         }
     }
 
@@ -411,9 +409,11 @@ class StatsDetailsPresenter(
         return getGenres()?.map { it.uppercase() } ?: emptyList()
     }
 
-    /**
-     * Get mean score rounded to two decimal of a list of manga
-     */
+    */
+/**
+ * Get mean score rounded to two decimal of a list of manga
+ *//*
+
     private fun List<LibraryManga>.getMeanScoreRounded(): Double? {
         val mangaTracks = this.map { it to getTracks(it) }
         val scoresList = mangaTracks.filter { it.second.isNotEmpty() }
@@ -421,9 +421,11 @@ class StatsDetailsPresenter(
         return if (scoresList.isEmpty()) null else scoresList.average().roundToTwoDecimal()
     }
 
-    /**
-     * Get mean score rounded to int of a single manga
-     */
+    */
+/**
+ * Get mean score rounded to int of a single manga
+ *//*
+
     private fun LibraryManga.getMeanScoreToInt(): Int? {
         val mangaTracks = getTracks(this)
         val scoresList = mangaTracks.filter { it.score > 0 }
@@ -431,18 +433,22 @@ class StatsDetailsPresenter(
         return if (scoresList.isEmpty()) null else scoresList.average().roundToInt().coerceIn(1..10)
     }
 
-    /**
-     * Get mean score of a tracker
-     */
+    */
+/**
+ * Get mean score of a tracker
+ *//*
+
     private fun List<Track?>.getMeanScoreByTracker(): Double? {
         val scoresList = this.filter { (it?.score ?: 0f) > 0 }
             .mapNotNull { it?.get10PointScore() }
         return if (scoresList.isEmpty()) null else scoresList.average()
     }
 
-    /**
-     * Convert the score to a 10 point score
-     */
+    */
+/**
+ * Convert the score to a 10 point score
+ *//*
+
     private fun Track.get10PointScore(): Float? {
         val service = trackManager.getService(this.sync_id)
         return service?.get10PointScore(this.score)
@@ -487,9 +493,11 @@ class StatsDetailsPresenter(
         return sumOf { manga -> db.getHistoryByMangaId(manga.id!!).executeAsBlocking().sumOf { it.time_read } }
     }
 
-    /**
-     * Get the manga and history grouped by day during the selected period
-     */
+    */
+/**
+ * Get the manga and history grouped by day during the selected period
+ *//*
+
     fun getMangaHistoryGroupedByDay(): Map<Calendar, List<MangaChapterHistory>> {
         val history = db.getHistoryPerPeriod(startDate.timeInMillis, endDate.timeInMillis).executeAsBlocking()
         val calendar = Calendar.getInstance().apply {
@@ -508,9 +516,11 @@ class StatsDetailsPresenter(
             ?: context.getString(R.string.unknown)
     }
 
-    /**
-     * Update the start date and end date according to time selected and fetch the history of the period
-     */
+    */
+/**
+ * Update the start date and end date according to time selected and fetch the history of the period
+ *//*
+
     fun updateReadDurationPeriod(millis: Long) {
         startDate = Calendar.getInstance().apply {
             timeInMillis = millis
@@ -569,3 +579,4 @@ class StatsDetailsPresenter(
         var readDuration: Long = 0,
     )
 }
+*/

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/stats_details_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    >
+</FrameLayout><!--
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/stats_details_layout"
@@ -200,6 +207,28 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
+                    <TextView
+                        android:id="@+id/stat_sort"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="12dp"
+                        android:background="@drawable/square_ripple"
+                        android:clickable="true"
+                        android:drawablePadding="6dp"
+                        android:alpha=".8"
+                        app:drawableTint="?android:textColorPrimary"
+                        android:ellipsize="start"
+                        android:focusable="true"
+                        android:gravity="center|end"
+                        android:maxLines="2"
+                        android:padding="6dp"
+                        android:layout_gravity="end"
+                        android:textAlignment="textEnd"
+                        style="?textAppearanceBodyMedium"
+                        android:textColor="?android:attr/textColorPrimary"
+                        tools:text="Title Count"
+                        app:drawableEndCompat="@drawable/ic_sort_24dp" />
+
                     <RelativeLayout
                         android:id="@+id/stats_date_layout"
                         android:layout_width="match_parent"
@@ -309,3 +338,4 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>
+-->

@@ -20,6 +20,16 @@ class NekoColors {
     }
 }
 
+object PieChartColors {
+    val ongoing = Color(0xFF3BAEEA)
+    val completed = Color(0x777BD555)
+    val licensed = Color(0x77F79A63)
+    val publicationComplete = Color(0x77d29d2f)
+    val cancelled = Color(0x77E85D75)
+    val hiatus = Color(0x77F17575)
+    val unknown = Color(0x775b5b5b)
+}
+
 object PrimaryColorRippleTheme : RippleTheme {
 
     @Composable

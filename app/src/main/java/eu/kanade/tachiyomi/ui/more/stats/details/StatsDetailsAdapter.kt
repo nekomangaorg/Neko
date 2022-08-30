@@ -1,3 +1,4 @@
+/*
 package eu.kanade.tachiyomi.ui.more.stats.details
 
 import android.content.Context
@@ -170,3 +171,4 @@ class StatsDetailsAdapter(
         val statsSublabelText = binding.statsSublabelText
     }
 }
+*/

@@ -13,7 +13,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="0dp"
-        android:layout_height="0dp"/>
+        android:layout_height="0dp" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/overflow_card_view"
@@ -90,7 +90,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:text="@string/stats"
                 app:icon="@drawable/ic_query_stats_24dp" />
-
 
             <eu.kanade.tachiyomi.widget.MenuSheetItemView
                 android:id="@+id/about_item"
