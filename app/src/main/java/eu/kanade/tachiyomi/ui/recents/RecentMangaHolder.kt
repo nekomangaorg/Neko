@@ -206,7 +206,7 @@ class RecentMangaHolder(
     ) {
         binding.downloadButton.downloadButton.setDownloadStatus(status, progress, animated)
         val isChapterRead =
-            if (adapter.showDownloads == RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded) isRead else false
+            if (adapter.showDownloads == RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded) isRead else true
         binding.downloadButton.downloadButton.isVisible =
             when (adapter.showDownloads) {
                 RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded,
