@@ -674,6 +674,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         checkForAppUpdates()
         DownloadService.callListeners()
         showDLQueueTutorial()
+        reEnableBackPressedCallBack()
     }
 
     private fun showDLQueueTutorial() {
