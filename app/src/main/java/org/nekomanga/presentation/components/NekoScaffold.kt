@@ -47,7 +47,7 @@ fun NekoScaffold(
     SideEffect {
         systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
     }
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
