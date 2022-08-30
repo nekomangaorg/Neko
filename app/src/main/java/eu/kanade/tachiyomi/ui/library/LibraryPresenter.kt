@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.chopByWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
+import eu.kanade.tachiyomi.util.mapStatus
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withUIContext
