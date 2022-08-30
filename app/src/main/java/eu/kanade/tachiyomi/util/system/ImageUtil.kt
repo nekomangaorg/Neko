@@ -129,9 +129,14 @@ object ImageUtil {
         return ImageDecoder.findType(bytes)
     }
 
-    fun autoSetBackground(image: Bitmap?, alwaysUseWhite: Boolean, context: Context): Drawable {
+    fun autoSetBackground(image: Bitmap?, alwaysUseWhite: Boolean, preferBlack: Boolean, context: Context): Drawable {
         val backgroundColor = if (alwaysUseWhite) Color.WHITE else {
-            context.getResourceColor(R.attr.readerBackground)
+            val color = context.getResourceColor(R.attr.readerBackground)
+            if (preferBlack && !color.isWhite) {
+                Color.BLACK
+            } else {
+                color
+            }
         }
         if (image == null) return ColorDrawable(backgroundColor)
         if (image.width < 50 || image.height < 50) {

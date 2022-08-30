@@ -574,6 +574,7 @@ class PagerPageHolder(
                     bytesArray.size,
                 ),
                 preferences.readerTheme().get() == 2,
+                preferences.readerTheme().get() == 4,
                 context,
             )
         }

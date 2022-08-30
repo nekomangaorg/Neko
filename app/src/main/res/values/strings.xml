@@ -424,6 +424,7 @@
     <string name="alpha_initial">A</string>
     <string name="smart_based_on_page">Smart (based on page)</string>
     <string name="smart_based_on_page_and_theme">Smart (based on page and theme)</string>
+    <string name="smart_based_on_page_and_theme_use_black">Smart (based on page and theme but use black)</string>
     <string name="always_show_chapter_transition">Always show chapter transition</string>
     <string name="if_disabled_transition_will_skip">If disabled, the transition page will be
         skipped if the next chapter is loaded</string>

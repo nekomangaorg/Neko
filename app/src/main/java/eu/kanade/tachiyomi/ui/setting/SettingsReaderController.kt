@@ -112,8 +112,9 @@ class SettingsReaderController : SettingsController() {
                     R.string.black,
                     R.string.smart_based_on_page,
                     R.string.smart_based_on_page_and_theme,
+                    R.string.smart_based_on_page_and_theme_use_black,
                 )
-                entryRange = 0..3
+                entryRange = 0..4
                 defaultValue = 2
             }
             switchPreference {
