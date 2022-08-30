@@ -128,6 +128,7 @@ fun MangaDetailsHeader(
                     Gap(height = 16.dp)
                     ButtonBlock(
                         hideButtonTextProvider = { generalState.value.hideButtonText },
+                        isInitializedProvider = { mangaState.value.initialized },
                         isMergedProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes },
                         inLibraryProvider = { mangaState.value.inLibrary },
                         loggedIntoTrackersProvider = isLoggedIntoTrackersProvider,

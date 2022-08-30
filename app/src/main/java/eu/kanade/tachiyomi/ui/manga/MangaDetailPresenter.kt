@@ -179,9 +179,7 @@ class MangaDetailPresenter(
                         _isRefreshing.value = false
                     }
                     is MangaResult.Success -> {
-                        updateArtworkFlow()
-                        updateFilterFlow()
-                        updateTrackingFlows(true)
+                        updateAllFlows()
                         _isRefreshing.value = false
                     }
                     is MangaResult.UpdatedChapters -> {

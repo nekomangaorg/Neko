@@ -50,6 +50,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun ButtonBlock(
     hideButtonTextProvider: () -> Boolean,
+    isInitializedProvider: () -> Boolean,
     isMergedProvider: () -> Boolean,
     inLibraryProvider: () -> Boolean,
     loggedIntoTrackersProvider: () -> Boolean,
@@ -63,6 +64,10 @@ fun ButtonBlock(
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
 ) {
+
+    if (!isInitializedProvider()) {
+        return
+    }
 
     val shape = RoundedCornerShape(35)
 
