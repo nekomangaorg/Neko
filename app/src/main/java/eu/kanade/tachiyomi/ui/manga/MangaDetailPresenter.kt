@@ -132,6 +132,7 @@ class MangaDetailPresenter(
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
         if (!manga.value.initialized) {
+            updateCategoryFlows()
             updateMangaFlow()
             updateArtworkFlow()
             onRefresh()
@@ -147,13 +148,15 @@ class MangaDetailPresenter(
      */
     private fun updateAllFlows() {
         presenterScope.launchIO {
+            //immediately update the categories in case loading manga takes a second
+            updateCategoryFlows()
+
             val m = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = m
-            val mangaState = getMangaStateCopyForCategories(getMangaStateCopyFromManga(m))
+            val mangaState = getMangaStateCopyFromManga(m)
             val currentArtwork = createCurrentArtwork(m)
             val altArtwork = createAltArtwork(m, currentArtwork)
             _mangaState.value = mangaState.copy(currentArtwork = currentArtwork, alternativeArtwork = altArtwork)
-            _generalState.value = getGeneralStateCopyForCategories(generalState.value)
             updateChapterFlows()
             updateFilterFlow()
         }
@@ -727,10 +730,11 @@ class MangaDetailPresenter(
      * Updates the flows for all categories, and manga categories
      */
     private fun updateCategoryFlows() {
-        presenterScope.launchIO {
+        presenterScope.launch {
             _generalState.value = getGeneralStateCopyForCategories(generalState.value)
+        }
+        presenterScope.launch {
             _mangaState.value = getMangaStateCopyForCategories(mangaState.value)
-
         }
     }
 
