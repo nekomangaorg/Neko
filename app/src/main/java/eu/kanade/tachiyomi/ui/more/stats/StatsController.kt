@@ -13,8 +13,10 @@ class StatsController : BaseComposeController<MangaDetailPresenter>() {
     @Composable
     override fun ScreenContent() {
         StatsScreen(
-            statsState = presenter.statsState.collectAsState(),
+            statsState = presenter.simpleState.collectAsState(),
+            detailedState = presenter.detailState.collectAsState(),
             onBackPressed = { activity?.onBackPressed() },
+            onSwitchClick = presenter::switchState,
         )
     }
 }

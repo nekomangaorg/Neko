@@ -220,7 +220,7 @@ dependencies {
     implementation(compose.bundles.accompanist)
     implementation(compose.number.picker)
 
-    // implementation(compose.bundles.charting)
+    //implementation(compose.bundles.charting)
 
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)

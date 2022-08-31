@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import com.elvishew.xlog.XLog
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
@@ -50,7 +51,6 @@ import eu.kanade.tachiyomi.util.system.toUtcCalendar
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
-import timber.log.Timber
 import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -74,12 +74,14 @@ class StatsDetailsController :
  * Selected day in the read duration stat
  *//*
 
+
     private var highlightedDay: Calendar? = null
 
     */
 /**
  * Returns the toolbar title to show when this controller is attached.
  *//*
+
 
     override fun getTitle() = resources?.getString(R.string.statistics_details)
 
@@ -265,6 +267,7 @@ class StatsDetailsController :
  * Initialize the chips state
  *//*
 
+
     private fun initializeChips() {
         with(binding) {
             chipStat.text = activity?.getString(presenter.selectedStat?.resourceId ?: defaultStat.resourceId)
@@ -284,6 +287,7 @@ class StatsDetailsController :
  * @param referenceDate date used to determine if should change week
  * @param weeksToAdd number of weeks to add or remove
  *//*
+
 
     private fun changeDatesReadDurationWithArrow(referenceDate: Calendar, weeksToAdd: Int) {
         with(binding) {
@@ -323,6 +327,7 @@ class StatsDetailsController :
  * @param weeksToAdd number of weeks to add or remove
  *//*
 
+
     private fun changeWeekReadDuration(weeksToAdd: Int) {
         presenter.startDate.apply { add(Calendar.WEEK_OF_YEAR, weeksToAdd) }
         presenter.endDate.apply { add(Calendar.WEEK_OF_YEAR, weeksToAdd) }
@@ -352,6 +357,7 @@ class StatsDetailsController :
  * Listener to update adapter when searchView text changes
  *//*
 
+
     private fun setSearchViewListener(searchView: SearchView?) {
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
@@ -368,6 +374,7 @@ class StatsDetailsController :
  * @param resourceId default string resource when no values are selected
  * @param resourceIdPlural string resource when more than 2 values are selected
  *//*
+
 
     private fun <T> Chip.setMultiChoiceItemsDialog(
         statsList: Array<T>,
@@ -410,6 +417,7 @@ class StatsDetailsController :
  * @param updateChipsVisibility whether to update the chips visibility
  *//*
 
+
     private fun resetAndSetup(updateStats: Boolean = true, updateChipsVisibility: Boolean = true) {
         resetLayout(updateChipsVisibility)
         setupStatistic(updateStats)
@@ -420,6 +428,7 @@ class StatsDetailsController :
  * Reset the text of the chip selected and reset layout
  * @param resourceId string resource of the stat name
  *//*
+
 
     private fun Chip.reset(resourceId: Int) {
         resetAndSetup()
@@ -432,6 +441,7 @@ class StatsDetailsController :
  * Reset the layout to the default state
  * @param updateChipsVisibility whether to update the chips visibility
  *//*
+
 
     private fun resetLayout(updateChipsVisibility: Boolean = false) {
         with(binding) {
@@ -458,6 +468,7 @@ class StatsDetailsController :
  * @param updateStats whether to recalculate the displayed stats
  *//*
 
+
     private fun setupStatistic(updateStats: Boolean = true) {
         if (updateStats) presenter.getStatisticData()
         with(binding) {
@@ -479,6 +490,7 @@ class StatsDetailsController :
 /**
  * Update the chips visibility according to the selected stat
  *//*
+
 
     private fun updateChipsVisibility() {
         with(binding) {
@@ -502,6 +514,7 @@ class StatsDetailsController :
  * Update the chip state according to the number of selected values
  *//*
 
+
     private fun <T> Chip.setState(
         selectedValues: MutableSet<T>,
         resourceId: Int,
@@ -521,6 +534,7 @@ class StatsDetailsController :
 /**
  * Reset all the filters selected
  *//*
+
 
     private fun resetFilters() {
         with(binding) {
@@ -566,6 +580,7 @@ class StatsDetailsController :
 /**
  * Handle which layout should be displayed according to the selected stat
  *//*
+
 
     private fun handleLayout() {
         when (presenter.selectedStat) {
@@ -705,7 +720,7 @@ class StatsDetailsController :
                     invalidate()
                 }
             } catch (e: Exception) {
-                Timber.e(e)
+                XLog.e(e)
             }
         }
     }
@@ -803,7 +818,7 @@ class StatsDetailsController :
                     invalidate()
                 }
             } catch (e: Exception) {
-                Timber.e(e)
+                XLog.e(e)
             }
         }
     }
@@ -812,6 +827,7 @@ class StatsDetailsController :
 /**
  * Round the rounded max label of the bar chart to avoid weird values
  *//*
+
 
     private fun Float.getRoundedMaxLabel(): Float {
         val longValue = toLong()
@@ -872,7 +888,7 @@ class StatsDetailsController :
                     invalidate()
                 }
             } catch (e: Exception) {
-                Timber.e(e)
+                XLog.e(e)
             }
         }
     }
@@ -881,6 +897,7 @@ class StatsDetailsController :
 /**
  * Custom MarkerView displayed when a bar is selected in the bar chart
  *//*
+
 
     inner class MyMarkerView(context: Context?, layoutResource: Int) : MarkerView(context, layoutResource) {
 

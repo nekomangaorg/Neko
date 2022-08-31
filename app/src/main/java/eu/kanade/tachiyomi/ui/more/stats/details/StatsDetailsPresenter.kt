@@ -89,6 +89,7 @@ class StatsDetailsPresenter(
  * Get the data of the selected stat
  *//*
 
+
     fun getStatisticData() {
         if (selectedStat == null || selectedStatsSort == null) {
             return
@@ -356,6 +357,7 @@ class StatsDetailsPresenter(
  * Filter the stat data according to the chips selected
  *//*
 
+
     private fun List<LibraryManga>.filterByChip(): List<LibraryManga> {
         return this.filterBySeriesType(selectedStat == Stats.SERIES_TYPE)
             .filterByStatus(selectedStat == Stats.STATUS)
@@ -414,6 +416,7 @@ class StatsDetailsPresenter(
  * Get mean score rounded to two decimal of a list of manga
  *//*
 
+
     private fun List<LibraryManga>.getMeanScoreRounded(): Double? {
         val mangaTracks = this.map { it to getTracks(it) }
         val scoresList = mangaTracks.filter { it.second.isNotEmpty() }
@@ -425,6 +428,7 @@ class StatsDetailsPresenter(
 /**
  * Get mean score rounded to int of a single manga
  *//*
+
 
     private fun LibraryManga.getMeanScoreToInt(): Int? {
         val mangaTracks = getTracks(this)
@@ -438,6 +442,7 @@ class StatsDetailsPresenter(
  * Get mean score of a tracker
  *//*
 
+
     private fun List<Track?>.getMeanScoreByTracker(): Double? {
         val scoresList = this.filter { (it?.score ?: 0f) > 0 }
             .mapNotNull { it?.get10PointScore() }
@@ -448,6 +453,7 @@ class StatsDetailsPresenter(
 /**
  * Convert the score to a 10 point score
  *//*
+
 
     private fun Track.get10PointScore(): Float? {
         val service = trackManager.getService(this.sync_id)
@@ -498,6 +504,7 @@ class StatsDetailsPresenter(
  * Get the manga and history grouped by day during the selected period
  *//*
 
+
     fun getMangaHistoryGroupedByDay(): Map<Calendar, List<MangaChapterHistory>> {
         val history = db.getHistoryPerPeriod(startDate.timeInMillis, endDate.timeInMillis).executeAsBlocking()
         val calendar = Calendar.getInstance().apply {
@@ -520,6 +527,7 @@ class StatsDetailsPresenter(
 /**
  * Update the start date and end date according to time selected and fetch the history of the period
  *//*
+
 
     fun updateReadDurationPeriod(millis: Long) {
         startDate = Calendar.getInstance().apply {
@@ -579,4 +587,5 @@ class StatsDetailsPresenter(
         var readDuration: Long = 0,
     )
 }
+
 */

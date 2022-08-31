@@ -171,4 +171,5 @@ class StatsDetailsAdapter(
         val statsSublabelText = binding.statsSublabelText
     }
 }
+
 */
