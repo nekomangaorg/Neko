@@ -45,7 +45,9 @@ fun StatsScreen(
                 val buttonText = if (isSimpleScreen) R.string.view_detailed_statistics else R.string.view_simple_statistics
 
                 item {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 16.dp), horizontalArrangement = Arrangement.End) {
                         OutlinedButton(onClick = onSwitchClick) {
                             Text(
                                 modifier = Modifier.padding(start = 8.dp),
