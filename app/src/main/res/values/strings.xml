@@ -394,6 +394,7 @@
     <string name="black">Black</string>
     <string name="smart_by_page">Smart (by page)</string>
     <string name="smart_by_theme">Smart (by theme)</string>
+    <string name="smart_by_theme_but_black">Smart (by theme but black)</string>
     <string name="default_reading_mode">Default reading mode</string>
     <string name="left_to_right_viewer">Left to right</string>
     <string name="right_to_left_viewer">Right to left</string>

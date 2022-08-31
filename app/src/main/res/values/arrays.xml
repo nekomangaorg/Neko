@@ -14,6 +14,7 @@
         <item>@string/black</item>
         <item>@string/smart_by_page</item>
         <item>@string/smart_by_theme</item>
+        <item>@string/smart_by_theme_but_black</item>
     </string-array>
 
     <string-array name="hopper_long_press">
