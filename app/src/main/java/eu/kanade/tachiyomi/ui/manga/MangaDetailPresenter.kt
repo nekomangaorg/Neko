@@ -337,6 +337,8 @@ class MangaDetailPresenter(
                             XLog.e("error refreshing tracker", it)
                             delay(3000)
                             _snackbarState.emit(SnackbarState(message = it.message, fieldRes = service.nameRes(), messageRes = R.string.error_refreshing_))
+                        }.onSuccess { track ->
+                            db.insertTrack(track).executeOnIO()
                         }
                     }
                 }
