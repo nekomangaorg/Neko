@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
@@ -37,9 +38,9 @@ fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, contentPad
 
         item {
 
-            /* LazyRow(modifier = Modifier.fillMaxWidth()) {
-                 item {
-                     FilterChip(
+            LazyRow(modifier = Modifier.fillMaxWidth()) {
+                item {
+                    /* FilterChip(
                          selected = filterState == Filter.ReadDuration,
                          onClick = {
                              filterState = when (filterState == Filter.ReadDuration) {
@@ -48,9 +49,9 @@ fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, contentPad
                              }
                          },
                          label = { Text(text = stringResource(id = R.string.read_duration)) },
-                     )
-                 }
-             }*/
+                     )*/
+                }
+            }
         }
         when (filterState) {
             Filter.None -> {
@@ -58,14 +59,10 @@ fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, contentPad
                     DetailedCard(manga)
                 }
             }
+
             else -> Unit
         }
     }
-}
-
-private enum class Filter {
-    None,
-    ReadDuration
 }
 
 @Composable
@@ -99,7 +96,8 @@ private fun Line(label: String, value: String) {
     }
 }
 
-
-
-
+private enum class Filter {
+    None,
+    ReadDuration
+}
 
