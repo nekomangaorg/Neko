@@ -1497,6 +1497,11 @@ class LibraryController(
     }
 
     private fun openManga(manga: Manga) {
+        view?.let {
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.hideSoftInputFromWindow(it.windowToken, 0)
+        }
+
         router.pushController(MangaDetailController(manga.id!!).withFadeTransaction())
     }
 
