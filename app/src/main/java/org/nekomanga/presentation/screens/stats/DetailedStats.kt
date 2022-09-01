@@ -2,16 +2,21 @@ package org.nekomanga.presentation.screens.stats
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,10 +25,47 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 
-fun LazyListScope.detailedStats(detailedStats: State<StatsConstants.DetailedState>) {
-    items(detailedStats.value.manga, key = { manga -> manga.id }) { manga ->
-        DetailedCard(manga)
+@Composable
+fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, contentPadding: PaddingValues, switchRow: @Composable () -> Unit) {
+
+    var filterState by rememberSaveable { mutableStateOf(Filter.None) }
+    LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = contentPadding) {
+
+        item {
+            switchRow()
+        }
+
+        item {
+
+            /* LazyRow(modifier = Modifier.fillMaxWidth()) {
+                 item {
+                     FilterChip(
+                         selected = filterState == Filter.ReadDuration,
+                         onClick = {
+                             filterState = when (filterState == Filter.ReadDuration) {
+                                 true -> Filter.None
+                                 false -> Filter.ReadDuration
+                             }
+                         },
+                         label = { Text(text = stringResource(id = R.string.read_duration)) },
+                     )
+                 }
+             }*/
+        }
+        when (filterState) {
+            Filter.None -> {
+                items(detailedStats.value.manga, key = { manga -> manga.id }) { manga ->
+                    DetailedCard(manga)
+                }
+            }
+            else -> Unit
+        }
     }
+}
+
+private enum class Filter {
+    None,
+    ReadDuration
 }
 
 @Composable

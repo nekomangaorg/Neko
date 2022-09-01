@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -23,8 +22,8 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Detailed
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.screens.stats.DetailedStats
 import org.nekomanga.presentation.screens.stats.SimpleStats
-import org.nekomanga.presentation.screens.stats.detailedStats
 
 @Composable
 fun StatsScreen(
@@ -58,37 +57,31 @@ fun StatsScreen(
             }
         } else {
 
-            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = incomingPaddingValues) {
-
-                val isSimpleScreen = statsState.value.screenState is StatsConstants.ScreenState.Simple
-
-                val buttonText = if (isSimpleScreen) R.string.view_detailed_statistics else R.string.view_simple_statistics
-
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 16.dp),
-                        horizontalArrangement = Arrangement.End,
-                    ) {
-                        OutlinedButton(onClick = onSwitchClick) {
-                            Text(
-                                modifier = Modifier.padding(start = 8.dp),
-                                text = stringResource(id = buttonText),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-                            )
-                        }
-                    }
-                }
-                if (statsState.value.screenState is StatsConstants.ScreenState.Simple) {
-                    item {
-                        SimpleStats(statsState = statsState)
-                    }
-                } else {
-                    detailedStats(detailedStats = detailedState)
-                }
+            if (statsState.value.screenState is StatsConstants.ScreenState.Simple) {
+                SimpleStats(statsState = statsState, contentPadding = incomingPaddingValues, switchRow = { SwitchViewRow(isSimpleScreen = true, onSwitchClick) })
+            } else {
+                DetailedStats(detailedStats = detailedState, contentPadding = incomingPaddingValues, switchRow = { SwitchViewRow(isSimpleScreen = false, onSwitchClick) })
             }
+        }
+    }
+}
+
+@Composable
+private fun SwitchViewRow(isSimpleScreen: Boolean, onSwitchClick: () -> Unit) {
+    val buttonText = if (isSimpleScreen) R.string.view_detailed_statistics else R.string.view_simple_statistics
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 16.dp),
+        horizontalArrangement = Arrangement.End,
+    ) {
+        OutlinedButton(onClick = onSwitchClick) {
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = stringResource(id = buttonText),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+            )
         }
     }
 }

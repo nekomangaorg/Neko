@@ -3,12 +3,14 @@ package org.nekomanga.presentation.screens.stats
 import android.icu.text.NumberFormat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,7 +35,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.presentation.components.NekoColors
 
 @Composable
-fun SimpleStats(statsState: State<StatsConstants.SimpleState>) {
+fun SimpleStats(statsState: State<StatsConstants.SimpleState>, contentPadding: PaddingValues, switchRow: @Composable () -> Unit) {
 
     val na = stringResource(id = R.string.n_a)
 
@@ -77,47 +79,53 @@ fun SimpleStats(statsState: State<StatsConstants.SimpleState>) {
         }
     }
 
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
 
+        item {
+            switchRow()
+        }
+        item {
+            Label(label = stringResource(id = R.string.general))
+            BasicStatRow(stats = stats)
+            Gap(16.dp)
+        }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Label(label = stringResource(id = R.string.general))
-        BasicStatRow(stats = stats)
-        Gap(16.dp)
-        Label(label = stringResource(id = R.string.manga_status_distribution))
+        item {
+            Label(label = stringResource(id = R.string.manga_status_distribution))
 
-        val size = LocalConfiguration.current.screenWidthDp / 2.8
+            val size = LocalConfiguration.current.screenWidthDp / 2.8
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            PieChart(
+            Row(
                 modifier = Modifier
-                    .scale(1f)
-                    .size(size.dp),
-                pieData = pieData, config = PieConfig(isDonut = true, expandDonutOnClick = false),
-            )
-            Column(
-                Modifier
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.Start,
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                statusDistribution.forEach {
-                    val text = stringResource(id = it.status.statusRes) + ": " + numberFormat.format(it.distribution)
-                    Text(text = text, style = MaterialTheme.typography.bodyMedium.copy(color = Color(it.status.color), fontWeight = FontWeight.Medium))
+                PieChart(
+                    modifier = Modifier
+                        .scale(1f)
+                        .size(size.dp),
+                    pieData = pieData, config = PieConfig(isDonut = true, expandDonutOnClick = false),
+                )
+                Column(
+                    Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.Start,
+                ) {
+                    statusDistribution.forEach {
+                        val text = stringResource(id = it.status.statusRes) + ": " + numberFormat.format(it.distribution)
+                        Text(text = text, style = MaterialTheme.typography.bodyMedium.copy(color = Color(it.status.color), fontWeight = FontWeight.Medium))
+                    }
                 }
             }
         }
 
-        //    BasicStatRow(stats = statusDistribution)
     }
 }
 
 @Composable
-private fun ColumnScope.Label(label: String) {
+private fun LazyItemScope.Label(label: String) {
     Text(
         modifier = Modifier.padding(start = 8.dp),
         text = label,
