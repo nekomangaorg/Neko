@@ -104,7 +104,7 @@ private fun EmptyScreen(
                         Text(
                             text = stringResource(id = action.resId),
                             color = MaterialTheme.colorScheme.secondary,
-                            style = MaterialTheme.typography.titleLarge,
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                     }
                 }

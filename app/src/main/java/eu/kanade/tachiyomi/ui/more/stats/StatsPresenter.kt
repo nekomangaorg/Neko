@@ -57,59 +57,67 @@ class StatsPresenter(
     private fun getStatsState() {
         presenterScope.launchIO {
             val libraryList = getLibrary()
-            val tracks = getTracks(libraryList)
-            val lastUpdate = prefs.libraryUpdateLastTimestamp().get()
-            _simpleState.value = StatsConstants.SimpleState(
-                screenState = StatsConstants.ScreenState.Simple,
-                mangaCount = libraryList.count(),
-                chapterCount = libraryList.sumOf { it.totalChapters },
-                readCount = libraryList.sumOf { it.read },
-                trackedCount = getMangaByTrackCount(libraryList, tracks),
-                mergeCount = libraryList.mapNotNull { it.merge_manga_url }.count(),
-                globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
-                downloadCount = libraryList.sumOf { getDownloadCount(it) },
-                tagCount = libraryList.mapNotNull { it.getGenres() }.flatten().distinct().count(),
-                trackerCount = getLoggedTrackers().count(),
-                readDuration = getReadDuration(libraryList),
-                averageMangaRating = libraryList.mapNotNull { it.rating?.toDoubleOrNull() }.average().roundToTwoDecimal(),
-                averageUserRating = getUserScore(tracks),
-                lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
-                statusDistribution = getStatusDistribution(libraryList),
-            )
+            if (libraryList.isEmpty()) {
+                _simpleState.value = StatsConstants.SimpleState(
+                    screenState = StatsConstants.ScreenState.NoResults,
+                )
+            } else {
+                val tracks = getTracks(libraryList)
+                val lastUpdate = prefs.libraryUpdateLastTimestamp().get()
+                _simpleState.value = StatsConstants.SimpleState(
+                    screenState = StatsConstants.ScreenState.Simple,
+                    mangaCount = libraryList.count(),
+                    chapterCount = libraryList.sumOf { it.totalChapters },
+                    readCount = libraryList.sumOf { it.read },
+                    trackedCount = getMangaByTrackCount(libraryList, tracks),
+                    mergeCount = libraryList.mapNotNull { it.merge_manga_url }.count(),
+                    globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
+                    downloadCount = libraryList.sumOf { getDownloadCount(it) },
+                    tagCount = libraryList.mapNotNull { it.getGenres() }.flatten().distinct().count(),
+                    trackerCount = getLoggedTrackers().count(),
+                    readDuration = getReadDuration(libraryList),
+                    averageMangaRating = libraryList.mapNotNull { it.rating?.toDoubleOrNull() }.average().roundToTwoDecimal(),
+                    averageUserRating = getUserScore(tracks),
+                    lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
+                    statusDistribution = getStatusDistribution(libraryList),
+                )
+            }
         }
     }
 
     private fun getDetailState() {
         presenterScope.launchIO {
             val libraryList = getLibrary()
-            val detailedStatMangaList = libraryList.map {
-                async {
-                    val history = db.getHistoryByMangaId(it.id!!).executeAsBlocking()
-                    val tracks = getTracks(it)
-                    
-                    DetailedStatManga(
-                        id = it.id!!,
-                        title = it.title,
-                        type = MangaType.fromLangFlag(it.lang_flag),
-                        status = MangaStatus.fromStatus(it.status),
-                        totalChapters = it.totalChapters,
-                        readChapters = it.read,
-                        readDuration = getReadDurationFromHistory(history),
-                        startYear = getStartYear(history),
-                        rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
-                        tags = (it.getGenres() ?: emptyList()).toImmutableList(),
-                        userScore = getUserScore(tracks),
-                        trackers = tracks.mapNotNull { trackManager.getService(it.sync_id) }.map { prefs.context.getString(it.nameRes()) }.toImmutableList(),
-                        categories = (db.getCategoriesForManga(it).executeAsBlocking().map { category -> category.name }.takeUnless { it.isEmpty() }
-                            ?: listOf(prefs.context.getString(R.string.default_value))).sorted().toImmutableList(),
-                    )
-                }
+            if (libraryList.isNotEmpty()) {
+                val detailedStatMangaList = libraryList.map {
+                    async {
+                        val history = db.getHistoryByMangaId(it.id!!).executeAsBlocking()
+                        val tracks = getTracks(it)
 
-            }.awaitAll().sortedBy { it.title }
-            _detailState.value = DetailedState(
-                isLoading = false,
-                manga = detailedStatMangaList.toImmutableList(),
-            )
+                        DetailedStatManga(
+                            id = it.id!!,
+                            title = it.title,
+                            type = MangaType.fromLangFlag(it.lang_flag),
+                            status = MangaStatus.fromStatus(it.status),
+                            totalChapters = it.totalChapters,
+                            readChapters = it.read,
+                            readDuration = getReadDurationFromHistory(history),
+                            startYear = getStartYear(history),
+                            rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
+                            tags = (it.getGenres() ?: emptyList()).toImmutableList(),
+                            userScore = getUserScore(tracks),
+                            trackers = tracks.mapNotNull { trackManager.getService(it.sync_id) }.map { prefs.context.getString(it.nameRes()) }.toImmutableList(),
+                            categories = (db.getCategoriesForManga(it).executeAsBlocking().map { category -> category.name }.takeUnless { it.isEmpty() }
+                                ?: listOf(prefs.context.getString(R.string.default_value))).sorted().toImmutableList(),
+                        )
+                    }
+
+                }.awaitAll().sortedBy { it.title }
+                _detailState.value = DetailedState(
+                    isLoading = false,
+                    manga = detailedStatMangaList.toImmutableList(),
+                )
+            }
         }
     }
 

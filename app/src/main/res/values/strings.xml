@@ -928,6 +928,7 @@
     <string name="tags">Total tags</string>
     <string name="manga_local">Local manga</string>
     <string name="global_update_manga">Globally updated manga</string>
+    <string name="unable_to_generate_stats">Library empty, unable to generate stats</string>
     <string name="trackers">Logged in trackers</string>
     <string name="n_a">N/A</string>
     <string name="typeNoSemi">Type</string>

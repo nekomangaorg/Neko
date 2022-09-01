@@ -49,6 +49,7 @@ object StatsConstants {
         object Loading : ScreenState()
         object Simple : ScreenState()
         object Detailed : ScreenState()
+        object NoResults : ScreenState()
     }
 
     data class StatusDistribution(val status: MangaStatus, val distribution: Int)
