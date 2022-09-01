@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
@@ -1162,14 +1163,14 @@ class MangaDetailPresenter(
             currentDescription = getDescription(),
             currentTitle = m.title,
             externalLinks = manga.value.getExternalLinks().toImmutableList(),
-            genres = (m.getGenres() ?: emptyList()).toImmutableList(),
+            genres = (m.getGenres(true) ?: emptyList()).toImmutableList(),
             initialized = m.initialized,
             inLibrary = m.favorite,
             isMerged = when (m.isMerged()) {
                 true -> Yes(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!, manga.value.title)
                 false -> No
             },
-            isPornographic = m.genre?.contains("pornographic") ?: false,
+            isPornographic = m.getContentRating()?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true) ?: false,
             langFlag = m.lang_flag,
             missingChapters = m.missing_chapters,
             originalTitle = m.originalTitle,
