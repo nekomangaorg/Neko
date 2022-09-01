@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.himanshoe.charty.pie.PieChart
 import com.himanshoe.charty.pie.config.PieConfig
@@ -31,6 +32,7 @@ import com.himanshoe.charty.pie.config.PieData
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.presentation.components.NekoColors
 
@@ -69,15 +71,8 @@ fun SimpleStats(statsState: State<StatsConstants.SimpleState>, contentPadding: P
             numberFormat.format(statsState.value.mergeCount).toString() to context.getString(R.string.merged),
         ).toImmutableList()
     }
-    val statusDistribution = remember {
-        statsState.value.statusDistribution.sortedBy { context.getString(it.status.statusRes) }.toImmutableList()
-    }
 
-    val pieData = remember {
-        statusDistribution.map {
-            PieData(it.distribution.toFloat(), Color(it.status.color))
-        }
-    }
+    val size = (LocalConfiguration.current.screenWidthDp / 2.8).dp
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
 
@@ -87,38 +82,52 @@ fun SimpleStats(statsState: State<StatsConstants.SimpleState>, contentPadding: P
         item {
             Label(label = stringResource(id = R.string.general))
             BasicStatRow(stats = stats)
-            Gap(16.dp)
         }
 
         item {
+            Gap(16.dp)
             Label(label = stringResource(id = R.string.manga_status_distribution))
 
-            val size = LocalConfiguration.current.screenWidthDp / 2.8
+            val statusDistribution = remember {
+                statsState.value.statusDistribution.sortedByDescending { it.distribution }.toImmutableList()
+            }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                PieChart(
-                    modifier = Modifier
-                        .scale(1f)
-                        .size(size.dp),
-                    pieData = pieData, config = PieConfig(isDonut = true, expandDonutOnClick = false),
-                )
-                Column(
-                    Modifier
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.Start,
-                ) {
-                    statusDistribution.forEach {
-                        val text = stringResource(id = it.status.statusRes) + ": " + numberFormat.format(it.distribution)
-                        Text(text = text, style = MaterialTheme.typography.bodyMedium.copy(color = Color(it.status.color), fontWeight = FontWeight.Medium))
-                    }
+            val statusDistributionText = remember {
+                statusDistribution.map {
+                    PieRowText(context.getString(it.status.statusRes) + ": " + numberFormat.format(it.distribution), Color(it.status.color))
+                }.toImmutableList()
+            }
+
+            val statusDistributionPieData = remember {
+                statusDistribution.map {
+                    PieData(it.distribution.toFloat(), Color(it.status.color))
                 }
             }
+
+            PieRow(pieData = statusDistributionPieData, pieSize = size, pieRowText = statusDistributionText)
+        }
+
+        item {
+            Gap(16.dp)
+            Label(label = stringResource(id = R.string.content_rating_distribution))
+
+            val contentRatingDistribution = remember {
+                statsState.value.contentRatingDistribution.sortedByDescending { it.distribution }.toImmutableList()
+            }
+
+            val contentRatingDistributionText = remember {
+                contentRatingDistribution.map {
+                    PieRowText(it.rating.prettyPrint() + ": " + numberFormat.format(it.distribution), Color(it.rating.color))
+                }.toImmutableList()
+            }
+
+            val contentRatingDistributionPieData = remember {
+                contentRatingDistribution.map {
+                    PieData(it.distribution.toFloat(), Color(it.rating.color))
+                }
+            }
+
+            PieRow(pieData = contentRatingDistributionPieData, pieSize = size, pieRowText = contentRatingDistributionText)
         }
 
     }
@@ -133,4 +142,33 @@ private fun LazyItemScope.Label(label: String) {
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
     )
     Gap(8.dp)
+}
+
+private data class PieRowText(val text: String, val color: Color)
+
+@Composable
+private fun PieRow(pieData: List<PieData>, pieSize: Dp, pieRowText: ImmutableList<PieRowText>) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        PieChart(
+            modifier = Modifier
+                .scale(1f)
+                .size(pieSize),
+            pieData = pieData, config = PieConfig(isDonut = true, expandDonutOnClick = false),
+        )
+        Column(
+            Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.Start,
+        ) {
+            pieRowText.forEach {
+                Text(text = it.text, style = MaterialTheme.typography.bodyMedium.copy(color = it.color, fontWeight = FontWeight.Medium))
+            }
+        }
+    }
 }

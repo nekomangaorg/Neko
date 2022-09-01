@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.more.stats
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
 
@@ -21,6 +22,7 @@ object StatsConstants {
         val trackerCount: Int = 0,
         val readDuration: String = "",
         val lastLibraryUpdate: String = "",
+        val contentRatingDistribution: ImmutableList<ContentRatingDistribution> = persistentListOf(),
         val statusDistribution: ImmutableList<StatusDistribution> = persistentListOf(),
     )
 
@@ -53,4 +55,6 @@ object StatsConstants {
     }
 
     data class StatusDistribution(val status: MangaStatus, val distribution: Int)
+
+    data class ContentRatingDistribution(val rating: MangaContentRating, val distribution: Int)
 }

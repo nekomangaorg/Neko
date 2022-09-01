@@ -28,6 +28,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
 import uy.kohesive.injekt.Injekt
@@ -78,6 +79,7 @@ class StatsPresenter(
                     averageMangaRating = libraryList.mapNotNull { it.rating?.toDoubleOrNull() }.average().roundToTwoDecimal(),
                     averageUserRating = getUserScore(tracks),
                     lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
+                    contentRatingDistribution = getContentRatingDistribution(libraryList),
                     statusDistribution = getStatusDistribution(libraryList),
                 )
             }
@@ -141,6 +143,13 @@ class StatsPresenter(
         return MangaStatus.values().map { status ->
             StatsConstants.StatusDistribution(status, statuses.count { it == status.status })
         }.toImmutableList()
+    }
+
+    private fun getContentRatingDistribution(libraryList: List<LibraryManga>): ImmutableList<StatsConstants.ContentRatingDistribution> {
+        return libraryList.asSequence().map { it.getContentRating() }.map { MangaContentRating.getContentRating(it) }
+            .groupBy { it }.map {
+                StatsConstants.ContentRatingDistribution(it.key, it.value.size)
+            }.toImmutableList()
     }
 
     private fun getLibrary(): List<LibraryManga> {

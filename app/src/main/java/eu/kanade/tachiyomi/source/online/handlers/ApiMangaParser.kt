@@ -120,7 +120,7 @@ class ApiMangaParser {
 
             val tempContentRating = mangaAttributesDto.contentRating?.capitalized()
 
-            val contentRating = if (tempContentRating == null || tempContentRating == "Safe") {
+            val contentRating = if (tempContentRating == null) {
                 null
             } else {
                 "Content rating: " + tempContentRating.capitalized()

@@ -935,6 +935,7 @@
     <string name="read_duration">Read duration</string>
     <string name="last_library_update">Last library update</string>
     <string name="manga_status_distribution">Status distribution</string>
+    <string name="content_rating_distribution">Content rating distribution</string>
     <string name="manga_score_distribution">Score distribution</string>
     <string name="view_detailed_statistics">View detailed statistics</string>
     <string name="view_simple_statistics">View simple statistics</string>

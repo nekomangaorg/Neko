@@ -8,10 +8,6 @@ enum class MangaStatus(val status: Int, @StringRes val statusRes: Int, @ColorLon
     Unknown(0, R.string.unknown, 0xFF45818e),
     Ongoing(1, R.string.ongoing, 0xFF3BAEEA),
     Completed(2, R.string.completed, 0xFF7BD555),
-
-    /*
-        Licensed(3, R.string.licensed, 0xffff00ff),
-    */
     PublicationComplete(4, R.string.publication_complete, 0xFFd29d2f),
     Cancelled(5, R.string.hiatus, 0xFFF17575),
     Hiatus(6, R.string.cancelled, 0xFFff00ff),
