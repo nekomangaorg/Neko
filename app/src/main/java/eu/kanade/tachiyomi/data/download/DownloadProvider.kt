@@ -8,6 +8,7 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -87,8 +88,13 @@ class DownloadProvider(private val context: Context) {
     fun findChapterDir(chapter: Chapter, manga: Manga): UniFile? {
         val mangaDir = findMangaDir(manga)
         return getValidChapterDirNames(chapter).asSequence()
-            .mapNotNull { mangaDir?.findFile(it, true) ?: mangaDir?.findFile("$it.cbz", true) }
-            .firstOrNull()
+            .mapNotNull {
+                mangaDir?.findFile(it, true)
+                    ?: mangaDir?.findFile("$it.cbz", true)
+            }.firstOrNull()
+            ?: mangaDir?.listFiles { _, filename ->
+                filename.contains(chapter.uuid())
+            }?.firstOrNull()
     }
 
     /**
@@ -221,7 +227,7 @@ class DownloadProvider(private val context: Context) {
         if (chapter.isMergedChapter()) {
             return getJ2kChapterName(chapter)
         } else {
-            if (useNewId.not() && chapter.old_mangadex_id == null) {
+            if (!useNewId && chapter.old_mangadex_id == null) {
                 return ""
             }
             val chapterId = if (useNewId) chapter.mangadex_chapter_id else chapter.old_mangadex_id

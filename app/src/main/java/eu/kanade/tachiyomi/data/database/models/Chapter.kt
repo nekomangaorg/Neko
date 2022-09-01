@@ -66,3 +66,8 @@ fun Chapter.fullUrl(): String {
         false -> MdUtil.baseUrl + url
     }
 }
+
+fun Chapter.uuid(): String {
+    return MdUtil.getChapterUUID(this.url)
+}
+

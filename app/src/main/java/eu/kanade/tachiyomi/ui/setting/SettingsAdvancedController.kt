@@ -147,7 +147,11 @@ class SettingsAdvancedController : SettingsController() {
             preference {
                 titleRes = R.string.force_download_cache_refresh
                 summaryRes = R.string.force_download_cache_refresh_summary
-                onClick { downloadManager.refreshCache() }
+                onClick {
+                    (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                        downloadManager.refreshCache()
+                    }
+                }
             }
 
             preference {

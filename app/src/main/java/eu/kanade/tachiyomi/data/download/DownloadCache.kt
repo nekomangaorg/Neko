@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
+import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -83,7 +84,6 @@ class DownloadCache(
 
     fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
         if (skipCache) {
-            val source = sourceManager.getMangadex()
             return provider.findChapterDir(chapter, manga) != null
         }
 
@@ -98,6 +98,7 @@ class DownloadCache(
         if (!chapter.isMergedChapter() && chapter.old_mangadex_id != null && chapter.old_mangadex_id in mangadexIds) {
             return true
         }
+
         val validChapterDirNames = provider.getValidChapterDirNames(chapter)
         return validChapterDirNames.any {
             it in fileNames || "$it.cbz" in fileNames
@@ -196,9 +197,11 @@ class DownloadCache(
                         sourceValue.key,
                     )
                 val id = manga?.id ?: return@mapNotNull null
-
-                val mangadexIds = mangaDir.value.files.map { it.substringAfterLast("- ", "") }
-                    .filter { it.isNotEmpty() }.toMutableSet()
+                
+                val mangadexIds = mangaDir.value.files.map { it.takeLast(36) }
+                    .filter {
+                        it.isUUID()
+                    }.toMutableSet()
 
                 id to Pair(mangaDir.value.files, mangadexIds)
             }.toMap()
