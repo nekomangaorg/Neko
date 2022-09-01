@@ -66,7 +66,7 @@ fun DetailsBottomSheet(
         is DetailsBottomSheetScreen.CategoriesSheet -> EditCategorySheet(
             addingToLibrary = currentScreen.addingToLibrary,
             categories = generalState.value.allCategories,
-            mangaCategories = mangaState.value.currentCategories,
+            mangaCategories = generalState.value.currentCategories,
             themeColorState = themeColorState,
             cancelClick = closeSheet,
             addNewCategory = addNewCategory,

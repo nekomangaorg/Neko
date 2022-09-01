@@ -47,7 +47,7 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy
 
-class MangaDetailController(val mangaId: Long) : BaseComposeController<MangaDetailPresenter>() {
+class MangaDetailController(mangaId: Long) : BaseComposeController<MangaDetailPresenter>() {
 
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)

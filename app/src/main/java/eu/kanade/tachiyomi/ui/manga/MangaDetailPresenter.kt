@@ -731,25 +731,14 @@ class MangaDetailPresenter(
      */
     private fun updateCategoryFlows() {
         presenterScope.launch {
-            _generalState.value = getGeneralStateCopyForCategories(generalState.value)
-        }
-        presenterScope.launch {
-            _mangaState.value = getMangaStateCopyForCategories(mangaState.value)
-        }
-    }
+            val categories = db.getCategories().executeAsBlocking()
+            val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
 
-    private fun getGeneralStateCopyForCategories(generalState: MangaConstants.MangaScreenGeneralState): MangaConstants.MangaScreenGeneralState {
-        val categories = db.getCategories().executeAsBlocking()
-        return generalState.copy(
-            allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
-        )
-    }
-
-    private fun getMangaStateCopyForCategories(mangaState: MangaConstants.MangaScreenMangaState): MangaConstants.MangaScreenMangaState {
-        val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
-        return mangaState.copy(
-            currentCategories = mangaCategories.map { it.toCategoryItem() }.toImmutableList(),
-        )
+            _generalState.value = generalState.value.copy(
+                allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
+                currentCategories = mangaCategories.map { it.toCategoryItem() }.toImmutableList(),
+            )
+        }
     }
 
     /**
