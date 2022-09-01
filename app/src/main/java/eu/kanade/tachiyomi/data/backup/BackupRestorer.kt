@@ -158,8 +158,10 @@ class BackupRestorer(val context: Context, val job: Job?) {
                 manga.id = backupManager.insertManga(manga)
             }
             manga.user_cover?.let {
-                coverCache.setCustomCoverToCache(manga, manga.user_cover!!)
-                MangaCoverMetadata.remove(manga.id!!)
+                runCatching {
+                    coverCache.setCustomCoverToCache(manga, manga.user_cover!!)
+                    MangaCoverMetadata.remove(manga.id!!)
+                }
             }
             backupManager.restoreChaptersForMangaOffline(manga, chapters)
             backupManager.restoreCategoriesForManga(manga, categories, backupCategories)

@@ -76,7 +76,7 @@ class StatsPresenter(
                     tagCount = libraryList.mapNotNull { it.getGenres() }.flatten().distinct().count(),
                     trackerCount = getLoggedTrackers().count(),
                     readDuration = getReadDuration(libraryList),
-                    averageMangaRating = libraryList.mapNotNull { it.rating?.toDoubleOrNull() }.average().roundToTwoDecimal(),
+                    averageMangaRating = getAverageMangaRating(libraryList),
                     averageUserRating = getUserScore(tracks),
                     lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
                     contentRatingDistribution = getContentRatingDistribution(libraryList),
@@ -220,6 +220,14 @@ class StatsPresenter(
         }
     }
 
+    private fun getAverageMangaRating(libraryList: List<LibraryManga>): Double {
+        val ratings = libraryList.mapNotNull { it.rating?.toDoubleOrNull() }
+        return when (ratings.isEmpty()) {
+            true -> 0.0
+            false -> ratings.average().roundToTwoDecimal()
+        }
+    }
+
     private fun getUserScore(mangaTracks: List<Track>): Double {
         val scores = mangaTracks.filter { track ->
             track.score > 0
@@ -228,10 +236,10 @@ class StatsPresenter(
         }.filter {
             it > 0.0
         }
-        return if (scores.isEmpty()) {
-            0.0
-        } else {
-            scores.average().roundToTwoDecimal()
+
+        return when (scores.isEmpty()) {
+            true -> 0.0
+            false -> scores.average().roundToTwoDecimal()
         }
     }
 }

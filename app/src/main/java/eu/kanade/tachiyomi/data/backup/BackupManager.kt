@@ -185,8 +185,10 @@ class BackupManager(val context: Context) {
             val historyForManga = databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
             if (historyForManga.isNotEmpty()) {
                 val history = historyForManga.mapNotNull { history ->
-                    val url = databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url
-                    url?.let { BackupHistory(url, history.last_read, history.time_read) }
+                    databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url?.let {
+                        BackupHistory(it, history.last_read, history.time_read)
+                    }
+
                 }
                 if (history.isNotEmpty()) {
                     mangaObject.history = history
