@@ -1,19 +1,31 @@
 package org.nekomanga.presentation.screens.stats
 
 import android.icu.text.NumberFormat
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.himanshoe.charty.pie.PieChart
+import com.himanshoe.charty.pie.config.PieConfig
+import com.himanshoe.charty.pie.config.PieData
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import jp.wasabeef.gap.Gap
@@ -56,17 +68,51 @@ fun SimpleStats(statsState: State<StatsConstants.SimpleState>) {
         ).toImmutableList()
     }
     val statusDistribution = remember {
-        statsState.value.statusDistribution.map {
-            numberFormat.format(it.distribution).toString() to context.getString(it.status.statusRes)
-        }.sortedBy { it.second }.toImmutableList()
+        statsState.value.statusDistribution.sortedBy { context.getString(it.status.statusRes) }.toImmutableList()
     }
+
+    val pieData = remember {
+        statusDistribution.map {
+            PieData(it.distribution.toFloat(), Color(it.status.color))
+        }
+    }
+
+
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Label(label = stringResource(id = R.string.general))
         BasicStatRow(stats = stats)
         Gap(16.dp)
         Label(label = stringResource(id = R.string.manga_status_distribution))
-        BasicStatRow(stats = statusDistribution)
+
+        val size = LocalConfiguration.current.screenWidthDp / 2.8
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            PieChart(
+                modifier = Modifier
+                    .scale(1f)
+                    .size(size.dp),
+                pieData = pieData, config = PieConfig(isDonut = true, expandDonutOnClick = false),
+            )
+            Column(
+                Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                statusDistribution.forEach {
+                    val text = stringResource(id = it.status.statusRes) + ": " + numberFormat.format(it.distribution)
+                    Text(text = text, style = MaterialTheme.typography.bodyMedium.copy(color = Color(it.status.color), fontWeight = FontWeight.Medium))
+                }
+            }
+        }
+
+        //    BasicStatRow(stats = statusDistribution)
     }
 }
 

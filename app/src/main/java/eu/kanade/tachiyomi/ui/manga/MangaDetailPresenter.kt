@@ -150,15 +150,18 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             //immediately update the categories in case loading manga takes a second
             updateCategoryFlows()
-
-            val m = db.getManga(mangaId).executeAsBlocking()!!
-            _currentManga.value = m
-            val mangaState = getMangaStateCopyFromManga(m)
-            val currentArtwork = createCurrentArtwork(m)
-            val altArtwork = createAltArtwork(m, currentArtwork)
-            _mangaState.value = mangaState.copy(currentArtwork = currentArtwork, alternativeArtwork = altArtwork)
-            updateChapterFlows()
-            updateFilterFlow()
+            runCatching {
+                val m = db.getManga(mangaId).executeAsBlocking()!!
+                _currentManga.value = m
+                val mangaState = getMangaStateCopyFromManga(m)
+                val currentArtwork = createCurrentArtwork(m)
+                val altArtwork = createAltArtwork(m, currentArtwork)
+                _mangaState.value = mangaState.copy(currentArtwork = currentArtwork, alternativeArtwork = altArtwork)
+                updateChapterFlows()
+                updateFilterFlow()
+            }.onFailure {
+                XLog.e("Error trying to update manga in all flows", it)
+            }
         }
         updateTrackingFlows(true)
     }

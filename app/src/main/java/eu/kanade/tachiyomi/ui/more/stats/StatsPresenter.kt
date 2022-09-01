@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedStatManga
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedState
-import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.STATUS_COLOR_MAP
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
@@ -139,8 +138,8 @@ class StatsPresenter(
 
     private fun getStatusDistribution(libraryList: List<LibraryManga>): ImmutableList<StatsConstants.StatusDistribution> {
         val statuses = libraryList.map { it.status }
-        return STATUS_COLOR_MAP.keys.map { status ->
-            StatsConstants.StatusDistribution(MangaStatus.fromStatus(status), statuses.count { it == status })
+        return MangaStatus.values().map { status ->
+            StatsConstants.StatusDistribution(status, statuses.count { it == status.status })
         }.toImmutableList()
     }
 
