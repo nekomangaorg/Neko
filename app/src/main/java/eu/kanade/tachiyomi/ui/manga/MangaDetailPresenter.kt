@@ -57,6 +57,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -341,9 +342,11 @@ class MangaDetailPresenter(
                     val service = trackManager.getService(trackItem.trackServiceId)!!
                     async(Dispatchers.IO) {
                         kotlin.runCatching { service.refresh(trackItem.toDbTrack()) }.onFailure {
-                            XLog.e("error refreshing tracker", it)
-                            delay(3000)
-                            _snackbarState.emit(SnackbarState(message = it.message, fieldRes = service.nameRes(), messageRes = R.string.error_refreshing_))
+                            if (it !is CancellationException) {
+                                XLog.e("error refreshing tracker", it)
+                                delay(3000)
+                                _snackbarState.emit(SnackbarState(message = it.message, fieldRes = service.nameRes(), messageRes = R.string.error_refreshing_))
+                            }
                         }.onSuccess { track ->
                             db.insertTrack(track).executeOnIO()
                         }
