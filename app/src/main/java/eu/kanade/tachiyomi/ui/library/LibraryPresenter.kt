@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_CONTENT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
@@ -44,7 +45,6 @@ import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.chopByWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
-import eu.kanade.tachiyomi.util.mapStatus
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -756,6 +756,15 @@ class LibraryPresenter(
                         }
                     }
                 }
+                BY_CONTENT -> {
+                    val contentRating = manga.getContentRating()
+                    if (contentRating.isNullOrBlank()) {
+                        listOf(LibraryItem(manga, makeOrGetHeader(unknown)))
+                    } else {
+                        listOf(LibraryItem(manga, makeOrGetHeader(contentRating)))
+                    }
+                }
+
                 else -> listOf(LibraryItem(manga, makeOrGetHeader(mapStatus(manga.status))))
             }
         }.flatten().toMutableList()
