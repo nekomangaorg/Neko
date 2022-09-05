@@ -59,9 +59,9 @@ open class MangaDex : HttpSource() {
 
     fun getRandomManga(): Flow<SManga?> {
         return flow {
-            network.service.randomManga()
+            network.service.randomManga(preferences.contentRatingSelections().toList())
                 .suspendOnSuccess {
-                    emit(this.data.data.toBasicManga(preferences.thumbnailQuality()))
+                    emit(this.data.data.toBasicManga(preferences.thumbnailQuality(), useNoCoverUrl = false))
                 }.suspendOnFailure {
                     this.log("trying to get random manga")
                     emit(null)

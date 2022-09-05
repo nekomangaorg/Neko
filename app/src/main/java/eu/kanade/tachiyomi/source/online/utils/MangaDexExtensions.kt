@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.source.online.utils
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 
-fun MangaDataDto.toBasicManga(coverQuality: Int = 0): SManga {
+fun MangaDataDto.toBasicManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = true): SManga {
     return SManga.create().apply {
         url = "/title/" + this@toBasicManga.id
         title = MdUtil.cleanString(
@@ -18,6 +18,6 @@ fun MangaDataDto.toBasicManga(coverQuality: Int = 0): SManga {
             ?.attributes?.fileName
             ?.let { coverFileName ->
                 MdUtil.cdnCoverUrl(this@toBasicManga.id, coverFileName, coverQuality)
-            } ?: MdConstants.noCoverUrl
+            } ?: if (useNoCoverUrl) MdConstants.noCoverUrl else null
     }
 }
