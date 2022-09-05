@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -79,8 +78,6 @@ class StatsPresenter(
                     averageMangaRating = getAverageMangaRating(libraryList),
                     averageUserRating = getUserScore(tracks),
                     lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
-                    contentRatingDistribution = getContentRatingDistribution(libraryList),
-                    statusDistribution = getStatusDistribution(libraryList),
                 )
             }
         }
@@ -100,6 +97,7 @@ class StatsPresenter(
                             title = it.title,
                             type = MangaType.fromLangFlag(it.lang_flag),
                             status = MangaStatus.fromStatus(it.status),
+                            contentRating = MangaContentRating.getContentRating(it.getContentRating()),
                             totalChapters = it.totalChapters,
                             readChapters = it.read,
                             readDuration = getReadDurationFromHistory(history),
@@ -136,20 +134,6 @@ class StatsPresenter(
 
             _simpleState.value = simpleState.value.copy(screenState = newState)
         }
-    }
-
-    private fun getStatusDistribution(libraryList: List<LibraryManga>): ImmutableList<StatsConstants.StatusDistribution> {
-        val statuses = libraryList.map { it.status }
-        return MangaStatus.values().map { status ->
-            StatsConstants.StatusDistribution(status, statuses.count { it == status.status })
-        }.toImmutableList()
-    }
-
-    private fun getContentRatingDistribution(libraryList: List<LibraryManga>): ImmutableList<StatsConstants.ContentRatingDistribution> {
-        return libraryList.asSequence().map { it.getContentRating() }.map { MangaContentRating.getContentRating(it) }
-            .groupBy { it }.map {
-                StatsConstants.ContentRatingDistribution(it.key, it.value.size)
-            }.toImmutableList()
     }
 
     private fun getLibrary(): List<LibraryManga> {
@@ -207,8 +191,8 @@ class StatsPresenter(
         return chaptersTime.getReadDuration(prefs.context.getString(R.string.none))
     }
 
-    private fun getReadDurationFromHistory(history: List<History>): String {
-        return history.sumOf { it.time_read }.getReadDuration(prefs.context.getString(R.string.none))
+    private fun getReadDurationFromHistory(history: List<History>): Long {
+        return history.sumOf { it.time_read }
     }
 
     private fun getStartYear(history: List<History>): Int? {

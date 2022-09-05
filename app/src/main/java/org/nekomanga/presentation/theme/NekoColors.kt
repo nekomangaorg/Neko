@@ -20,14 +20,19 @@ class NekoColors {
     }
 }
 
-object PieChartColors {
-    val ongoing = Color(0xFF3BAEEA)
-    val completed = Color(0x777BD555)
-    val licensed = Color(0x77F79A63)
-    val publicationComplete = Color(0x77d29d2f)
-    val cancelled = Color(0x77E85D75)
-    val hiatus = Color(0x77F17575)
-    val unknown = Color(0x775b5b5b)
+object ChartColors {
+    val one = Color(0xFF45818e)
+    val two = Color(0xFF3BAEEA)
+    val three = Color(0xFF7BD555)
+    val four = Color(0xFFd29d2f)
+    val five = Color(0xFFF17575)
+    val six = Color(0xFFe65da1)
+    val seven = Color(0xFF55e2cf)
+    val eight = Color(0xFF8a56e2)
+    val nine = Color(0xFFb699b9)
+    val ten = Color(0xFF30a58e)
+    val eleven = Color(0xFFff00ff)
+    val twelve = Color(0xFFde1f62)
 }
 
 object PrimaryColorRippleTheme : RippleTheme {

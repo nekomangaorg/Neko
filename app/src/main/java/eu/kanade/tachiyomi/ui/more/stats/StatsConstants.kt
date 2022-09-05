@@ -22,8 +22,6 @@ object StatsConstants {
         val trackerCount: Int = 0,
         val readDuration: String = "",
         val lastLibraryUpdate: String = "",
-        val contentRatingDistribution: ImmutableList<ContentRatingDistribution> = persistentListOf(),
-        val statusDistribution: ImmutableList<StatusDistribution> = persistentListOf(),
     )
 
     data class DetailedState(
@@ -35,10 +33,11 @@ object StatsConstants {
         val id: Long,
         val title: String,
         val status: MangaStatus,
+        val contentRating: MangaContentRating,
         val type: MangaType,
         val totalChapters: Int,
         val readChapters: Int,
-        val readDuration: String,
+        val readDuration: Long,
         val rating: Double?,
         val userScore: Double?,
         val startYear: Int?,
