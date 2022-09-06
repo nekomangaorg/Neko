@@ -163,19 +163,13 @@ fun MangaScreen(
     }
 
     val isDarkTheme = isSystemInDarkTheme()
-    val secondaryColor = MaterialTheme.colorScheme.secondary
     val surfaceColor = MaterialTheme.colorScheme.surface
 
-    val defaultTextSelection = LocalTextSelectionColors.current
+    val defaultThemeColorState = defaultThemeColorState()
 
     var themeColorState by remember {
         mutableStateOf(
-            ThemeColorState(
-                buttonColor = secondaryColor,
-                rippleTheme = PrimaryColorRippleTheme,
-                textSelectionColors = defaultTextSelection,
-                altContainerColor = Color(ColorUtils.blendARGB(secondaryColor.toArgb(), surfaceColor.toArgb(), .706f)),
-            ),
+            defaultThemeColorState,
         )
     }
 
@@ -504,5 +498,15 @@ class ThemeColorState(buttonColor: Color, rippleTheme: RippleTheme, textSelectio
     var rippleTheme by mutableStateOf(rippleTheme)
     var textSelectionColors by mutableStateOf(textSelectionColors)
     var altContainerColor by mutableStateOf(altContainerColor)
+}
+
+@Composable
+fun defaultThemeColorState(): ThemeColorState {
+    return ThemeColorState(
+        buttonColor = MaterialTheme.colorScheme.secondary,
+        rippleTheme = PrimaryColorRippleTheme,
+        textSelectionColors = LocalTextSelectionColors.current,
+        altContainerColor = Color(ColorUtils.blendARGB(MaterialTheme.colorScheme.secondary.toArgb(), MaterialTheme.colorScheme.surface.toArgb(), .706f)),
+    )
 }
 

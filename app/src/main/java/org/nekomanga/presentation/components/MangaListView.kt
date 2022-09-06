@@ -87,7 +87,9 @@ fun PagingListManga(
     shouldOutlineCover: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (Long) -> Unit = {},
-) {
+    onLongClick: (DisplayManga) -> Unit = {},
+
+    ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
@@ -100,9 +102,11 @@ fun PagingListManga(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
-                        .clickable {
-                            onClick(displayManga.mangaId)
-                        },
+                        .combinedClickable(
+                            onClick = { onClick(displayManga.mangaId) },
+                            onLongClick = { onLongClick(displayManga) },
+
+                            ),
                 )
             }
         }
