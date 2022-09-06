@@ -11,13 +11,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -96,7 +96,7 @@ fun PagingMangaGrid(
     contentPadding: PaddingValues = PaddingValues(),
     isComfortable: Boolean = true,
     onClick: (Long) -> Unit = {},
-    onLongClick: (Long) -> Unit = {},
+    onLongClick: (DisplayManga) -> Unit = {},
 ) {
     val cells = GridCells.Fixed(columns)
 
@@ -153,21 +153,19 @@ fun PagingMangaGrid(
                         shouldOutlineCover = shouldOutlineCover,
                         isComfortable = isComfortable,
                         onClick = { onClick(displayManga.mangaId) },
-                        onLongClick = { onLongClick(displayManga.mangaId) },
+                        onLongClick = { onLongClick(displayManga) },
                     )
                 }
             }
-            if (initialLoading.not() && isLoading) {
-                item {
-                    Loading(
-                        isLoading,
-                        Modifier
-                            .padding(8.dp)
-                            .padding(top = contentPadding.calculateTopPadding())
-                            .wrapContentSize(),
-                    )
-                }
-            }
+        }
+        if (initialLoading.not() && isLoading) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .padding(bottom = contentPadding.calculateBottomPadding())
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(),
+            )
         }
     }
 }
