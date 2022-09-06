@@ -7,12 +7,16 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -20,21 +24,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.LazyPagingItems
+import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.ui.source.latest.LatestScreenState
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.ListGridActionButton
+import org.nekomanga.presentation.components.Loading
+import org.nekomanga.presentation.components.MangaGrid
+import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.PagingListManga
-import org.nekomanga.presentation.components.PagingMangaGrid
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Shapes
@@ -47,7 +53,7 @@ fun LatestScreen(
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
-    pagingItems: LazyPagingItems<DisplayManga>,
+    loadNextPage: () -> Unit,
 ) {
 
     val scope = rememberCoroutineScope()
@@ -112,26 +118,50 @@ fun LatestScreen(
                 }
             }
 
-
-            if (latestScreenState.value.isList) {
-                PagingListManga(
-                    mangaListPagingItems = pagingItems,
-                    shouldOutlineCover = latestScreenState.value.outlineCovers,
-                    contentPadding = contentPadding,
-                    onClick = openManga,
-                    onLongClick = ::mangaLongClick,
-                )
+            if (latestScreenState.value.isLoading && latestScreenState.value.page == 1) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Loading(
+                        Modifier
+                            .zIndex(1f)
+                            .padding(8.dp)
+                            .padding(top = contentPadding.calculateTopPadding())
+                            .align(Alignment.TopCenter),
+                    )
+                }
             } else {
 
-                PagingMangaGrid(
-                    mangaListPagingItems = pagingItems,
-                    shouldOutlineCover = latestScreenState.value.outlineCovers,
-                    columns = numberOfColumns(rawValue = latestScreenState.value.rawColumnCount),
-                    isComfortable = latestScreenState.value.isComfortableGrid,
-                    contentPadding = contentPadding,
-                    onClick = openManga,
-                    onLongClick = ::mangaLongClick,
-                )
+                if (latestScreenState.value.isList) {
+                    MangaList(
+                        mangaList = latestScreenState.value.displayManga,
+                        shouldOutlineCover = latestScreenState.value.outlineCovers,
+                        contentPadding = contentPadding,
+                        onClick = openManga,
+                        onLongClick = ::mangaLongClick,
+                        loadNextItems = loadNextPage,
+                    )
+                } else {
+                    MangaGrid(
+                        mangaList = latestScreenState.value.displayManga,
+                        shouldOutlineCover = latestScreenState.value.outlineCovers,
+                        columns = numberOfColumns(rawValue = latestScreenState.value.rawColumnCount),
+                        isComfortable = latestScreenState.value.isComfortableGrid,
+                        contentPadding = contentPadding,
+                        onClick = openManga,
+                        onLongClick = ::mangaLongClick,
+                        loadNextItems = loadNextPage,
+                    )
+                }
+                if (latestScreenState.value.isLoading && latestScreenState.value.page != 1) {
+                    Box(Modifier.fillMaxSize()) {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .padding(bottom = contentPadding.calculateBottomPadding())
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth(),
+                        )
+                    }
+                }
             }
         }
     }

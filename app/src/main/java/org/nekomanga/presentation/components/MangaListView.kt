@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,11 +13,13 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,9 +29,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
@@ -82,72 +80,39 @@ fun MangaRow(
 }
 
 @Composable
-fun PagingListManga(
-    mangaListPagingItems: LazyPagingItems<DisplayManga>,
-    shouldOutlineCover: Boolean = true,
-    contentPadding: PaddingValues = PaddingValues(),
-    onClick: (Long) -> Unit = {},
-    onLongClick: (DisplayManga) -> Unit = {},
-
-    ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = contentPadding,
-    ) {
-        items(mangaListPagingItems, key = { display -> display.mangaId }) { displayManga ->
-            displayManga?.let {
-                MangaRow(
-                    displayManga = displayManga,
-                    shouldOutlineCover = shouldOutlineCover,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .combinedClickable(
-                            onClick = { onClick(displayManga.mangaId) },
-                            onLongClick = { onLongClick(displayManga) },
-
-                            ),
-                )
-            }
-        }
-        mangaListPagingItems.apply {
-            when {
-                loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading -> {
-                    item {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Loading(
-                                isLoading = true,
-                                modifier = Modifier.align(Alignment.Center),
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun MangaList(
     mangaList: List<DisplayManga>,
     shouldOutlineCover: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (Long) -> Unit = {},
+    onLongClick: (DisplayManga) -> Unit = {},
+    loadNextItems: () -> Unit = {},
 ) {
+
+    val scrollState = rememberLazyListState()
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
+        state = scrollState,
         contentPadding = contentPadding,
     ) {
-        itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
+        itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
+
+            LaunchedEffect(scrollState) {
+                if (index >= mangaList.size - 1) {
+                    loadNextItems()
+                }
+            }
             MangaRow(
                 displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .clickable {
-                        onClick(displayManga.mangaId)
-                    },
+                    .combinedClickable(
+                        onClick = { onClick(displayManga.mangaId) },
+                        onLongClick = { onLongClick(displayManga) },
+                    ),
             )
         }
     }

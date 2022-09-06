@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.paging.compose.collectAsLazyPagingItems
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
@@ -30,9 +29,9 @@ class LatestController(bundle: Bundle? = null) :
             switchDisplayClick = presenter::switchDisplayMode,
             onBackPress = { activity?.onBackPressed() },
             openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
-            pagingItems = presenter.mangaList.collectAsLazyPagingItems(),
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
+            loadNextPage = presenter::loadNextItems,
         )
     }
 }

@@ -14,27 +14,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Loading(isLoading: Boolean, modifier: Modifier = Modifier) {
-    if (isLoading) {
-        Box(
-            modifier = modifier
-                .size(40.dp)
-                .background(color = MaterialTheme.colorScheme.secondary, shape = CircleShape),
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(28.dp)
-                    .padding(2.dp)
-                    .align(Alignment.Center),
-                color = MaterialTheme.colorScheme.onSecondary,
-                strokeWidth = 2.dp,
-            )
-        }
+fun Loading(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .background(color = MaterialTheme.colorScheme.secondary, shape = CircleShape),
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(28.dp)
+                .padding(2.dp)
+                .align(Alignment.Center),
+            color = MaterialTheme.colorScheme.onSecondary,
+            strokeWidth = 2.dp,
+        )
     }
 }
 
 @Preview
 @Composable
 private fun Loading() {
-    Loading(isLoading = true)
+    Loading()
 }
