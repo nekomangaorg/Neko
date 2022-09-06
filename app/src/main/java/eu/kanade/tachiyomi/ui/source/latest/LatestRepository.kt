@@ -13,12 +13,13 @@ class LatestRepository(
     private val db: DatabaseHelper = Injekt.get(),
 ) {
 
-    suspend fun getPage(page: Int): Pair<Boolean, List<DisplayManga>> {
+    suspend fun getPage(page: Int): Result<Pair<Boolean, List<DisplayManga>>> {
+
         val results = mangaDex.latestChapters(page)
         val displayMangaList = results.displayManga.map { sourceManga ->
             sourceManga.toDisplayManga(db, mangaDex.id)
         }
 
-        return results.hasNextPage to displayMangaList
+        return Result.success(results.hasNextPage to displayMangaList)
     }
 }
