@@ -74,7 +74,7 @@ class StatsPresenter(
                     downloadCount = libraryList.sumOf { getDownloadCount(it) },
                     tagCount = libraryList.mapNotNull { it.getGenres() }.flatten().distinct().count(),
                     trackerCount = getLoggedTrackers().count(),
-                    readDuration = getReadDuration(libraryList),
+                    readDuration = getReadDuration(),
                     averageMangaRating = getAverageMangaRating(libraryList),
                     averageUserRating = getUserScore(tracks),
                     lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
@@ -184,10 +184,8 @@ class StatsPresenter(
         return service?.get10PointScore(track.score)
     }
 
-    private fun getReadDuration(libraryManga: List<LibraryManga>): String {
-        val chaptersTime = libraryManga.sumOf { manga ->
-            db.getHistoryByMangaId(manga.id!!).executeAsBlocking().sumOf { it.time_read }
-        }
+    private fun getReadDuration(): String {
+        val chaptersTime = db.getTotalReadDuration()
         return chaptersTime.getReadDuration(prefs.context.getString(R.string.none))
     }
 
