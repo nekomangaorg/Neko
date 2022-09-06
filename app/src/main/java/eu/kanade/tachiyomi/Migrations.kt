@@ -127,6 +127,11 @@ object Migrations {
                     preferences.autoDownloadWhileReading().set(max(2, oldDLAfterReading))
                 }
             }
+            if (oldVersion < 157) {
+                LibraryUpdateJob.setupTask(context, 0)
+                LibraryUpdateJob.setupTask(context)
+            }
+
 
             return true
         }

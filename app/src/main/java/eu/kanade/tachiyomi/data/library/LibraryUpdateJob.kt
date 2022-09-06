@@ -32,7 +32,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
     }
 
     companion object {
-        private const val TAG = "LibraryUpdate"
+        const val TAG = "LibraryUpdate"
 
         fun setupTask(context: Context, prefInterval: Int? = null) {
             val preferences = Injekt.get<PreferencesHelper>()
