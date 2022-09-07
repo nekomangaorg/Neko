@@ -32,10 +32,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.ui.source.latest.LatestScreenState
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.ListGridActionButton
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid

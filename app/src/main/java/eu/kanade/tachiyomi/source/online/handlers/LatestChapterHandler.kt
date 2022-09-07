@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
-import eu.kanade.tachiyomi.data.models.SourceManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
@@ -17,6 +16,7 @@ import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.manga.SourceManga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy

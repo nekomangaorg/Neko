@@ -1,6 +1,4 @@
-package eu.kanade.tachiyomi.data.models
-
-import org.nekomanga.domain.manga.Artwork
+package org.nekomanga.domain.manga
 
 data class SourceManga(val currentThumbnail: String, val url: String, val title: String, val displayText: String = "")
 

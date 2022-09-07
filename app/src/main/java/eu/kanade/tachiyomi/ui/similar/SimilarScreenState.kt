@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.similar
 
-import eu.kanade.tachiyomi.data.models.DisplayManga
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.manga.DisplayManga
 
 data class SimilarScreenState(
     val isRefreshing: Boolean = false,

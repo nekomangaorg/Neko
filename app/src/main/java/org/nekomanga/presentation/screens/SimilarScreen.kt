@@ -32,10 +32,10 @@ import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.ListGridActionButton
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader

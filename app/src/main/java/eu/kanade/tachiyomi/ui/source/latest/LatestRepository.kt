@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.toDisplayManga
+import org.nekomanga.domain.manga.DisplayManga
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

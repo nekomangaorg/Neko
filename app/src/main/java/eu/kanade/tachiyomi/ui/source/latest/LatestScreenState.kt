@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
-import eu.kanade.tachiyomi.data.models.DisplayManga
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.manga.DisplayManga
 
 data class LatestScreenState(
     val isLoading: Boolean = false,
