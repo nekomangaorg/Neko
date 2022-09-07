@@ -42,11 +42,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -450,18 +450,14 @@ private fun ExpandedLayout(
             item { details() }
         }
 
-        VerticalDivider(
-            Modifier
-                .zIndex(100f)
-                .align(Alignment.TopCenter),
-        )
+        VerticalDivider(Modifier.align(Alignment.TopCenter))
 
         LazyColumn(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .fillMaxWidth(.5f)
                 .fillMaxHeight()
-                .zIndex(0f),
+                .clipToBounds(),
             contentPadding = chapterContentPadding,
         ) {
             item { chapterHeader() }
