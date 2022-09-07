@@ -144,16 +144,6 @@ object MangaConstants {
         Filter
     }
 
-    data class SnackbarState(
-        val message: String? = null,
-        @StringRes val messageRes: Int? = null,
-        @StringRes val fieldRes: Int? = null,
-        val actionLabel: String? = null,
-        @StringRes val actionLabelRes: Int? = null,
-        val action: (() -> Unit)? = null,
-        val dismissAction: (() -> Unit)? = null,
-    )
-
     class ChapterFilterActions(
         val changeSort: (sortOptions: SortOption?) -> Unit,
         val changeFilter: (filterOption: FilterOption?) -> Unit,

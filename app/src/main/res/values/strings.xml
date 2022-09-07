@@ -681,6 +681,7 @@
     <string name="date_format">Date format</string>
     <string name="manage_notifications">Manage notifications</string>
     <string name="check_for_updates">Check for updates</string>
+
     <string name="updated_to_">Updated to v%1$s</string>
     <string name="secure_screen">Secure screen</string>
     <string name="secure_screen_summary">Secure screen hides app contents when switching apps and block screenshots</string>
@@ -828,6 +829,8 @@
     <string name="build_time">Build time</string>
     <string name="send_crash_report">Send crash reports</string>
     <string name="helps_fix_bugs">Helps fix any bugs. No sensitive data will be sent</string>
+    <string name="checking_for_updates">Checking for updates</string>
+    <string name="build_information">Build information</string>
     <string name="whats_new">What\'s new</string>
     <string name="whats_new_this_release">What\'s new in this release</string>
     <string name="website">Website</string>
