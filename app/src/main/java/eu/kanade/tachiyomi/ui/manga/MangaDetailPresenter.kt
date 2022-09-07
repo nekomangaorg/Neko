@@ -1587,7 +1587,9 @@ class MangaDetailPresenter(
 
     fun copiedToClipboard(message: String) {
         presenterScope.launchIO {
-            _snackbarState.emit(SnackbarState(messageRes = R.string._copied_to_clipboard, message = message))
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                _snackbarState.emit(SnackbarState(messageRes = R.string._copied_to_clipboard, message = message))
+            }
         }
     }
 

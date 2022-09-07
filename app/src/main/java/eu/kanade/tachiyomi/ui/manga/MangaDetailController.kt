@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
@@ -86,15 +85,11 @@ class MangaDetailController(mangaId: Long) : BaseComposeController<MangaDetailPr
             ),
             generatePalette = this::setPalette,
             titleLongClick = { context, content ->
-                if (Build.VERSION.SDK_INT + Build.VERSION.SDK_INT < 33) {
-                    presenter.copiedToClipboard(context.getString(R.string.title))
-                }
+                presenter.copiedToClipboard(context.getString(R.string.title))
                 copyToClipboard(context, content, R.string.title)
             },
             creatorLongClick = { context, content ->
-                if (Build.VERSION.SDK_INT + Build.VERSION.SDK_INT < 33) {
-                    presenter.copiedToClipboard(context.getString(R.string.creator))
-                }
+                presenter.copiedToClipboard(context.getString(R.string.creator))
                 copyToClipboard(context, content, R.string.creator)
             },
             toggleFavorite = presenter::toggleFavorite,
