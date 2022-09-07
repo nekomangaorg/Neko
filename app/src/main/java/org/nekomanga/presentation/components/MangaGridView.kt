@@ -40,6 +40,7 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -162,8 +163,8 @@ private fun MangaGridItem(
             }
 
             if (displayManga.inLibrary) {
-                val offset = (-6).dp
-                Favorited(offset)
+                val offset = (-2).dp
+                InLibraryBadge(offset, shouldOutlineCover)
             }
         }
     }
@@ -258,13 +259,7 @@ private fun CompactGridItem(
 
 @Composable
 private fun GridCover(manga: DisplayManga, shouldOutlineCover: Boolean) {
-    val outlineModifier = when (shouldOutlineCover) {
-        true -> Modifier.border(
-            .75.dp, NekoColors.outline,
-            RoundedCornerShape(Shapes.coverRadius),
-        )
-        else -> Modifier
-    }
+
     val color by remember { mutableStateOf(Pastel.getColorLight()) }
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
@@ -278,7 +273,9 @@ private fun GridCover(manga: DisplayManga, shouldOutlineCover: Boolean) {
         modifier = Modifier
             .aspectRatio(3f / 4f)
             .clip(RoundedCornerShape(Shapes.coverRadius))
-            .then(outlineModifier),
+            .conditional(shouldOutlineCover) {
+                this.border(width = Outline.thickness, color = Outline.color, shape = RoundedCornerShape(Shapes.coverRadius))
+            },
     )
 }
 

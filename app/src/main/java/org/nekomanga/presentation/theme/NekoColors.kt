@@ -6,10 +6,10 @@ import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 class NekoColors {
     companion object {
-        val outline = Color(0xFF79747E)
         const val highAlphaHighContrast = 1f
         const val highAlphaLowContrast = .87f
         const val mediumAlphaHighContrast = .74f
@@ -18,6 +18,11 @@ class NekoColors {
         const val disabledAlphaLowContrast = .38f
         const val veryLowContrast = .1f
     }
+}
+
+object Outline {
+    val color = Color(0XFF9D9D9D)
+    val thickness = .75.dp
 }
 
 object ChartColors {
