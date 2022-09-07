@@ -15,10 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -134,31 +132,24 @@ fun MangaListWithHeader(
     LazyColumn(
         modifier = modifier
             .wrapContentWidth(align = Alignment.CenterHorizontally),
-        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
+        contentPadding = contentPadding,
     ) {
-        groupedManga.onEachIndexed { index, entry ->
-            val stringRes = entry.key
-            val mangaList = entry.value
+        groupedManga.forEach { (stringRes, mangaList) ->
             stickyHeader {
-                Box(modifier = Modifier.padding(top = contentPadding.calculateTopPadding())) {
-                    HeaderCard(stringResource(id = stringRes))
-                }
+                HeaderCard(stringResource(id = stringRes))
             }
-
             itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
-                CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
-                    MangaRow(
-                        displayManga = displayManga,
-                        shouldOutlineCover,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .combinedClickable(
-                                onClick = { onClick(displayManga.mangaId) },
-                                onLongClick = { onLongClick(displayManga) },
-                            ),
-                    )
-                }
+                MangaRow(
+                    displayManga = displayManga,
+                    shouldOutlineCover,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .combinedClickable(
+                            onClick = { onClick(displayManga.mangaId) },
+                            onLongClick = { onLongClick(displayManga) },
+                        ),
+                )
             }
         }
     }

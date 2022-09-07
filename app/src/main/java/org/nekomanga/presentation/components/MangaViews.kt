@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -26,7 +25,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.extensions.conditional
-import org.nekomanga.presentation.theme.Typefaces
 
 @Composable
 internal fun MangaTitle(
@@ -38,8 +36,7 @@ internal fun MangaTitle(
 ) {
     Text(
         text = title,
-        style = TextStyle(
-            fontFamily = Typefaces.montserrat,
+        style = MaterialTheme.typography.bodyMedium.copy(
             fontSize = fontSize,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = fontWeight,
@@ -59,8 +56,7 @@ internal fun DisplayText(
 ) {
     Text(
         text = displayText,
-        style = TextStyle(
-            fontFamily = Typefaces.montserrat,
+        style = MaterialTheme.typography.bodyMedium.copy(
             fontSize = fontSize,
             fontWeight = fontWeight,
             color = MaterialTheme.colorScheme.onSurface.copy(.6f),
