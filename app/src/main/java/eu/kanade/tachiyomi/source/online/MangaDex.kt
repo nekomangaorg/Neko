@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
+import com.github.michaelbull.result.Result
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnFailure
 import com.skydoves.sandwich.suspendOnSuccess
@@ -29,6 +30,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
+import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
 
 open class MangaDex : HttpSource() {
@@ -81,10 +84,6 @@ open class MangaDex : HttpSource() {
         return latestChapterHandler.getPage(page)
     }
 
-    suspend fun fetchFollowList(): MangaListPage {
-        return followsHandler.fetchFollows()
-    }
-
     override suspend fun getMangaDetails(manga: SManga): SManga {
         return mangaHandler.fetchMangaDetails(manga)
     }
@@ -109,7 +108,7 @@ open class MangaDex : HttpSource() {
         return imageHandler.getImage(page, isLogged())
     }
 
-    suspend fun fetchAllFollows(): List<SManga> {
+    suspend fun fetchAllFollows(): Result<Map<Int, List<SourceManga>>, ResultError> {
         return followsHandler.fetchAllFollows()
     }
 

@@ -75,14 +75,7 @@ fun StatsScreen(
     ) { incomingPaddingValues ->
 
         if (statsState.value.screenState is Loading || (statsState.value.screenState is Detailed && detailedState.value.isLoading)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                LoadingScreen()
-            }
+            LoadingScreen(incomingPaddingValues)
         } else if (statsState.value.screenState is StatsConstants.ScreenState.NoResults) {
             Box(
                 modifier = Modifier

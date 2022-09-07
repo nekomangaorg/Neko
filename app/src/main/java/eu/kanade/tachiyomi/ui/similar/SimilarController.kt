@@ -19,7 +19,6 @@ class SimilarController(mangaUUID: String) : BaseComposeController<SimilarPresen
 
     @Composable
     override fun ScreenContent() {
-
         SimilarScreen(
             similarScreenState = presenter.similarScreenState.collectAsState(),
             switchDisplayClick = presenter::switchDisplayMode,

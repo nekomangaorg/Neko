@@ -134,12 +134,17 @@ fun MangaListWithHeader(
     LazyColumn(
         modifier = modifier
             .wrapContentWidth(align = Alignment.CenterHorizontally),
-        contentPadding = contentPadding,
+        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
     ) {
-        groupedManga.forEach { (stringRes, mangaList) ->
+        groupedManga.onEachIndexed { index, entry ->
+            val stringRes = entry.key
+            val mangaList = entry.value
             stickyHeader {
-                HeaderCard(stringResource(id = stringRes))
+                Box(modifier = Modifier.padding(top = contentPadding.calculateTopPadding())) {
+                    HeaderCard(stringResource(id = stringRes))
+                }
             }
+
             itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
                 CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
                     MangaRow(
