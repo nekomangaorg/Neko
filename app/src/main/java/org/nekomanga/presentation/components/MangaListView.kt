@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -35,6 +36,8 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Shapes
 
@@ -121,21 +124,21 @@ fun MangaList(
 
 @Composable
 fun MangaListWithHeader(
-    groupedManga: Map<String, List<DisplayManga>>,
+    groupedManga: ImmutableMap<Int, ImmutableList<DisplayManga>>,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (Long) -> Unit = {},
-    onLongClick: (Long) -> Unit = {},
+    onLongClick: (DisplayManga) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier
             .wrapContentWidth(align = Alignment.CenterHorizontally),
         contentPadding = contentPadding,
     ) {
-        groupedManga.forEach { (text, mangaList) ->
+        groupedManga.forEach { (stringRes, mangaList) ->
             stickyHeader {
-                HeaderCard(text)
+                HeaderCard(stringResource(id = stringRes))
             }
             itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
                 CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
@@ -147,7 +150,7 @@ fun MangaListWithHeader(
                             .wrapContentHeight()
                             .combinedClickable(
                                 onClick = { onClick(displayManga.mangaId) },
-                                onLongClick = { onLongClick(displayManga.mangaId) },
+                                onLongClick = { onLongClick(displayManga) },
                             ),
                     )
                 }

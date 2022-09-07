@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -40,28 +41,30 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun MangaGridWithHeader(
-    groupedManga: Map<String, List<DisplayManga>>,
+    groupedManga: ImmutableMap<Int, ImmutableList<DisplayManga>>,
     shouldOutlineCover: Boolean,
     columns: Int,
     modifier: Modifier = Modifier,
     isComfortable: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (Long) -> Unit = {},
-    onLongClick: (Long) -> Unit = {},
+    onLongClick: (DisplayManga) -> Unit = {},
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier,
         contentPadding = contentPadding,
     ) {
-        groupedManga.forEach { (headerText, allGrids) ->
+        groupedManga.forEach { (stringRes, allGrids) ->
             stickyHeader {
-                HeaderCard(headerText)
+                HeaderCard(stringResource(id = stringRes))
             }
             gridItems(
                 items = allGrids,
@@ -75,7 +78,7 @@ fun MangaGridWithHeader(
                     shouldOutlineCover = shouldOutlineCover,
                     isComfortable = isComfortable,
                     onClick = { onClick(displayManga.mangaId) },
-                    onLongClick = { onLongClick(displayManga.mangaId) },
+                    onLongClick = { onLongClick(displayManga) },
                 )
             }
         }
