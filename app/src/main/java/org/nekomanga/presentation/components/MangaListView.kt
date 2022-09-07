@@ -35,6 +35,7 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -158,13 +159,6 @@ fun MangaListWithHeader(
 @Composable
 private fun MangaCover(manga: DisplayManga, shouldOutlineCover: Boolean, modifier: Modifier = Modifier) {
     Box {
-        val outlineModifier = when (shouldOutlineCover) {
-            true -> Modifier.border(
-                .75.dp, NekoColors.outline,
-                RoundedCornerShape(Shapes.coverRadius),
-            )
-            else -> Modifier
-        }
         val color by remember { mutableStateOf(Pastel.getColorLight()) }
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -179,12 +173,18 @@ private fun MangaCover(manga: DisplayManga, shouldOutlineCover: Boolean, modifie
                 .size(48.dp)
                 .padding(4.dp)
                 .clip(RoundedCornerShape(Shapes.coverRadius))
-                .then(outlineModifier),
+                .conditional(shouldOutlineCover) {
+                    this.border(
+                        width = Outline.thickness,
+                        color = Outline.color,
+                        shape = RoundedCornerShape(Shapes.coverRadius),
+                    )
+                },
         )
 
         if (manga.inLibrary) {
-            val offset = (-4).dp
-            Favorited(offset)
+            val offset = (-2).dp
+            InLibraryIcon(offset, shouldOutlineCover)
         }
     }
 }
