@@ -162,12 +162,13 @@ class LibraryItem(
             return constraint.isEmpty()
         }
         return manga.title.contains(constraint, true) ||
+            (manga.alt_titles?.contains(constraint, true) ?: false) ||
             (manga.author?.contains(constraint, true) ?: false) ||
             (manga.artist?.contains(constraint, true) ?: false) ||
             if (constraint.contains(",")) {
-                val genres = manga.genre?.split(", ")
+                val genres = manga.getGenres()
                 constraint.split(",").all { containsGenre(it.trim(), genres) }
-            } else containsGenre(constraint, manga.genre?.split(", "))
+            } else containsGenre(constraint, manga.getGenres())
     }
 
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
