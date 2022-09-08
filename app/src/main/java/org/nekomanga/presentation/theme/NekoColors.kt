@@ -26,14 +26,14 @@ object Outline {
 }
 
 object ChartColors {
-    val one = Color(0xFF45818e)
+    val one = Color(0xFFa368f7)
     val two = Color(0xFF3BAEEA)
     val three = Color(0xFF7BD555)
     val four = Color(0xFFd29d2f)
     val five = Color(0xFFF17575)
     val six = Color(0xFFe65da1)
     val seven = Color(0xFF55e2cf)
-    val eight = Color(0xFF8a56e2)
+    val eight = Color(0xFF45818e)
     val nine = Color(0xFFb699b9)
     val ten = Color(0xFF30a58e)
     val eleven = Color(0xFFff00ff)

@@ -27,6 +27,14 @@ object StatsConstants {
     data class DetailedState(
         val isLoading: Boolean = true,
         val manga: ImmutableList<DetailedStatManga> = persistentListOf(),
+        val tags: ImmutableList<String> = persistentListOf(),
+        val detailTagState: DetailedTagState = DetailedTagState(),
+    )
+
+    data class DetailedTagState(
+        val totalReadDuration: Long = 0L,
+        val totalChapters: Int = 0,
+        val sortedTagPairs: ImmutableList<Pair<String, ImmutableList<DetailedStatManga>>> = persistentListOf(),
     )
 
     data class DetailedStatManga(

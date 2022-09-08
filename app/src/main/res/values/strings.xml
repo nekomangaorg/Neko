@@ -936,6 +936,7 @@
     <string name="unable_to_generate_stats">Library empty, unable to generate stats</string>
     <string name="trackers">Logged in trackers</string>
     <string name="n_a">N/A</string>
+    <string name="no_data_to_show_in_chart">No data to show in chart</string>
     <string name="typeNoSemi">Type</string>
     <string name="read_duration">Read duration</string>
     <string name="last_library_update">Last library update</string>

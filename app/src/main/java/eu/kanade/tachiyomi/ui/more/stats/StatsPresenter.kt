@@ -27,6 +27,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
@@ -115,7 +116,19 @@ class StatsPresenter(
                 _detailState.value = DetailedState(
                     isLoading = false,
                     manga = detailedStatMangaList.toImmutableList(),
+                    tags = detailedStatMangaList.asSequence().map { it.tags }.flatten().distinct().sortedBy { it }.toImmutableList(),
                 )
+
+                val sortedSeries =
+                    _detailState.value.tags.map { tag -> tag to _detailState.value.manga.filter { it.tags.contains(tag) }.toImmutableList() }.sortedByDescending { it.second.count() }.toImmutableList()
+                val totalCount = sortedSeries.sumOf { it.second.size }
+                val totalDuration = sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
+
+                _detailState.update {
+                    it.copy(
+                        detailTagState = StatsConstants.DetailedTagState(totalReadDuration = totalDuration, totalChapters = totalCount, sortedTagPairs = sortedSeries),
+                    )
+                }
             }
         }
     }
