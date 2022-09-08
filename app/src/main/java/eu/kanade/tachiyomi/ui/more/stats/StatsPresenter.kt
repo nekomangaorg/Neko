@@ -73,7 +73,7 @@ class StatsPresenter(
                     mergeCount = libraryList.mapNotNull { it.merge_manga_url }.count(),
                     globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
                     downloadCount = libraryList.sumOf { getDownloadCount(it) },
-                    tagCount = libraryList.mapNotNull { it.getGenres() }.flatten().distinct().count(),
+                    tagCount = libraryList.mapNotNull { it.getGenres() }.flatten().distinct().count { !it.contains("content rating:", true) },
                     trackerCount = getLoggedTrackers().count(),
                     readDuration = getReadDuration(),
                     averageMangaRating = getAverageMangaRating(libraryList),
@@ -116,7 +116,7 @@ class StatsPresenter(
                 _detailState.value = DetailedState(
                     isLoading = false,
                     manga = detailedStatMangaList.toImmutableList(),
-                    tags = detailedStatMangaList.asSequence().map { it.tags }.flatten().distinct().sortedBy { it }.toImmutableList(),
+                    tags = detailedStatMangaList.asSequence().map { it.tags }.flatten().distinct().filter { !it.contains("content rating:", true) }.sortedBy { it }.toImmutableList(),
                 )
 
                 val sortedSeries =

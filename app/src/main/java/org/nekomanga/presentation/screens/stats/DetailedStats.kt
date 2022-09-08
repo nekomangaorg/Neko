@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ElevatedCard
@@ -38,6 +35,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.himanshoe.charty.pie.PieChart
 import com.himanshoe.charty.pie.config.PieConfig
 import com.himanshoe.charty.pie.config.PieData
@@ -78,27 +77,27 @@ fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, colors: Li
             .fillMaxWidth()
             .padding(top = contentPadding.calculateTopPadding()),
     ) {
-        LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            customChip(
+        FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 4.dp, crossAxisSpacing = 4.dp) {
+            CustomChip(
                 isSelected = filterState == Filter.Type,
                 onClick = { filterStateClick(Filter.Type) },
                 label = R.string.series_type,
             )
-            customChip(
+            CustomChip(
                 isSelected = filterState == Filter.Status,
                 onClick = { filterStateClick(Filter.Status) },
                 label = R.string.status,
             )
-            customChip(
+            CustomChip(
                 isSelected = filterState == Filter.ContentRating,
                 onClick = { filterStateClick(Filter.ContentRating) },
                 label = R.string.content_rating_distribution,
             )
-            /* customChip(
-                 isSelected = filterState == Filter.Tag,
-                 onClick = { filterStateClick(Filter.Tag) },
-                 label = R.string.tag,
-             )*/
+            CustomChip(
+                isSelected = filterState == Filter.Tag,
+                onClick = { filterStateClick(Filter.Tag) },
+                label = R.string.tag,
+            )
         }
 
         when (filterState) {
@@ -111,41 +110,61 @@ fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, colors: Li
             Filter.Type -> {
                 LazyWrapper(
                     contentPadding = contentPadding,
-                    contentList = listOf(
-                        { SortChip(sortType, onClick = sortTypeClick) },
-                        { Type(detailedStats = detailedStats, colors = colors, sortType = sortType) },
-                    ),
+                    showSortChip = true,
+                    sortType = sortType,
+                    sortChipClick = sortTypeClick,
+                    contentList = listOf { Type(detailedStats = detailedStats, colors = colors, sortType = sortType) },
                 )
             }
 
             Filter.Status -> {
                 LazyWrapper(
                     contentPadding = contentPadding,
-                    contentList = listOf(
-                        { SortChip(sortType, onClick = sortTypeClick) },
-                        { Status(detailedStats = detailedStats, colors = colors, sortType = sortType) },
-                    ),
+                    showSortChip = true,
+                    sortType = sortType,
+                    sortChipClick = sortTypeClick,
+                    contentList = listOf { Status(detailedStats = detailedStats, colors = colors, sortType = sortType) },
                 )
             }
 
             Filter.ContentRating -> {
                 LazyWrapper(
                     contentPadding = contentPadding,
-                    contentList = listOf(
-                        { SortChip(sortType, onClick = sortTypeClick) },
-                        { ContentRating(detailedStats = detailedStats, sortType = sortType, colors = colors) },
-                    ),
+                    showSortChip = true,
+                    sortType = sortType,
+                    sortChipClick = sortTypeClick,
+                    contentList = listOf { ContentRating(detailedStats = detailedStats, sortType = sortType, colors = colors) },
                 )
             }
-            /*Filter.Tag -> {
+            Filter.Tag -> {
                 val tagStats = detailedStats.value.detailTagState
-                val sortedTagPairs = when (sortType) {
-
+                val sortedTagPairs = remember(sortType) {
+                    tagStats.sortedTagPairs.sortedWith { t, t2 ->
+                        when (sortType) {
+                            Sort.Entries -> t2.second.size.compareTo(t.second.size)
+                            Sort.Chapters -> t2.second.sumOf { it.readChapters }.compareTo(t.second.sumOf { it.readChapters })
+                            Sort.Duration -> t2.second.sumOf { it.readDuration }.compareTo(t.second.sumOf { it.readDuration })
+                        }
+                    }
                 }
-                items(tagStats.sortedTagPairs) { tagPair ->
-                    Tag(entry = tagPair, color = colors[0], totalCount = detailedStats.value.detailTagState.totalChapters, totalReadDuration = detailedStats.value.detailTagState.totalReadDuration)
-                }
-            }*/
+                LazyWrapper(
+                    contentPadding = contentPadding,
+                    showSortChip = true,
+                    sortType = sortType,
+                    sortChipClick = sortTypeClick,
+                    contentList =
+                    sortedTagPairs.map { tagPair ->
+                        {
+                            Tag(
+                                entry = tagPair,
+                                color = colors[0],
+                                totalCount = detailedStats.value.detailTagState.totalChapters,
+                                totalReadDuration = detailedStats.value.detailTagState.totalReadDuration,
+                            )
+                        }
+                    },
+                )
+            }
 
             else -> Unit
         }
@@ -153,8 +172,14 @@ fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, colors: Li
 }
 
 @Composable
-private fun LazyWrapper(contentPadding: PaddingValues, contentList: List<@Composable () -> Unit>) {
+private fun LazyWrapper(contentPadding: PaddingValues, showSortChip: Boolean = false, sortType: Sort = Sort.Entries, sortChipClick: () -> Unit = {}, contentList: List<@Composable () -> Unit>) {
     LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())) {
+        if (showSortChip) {
+            item {
+                SortChip(sortType = sortType, onClick = sortChipClick)
+            }
+        }
+
         contentList.forEach { content ->
             item { content() }
         }
@@ -179,23 +204,17 @@ private fun SortChip(sortType: Sort, onClick: () -> Unit) {
     }
 }
 
-private fun LazyListScope.customChip(isSelected: Boolean, onClick: () -> Unit, @StringRes label: Int) {
-    item {
-        FilterChip(
-            selected = isSelected,
-            leadingIcon = {
-                if (isSelected) {
-                    Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                }
-            },
-            onClick = onClick,
-            label = { Text(text = stringResource(id = label)) },
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                selectedLabelColor = MaterialTheme.colorScheme.primary,
-            ),
-        )
-    }
+@Composable
+private fun CustomChip(isSelected: Boolean, onClick: () -> Unit, @StringRes label: Int) {
+    FilterChip(
+        selected = isSelected,
+        onClick = onClick,
+        label = { Text(text = stringResource(id = label)) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            selectedLabelColor = MaterialTheme.colorScheme.primary,
+        ),
+    )
 }
 
 @Composable
