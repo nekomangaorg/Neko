@@ -926,13 +926,13 @@
     <string name="chapters_read">Read chapters</string>
     <string name="most_entries">Most entries</string>
     <string name="read_chapter_count">Read chapters count</string>
-    <string name="average_score">Average manga score</string>
-    <string name="mean_score">Average user score</string>
+    <string name="average_score">Avg manga score</string>
+    <string name="mean_score">Avg user score</string>
     <string name="manga_tracked">Tracked manga</string>
     <string name="chapters_downloaded">Downloaded chapters</string>
     <string name="tags">Total tags</string>
     <string name="manga_local">Local manga</string>
-    <string name="global_update_manga">Globally updated manga</string>
+    <string name="global_update_manga">Globally updated</string>
     <string name="unable_to_generate_stats">Library empty, unable to generate stats</string>
     <string name="trackers">Logged in trackers</string>
     <string name="n_a">N/A</string>
