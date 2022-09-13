@@ -31,7 +31,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
@@ -78,6 +77,7 @@ import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.MergeManga
+import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
@@ -1587,7 +1587,9 @@ class MangaDetailPresenter(
 
     fun copiedToClipboard(message: String) {
         presenterScope.launchIO {
-            _snackbarState.emit(SnackbarState(messageRes = R.string._copied_to_clipboard, message = message))
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                _snackbarState.emit(SnackbarState(messageRes = R.string._copied_to_clipboard, message = message))
+            }
         }
     }
 

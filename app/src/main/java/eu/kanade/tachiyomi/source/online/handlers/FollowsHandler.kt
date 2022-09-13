@@ -1,32 +1,36 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.get
+import com.github.michaelbull.result.getError
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.suspendOnFailure
-import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
-import eu.kanade.tachiyomi.source.model.MangaListPage
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
-import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -35,62 +39,59 @@ class FollowsHandler {
 
     val preferences: PreferencesHelper by injectLazy()
     val statusHandler: StatusHandler by injectLazy()
-    val authService: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }
+    private val authService: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }
 
     /**
      * fetch all follows
      */
-    suspend fun fetchFollows(): MangaListPage {
+    suspend fun fetchAllFollows(): Result<Map<Int, List<SourceManga>>, ResultError> {
         return withContext(Dispatchers.IO) {
             val readingFuture = async {
                 statusHandler.fetchReadingStatusForAllManga()
             }
 
-            val results = mutableListOf<MangaDataDto>()
-            val response = authService.userFollowList(0)
-            response.suspendOnSuccess {
-                val mangaListDto = this.data
-                results.addAll(mangaListDto.data.toMutableList())
+            val response = fetchOffset(0)
 
-                if (mangaListDto.total > mangaListDto.limit) {
-                    val totalRequestNo = (mangaListDto.total / mangaListDto.limit)
-                    val restOfResults = (1..totalRequestNo).map { pos ->
-                        async {
-                            authService.userFollowList(pos * mangaListDto.limit)
-                                .getOrNull()?.data ?: emptyList()
-                        }
-                    }.awaitAll().flatten()
-                    results.addAll(restOfResults)
-                    val readingStatusResponse = readingFuture.await()
-
-                    followsParseMangaPage(results, readingStatusResponse)
-                }
-            }.suspendOnFailure {
-                this.log("getting follows")
-                throw Exception("Failure to get follows")
+            if (response.getError() != null) {
+                return@withContext Err(response.getError()!!)
             }
-            val readingStatusResponse = readingFuture.await()
-            followsParseMangaPage(results, readingStatusResponse)
+
+            val mangaListDto = response.get()!!
+            val allResults = if (mangaListDto.total > mangaListDto.limit) {
+                val totalRequestNo = (mangaListDto.total / mangaListDto.limit)
+                (1..totalRequestNo).map { pos ->
+                    async {
+                        fetchOffset(pos * mangaListDto.limit)
+                    }
+                }.awaitAll().mapNotNull { it.get() } + mangaListDto
+            } else {
+                listOf(mangaListDto)
+            }.map { it.data }.flatten()
+
+            return@withContext Ok(allFollowsParser(allResults, readingFuture.await()))
+
         }
     }
 
-    /**
-     * Parse follows api to manga page
-     * used when multiple follows
-     */
-    private fun followsParseMangaPage(
-        mangaDataDtoList: List<MangaDataDto>,
-        readingStatusMap: Map<String, String?>,
-    ): MangaListPage {
-        val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
+    private suspend fun fetchOffset(offset: Int): Result<MangaListDto, ResultError> {
+        val response = authService.userFollowList(offset).onFailure {
+            this.log("Failed to get follows with offset $offset")
+        }.getOrNull()
 
-        val result = mangaDataDtoList.map { mangaDto ->
-            mangaDto.toBasicManga(preferences.thumbnailQuality()).apply {
-                this.follow_status = FollowStatus.fromDex(readingStatusMap[mangaDto.id])
-            }
-        }.sortedWith(comparator)
+        return when (response) {
+            null -> Err(ResultError.Generic(errorString = "Failure to get follows"))
+            else -> Ok(response)
+        }
+    }
 
-        return MangaListPage(result, false)
+    private fun allFollowsParser(mangaDataDtoList: List<MangaDataDto>, readingStatusMap: Map<String, String?>): Map<Int, List<SourceManga>> {
+        val coverQuality = preferences.thumbnailQuality()
+        return mangaDataDtoList.asSequence().map {
+            val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
+            it.toSourceManga(coverQuality).copy(displayTextRes = followStatus.stringRes)
+        }
+            .sortedBy { it.title }
+            .groupBy { it.displayTextRes!! }
     }
 
     /**
@@ -169,13 +170,6 @@ class FollowsHandler {
 
             response.getOrNull()?.result == "ok"
         }
-    }
-
-    /**
-     * fetch all manga from all possible pages
-     */
-    suspend fun fetchAllFollows(): List<SManga> {
-        return fetchFollows().manga
     }
 
     suspend fun fetchTrackingInfo(url: String): Track {

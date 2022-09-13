@@ -42,11 +42,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -61,7 +61,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenGeneralState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.SnackbarState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInWebView
@@ -69,6 +68,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
@@ -128,32 +128,16 @@ fun MangaScreen(
     LaunchedEffect(snackbarHostState.currentSnackbarData) {
         snackbar.collect { state ->
             scope.launch {
-                val message = when {
-                    state.message != null && state.messageRes != null && state.fieldRes != null -> context.getString(state.messageRes, context.getString(state.fieldRes)) + state.message
-                    state.message != null && state.messageRes != null -> context.getString(state.messageRes, state.message)
-                    state.messageRes != null && state.fieldRes != null -> context.getString(state.messageRes, context.getString(state.fieldRes))
-                    state.message != null -> state.message
-                    state.messageRes != null -> context.getString(state.messageRes)
-                    else -> ""
-                }
-                val actionLabel = when {
-                    state.actionLabel != null -> state.actionLabel
-                    state.actionLabelRes != null -> context.getString(state.actionLabelRes)
-                    else -> null
-                }
-
                 snackbarHostState.currentSnackbarData?.dismiss()
-
                 val result = snackbarHostState.showSnackbar(
-                    message = message,
-                    actionLabel = actionLabel,
+                    message = state.getFormattedMessage(context),
+                    actionLabel = state.getFormattedActionLabel(context),
                     withDismissAction = true,
                 )
                 when (result) {
                     SnackbarResult.ActionPerformed -> state.action?.invoke()
                     SnackbarResult.Dismissed -> state.dismissAction?.invoke()
                 }
-
             }
         }
     }
@@ -163,19 +147,13 @@ fun MangaScreen(
     }
 
     val isDarkTheme = isSystemInDarkTheme()
-    val secondaryColor = MaterialTheme.colorScheme.secondary
     val surfaceColor = MaterialTheme.colorScheme.surface
 
-    val defaultTextSelection = LocalTextSelectionColors.current
+    val defaultThemeColorState = defaultThemeColorState()
 
     var themeColorState by remember {
         mutableStateOf(
-            ThemeColorState(
-                buttonColor = secondaryColor,
-                rippleTheme = PrimaryColorRippleTheme,
-                textSelectionColors = defaultTextSelection,
-                altContainerColor = Color(ColorUtils.blendARGB(secondaryColor.toArgb(), surfaceColor.toArgb(), .706f)),
-            ),
+            defaultThemeColorState,
         )
     }
 
@@ -456,18 +434,14 @@ private fun ExpandedLayout(
             item { details() }
         }
 
-        VerticalDivider(
-            Modifier
-                .zIndex(100f)
-                .align(Alignment.TopCenter),
-        )
+        VerticalDivider(Modifier.align(Alignment.TopCenter))
 
         LazyColumn(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .fillMaxWidth(.5f)
                 .fillMaxHeight()
-                .zIndex(0f),
+                .clipToBounds(),
             contentPadding = chapterContentPadding,
         ) {
             item { chapterHeader() }
@@ -504,5 +478,15 @@ class ThemeColorState(buttonColor: Color, rippleTheme: RippleTheme, textSelectio
     var rippleTheme by mutableStateOf(rippleTheme)
     var textSelectionColors by mutableStateOf(textSelectionColors)
     var altContainerColor by mutableStateOf(altContainerColor)
+}
+
+@Composable
+fun defaultThemeColorState(): ThemeColorState {
+    return ThemeColorState(
+        buttonColor = MaterialTheme.colorScheme.secondary,
+        rippleTheme = PrimaryColorRippleTheme,
+        textSelectionColors = LocalTextSelectionColors.current,
+        altContainerColor = Color(ColorUtils.blendARGB(MaterialTheme.colorScheme.secondary.toArgb(), MaterialTheme.colorScheme.surface.toArgb(), .706f)),
+    )
 }
 

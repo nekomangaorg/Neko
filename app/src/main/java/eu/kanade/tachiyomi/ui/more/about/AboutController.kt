@@ -1,40 +1,42 @@
-package eu.kanade.tachiyomi.ui.more
+package eu.kanade.tachiyomi.ui.more.about
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.core.content.getSystemService
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.setting.LicensesController
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.AboutScreen
-import uy.kohesive.injekt.injectLazy
-import java.text.DateFormat
 
 class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPresenter>(bundle) {
 
-    private val preferences: PreferencesHelper by injectLazy()
     override val presenter = AboutPresenter()
-
-    private val dateFormat: DateFormat by lazy {
-        preferences.dateFormat()
-    }
 
     @Composable
     override fun ScreenContent() {
         AboutScreen(
-            getFormattedBuildTime = { this.presenter.getFormattedBuildTime(dateFormat) },
-            checkForUpdate = { context -> presenter.checkForUpdate(context) },
-            onDownloadClicked = this::downloadApp,
-            onVersionClicked = { context -> this.copyVersionInfo(context) },
+            aboutScreenState = presenter.aboutScreenState.collectAsState(),
+            checkForUpdate = presenter::checkForUpdate,
+            onDownloadClicked = { url ->
+                presenter.hideUpdateDialog()
+                this.downloadApp(url)
+            },
+            dismissDialog = presenter::hideUpdateDialog,
+            snackbar = presenter.snackBarState,
+            onVersionClicked = { context ->
+                presenter.copyToClipboard()
+                copyVersionInfo(context)
+            },
             onClickLicenses = { router.pushController(LicensesController().withFadeTransaction()) },
-        ) { activity?.onBackPressed() }
+            onBackPressed = { activity?.onBackPressed() },
+        )
     }
 
     /**
@@ -50,7 +52,7 @@ class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPrese
     /**
      * Start the process to download the update
      */
-    fun downloadApp(url: String) {
+    private fun downloadApp(url: String) {
         applicationContext ?: return
         AppUpdateService.start(applicationContext!!, url, true)
     }

@@ -38,7 +38,7 @@ class XLogSetup(context: Context) {
         val logConfig = LogConfiguration.Builder()
             .logLevel(logLevel)
             .disableBorder()
-            .enableStackTrace(2)
+            .enableStackTrace(5)
             .tag("||NEKO")
             .build()
 

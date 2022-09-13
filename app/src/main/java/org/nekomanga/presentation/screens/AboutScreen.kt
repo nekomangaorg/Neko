@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens
 
 import ToolTipIconButton
 import android.content.Context
-import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,9 +13,11 @@ import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -27,7 +28,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.elvishew.xlog.XLog
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import compose.icons.SimpleIcons
@@ -40,9 +40,11 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
+import eu.kanade.tachiyomi.ui.more.about.AboutScreenState
 import eu.kanade.tachiyomi.util.system.isOnline
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.snackbar.snackbarHost
@@ -50,19 +52,19 @@ import org.nekomanga.presentation.theme.Padding
 
 @Composable
 fun AboutScreen(
-    getFormattedBuildTime: () -> String,
-    checkForUpdate: (Context) -> Flow<AppUpdateResult>,
+    aboutScreenState: State<AboutScreenState>,
+    checkForUpdate: (Context) -> Unit,
     onVersionClicked: (Context) -> Unit,
     onDownloadClicked: (String) -> Unit,
     onClickLicenses: () -> Unit,
     onBackPressed: () -> Unit,
+    dismissDialog: () -> Unit,
+    snackbar: SharedFlow<SnackbarState>,
 ) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val shouldShowDialog = remember { mutableStateOf(false) }
-    var appUpdateResult: AppUpdateResult = AppUpdateResult.NoNewUpdate
 
     NekoScaffold(
         title = stringResource(id = R.string.about),
@@ -70,14 +72,28 @@ fun AboutScreen(
         snackBarHost = snackbarHost(snackbarHostState),
     ) { contentPadding ->
 
-        if (shouldShowDialog.value && appUpdateResult is AppUpdateResult.NewUpdate) {
-            val release = (appUpdateResult as AppUpdateResult.NewUpdate).release
+        LaunchedEffect(snackbarHostState.currentSnackbarData) {
+            snackbar.collect { state ->
+                scope.launch {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    val result = snackbarHostState.showSnackbar(
+                        message = state.getFormattedMessage(context),
+                        actionLabel = state.getFormattedActionLabel(context),
+                        withDismissAction = true,
+                    )
+                    when (result) {
+                        SnackbarResult.ActionPerformed -> state.action?.invoke()
+                        SnackbarResult.Dismissed -> state.dismissAction?.invoke()
+                    }
+                }
+            }
+        }
+
+        if (aboutScreenState.value.shouldShowUpdateDialog && aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate) {
             AppUpdateDialog(
-                release = release, onDismissRequest = { shouldShowDialog.value = false },
-                onConfirm = { url ->
-                    onDownloadClicked(url)
-                    shouldShowDialog.value = false
-                },
+                release = (aboutScreenState.value.updateResult as AppUpdateResult.NewUpdate).release,
+                onDismissRequest = dismissDialog,
+                onConfirm = onDownloadClicked,
             )
         }
 
@@ -93,23 +109,13 @@ fun AboutScreen(
                     title = stringResource(R.string.version),
                     subtitle = when {
                         BuildConfig.DEBUG -> {
-                            "Debug ${BuildConfig.COMMIT_SHA} (${getFormattedBuildTime()})"
+                            "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
                         }
                         else -> {
-                            "Stable ${BuildConfig.VERSION_NAME} (${getFormattedBuildTime()})"
+                            "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
                         }
                     },
-                    onClick = {
-                        onVersionClicked(context)
-                        if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    context.getString(R.string._copied_to_clipboard, "Build information"),
-                                    withDismissAction = true,
-                                )
-                            }
-                        }
-                    },
+                    onClick = { onVersionClicked(context) },
                 )
             }
 
@@ -117,7 +123,7 @@ fun AboutScreen(
                 PreferenceRow(
                     title = stringResource(R.string.check_for_updates),
                     onClick = {
-                        if (context.isOnline().not()) {
+                        if (!context.isOnline()) {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
                                     context.getString(R.string.no_network_connection),
@@ -125,29 +131,7 @@ fun AboutScreen(
                                 )
                             }
                         } else {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    context.getString(R.string.searching_for_updates),
-                                    withDismissAction = true,
-                                )
-
-                                checkForUpdate(context).collect { result ->
-                                    when (result) {
-                                        is AppUpdateResult.NewUpdate -> {
-                                            XLog.i("should show dialog now")
-                                            appUpdateResult = result
-                                            shouldShowDialog.value = true
-                                        }
-                                        else -> {
-                                            XLog.i("no update found")
-                                            snackbarHostState.showSnackbar(
-                                                context.getString(R.string.no_new_updates_available),
-                                                withDismissAction = true,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                            checkForUpdate(context)
                         }
                     },
                 )

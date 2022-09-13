@@ -71,6 +71,7 @@ class StatusSyncJob(
 
                 "1" -> {
                     val total = followsSyncService.fromMangaDex(
+                        ::errorNotification,
                         ::updateNotificationProgress,
                         ::completeNotificationFromDex,
                     )
@@ -142,9 +143,9 @@ class StatusSyncJob(
         )
     }
 
-    private fun errorNotification() {
+    private fun errorNotification(errorTxt: String? = null) {
         val notification = progressNotification
-            .setContentTitle(context.getString(R.string.not_logged_into_mangadex_cannot_sync))
+            .setContentTitle(errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync))
             .setOngoing(true)
             .setAutoCancel(true)
             .build()

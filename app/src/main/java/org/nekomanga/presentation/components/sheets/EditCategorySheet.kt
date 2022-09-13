@@ -32,21 +32,24 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 import java.util.Locale
 
 @Composable
 fun EditCategorySheet(
     addingToLibrary: Boolean,
-    categories: List<CategoryItem>,
-    mangaCategories: List<CategoryItem>,
-    themeColorState: ThemeColorState,
+    categories: ImmutableList<CategoryItem>,
+    mangaCategories: ImmutableList<CategoryItem> = persistentListOf(),
+    themeColorState: ThemeColorState = defaultThemeColorState(),
     cancelClick: () -> Unit,
     addNewCategory: (String) -> Unit,
     confirmClicked: (List<CategoryItem>) -> Unit,
-    addToLibraryClick: () -> Unit,
+    addToLibraryClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 

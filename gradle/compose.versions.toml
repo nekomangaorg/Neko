@@ -12,7 +12,6 @@ accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-dra
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist_version" }
 accompainist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
 
-paging = "androidx.paging:paging-compose:1.0.0-alpha16"
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
@@ -40,5 +39,5 @@ markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
 
 [bundles]
 accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompainist-webview"]
-compose = ["activity", "animations", "paging", "material3-core", "material3-windowsize", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
+compose = ["activity", "animations", "material3-core", "material3-windowsize", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
 charting = ["charty"]

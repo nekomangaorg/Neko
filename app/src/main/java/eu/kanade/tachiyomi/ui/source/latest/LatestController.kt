@@ -1,92 +1,28 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
 import android.os.Bundle
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.stringResource
-import androidx.paging.compose.collectAsLazyPagingItems
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
-import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import org.nekomanga.presentation.components.ListGridActionButton
-import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.PagingListManga
-import org.nekomanga.presentation.components.PagingMangaGrid
-import uy.kohesive.injekt.injectLazy
+import org.nekomanga.presentation.screens.LatestScreen
 
 class LatestController(bundle: Bundle? = null) :
     BaseComposeController<LatestPresenter>(bundle) {
 
     override var presenter = LatestPresenter()
 
-    private val preferences: PreferencesHelper by injectLazy()
-
     @Composable
     override fun ScreenContent() {
-        val isList by preferences.browseAsList().asFlow()
-            .collectAsState(preferences.browseAsList().get())
-
-        NekoScaffold(
-            title = stringResource(id = R.string.latest),
-            onNavigationIconClicked = { activity?.onBackPressed() },
-            actions = {
-                ListGridActionButton(
-                    isList = isList,
-                    buttonClicked = { preferences.browseAsList().set(isList.not()) },
-                )
-            },
-        ) { incomingContentPadding ->
-            val contentPadding =
-                PaddingValues(
-                    bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                        .asPaddingValues().calculateBottomPadding(),
-                    top = incomingContentPadding.calculateTopPadding(),
-                )
-
-            val mangaListPagingItems = presenter.mangaList.collectAsLazyPagingItems()
-
-            if (isList) {
-                PagingListManga(
-                    mangaListPagingItems = mangaListPagingItems,
-                    shouldOutlineCover = preferences.outlineOnCovers()
-                        .get(),
-                    contentPadding = contentPadding,
-                    onClick = { mangaId ->
-                        router.pushController(
-                            MangaDetailController(mangaId).withFadeTransaction(),
-                        )
-                    },
-                )
-            } else {
-                val columns =
-                    binding.root.rootView.measuredWidth.numberOfColumnsForCompose(
-                        preferences.gridSize().get(),
-                    )
-
-                PagingMangaGrid(
-                    mangaListPagingItems = mangaListPagingItems,
-                    shouldOutlineCover = preferences.outlineOnCovers()
-                        .get(),
-                    columns = columns,
-                    isComfortable = preferences.libraryLayout().get() == 2,
-                    contentPadding = contentPadding,
-                    onClick = { mangaId ->
-                        router.pushController(
-                            MangaDetailController(mangaId).withFadeTransaction(),
-                        )
-                    },
-                )
-            }
-        }
+        LatestScreen(
+            latestScreenState = presenter.latestScreenState.collectAsState(),
+            switchDisplayClick = presenter::switchDisplayMode,
+            onBackPress = { activity?.onBackPressed() },
+            openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
+            addNewCategory = presenter::addNewCategory,
+            toggleFavorite = presenter::toggleFavorite,
+            loadNextPage = presenter::loadNextItems,
+        )
     }
 }

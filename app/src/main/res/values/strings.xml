@@ -3,7 +3,7 @@
     <string name="app_name" translatable="false">Neko</string>
 
     <string name="all_files_permission_required">File permissions required</string>
-    <string name="external_storage_permission_notice">Neko requires access to all files in Android 11 to download chapters, create automatic backups, and read local manga. \n\nOn the next screen, enable \"Allow access to manage all files.\"</string>
+    <string name="external_storage_permission_notice">Neko requires access to all files in Android 11 to download chapters, and create automatic backups. \n\nOn the next screen, enable \"Allow access to manage all files.\"</string>
     <string name="external_storage_download_notice">Neko requires access to all files to download chapters. Tap here, then enable \"Allow access to manage all files.\"</string>
 
     <!--Models-->
@@ -681,6 +681,7 @@
     <string name="date_format">Date format</string>
     <string name="manage_notifications">Manage notifications</string>
     <string name="check_for_updates">Check for updates</string>
+
     <string name="updated_to_">Updated to v%1$s</string>
     <string name="secure_screen">Secure screen</string>
     <string name="secure_screen_summary">Secure screen hides app contents when switching apps and block screenshots</string>
@@ -828,6 +829,8 @@
     <string name="build_time">Build time</string>
     <string name="send_crash_report">Send crash reports</string>
     <string name="helps_fix_bugs">Helps fix any bugs. No sensitive data will be sent</string>
+    <string name="checking_for_updates">Checking for updates</string>
+    <string name="build_information">Build information</string>
     <string name="whats_new">What\'s new</string>
     <string name="whats_new_this_release">What\'s new in this release</string>
     <string name="website">Website</string>
@@ -933,6 +936,7 @@
     <string name="unable_to_generate_stats">Library empty, unable to generate stats</string>
     <string name="trackers">Logged in trackers</string>
     <string name="n_a">N/A</string>
+    <string name="no_data_to_show_in_chart">No data to show in chart</string>
     <string name="typeNoSemi">Type</string>
     <string name="read_duration">Read duration</string>
     <string name="last_library_update">Last library update</string>

@@ -8,7 +8,6 @@ import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
-import eu.kanade.tachiyomi.data.models.SourceManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
@@ -27,6 +26,7 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import org.nekomanga.domain.manga.SourceManga
 import uy.kohesive.injekt.injectLazy
 
 class SimilarHandler {
