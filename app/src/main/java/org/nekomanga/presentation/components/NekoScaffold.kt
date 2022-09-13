@@ -14,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
@@ -34,6 +35,7 @@ fun NekoScaffold(
     onNavigationIconClicked: () -> Unit,
     modifier: Modifier = Modifier,
     themeColorState: ThemeColorState? = null,
+    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
     subtitle: String = "",
@@ -47,7 +49,6 @@ fun NekoScaffold(
     SideEffect {
         systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
     }
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
@@ -55,86 +56,11 @@ fun NekoScaffold(
         {
             CompositionLocalProvider(LocalRippleTheme provides (themeColorState?.rippleTheme ?: PrimaryColorRippleTheme)) {
                 if (subtitle.isEmpty() && title.isNotEmpty()) {
-                    CenterAlignedTopAppBar(
-                        colors = TopAppBarDefaults.smallTopAppBarColors(
-                            containerColor = color,
-                            scrolledContainerColor = color,
-                        ),
-                        modifier = Modifier
-                            .statusBarsPadding(),
-                        title = {
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.titleLarge,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                        navigationIcon = {
-                            ToolTipIconButton(
-                                toolTipLabel = navigationIconLabel,
-                                icon = navigationIcon,
-                                buttonClicked = onNavigationIconClicked,
-                            )
-                        },
-                        actions = actions,
-                        scrollBehavior = scrollBehavior,
-                    )
+                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
                 } else if (title.isEmpty()) {
-                    SmallTopAppBar(
-                        colors = TopAppBarDefaults.smallTopAppBarColors(
-                            containerColor = color,
-                            scrolledContainerColor = color,
-                        ),
-                        modifier = Modifier
-                            .statusBarsPadding(),
-                        title = {},
-                        navigationIcon = {
-                            ToolTipIconButton(
-                                toolTipLabel = navigationIconLabel,
-                                icon = navigationIcon,
-                                buttonClicked = onNavigationIconClicked,
-                            )
-                        },
-                        actions = actions,
-                        scrollBehavior = scrollBehavior,
-                    )
+                    NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
                 } else {
-                    SmallTopAppBar(
-                        colors = TopAppBarDefaults.smallTopAppBarColors(
-                            containerColor = color,
-                            scrolledContainerColor = color,
-                        ),
-                        modifier = Modifier
-                            .statusBarsPadding(),
-                        title = {
-                            Column {
-                                Text(
-                                    text = title,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                if (subtitle.isNotEmpty()) {
-                                    Text(
-                                        text = subtitle,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                }
-                            }
-                        },
-                        navigationIcon = {
-                            ToolTipIconButton(
-                                toolTipLabel = navigationIconLabel,
-                                icon = navigationIcon,
-                                buttonClicked = onNavigationIconClicked,
-                            )
-                        },
-                        actions = actions,
-                        scrollBehavior = scrollBehavior,
-                    )
+                    TitleAndSubtitleTopAppBar(color, title, subtitle, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
                 }
             }
         },
@@ -143,6 +69,117 @@ fun NekoScaffold(
             content(paddingValues)
         }
     }
+}
+
+@Composable
+private fun TitleAndSubtitleTopAppBar(
+    color: Color,
+    title: String,
+    subtitle: String,
+    navigationIconLabel: String,
+    navigationIcon: ImageVector,
+    onNavigationIconClicked: () -> Unit,
+    actions: @Composable() (RowScope.() -> Unit),
+    scrollBehavior: TopAppBarScrollBehavior,
+) {
+    SmallTopAppBar(
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = color,
+            scrolledContainerColor = color,
+        ),
+        modifier = Modifier.statusBarsPadding(),
+        title = {
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (subtitle.isNotEmpty()) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        },
+        navigationIcon = {
+            ToolTipIconButton(
+                toolTipLabel = navigationIconLabel,
+                icon = navigationIcon,
+                buttonClicked = onNavigationIconClicked,
+            )
+        },
+        actions = actions,
+        scrollBehavior = scrollBehavior,
+    )
+}
+
+@Composable
+private fun NoTitleTopAppBar(
+    color: Color,
+    navigationIconLabel: String,
+    navigationIcon: ImageVector,
+    onNavigationIconClicked: () -> Unit,
+    actions: @Composable() (RowScope.() -> Unit),
+    scrollBehavior: TopAppBarScrollBehavior,
+) {
+    SmallTopAppBar(
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = color,
+            scrolledContainerColor = color,
+        ),
+        modifier = Modifier.statusBarsPadding(),
+        title = {},
+        navigationIcon = {
+            ToolTipIconButton(
+                toolTipLabel = navigationIconLabel,
+                icon = navigationIcon,
+                buttonClicked = onNavigationIconClicked,
+            )
+        },
+        actions = actions,
+        scrollBehavior = scrollBehavior,
+    )
+}
+
+@Composable
+private fun TitleOnlyTopAppBar(
+    color: Color,
+    title: String,
+    navigationIconLabel: String,
+    navigationIcon: ImageVector,
+    onNavigationIconClicked: () -> Unit,
+    actions: @Composable() (RowScope.() -> Unit),
+    scrollBehavior: TopAppBarScrollBehavior,
+) {
+    CenterAlignedTopAppBar(
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = color,
+            scrolledContainerColor = color,
+        ),
+        modifier = Modifier.statusBarsPadding(),
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
+        navigationIcon = {
+            ToolTipIconButton(
+                toolTipLabel = navigationIconLabel,
+                icon = navigationIcon,
+                buttonClicked = onNavigationIconClicked,
+            )
+        },
+        actions = actions,
+        scrollBehavior = scrollBehavior,
+    )
 }
 
 @Composable

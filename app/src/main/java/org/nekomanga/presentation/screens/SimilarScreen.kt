@@ -115,7 +115,6 @@ fun SimilarScreen(
 
                 val haptic = LocalHapticFeedback.current
 
-
                 SimilarContent(
                     similarScreenState = similarScreenState,
                     paddingValues = incomingPaddingValues,
