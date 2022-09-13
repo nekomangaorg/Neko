@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.FollowsScreen
 
 /**
- * Controller that shows the latest manga from the catalogue. Inherit [BrowseCatalogueController].
+ * Controller that shows the follows for a logged in MangaDex user
  */
 class FollowsController(bundle: Bundle? = null) : BaseComposeController<FollowsPresenter>() {
     override var presenter = FollowsPresenter()
