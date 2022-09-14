@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -116,9 +117,10 @@ class StatsPresenter(
                 _detailState.value = DetailedState(
                     isLoading = false,
                     manga = detailedStatMangaList.toImmutableList(),
+                    categories = (db.getCategories().executeAsBlocking().map { it.name } + listOf(prefs.context.getString(R.string.default_value))).toPersistentList(),
                     tags = detailedStatMangaList.asSequence().map { it.tags }.flatten().distinct().filter { !it.contains("content rating:", true) }.sortedBy { it }.toImmutableList(),
                 )
-
+                
                 val sortedSeries =
                     _detailState.value.tags.map { tag -> tag to _detailState.value.manga.filter { it.tags.contains(tag) }.toImmutableList() }.sortedByDescending { it.second.count() }.toImmutableList()
                 val totalCount = sortedSeries.sumOf { it.second.size }

@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.stats
 
 import android.content.Context
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -30,7 +30,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,27 +38,38 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
+import com.himanshoe.charty.common.axis.AxisConfig
+import com.himanshoe.charty.common.dimens.ChartDimens
+import com.himanshoe.charty.line.LineChart
+import com.himanshoe.charty.line.config.LineConfig
+import com.himanshoe.charty.line.model.LineData
 import com.himanshoe.charty.pie.PieChart
 import com.himanshoe.charty.pie.config.PieConfig
 import com.himanshoe.charty.pie.config.PieData
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
+import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedState
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 
 @Composable
-fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, colors: List<Color>, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
+fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
 
     var filterState by rememberSaveable { mutableStateOf(Filter.None) }
 
@@ -88,35 +98,14 @@ fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, colors: Li
             .fillMaxWidth()
             .padding(top = contentPadding.calculateTopPadding()),
     ) {
-        FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 4.dp, crossAxisSpacing = 4.dp) {
-            CustomChip(
-                isSelected = filterState == Filter.Type,
-                onClick = { filterStateClick(Filter.Type) },
-                label = R.string.series_type,
-            )
-            CustomChip(
-                isSelected = filterState == Filter.Status,
-                onClick = { filterStateClick(Filter.Status) },
-                label = R.string.status,
-            )
-            CustomChip(
-                isSelected = filterState == Filter.ContentRating,
-                onClick = { filterStateClick(Filter.ContentRating) },
-                label = R.string.content_rating_distribution,
-            )
-            CustomChip(
-                isSelected = filterState == Filter.Tag,
-                onClick = { filterStateClick(Filter.Tag) },
-                label = R.string.tag,
-            )
-        }
+        FilterChipHeader(filterState, filterStateClick)
 
         val context = LocalContext.current
 
 
         when (filterState) {
             Filter.None -> {
-                DetailedCardView(detailedStats.value.manga, contentPadding = contentPadding, splitScreen)
+                DetailedCardView(detailedStats.manga, contentPadding = contentPadding, splitScreen)
             }
             Filter.Type -> {
                 TypeView(sortType, detailedStats, context, colors, contentPadding, splitScreen, sortChipClick)
@@ -129,31 +118,78 @@ fun DetailedStats(detailedStats: State<StatsConstants.DetailedState>, colors: Li
             Filter.ContentRating -> {
                 ContentRatingView(sortType, detailedStats, colors, contentPadding, splitScreen, sortChipClick)
             }
+
+            Filter.Category -> {
+                CategoryView(sortType, detailedStats, colors, contentPadding, splitScreen, sortChipClick)
+            }
+
             Filter.Tag -> {
                 TagView(sortType, detailedStats, colors, contentPadding, splitScreen, sortChipClick)
+            }
+
+            Filter.StartYear -> {
+                StartYearView(detailedStats, colors, contentPadding, splitScreen)
             }
         }
     }
 }
 
 @Composable
+private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> Unit) {
+    FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 4.dp, crossAxisSpacing = 4.dp, crossAxisAlignment = FlowCrossAxisAlignment.Center) {
+        CustomChip(
+            isSelected = filterState == Filter.Type,
+            onClick = { filterStateClick(Filter.Type) },
+            label = R.string.series_type,
+        )
+        CustomChip(
+            isSelected = filterState == Filter.Status,
+            onClick = { filterStateClick(Filter.Status) },
+            label = R.string.status,
+        )
+        CustomChip(
+            isSelected = filterState == Filter.ContentRating,
+            onClick = { filterStateClick(Filter.ContentRating) },
+            label = R.string.content_rating_distribution,
+        )
+        CustomChip(
+            isSelected = filterState == Filter.Category,
+            onClick = { filterStateClick(Filter.Category) },
+            label = R.string.categories,
+        )
+        CustomChip(
+            isSelected = filterState == Filter.Tag,
+            onClick = { filterStateClick(Filter.Tag) },
+            label = R.string.tag,
+        )
+        /*  CustomChip(
+              isSelected = filterState == Filter.StartYear,
+              onClick = { filterStateClick(Filter.StartYear) },
+              label = R.string.start_year,
+          )*/
+    }
+}
+
+@Composable
 private fun TagView(
     sortType: Sort,
-    detailedStats: State<StatsConstants.DetailedState>,
-    colors: List<Color>,
+    detailedStats: DetailedState,
+    colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
     splitScreen: Boolean,
     sortChipClick: () -> Unit,
 ) {
-    val tagStats = detailedStats.value.detailTagState
+    val tagStats = detailedStats.detailTagState
     val sortedTagPairs = remember(sortType) {
+        tagStats.sortedTagPairs.map { it }
+
         tagStats.sortedTagPairs.sortedWith { t, t2 ->
             when (sortType) {
                 Sort.Entries -> t2.second.size.compareTo(t.second.size)
                 Sort.Chapters -> t2.second.sumOf { it.readChapters }.compareTo(t.second.sumOf { it.readChapters })
                 Sort.Duration -> t2.second.sumOf { it.readDuration }.compareTo(t.second.sumOf { it.readDuration })
             }
-        }
+        }.toPersistentList()
     }
     StatCardView(
         contentPadding = contentPadding,
@@ -163,22 +199,22 @@ private fun TagView(
         sortChipClick = sortChipClick,
         showSortChip = true,
         color = colors[0],
-        totalCount = detailedStats.value.detailTagState.totalChapters,
-        totalReadDuration = detailedStats.value.detailTagState.totalReadDuration,
+        totalCount = detailedStats.detailTagState.totalChapters,
+        totalReadDuration = detailedStats.detailTagState.totalReadDuration,
     )
 }
 
 @Composable
 private fun ContentRatingView(
     sortType: Sort,
-    detailedStats: State<StatsConstants.DetailedState>,
-    colors: List<Color>,
+    detailedStats: DetailedState,
+    colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
     splitScreen: Boolean,
     sortChipClick: () -> Unit,
 ) {
     val sortedSeries = remember(sortType) {
-        detailedStats.value.manga.groupBy { it.contentRating.prettyPrint() }.entries.sortedWith(mapEntryComparator(sortType))
+        detailedStats.manga.groupBy { it.contentRating.prettyPrint() }.entries.sortedWith(mapEntryComparator(sortType)).toPersistentList()
     }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -194,22 +230,86 @@ private fun ContentRatingView(
         colorMap = colorMap,
         totalCount = totalCount,
         totalDuration = totalDuration,
-        pieData = pieData,
-    )
+    ) { width ->
+        Pie(pieData = pieData, chartWidth = width)
+    }
+}
+
+@Composable
+private fun CategoryView(
+    sortType: Sort,
+    detailedStats: DetailedState,
+    colors: ImmutableList<Color>,
+    contentPadding: PaddingValues,
+    splitScreen: Boolean,
+    sortChipClick: () -> Unit,
+) {
+    val defaultCategoryName = stringResource(id = R.string.default_value)
+
+    val sortedSeries = remember(sortType) {
+        detailedStats.categories.associateWith { category ->
+            detailedStats.manga.filter { it.categories.contains(category) }
+        }.entries.filter { it.key != defaultCategoryName || it.value.isNotEmpty() }.sortedWith(mapEntryComparator(sortType)).toPersistentList()
+    }
+    val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
+    val totalCount = remember { sortedSeries.sumOf { it.value.size } }
+    val totalDuration = remember { sortedSeries.sumOf { values -> values.value.sumOf { it.readDuration } } }
+    val pieData = remember(sortType) { pieData(sortedSeries, colorMap, sortType) }
+
+    DefaultView(
+        contentPadding = contentPadding,
+        splitScreen = splitScreen,
+        sortType = sortType,
+        sortChipClick = sortChipClick,
+        sortedSeries = sortedSeries,
+        colorMap = colorMap,
+        totalCount = totalCount,
+        totalDuration = totalDuration,
+    ) { width ->
+        Pie(pieData = pieData, chartWidth = width)
+    }
+}
+
+@Composable
+private fun StartYearView(
+    detailedStats: DetailedState,
+    colors: ImmutableList<Color>,
+    contentPadding: PaddingValues,
+    splitScreen: Boolean,
+) {
+    val notStartedString = stringResource(id = R.string.not_started)
+    val sortedSeries = remember {
+        detailedStats.manga.groupBy { it.startYear?.toString() ?: notStartedString }.entries.sortedBy { it.key }.toPersistentList()
+    }
+    val lineData = remember {
+        sortedSeries.filter { it.key != notStartedString }.map { LineData(xValue = it.key, yValue = it.value.size.toFloat()) }.toPersistentList()
+    }
+    val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toImmutableMap() }
+
+
+    DefaultView(
+        contentPadding = contentPadding,
+        splitScreen = splitScreen,
+        colorMap = colorMap,
+        sortedSeries = sortedSeries,
+        showSortChip = false,
+    ) { width ->
+        Line(lineData = lineData, chartWidth = width, color = MaterialTheme.colorScheme.secondary)
+    }
 }
 
 @Composable
 private fun StatusView(
     sortType: Sort,
-    detailedStats: State<StatsConstants.DetailedState>,
+    detailedStats: DetailedState,
     context: Context,
-    colors: List<Color>,
+    colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
     splitScreen: Boolean,
     sortChipClick: () -> Unit,
 ) {
     val sortedSeries = remember(sortType) {
-        detailedStats.value.manga.groupBy { context.getString(it.status.statusRes) }.entries.sortedWith(mapEntryComparator(sortType))
+        detailedStats.manga.groupBy { context.getString(it.status.statusRes) }.entries.sortedWith(mapEntryComparator(sortType)).toPersistentList()
     }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -225,22 +325,23 @@ private fun StatusView(
         colorMap = colorMap,
         totalCount = totalCount,
         totalDuration = totalDuration,
-        pieData = pieData,
-    )
+    ) { width ->
+        Pie(pieData = pieData, chartWidth = width)
+    }
 }
 
 @Composable
 private fun TypeView(
     sortType: Sort,
-    detailedStats: State<StatsConstants.DetailedState>,
+    detailedStats: DetailedState,
     context: Context,
-    colors: List<Color>,
+    colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
     splitScreen: Boolean,
     sortChipClick: () -> Unit,
 ) {
     val sortedSeries = remember(sortType) {
-        detailedStats.value.manga.groupBy { context.getString(it.type.typeRes) }.entries.sortedWith(mapEntryComparator(sortType))
+        detailedStats.manga.groupBy { context.getString(it.type.typeRes) }.entries.sortedWith(mapEntryComparator(sortType)).toPersistentList()
     }
     val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
@@ -256,21 +357,23 @@ private fun TypeView(
         colorMap = colorMap,
         totalCount = totalCount,
         totalDuration = totalDuration,
-        pieData = pieData,
-    )
+    ) { width ->
+        Pie(pieData = pieData, chartWidth = width)
+    }
 }
 
 @Composable
 private fun DefaultView(
     contentPadding: PaddingValues,
-    sortType: Sort,
-    sortChipClick: () -> Unit,
-    sortedSeries: List<Map.Entry<String, List<StatsConstants.DetailedStatManga>>>,
-    colorMap: Map<String, Color>,
-    totalCount: Int,
-    totalDuration: Long,
-    pieData: List<PieData>,
+    sortType: Sort = Sort.Entries,
+    sortChipClick: () -> Unit = {},
+    sortedSeries: ImmutableList<Map.Entry<String, List<StatsConstants.DetailedStatManga>>>,
+    colorMap: ImmutableMap<String, Color>,
+    totalCount: Int = 0,
+    totalDuration: Long = 0L,
     splitScreen: Boolean,
+    showSortChip: Boolean = true,
+    graph: @Composable (width: Float) -> Unit,
 ) {
 
     val chartWidth = when (splitScreen) {
@@ -279,11 +382,13 @@ private fun DefaultView(
     }
 
     LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())) {
-
-        if (splitScreen) {
+        if (showSortChip) {
             item {
                 SortChip(sortType = sortType, onClick = sortChipClick)
             }
+        }
+
+        if (splitScreen) {
 
             item {
                 Row(
@@ -293,7 +398,7 @@ private fun DefaultView(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Pie(pieData = pieData, chartWidth = chartWidth)
+                    graph(chartWidth)
                     Column(
                         Modifier
                             .fillMaxWidth(.9f)
@@ -315,7 +420,10 @@ private fun DefaultView(
                 }
             }
         } else {
-            item { Pie(pieData = pieData, chartWidth = chartWidth) }
+
+            item {
+                graph(chartWidth)
+            }
             items(sortedSeries, key = { it.key }) { entry ->
                 StatCard(
                     header = entry.key,
@@ -354,7 +462,7 @@ private fun DetailedCardView(mangaList: ImmutableList<StatsConstants.DetailedSta
 private fun StatCardView(
     contentPadding: PaddingValues,
     splitScreen: Boolean,
-    sortedSeries: List<Pair<String, List<StatsConstants.DetailedStatManga>>>,
+    sortedSeries: ImmutableList<Pair<String, ImmutableList<StatsConstants.DetailedStatManga>>>,
     color: Color,
     totalCount: Int,
     totalReadDuration: Long,
@@ -510,9 +618,50 @@ private fun Pie(pieData: List<PieData>, chartWidth: Float) {
         if (pieData.isNotEmpty()) {
             PieChart(
                 modifier = Modifier
+                    .fillMaxWidth(),
+                pieData = pieData, config = PieConfig(isDonut = false, expandDonutOnClick = false),
+            )
+        } else {
+            Text(
+                text = stringResource(id = R.string.no_data_to_show_in_chart),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White),
-                pieData = pieData, config = PieConfig(isDonut = false, expandDonutOnClick = true),
+                    .padding(vertical = 12.dp),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
+private fun Line(lineData: List<LineData>, chartWidth: Float, color: Color) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 0.dp)
+            .fillMaxWidth(chartWidth),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (lineData.isNotEmpty()) {
+            val height = LocalConfiguration.current.screenHeightDp / 3
+
+            LineChart(
+                lineData = lineData,
+                color = color,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(height.dp)
+                    .padding(16.dp),
+                chartDimens = ChartDimens(8.dp),
+                axisConfig = AxisConfig(
+                    showAxis = true,
+                    isAxisDashed = false,
+                    showUnitLabels = true,
+                    showXLabels = true,
+                    xAxisColor = MaterialTheme.colorScheme.onSurface,
+                    yAxisColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                lineConfig = LineConfig(hasSmoothCurve = false, hasDotMarker = true),
             )
         } else {
             Text(
@@ -602,11 +751,11 @@ private fun <T : Comparable<T>> mapEntryComparator(sortType: Sort) = Comparator<
 /**
  * Creates the color map using the unique key so changing sort order doesnt change the color
  */
-private fun <T> colorMap(sortedSeries: List<T>, colors: List<Color>): Map<T, Color> {
-    return sortedSeries.mapIndexed { index, T -> T to colors[index] }.toMap()
+private fun <T> colorMap(sortedSeries: List<T>, colors: List<Color>): ImmutableMap<T, Color> {
+    return sortedSeries.mapIndexed { index, T -> T to colors[index] }.toMap().toImmutableMap()
 }
 
-private fun <T> pieData(sortedSeries: List<Map.Entry<T, List<StatsConstants.DetailedStatManga>>>, colorMap: Map<T, Color>, sortType: Sort): List<PieData> {
+private fun <T> pieData(sortedSeries: ImmutableList<Map.Entry<T, List<StatsConstants.DetailedStatManga>>>, colorMap: ImmutableMap<T, Color>, sortType: Sort): ImmutableList<PieData> {
     return sortedSeries.mapNotNull { entry ->
         val data = when (sortType) {
             Sort.Entries -> entry.value.size
@@ -618,7 +767,7 @@ private fun <T> pieData(sortedSeries: List<Map.Entry<T, List<StatsConstants.Deta
         } else {
             null
         }
-    }
+    }.toPersistentList()
 }
 
 private enum class Filter {
@@ -626,7 +775,9 @@ private enum class Filter {
     Type,
     Status,
     ContentRating,
+    Category,
     Tag,
+    StartYear,
 }
 
 private enum class Sort(@StringRes val stringRes: Int) {

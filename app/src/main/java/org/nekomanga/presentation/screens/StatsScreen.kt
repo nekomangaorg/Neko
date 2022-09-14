@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Detailed
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.screens.stats.DetailedStats
@@ -35,7 +36,7 @@ fun StatsScreen(
     windowSizeClass: WindowSizeClass,
 ) {
     val colors = remember {
-        arrayListOf(
+        persistentListOf(
             ChartColors.one,
             ChartColors.two,
             ChartColors.three,
@@ -90,9 +91,9 @@ fun StatsScreen(
             }
         } else {
             if (isSimple) {
-                SimpleStats(statsState = statsState, contentPadding = incomingPaddingValues, windowSizeClass = windowSizeClass)
+                SimpleStats(statsState = statsState.value, contentPadding = incomingPaddingValues, windowSizeClass = windowSizeClass)
             } else {
-                DetailedStats(detailedStats = detailedState, colors = colors, contentPadding = incomingPaddingValues, windowSizeClass = windowSizeClass)
+                DetailedStats(detailedStats = detailedState.value, colors = colors, contentPadding = incomingPaddingValues, windowSizeClass = windowSizeClass)
             }
         }
     }
