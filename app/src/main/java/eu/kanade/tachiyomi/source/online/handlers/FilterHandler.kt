@@ -5,15 +5,17 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaTag
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
 class FilterHandler {
 
     val preferencesHelper: PreferencesHelper by injectLazy()
-
+    
     internal fun getMDFilterList(): FilterList {
         val filters = mutableListOf(
+            HasAvailableChaptersFilter("Has available chapters"),
             OriginalLanguageList(getOriginalLanguage()),
             DemographicList(getDemographics()),
             StatusList(getStatus()),
@@ -45,6 +47,8 @@ class FilterHandler {
 
         return FilterList(list = filters.toList())
     }
+
+    private class HasAvailableChaptersFilter(hasAvailableChapters: String) : Filter.CheckBox(hasAvailableChapters)
 
     private class Demographic(name: String) : Filter.CheckBox(name)
     private class DemographicList(demographics: List<Demographic>) :
@@ -115,12 +119,18 @@ class FilterHandler {
         val statusList = mutableListOf<String>() // status[]
         val includeTagList = mutableListOf<String>() // includedTags[]
         val excludeTagList = mutableListOf<String>() // excludedTags[]
+        val hasAvailableChapterLangs = mutableListOf<String>()// availableTranslatedLanguage[]
 
         // if (filters.fin)
 
         // add filters
         filters.forEach { filter ->
             when (filter) {
+                is HasAvailableChaptersFilter -> {
+                    if (filter.state) {
+                        hasAvailableChapterLangs += MdUtil.getLangsToShow(preferencesHelper)
+                    }
+                }
                 is OriginalLanguageList -> {
                     filter.state.filter { lang -> lang.state }
                         .forEach { lang ->
@@ -177,6 +187,10 @@ class FilterHandler {
                 }
                 else -> Unit
             }
+        }
+        if (hasAvailableChapterLangs.isNotEmpty()) {
+            queryMap["hasAvailableChapters"] = true
+            queryMap["availableTranslatedLanguage[]"] = hasAvailableChapterLangs
         }
         if (originalLanguageList.isNotEmpty()) {
             queryMap["originalLanguage[]"] = originalLanguageList
