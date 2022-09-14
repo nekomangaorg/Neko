@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.source.online
 
+import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.andThen
 import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.suspendOnFailure
-import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -21,12 +21,11 @@ import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.source.online.utils.toSourceManga
+import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
@@ -60,16 +59,17 @@ open class MangaDex : HttpSource() {
         return followsHandler.updateFollowStatus(mangaID, followStatus)
     }
 
-    fun getRandomManga(): Flow<SManga?> {
-        return flow {
-            network.service.randomManga(preferences.contentRatingSelections().toList())
-                .suspendOnSuccess {
-                    emit(this.data.data.toBasicManga(preferences.thumbnailQuality(), useNoCoverUrl = false))
-                }.suspendOnFailure {
-                    this.log("trying to get random manga")
-                    emit(null)
+    suspend fun getRandomManga(): Result<SourceManga, ResultError> {
+        return withIOContext {
+            val response = network.service.randomManga(preferences.contentRatingSelections().toList())
+
+            val result = response.getOrResultError("trying to get random Manga")
+                .andThen {
+                    Ok(it.data.toSourceManga(preferences.thumbnailQuality(), useNoCoverUrl = false))
                 }
-        }.flowOn(Dispatchers.IO)
+            
+            return@withIOContext result
+        }
     }
 
     suspend fun getArtwork(mangaId: Long, mangaUUID: String): List<ArtworkImpl> {

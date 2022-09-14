@@ -1,7 +1,12 @@
 package eu.kanade.tachiyomi.util
 
 import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.skydoves.sandwich.ApiResponse
+import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.onSuccess
 import eu.kanade.tachiyomi.source.online.models.dto.ErrorResponse
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -30,6 +35,23 @@ fun ApiResponse.Failure.Error<*>.toResultError(errorType: String): ResultError {
     }
 
     return ResultError.HttpError(this.statusCode.code, error)
+}
+
+fun ApiResponse.Failure<*>.toResultError(errorType: String): ResultError {
+    return when (this) {
+        is ApiResponse.Failure.Error -> this.toResultError(errorType)
+        is ApiResponse.Failure.Exception -> this.toResultError(errorType)
+    }
+}
+
+fun <T> ApiResponse<T>.getOrResultError(errorType: String): Result<T, ResultError> {
+    var result: Result<T, ResultError> = Err(ResultError.Generic(errorString = "Unknown Error"))
+    this.onFailure {
+        result = Err(this.toResultError(errorType))
+    }.onSuccess {
+        result = Ok(this.data)
+    }
+    return result
 }
 
 /**

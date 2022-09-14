@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -363,12 +365,11 @@ open class BrowseSourceController(bundle: Bundle) :
                 sheet.dismiss()
                 showProgressBar()
                 adapter?.clear()
-                presenter.searchRandomManga().collect { manga ->
-                    if (manga == null) {
-                        onAddPageError(Exception("Error opening random manga"))
-                    } else {
-                        openManga(manga)
-                    }
+                val result = presenter.searchRandomManga()
+                result.onSuccess {
+                    openManga(it.mangaId)
+                }.onFailure {
+                    onAddPageError(Exception("Error opening random manga"))
                 }
             }
         }
@@ -699,7 +700,14 @@ open class BrowseSourceController(bundle: Bundle) :
      * opens a manga
      */
     private fun openManga(manga: Manga) {
-        router.pushController(MangaDetailController(manga.id!!).withFadeTransaction())
+        openManga(manga.id!!)
+    }
+
+    /**
+     * opens a manga
+     */
+    private fun openManga(mangaId: Long) {
+        router.pushController(MangaDetailController(mangaId).withFadeTransaction())
     }
 
     /**
