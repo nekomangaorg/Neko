@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +31,7 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
-fun SimpleStats(statsState: State<StatsConstants.SimpleState>, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
+fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
 
     val na = stringResource(id = R.string.n_a)
 
@@ -42,28 +41,28 @@ fun SimpleStats(statsState: State<StatsConstants.SimpleState>, contentPadding: P
 
     val stats = remember {
 
-        val userScore = when (statsState.value.averageUserRating == 0.0) {
+        val userScore = when (statsState.averageUserRating == 0.0) {
             true -> na
-            false -> statsState.value.averageUserRating.toString()
+            false -> statsState.averageUserRating.toString()
         }
-        val libUpdates = when (statsState.value.lastLibraryUpdate.isEmpty()) {
+        val libUpdates = when (statsState.lastLibraryUpdate.isEmpty()) {
             true -> na
-            false -> statsState.value.lastLibraryUpdate
+            false -> statsState.lastLibraryUpdate
         }
 
         listOf(
-            numberFormat.format(statsState.value.mangaCount).toString() to context.getString(R.string.total_manga),
-            numberFormat.format(statsState.value.chapterCount).toString() to context.getString(R.string.total_chapters),
-            numberFormat.format(statsState.value.readCount).toString() to context.getString(R.string.chapters_read),
-            statsState.value.readDuration to context.getString(R.string.read_duration),
+            numberFormat.format(statsState.mangaCount).toString() to context.getString(R.string.total_manga),
+            numberFormat.format(statsState.chapterCount).toString() to context.getString(R.string.total_chapters),
+            numberFormat.format(statsState.readCount).toString() to context.getString(R.string.chapters_read),
+            statsState.readDuration to context.getString(R.string.read_duration),
             libUpdates to context.getString(R.string.last_library_update),
-            numberFormat.format(statsState.value.globalUpdateCount).toString() to context.getString(R.string.global_update_manga),
-            statsState.value.averageMangaRating.toString() to context.getString(R.string.average_score),
+            numberFormat.format(statsState.globalUpdateCount).toString() to context.getString(R.string.global_update_manga),
+            statsState.averageMangaRating.toString() to context.getString(R.string.average_score),
             userScore to context.getString(R.string.mean_score),
-            statsState.value.trackerCount.toString() to context.getString(R.string.trackers),
-            numberFormat.format(statsState.value.trackedCount).toString() to context.getString(R.string.manga_tracked),
-            numberFormat.format(statsState.value.tagCount).toString() to context.getString(R.string.tags),
-            numberFormat.format(statsState.value.mergeCount).toString() to context.getString(R.string.merged),
+            statsState.trackerCount.toString() to context.getString(R.string.trackers),
+            numberFormat.format(statsState.trackedCount).toString() to context.getString(R.string.manga_tracked),
+            numberFormat.format(statsState.tagCount).toString() to context.getString(R.string.tags),
+            numberFormat.format(statsState.mergeCount).toString() to context.getString(R.string.merged),
         ).toImmutableList()
     }
 
