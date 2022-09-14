@@ -80,7 +80,7 @@ open class MangaDex : HttpSource() {
         return searchHandler.search(page, query, filters)
     }
 
-    suspend fun latestChapters(page: Int): MangaListPage {
+    suspend fun latestChapters(page: Int): Result<MangaListPage, ResultError> {
         return latestChapterHandler.getPage(page)
     }
 

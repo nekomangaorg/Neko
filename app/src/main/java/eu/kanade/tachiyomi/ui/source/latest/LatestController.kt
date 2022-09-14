@@ -23,6 +23,7 @@ class LatestController(bundle: Bundle? = null) :
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
             loadNextPage = presenter::loadNextItems,
+            retryClick = presenter::loadNextItems,
         )
     }
 }

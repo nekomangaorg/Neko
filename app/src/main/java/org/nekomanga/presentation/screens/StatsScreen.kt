@@ -87,7 +87,7 @@ fun StatsScreen(
                     .padding(top = incomingPaddingValues.calculateTopPadding(), start = 16.dp, end = 16.dp),
                 contentAlignment = Alignment.BottomCenter,
             ) {
-                IconicsEmptyScreen(iconicImage = CommunityMaterial.Icon2.cmd_heart_off, iconSize = 128.dp, message = stringResource(id = R.string.unable_to_generate_stats))
+                EmptyScreen(iconicImage = CommunityMaterial.Icon2.cmd_heart_off, iconSize = 128.dp, message = stringResource(id = R.string.unable_to_generate_stats))
             }
         } else {
             if (isSimple) {
