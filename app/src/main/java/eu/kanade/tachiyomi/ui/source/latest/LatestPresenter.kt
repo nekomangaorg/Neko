@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.network.ResultError
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -51,9 +52,15 @@ class LatestPresenter(
         getNextKey = {
             _latestScreenState.value.page + 1
         },
-        onError = { throwable ->
+        onError = { resultError ->
             _latestScreenState.update {
-                it.copy(isLoading = false, error = throwable?.localizedMessage)
+                it.copy(
+                    isLoading = false,
+                    error = when (resultError) {
+                        is ResultError.Generic -> resultError.errorString
+                        else -> (resultError as ResultError.HttpError).message
+                    },
+                )
             }
         },
         onSuccess = { hasNexPage, items, newKey ->

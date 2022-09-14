@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.follows.FollowsScreenState
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
@@ -98,11 +99,11 @@ fun FollowsScreen(
             if (followsScreenState.value.isLoading) {
                 LoadingScreen(incomingPaddingValues)
             } else if (followsScreenState.value.error != null) {
-                IconsEmptyScreen(
+                EmptyScreen(
                     icon = Icons.Default.ErrorOutline,
                     iconSize = 176.dp,
                     message = followsScreenState.value.error,
-                    actions = listOf(Action(R.string.retry, retryClick)),
+                    actions = persistentListOf(Action(R.string.retry, retryClick)),
                 )
             } else {
 
@@ -137,7 +138,7 @@ private fun FollowsContent(
     mangaLongClick: (DisplayManga) -> Unit,
 ) {
     if (followsScreenState.value.displayManga.isEmpty()) {
-        IconicsEmptyScreen(
+        EmptyScreen(
             iconicImage = CommunityMaterial.Icon.cmd_compass_off,
             iconSize = 176.dp,
             message = stringResource(id = R.string.no_results_found),

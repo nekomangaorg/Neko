@@ -33,6 +33,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
@@ -148,11 +149,11 @@ private fun SimilarContent(
 ) {
     if (!similarScreenState.value.isRefreshing) {
         if (similarScreenState.value.displayManga.isEmpty()) {
-            IconicsEmptyScreen(
+            EmptyScreen(
                 iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                 iconSize = 176.dp,
                 message = stringResource(id = R.string.no_results_found),
-                actions = listOf(Action(R.string.retry, refreshing)),
+                actions = persistentListOf(Action(R.string.retry, refreshing)),
             )
         } else {
             val contentPadding = PaddingValues(

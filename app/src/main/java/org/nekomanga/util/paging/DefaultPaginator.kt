@@ -1,11 +1,16 @@
 package org.nekomanga.util.paging
 
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
+import org.nekomanga.domain.network.ResultError
+
 class DefaultPaginator<Key, Item>(
     private val initialKey: Key,
     private inline val onLoadUpdated: (Boolean) -> Unit,
-    private inline val onRequest: suspend (nextKey: Key) -> Result<Pair<Boolean, List<Item>>>,
+    private inline val onRequest: suspend (nextKey: Key) -> Result<Pair<Boolean, List<Item>>, ResultError>,
     private inline val getNextKey: suspend (List<Item>) -> Key,
-    private inline val onError: suspend (Throwable?) -> Unit,
+    private inline val onError: suspend (ResultError?) -> Unit,
     private inline val onSuccess: suspend (hasNextPage: Boolean, items: List<Item>, newKey: Key) -> Unit,
 ) : Paginator<Key, Item> {
 
@@ -20,15 +25,14 @@ class DefaultPaginator<Key, Item>(
         val result = onRequest(currentKey)
         isMakingRequest = false
 
-        val (hasNextPage, items) = result.getOrElse {
+        result.onSuccess { (hasNextPage, items) ->
+            currentKey = getNextKey(items)
+            onSuccess(hasNextPage, items, currentKey)
+            onLoadUpdated(false)
+        }.onFailure {
             onError(it)
             onLoadUpdated(false)
-            return
         }
-
-        currentKey = getNextKey(items)
-        onSuccess(hasNextPage, items, currentKey)
-        onLoadUpdated(false)
     }
 
     override fun reset() {

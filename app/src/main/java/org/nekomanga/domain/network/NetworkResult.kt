@@ -8,4 +8,8 @@ import androidx.annotation.StringRes
 
 sealed interface ResultError {
     data class Generic(val errorString: String = "", @StringRes val errorRes: Int = -1) : ResultError
+    data class HttpError(val httpCode: Int, val message: String) : ResultError
 }
+
+
+
