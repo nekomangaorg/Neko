@@ -12,7 +12,7 @@ import java.util.Locale
 class FilterHandler {
 
     val preferencesHelper: PreferencesHelper by injectLazy()
-    
+
     internal fun getMDFilterList(): FilterList {
         val filters = mutableListOf(
             HasAvailableChaptersFilter("Has available chapters"),
@@ -99,7 +99,7 @@ class FilterHandler {
         Filter.Select<String>("Excluded tags mode", arrayOf("And", "Or"), 1)
 
     val sortableList = listOf(
-        Pair("Latest Uploaded chapter (Any language)", ""),
+        Pair("Latest Uploaded chapter (Any language)", "latestUploadedChapter"),
         Pair("Relevance", "relevance"),
         Pair("Number of follows", "followedCount"),
         Pair("Created at", "createdAt"),
@@ -120,8 +120,6 @@ class FilterHandler {
         val includeTagList = mutableListOf<String>() // includedTags[]
         val excludeTagList = mutableListOf<String>() // excludedTags[]
         val hasAvailableChapterLangs = mutableListOf<String>()// availableTranslatedLanguage[]
-
-        // if (filters.fin)
 
         // add filters
         filters.forEach { filter ->
@@ -159,7 +157,7 @@ class FilterHandler {
                         }
                 }
                 is SortFilter -> {
-                    if (filter.state != null && filter.state!!.index != 0) {
+                    if (filter.state != null) {
                         val query = sortableList[filter.state!!.index].second
                         val value = when (filter.state!!.ascending) {
                             true -> "asc"
