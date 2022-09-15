@@ -24,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.network.message
 import org.nekomanga.presentation.components.ListGridActionButton
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
@@ -99,10 +101,11 @@ fun FollowsScreen(
             if (followsScreenState.value.isLoading) {
                 LoadingScreen(incomingPaddingValues)
             } else if (followsScreenState.value.error != null) {
+                val message = followsScreenState.value.error!!.message(LocalContext.current)
                 EmptyScreen(
                     icon = Icons.Default.ErrorOutline,
                     iconSize = 176.dp,
-                    message = followsScreenState.value.error,
+                    message = message,
                     actions = persistentListOf(Action(R.string.retry, retryClick)),
                 )
             } else {

@@ -39,9 +39,8 @@ class LatestChapterHandler {
 
             val contentRatings = preferencesHelper.contentRatingSelections().toList()
 
-            val response = service.latestChapters(limit, offset, langs, contentRatings)
-
-            return@withContext response.getOrResultError("getting latest chapters")
+            return@withContext service.latestChapters(limit, offset, langs, contentRatings)
+                .getOrResultError("getting latest chapters")
                 .andThen {
                     latestChapterParse(it)
                 }

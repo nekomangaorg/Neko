@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi.ui.follows
 
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.get
-import com.github.michaelbull.result.getError
+import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
@@ -23,15 +21,13 @@ class FollowsRepository {
     private val db: DatabaseHelper = Injekt.get()
 
     suspend fun fetchFollows(): Result<ImmutableMap<Int, ImmutableList<DisplayManga>>, ResultError> {
-        val result = mangaDex.fetchAllFollows()
-        result.getError()?.let {
-            return Err(it)
-        }
-
-        return Ok(
-            result.get()!!.entries.map { entry ->
-                entry.key to entry.value.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList()
-            }.toMap().toImmutableMap(),
-        )
+        return mangaDex.fetchAllFollows()
+            .andThen { sourceMap ->
+                Ok(
+                    sourceMap.entries.associate { entry ->
+                        entry.key to entry.value.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList()
+                    }.toImmutableMap(),
+                )
+            }
     }
 }

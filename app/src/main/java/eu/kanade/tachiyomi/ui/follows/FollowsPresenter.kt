@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
-import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
@@ -79,7 +78,7 @@ class FollowsPresenter(
             val result = repo.fetchFollows()
             result.onFailure { resultError ->
                 _followsScreenState.update {
-                    it.copy(isLoading = false, error = (resultError as? ResultError.Generic)?.errorString ?: "Error getting follows")
+                    it.copy(isLoading = false, error = resultError)
                 }
             }.onSuccess { displayManga ->
                 _followsScreenState.update {

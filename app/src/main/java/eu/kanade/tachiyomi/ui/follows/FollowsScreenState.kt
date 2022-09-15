@@ -6,11 +6,12 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.network.ResultError
 
 data class FollowsScreenState(
     val isLoading: Boolean,
     val displayManga: ImmutableMap<Int, ImmutableList<DisplayManga>> = persistentMapOf(),
-    val error: String? = null,
+    val error: ResultError? = null,
     val isList: Boolean,
     val outlineCovers: Boolean,
     val isComfortableGrid: Boolean,
