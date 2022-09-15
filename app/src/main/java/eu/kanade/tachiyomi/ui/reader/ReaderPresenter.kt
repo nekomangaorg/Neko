@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Environment
 import androidx.annotation.ColorInt
 import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.onSuccess
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -348,26 +349,30 @@ class ReaderPresenter(
                 title = ""
             }
             )
-        val (networkManga, chapters) = mangaDex.fetchMangaAndChapterDetails(tempManga)
+        mangaDex.fetchMangaAndChapterDetails(tempManga, false).onSuccess {
+            val networkManga = it.sManga!!
+            val chapters = it.sChapters
 
-        tempManga.copyFrom(networkManga)
-        tempManga.title = networkManga.title
 
-        db.insertManga(tempManga).executeAsBlocking()
-        val manga = db.getMangadexManga(tempManga.url).executeAsBlocking()!!
+            tempManga.copyFrom(networkManga)
+            tempManga.title = networkManga.title
 
-        XLog.d("tempManga id ${tempManga.id}")
-        XLog.d("Manga id ${manga.id}")
+            db.insertManga(tempManga).executeAsBlocking()
+            val manga = db.getMangadexManga(tempManga.url).executeAsBlocking()!!
 
-        if (chapters.isNotEmpty()) {
-            val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
-            val currentChapter = newChapters.find { it.url == MdUtil.chapterSuffix + urlChapterId }
-            if (currentChapter?.id != null) {
-                withContext(Dispatchers.Main) {
-                    init(manga, currentChapter.id!!)
+            XLog.d("tempManga id ${tempManga.id}")
+            XLog.d("Manga id ${manga.id}")
+
+            if (chapters.isNotEmpty()) {
+                val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
+                val currentChapter = newChapters.find { it.url == MdUtil.chapterSuffix + urlChapterId }
+                if (currentChapter?.id != null) {
+                    withContext(Dispatchers.Main) {
+                        init(manga, currentChapter.id!!)
+                    }
+                } else {
+                    throw Exception("Chapter not found")
                 }
-            } else {
-                throw Exception("Chapter not found")
             }
         }
     }

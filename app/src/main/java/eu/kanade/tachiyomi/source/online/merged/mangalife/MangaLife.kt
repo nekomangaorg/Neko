@@ -1,5 +1,8 @@
 package eu.kanade.tachiyomi.source.online.merged.mangalife
 
+import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
@@ -8,6 +11,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.util.asJsoup
+import eu.kanade.tachiyomi.util.lang.toResultError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -15,6 +19,7 @@ import kotlinx.serialization.json.Json
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import okhttp3.Response
 import org.jsoup.nodes.Document
+import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -59,58 +64,63 @@ class MangaLife : ReducedHttpSource() {
         }
     }
 
-    suspend fun fetchChapters(mergeMangaUrl: String): List<SChapter> {
+    suspend fun fetchChapters(mergeMangaUrl: String): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
-            val response = client.newCall(GET("$baseUrl$mergeMangaUrl", headers)).await()
-            val vmChapters =
-                response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
-                    .substringAfter("vm.Chapters = ").substringBefore(";")
+            com.github.michaelbull.result.runCatching {
 
-            val mangaLifeChapters = json.decodeFromString<List<MangaLifeChapterDto>>(vmChapters)
+                val response = client.newCall(GET("$baseUrl$mergeMangaUrl", headers)).await()
+                val vmChapters =
+                    response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
+                        .substringAfter("vm.Chapters = ").substringBefore(";")
 
-            mangaLifeChapters.map { chp ->
-                SChapter.create().apply {
-                    name = when (chp.chapterName == null || chp.chapterName.isEmpty()) {
-                        true -> "${chp.type} ${chapterImage(chp.chapter, true)}"
-                        false -> chp.chapterName
-                    }
+                val mangaLifeChapters = json.decodeFromString<List<MangaLifeChapterDto>>(vmChapters)
 
-                    //get the seasons
-                    val season1 = name.substringAfter("Volume ", "")
-                    val season2 = name.substringBefore(" - Chapter", "").substringAfter("S")
-                    if (season1.isNotEmpty() && season2.isEmpty()) {
-                        vol = season1
-                    } else if (season2.isNotEmpty()) {
-                        vol = season2
-                    }
+                mangaLifeChapters.map { chp ->
+                    SChapter.create().apply {
+                        name = when (chp.chapterName == null || chp.chapterName.isEmpty()) {
+                            true -> "${chp.type} ${chapterImage(chp.chapter, true)}"
+                            false -> chp.chapterName
+                        }
 
-                    //set the chapter text
-                    if (chp.type != "Volume") {
-                        val splitName = name.substringAfter(" - Chapter").split(" ")
-                        for (split in splitName) {
-                            val splitFloat = split.toFloatOrNull()
-                            if (splitFloat != null) {
-                                chapter_txt = splitFloat.toString()
-                                break
+                        //get the seasons
+                        val season1 = name.substringAfter("Volume ", "")
+                        val season2 = name.substringBefore(" - Chapter", "").substringAfter("S")
+                        if (season1.isNotEmpty() && season2.isEmpty()) {
+                            vol = season1
+                        } else if (season2.isNotEmpty()) {
+                            vol = season2
+                        }
+
+                        //set the chapter text
+                        if (chp.type != "Volume") {
+                            val splitName = name.substringAfter(" - Chapter").split(" ")
+                            for (split in splitName) {
+                                val splitFloat = split.toFloatOrNull()
+                                if (splitFloat != null) {
+                                    chapter_txt = splitFloat.toString()
+                                    break
+                                }
                             }
                         }
+
+                        url = "/read-online/" + response.request.url.toString()
+                            .substringAfter("/manga/") + chapterURLEncode(chp.chapter)
+                        mangadex_chapter_id = url.substringAfter("/read-online/")
+                        date_upload = runCatching {
+                            when (chp.date.isEmpty()) {
+                                true -> 0L
+                                false -> dateFormat.parse("$chp.date +0600")?.time!!
+                            }
+                        }.getOrElse { 0L }
+
+
+                        scanlator = this@MangaLife.name
                     }
-
-                    url = "/read-online/" + response.request.url.toString()
-                        .substringAfter("/manga/") + chapterURLEncode(chp.chapter)
-                    mangadex_chapter_id = url.substringAfter("/read-online/")
-                    date_upload = runCatching {
-                        when (chp.date.isEmpty()) {
-                            true -> 0L
-                            false -> dateFormat.parse("$chp.date +0600")?.time!!
-                        }
-                    }.getOrElse { 0L }
-
-
-                    scanlator = this@MangaLife.name
-                }
-            }.asReversed()
-
+                }.asReversed()
+            }.mapError {
+                XLog.e(it)
+                "Unknown Exception with merge".toResultError()
+            }
         }
     }
 

@@ -2,6 +2,9 @@ package eu.kanade.tachiyomi.ui.manga
 
 import androidx.core.text.isDigitsOnly
 import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -18,7 +21,6 @@ import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -87,38 +89,40 @@ class MangaUpdateCoordinator {
      */
     private fun ProducerScope<MangaResult>.startMangaJob(scope: CoroutineScope, manga: Manga): Job {
         return scope.launchIO {
-            runCatching {
-                withIOContext {
-                    val artwork = mangaDex.getArtwork(manga.id!!, manga.uuid())
-                    db.deleteArtworkForManga(manga).executeOnIO()
-                    db.insertArtWorkList(artwork).executeOnIO()
-                    send(MangaResult.UpdatedArtwork)
-
-                }
-                mangaDex.getMangaDetails(manga)
-            }.onFailure { e ->
-                XLog.e("error with mangadex getting manga", e)
-                send(MangaResult.Error(text = "Error getting manga from MangaDex"))
-                cancel()
-            }.onSuccess { resultingManga ->
-                val originalThumbnail = manga.thumbnail_url
-
-                resultingManga.let { networkManga ->
-                    manga.copyFrom(networkManga)
-                    manga.initialized = true
-                    //This clears custom titles from j2k/sy and if MangaDex removes the title
-                    manga.user_title?.let { customTitle ->
-                        if (customTitle != manga.originalTitle && customTitle !in manga.getAltTitles()) {
-                            manga.user_title = null
+            mangaDex.getMangaDetails(manga.uuid())
+                .onFailure {
+                    send(MangaResult.Error(text = "Error getting manga from MangaDex"))
+                    cancel()
+                }.onSuccess {
+                    val resultingManga = it.first
+                    val artwork = it.second
+                    if (artwork.isNotEmpty()) {
+                        artwork.map { art -> art.toArtworkImpl(manga.id!!) }.let { transformedArtwork ->
+                            db.deleteArtworkForManga(manga).executeOnIO()
+                            db.insertArtWorkList(transformedArtwork).executeOnIO()
+                            send(MangaResult.UpdatedArtwork)
                         }
                     }
-                    if (networkManga.thumbnail_url != null && networkManga.thumbnail_url != originalThumbnail) {
-                        coverCache.deleteFromCache(originalThumbnail, manga.favorite)
+
+                    val originalThumbnail = manga.thumbnail_url
+
+                    resultingManga.let { networkManga ->
+                        manga.copyFrom(networkManga)
+                        manga.initialized = true
+                        //This clears custom titles from j2k/sy and if MangaDex removes the title
+                        manga.user_title?.let { customTitle ->
+                            if (customTitle != manga.originalTitle && customTitle !in manga.getAltTitles()) {
+                                manga.user_title = null
+                            }
+                        }
+                        if (networkManga.thumbnail_url != null && networkManga.thumbnail_url != originalThumbnail) {
+                            coverCache.deleteFromCache(originalThumbnail, manga.favorite)
+                        }
+                        db.insertManga(manga).executeOnIO()
+                        send(MangaResult.UpdatedManga)
                     }
-                    db.insertManga(manga).executeOnIO()
-                    send(MangaResult.UpdatedManga)
+
                 }
-            }
         }
     }
 
@@ -130,27 +134,24 @@ class MangaUpdateCoordinator {
         return scope.launchIO {
 
             val deferredChapters = async {
-                runCatching {
-                    mangaDex.fetchChapterList(manga)
-                }.onFailure { e ->
-                    XLog.e("error with mangadex getting chapters", e)
-                    send(MangaResult.Error(text = "error with MangaDex: getting chapters"))
-                    cancel()
-                }.getOrNull() ?: emptyList()
+                mangaDex.fetchChapterList(manga)
+                    .onFailure {
+                        send(MangaResult.Error(text = "error with MangaDex: getting chapters"))
+                        cancel()
+                    }.getOrElse { emptyList() }
             }
 
             val deferredMergedChapters =
                 async {
-                    if (manga.isMerged()) {
-                        kotlin.runCatching {
+                    when (manga.isMerged()) {
+                        true -> {
                             mergedSource.fetchChapters(manga.merge_manga_url!!)
-                        }.onFailure { e ->
-                            XLog.e("error with mergedsource", e)
-                            send(MangaResult.Error(text = "error with merged source: getting chapters "))
-                            this.cancel()
-                        }.getOrNull() ?: emptyList()
-                    } else {
-                        emptyList()
+                                .onFailure {
+                                    send(MangaResult.Error(text = "error with merged source: getting chapters "))
+                                    this.cancel()
+                                }.getOrElse { emptyList() }
+                        }
+                        false -> emptyList()
                     }
                 }
 

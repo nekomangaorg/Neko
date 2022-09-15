@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -44,9 +45,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.himanshoe.charty.common.axis.AxisConfig
 import com.himanshoe.charty.common.dimens.ChartDimens
 import com.himanshoe.charty.line.LineChart
@@ -61,6 +59,7 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedState
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
+import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableMap
@@ -136,7 +135,11 @@ fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, co
 
 @Composable
 private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> Unit) {
-    FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 4.dp, crossAxisSpacing = 4.dp, crossAxisAlignment = FlowCrossAxisAlignment.Center) {
+
+    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        item {
+            Gap(8.dp)
+        }
         CustomChip(
             isSelected = filterState == Filter.Type,
             onClick = { filterStateClick(Filter.Type) },
@@ -550,17 +553,18 @@ private fun SortChip(sortType: Sort, onClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun CustomChip(isSelected: Boolean, onClick: () -> Unit, @StringRes label: Int) {
-    FilterChip(
-        selected = isSelected,
-        onClick = onClick,
-        label = { Text(text = stringResource(id = label)) },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            selectedLabelColor = MaterialTheme.colorScheme.primary,
-        ),
-    )
+private fun LazyListScope.CustomChip(isSelected: Boolean, onClick: () -> Unit, @StringRes label: Int) {
+    item(key = label) {
+        FilterChip(
+            selected = isSelected,
+            onClick = onClick,
+            label = { Text(text = stringResource(id = label)) },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                selectedLabelColor = MaterialTheme.colorScheme.primary,
+            ),
+        )
+    }
 }
 
 @Composable
@@ -619,7 +623,7 @@ private fun Pie(pieData: List<PieData>, chartWidth: Float) {
             PieChart(
                 modifier = Modifier
                     .fillMaxWidth(),
-                pieData = pieData, config = PieConfig(isDonut = false, expandDonutOnClick = false),
+                pieData = pieData, config = PieConfig(isDonut = true, expandDonutOnClick = false),
             )
         } else {
             Text(

@@ -5,11 +5,13 @@ import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.onSuccess
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -272,14 +274,15 @@ open class BrowseSourcePresenter(
      * @return the initialized manga
      */
     private suspend fun getMangaDetails(manga: Manga): Manga {
-        try {
-            val networkManga = source.getMangaDetails(manga)
-            manga.copyFrom(networkManga)
-            manga.initialized = true
-            db.insertManga(manga).executeAsBlocking()
-        } catch (e: Exception) {
-            XLog.e(e)
-        }
+        source.getMangaDetails(manga.uuid(), false)
+            .onSuccess {
+                runCatching {
+                    val networkManga = it.first
+                    manga.copyFrom(networkManga)
+                    manga.initialized = true
+                    db.insertManga(manga).executeAsBlocking()
+                }
+            }
         return manga
     }
 

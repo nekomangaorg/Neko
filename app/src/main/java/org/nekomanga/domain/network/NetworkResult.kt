@@ -22,6 +22,13 @@ fun ResultError.message(context: Context): String {
     }
 }
 
+fun ResultError.message(): String {
+    return when (this) {
+        is ResultError.HttpError -> this.message
+        is ResultError.Generic -> errorString
+    }
+}
+
 
 
 

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source
 
+import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -26,28 +27,7 @@ interface Source {
      * Returns the list of filters for the source.
      */
     fun getFilterList(): FilterList
-
-    /**
-     * Returns a updated details for a manga
-     *
-     * @param manga the manga to update.
-     */
-    suspend fun getMangaDetails(manga: SManga): SManga
-
-    /**
-     * Returns a updated details for a manga and the chapter list
-     *
-     * @param manga the manga to update.
-     */
-    suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>>
-
-    /**
-     * Returns an observable with all the available chapters for a manga.
-     *
-     * @param manga the manga to update.
-     */
-    suspend fun fetchChapterList(manga: SManga): List<SChapter>
-
+    
     /**
      * Returns an observable with the list of pages a chapter has.
      *
@@ -63,3 +43,9 @@ interface Source {
 
     suspend fun logout(): Logout
 }
+
+data class MangaDetailChapterInformation(
+    val sManga: SManga? = null,
+    val sourceArtwork: List<SourceArtwork> = emptyList(),
+    val sChapters: List<SChapter>,
+)

@@ -30,12 +30,9 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.buffer
 import okio.gzip
@@ -206,25 +203,7 @@ class BackupManager(val context: Context) {
         manga.favorite = dbManga.favorite || manga.favorite
         databaseHelper.insertManga(manga).executeAsBlocking()
     }
-
-    /**
-     * Fetches manga information
-     *
-     * @param source source of manga
-     * @param manga manga that needs updating
-     * @return Updated manga info.
-     */
-    suspend fun restoreMangaFetch(source: Source, manga: Manga): Manga {
-        return withContext(Dispatchers.IO) {
-            val networkManga = source.getMangaDetails(manga)
-            manga.copyFrom(networkManga)
-            manga.favorite = true
-            manga.initialized = true
-            manga.id = databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
-            manga
-        }
-    }
-
+    
     /**
      * Restore the categories from Json
      *

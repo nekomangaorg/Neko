@@ -212,7 +212,6 @@ dependencies {
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
     implementation("me.saket.cascade:cascade:2.0.0-beta1")
     implementation("me.saket.cascade:cascade-compose:2.0.0-beta1")
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
 
     //Compose
     implementation(compose.bundles.compose)
@@ -231,6 +230,8 @@ dependencies {
     implementation(libs.sandwich)
     implementation(libs.aboutLibraries.compose)
     debugImplementation(libs.leakcanary)
+
+    implementation(libs.bundles.results)
 
     testImplementation(libs.bundles.tests)
 

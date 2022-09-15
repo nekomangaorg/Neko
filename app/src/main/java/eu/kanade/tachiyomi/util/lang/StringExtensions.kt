@@ -16,6 +16,7 @@ import androidx.annotation.StringRes
 import androidx.core.text.parseAsHtml
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.domain.network.ResultError
 import java.util.Locale
 import kotlin.math.floor
 
@@ -209,3 +210,5 @@ fun String.isUUID() =
 fun String.htmlDecode(): String {
     return this.parseAsHtml().toString()
 }
+
+fun String.toResultError() = ResultError.Generic(errorString = this)

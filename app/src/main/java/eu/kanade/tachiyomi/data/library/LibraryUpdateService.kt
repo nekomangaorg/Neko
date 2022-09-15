@@ -11,6 +11,8 @@ import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.getOrThrow
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -24,6 +26,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -50,6 +53,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -393,36 +397,32 @@ class LibraryUpdateService(
 
             val source = sourceManager.getMangadex()
 
-            val details = withIOContext {
+            val holder = withIOContext {
                 if (preferences.fasterLibraryUpdates().get()) {
-                    null to source.fetchChapterList(manga)
+                    MangaDetailChapterInformation(null, emptyList(), source.fetchChapterList(manga).getOrThrow { Exception(it.message()) })
                 } else {
-                    source.fetchMangaAndChapterDetails(manga)
+                    source.fetchMangaAndChapterDetails(manga, true).getOrThrow { Exception(it.message()) }
                 }
             }
 
-            val merged = if (manga.isMerged()) {
-                withIOContext {
-                    runCatching {
-                        sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!)
+            val merged = when (manga.isMerged()) {
+                true -> {
+                    withIOContext {
+                        sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!).getOrElse {
+                            errorFromMerged = true
+                            emptyList()
+                        }
                     }
-                }.getOrElse { e ->
-                    XLog.e("Error with mergedsource", e)
-                    errorFromMerged = true
-                    emptyList()
                 }
-            } else {
-                emptyList()
+                false -> emptyList()
             }
-
-            val fetchedChapters = details.second.toMutableList() + merged
+            
+            val fetchedChapters = holder.sChapters + merged
 
             // delete cover cache image if the thumbnail from network is not empty
             // note: we preload the covers here so we can view everything offline if they change
 
-            val detailsManga = details.first
-
-            detailsManga?.let {
+            holder.sManga?.let {
                 val thumbnailUrl = manga.thumbnail_url
                 manga.copyFrom(it)
                 manga.initialized = true
@@ -442,11 +442,12 @@ class LibraryUpdateService(
                 }
                 db.insertManga(manga).executeOnIO()
 
-                withIOContext {
-                    runCatching {
-                        val artwork = source.getArtwork(manga.id!!, MdUtil.getMangaUUID(manga.url))
-                        db.deleteArtworkForManga(manga).executeOnIO()
-                        db.insertArtWorkList(artwork).executeOnIO()
+                if (holder.sourceArtwork.isNotEmpty()) {
+                    holder.sourceArtwork.map { sourceArt -> sourceArt.toArtworkImpl(manga.id!!) }.let { art ->
+                        kotlin.runCatching {
+                            db.deleteArtworkForManga(manga).executeOnIO()
+                            db.insertArtWorkList(art).executeOnIO()
+                        }
                     }
                 }
 
