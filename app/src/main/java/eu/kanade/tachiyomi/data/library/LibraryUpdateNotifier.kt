@@ -184,7 +184,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                 )
                                 addAction(
                                     R.drawable.ic_eye_24dp,
-                                    context.getString(R.string.mark_as_read),
+                                    context.getString(R.string.mark_read),
                                     NotificationReceiver.markAsReadPendingBroadcast(
                                         context,
                                         manga,
@@ -194,10 +194,20 @@ class LibraryUpdateNotifier(private val context: Context) {
                                 )
                                 addAction(
                                     R.drawable.ic_book_24dp,
-                                    context.getString(R.string.view_chapters),
+                                    context.getString(R.string.view),
                                     NotificationReceiver.openChapterPendingActivity(
                                         context,
                                         manga,
+                                        Notifications.ID_NEW_CHAPTERS,
+                                    ),
+                                )
+                                addAction(
+                                    android.R.drawable.stat_sys_download_done,
+                                    context.getString(R.string.download),
+                                    NotificationReceiver.downloadChaptersPendingBroadcast(
+                                        context,
+                                        manga,
+                                        chapters,
                                         Notifications.ID_NEW_CHAPTERS,
                                     ),
                                 )

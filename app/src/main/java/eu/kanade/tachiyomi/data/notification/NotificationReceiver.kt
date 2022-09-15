@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
@@ -106,6 +107,18 @@ class NotificationReceiver : BroadcastReceiver() {
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
                 markAsRead(urls, mangaId)
+            }
+            //download manga chapter
+            ACTION_DOWNLOAD_CHAPTER -> {
+                val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                if (notificationId > -1) {
+                    dismissNotification(context, notificationId, intent.getIntExtra(EXTRA_GROUP_ID, 0))
+                }
+                val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
+                val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
+                if (mangaId > -1) {
+                    downloadChapters(urls, mangaId)
+                }
             }
 
             // Share crash dump file
@@ -287,6 +300,23 @@ class NotificationReceiver : BroadcastReceiver() {
         AppUpdateService.stop(context)
     }
 
+    /**
+     * Method called when user wants to download chapters
+     *
+     * @param chapterUrls URLs of chapter to download
+     * @param mangaId id of manga
+     */
+    private fun downloadChapters(chapterUrls: Array<String>, mangaId: Long) {
+        launchIO {
+            val db: DatabaseHelper = Injekt.get()
+            val manga = db.getManga(mangaId).executeOnIO()
+            val chapters = chapterUrls.mapNotNull { db.getChapter(it, mangaId).executeOnIO() }
+            if (manga != null && chapters.isNotEmpty()) {
+                downloadManager.downloadChapters(manga, chapters)
+            }
+        }
+    }
+
     companion object {
         private const val NAME = "NotificationReceiver"
 
@@ -320,6 +350,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to open chapter
         private const val ACTION_OPEN_CHAPTER = "$ID.$NAME.ACTION_OPEN_CHAPTER"
+
+        // Called to download a chapter
+        private const val ACTION_DOWNLOAD_CHAPTER = "$ID.$NAME.ACTION_DOWNLOAD_CHAPTER"
 
         // Value containing file location.
         private const val EXTRA_FILE_LOCATION = "$ID.$NAME.FILE_LOCATION"
@@ -586,6 +619,28 @@ class NotificationReceiver : BroadcastReceiver() {
                 newIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
+        }
+
+        /**
+         * Returns [PendingIntent] that downloads chapters
+         *
+         * @param context context of application
+         * @param manga manga of chapter
+         */
+        internal fun downloadChaptersPendingBroadcast(
+            context: Context,
+            manga: Manga,
+            chapters: Array<Chapter>,
+            groupId: Int,
+        ): PendingIntent {
+            val newIntent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_DOWNLOAD_CHAPTER
+                putExtra(EXTRA_CHAPTER_URL, chapters.map { it.url }.toTypedArray())
+                putExtra(EXTRA_MANGA_ID, manga.id)
+                putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
+                putExtra(EXTRA_GROUP_ID, groupId)
+            }
+            return PendingIntent.getBroadcast(context, manga.id.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
         /**

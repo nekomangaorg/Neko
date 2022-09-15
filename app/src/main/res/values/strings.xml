@@ -1048,6 +1048,7 @@
     <string name="loading">Loading…</string>
     <string name="lock">Lock</string>
     <string name="mark_as_read">Mark as read</string>
+    <string name="mark_read">Mark read</string>
     <string name="mark_as_unread">Mark as unread</string>
     <string name="mark_all_as">Mark all as</string>
     <string name="mark_all_as_read">Mark all as read</string>
@@ -1120,6 +1121,7 @@
     <string name="view_log">View log</string>
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>
+    <string name="view">View</string>
     <string name="wifi">Wi-Fi</string>
 
 
