@@ -287,17 +287,16 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.double_page_gap
                 entriesRes = arrayOf(
                     R.string.double_page_gap_0,
-                    R.string.double_page_gap_5,
                     R.string.double_page_gap_10,
-                    R.string.double_page_gap_15,
                     R.string.double_page_gap_20,
-                    R.string.double_page_gap_25,
                     R.string.double_page_gap_30,
-                    R.string.double_page_gap_35,
                     R.string.double_page_gap_40,
+                    R.string.double_page_gap_50,
+                    R.string.double_page_gap_60,
+                    R.string.double_page_gap_70,
 
                     )
-                entryValues = listOf(0, 5, 10, 15, 20, 25, 30, 35, 40)
+                entryValues = listOf(0, 10, 20, 30, 40, 50, 60, 70)
                 defaultValue = "0"
             }
 
