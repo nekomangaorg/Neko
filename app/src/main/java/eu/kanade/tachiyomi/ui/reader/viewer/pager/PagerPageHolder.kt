@@ -837,7 +837,7 @@ class PagerPageHolder(
 
         imageStream.close()
         imageStream2.close()
-        return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg) {
+        return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg, viewer.config.doublePageGap) {
             scope?.launchUI {
                 if (it == 100) {
                     progressBar.completeAndFadeOut()

@@ -24,6 +24,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
                 updatePagedGroup(!isWebtoonView)
                 landscapeZoom.isVisible = it == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE - 1
             }
+
+            doublePageGap.bindToIntPreference(preferences.doublePageGap(), R.array.double_page_gap)
             binding.navigatePan.bindToPreference(preferences.navigateToPan())
             binding.landscapeZoom.bindToPreference(preferences.landscapeZoom())
             zoomStart.bindToPreference(preferences.zoomStart(), 1)
@@ -105,5 +107,6 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
         binding.landscapeZoom.isVisible = show && preferences.imageScaleType().get() == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE
         binding.extendPastCutout.isVisible = show && isFullFit && hasCutout && preferences.fullscreen().get()
         binding.invertDoublePages.isVisible = show && preferences.pageLayout().get() != PageLayout.SINGLE_PAGE.value
+        binding.doublePageGap.isVisible = show && preferences.pageLayout().get() != PageLayout.SINGLE_PAGE.value
     }
 }

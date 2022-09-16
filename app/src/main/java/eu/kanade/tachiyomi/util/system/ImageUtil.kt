@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.graphics.BitmapRegionDecoder
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
@@ -25,7 +26,6 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder
-
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -426,6 +426,7 @@ object ImageUtil {
         imageBitmap2: Bitmap,
         isLTR: Boolean,
         @ColorInt background: Int = Color.WHITE,
+        gap: Int = 0,
         progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
         val height = imageBitmap.height
@@ -433,21 +434,38 @@ object ImageUtil {
         val height2 = imageBitmap2.height
         val width2 = imageBitmap2.width
         val maxHeight = max(height, height2)
-        val result = Bitmap.createBitmap(width + width2, max(height, height2), Bitmap.Config.ARGB_8888)
+        val gapInPx = gap.dpToPx
+
+        val result = Bitmap.createBitmap(width + width2 + gapInPx, max(height, height2), Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
         canvas.drawColor(background)
+
         val upperPart = Rect(
-            if (isLTR) 0 else width2,
+            if (isLTR) 0 else (width2 + gapInPx),
             (maxHeight - imageBitmap.height) / 2,
-            (if (isLTR) 0 else width2) + imageBitmap.width,
+            (if (isLTR) 0 else (width2 + gapInPx)) + imageBitmap.width,
             imageBitmap.height + (maxHeight - imageBitmap.height) / 2,
         )
         canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
+
+        if (gapInPx != 0) {
+            canvas.drawRect(
+                (if (isLTR) width2 else width).toFloat(),
+                0f,
+                ((if (isLTR) width2 else width) + gapInPx).toFloat(),
+                maxHeight.toFloat(),
+                Paint().apply {
+                    color = background
+                    style = Paint.Style.FILL
+                },
+            )
+        }
+
         progressCallback?.invoke(98)
         val bottomPart = Rect(
-            if (!isLTR) 0 else width,
+            (if (!isLTR) 0 else (width + gapInPx)),
             (maxHeight - imageBitmap2.height) / 2,
-            (if (!isLTR) 0 else width) + imageBitmap2.width,
+            (if (!isLTR) 0 else (width + gapInPx)) + imageBitmap2.width,
             imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2,
         )
         canvas.drawBitmap(imageBitmap2, imageBitmap2.rect, bottomPart, null)

@@ -281,6 +281,26 @@ class SettingsReaderController : SettingsController() {
                 preferences.pageLayout()
                     .asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE.value }
             }
+
+            intListPreference(activity) {
+                key = Keys.doublePageGap
+                titleRes = R.string.double_page_gap
+                entriesRes = arrayOf(
+                    R.string.double_page_gap_0,
+                    R.string.double_page_gap_5,
+                    R.string.double_page_gap_10,
+                    R.string.double_page_gap_15,
+                    R.string.double_page_gap_20,
+                    R.string.double_page_gap_25,
+                    R.string.double_page_gap_30,
+                    R.string.double_page_gap_35,
+                    R.string.double_page_gap_40,
+
+                    )
+                entryValues = listOf(0, 5, 10, 15, 20, 25, 30, 35, 40)
+                defaultValue = "0"
+            }
+
         }
         preferenceCategory {
             titleRes = R.string.webtoon

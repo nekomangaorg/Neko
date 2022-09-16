@@ -146,6 +146,8 @@ class PreferencesHelper(val context: Context) {
 
     fun imageScaleType() = flowPrefs.getInt(Keys.imageScaleType, 1)
 
+    fun doublePageGap() = flowPrefs.getInt(Keys.doublePageGap, 0)
+
     fun zoomStart() = flowPrefs.getInt(Keys.zoomStart, 1)
 
     fun readerTheme() = flowPrefs.getInt(Keys.readerTheme, 2)

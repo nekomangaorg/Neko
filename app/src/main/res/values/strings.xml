@@ -403,6 +403,7 @@
     <string name="continuous_vertical">Continuous vertical</string>
     <string name="paged">Paged</string>
     <string name="scale_type">Scale type</string>
+    <string name="double_page_gap">Double page gap</string>
     <string name="tap_zones">Tap zones</string>
     <string name="fit_screen">Fit screen</string>
     <string name="stretch">Stretch</string>
@@ -412,6 +413,15 @@
     <string name="smart_fit">Smart fit</string>
     <string name="zoom_start_position">Zoom start position</string>
     <string name="split_double_pages">Split double pages</string>
+    <string name="double_page_gap_0">None</string>
+    <string name="double_page_gap_5">5</string>
+    <string name="double_page_gap_10">10</string>
+    <string name="double_page_gap_15">15</string>
+    <string name="double_page_gap_20">20</string>
+    <string name="double_page_gap_25">25</string>
+    <string name="double_page_gap_30">30</string>
+    <string name="double_page_gap_35">35</string>
+    <string name="double_page_gap_40">40</string>
     <string name="double_pages">Double pages</string>
     <string name="single_page">Single page</string>
     <string name="switch_to_double">Switch to double pages</string>
