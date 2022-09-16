@@ -29,6 +29,6 @@ object TrackingConstants {
 
     enum class ReadingDate {
         Start,
-        Finish
+        Finish,
     }
 }

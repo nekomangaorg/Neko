@@ -108,11 +108,12 @@ class StatsPresenter(
                             tags = (it.getGenres() ?: emptyList()).toImmutableList(),
                             userScore = getUserScore(tracks),
                             trackers = tracks.mapNotNull { trackManager.getService(it.sync_id) }.map { prefs.context.getString(it.nameRes()) }.toImmutableList(),
-                            categories = (db.getCategoriesForManga(it).executeAsBlocking().map { category -> category.name }.takeUnless { it.isEmpty() }
-                                ?: listOf(prefs.context.getString(R.string.default_value))).sorted().toImmutableList(),
+                            categories = (
+                                db.getCategoriesForManga(it).executeAsBlocking().map { category -> category.name }.takeUnless { it.isEmpty() }
+                                    ?: listOf(prefs.context.getString(R.string.default_value))
+                                ).sorted().toImmutableList(),
                         )
                     }
-
                 }.awaitAll().sortedBy { it.title }
                 _detailState.value = DetailedState(
                     isLoading = false,
@@ -120,7 +121,7 @@ class StatsPresenter(
                     categories = (db.getCategories().executeAsBlocking().map { it.name } + listOf(prefs.context.getString(R.string.default_value))).toPersistentList(),
                     tags = detailedStatMangaList.asSequence().map { it.tags }.flatten().distinct().filter { !it.contains("content rating:", true) }.sortedBy { it }.toImmutableList(),
                 )
-                
+
                 val sortedSeries =
                     _detailState.value.tags.map { tag -> tag to _detailState.value.manga.filter { it.tags.contains(tag) }.toImmutableList() }.sortedByDescending { it.second.count() }.toImmutableList()
                 val totalCount = sortedSeries.sumOf { it.second.size }
@@ -137,7 +138,6 @@ class StatsPresenter(
 
     fun switchState() {
         presenterScope.launchIO {
-
             val newState = when (simpleState.value.screenState) {
                 is StatsConstants.ScreenState.Simple -> {
                     StatsConstants.ScreenState.Detailed

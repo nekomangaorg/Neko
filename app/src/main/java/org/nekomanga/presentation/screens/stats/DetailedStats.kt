@@ -69,7 +69,6 @@ import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 
 @Composable
 fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
-
     var filterState by rememberSaveable { mutableStateOf(Filter.None) }
 
     var sortType by remember { mutableStateOf(Sort.Entries) }
@@ -100,7 +99,6 @@ fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, co
         FilterChipHeader(filterState, filterStateClick)
 
         val context = LocalContext.current
-
 
         when (filterState) {
             Filter.None -> {
@@ -135,7 +133,6 @@ fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, co
 
 @Composable
 private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> Unit) {
-
     LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         item {
             Gap(8.dp)
@@ -289,7 +286,6 @@ private fun StartYearView(
     }
     val colorMap = remember { sortedSeries.associate { it.key to colors[0] }.toImmutableMap() }
 
-
     DefaultView(
         contentPadding = contentPadding,
         splitScreen = splitScreen,
@@ -378,7 +374,6 @@ private fun DefaultView(
     showSortChip: Boolean = true,
     graph: @Composable (width: Float) -> Unit,
 ) {
-
     val chartWidth = when (splitScreen) {
         true -> .5f
         false -> 1f
@@ -392,7 +387,6 @@ private fun DefaultView(
         }
 
         if (splitScreen) {
-
             item {
                 Row(
                     modifier = Modifier
@@ -423,7 +417,6 @@ private fun DefaultView(
                 }
             }
         } else {
-
             item {
                 graph(chartWidth)
             }
@@ -446,8 +439,7 @@ private fun DefaultView(
 @Composable
 private fun DetailedCardView(mangaList: ImmutableList<StatsConstants.DetailedStatManga>, contentPadding: PaddingValues, splitScreen: Boolean) {
     if (splitScreen) {
-        LazyGridWrapper(contentPadding = contentPadding)
-        {
+        LazyGridWrapper(contentPadding = contentPadding) {
             items(mangaList, key = { it.id }) {
                 DetailedCard(manga = it, modifier = Modifier.fillMaxWidth(.3f))
             }
@@ -508,7 +500,6 @@ private fun StatCardView(
 
 @Composable
 private fun LazyGridWrapper(contentPadding: PaddingValues, showSortChip: Boolean = false, sortType: Sort = Sort.Entries, sortChipClick: () -> Unit = {}, content: LazyGridScope.() -> Unit) {
-
     LazyVerticalGrid(columns = GridCells.Adaptive(400.dp), contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())) {
         if (showSortChip) {
             item {
@@ -623,7 +614,8 @@ private fun Pie(pieData: List<PieData>, chartWidth: Float) {
             PieChart(
                 modifier = Modifier
                     .fillMaxWidth(),
-                pieData = pieData, config = PieConfig(isDonut = true, expandDonutOnClick = false),
+                pieData = pieData,
+                config = PieConfig(isDonut = true, expandDonutOnClick = false),
             )
         } else {
             Text(
@@ -719,7 +711,6 @@ private fun StatCard(header: String, headerColor: Color, count: Int, totalCount:
 
                     Text(text = readDuration.getReadDuration(stringResource(id = R.string.none)), style = valueStyle)
                     Text(text = percentage(readDuration, totalReadDuration), style = valueStyle)
-
                 }
             }
         }
@@ -787,6 +778,5 @@ private enum class Filter {
 private enum class Sort(@StringRes val stringRes: Int) {
     Entries(R.string.most_entries),
     Chapters(R.string.chapters_read),
-    Duration(R.string.read_duration)
+    Duration(R.string.read_duration),
 }
-

@@ -88,7 +88,8 @@ class StatusSyncJob(
                 else -> {
                     followsSyncService.toMangaDex(
                         ::updateNotificationProgress,
-                        ::completeNotificationToDex, ids,
+                        ::completeNotificationToDex,
+                        ids,
                     )
                 }
             }

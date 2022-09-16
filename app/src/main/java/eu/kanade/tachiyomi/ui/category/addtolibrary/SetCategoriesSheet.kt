@@ -48,7 +48,9 @@ class SetCategoriesSheet(
         addingToLibrary: Boolean,
         onMangaAdded: () -> Unit,
     ) : this(
-        activity, listOf(manga), categories,
+        activity,
+        listOf(manga),
+        categories,
         categories.map {
             if (it.id in preselected) {
                 TriStateCheckBox.State.CHECKED
@@ -56,7 +58,8 @@ class SetCategoriesSheet(
                 TriStateCheckBox.State.UNCHECKED
             }
         }.toTypedArray(),
-        addingToLibrary, onMangaAdded,
+        addingToLibrary,
+        onMangaAdded,
     )
 
     private val fastAdapter: FastAdapter<AddCategoryItem>

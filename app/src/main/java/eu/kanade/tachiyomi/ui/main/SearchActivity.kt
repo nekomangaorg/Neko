@@ -38,12 +38,14 @@ class SearchActivity : MainActivity() {
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
-                    rootSearchController is RootSearchInterface ||
-                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                    ) && rootSearchController !is SmallToolbarInterface
+                rootSearchController is RootSearchInterface ||
+                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                ) && rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
-            } else popToRoot()
+            } else {
+                popToRoot()
+            }
         }
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
@@ -107,11 +109,13 @@ class SearchActivity : MainActivity() {
 
     override fun handleIntentAction(intent: Intent): Boolean {
         val notificationId = intent.getIntExtra("notificationId", -1)
-        if (notificationId > -1) NotificationReceiver.dismissNotification(
-            applicationContext,
-            notificationId,
-            intent.getIntExtra("groupId", 0),
-        )
+        if (notificationId > -1) {
+            NotificationReceiver.dismissNotification(
+                applicationContext,
+                notificationId,
+                intent.getIntExtra("groupId", 0),
+            )
+        }
         when (intent.action) {
             Intent.ACTION_SEARCH, Intent.ACTION_SEND, "com.google.android.gms.actions.SEARCH_ACTION" -> {
                 // If the intent match the "standard" Android search intent

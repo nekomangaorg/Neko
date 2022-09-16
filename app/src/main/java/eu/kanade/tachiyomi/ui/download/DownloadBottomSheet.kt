@@ -122,11 +122,14 @@ class DownloadBottomSheet @JvmOverloads constructor(
 
     private fun updateDLTitle() {
         val extCount = presenter.downloadQueue.firstOrNull()
-        binding.titleText.text = if (extCount != null) resources.getString(
-            R.string.downloading_,
-            extCount.chapter.name,
-        )
-        else ""
+        binding.titleText.text = if (extCount != null) {
+            resources.getString(
+                R.string.downloading_,
+                extCount.chapter.name,
+            )
+        } else {
+            ""
+        }
     }
 
     /**

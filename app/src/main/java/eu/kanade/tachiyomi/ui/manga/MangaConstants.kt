@@ -123,25 +123,25 @@ object MangaConstants {
         All,
         Unread,
         Downloaded,
-        Bookmarked
+        Bookmarked,
     }
 
     enum class SortType {
         SourceOrder,
         ChapterNumber,
-        UploadDate
+        UploadDate,
     }
 
     enum class SortState {
         Ascending,
         Descending,
-        None
+        None,
     }
 
     enum class SetGlobal {
         HideTitles,
         Sort,
-        Filter
+        Filter,
     }
 
     class ChapterFilterActions(

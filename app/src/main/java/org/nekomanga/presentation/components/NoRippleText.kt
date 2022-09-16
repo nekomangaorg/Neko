@@ -43,6 +43,5 @@ fun NoRippleText(
         style = style,
         overflow = TextOverflow.Ellipsis,
 
-        )
+    )
 }
- 

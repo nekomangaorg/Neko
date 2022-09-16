@@ -295,11 +295,10 @@ class SettingsReaderController : SettingsController() {
                     R.string.double_page_gap_60,
                     R.string.double_page_gap_70,
 
-                    )
+                )
                 entryValues = listOf(0, 10, 20, 30, 40, 50, 60, 70)
                 defaultValue = "0"
             }
-
         }
         preferenceCategory {
             titleRes = R.string.webtoon

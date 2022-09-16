@@ -277,8 +277,11 @@ class WebtoonPageHolder(
                         zoomDuration = viewer.config.doubleTapAnimDuration,
                         minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
                         cropBorders =
-                        if (viewer.hasMargins) viewer.config.verticalCropBorders
-                        else viewer.config.webtoonCropBorders,
+                        if (viewer.hasMargins) {
+                            viewer.config.verticalCropBorders
+                        } else {
+                            viewer.config.webtoonCropBorders
+                        },
                     ),
                 )
             }

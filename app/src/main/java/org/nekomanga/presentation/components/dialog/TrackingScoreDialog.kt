@@ -29,7 +29,6 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun TrackingScoreDialog(themeColorState: ThemeColorState, trackAndService: TrackingConstants.TrackAndService, onDismiss: () -> Unit, trackScoreChange: (Int) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-
         val displayedScore = trackAndService.service.displayScore(trackAndService.track)
         val index = when {
             displayedScore == "-" -> 0
@@ -38,7 +37,6 @@ fun TrackingScoreDialog(themeColorState: ThemeColorState, trackAndService: Track
         }
 
         var currentIndex by remember { mutableStateOf(index) }
-
 
         AlertDialog(
             title = {
@@ -62,7 +60,6 @@ fun TrackingScoreDialog(themeColorState: ThemeColorState, trackAndService: Track
                         textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     )
                 }
-
             },
             onDismissRequest = onDismiss,
             dismissButton = {

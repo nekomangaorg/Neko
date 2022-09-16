@@ -103,7 +103,9 @@ fun RecyclerView.LayoutManager.getFirstPos(recyclerView: RecyclerView?, toolbarH
             val bottom = (
                 if (isLibraryHeader) {
                     it.findViewById<TextView>(R.id.category_title)?.bottom?.plus(it.y)?.roundToInt()
-                } else it.bottom
+                } else {
+                    it.bottom
+                }
                 ) ?: it.bottom
             bottom >= inset + toolbarHeight && it.height > 0
         }

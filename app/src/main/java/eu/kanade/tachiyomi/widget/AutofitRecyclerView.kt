@@ -43,8 +43,11 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
     val itemWidth: Int
         get() {
-            return if (width == 0) measuredWidth / getTempSpan()
-            else width / managerSpanCount
+            return if (width == 0) {
+                measuredWidth / getTempSpan()
+            } else {
+                width / managerSpanCount
+            }
         }
 
     init {

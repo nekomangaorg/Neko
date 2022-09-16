@@ -76,6 +76,5 @@ fun RemoveTrackingDialog(themeColorState: ThemeColorState, name: String, canRemo
                 }
             },
         )
-
     }
 }

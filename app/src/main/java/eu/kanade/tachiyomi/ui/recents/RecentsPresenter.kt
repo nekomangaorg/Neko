@@ -220,7 +220,9 @@ class RecentsPresenter(
                 } else {
                     recentItems.none { mch.chapter.id == it.mch.chapter.id }
                 }
-            } else true
+            } else {
+                true
+            }
         }
         val pairs = mangaList.mapNotNull {
             val chapter = when {
@@ -242,9 +244,14 @@ class RecentsPresenter(
             }
             if (chapter == null) if ((query.isNotEmpty() || viewType > VIEW_TYPE_UNGROUP_ALL) &&
                 it.chapter.id != null
-            ) Pair(it, it.chapter)
-            else null
-            else Pair(it, chapter)
+            ) {
+                Pair(it, it.chapter)
+            } else {
+                null
+            }
+            else {
+                Pair(it, chapter)
+            }
         }
         val newItems = if (query.isEmpty() && !isUngrouped) {
             val nChaptersItems =
@@ -302,7 +309,9 @@ class RecentsPresenter(
                             if (preferences.sortFetchedTime().get()) item.date_fetch else item.date_upload
                         }
                 }
-            } else pairs.map { RecentMangaItem(it.first, it.second, null) }
+            } else {
+                pairs.map { RecentMangaItem(it.first, it.second, null) }
+            }
         }
         if (customViewType == null) {
             recentItems = if (isOnFirstPage || !updatePageCount) {

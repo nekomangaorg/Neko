@@ -93,7 +93,7 @@ data class SimpleChapter(
             oldMangaDexChapterId = null,
             language = "",
 
-            )
+        )
     }
 
     fun toDbChapter(): Chapter = ChapterImpl().also {
@@ -116,7 +116,6 @@ data class SimpleChapter(
         it.chapter_txt = chapterText
         it.mangadex_chapter_id = mangaDexChapterId
         it.old_mangadex_id = oldMangaDexChapterId
-
     }
 
     fun toChapterItem(downloadState: Download.State = Download.State.default, downloadProgress: Float = 0f): ChapterItem = ChapterItem(

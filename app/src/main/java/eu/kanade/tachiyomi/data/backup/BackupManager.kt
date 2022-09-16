@@ -185,7 +185,6 @@ class BackupManager(val context: Context) {
                     databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url?.let {
                         BackupHistory(it, history.last_read, history.time_read)
                     }
-
                 }
                 if (history.isNotEmpty()) {
                     mangaObject.history = history
@@ -203,7 +202,7 @@ class BackupManager(val context: Context) {
         manga.favorite = dbManga.favorite || manga.favorite
         databaseHelper.insertManga(manga).executeAsBlocking()
     }
-    
+
     /**
      * Restore the categories from Json
      *

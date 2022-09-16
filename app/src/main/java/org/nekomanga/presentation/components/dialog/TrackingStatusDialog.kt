@@ -35,7 +35,6 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, service: TrackServiceItem, onDismiss: () -> Unit, trackStatusChange: (Int) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-
         var selectedStatus by remember { mutableStateOf(initialStatus) }
         val scope = rememberCoroutineScope()
         AlertDialog(
@@ -55,7 +54,6 @@ fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, s
                             }
                         }
 
-
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -67,7 +65,6 @@ fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, s
                                 ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-
                             RadioButton(
                                 selected = (status == selectedStatus),
                                 onClick = {

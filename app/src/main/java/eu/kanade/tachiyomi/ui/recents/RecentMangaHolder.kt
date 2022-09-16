@@ -98,7 +98,9 @@ class RecentMangaHolder(
         val chapterName = if (item.mch.manga.hideChapterTitle(adapter.preferences)) {
             val number = adapter.decimalFormat.format(item.chapter.chapter_number.toDouble())
             itemView.context.getString(R.string.chapter_, number)
-        } else item.chapter.name
+        } else {
+            item.chapter.name
+        }
         binding.title.apply {
             text = if (!showTitleFirst) {
                 chapterName
@@ -186,9 +188,11 @@ class RecentMangaHolder(
     }
 
     private fun resetFrontView() {
-        if (binding.frontView.translationX != 0f) itemView.post {
-            androidx.transition.TransitionManager.endTransitions(adapter.recyclerView)
-            adapter.notifyItemChanged(flexibleAdapterPosition)
+        if (binding.frontView.translationX != 0f) {
+            itemView.post {
+                androidx.transition.TransitionManager.endTransitions(adapter.recyclerView)
+                adapter.notifyItemChanged(flexibleAdapterPosition)
+            }
         }
     }
 

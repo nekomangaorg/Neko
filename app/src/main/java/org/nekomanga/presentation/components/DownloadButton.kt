@@ -52,12 +52,12 @@ fun DownloadButton(buttonColor: Color, downloadStateProvider: () -> Download.Sta
 
     LaunchedEffect(downloadState) {
         when (downloadState) {
-            //this reset download complete in case you remove the chapter and want to redownload it
+            // this reset download complete in case you remove the chapter and want to redownload it
             Download.State.NOT_DOWNLOADED -> downloadComplete = false
-            //this signals its downloading, so a future downloaded state triggers the animation
+            // this signals its downloading, so a future downloaded state triggers the animation
             Download.State.DOWNLOADING -> wasDownloading = true
             Download.State.DOWNLOADED -> {
-                //this will run the animation for the check
+                // this will run the animation for the check
                 if (wasDownloading) {
                     downloadComplete = true
                     wasDownloading = false
@@ -80,13 +80,11 @@ fun DownloadButton(buttonColor: Color, downloadStateProvider: () -> Download.Sta
 private fun NotDownloaded(buttonColor: Color, modifier: Modifier) {
     Background(color = Color.Transparent, borderStroke = BorderStroke(borderSize.dp, buttonColor), modifier = modifier) {
         DownloadIcon(color = buttonColor, icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward))
-
     }
 }
 
 @Composable
 private fun Downloaded(buttonColor: Color, downloadComplete: Boolean, modifier: Modifier) {
-
     val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
 
     val animatedPainter = rememberAnimatedVectorPainter(
@@ -99,10 +97,8 @@ private fun Downloaded(buttonColor: Color, downloadComplete: Boolean, modifier: 
         false -> iconPainter
     }
 
-
     Background(color = buttonColor, modifier = modifier) {
         DownloadIcon(color = MaterialTheme.colorScheme.surface, icon = painter)
-
     }
 }
 
@@ -126,7 +122,6 @@ private fun Queued(modifier: Modifier) {
             strokeWidth = borderSize.dp,
         )
         DownloadIcon(color = disabledColor, icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward), alpha = alpha.value)
-
     }
 }
 
@@ -156,7 +151,6 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
         animationSpec = infiniteRepeatable(tween(1000, easing = EaseInOutCirc), repeatMode = RepeatMode.Reverse),
     )
 
-
     Background(color = backgroundColor, modifier = modifier) {
         CircularProgressIndicator(
             progress = animatedProgress,
@@ -166,7 +160,6 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
             strokeWidth = borderSize.dp,
         )
         DownloadIcon(color = iconColor, icon = iconPainter, alpha = alpha.value)
-
     }
 }
 

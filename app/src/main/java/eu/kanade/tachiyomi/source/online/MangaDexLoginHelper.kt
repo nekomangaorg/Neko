@@ -97,7 +97,6 @@ class MangaDexLoginHelper {
 
                 this.log(type)
                 this.throws(type)
-
             }.getOrThrow()
 
             preferences.setTokens(

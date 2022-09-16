@@ -18,4 +18,3 @@ class ArtworkKeyer : Keyer<Artwork> {
         }
     }
 }
-

@@ -38,7 +38,9 @@ class ChapterHolder(
         binding.chapterTitle.text = if (manga.hideChapterTitle(adapter.preferences)) {
             val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
             itemView.context.getString(R.string.chapter_, number)
-        } else chapter.name
+        } else {
+            chapter.name
+        }
 
         ChapterUtil.setTextViewForChapter(binding.chapterTitle, item, hideStatus = isLocked)
 
@@ -150,9 +152,11 @@ class ChapterHolder(
     }
 
     private fun resetFrontView() {
-        if (binding.frontView.translationX != 0f) itemView.post {
-            androidx.transition.TransitionManager.endTransitions(adapter.recyclerView)
-            adapter.notifyItemChanged(flexibleAdapterPosition)
+        if (binding.frontView.translationX != 0f) {
+            itemView.post {
+                androidx.transition.TransitionManager.endTransitions(adapter.recyclerView)
+                adapter.notifyItemChanged(flexibleAdapterPosition)
+            }
         }
     }
 

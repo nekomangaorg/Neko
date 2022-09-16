@@ -73,8 +73,8 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 listOf(getMangaDetails(manga.my_anime_list_id!!.toLong()))
             } else {
                 val url = "$baseApiUrl/manga".toUri().buildUpon()
-                // MAL API throws a 400 when the query is over 64 characters...
-                .appendQueryParameter("q", query.take(64))
+                    // MAL API throws a 400 when the query is over 64 characters...
+                    .appendQueryParameter("q", query.take(64))
                     .appendQueryParameter("nsfw", "true")
                     .build()
                 authClient.newCall(GET(url.toString()))
@@ -88,7 +88,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                                 async { getMangaDetails(id) }
                             }
                             .awaitAll()
-                        .filter { trackSearch -> !trackSearch.publishing_type.contains("novel") }
+                            .filter { trackSearch -> !trackSearch.publishing_type.contains("novel") }
                     }
             }
         }

@@ -139,6 +139,7 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+    namespace = "eu.kanade.tachiyomi"
 }
 
 dependencies {
@@ -206,7 +207,6 @@ dependencies {
 
     implementation(libs.bundles.flexibleadapter)
 
-    implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
@@ -234,8 +234,6 @@ dependencies {
     implementation(libs.bundles.results)
 
     testImplementation(libs.bundles.tests)
-
-    //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }
 
@@ -272,7 +270,7 @@ tasks {
     }
 
     preBuild {
-// dependsOn(formatKotlin)
+        dependsOn(formatKotlin)
     }
 }
 

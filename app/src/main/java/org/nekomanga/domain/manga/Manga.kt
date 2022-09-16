@@ -25,4 +25,3 @@ data class Artwork(
     val volume: String = "",
     val active: Boolean = false,
 )
-

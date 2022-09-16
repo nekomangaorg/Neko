@@ -382,10 +382,8 @@ class LibraryUpdateService(
         manga: LibraryManga,
         progress: Int,
         shouldDownload: Boolean,
-    ):
-        Boolean {
+    ): Boolean {
         return runCatching {
-
             var hasDownloads = false
             if (job?.isCancelled == true) {
                 return@runCatching false
@@ -416,7 +414,7 @@ class LibraryUpdateService(
                 }
                 false -> emptyList()
             }
-            
+
             val fetchedChapters = holder.sChapters + merged
 
             // delete cover cache image if the thumbnail from network is not empty
@@ -430,7 +428,7 @@ class LibraryUpdateService(
                 withIOContext {
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                            .get()
+                        .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                         // load new covers in background
@@ -461,7 +459,6 @@ class LibraryUpdateService(
                     }
                 }
             }
-
 
             if (fetchedChapters.isNotEmpty()) {
                 val newChapters =
@@ -497,9 +494,11 @@ class LibraryUpdateService(
                         downloadManager.deleteChapters(removedChapters, manga, source)
                     }
                 }
-                if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
-                    manga,
-                )
+                if (newChapters.first.size + newChapters.second.size > 0) {
+                    listener?.onUpdateManga(
+                        manga,
+                    )
+                }
 
                 if (newChapters.first.size + newChapters.second.size > 0) {
                     listener?.onUpdateManga(manga)
@@ -530,7 +529,6 @@ class LibraryUpdateService(
                 launch {
                     updateMissingChapterCount(manga)
                 }
-
             }
 
             hasDownloads
@@ -675,10 +673,12 @@ class LibraryUpdateService(
                     putExtra(KEY_TARGET, target)
                     category?.id?.let { id ->
                         putExtra(KEY_CATEGORY, id)
-                        if (mangaToUse != null) putExtra(
-                            KEY_MANGAS,
-                            mangaToUse.mapNotNull { it.id }.toLongArray(),
-                        )
+                        if (mangaToUse != null) {
+                            putExtra(
+                                KEY_MANGAS,
+                                mangaToUse.mapNotNull { it.id }.toLongArray(),
+                            )
+                        }
                     }
                 }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -688,9 +688,14 @@ class LibraryUpdateService(
                 }
                 true
             } else {
-                if (target == Target.CHAPTERS) category?.id?.let {
-                    if (mangaToUse != null) instance?.addMangaToQueue(it, mangaToUse)
-                    else instance?.addCategory(it)
+                if (target == Target.CHAPTERS) {
+                    category?.id?.let {
+                        if (mangaToUse != null) {
+                            instance?.addMangaToQueue(it, mangaToUse)
+                        } else {
+                            instance?.addCategory(it)
+                        }
+                    }
                 }
                 false
             }

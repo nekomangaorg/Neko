@@ -59,7 +59,6 @@ class SettingsAppearanceController : SettingsController() {
                     isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }.launchIn(viewScope)
             }
-
         }
 
         preferenceCategory {

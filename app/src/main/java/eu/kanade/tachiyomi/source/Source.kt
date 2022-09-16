@@ -27,7 +27,7 @@ interface Source {
      * Returns the list of filters for the source.
      */
     fun getFilterList(): FilterList
-    
+
     /**
      * Returns an observable with the list of pages a chapter has.
      *

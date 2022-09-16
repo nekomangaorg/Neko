@@ -98,7 +98,6 @@ fun DescriptionBlock(
             .then(clickable),
         // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
     ) {
-
         if (!isExpanded) {
             val text = descriptionProvider().split("\n").take(2).joinToString("\n")
 
@@ -193,7 +192,6 @@ fun DescriptionBlock(
  */
 @Composable
 private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifier = Modifier) {
-
     val (text, icon) = when (isMore) {
         true -> R.string.more to Icons.Filled.ExpandMore
         false -> R.string.less to Icons.Filled.ExpandLess
@@ -223,9 +221,10 @@ private fun AltTitles(altTitles: ImmutableList<String>, currentTitle: String, ta
         val isCustomTitle = altTitles.contains(currentTitle)
         val onChipColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = NekoColors.mediumAlphaHighContrast)
 
-
         Text(
-            text = "Alt Titles:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+            text = "Alt Titles:",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
         LazyRow(
             modifier = Modifier
@@ -288,7 +287,9 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, g
 
     val haptic = LocalHapticFeedback.current
     Text(
-        text = "Tags:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+        text = "Tags:",
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
     )
     Gap(8.dp)
     FlowRow(
@@ -303,11 +304,14 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, g
                 placeable.place(0, 0)
             }
         },
-        mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 12.dp, crossAxisSpacing = 12.dp,
+        mainAxisAlignment = FlowMainAxisAlignment.Start,
+        mainAxisSpacing = 12.dp,
+        crossAxisSpacing = 12.dp,
     ) {
         genres.forEach { genre ->
             Chip(
-                label = genre, containerColor = tagColor,
+                label = genre,
+                containerColor = tagColor,
                 modifier = Modifier.combinedClickable(
                     onClick = { genreClick(genre) },
                     onLongClick = {
@@ -317,7 +321,6 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, g
                 ),
             )
         }
-
     }
 }
 

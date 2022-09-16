@@ -25,8 +25,11 @@ class IntListMatPreference @JvmOverloads constructor(
 
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
         val index = entryValues.indexOf(sharedPreferences?.getInt(key, defValue) ?: defValue)
-        if (entries.isEmpty() || index == -1) ""
-        else entries[index]
+        if (entries.isEmpty() || index == -1) {
+            ""
+        } else {
+            entries[index]
+        }
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {

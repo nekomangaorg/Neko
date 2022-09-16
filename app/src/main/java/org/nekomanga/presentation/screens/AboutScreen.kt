@@ -214,7 +214,6 @@ fun AboutScreen(
                     )
                 }
             }
-
         }
     }
 }
@@ -256,4 +255,3 @@ private fun LinkIcon(
         buttonClicked = { uriHandler.openUri(url) },
     )
 }
-

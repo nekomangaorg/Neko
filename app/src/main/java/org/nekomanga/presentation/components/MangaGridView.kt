@@ -95,12 +95,10 @@ fun MangaGrid(
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
     loadNextItems: () -> Unit = {},
-
-    ) {
+) {
     val cells = GridCells.Fixed(columns)
 
     val scrollState = rememberLazyGridState()
-
 
     LazyVerticalGrid(
         columns = cells,
@@ -262,7 +260,6 @@ private fun CompactGridItem(
 
 @Composable
 private fun GridCover(manga: DisplayManga, shouldOutlineCover: Boolean) {
-
     val color by remember { mutableStateOf(Pastel.getColorLight()) }
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
@@ -281,4 +278,3 @@ private fun GridCover(manga: DisplayManga, shouldOutlineCover: Boolean) {
             },
     )
 }
-

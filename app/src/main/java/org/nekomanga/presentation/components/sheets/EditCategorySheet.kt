@@ -52,7 +52,6 @@ fun EditCategorySheet(
     addToLibraryClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
-
         val context = LocalContext.current
 
         val enabledCategories = remember { mangaCategories.associateBy { it.id }.toMutableMap() }
@@ -63,7 +62,6 @@ fun EditCategorySheet(
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .4
 
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-
             if (showAddCategoryDialog) {
                 AddCategoryDialog(themeColorState = themeColorState, currentCategories = categories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
             }
@@ -119,7 +117,6 @@ fun EditCategorySheet(
                         Gap(4.dp)
                         Text(text = category.name, color = MaterialTheme.colorScheme.onSurface)
                     }
-
                 }
             }
 
@@ -137,7 +134,6 @@ fun EditCategorySheet(
                     },
                     colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
                 ) {
-
                     Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                 }
             }

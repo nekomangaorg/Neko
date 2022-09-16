@@ -57,7 +57,6 @@ class FollowsPresenter(
                     )
                 }
             }
-
         }
         presenterScope.launch {
             preferences.browseAsList().asFlow().collectLatest {
@@ -69,7 +68,6 @@ class FollowsPresenter(
     }
 
     fun getFollows() {
-
         presenterScope.launch {
             _followsScreenState.update {
                 it.copy(isLoading = true, error = null)
@@ -103,7 +101,6 @@ class FollowsPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-
                 val defaultCategory = preferences.defaultCategory()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {

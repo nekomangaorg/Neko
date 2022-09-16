@@ -52,8 +52,11 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
             }
             val adapter = FlexibleAdapter(
                 filterOrder.toCharArray().map {
-                    if (FilterBottomSheet.Filters.filterOf(it) != null) ManageFilterItem(it)
-                    else null
+                    if (FilterBottomSheet.Filters.filterOf(it) != null) {
+                        ManageFilterItem(it)
+                    } else {
+                        null
+                    }
                 }.filterNotNull(),
                 this,
                 true,
@@ -109,14 +112,15 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
             }
             setGridText(value)
         }
-        binding.gridSeekbar.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
-            override fun onStartTrackingTouch(slider: Slider) {}
+        binding.gridSeekbar.addOnSliderTouchListener(
+            object : Slider.OnSliderTouchListener {
+                override fun onStartTrackingTouch(slider: Slider) {}
 
-            override fun onStopTrackingTouch(slider: Slider) {
-                preferences.gridSize().set((slider.value / 2f) - .5f)
-                setGridText(slider.value)
-            }
-        },
+                override fun onStopTrackingTouch(slider: Slider) {
+                    preferences.gridSize().set((slider.value / 2f) - .5f)
+                    setGridText(slider.value)
+                }
+            },
         )
     }
 

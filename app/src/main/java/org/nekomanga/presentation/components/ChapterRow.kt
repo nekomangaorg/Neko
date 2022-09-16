@@ -116,7 +116,6 @@ fun ChapterRow(
                         Background(icon, Alignment.CenterStart, color, stringResource(id = text), themeColor.buttonColor)
                     }
                     else -> Unit
-
                 }
             },
             dismissContent = {
@@ -145,7 +144,6 @@ fun ChapterRow(
             dismissState.isDismissed(DismissDirection.EndToStart) -> Reset(dismissState = dismissState, action = onRead)
             dismissState.isDismissed(DismissDirection.StartToEnd) -> Reset(dismissState = dismissState, action = onBookmark)
         }
-
     }
 }
 
@@ -182,7 +180,6 @@ private fun Background(icon: ImageVector, alignment: Alignment, color: Color, te
                 color = contentColor,
             )
         }
-
     }
 }
 
@@ -246,7 +243,7 @@ private fun ChapterInfo(
             ),
         ),
 
-        )
+    )
 
     Row(
         modifier = Modifier
@@ -262,13 +259,11 @@ private fun ChapterInfo(
             .padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-
         Column(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .fillMaxWidth(.8f),
         ) {
-
             val titleText = when (shouldHideChapterTitles) {
                 true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapterNumber))
                 false -> title
@@ -277,7 +272,8 @@ private fun ChapterInfo(
             Row {
                 if (bookmark) {
                     Icon(
-                        imageVector = Icons.Filled.Bookmark, contentDescription = null,
+                        imageVector = Icons.Filled.Bookmark,
+                        contentDescription = null,
                         modifier = Modifier
                             .size(16.dp)
                             .align(Alignment.CenterVertically),
@@ -316,7 +312,6 @@ private fun ChapterInfo(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (language.isNotNullOrEmpty() && language.equals("en", true).not()) {
-
                     val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
 
                     when (iconRes == null) {
@@ -332,7 +327,6 @@ private fun ChapterInfo(
                             )
                         }
                         false -> {
-
                             val painter = rememberDrawablePainter(drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes))
                             Image(
                                 painter = painter,
@@ -357,14 +351,13 @@ private fun ChapterInfo(
                 )
 
                 statuses.joinToString(" • ")
-
             }
-
         }
         Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
-
             DownloadButton(
-                themeColorState.buttonColor, downloadStateProvider, downloadProgressProvider,
+                themeColorState.buttonColor,
+                downloadStateProvider,
+                downloadProgressProvider,
                 Modifier
                     .combinedClickable(
                         onClick = {
@@ -419,4 +412,3 @@ val decimalFormat = DecimalFormat(
     DecimalFormatSymbols()
         .apply { decimalSeparator = '.' },
 )
-

@@ -56,7 +56,6 @@ fun ToolTipIconButton(
             },
         ),
     ) {
-        
         if (icon != null) {
             Icon(
                 imageVector = icon,
@@ -72,7 +71,6 @@ fun ToolTipIconButton(
                 contentDescription = toolTipLabel,
             )
         }
-
     }
 
     Tooltip(

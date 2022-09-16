@@ -107,7 +107,9 @@ fun String.capitalized(): String {
     return this.replaceFirstChar {
         if (it.isLowerCase()) {
             it.titlecase(Locale.US)
-        } else it.toString()
+        } else {
+            it.toString()
+        }
     }
 }
 

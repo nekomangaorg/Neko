@@ -32,7 +32,6 @@ import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
-
     val na = stringResource(id = R.string.n_a)
 
     val context = LocalContext.current
@@ -40,7 +39,6 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
     val numberFormat = NumberFormat.getInstance(NumberFormat.NUMBERSTYLE)
 
     val stats = remember {
-
         val userScore = when (statsState.averageUserRating == 0.0) {
             true -> na
             false -> statsState.averageUserRating.toString()
@@ -73,9 +71,7 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
         false -> Arrangement.Top
     }
 
-
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = verticalArrangement) {
-
         val axisPadding = when (isTablet) {
             true -> 16.dp
             false -> 8.dp
@@ -101,13 +97,10 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
 
 @Composable
 private fun BasicStat(value: String, label: String, isTablet: Boolean) {
-
     val (titleTypography, labelTypography, padding) = when (isTablet) {
         true -> Triple(MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.SemiBold), MaterialTheme.typography.titleMedium, 20.dp)
         false -> Triple(MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), MaterialTheme.typography.labelMedium, 12.dp)
     }
-
-
 
     ElevatedCard(
         shape = RoundedCornerShape(25),
@@ -120,4 +113,3 @@ private fun BasicStat(value: String, label: String, isTablet: Boolean) {
         }
     }
 }
-

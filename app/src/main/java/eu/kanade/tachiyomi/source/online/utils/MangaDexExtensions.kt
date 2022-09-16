@@ -24,7 +24,6 @@ fun MangaDataDto.toBasicManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = tr
 }
 
 fun MangaDataDto.toSourceManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = true): SourceManga {
-
     val thumbnail = this@toSourceManga.relationships
         .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.Types.coverArt }
         ?.attributes?.fileName
@@ -43,4 +42,3 @@ fun MangaDataDto.toSourceManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = t
         currentThumbnail = thumbnail,
     )
 }
-

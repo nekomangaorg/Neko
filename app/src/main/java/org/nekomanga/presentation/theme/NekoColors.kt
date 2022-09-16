@@ -71,5 +71,3 @@ fun dynamicTextSelectionColor(color: Color) = TextSelectionColors(
     handleColor = color,
     backgroundColor = color.copy(alpha = NekoColors.disabledAlphaHighContrast),
 )
-
-

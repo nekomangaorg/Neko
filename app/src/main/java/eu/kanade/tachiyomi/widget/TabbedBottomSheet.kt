@@ -43,25 +43,26 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
             view?.isNestedScrollingEnabled = binding.pager.currentItem == index
             view?.requestLayout()
         }
-        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
-                view?.isNestedScrollingEnabled = true
-                view?.requestLayout()
-            }
+        binding.tabs.addOnTabSelectedListener(
+            object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
+                    view?.isNestedScrollingEnabled = true
+                    view?.requestLayout()
+                }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-                val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
-                view?.isNestedScrollingEnabled = false
-                view?.requestLayout()
-            }
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
+                    val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
+                    view?.isNestedScrollingEnabled = false
+                    view?.requestLayout()
+                }
 
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
-                view?.isNestedScrollingEnabled = true
-                view?.requestLayout()
-            }
-        },
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+                    val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
+                    view?.isNestedScrollingEnabled = true
+                    view?.requestLayout()
+                }
+            },
         )
     }
 

@@ -118,7 +118,9 @@ abstract class SettingsController : PreferenceController() {
     open fun getSearchTitle(): String? {
         return if (this is FloatingSearchInterface) {
             searchTitle(preferenceScreen?.title?.toString()?.lowercase(Locale.ROOT))
-        } else null
+        } else {
+            null
+        }
     }
 
     fun setTitle() {

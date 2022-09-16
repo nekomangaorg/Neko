@@ -28,8 +28,3 @@ fun ResultError.message(): String {
         is ResultError.Generic -> errorString
     }
 }
-
-
-
-
-

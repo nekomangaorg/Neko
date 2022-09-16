@@ -1,5 +1,19 @@
-[*.{kt,kts}]
-indent_size = 4
+[*]
+indent_style = space
+indent_size = 2
+
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
 insert_final_newline = true
+
+[*.{java,kt,kts,scala,rs,xml,kt.spec,kts.spec}]
+indent_size = 4
+
+[*.{kt,kts}]
+ij_kotlin_imports_layout = *
 ij_kotlin_allow_trailing_comma = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
+
+[*.md]
+trim_trailing_whitespace = false

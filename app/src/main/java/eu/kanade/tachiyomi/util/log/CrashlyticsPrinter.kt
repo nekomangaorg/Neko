@@ -13,7 +13,6 @@ class CrashlyticsPrinter(private val logLevel: Int) : Printer {
      * @param msg the msg of log
      */
     override fun println(logLevel: Int, tag: String?, msg: String?) {
-
         if (logLevel >= this.logLevel && msg != null) {
             try {
                 FirebaseCrashlytics.getInstance().log(msg)

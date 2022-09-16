@@ -353,7 +353,6 @@ class ReaderPresenter(
             val networkManga = it.sManga!!
             val chapters = it.sChapters
 
-
             tempManga.copyFrom(networkManga)
             tempManga.title = networkManga.title
 

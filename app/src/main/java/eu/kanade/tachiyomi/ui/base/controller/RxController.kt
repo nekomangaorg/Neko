@@ -31,7 +31,7 @@ abstract class RxController<VB : ViewBinding>(bundle: Bundle? = null) : BaseCont
         super.onDetach(view)
         untilDetachSubscriptions.unsubscribe()
     }
-    
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
         showToolbar()
         return super.onCreateView(inflater, container, savedViewState)

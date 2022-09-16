@@ -75,12 +75,14 @@ class SettingsLibraryController : SettingsController() {
                 isPersistent = false
                 val catCount = db.getCategories().executeAsBlocking().size
                 titleRes = if (catCount > 0) R.string.edit_categories else R.string.add_categories
-                if (catCount > 0) summary =
-                    context.resources.getQuantityString(
-                        R.plurals.category_plural,
-                        catCount,
-                        catCount,
-                    )
+                if (catCount > 0) {
+                    summary =
+                        context.resources.getQuantityString(
+                            R.plurals.category_plural,
+                            catCount,
+                            catCount,
+                        )
+                }
                 onClick { router.pushController(CategoryController().withFadeTransaction()) }
             }
             intListPreference(activity) {

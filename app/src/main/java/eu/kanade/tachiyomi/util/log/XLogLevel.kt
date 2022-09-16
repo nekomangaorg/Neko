@@ -8,7 +8,8 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 enum class XLogLevel(val description: String) {
     MINIMAL("critical errors only"),
     EXTRA("log everything"),
-    EXTREME("network inspection mode");
+    EXTREME("network inspection mode"),
+    ;
 
     companion object {
         private var curLogLevel: Int? = null

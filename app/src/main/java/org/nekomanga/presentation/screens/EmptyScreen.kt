@@ -85,7 +85,6 @@ private fun EmptyScreen(
             Arrangement.Top,
             Alignment.CenterHorizontally,
         ) {
-
             icon()
 
             message?.let {

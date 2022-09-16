@@ -104,7 +104,7 @@ fun DetailsBottomSheet(
             },
         )
         is DetailsBottomSheetScreen.TrackingSearchSheet -> {
-            //do the initial search this way we dont need to "reset" the state after the sheet closes
+            // do the initial search this way we dont need to "reset" the state after the sheet closes
             LaunchedEffect(key1 = currentScreen.trackingService.id) {
                 trackActions.search(mangaState.value.originalTitle, currentScreen.trackingService)
             }
@@ -148,7 +148,8 @@ fun DetailsBottomSheet(
         }
         is DetailsBottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
-                themeColorState = themeColorState, externalLinks = mangaState.value.externalLinks,
+                themeColorState = themeColorState,
+                externalLinks = mangaState.value.externalLinks,
                 onLinkClick = { url, title ->
                     closeSheet()
                     openInWebView(url, title)

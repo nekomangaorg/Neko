@@ -119,7 +119,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
                     ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom
-                        ?: 0
+                    ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -552,7 +552,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         SeriesType('m', R.string.series_type),
         MissingChapters('o', R.string.missing_chapters),
         Merged('n', R.string.merged),
-        Tracked('t', R.string.tracked);
+        Tracked('t', R.string.tracked),
+        ;
 
         companion object {
             val DEFAULT_ORDER = listOf(

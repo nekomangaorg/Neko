@@ -197,7 +197,7 @@ class DownloadCache(
                         sourceValue.key,
                     )
                 val id = manga?.id ?: return@mapNotNull null
-                
+
                 val mangadexIds = mangaDir.value.files.map { it.takeLast(36) }
                     .filter {
                         it.isUUID()

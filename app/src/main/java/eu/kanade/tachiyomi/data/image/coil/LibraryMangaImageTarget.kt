@@ -55,4 +55,3 @@ inline fun ImageView.loadManga(
         .build()
     return imageLoader.enqueue(request)
 }
-

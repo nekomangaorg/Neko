@@ -15,9 +15,8 @@ import uy.kohesive.injekt.api.get
 open class MatPreference @JvmOverloads constructor(
     val activity: Activity?,
     context: Context,
-    attrs:
-        AttributeSet? =
-            null,
+    attrs: AttributeSet? =
+        null,
 ) :
     Preference(context, attrs) {
 

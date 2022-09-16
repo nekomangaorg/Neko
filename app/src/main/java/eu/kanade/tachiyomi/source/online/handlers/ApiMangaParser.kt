@@ -42,7 +42,6 @@ class ApiMangaParser {
             manga.rating = stats.first
             manga.users = stats.second
 
-
             manga.description = mangaAttributesDto.description.asMdMap<String>()["en"]
 
             val authors = mangaDto.relationships.filter { relationshipDto ->
@@ -236,7 +235,7 @@ class ApiMangaParser {
             throw e
         }
     }
-    
+
     private fun parseStatus(status: String) = when (status) {
         "ongoing" -> SManga.ONGOING
         "completed" -> SManga.PUBLICATION_COMPLETE

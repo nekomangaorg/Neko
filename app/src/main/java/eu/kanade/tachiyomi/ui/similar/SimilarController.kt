@@ -34,4 +34,3 @@ class SimilarController(mangaUUID: String) : BaseComposeController<SimilarPresen
         const val MANGA_EXTRA = "manga"
     }
 }
-

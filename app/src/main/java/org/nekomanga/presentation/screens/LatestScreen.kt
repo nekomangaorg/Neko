@@ -59,7 +59,6 @@ fun LatestScreen(
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
 ) {
-
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
 
@@ -73,7 +72,8 @@ fun LatestScreen(
     }
 
     ModalBottomSheetLayout(
-        sheetState = sheetState, sheetShape = RoundedCornerShape(Shapes.sheetRadius),
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 EditCategorySheet(
@@ -91,7 +91,6 @@ fun LatestScreen(
             }
         },
     ) {
-
         NekoScaffold(
             title = stringResource(id = R.string.latest),
             onNavigationIconClicked = onBackPress,
@@ -141,7 +140,6 @@ fun LatestScreen(
                     contentPadding = incomingContentPadding,
                 )
             } else {
-
                 if (latestScreenState.value.isList) {
                     MangaList(
                         mangaList = latestScreenState.value.displayManga,
@@ -178,5 +176,3 @@ fun LatestScreen(
         }
     }
 }
-
-

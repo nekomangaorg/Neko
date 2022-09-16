@@ -208,7 +208,9 @@ fun syncChaptersWithSource(
             if (toAdd.isNotEmpty()) {
                 manga.last_update = Date().time
             }
-        } else manga.last_update = dateFetch
+        } else {
+            manga.last_update = dateFetch
+        }
         db.updateLastUpdated(manga).executeAsBlocking()
     }
 

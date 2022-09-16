@@ -73,7 +73,10 @@ class SettingsSiteController :
                 R.string.content_rating_pornographic,
             )
             entryValues = listOf(
-                MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic,
+                MdConstants.ContentRating.safe,
+                MdConstants.ContentRating.suggestive,
+                MdConstants.ContentRating.erotica,
+                MdConstants.ContentRating.pornographic,
             )
 
             defValue = setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
@@ -161,7 +164,6 @@ class SettingsSiteController :
                 StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
             }
         }
-        
 
         switchPreference {
             key = PreferenceKeys.addToLibraryAsPlannedToRead

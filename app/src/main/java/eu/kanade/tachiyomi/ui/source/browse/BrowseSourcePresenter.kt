@@ -48,7 +48,6 @@ import org.nekomanga.domain.network.ResultError
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

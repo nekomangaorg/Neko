@@ -90,7 +90,6 @@ fun MangaList(
     onLongClick: (DisplayManga) -> Unit = {},
     loadNextItems: () -> Unit = {},
 ) {
-
     val scrollState = rememberLazyListState()
 
     LazyColumn(

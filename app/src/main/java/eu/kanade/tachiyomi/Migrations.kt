@@ -132,7 +132,6 @@ object Migrations {
                 LibraryUpdateJob.setupTask(context)
             }
 
-
             return true
         }
         return false

@@ -57,5 +57,3 @@ class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPrese
         AppUpdateService.start(applicationContext!!, url, true)
     }
 }
-
-

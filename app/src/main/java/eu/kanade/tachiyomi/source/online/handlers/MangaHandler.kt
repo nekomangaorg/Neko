@@ -83,7 +83,6 @@ class MangaHandler {
             }.andThen { sManga ->
                 Ok(sManga to artworks.await())
             }
-
         }
     }
 
@@ -120,7 +119,6 @@ class MangaHandler {
     }
 
     private fun CoroutineScope.statsAsync(mangaUUID: String) = async {
-
         service.mangaStatistics(mangaUUID)
             .getOrResultError("trying to get rating for $mangaUUID")
             .mapBoth(
@@ -145,7 +143,6 @@ class MangaHandler {
     suspend fun fetchChapterList(mangaUUID: String, lastChapterNumber: Int?): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
             val langs = MdUtil.getLangsToShow(preferencesHelper)
-
 
             fetchOffset(mangaUUID, langs, 0).andThen { chapterListDto ->
                 Ok(

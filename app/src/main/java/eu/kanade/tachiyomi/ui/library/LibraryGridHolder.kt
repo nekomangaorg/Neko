@@ -194,11 +194,17 @@ fun MangaGridItemBinding.setFreeformCoverRatio(manga: Manga?, parent: AutofitRec
 
 fun MangaGridItemBinding.setBGAndFG(libraryLayout: Int) {
     val bottom =
-        if (libraryLayout == LibraryItem.LAYOUT_COMFORTABLE_GRID) 2.dpToPx
-        else card.marginBottom - 2.dpToPx
+        if (libraryLayout == LibraryItem.LAYOUT_COMFORTABLE_GRID) {
+            2.dpToPx
+        } else {
+            card.marginBottom - 2.dpToPx
+        }
     val others =
-        if (libraryLayout == LibraryItem.LAYOUT_COMPACT_GRID) 4.dpToPx
-        else 5.dpToPx
+        if (libraryLayout == LibraryItem.LAYOUT_COMPACT_GRID) {
+            4.dpToPx
+        } else {
+            5.dpToPx
+        }
     (constraintLayout.background as? RippleDrawable)?.apply {
         for (i in 0 until numberOfLayers) {
             setLayerInset(i, others, others, others, bottom)

@@ -99,7 +99,9 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         binding.downloadIcon.setImageDrawable(
             if (state == Download.State.CHECKED) {
                 checkDrawable
-            } else downloadDrawable,
+            } else {
+                downloadDrawable
+            },
         )
         when (state) {
             Download.State.CHECKED -> {

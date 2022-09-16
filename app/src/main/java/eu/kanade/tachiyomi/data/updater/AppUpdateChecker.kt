@@ -26,7 +26,7 @@ class AppUpdateChecker {
     ): AppUpdateResult {
         // Limit checks to once a day at most
         if (!isUserPrompt && Date().time < preferences.lastAppCheck()
-                .get() + TimeUnit.DAYS.toMillis(1)
+            .get() + TimeUnit.DAYS.toMillis(1)
         ) {
             return AppUpdateResult.NoNewUpdate
         }
@@ -67,4 +67,3 @@ class AppUpdateChecker {
 const val GITHUB_REPO: String = "CarlosEsco/Neko"
 const val LATEST_RELEASE_URL = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
 const val RELEASE_URL = "https://github.com/$GITHUB_REPO/releases/tag/${BuildConfig.VERSION_NAME}"
-

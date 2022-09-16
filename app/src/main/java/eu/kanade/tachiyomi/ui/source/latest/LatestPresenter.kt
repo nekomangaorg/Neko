@@ -84,7 +84,6 @@ class LatestPresenter(
                     )
                 }
             }
-
         }
         presenterScope.launch {
             preferences.browseAsList().asFlow().collectLatest {
@@ -116,7 +115,6 @@ class LatestPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-
                 val defaultCategory = preferences.defaultCategory()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
@@ -165,4 +163,3 @@ class LatestPresenter(
         preferences.browseAsList().set(!latestScreenState.value.isList)
     }
 }
-

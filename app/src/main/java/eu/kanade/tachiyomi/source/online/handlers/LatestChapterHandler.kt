@@ -69,7 +69,6 @@ class LatestChapterHandler {
                     "contentRating[]" to allContentRating,
                 )
 
-
             service.search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("trying to search manga from latest chapters").andThen { mangaListDto ->
                     val hasMoreResults = chapterListDto.limit + chapterListDto.offset < chapterListDto.total
@@ -84,7 +83,6 @@ class LatestChapterHandler {
 
                     Ok(MangaListPage(sourceManga = mangaList.toImmutableList(), hasNextPage = hasMoreResults))
                 }
-
         }.getOrElse {
             XLog.e("Error parsing latest chapters", it)
             Err(ResultError.Generic(errorString = "Error parsing latest chapters response"))

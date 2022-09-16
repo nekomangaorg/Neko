@@ -110,7 +110,6 @@ fun MangaScreen(
     chapterActions: ChapterActions,
     onBackPressed: () -> Unit,
 ) {
-
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
 
@@ -123,7 +122,6 @@ fun MangaScreen(
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-
 
     LaunchedEffect(snackbarHostState.currentSnackbarData) {
         snackbar.collect { state ->
@@ -167,7 +165,7 @@ fun MangaScreen(
         )
     }
 
-    //set the current sheet to null when bottom sheet is closed
+    // set the current sheet to null when bottom sheet is closed
     if (sheetState.isVisible.not()) {
         currentBottomSheet = null
     }
@@ -203,7 +201,6 @@ fun MangaScreen(
             }
         },
     ) {
-
         NekoScaffold(
             title = "",
             themeColorState = themeColorState,
@@ -225,10 +222,9 @@ fun MangaScreen(
                         backgroundColor = themeColorState.buttonColor,
                         contentColor = MaterialTheme.colorScheme.surface,
 
-                        )
+                    )
                 },
             ) {
-
                 val mangaDetailContentPadding =
                     PaddingValues(
                         bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
@@ -350,7 +346,6 @@ fun MangaScreen(
                     )
                 }
 
-
                 CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
                     if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                         ExpandedLayout(
@@ -378,7 +373,6 @@ fun MangaScreen(
                             onConfirm = {
                                 chapterActions.delete(generalState.value.removedChapters)
                                 chapterActions.clearRemoved
-
                             },
                             onDismiss = chapterActions.clearRemoved,
                         )
@@ -453,7 +447,6 @@ private fun ExpandedLayout(
 }
 
 private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color {
-
     val color1 = buttonColor.toArgb()
     val luminance = ColorUtils.calculateLuminance(color1).toFloat()
 
@@ -489,4 +482,3 @@ fun defaultThemeColorState(): ThemeColorState {
         altContainerColor = Color(ColorUtils.blendARGB(MaterialTheme.colorScheme.secondary.toArgb(), MaterialTheme.colorScheme.surface.toArgb(), .706f)),
     )
 }
-

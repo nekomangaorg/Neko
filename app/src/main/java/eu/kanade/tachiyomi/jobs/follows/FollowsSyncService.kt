@@ -46,7 +46,6 @@ class FollowsSyncService {
             val syncFollowStatusInts =
                 preferences.mangadexSyncToLibraryIndexes().get().map { it.toInt() }
 
-
             sourceManager.getMangadex().fetchAllFollows().onFailure {
                 errorNotification((it as? ResultError.Generic)?.errorString ?: "Error fetching follows")
             }.onSuccess { unfilteredManga ->

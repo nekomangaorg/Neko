@@ -67,7 +67,6 @@ fun MangaDetailsHeader(
     quickReadClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
         val isExpanded = rememberSaveable {
@@ -81,7 +80,6 @@ fun MangaDetailsHeader(
             true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
             false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
         }
-
 
         Column {
             BoxWithConstraints {
@@ -227,6 +225,5 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeCo
             ),
         ),
 
-        )
+    )
 }
-

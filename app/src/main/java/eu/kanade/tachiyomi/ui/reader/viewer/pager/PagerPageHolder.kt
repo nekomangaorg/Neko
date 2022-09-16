@@ -48,7 +48,6 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-
 import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
@@ -131,8 +130,11 @@ class PagerPageHolder(
         )
         progressBar.foregroundTintList = ColorStateList.valueOf(
             context.getResourceColor(
-                if (isInvertedFromTheme()) R.attr.colorPrimaryInverse
-                else R.attr.colorPrimary,
+                if (isInvertedFromTheme()) {
+                    R.attr.colorPrimaryInverse
+                } else {
+                    R.attr.colorPrimary
+                },
             ),
         )
     }
@@ -274,10 +276,14 @@ class PagerPageHolder(
                         ZoomType.Center -> center.also { it?.y = 0F }
                     }
 
-                    val topInsets = if (viewer.activity.isSplitScreen) 0f else {
+                    val topInsets = if (viewer.activity.isSplitScreen) {
+                        0f
+                    } else {
                         viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
                     }
-                    val bottomInsets = if (viewer.activity.isSplitScreen) 0f else {
+                    val bottomInsets = if (viewer.activity.isSplitScreen) {
+                        0f
+                    } else {
                         viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
                     }
                     val targetScale = (height.toFloat() - topInsets - bottomInsets) / sHeight.toFloat()
@@ -863,7 +869,9 @@ class PagerPageHolder(
         fun getBGType(readerTheme: Int, context: Context): Int {
             return if (readerTheme == 3) {
                 if (context.isInNightMode()) 2 else 1
-            } else 0 + (context.resources.configuration?.orientation ?: 0) * 10
+            } else {
+                0 + (context.resources.configuration?.orientation ?: 0) * 10
+            }
         }
     }
 }

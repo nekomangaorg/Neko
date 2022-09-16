@@ -392,8 +392,11 @@ fun Context.isInNightMode(): Boolean {
 }
 
 fun Context.appDelegateNightMode(): Int {
-    return if (isInNightMode()) AppCompatDelegate.MODE_NIGHT_YES
-    else AppCompatDelegate.MODE_NIGHT_NO
+    return if (isInNightMode()) {
+        AppCompatDelegate.MODE_NIGHT_YES
+    } else {
+        AppCompatDelegate.MODE_NIGHT_NO
+    }
 }
 
 fun Context.isOnline(): Boolean {

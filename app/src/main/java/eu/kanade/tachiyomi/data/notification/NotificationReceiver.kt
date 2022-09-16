@@ -99,16 +99,18 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             ACTION_MARK_AS_READ -> {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-                if (notificationId > -1) dismissNotification(
-                    context,
-                    notificationId,
-                    intent.getIntExtra(EXTRA_GROUP_ID, 0),
-                )
+                if (notificationId > -1) {
+                    dismissNotification(
+                        context,
+                        notificationId,
+                        intent.getIntExtra(EXTRA_GROUP_ID, 0),
+                    )
+                }
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
                 markAsRead(urls, mangaId)
             }
-            //download manga chapter
+            // download manga chapter
             ACTION_DOWNLOAD_CHAPTER -> {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (notificationId > -1) {
@@ -558,8 +560,7 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun openChapterPendingActivity(
             context: Context,
             manga: Manga,
-            chapter:
-            Chapter,
+            chapter: Chapter,
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(
@@ -581,8 +582,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             notes: String,
             downloadLink: String,
-        ):
-            PendingIntent {
+        ): PendingIntent {
             val newIntent =
                 Intent(
                     context,
@@ -605,8 +605,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param context context of application
          * @param manga manga of chapter
          */
-        internal fun openChapterPendingActivity(context: Context, manga: Manga, groupId: Int):
-            PendingIntent {
+        internal fun openChapterPendingActivity(context: Context, manga: Manga, groupId: Int): PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -680,11 +679,9 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun markAsReadPendingBroadcast(
             context: Context,
             manga: Manga,
-            chapters:
-            Array<Chapter>,
+            chapters: Array<Chapter>,
             groupId: Int,
-        ):
-            PendingIntent {
+        ): PendingIntent {
             val newIntent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_MARK_AS_READ
                 putExtra(EXTRA_CHAPTER_URL, chapters.map { it.url }.toTypedArray())

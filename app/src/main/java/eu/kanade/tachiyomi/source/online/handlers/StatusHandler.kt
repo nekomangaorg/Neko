@@ -26,7 +26,6 @@ class StatusHandler {
 
     suspend fun fetchReadingStatusForAllManga(): Map<String, String?> {
         return withContext(Dispatchers.IO) {
-
             return@withContext authService.readingStatusAllManga()
                 .getOrResultError("getting reading status")
                 .mapBoth(

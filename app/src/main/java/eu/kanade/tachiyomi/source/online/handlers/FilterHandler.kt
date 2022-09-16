@@ -119,7 +119,7 @@ class FilterHandler {
         val statusList = mutableListOf<String>() // status[]
         val includeTagList = mutableListOf<String>() // includedTags[]
         val excludeTagList = mutableListOf<String>() // excludedTags[]
-        val hasAvailableChapterLangs = mutableListOf<String>()// availableTranslatedLanguage[]
+        val hasAvailableChapterLangs = mutableListOf<String>() // availableTranslatedLanguage[]
 
         // add filters
         filters.forEach { filter ->

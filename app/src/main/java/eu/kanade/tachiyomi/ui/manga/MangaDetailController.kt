@@ -59,11 +59,13 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)
         val context = applicationContext ?: return
-        if (notificationId > -1) NotificationReceiver.dismissNotification(
-            context,
-            notificationId,
-            bundle.getInt("groupId", 0),
-        )
+        if (notificationId > -1) {
+            NotificationReceiver.dismissNotification(
+                context,
+                notificationId,
+                bundle.getInt("groupId", 0),
+            )
+        }
     }
 
     override val presenter = MangaDetailPresenter(mangaId!!)

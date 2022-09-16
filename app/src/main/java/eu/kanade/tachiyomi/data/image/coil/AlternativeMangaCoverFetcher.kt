@@ -250,7 +250,7 @@ class AlternativeMangaCoverFetcher(
             else -> null
         }
     }
-    
+
     private enum class Type {
         File, URL;
     }

@@ -184,7 +184,6 @@ class FollowsHandler {
             readingStatusResponse.onFailure {
                 this.log("trying to fetch reading status for $mangaUUID")
                 throw Exception("error trying to get tracking info")
-
             }
             val followStatus =
                 FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
@@ -196,7 +195,6 @@ class FollowsHandler {
                 score = rating?.rating?.toFloat() ?: 0f
             }
             return@withContext track
-
         }
     }
 }

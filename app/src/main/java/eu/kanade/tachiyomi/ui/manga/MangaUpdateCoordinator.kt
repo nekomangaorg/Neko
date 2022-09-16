@@ -53,7 +53,6 @@ class MangaUpdateCoordinator {
      *  Channel flow for updating the Manga/Chapters in the given scope
      */
     suspend fun update(manga: Manga, scope: CoroutineScope) = channelFlow {
-
         val mangaWasInitialized = manga.initialized
 
         if (!mangaDex.checkIfUp()) {
@@ -81,7 +80,6 @@ class MangaUpdateCoordinator {
                 send(MangaResult.Success)
             }
         }
-
     }.flowOn(Dispatchers.IO)
 
     /**
@@ -109,7 +107,7 @@ class MangaUpdateCoordinator {
                     resultingManga.let { networkManga ->
                         manga.copyFrom(networkManga)
                         manga.initialized = true
-                        //This clears custom titles from j2k/sy and if MangaDex removes the title
+                        // This clears custom titles from j2k/sy and if MangaDex removes the title
                         manga.user_title?.let { customTitle ->
                             if (customTitle != manga.originalTitle && customTitle !in manga.getAltTitles()) {
                                 manga.user_title = null
@@ -121,7 +119,6 @@ class MangaUpdateCoordinator {
                         db.insertManga(manga).executeOnIO()
                         send(MangaResult.UpdatedManga)
                     }
-
                 }
         }
     }
@@ -132,7 +129,6 @@ class MangaUpdateCoordinator {
      */
     private fun ProducerScope<MangaResult>.startChapterJob(scope: CoroutineScope, manga: Manga, mangaWasAlreadyInitialized: Boolean): Job {
         return scope.launchIO {
-
             val deferredChapters = async {
                 mangaDex.fetchChapterList(manga)
                     .onFailure {
@@ -158,7 +154,7 @@ class MangaUpdateCoordinator {
             val allChapters = deferredChapters.await() + deferredMergedChapters.await()
 
             val newChapters = syncChaptersWithSource(db, allChapters, manga)
-            //chapters that were added
+            // chapters that were added
             if (newChapters.first.isNotEmpty()) {
                 val downloadNew = preferences.downloadNewChapters().get()
                 if (downloadNew && mangaWasAlreadyInitialized) {
@@ -168,7 +164,7 @@ class MangaUpdateCoordinator {
                 }
                 mangaShortcutManager.updateShortcuts()
             }
-            //chapters that were removed
+            // chapters that were removed
             if (newChapters.second.isNotEmpty()) {
                 val removedChaptersId = newChapters.second.mapNotNull { it.id }
                 send(MangaResult.ChaptersRemoved(removedChaptersId))
@@ -198,4 +194,3 @@ sealed class MangaResult {
     class ChaptersRemoved(val chapterIdsRemoved: List<Long>) : MangaResult()
     object Success : MangaResult()
 }
-

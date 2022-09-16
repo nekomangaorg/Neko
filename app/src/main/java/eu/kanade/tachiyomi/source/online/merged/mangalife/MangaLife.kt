@@ -45,7 +45,7 @@ class MangaLife : ReducedHttpSource() {
                 thumbnailUrl = document.select(".SearchResult > .SearchResultCover img").first()!!.attr("ng-src")
             }
 
-            //val searchResults =
+            // val searchResults =
             val results = FuzzySearch.extractSorted(query, directory.keys, 88).mapNotNull {
                 directory[it.string]
             }
@@ -67,7 +67,6 @@ class MangaLife : ReducedHttpSource() {
     suspend fun fetchChapters(mergeMangaUrl: String): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result.runCatching {
-
                 val response = client.newCall(GET("$baseUrl$mergeMangaUrl", headers)).await()
                 val vmChapters =
                     response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
@@ -82,7 +81,7 @@ class MangaLife : ReducedHttpSource() {
                             false -> chp.chapterName
                         }
 
-                        //get the seasons
+                        // get the seasons
                         val season1 = name.substringAfter("Volume ", "")
                         val season2 = name.substringBefore(" - Chapter", "").substringAfter("S")
                         if (season1.isNotEmpty() && season2.isEmpty()) {
@@ -91,7 +90,7 @@ class MangaLife : ReducedHttpSource() {
                             vol = season2
                         }
 
-                        //set the chapter text
+                        // set the chapter text
                         if (chp.type != "Volume") {
                             val splitName = name.substringAfter(" - Chapter").split(" ")
                             for (split in splitName) {
@@ -112,7 +111,6 @@ class MangaLife : ReducedHttpSource() {
                                 false -> dateFormat.parse("$chp.date +0600")?.time!!
                             }
                         }.getOrElse { 0L }
-
 
                         scanlator = this@MangaLife.name
                     }

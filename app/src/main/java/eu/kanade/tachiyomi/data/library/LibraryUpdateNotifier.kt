@@ -170,7 +170,9 @@ class LibraryUpdateNotifier(private val context: Context) {
                                             (chapterNames.size - (MAX_CHAPTERS - 1)),
                                             (chapterNames.size - (MAX_CHAPTERS - 1)),
                                         )
-                                } else chapterNames.joinToString(", ")
+                                } else {
+                                    chapterNames.joinToString(", ")
+                                }
                                 setContentText(chaptersNames)
                                 setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
                                 priority = NotificationCompat.PRIORITY_HIGH

@@ -54,7 +54,6 @@ fun FollowsScreen(
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     retryClick: () -> Unit,
 ) {
-
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
 
@@ -68,7 +67,8 @@ fun FollowsScreen(
     }
 
     ModalBottomSheetLayout(
-        sheetState = sheetState, sheetShape = RoundedCornerShape(Shapes.sheetRadius),
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 EditCategorySheet(
@@ -86,7 +86,6 @@ fun FollowsScreen(
             }
         },
     ) {
-
         NekoScaffold(
             title = stringResource(id = R.string.follows),
             onNavigationIconClicked = onBackPress,
@@ -109,7 +108,6 @@ fun FollowsScreen(
                     actions = persistentListOf(Action(R.string.retry, retryClick)),
                 )
             } else {
-
                 val haptic = LocalHapticFeedback.current
 
                 FollowsContent(
@@ -153,7 +151,6 @@ private fun FollowsContent(
             top = paddingValues.calculateTopPadding(),
         )
 
-
         if (followsScreenState.value.isList) {
             MangaListWithHeader(
                 groupedManga = followsScreenState.value.displayManga,
@@ -163,7 +160,6 @@ private fun FollowsContent(
                 onLongClick = mangaLongClick,
             )
         } else {
-
             MangaGridWithHeader(
                 groupedManga = followsScreenState.value.displayManga,
                 shouldOutlineCover = followsScreenState.value.outlineCovers,

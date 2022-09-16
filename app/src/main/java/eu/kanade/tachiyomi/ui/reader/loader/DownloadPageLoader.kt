@@ -52,7 +52,9 @@ class DownloadPageLoader(
                     }
                 }
                 ZipFile(tmpFile.absolutePath)
-            } else ZipFile(chapterPath.filePath)
+            } else {
+                ZipFile(chapterPath.filePath)
+            }
             return zip.entries().toList()
                 .filter { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
                 .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }

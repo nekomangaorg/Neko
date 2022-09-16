@@ -35,11 +35,14 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         return activity.materialAlertDialog()
             .setCustomTitleAndMessage(
                 R.string.reset_chapter_question,
-                if (chapter?.name != null) activity.getString(
-                    R.string.this_will_remove_the_read_date_for_x_question,
-                    chapter?.name ?: "",
-                )
-                else activity.getString(R.string.this_will_remove_the_read_date_question),
+                if (chapter?.name != null) {
+                    activity.getString(
+                        R.string.this_will_remove_the_read_date_for_x_question,
+                        chapter?.name ?: "",
+                    )
+                } else {
+                    activity.getString(R.string.this_will_remove_the_read_date_question)
+                },
             )
             .addCheckBoxPrompt(
                 activity.getString(

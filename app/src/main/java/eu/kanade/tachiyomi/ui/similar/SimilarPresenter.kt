@@ -57,7 +57,6 @@ class SimilarPresenter(
                     )
                 }
             }
-
         }
         presenterScope.launch {
             preferences.browseAsList().asFlow().collectLatest {
@@ -75,7 +74,6 @@ class SimilarPresenter(
     private fun getSimilarManga(forceRefresh: Boolean = false) {
         presenterScope.launch {
             if (mangaUUID.isNotEmpty()) {
-
                 _similarScreenState.update {
                     it.copy(isRefreshing = true, displayManga = persistentMapOf())
                 }
@@ -103,7 +101,6 @@ class SimilarPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-
                 val defaultCategory = preferences.defaultCategory()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {

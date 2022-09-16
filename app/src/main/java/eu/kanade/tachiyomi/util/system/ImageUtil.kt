@@ -76,8 +76,11 @@ object ImageUtil {
         } else {
             null
         }
-        return if (bitmapResized != null) BitmapDrawable(resources, bitmapResized)
-        else null
+        return if (bitmapResized != null) {
+            BitmapDrawable(resources, bitmapResized)
+        } else {
+            null
+        }
     }
 
     fun getExtensionFromMimeType(mime: String?): String {
@@ -107,7 +110,7 @@ object ImageUtil {
         HEIF("image/heif", "heif"),
         JPEG("image/jpeg", "jpg"),
 
-        //JXL("image/jxl", "jxl"),
+        // JXL("image/jxl", "jxl"),
         PNG("image/png", "png"),
         WEBP("image/webp", "webp"),
     }
@@ -130,7 +133,9 @@ object ImageUtil {
     }
 
     fun autoSetBackground(image: Bitmap?, alwaysUseWhite: Boolean, preferBlack: Boolean, context: Context): Drawable {
-        val backgroundColor = if (alwaysUseWhite) Color.WHITE else {
+        val backgroundColor = if (alwaysUseWhite) {
+            Color.WHITE
+        } else {
             val color = context.getResourceColor(R.attr.readerBackground)
             if (preferBlack && !color.isWhite) {
                 Color.BLACK
@@ -280,35 +285,39 @@ object ImageUtil {
         }
         val isLandscape = context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (darkBG) {
-            return if (!isLandscape && image.getPixel(left, bot).isWhite && image.getPixel(right, bot).isWhite) GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
-            )
-            else if (!isLandscape && image.getPixel(left, top).isWhite && image.getPixel(right, top).isWhite) GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
-            )
-            else ColorDrawable(blackPixel)
+            return if (!isLandscape && image.getPixel(left, bot).isWhite && image.getPixel(right, bot).isWhite) {
+                GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
+                )
+            } else if (!isLandscape && image.getPixel(left, top).isWhite && image.getPixel(right, top).isWhite) {
+                GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
+                )
+            } else {
+                ColorDrawable(blackPixel)
+            }
         }
         if (!isLandscape && (
-                topIsBlackStreak || (
-                    topLeftIsDark && topRightIsDark &&
-                        image.getPixel(left - offsetX, top).isDark && image.getPixel(right + offsetX, top).isDark &&
-                        (topMidIsDark || overallBlackPixels > 9)
-                    )
+            topIsBlackStreak || (
+                topLeftIsDark && topRightIsDark &&
+                    image.getPixel(left - offsetX, top).isDark && image.getPixel(right + offsetX, top).isDark &&
+                    (topMidIsDark || overallBlackPixels > 9)
                 )
+            )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
             )
         } else if (!isLandscape && (
-                bottomIsBlackStreak || (
-                    botLeftIsDark && botRightIsDark &&
-                        image.getPixel(left - offsetX, bot).isDark && image.getPixel(right + offsetX, bot).isDark &&
-                        (image.getPixel(midX, bot).isDark || overallBlackPixels > 9)
-                    )
+            bottomIsBlackStreak || (
+                botLeftIsDark && botRightIsDark &&
+                    image.getPixel(left - offsetX, bot).isDark && image.getPixel(right + offsetX, bot).isDark &&
+                    (image.getPixel(midX, bot).isDark || overallBlackPixels > 9)
                 )
+            )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,

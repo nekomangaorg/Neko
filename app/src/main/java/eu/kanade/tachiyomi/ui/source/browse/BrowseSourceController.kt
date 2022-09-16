@@ -415,8 +415,11 @@ open class BrowseSourceController(bundle: Bundle) :
             if (sourceFilter is Filter.Group<*>) {
                 for (filter in sourceFilter.state) {
                     if (filter is Filter<*> &&
-                        if (useContains) filter.name.contains(genreName, true)
-                        else filter.name.equals(genreName, true)
+                        if (useContains) {
+                            filter.name.contains(genreName, true)
+                        } else {
+                            filter.name.equals(genreName, true)
+                        }
                     ) {
                         when (filter) {
                             is Filter.TriState -> filter.state = 1
@@ -430,8 +433,11 @@ open class BrowseSourceController(bundle: Bundle) :
             } else if (sourceFilter is Filter.Select<*>) {
                 val index = sourceFilter.values.filterIsInstance<String>()
                     .indexOfFirst {
-                        if (useContains) it.contains(genreName, true)
-                        else it.equals(genreName, true)
+                        if (useContains) {
+                            it.contains(genreName, true)
+                        } else {
+                            it.equals(genreName, true)
+                        }
                     }
 
                 if (index != -1) {

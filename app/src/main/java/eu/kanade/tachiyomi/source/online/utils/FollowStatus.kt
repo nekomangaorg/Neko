@@ -11,7 +11,8 @@ enum class FollowStatus(val int: Int, @StringRes val stringRes: Int) {
     ON_HOLD(3, R.string.follows_on_hold),
     PLAN_TO_READ(4, R.string.follows_plan_to_read),
     DROPPED(5, R.string.follows_dropped),
-    RE_READING(6, R.string.follows_re_reading);
+    RE_READING(6, R.string.follows_re_reading),
+    ;
 
     fun toDex(): String = this.name.lowercase(Locale.US)
 

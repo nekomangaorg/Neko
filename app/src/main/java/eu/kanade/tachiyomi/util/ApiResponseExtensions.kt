@@ -58,7 +58,6 @@ fun <T> ApiResponse<T>.getOrResultError(errorType: String): Result<T, ResultErro
  * Maps the ApiResponse Exception to a Result Error
  */
 fun ApiResponse.Failure.Exception<*>.toResultError(errorType: String): ResultError {
-
     XLog.enableStackTrace(10).e("Exception $errorType ${this.message}", this.exception)
 
     return ResultError.Generic(errorString = "Unknown Error: '${this.message}'")

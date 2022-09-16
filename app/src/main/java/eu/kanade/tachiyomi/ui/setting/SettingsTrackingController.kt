@@ -51,7 +51,10 @@ class SettingsTrackingController :
                 R.string.content_rating_pornographic,
             )
             entryValues = listOf(
-                MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic,
+                MdConstants.ContentRating.safe,
+                MdConstants.ContentRating.suggestive,
+                MdConstants.ContentRating.erotica,
+                MdConstants.ContentRating.pornographic,
             )
 
             defValue = setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic)
@@ -81,7 +84,6 @@ class SettingsTrackingController :
                 this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
                     updateAutoAddTracker(newValue as Boolean, TrackManager.MYANIMELIST)
                 }
-
             }
             trackPreference(trackManager.aniList) {
                 activity?.openInBrowser(AnilistApi.authUrl())

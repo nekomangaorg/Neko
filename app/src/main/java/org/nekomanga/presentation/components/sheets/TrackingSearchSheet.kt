@@ -71,13 +71,10 @@ fun TrackingSearchSheet(
 
     var trackSearchItem by remember { mutableStateOf<TrackSearchItem?>(null) }
 
-
     BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-
         Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
-
             Header(stringResource(id = R.string.select_an_entry), cancelClick)
 
             when (trackSearchResult) {
@@ -87,8 +84,7 @@ fun TrackingSearchSheet(
                             .fillMaxWidth()
                             .requiredHeightIn(0.dp, maxLazyHeight.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                    )
-                    {
+                    ) {
                         item {
                             Gap(8.dp)
                         }
@@ -154,7 +150,6 @@ private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: Tra
             is TrackSearchResult.Error -> Text(text = trackSearchResult.errorMessage)
             else -> Unit
         }
-
     }
 }
 
@@ -166,7 +161,6 @@ private fun TrackSearchItem(
     openInBrowser: (String, String) -> Unit,
     trackSearchItemClick: (TrackSearchItem) -> Unit,
 ) {
-
     val isSelected = alreadySelectedTrack != null && alreadySelectedTrack.mediaId != 0L && alreadySelectedTrack.mediaId == trackSearch.trackItem.mediaId
 
     val (backdropColor, outlineColor) = if (isSelected) {
@@ -175,13 +169,11 @@ private fun TrackSearchItem(
         MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.outline
     }
 
-
     OutlinedCard(
         modifier = Modifier.padding(horizontal = 8.dp),
         border = CardDefaults.outlinedCardBorder(true).copy(brush = SolidColor(outlineColor)),
         onClick = { trackSearchItemClick(trackSearch) },
     ) {
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -200,7 +192,6 @@ private fun TrackSearchItem(
                     .fillMaxWidth()
                     .background(color = backdropColor.copy(alpha = NekoColors.highAlphaLowContrast)),
             ) {
-
                 IconButton(
                     onClick = { openInBrowser(trackSearch.trackItem.trackingUrl, trackSearch.trackItem.title) },
                     modifier = Modifier
@@ -208,7 +199,8 @@ private fun TrackSearchItem(
                         .align(Alignment.TopEnd),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.OpenInBrowser, contentDescription = null,
+                        imageVector = Icons.Default.OpenInBrowser,
+                        contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurface,
                     )
@@ -251,7 +243,6 @@ private fun TrackSearchItem(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
-
                         }
                     }
 
@@ -291,4 +282,3 @@ private fun TrackSearchItem(
         }
     }
 }
-

@@ -79,7 +79,8 @@ class SourceFilterSheet(val activity: Activity) :
             setCardViewMax(insets)
         }
 
-        (binding.root.parent.parent as? View)?.viewTreeObserver?.addOnGlobalLayoutListener(object :
+        (binding.root.parent.parent as? View)?.viewTreeObserver?.addOnGlobalLayoutListener(
+            object :
                 OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     updateBottomButtons()

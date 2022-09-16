@@ -74,7 +74,6 @@ class AboutPresenter : BaseCoroutinePresenter<AboutPresenter>() {
             _aboutScreenState.update {
                 it.copy(checkingForUpdates = false)
             }
-
         }
     }
 

@@ -73,9 +73,7 @@ fun TrackingDateSheet(
 
     val currentDateExists = trackingDate.currentDate > 0L
 
-
     BaseSheet(themeColor = themeColorState) {
-
         Box(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
@@ -83,7 +81,8 @@ fun TrackingDateSheet(
         ) {
             IconButton(onClick = { onDismiss() }) {
                 Icon(
-                    imageVector = Icons.Default.Close, contentDescription = null,
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
                     modifier = Modifier
                         .size(28.dp),
                     tint = MaterialTheme.colorScheme.onSurface,
@@ -102,9 +101,7 @@ fun TrackingDateSheet(
                     .fillMaxWidth()
                     .align(Alignment.CenterStart),
             )
-
         }
-
 
         Gap(8.dp)
         Divider()
@@ -177,7 +174,8 @@ fun TrackingDateSheet(
                 Arrangement.SpaceBetween,
             ) {
                 DateTextField(
-                    onEditingComplete = { currentDate -> newDate = currentDate }, format = format,
+                    onEditingComplete = { currentDate -> newDate = currentDate },
+                    format = format,
                     maxDate = LocalDate.now(),
                     contentTextStyle = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
                     cursorBrush = SolidColor(themeColorState.buttonColor),
