@@ -33,6 +33,8 @@ data class SimilarMangaDatabaseDto(
     var aniListManga: List<RelatedMangaDto>? = null,
     var myAnimelistApi: MalMangaRecommendationsDto? = null,
     var myAnimeListManga: List<RelatedMangaDto>? = null,
+    var mangaUpdatesApi: MUMangaDto? = null,
+    var mangaUpdatesListManga: List<RelatedMangaDto>? = null,
 )
 
 @Serializable
@@ -113,4 +115,156 @@ data class MalMangaRecommendationDto(
     val recommendation_url: String,
     val title: String,
     val recommendation_count: Int,
+)
+
+@Serializable
+data class MUMangaDto(
+
+    val series_id: Long,
+
+    val title: String,
+    val url: String,
+    val associated: List<MUAssociatedDto>,
+    val description: String,
+    val image: MUImageDto,
+    val type: String,
+    val year: String,
+    val bayesian_rating: Double,
+    val rating_votes: Long,
+    val genres: List<MUGenreDto>,
+    val categories: List<MUCategoryDto>,
+    val latest_chapter: Long,
+    val forum_id: Long,
+    val status: String,
+    val licensed: Boolean,
+    val completed: Boolean,
+    val anime: MUAnimeDto,
+
+    val related_series: List<MURelatedSeriesDto>,
+
+    val authors: List<MUAuthorDto>,
+    val publishers: List<MUPublisherDto>,
+    val publications: List<MUPublicationDto>,
+
+    val recommendations: List<MURecommendationDto>,
+    val category_recommendations: List<MUCategoryRecommendationDto>,
+
+    val rank: MURankDto,
+    val last_updated: MULastUpdatedDto,
+)
+
+@Serializable
+data class MUAnimeDto(
+    val start: String? = null,
+    val end: String? = null,
+)
+
+@Serializable
+data class MUAssociatedDto(
+    val title: String,
+)
+
+@Serializable
+data class MURelatedSeriesDto(
+    val relation_id: Long,
+    val relation_type: String,
+    val related_series_id: Long,
+    val related_series_name: String,
+    val triggered_by_relation_id: Long,
+)
+
+@Serializable
+data class MUAuthorDto(
+    val name: String,
+    val author_id: Long,
+    val type: String,
+)
+
+@Serializable
+data class MUCategoryDto(
+    val series_id: Long,
+    val category: String,
+    val votes: Long,
+    val votes_plus: Long,
+    val votes_minus: Long,
+    val added_by: Long,
+)
+
+@Serializable
+data class MURecommendationDto(
+    val series_name: String,
+    val series_id: Long,
+    val weight: Long,
+)
+
+@Serializable
+data class MUCategoryRecommendationDto(
+    val series_name: String,
+    val series_id: Long,
+    val weight: Long,
+)
+
+@Serializable
+data class MUGenreDto(
+    val genre: String,
+)
+
+@Serializable
+data class MUImageDto(
+    val url: MUURLDto,
+    val height: Long,
+    val width: Long,
+)
+
+@Serializable
+data class MUURLDto(
+    val original: String,
+    val thumb: String,
+)
+
+@Serializable
+data class MULastUpdatedDto(
+    val timestamp: Long,
+    val as_rfc3339: String,
+    val as_string: String,
+)
+
+@Serializable
+data class MUPublicationDto(
+    val publication_name: String,
+    val publisher_name: String,
+    val publisher_id: Long,
+)
+
+@Serializable
+data class MUPublisherDto(
+    val publisher_name: String,
+    val publisher_id: Long,
+    val type: String,
+    val notes: String,
+)
+
+@Serializable
+data class MURankDto(
+    val position: MUPositionDto,
+    val old_position: MUPositionDto,
+    val lists: MUListsDto,
+)
+
+@Serializable
+data class MUListsDto(
+    val reading: Long,
+    val wish: Long,
+    val complete: Long,
+    val unfinished: Long,
+    val custom: Long,
+)
+
+@Serializable
+data class MUPositionDto(
+    val week: Long,
+    val month: Long,
+    val three_months: Long,
+    val six_months: Long,
+    val year: Long,
 )

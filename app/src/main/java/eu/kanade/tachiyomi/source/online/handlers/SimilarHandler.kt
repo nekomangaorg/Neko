@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.models.dto.AnilistMangaRecommendationsDto
+import eu.kanade.tachiyomi.source.online.models.dto.MUMangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MalMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
@@ -297,6 +298,72 @@ class SimilarHandler {
 
         dbDto.myAnimelistApi = similarDto
         dbDto.myAnimeListManga = mangaList
+
+        insertMangaSimilar(dexId, dbDto, mangaDb)
+    }
+
+    /**
+     * fetch our similar mangaList from external service mangaupdates
+     */
+    suspend fun fetchSimilarExternalMUManga(
+        dexId: String,
+        forceRefresh: Boolean,
+    ): List<SourceManga> {
+        // See if we have a valid mapping for our MU service
+        val muId = mappings.getExternalID(dexId, "mu_new")
+            ?: return emptyList()
+
+        if (forceRefresh) {
+            val response = network.similarService.getSimilarMUManga(muId).onFailure {
+                val type = "trying to get MU similar manga"
+                this.log(type)
+                if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
+                    this.throws(type)
+                }
+            }.getOrNull()
+            similarMangaExternalMUParse(dexId, response)
+        }
+        val mangaDb = db.getSimilar(dexId).executeAsBlocking()
+        val dbDto = getDbDto(mangaDb)
+        // Get data from db
+        return dbDto.mangaUpdatesListManga?.map { it.toSourceManga() }?.sortedByDescending {
+            if (it.displayText.split(" ")[0] == "Category") -1.0 else it.displayText.split(" ")[0].toDouble()
+        } ?: emptyList()
+    }
+
+    private suspend fun similarMangaExternalMUParse(
+        dexId: String,
+        similarDto: MUMangaDto?,
+    ) {
+        // Error check http response
+        similarDto ?: return
+
+        // Get our page of mangaList
+        val idPairs = similarDto.recommendations.associate {
+            val id = mappings.getMangadexID(it.series_id.toString(), "mu_new")
+            val text = it.weight.toString() + " user votes"
+            id to text
+        }.toMutableMap()
+        idPairs += similarDto.category_recommendations.associate {
+            val id = mappings.getMangadexID(it.series_id.toString(), "mu_new")
+            val text = "Category Recommendation"
+            id to text
+        }
+        val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key })
+
+        // Convert to lookup array
+        // TODO: Also filter out manga here that are already presented
+        val thumbQuality = preferencesHelper.thumbnailQuality()
+
+        val mangaList = mangaListDto.data.map {
+            it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
+        }
+
+        val mangaDb = db.getSimilar(dexId).executeAsBlocking()
+        val dbDto = getDbDto(mangaDb)
+
+        dbDto.mangaUpdatesApi = similarDto
+        dbDto.mangaUpdatesListManga = mangaList
 
         insertMangaSimilar(dexId, dbDto, mangaDb)
     }
