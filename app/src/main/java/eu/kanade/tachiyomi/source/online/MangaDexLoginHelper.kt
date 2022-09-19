@@ -90,8 +90,9 @@ class MangaDexLoginHelper {
                 if (this is ApiResponse.Failure.Error && this.response.errorBody() != null) {
                     val error = json.decodeFromString<ErrorResponse>(this.response.errorBody()!!.string())
                     if (error.errors.isNotEmpty()) {
-                        this.log(error.errors.first().detail)
-                        throw Exception(error.errors.first().detail)
+                        val message = error.errors.first().detail ?: error.errors.first().title ?: "Unable to parse json error"
+                        this.log(message)
+                        throw Exception(message)
                     }
                 }
 

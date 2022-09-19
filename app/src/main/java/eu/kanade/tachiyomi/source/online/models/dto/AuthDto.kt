@@ -18,7 +18,7 @@ data class LoginResponseDto(val result: String, val token: LoginBodyTokenDto)
 data class ErrorResponse(val result: String, val errors: List<ErrorResult>)
 
 @Serializable
-data class ErrorResult(val status: Int, val detail: String)
+data class ErrorResult(val status: Int, val title: String?, val detail: String?)
 
 /**
  * Tokens for the logins
