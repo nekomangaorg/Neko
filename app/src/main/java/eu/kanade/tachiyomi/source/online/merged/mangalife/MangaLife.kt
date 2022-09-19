@@ -32,7 +32,7 @@ class MangaLife : ReducedHttpSource() {
 
     val json: Json by injectLazy()
 
-    lateinit var thumbnailUrl: String
+    private lateinit var thumbnailUrl: String
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
@@ -145,7 +145,7 @@ class MangaLife : ReducedHttpSource() {
 
         val seasonURI = when (curChapter.directory.isNullOrBlank()) {
             true -> ""
-            false -> curChapter.directory
+            false -> "${curChapter.directory}/"
         }
 
         val path = "$host/manga/$titleURI/$seasonURI"
