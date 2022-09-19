@@ -61,4 +61,5 @@ data class GroupDataDto(
 @Serializable
 data class GroupAttributesDto(
     val name: String,
+    val description: String?,
 )

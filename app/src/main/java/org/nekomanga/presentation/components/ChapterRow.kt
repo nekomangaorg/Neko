@@ -62,6 +62,11 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -85,6 +90,7 @@ fun ChapterRow(
     onBookmark: () -> Unit,
     onWebView: () -> Unit,
     onRead: () -> Unit,
+    blockScanlator: (String) -> Unit,
     markPrevious: (Boolean) -> Unit,
     onDownload: (DownloadAction) -> Unit,
 ) {
@@ -137,6 +143,7 @@ fun ChapterRow(
                     onWebView = onWebView,
                     onDownload = onDownload,
                     markPrevious = markPrevious,
+                    blockScanlator = blockScanlator,
                 )
             },
         )
@@ -202,9 +209,19 @@ private fun ChapterInfo(
     onWebView: () -> Unit,
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
+    blockScanlator: (String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
     var chapterDropdown by remember { mutableStateOf(false) }
+
+    val splitScanlator = remember {
+        ChapterUtil.getScanlators(scanlator).map {
+            SimpleDropDownItem.Action(
+                text = it,
+                onClick = { blockScanlator(it) },
+            )
+        }.toImmutableList()
+    }
 
     val haptic = LocalHapticFeedback.current
 
@@ -223,26 +240,7 @@ private fun ChapterInfo(
         expanded = dropdown,
         themeColorState = themeColorState,
         onDismiss = { dropdown = false },
-        dropDownItems = listOf(
-            SimpleDropDownItem.Action(
-                text = stringResource(R.string.open_in_webview),
-                onClick = { onWebView() },
-            ),
-            SimpleDropDownItem.Parent(
-                text = stringResource(R.string.mark_previous_as),
-                children = listOf(
-                    SimpleDropDownItem.Action(
-                        text = stringResource(R.string.read),
-                        onClick = { markPrevious(true) },
-                    ),
-                    SimpleDropDownItem.Action(
-                        text = stringResource(R.string.unread),
-                        onClick = { markPrevious(false) },
-                    ),
-                ),
-            ),
-        ),
-
+        dropDownItems = getDropDownItems(scanlator.isNotBlank(), splitScanlator, onWebView, markPrevious),
     )
 
     Row(
@@ -376,7 +374,7 @@ private fun ChapterInfo(
                 dropDownItems =
                 when (downloadStateProvider()) {
                     Download.State.DOWNLOADED -> {
-                        listOf(
+                        persistentListOf(
                             SimpleDropDownItem.Action(
                                 text = stringResource(R.string.remove),
                                 onClick = {
@@ -386,7 +384,7 @@ private fun ChapterInfo(
                         )
                     }
                     else -> {
-                        listOf(
+                        persistentListOf(
                             SimpleDropDownItem.Action(
                                 text = stringResource(R.string.start_downloading_now),
                                 onClick = {
@@ -405,6 +403,46 @@ private fun ChapterInfo(
             )
         }
     }
+}
+
+@Composable
+private fun getDropDownItems(
+    showScanlator: Boolean,
+    scanlators: ImmutableList<SimpleDropDownItem>,
+    onWebView: () -> Unit,
+    markPrevious: (Boolean) -> Unit,
+): PersistentList<SimpleDropDownItem> {
+    return (
+        listOf(
+            SimpleDropDownItem.Action(
+                text = stringResource(R.string.open_in_webview),
+                onClick = { onWebView() },
+            ),
+            SimpleDropDownItem.Parent(
+                text = stringResource(R.string.mark_previous_as),
+                children = listOf(
+                    SimpleDropDownItem.Action(
+                        text = stringResource(R.string.read),
+                        onClick = { markPrevious(true) },
+                    ),
+                    SimpleDropDownItem.Action(
+                        text = stringResource(R.string.unread),
+                        onClick = { markPrevious(false) },
+                    ),
+                ),
+            ),
+        ) +
+            if (showScanlator) {
+                listOf(
+                    SimpleDropDownItem.Parent(
+                        text = stringResource(R.string.block_scanlator),
+                        children = scanlators,
+                    ),
+                )
+            } else {
+                emptyList()
+            }
+        ).toPersistentList()
 }
 
 val decimalFormat = DecimalFormat(

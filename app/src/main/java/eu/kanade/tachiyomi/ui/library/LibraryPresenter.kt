@@ -366,8 +366,8 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
-            } else {
+                    (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
+                } else {
                     filterMangaType != item.manga.seriesType()
                 }
             ) {
@@ -392,9 +392,9 @@ class LibraryPresenter(
             val hasTrack = loggedServices.any { service ->
                 tracks.any {
                     if (service.isMdList() && (
-                        source.isLogged()
-                            .not() || it.status == FollowStatus.UNFOLLOWED.int
-                        )
+                            source.isLogged()
+                                .not() || it.status == FollowStatus.UNFOLLOWED.int
+                            )
                     ) {
                         false
                     } else {
@@ -715,8 +715,10 @@ class LibraryPresenter(
 
     private fun getCustomMangaItems(
         libraryManga: List<LibraryManga>,
-    ): Pair<List<LibraryItem>,
-        List<Category>,> {
+    ): Pair<
+        List<LibraryItem>,
+        List<Category>,
+        > {
         val tagItems: MutableMap<String, LibraryHeaderItem> = mutableMapOf()
 
         // internal function to make headers

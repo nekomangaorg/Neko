@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.SimpleDropDownItem
 import org.nekomanga.presentation.components.SimpleDropdownMenu
@@ -214,7 +215,7 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeCo
         expanded = favoriteExpanded,
         themeColorState = themeColorState,
         onDismiss = onDismiss,
-        dropDownItems = listOf(
+        dropDownItems = persistentListOf(
             SimpleDropDownItem.Action(
                 text = stringResource(R.string.remove_from_library),
                 onClick = { toggleFavorite() },

@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import eu.kanade.tachiyomi.R
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.presentation.theme.NekoTheme
 
 @Composable
@@ -76,7 +77,7 @@ fun AppBarActions(
             dropDownItems =
             overflowActions.map { appBarAction ->
                 appBarAction.toSimpleAction()
-            },
+            }.toPersistentList(),
         )
     }
 }

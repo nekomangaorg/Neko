@@ -669,22 +669,27 @@ class MangaDetailPresenter(
     private fun updateChapterFlows() {
         presenterScope.launchIO {
             // possibly move this into a chapter repository
-            val allChapters = db.getChapters(mangaId).executeOnIO().mapNotNull { it.toSimpleChapter() }.map { chapter ->
-                val downloadState = when {
-                    downloadManager.isChapterDownloaded(chapter.toDbChapter(), currentManga) -> Download.State.DOWNLOADED
-                    downloadManager.hasQueue() -> downloadManager.queue.find { it.chapter.id == chapter.id }?.status ?: Download.State.default
-                    else -> Download.State.default
+            val blockedScanlators = preferences.blockedScanlators().get()
+            val allChapters = db.getChapters(mangaId).executeOnIO().mapNotNull { it.toSimpleChapter() }
+                .filter {
+                    it.scanlatorList().none { scanlator -> blockedScanlators.contains(scanlator) }
                 }
+                .map { chapter ->
+                    val downloadState = when {
+                        downloadManager.isChapterDownloaded(chapter.toDbChapter(), currentManga) -> Download.State.DOWNLOADED
+                        downloadManager.hasQueue() -> downloadManager.queue.find { it.chapter.id == chapter.id }?.status ?: Download.State.default
+                        else -> Download.State.default
+                    }
 
-                ChapterItem(
-                    chapter = chapter,
-                    downloadState = downloadState,
-                    downloadProgress = when (downloadState == Download.State.DOWNLOADING) {
-                        true -> downloadManager.queue.find { it.chapter.id == chapter.id }!!.progressFloat
-                        false -> 0f
-                    },
-                )
-            }
+                    ChapterItem(
+                        chapter = chapter,
+                        downloadState = downloadState,
+                        downloadProgress = when (downloadState == Download.State.DOWNLOADING) {
+                            true -> downloadManager.queue.find { it.chapter.id == chapter.id }!!.progressFloat
+                            false -> 0f
+                        },
+                    )
+                }
             _generalState.update {
                 it.copy(allChapters = allChapters.toImmutableList())
             }
@@ -1547,6 +1552,21 @@ class MangaDetailPresenter(
                     )
                 }
             }
+        }
+    }
+
+    fun blockScanlator(scanlator: String) {
+        presenterScope.launchIO {
+            val scanlatorImpl = db.getScanlatorByName(scanlator).executeAsBlocking()
+            if (scanlatorImpl == null) {
+                launchIO {
+                    mangaUpdateCoordinator.updateScanlator(scanlator)
+                }
+            }
+            val blockedScanlators = preferences.blockedScanlators().get().toMutableSet()
+            blockedScanlators.add(scanlator)
+            preferences.blockedScanlators().set(blockedScanlators)
+            updateChapterFlows()
         }
     }
 

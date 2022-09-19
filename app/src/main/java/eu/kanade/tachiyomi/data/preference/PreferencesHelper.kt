@@ -508,6 +508,9 @@ class PreferencesHelper(val context: Context) {
     fun sortChapterByAscendingOrDescending() =
         prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
 
+    fun blockedScanlators() =
+        flowPrefs.getStringSet(Keys.blockedScanlators, emptySet())
+
     fun coverRatios() = flowPrefs.getStringSet(Keys.coverRatios, emptySet())
 
     fun coverColors() = flowPrefs.getStringSet(Keys.coverColors, emptySet())

@@ -218,6 +218,7 @@ object MangaConstants {
         val download: (List<ChapterItem>, DownloadAction) -> Unit,
         val delete: (List<ChapterItem>) -> Unit,
         val open: (Context, ChapterItem) -> Unit,
+        val blockScanlator: (String) -> Unit,
         val openNext: (Context) -> Unit,
     )
 }

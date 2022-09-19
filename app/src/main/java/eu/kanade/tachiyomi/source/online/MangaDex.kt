@@ -1,9 +1,11 @@
 package eu.kanade.tachiyomi.source.online
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.skydoves.sandwich.onFailure
+import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -24,6 +26,7 @@ import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
+import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -69,6 +72,27 @@ open class MangaDex : HttpSource() {
                 }
 
             return@withIOContext result
+        }
+    }
+
+    suspend fun getScanlator(scanlator: String): Result<Scanlator, ResultError> {
+        return withIOContext {
+            network.service.scanlatorGroup(scanlator).getOrResultError("Trying to get scanlator")
+                .andThen { groupListDto ->
+                    val groupDto = groupListDto.results.firstOrNull()
+                    when (groupDto == null) {
+                        true -> Err("No Results".toResultError())
+                        false -> {
+                            Ok(
+                                Scanlator(
+                                    name = groupDto.attributes.name,
+                                    uuid = groupDto.id,
+                                    description = groupDto.attributes.description,
+                                ),
+                            )
+                        }
+                    }
+                }
         }
     }
 
