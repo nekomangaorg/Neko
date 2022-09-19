@@ -259,4 +259,3 @@ fun SManga.getSlug(): String {
 
     return slug.joinToString("-")
 }
-

@@ -60,8 +60,10 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import jp.wasabeef.gap.Gap
+import kotlin.random.Random
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.presentation.components.NekoColors
@@ -251,7 +253,14 @@ private fun CategoryView(
             detailedStats.manga.filter { it.categories.contains(category) }
         }.entries.filter { it.key != defaultCategoryName || it.value.isNotEmpty() }.sortedWith(mapEntryComparator(sortType)).toPersistentList()
     }
-    val colorMap = remember { colorMap(sortedSeries.map { it.key }, colors) }
+    val colorsToUse = remember {
+        when (sortedSeries.size <= colors.size) {
+            true -> colors
+            false -> sortedSeries.map { Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256)) }.toImmutableList()
+        }
+    }
+
+    val colorMap = remember { colorMap(sortedSeries.map { it.key }, colorsToUse) }
     val totalCount = remember { sortedSeries.sumOf { it.value.size } }
     val totalDuration = remember { sortedSeries.sumOf { values -> values.value.sumOf { it.readDuration } } }
     val pieData = remember(sortType) { pieData(sortedSeries, colorMap, sortType) }
