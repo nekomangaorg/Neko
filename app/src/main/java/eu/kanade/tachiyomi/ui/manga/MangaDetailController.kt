@@ -118,7 +118,7 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
                 search = presenter::searchMergedManga,
                 add = presenter::addMergedManga,
             ),
-            similarClick = { router.pushController(SimilarController(presenter.manga.value.uuid()).withFadeTransaction()) },
+            similarClick = { router.pushController(SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction()) },
             shareClick = this::shareManga,
             coverActions = CoverActions(
                 share = this::shareCover,
@@ -150,7 +150,7 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {
-        startActivity(ReaderActivity.newIntent(context, presenter.manga.value, chapter))
+        startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
     }
 
     /**
@@ -207,9 +207,9 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
             withUIContext {
                 val stream = cover?.getUriCompat(context)
                 try {
-                    val manga = presenter.manga.value
+                    val manga = presenter.manga.value!!
                     var url = presenter.sourceManager.getMangadex().mangaDetailsRequest(manga).url.toString()
-                    url = "$url/" + presenter.manga.value.getSlug()
+                    url = "$url/" + manga.getSlug()
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/*"
                         putExtra(Intent.EXTRA_TEXT, url)

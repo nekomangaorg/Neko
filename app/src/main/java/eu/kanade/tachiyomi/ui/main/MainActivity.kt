@@ -825,7 +825,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         when (val controller = router.backstack.lastOrNull()?.controller) {
             is MangaDetailController -> {
                 val url = try {
-                    (source as HttpSource).mangaDetailsRequest(controller.presenter.manga.value).url.toString()
+                    (source as HttpSource).mangaDetailsRequest(controller.presenter.manga.value!!).url.toString()
                 } catch (e: Exception) {
                     return
                 }
