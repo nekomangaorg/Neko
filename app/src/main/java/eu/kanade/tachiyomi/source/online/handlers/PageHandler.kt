@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
-import com.skydoves.sandwich.ApiResponse
+import com.github.michaelbull.result.getOrThrow
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -15,11 +15,12 @@ import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.throws
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.injectLazy
 
 class PageHandler {
@@ -78,23 +79,11 @@ class PageHandler {
                     throw Exception("This chapter has no pages, it might not be release yet, try refreshing")
                 }
 
-                val atHomeResponse =
-                    network.service.getAtHomeServer(
-                        chapter.mangadex_chapter_id,
-                        preferences.usePort443Only(),
-                    )
-
-                when (atHomeResponse) {
-                    is ApiResponse.Success -> {
-                        XLog.d("successfully got at home host")
-                    }
-                    is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception<*> -> {
-                        atHomeResponse.log("trying to get at home response")
-                        atHomeResponse.throws("error getting image")
-                    }
-                }
-
-                val atHomeDto = atHomeResponse.getOrThrow()
+                val atHomeDto = network.cdnService.getAtHomeServer(
+                    chapter.mangadex_chapter_id,
+                    preferences.usePort443Only(),
+                ).getOrResultError("trying to get at home response")
+                    .getOrThrow { Exception(it.message()) }
 
                 return@withContext pageListParse(
                     chapter.mangadex_chapter_id,

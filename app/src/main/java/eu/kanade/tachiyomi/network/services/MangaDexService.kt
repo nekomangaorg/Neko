@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.network.services
 import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
-import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -84,13 +83,6 @@ interface MangaDexService {
 
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
-
-    @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.atHomeServer}/{chapterId}")
-    suspend fun getAtHomeServer(
-        @Path("chapterId") chapterId: String,
-        @Query("forcePort443") forcePort443: Boolean,
-    ): ApiResponse<AtHomeDto>
 
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): ApiResponse<ResultDto>

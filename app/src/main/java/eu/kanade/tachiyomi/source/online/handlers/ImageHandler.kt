@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
-import com.skydoves.sandwich.getOrThrow
+import com.github.michaelbull.result.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
@@ -16,15 +16,16 @@ import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
-import eu.kanade.tachiyomi.util.throws
 import java.util.Date
 import kotlin.collections.set
 import kotlin.time.Duration.Companion.seconds
 import okhttp3.Request
 import okhttp3.Response
+import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.injectLazy
 
 class ImageHandler {
@@ -147,14 +148,13 @@ class ImageHandler {
                 false -> {
                     log.d("Time has expired get new at home url isLogged $isLogged")
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
-                    val atHomeResponse = network.service.getAtHomeServer(
+
+                    network.cdnService.getAtHomeServer(
                         page.mangaDexChapterId,
                         preferences.usePort443Only(),
                     )
-                    atHomeResponse.onFailure {
-                        this.log(" getting image")
-                        this.throws("getting image")
-                    }.getOrThrow()
+                        .getOrResultError("getting image")
+                        .getOrThrow { Exception(it.message()) }
                         .baseUrl
                 }
             }

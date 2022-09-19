@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
+import eu.kanade.tachiyomi.network.services.MangaDexCdnService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.SimilarService
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -118,6 +119,10 @@ class NetworkHelper(val context: Context) {
         return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).build()
     }
 
+    private fun buildCdnRateLimitedClient(): OkHttpClient {
+        return nonRateLimitedClient.newBuilder().rateLimit(permits = 40, period = 1, unit = TimeUnit.MINUTES).build()
+    }
+
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
         return buildRateLimitedClient().newBuilder()
             .addNetworkInterceptor(authInterceptor())
@@ -136,6 +141,8 @@ class NetworkHelper(val context: Context) {
     val cloudFlareClient = buildCloudFlareClient()
 
     val client = buildRateLimitedClient()
+
+    private val cdnClient = buildCdnRateLimitedClient()
 
     private val authClient = buildRateLimitedAuthenticatedClient()
 
@@ -156,6 +163,11 @@ class NetworkHelper(val context: Context) {
         jsonRetrofitClient.baseUrl(MdApi.baseUrl)
             .client(client.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
             .create(MangaDexService::class.java)
+
+    val cdnService: MangaDexCdnService =
+        jsonRetrofitClient.baseUrl(MdApi.baseUrl)
+            .client(cdnClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
+            .create(MangaDexCdnService::class.java)
 
     val authService: MangaDexAuthService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
         .client(authClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
@@ -179,12 +191,6 @@ class NetworkHelper(val context: Context) {
                 .build()
 
             return chain.proceed(request)
-
-            /*  val response = chain.proceed(request)
-              response.request.headers.forEach {
-                  XLog.disableStackTrace().d("headers sent ${it.first} ${it.second}")
-              }
-              return response*/
         }
     }
 }
