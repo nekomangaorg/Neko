@@ -10,9 +10,9 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
 import io.github.g00fy2.versioncompare.Version
-import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import uy.kohesive.injekt.injectLazy
 
 class AppUpdateChecker {
 

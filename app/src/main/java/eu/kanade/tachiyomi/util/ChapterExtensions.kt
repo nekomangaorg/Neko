@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.util
 
 import eu.kanade.tachiyomi.source.model.SChapter
-import org.nekomanga.domain.chapter.ChapterItem
 import kotlin.math.floor
+import org.nekomanga.domain.chapter.ChapterItem
 
 /**
  * Calculate the missing chapters for a given list of chapters. Return null if none are missing

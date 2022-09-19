@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.source.model
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import tachiyomi.source.model.MangaInfo
 import java.io.Serializable
+import tachiyomi.source.model.MangaInfo
 
 interface SManga : Serializable {
 

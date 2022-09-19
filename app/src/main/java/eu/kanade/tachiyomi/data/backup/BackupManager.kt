@@ -33,13 +33,13 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import java.io.FileOutputStream
+import kotlin.math.max
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.buffer
 import okio.gzip
 import okio.sink
 import uy.kohesive.injekt.injectLazy
-import java.io.FileOutputStream
-import kotlin.math.max
 
 class BackupManager(val context: Context) {
 

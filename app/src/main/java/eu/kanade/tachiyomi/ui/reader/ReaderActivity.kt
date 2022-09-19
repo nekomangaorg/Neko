@@ -121,6 +121,13 @@ import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.doOnEnd
 import eu.kanade.tachiyomi.widget.doOnStart
+import java.io.File
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -133,13 +140,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nucleus.factory.RequiresPresenter
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.Locale
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the

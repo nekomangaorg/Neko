@@ -53,9 +53,9 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
+import kotlin.math.max
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
-import kotlin.math.max
 
 /**
  * Controller to manage the catalogues available in the app.

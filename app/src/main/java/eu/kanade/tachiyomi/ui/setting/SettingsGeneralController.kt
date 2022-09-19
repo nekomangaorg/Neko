@@ -8,8 +8,8 @@ import android.view.View
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 
 class SettingsGeneralController : SettingsController() {
 

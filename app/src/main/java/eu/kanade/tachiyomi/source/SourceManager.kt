@@ -4,8 +4,8 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdLang
-import uy.kohesive.injekt.injectLazy
 import java.security.MessageDigest
+import uy.kohesive.injekt.injectLazy
 
 /**
  *Currently hardcoded to always return the same English [MangaDex] instance

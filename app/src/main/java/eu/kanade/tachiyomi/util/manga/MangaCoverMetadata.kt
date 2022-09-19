@@ -7,9 +7,9 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.getBestColor
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import uy.kohesive.injekt.injectLazy
 
 /** Object that holds info about a covers size ratio + dominant colors */
 object MangaCoverMetadata {

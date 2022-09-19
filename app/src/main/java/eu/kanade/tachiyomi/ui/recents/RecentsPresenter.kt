@@ -26,6 +26,11 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
+import java.util.Calendar
+import java.util.Date
+import java.util.TreeMap
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
@@ -36,11 +41,6 @@ import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.Calendar
-import java.util.Date
-import java.util.TreeMap
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 class RecentsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),

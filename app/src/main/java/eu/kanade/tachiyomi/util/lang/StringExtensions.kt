@@ -16,9 +16,9 @@ import androidx.annotation.StringRes
 import androidx.core.text.parseAsHtml
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import org.nekomanga.domain.network.ResultError
 import java.util.Locale
 import kotlin.math.floor
+import org.nekomanga.domain.network.ResultError
 
 /**
  * Replaces the given string to have at most [count] characters using [replacement] at its end.

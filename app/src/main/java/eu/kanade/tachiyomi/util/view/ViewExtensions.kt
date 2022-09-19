@@ -76,10 +76,10 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.StaggeredGridLayoutManagerAccurateOffset
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
-import me.saket.cascade.CascadePopupMenu
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import me.saket.cascade.CascadePopupMenu
 
 /**
  * Returns coordinates of view.

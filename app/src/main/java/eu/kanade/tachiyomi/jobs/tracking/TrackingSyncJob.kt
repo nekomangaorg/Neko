@@ -15,10 +15,10 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.withUIContext
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.injectLazy
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * WorkManager job that syncs tracking from trackers to Neko

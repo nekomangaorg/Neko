@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource.Companion.USER_AGENT
 import eu.kanade.tachiyomi.source.online.models.dto.Language
 import eu.kanade.tachiyomi.source.online.models.dto.MangaPlusResponse
+import java.util.UUID
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
@@ -19,7 +20,6 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.UUID
 
 class MangaPlusHandler {
     val baseUrl = "https://jumpg-webapi.tokyo-cdn.com/api"

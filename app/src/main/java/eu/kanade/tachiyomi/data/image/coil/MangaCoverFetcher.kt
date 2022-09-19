@@ -18,6 +18,9 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
+import java.io.File
+import java.net.HttpURLConnection
+import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,9 +36,6 @@ import okio.buffer
 import okio.sink
 import org.nekomanga.domain.manga.Artwork
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.net.HttpURLConnection
-import java.util.Date
 
 class MangaCoverFetcher(
     private val altUrl: String,

@@ -114,6 +114,9 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
+import kotlin.math.abs
+import kotlin.math.min
+import kotlin.math.roundToLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -122,9 +125,6 @@ import me.saket.cascade.overrideAllPopupMenus
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import kotlin.math.abs
-import kotlin.math.min
-import kotlin.math.roundToLong
 
 @SuppressLint("ResourceType")
 open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {

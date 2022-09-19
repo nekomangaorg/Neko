@@ -6,8 +6,8 @@ import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaTag
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import uy.kohesive.injekt.injectLazy
 import java.util.Locale
+import uy.kohesive.injekt.injectLazy
 
 class FilterHandler {
 

@@ -19,12 +19,12 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import kotlin.math.max
+import kotlin.math.min
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Implementation of a [BaseViewer] to display pages with a [RecyclerView].

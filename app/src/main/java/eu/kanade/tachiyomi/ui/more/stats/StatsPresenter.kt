@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
+import java.util.Calendar
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
@@ -34,7 +35,6 @@ import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Calendar
 
 class StatsPresenter(
     private val db: DatabaseHelper = Injekt.get(),

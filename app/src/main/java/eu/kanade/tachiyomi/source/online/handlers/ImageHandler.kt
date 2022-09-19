@@ -20,12 +20,12 @@ import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
-import okhttp3.Request
-import okhttp3.Response
-import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import kotlin.collections.set
 import kotlin.time.Duration.Companion.seconds
+import okhttp3.Request
+import okhttp3.Response
+import uy.kohesive.injekt.injectLazy
 
 class ImageHandler {
     val network: NetworkHelper by injectLazy()

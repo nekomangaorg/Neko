@@ -15,9 +15,9 @@ import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.system.withDefContext
-import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 import kotlin.math.roundToInt
+import uy.kohesive.injekt.injectLazy
 
 /**
  * Adapter storing a list of manga in a certain category.

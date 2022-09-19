@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.source.model
 
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
-import tachiyomi.source.model.ChapterInfo
 import java.io.Serializable
+import tachiyomi.source.model.ChapterInfo
 
 interface SChapter : Serializable {
 

@@ -91,10 +91,10 @@ class FollowsHandler {
         val coverQuality = preferences.thumbnailQuality()
         return mangaDataDtoList.asSequence().map {
             val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
-            it.toSourceManga(coverQuality).copy(displayTextRes = followStatus.stringRes)
+            followStatus to it.toSourceManga(coverQuality)
         }
-            .sortedBy { it.title }
-            .groupBy { it.displayTextRes!! }
+            .sortedBy { it.second.title }
+            .groupBy({ it.first.int }, { it.second })
     }
 
     /**

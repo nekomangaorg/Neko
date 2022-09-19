@@ -32,12 +32,12 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
-import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.NoRippleText
 import java.text.NumberFormat
 import java.util.Locale
+import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
+import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.NoRippleText
 
 @Composable
 fun InformationBlock(

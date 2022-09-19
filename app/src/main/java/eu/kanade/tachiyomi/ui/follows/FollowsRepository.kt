@@ -6,6 +6,7 @@ import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -25,7 +26,7 @@ class FollowsRepository {
             .andThen { sourceMap ->
                 Ok(
                     sourceMap.entries.associate { entry ->
-                        entry.key to entry.value.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList()
+                        FollowStatus.fromInt(entry.key).stringRes to entry.value.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList()
                     }.toImmutableMap(),
                 )
             }

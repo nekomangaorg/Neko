@@ -22,9 +22,9 @@ import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlin.math.floor
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
-import kotlin.math.floor
 
 class ApiMangaParser {
     val network: NetworkHelper by injectLazy()

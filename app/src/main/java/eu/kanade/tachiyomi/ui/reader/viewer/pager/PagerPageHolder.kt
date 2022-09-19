@@ -38,6 +38,10 @@ import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Job
@@ -49,10 +53,6 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * View of the ViewPager that contains a page of a chapter.

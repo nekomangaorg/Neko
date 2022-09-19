@@ -11,8 +11,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
-import kotlinx.coroutines.delay
 import kotlin.math.max
+import kotlinx.coroutines.delay
 
 /**
  * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.

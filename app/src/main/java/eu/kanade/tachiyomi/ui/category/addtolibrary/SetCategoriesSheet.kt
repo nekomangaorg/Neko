@@ -26,10 +26,10 @@ import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
-import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
+import uy.kohesive.injekt.injectLazy
 
 class SetCategoriesSheet(
     private val activity: Activity,
