@@ -689,8 +689,6 @@ class MangaDetailPresenter(
                 it.copy(allChapters = allChapters.toImmutableList())
             }
 
-            val needToRefreshFilters = generalState.value.allScanlators.isEmpty()
-
             val allChapterScanlators = allChapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
             if (allChapterScanlators.size == 1 && currentManga.filtered_scanlators.isNotNullOrEmpty()) {
                 updateMangaScanlator(emptySet())
@@ -707,11 +705,7 @@ class MangaDetailPresenter(
                 )
             }
 
-            // this is only really needed on initial load since all chapter scanlators is empty and the scanlator filter sheet would be also
-            if (needToRefreshFilters) {
-                updateFilterFlow()
-            }
-
+            updateFilterFlow()
             // do this after so the texts gets updated
             updateNextUnreadChapter()
             updateMissingChapters()
