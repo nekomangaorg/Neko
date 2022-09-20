@@ -30,7 +30,7 @@ class ScanlatorPutResolver : DefaultPutResolver<ScanlatorImpl>() {
         .whereArgs(obj.id)
         .build()
 
-    override fun mapToContentValues(obj: ScanlatorImpl) = ContentValues(3).apply {
+    override fun mapToContentValues(obj: ScanlatorImpl) = ContentValues(4).apply {
         put(ScanlatorTable.COL_ID, obj.id)
         put(ScanlatorTable.COL_NAME, obj.name)
         put(ScanlatorTable.COL_UUID, obj.uuid)
