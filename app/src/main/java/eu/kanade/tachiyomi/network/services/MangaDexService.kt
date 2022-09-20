@@ -64,6 +64,7 @@ interface MangaDexService {
         @Query("offset") offset: Int,
         @Query("translatedLanguage[]") translatedLanguages: List<String>,
         @Query("contentRating[]") contentRating: List<String>,
+        @Query("excludedGroups[]") blockedScanlators: List<String>,
     ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
@@ -83,7 +84,7 @@ interface MangaDexService {
     suspend fun randomManga(@Query("contentRating[]") contentRating: List<String>): ApiResponse<MangaDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/group")
+    @GET(MdApi.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
     @POST(MdApi.legacyMapping)

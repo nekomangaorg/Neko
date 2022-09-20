@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.database.queries
 
+import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.Query
 import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.ScanlatorImpl
@@ -20,13 +21,12 @@ interface ScanlatorQueries : DbProvider {
         )
         .prepare()
 
-    fun getScanlatorByUUID(uuid: String) = db.get()
-        .`object`(ScanlatorImpl::class.java)
-        .withQuery(
-            Query.builder()
+    fun deleteScanlator(name: String) = db.delete()
+        .byQuery(
+            DeleteQuery.builder()
                 .table(ScanlatorTable.TABLE)
-                .where("${ScanlatorTable.COL_UUID} = ?")
-                .whereArgs(uuid)
+                .where("${ScanlatorTable.COL_NAME} = ?")
+                .whereArgs(name)
                 .build(),
         )
         .prepare()

@@ -79,7 +79,7 @@ open class MangaDex : HttpSource() {
         return withIOContext {
             network.service.scanlatorGroup(scanlator).getOrResultError("Trying to get scanlator")
                 .andThen { groupListDto ->
-                    val groupDto = groupListDto.results.firstOrNull()
+                    val groupDto = groupListDto.data.firstOrNull()
                     when (groupDto == null) {
                         true -> Err("No Results".toResultError())
                         false -> {
@@ -100,8 +100,8 @@ open class MangaDex : HttpSource() {
         return searchHandler.search(page, query, filters)
     }
 
-    suspend fun latestChapters(page: Int): Result<MangaListPage, ResultError> {
-        return latestChapterHandler.getPage(page)
+    suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
+        return latestChapterHandler.getPage(page, blockedScanlatorUUIDs)
     }
 
     suspend fun getMangaDetails(mangaUUID: String, fetchArtwork: Boolean = true): Result<Pair<SManga, List<SourceArtwork>>, ResultError> {

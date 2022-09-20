@@ -43,7 +43,7 @@ data class GroupListDto(
     val offset: Int,
     val total: Int,
     val result: String,
-    val results: List<GroupDataDto>,
+    val data: List<GroupDataDto>,
 )
 
 @Serializable
