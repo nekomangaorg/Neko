@@ -59,6 +59,21 @@ class SimilarRepository {
                     .getOrNull()
             }
 
+            val mu = async {
+                runCatching {
+                    logTimeTaken("MU Recs:") {
+                        createGroup(
+                            R.string.manga_updates,
+                            similarHandler.fetchSimilarExternalMUManga(
+                                dexId,
+                                actualRefresh,
+                            ),
+                        )
+                    }
+                }.onFailure { XLog.e("Failed to get MU recs", it) }
+                    .getOrNull()
+            }
+
             val anilist = async {
                 runCatching {
                     logTimeTaken("Anilist Recs:") {
@@ -89,7 +104,7 @@ class SimilarRepository {
                     .getOrNull()
             }
 
-            listOfNotNull(related.await(), similar.await(), anilist.await(), mal.await())
+            listOfNotNull(related.await(), similar.await(), mu.await(), anilist.await(), mal.await())
         }
     }
 

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.source.online.models.dto.AnilistMangaRecommendationsDto
+import eu.kanade.tachiyomi.source.online.models.dto.MUMangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MalMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDto
 import retrofit2.http.GET
@@ -21,4 +22,7 @@ interface SimilarService {
 
     @GET("https://api.jikan.moe/v3/manga/{id}/recommendations")
     suspend fun getSimilarMalManga(@Path("id") mangaId: String): ApiResponse<MalMangaRecommendationsDto>
+
+    @GET("https://api.mangaupdates.com/v1/series/{id}")
+    suspend fun getSimilarMUManga(@Path("id") mangaId: String): ApiResponse<MUMangaDto>
 }
