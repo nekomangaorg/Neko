@@ -327,7 +327,10 @@ class SimilarHandler {
         val dbDto = getDbDto(mangaDb)
         // Get data from db
         return dbDto.mangaUpdatesListManga?.map { it.toSourceManga() }?.sortedByDescending {
-            if (it.displayText.split(" ")[0] == "Category") -1.0 else it.displayText.split(" ")[0].toDouble()
+            when (it.displayText == "Similar") {
+                true -> -1.0
+                false -> it.displayText.split(" ")[0].toDouble()
+            }
         } ?: emptyList()
     }
 
@@ -346,7 +349,7 @@ class SimilarHandler {
         }.toMutableMap()
         idPairs += similarDto.category_recommendations.associate {
             val id = mappings.getMangadexID(it.series_id.toString(), "mu_new")
-            val text = "Category Recommendation"
+            val text = "Similar"
             id to text
         }
         val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key })

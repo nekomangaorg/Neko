@@ -50,7 +50,7 @@ class ArtWorkGetResolver : DefaultGetResolver<ArtworkImpl>() {
         locale = cursor.getString(cursor.getColumnIndex(ArtworkTable.COL_LOCALE)),
         description = cursor.getString(cursor.getColumnIndex(ArtworkTable.COL_DESCRIPTION)),
 
-        )
+    )
 }
 
 class ArtWorkDeleteResolver : DefaultDeleteResolver<ArtworkImpl>() {
