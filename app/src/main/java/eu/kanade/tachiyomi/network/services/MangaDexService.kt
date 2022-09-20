@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
@@ -63,6 +64,7 @@ interface MangaDexService {
         @Query("offset") offset: Int,
         @Query("translatedLanguage[]") translatedLanguages: List<String>,
         @Query("contentRating[]") contentRating: List<String>,
+        @Query("excludedGroups[]") blockedScanlators: List<String>,
     ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
@@ -80,6 +82,10 @@ interface MangaDexService {
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/random")
     suspend fun randomManga(@Query("contentRating[]") contentRating: List<String>): ApiResponse<MangaDto>
+
+    @Headers("Cache-Control: no-cache")
+    @GET(MdApi.group)
+    suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>

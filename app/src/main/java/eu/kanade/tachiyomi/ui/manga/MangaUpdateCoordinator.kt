@@ -179,7 +179,22 @@ class MangaUpdateCoordinator {
      * @param chapters the list of chapters to download.
      */
     fun downloadChapters(manga: Manga, chapters: List<ChapterItem>) {
-        downloadManager.downloadChapters(manga, chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+        val blockedScanlators = preferences.blockedScanlators().get()
+
+        downloadManager.downloadChapters(
+            manga,
+            chapters.filter {
+                !it.isDownloaded && it.chapter.scanlatorList()
+                    .none { scanlator -> scanlator in blockedScanlators }
+            }
+                .map { it.chapter.toDbChapter() },
+        )
+    }
+
+    suspend fun updateScanlator(scanlator: String) {
+        mangaDex.getScanlator(scanlator).onSuccess {
+            db.insertScanlators(listOf(it.toScanlatorImpl())).executeAsBlocking()
+        }
     }
 }
 

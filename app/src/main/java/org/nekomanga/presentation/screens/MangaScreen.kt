@@ -343,6 +343,7 @@ fun MangaScreen(
                             }
                             chapterActions.mark(chaptersToMark, action)
                         },
+                        blockScanlator = { scanlator -> chapterActions.blockScanlator(scanlator) },
                     )
                 }
 

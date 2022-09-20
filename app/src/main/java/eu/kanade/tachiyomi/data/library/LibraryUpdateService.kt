@@ -415,7 +415,10 @@ class LibraryUpdateService(
                 false -> emptyList()
             }
 
-            val fetchedChapters = holder.sChapters + merged
+            val blockedGroups = preferences.blockedScanlators().get()
+
+            val fetchedChapters = (holder.sChapters + merged)
+                .filter { ChapterUtil.getScanlators(it.scanlator).none { scanlator -> scanlator in blockedGroups } }
 
             // delete cover cache image if the thumbnail from network is not empty
             // note: we preload the covers here so we can view everything offline if they change
@@ -428,7 +431,7 @@ class LibraryUpdateService(
                 withIOContext {
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                        .get()
+                            .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                         // load new covers in background

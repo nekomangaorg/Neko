@@ -160,6 +160,8 @@ object PreferenceKeys {
 
     const val filterMissingChapters = "pref_filter_missing_chapters_key"
 
+    const val blockedScanlators = "blocked_scanlators"
+
     const val showEmptyCategoriesFiltering = "show_empty_categories_filtering"
 
     const val librarySortingMode = "library_sorting_mode"
