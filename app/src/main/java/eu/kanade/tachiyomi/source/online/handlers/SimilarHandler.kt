@@ -154,22 +154,16 @@ class SimilarHandler {
         // Get our page of mangaList
         // TODO: We should also remove any that have a bad language here
         val activeLangs = MdUtil.getLangsToShow(preferencesHelper)
-        val idPairs = similarDto.matches.map {
-            if (it.languages.isNotEmpty()) {
-                var commonLang = false
-                it.languages.forEach { lang ->
-                    if (activeLangs.contains(lang)) {
-                        commonLang = true
-                    }
+        val idPairs = similarDto.matches.mapNotNull {
+            when (it.languages.isEmpty() || it.languages.any { lang -> lang in activeLangs }) {
+                true -> {
+                    val id = it.id
+                    val text = String.format("%.2f", 100.0 * it.score) + "% match"
+                    id to text
                 }
-                if (!commonLang) {
-                    return@map null
-                }
+                false -> null
             }
-            val id = it.id
-            val text = String.format("%.2f", 100.0 * it.score) + "% match"
-            id to text
-        }.filterNotNull().toMap()
+        }.toMap()
         if (idPairs.isEmpty()) {
             return
         }
