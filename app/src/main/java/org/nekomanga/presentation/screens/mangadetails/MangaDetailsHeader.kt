@@ -70,10 +70,10 @@ fun MangaDetailsHeader(
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
-        val isExpanded = rememberSaveable {
+        val isExpanded = rememberSaveable(mangaState.value.inLibrary) {
             when (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
-                false -> mutableStateOf(!mangaState.value.inLibrary)
                 true -> mutableStateOf(true)
+                false -> mutableStateOf(!mangaState.value.inLibrary)
             }
         }
 
