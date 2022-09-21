@@ -1,5 +1,9 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.andThen
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -11,11 +15,16 @@ import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.source.online.utils.toSourceManga
+import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.isUUID
+import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.throws
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -25,6 +34,26 @@ class SearchHandler {
     private val filterHandler: FilterHandler by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
     private val preferencesHelper: PreferencesHelper by injectLazy()
+
+    private suspend fun searchForManga(mangaUUID: String): Result<MangaListPage, ResultError> {
+        return service.viewManga(mangaUUID)
+            .getOrResultError("trying to view manga with UUID $mangaUUID")
+            .andThen { mangaDto ->
+                val sourceManga = persistentListOf(mangaDto.data.toSourceManga(preferencesHelper.thumbnailQuality(), false))
+                Ok(MangaListPage(sourceManga = sourceManga, hasNextPage = false))
+            }
+    }
+
+    suspend fun search2(page: Int, query: String, filters: FilterList): Result<MangaListPage, ResultError> {
+        return withContext(Dispatchers.IO) {
+            when (query.startsWith(MdUtil.PREFIX_ID_SEARCH)) {
+                true -> searchForManga(query.removePrefix(MdUtil.PREFIX_ID_SEARCH))
+                false -> {
+                    Err("test".toResultError())
+                }
+            }
+        }
+    }
 
     suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
         return withContext(Dispatchers.IO) {

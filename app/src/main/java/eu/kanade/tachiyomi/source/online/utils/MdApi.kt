@@ -7,6 +7,7 @@ object MdApi {
     const val refreshToken = "/auth/refresh"
     const val logout = "/auth/logout"
     const val manga = "/manga"
+    const val list = "/list"
     const val statistics = "/statistics/manga"
     const val chapter = "/chapter"
     const val cover = "/cover"

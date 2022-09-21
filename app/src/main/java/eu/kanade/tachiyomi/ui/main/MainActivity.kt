@@ -88,6 +88,7 @@ import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseComposeController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -307,6 +308,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 when (router.backstack.firstOrNull()?.controller) {
                     is RecentsController -> R.id.nav_recents
                     is BrowseSourceController -> R.id.nav_browse
+                    is BrowseComposeController -> R.id.nav_browse_2
                     else -> R.id.nav_library
                 }
         }
@@ -330,6 +332,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     when (id) {
                         R.id.nav_library -> LibraryController()
                         R.id.nav_recents -> RecentsController()
+                        R.id.nav_browse_2 -> BrowseComposeController()
                         else -> BrowseSourceController()
                     },
                     id,

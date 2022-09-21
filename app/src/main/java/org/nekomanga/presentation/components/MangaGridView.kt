@@ -17,10 +17,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -130,43 +128,41 @@ fun MangaGrid(
 }
 
 @Composable
-private fun MangaGridItem(
+fun MangaGridItem(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
     isComfortable: Boolean = true,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
-        Box {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(Shapes.coverRadius))
-                    .combinedClickable(
-                        onClick = onClick,
-                        onLongClick = onLongClick,
-                    )
-                    .padding(2.dp),
-            ) {
-                if (isComfortable) {
-                    ComfortableGridItem(
-                        displayManga,
-                        displayManga.displayText,
-                        shouldOutlineCover,
-                    )
-                } else {
-                    CompactGridItem(
-                        displayManga,
-                        displayManga.displayText,
-                        shouldOutlineCover,
-                    )
-                }
+    Box {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(Shapes.coverRadius))
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                )
+                .padding(2.dp),
+        ) {
+            if (isComfortable) {
+                ComfortableGridItem(
+                    displayManga,
+                    displayManga.displayText,
+                    shouldOutlineCover,
+                )
+            } else {
+                CompactGridItem(
+                    displayManga,
+                    displayManga.displayText,
+                    shouldOutlineCover,
+                )
             }
+        }
 
-            if (displayManga.inLibrary) {
-                val offset = (-2).dp
-                InLibraryBadge(offset, shouldOutlineCover)
-            }
+        if (displayManga.inLibrary) {
+            val offset = (-2).dp
+            InLibraryBadge(offset, shouldOutlineCover)
         }
     }
 }
@@ -181,12 +177,14 @@ private fun ComfortableGridItem(
         GridCover(manga, shouldOutlineCover)
         MangaTitle(
             title = manga.title,
-            modifier = Modifier.padding(
-                top = 0.dp,
-                bottom = if (displayText.isNotBlank()) 0.dp else 4.dp,
-                start = 4.dp,
-                end = 4.dp,
-            ),
+            modifier = Modifier
+                .padding(
+                    top = 0.dp,
+                    bottom = if (displayText.isNotBlank()) 0.dp else 4.dp,
+                    start = 4.dp,
+                    end = 4.dp,
+                )
+                .weight(1f),
             fontSize = MaterialTheme.typography.bodySmall.fontSize,
             fontWeight = FontWeight.Medium,
         )
@@ -237,6 +235,7 @@ private fun CompactGridItem(
                     start = 4.dp,
                     end = 4.dp,
                 ),
+                fontColor = MaterialTheme.colorScheme.surface,
                 fontWeight = FontWeight.Medium,
             )
 

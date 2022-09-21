@@ -1,16 +1,26 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.manga.MangaDetailController
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import org.nekomanga.presentation.screens.BrowseScreen
 
-class BrowseComposeController : BaseComposeController<BrowseComposePresenter>() {
-    override val presenter: BaseCoroutinePresenter<BrowseComposePresenter>
-        get() = TODO("Not yet implemented")
+class BrowseComposeController(query: String? = null) : BaseComposeController<BrowseComposePresenter>() {
+    override val presenter = BrowseComposePresenter()
 
     @Composable
     override fun ScreenContent() {
-        TODO("Not yet implemented")
+        BrowseScreen(
+            browseScreenState = presenter.browseScreenState.collectAsState(),
+            switchDisplayClick = presenter::switchDisplayMode,
+            onBackPress = { activity?.onBackPressed() },
+            openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
+            addNewCategory = presenter::addNewCategory,
+            toggleFavorite = presenter::toggleFavorite,
+            loadNextPage = presenter::loadNextItems,
+            retryClick = presenter::loadNextItems,
+        )
     }
 }
-

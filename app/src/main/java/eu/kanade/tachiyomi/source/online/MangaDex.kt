@@ -20,6 +20,8 @@ import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
+import eu.kanade.tachiyomi.source.online.handlers.ListHandler
+import eu.kanade.tachiyomi.source.online.handlers.ListResults
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
@@ -49,6 +51,8 @@ open class MangaDex : HttpSource() {
     private val mangaHandler: MangaHandler by injectLazy()
 
     private val searchHandler: SearchHandler by injectLazy()
+
+    private val listHandler: ListHandler by injectLazy()
 
     private val pageHandler: PageHandler by injectLazy()
 
@@ -98,6 +102,14 @@ open class MangaDex : HttpSource() {
 
     suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
         return searchHandler.search(page, query, filters)
+    }
+
+    suspend fun search2(page: Int, query: String, filters: FilterList): Result<MangaListPage, ResultError> {
+        return searchHandler.search2(page, query, filters)
+    }
+
+    suspend fun fetchList(listId: String): Result<ListResults, ResultError> {
+        return listHandler.retrieveList(listId)
     }
 
     suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {

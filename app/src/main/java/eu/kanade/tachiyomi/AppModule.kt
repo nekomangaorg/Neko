@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
+import eu.kanade.tachiyomi.source.online.handlers.ListHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
@@ -34,6 +35,7 @@ import eu.kanade.tachiyomi.ui.follows.FollowsRepository
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
+import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
 import eu.kanade.tachiyomi.ui.source.latest.LatestRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
@@ -87,6 +89,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(SearchHandler())
 
+        addSingleton(ListHandler())
+
         addSingleton(PageHandler())
 
         addSingleton(ImageHandler())
@@ -124,6 +128,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(TrackingCoordinator())
 
         addSingleton(LatestRepository())
+
+        addSingleton(BrowseRepository())
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 

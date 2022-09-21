@@ -10,6 +10,11 @@
             android:id="@+id/nav_recents"
             android:icon="@drawable/ic_recents_selector_24dp"
             android:title="@string/recents" />
+
+        <item
+            android:id="@+id/nav_browse_2"
+            android:icon="@drawable/ic_author_24dp"
+            android:title="New Browse" />
         <item
             android:id="@+id/nav_browse"
             android:icon="@drawable/ic_browse_selector_24dp"
