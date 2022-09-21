@@ -14,10 +14,10 @@ import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.toast
+import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.math.max
 
 object Migrations {
 
@@ -131,7 +131,6 @@ object Migrations {
                 LibraryUpdateJob.setupTask(context, 0)
                 LibraryUpdateJob.setupTask(context)
             }
-
 
             return true
         }

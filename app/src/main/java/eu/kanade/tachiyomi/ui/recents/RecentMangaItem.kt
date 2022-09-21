@@ -20,16 +20,22 @@ class RecentMangaItem(
     BaseChapterItem<BaseChapterHolder, AbstractHeaderItem<*>>(chapter, header) {
 
     override fun getLayoutRes(): Int {
-        return if (mch.manga.id == null) R.layout.recents_footer_item
-        else R.layout.recent_manga_item
+        return if (mch.manga.id == null) {
+            R.layout.recents_footer_item
+        } else {
+            R.layout.recent_manga_item
+        }
     }
 
     override fun createViewHolder(
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): BaseChapterHolder {
-        return if (mch.manga.id == null) RecentMangaFooterHolder(view, adapter as RecentMangaAdapter)
-        else RecentMangaHolder(view, adapter as RecentMangaAdapter)
+        return if (mch.manga.id == null) {
+            RecentMangaFooterHolder(view, adapter as RecentMangaAdapter)
+        } else {
+            RecentMangaHolder(view, adapter as RecentMangaAdapter)
+        }
     }
 
     override fun isSwipeable(): Boolean {
@@ -39,16 +45,22 @@ class RecentMangaItem(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other is RecentMangaItem) {
-            return if (mch.manga.id == null) (header as? RecentMangaHeaderItem)?.recentsType ==
-                (other.header as? RecentMangaHeaderItem)?.recentsType
-            else chapter.id == other.chapter.id
+            return if (mch.manga.id == null) {
+                (header as? RecentMangaHeaderItem)?.recentsType ==
+                    (other.header as? RecentMangaHeaderItem)?.recentsType
+            } else {
+                chapter.id == other.chapter.id
+            }
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return if (mch.manga.id == null) -((header as? RecentMangaHeaderItem)?.recentsType ?: 0).hashCode()
-        else (chapter.id ?: 0L).hashCode()
+        return if (mch.manga.id == null) {
+            -((header as? RecentMangaHeaderItem)?.recentsType ?: 0).hashCode()
+        } else {
+            (chapter.id ?: 0L).hashCode()
+        }
     }
 
     override fun bindViewHolder(
@@ -57,7 +69,8 @@ class RecentMangaItem(
         position: Int,
         payloads: MutableList<Any?>?,
     ) {
-        if (mch.manga.id == null) (holder as? RecentMangaFooterHolder)?.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
-        else if (chapter.id != null) (holder as? RecentMangaHolder)?.bind(this)
+        if (mch.manga.id == null) {
+            (holder as? RecentMangaFooterHolder)?.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
+        } else if (chapter.id != null) (holder as? RecentMangaHolder)?.bind(this)
     }
 }

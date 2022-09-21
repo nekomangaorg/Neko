@@ -27,7 +27,7 @@ class TrackerPreference @JvmOverloads constructor(context: Context, attrs: Attri
         logoContainer.setCardBackgroundColor(iconColor)
         checkedIcon.isVisible = !getPersistedString("").isNullOrEmpty()
     }
-    
+
     @ColorInt
     var iconColor: Int = Color.TRANSPARENT
         set(value) {

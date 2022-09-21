@@ -5,6 +5,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -18,7 +19,6 @@ import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
 import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.TrackerPreference
 import uy.kohesive.injekt.injectLazy
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsTrackingController :
     SettingsController(),
@@ -51,7 +51,10 @@ class SettingsTrackingController :
                 R.string.content_rating_pornographic,
             )
             entryValues = listOf(
-                MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic,
+                MdConstants.ContentRating.safe,
+                MdConstants.ContentRating.suggestive,
+                MdConstants.ContentRating.erotica,
+                MdConstants.ContentRating.pornographic,
             )
 
             defValue = setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic)
@@ -81,7 +84,6 @@ class SettingsTrackingController :
                 this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
                     updateAutoAddTracker(newValue as Boolean, TrackManager.MYANIMELIST)
                 }
-
             }
             trackPreference(trackManager.aniList) {
                 activity?.openInBrowser(AnilistApi.authUrl())

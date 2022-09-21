@@ -58,7 +58,6 @@ fun FilterChapterSheet(
     setAsGlobal: (MangaConstants.SetGlobal) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
-
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .8
 
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
@@ -95,7 +94,8 @@ private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.So
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.sort), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
             if (!sortFilter.matchesGlobalDefaults) {
@@ -111,13 +111,11 @@ private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.So
         SortLine(themeColorState, SortOption(sortFilter.sourceOrderSort, SourceOrder), stringResource(id = R.string.by_source_order), changeSort)
         SortLine(themeColorState, SortOption(sortFilter.chapterNumberSort, ChapterNumber), stringResource(id = R.string.by_chapter_number), changeSort)
         SortLine(themeColorState, SortOption(sortFilter.uploadDateSort, UploadDate), stringResource(id = R.string.by_update_date), changeSort)
-
     }
 }
 
 @Composable
 private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: String, changeSort: (SortOption) -> Unit) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -129,10 +127,10 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
                 }
                 val sortOption = state.copy(sortState = newState)
                 changeSort(sortOption)
-
             }
             .padding(horizontal = 0.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         when (state.sortState) {
             Ascending -> {
@@ -146,7 +144,6 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
             }
         }
         Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-
     }
 }
 
@@ -167,7 +164,8 @@ private fun Filter(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
@@ -214,13 +212,11 @@ private fun Filter(
         CheckboxLine(themeColorState = themeColorState, checked = hideTitlesFilter, text = stringResource(id = R.string.hide_chapter_titles)) {
             changeHideTitles(!hideTitlesFilter)
         }
-
     }
 }
 
 @Composable
 private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.FilterOption, text: String, changeFilter: (MangaConstants.FilterOption) -> Unit) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -254,7 +250,6 @@ private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.F
         )
         Gap(width = 8.dp)
         Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-
     }
 }
 
@@ -278,23 +273,21 @@ private fun CheckboxLine(themeColorState: ThemeColorState, checked: Boolean, dis
         )
         Gap(width = 8.dp)
         Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-
     }
 }
 
 @Composable
 private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaConstants.ScanlatorFilter, changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
@@ -323,7 +316,6 @@ private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaCo
 
 @Composable
 private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: MangaConstants.ScanlatorOption, enabledButton: Boolean, changeScanlatorFilter: () -> Unit) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -342,23 +334,21 @@ private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: Man
         )
         Gap(width = 8.dp)
         Text(text = scanlatorOption.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-
     }
 }
 
 @Composable
 private fun Language(themeColorState: ThemeColorState, languageFilter: MangaConstants.LanguageFilter, changeLanguageFilter: (MangaConstants.LanguageOption?) -> Unit) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 modifier = Modifier.padding(vertical = 16.dp),
@@ -387,7 +377,6 @@ private fun Language(themeColorState: ThemeColorState, languageFilter: MangaCons
 
 @Composable
 private fun LanguageLine(themeColorState: ThemeColorState, languageOption: MangaConstants.LanguageOption, enabledButton: Boolean, changeLanguageFilter: () -> Unit) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -406,9 +395,5 @@ private fun LanguageLine(themeColorState: ThemeColorState, languageOption: Manga
         )
         Gap(width = 8.dp)
         Text(text = MdLang.fromIsoCode(languageOption.name)?.prettyPrint ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-
     }
 }
-
-
-

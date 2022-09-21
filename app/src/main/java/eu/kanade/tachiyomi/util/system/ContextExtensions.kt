@@ -40,10 +40,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import java.io.File
 import kotlin.math.max
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
 
@@ -392,8 +392,11 @@ fun Context.isInNightMode(): Boolean {
 }
 
 fun Context.appDelegateNightMode(): Int {
-    return if (isInNightMode()) AppCompatDelegate.MODE_NIGHT_YES
-    else AppCompatDelegate.MODE_NIGHT_NO
+    return if (isInNightMode()) {
+        AppCompatDelegate.MODE_NIGHT_YES
+    } else {
+        AppCompatDelegate.MODE_NIGHT_NO
+    }
 }
 
 fun Context.isOnline(): Boolean {

@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.util.system
 
 import com.elvishew.xlog.XLog
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
@@ -12,8 +14,6 @@ import rx.Emitter
 import rx.Observable
 import rx.Subscriber
 import rx.Subscription
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /*
  * Util functions for bridging RxJava and coroutines. Taken from TachiyomiEH/SY.
@@ -34,11 +34,13 @@ private suspend fun <T> Observable<T>.awaitOne(): T = suspendCancellableCoroutin
                 }
 
                 override fun onCompleted() {
-                    if (cont.isActive) cont.resumeWithException(
-                        IllegalStateException(
-                            "Should have invoked onNext",
-                        ),
-                    )
+                    if (cont.isActive) {
+                        cont.resumeWithException(
+                            IllegalStateException(
+                                "Should have invoked onNext",
+                            ),
+                        )
+                    }
                 }
 
                 override fun onError(e: Throwable) {
@@ -62,7 +64,6 @@ fun <T> runAsObservable(
     scope: CoroutineScope = GlobalScope,
     backpressureMode: Emitter.BackpressureMode = Emitter.BackpressureMode.NONE,
     block: suspend () -> T,
-
 ): Observable<T> {
     return Observable.create(
         { emitter ->

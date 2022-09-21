@@ -22,11 +22,11 @@ import jp.wasabeef.gap.Gap
  */
 @Composable
 fun ColumnScope.Header(text: String, cancelClick: () -> Unit) {
-
     Box(modifier = Modifier.padding(horizontal = 8.dp)) {
         IconButton(onClick = { cancelClick() }) {
             Icon(
-                imageVector = Icons.Default.Close, contentDescription = null,
+                imageVector = Icons.Default.Close,
+                contentDescription = null,
                 modifier = Modifier
                     .size(28.dp),
                 tint = MaterialTheme.colorScheme.onSurface,

@@ -32,12 +32,12 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
-import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.NoRippleText
 import java.text.NumberFormat
 import java.util.Locale
+import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
+import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.NoRippleText
 
 @Composable
 fun InformationBlock(
@@ -56,7 +56,6 @@ fun InformationBlock(
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
 ) {
-
     val highAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast)
     val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
@@ -122,7 +121,7 @@ fun InformationBlock(
             mainAxisAlignment = FlowMainAxisAlignment.Start,
             crossAxisAlignment = FlowCrossAxisAlignment.Center,
 
-            ) {
+        ) {
             if (langFlagProvider() != null) {
                 val flag = when (langFlagProvider()!!.lowercase(Locale.US)) {
                     "zh-hk" -> R.drawable.ic_flag_hk
@@ -188,17 +187,15 @@ fun InformationBlock(
                     com.mikepenz.iconics.compose.Image(asset = CommunityMaterial.Icon.cmd_check_decagram, colorFilter = ColorFilter.tint(mediumAlpha))
                 }
             }
-
         }
 
         missingChaptersProvider()?.let { numberOfMissingChapters ->
             Gap(4.dp)
             NoRippleText(
-                text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters), style = MaterialTheme.typography.bodyLarge,
+                text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters),
+                style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
         }
-
     }
 }
-

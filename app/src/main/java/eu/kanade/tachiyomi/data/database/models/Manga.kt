@@ -24,8 +24,8 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
-import tachiyomi.source.model.MangaInfo
 import java.util.Locale
+import tachiyomi.source.model.MangaInfo
 
 interface Manga : SManga {
 

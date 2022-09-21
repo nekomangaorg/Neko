@@ -29,7 +29,6 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun TrackingChapterDialog(themeColorState: ThemeColorState, track: TrackItem, onDismiss: () -> Unit, trackChapterChanged: (Int) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-
         var currentChapter by remember { mutableStateOf(track.lastChapterRead.toInt()) }
 
         val range = when (track.totalChapters > 0) {
@@ -59,7 +58,6 @@ fun TrackingChapterDialog(themeColorState: ThemeColorState, track: TrackItem, on
                         dividersColor = themeColorState.buttonColor,
                     )
                 }
-
             },
             onDismissRequest = onDismiss,
             dismissButton = {

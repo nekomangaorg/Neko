@@ -48,8 +48,11 @@ class LibraryListHolder(
                 binding.title.isVisible = false
             } else {
                 binding.title.text = itemView.context.getString(
-                    if (adapter.hasActiveFilters) R.string.no_matches_for_filters_short
-                    else R.string.category_is_empty,
+                    if (adapter.hasActiveFilters) {
+                        R.string.no_matches_for_filters_short
+                    } else {
+                        R.string.category_is_empty
+                    },
                 )
             }
             binding.title.textAlignment = View.TEXT_ALIGNMENT_CENTER

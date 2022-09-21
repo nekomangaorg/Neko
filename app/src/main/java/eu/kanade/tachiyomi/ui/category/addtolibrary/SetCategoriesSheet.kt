@@ -26,10 +26,10 @@ import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
-import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
+import uy.kohesive.injekt.injectLazy
 
 class SetCategoriesSheet(
     private val activity: Activity,
@@ -48,7 +48,9 @@ class SetCategoriesSheet(
         addingToLibrary: Boolean,
         onMangaAdded: () -> Unit,
     ) : this(
-        activity, listOf(manga), categories,
+        activity,
+        listOf(manga),
+        categories,
         categories.map {
             if (it.id in preselected) {
                 TriStateCheckBox.State.CHECKED
@@ -56,7 +58,8 @@ class SetCategoriesSheet(
                 TriStateCheckBox.State.UNCHECKED
             }
         }.toTypedArray(),
-        addingToLibrary, onMangaAdded,
+        addingToLibrary,
+        onMangaAdded,
     )
 
     private val fastAdapter: FastAdapter<AddCategoryItem>

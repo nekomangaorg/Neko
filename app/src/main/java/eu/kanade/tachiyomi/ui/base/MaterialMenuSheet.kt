@@ -114,14 +114,15 @@ class MaterialMenuSheet(
         }
         elevate(binding.menuSheetRecycler.canScrollVertically(-1))
         if (binding.titleLayout.isVisible) {
-            binding.menuSheetRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    val notAtTop = binding.menuSheetRecycler.canScrollVertically(-1)
-                    if (notAtTop != isElevated) {
-                        elevate(notAtTop)
+            binding.menuSheetRecycler.addOnScrollListener(
+                object : RecyclerView.OnScrollListener() {
+                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                        val notAtTop = binding.menuSheetRecycler.canScrollVertically(-1)
+                        if (notAtTop != isElevated) {
+                            elevate(notAtTop)
+                        }
                     }
-                }
-            },
+                },
             )
         }
     }

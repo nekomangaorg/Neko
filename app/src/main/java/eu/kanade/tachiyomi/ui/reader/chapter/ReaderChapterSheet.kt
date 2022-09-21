@@ -60,7 +60,9 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         val navPrimary = ColorUtils.setAlphaComponent(
             if (hasLightNav) {
                 fullPrimary
-            } else Color.BLACK,
+            } else {
+                Color.BLACK
+            },
             200,
         )
         sheetBehavior = BottomSheetBehavior.from(this)
@@ -181,22 +183,26 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         )
 
         backgroundTintList = ColorStateList.valueOf(
-            if (!sheetBehavior.isExpanded()) primary
-            else fullPrimary,
+            if (!sheetBehavior.isExpanded()) {
+                primary
+            } else {
+                fullPrimary
+            },
         )
 
-        binding.chapterRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE ||
-                    newState == RecyclerView.SCROLL_STATE_SETTLING
-                ) {
-                    sheetBehavior?.isDraggable = true
-                } else {
-                    sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
+        binding.chapterRecycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE ||
+                        newState == RecyclerView.SCROLL_STATE_SETTLING
+                    ) {
+                        sheetBehavior?.isDraggable = true
+                    } else {
+                        sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
+                    }
                 }
-            }
-        },
+            },
         )
 
         binding.chapterRecycler.layoutManager = LinearLayoutManager(context)

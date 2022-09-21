@@ -27,12 +27,12 @@ fun OverflowOptions(chapterActions: MangaConstants.ChapterActions, chaptersProvi
                                 title = stringResource(id = R.string.next_5_unread),
                                 onClick = { chapterActions.download(emptyList(), MangaConstants.DownloadAction.DownloadNextUnread(5)) },
 
-                                ),
+                            ),
                             AppBar.OverflowAction(
                                 title = stringResource(id = R.string.next_10_unread),
                                 onClick = { chapterActions.download(emptyList(), MangaConstants.DownloadAction.DownloadNextUnread(10)) },
 
-                                ),
+                            ),
                         ),
                     ),
                     AppBar.OverflowAction(

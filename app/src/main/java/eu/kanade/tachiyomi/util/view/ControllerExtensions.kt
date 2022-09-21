@@ -62,11 +62,11 @@ import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
-import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import uy.kohesive.injekt.injectLazy
 
 fun Controller.setOnQueryTextChangeListener(
     searchView: SearchView?,
@@ -78,7 +78,7 @@ fun Controller.setOnQueryTextChangeListener(
         object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (!onlyOnSubmit && router.backstack.lastOrNull()
-                        ?.controller == this@setOnQueryTextChangeListener
+                    ?.controller == this@setOnQueryTextChangeListener
                 ) {
                     return f(newText)
                 }
@@ -126,8 +126,11 @@ fun <T> Controller.liftAppbarWith(recyclerOrNested: T, padView: Boolean = false)
     val recycler = recyclerOrNested as? RecyclerView ?: recyclerOrNested as? NestedScrollView ?: return
     if (padView) {
         var appBarHeight = (
-            if (fullAppBarHeight ?: 0 > 0) fullAppBarHeight!!
-            else activityBinding?.appBar?.attrToolbarHeight ?: 0
+            if (fullAppBarHeight ?: 0 > 0) {
+                fullAppBarHeight!!
+            } else {
+                activityBinding?.appBar?.attrToolbarHeight ?: 0
+            }
             )
         activityBinding!!.toolbar.post {
             if (fullAppBarHeight!! > 0) {
@@ -198,7 +201,7 @@ fun <T> Controller.liftAppbarWith(recyclerOrNested: T, padView: Boolean = false)
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (router?.backstack?.lastOrNull()
-                        ?.controller == this@liftAppbarWith && activity != null
+                    ?.controller == this@liftAppbarWith && activity != null
                 ) {
                     val notAtTop = recycler.canScrollVertically(-1)
                     if (notAtTop != isToolbarColored) colorToolbar(notAtTop)
@@ -227,8 +230,11 @@ fun Controller.scrollViewWith(
     activityBinding?.appBar?.useTabsInPreLayout = includeTabView
     activityBinding?.appBar?.setToolbarModeBy(this@scrollViewWith)
     var appBarHeight = (
-        if (fullAppBarHeight ?: 0 > 0) fullAppBarHeight!!
-        else activityBinding?.appBar?.preLayoutHeight ?: 0
+        if (fullAppBarHeight ?: 0 > 0) {
+            fullAppBarHeight!!
+        } else {
+            activityBinding?.appBar?.preLayoutHeight ?: 0
+        }
         )
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
     val swipeCircle = swipeRefreshLayout?.findChild<ImageView>()
@@ -275,10 +281,12 @@ fun Controller.scrollViewWith(
         val systemInsets =
             if (ignoreInsetVisibility) insets.ignoredSystemInsets else insets.getInsets(systemBars())
         val headerHeight = systemInsets.top + appBarHeight
-        if (!customPadding) view.updatePaddingRelative(
-            top = headerHeight,
-            bottom = if (padBottom) systemInsets.bottom else view.paddingBottom,
-        )
+        if (!customPadding) {
+            view.updatePaddingRelative(
+                top = headerHeight,
+                bottom = if (padBottom) systemInsets.bottom else view.paddingBottom,
+            )
+        }
         swipeRefreshLayout?.setProgressViewOffset(
             true,
             headerHeight + (-60).dpToPx,
@@ -353,10 +361,10 @@ fun Controller.scrollViewWith(
                     }
                 } else {
                     if (!customPadding && lastY == 0f && (
-                            (
-                                this@scrollViewWith !is FloatingSearchInterface
-                                ) || includeTabView
-                            )
+                        (
+                            this@scrollViewWith !is FloatingSearchInterface
+                            ) || includeTabView
+                        )
                     ) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val v = View(activity)
@@ -386,9 +394,11 @@ fun Controller.scrollViewWith(
                         v.layoutParams = params
                     }
                     toolbarColorAnim?.cancel()
-                    if (activityBinding!!.toolbar.tag == randomTag) activityBinding!!.toolbar.setOnClickListener(
-                        null,
-                    )
+                    if (activityBinding!!.toolbar.tag == randomTag) {
+                        activityBinding!!.toolbar.setOnClickListener(
+                            null,
+                        )
+                    }
                 }
             }
         },
@@ -449,12 +459,12 @@ fun Controller.scrollViewWith(
                         }
 
                         if (!isToolbarColor && (
-                                dy == 0 ||
-                                    (
-                                        activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
-                                            dy == 0 && activityBinding!!.appBar.y == 0f
-                                        )
-                                )
+                            dy == 0 ||
+                                (
+                                    activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
+                                        dy == 0 && activityBinding!!.appBar.y == 0f
+                                    )
+                            )
                         ) {
                             colorToolbar(true)
                         }
@@ -491,7 +501,11 @@ fun Controller.scrollViewWith(
                         val closerToEdge =
                             if (activityBinding!!.bottomNav?.isVisible == true &&
                                 preferences.hideBottomNavOnScroll().get()
-                            ) closerToBottom else closerToTop
+                            ) {
+                                closerToBottom
+                            } else {
+                                closerToTop
+                            }
                         lastY = activityBinding!!.appBar.snapAppBarY(this@scrollViewWith, recycler) {
                             val activityBinding = activityBinding ?: return@snapAppBarY
                             swipeCircle?.translationY = max(

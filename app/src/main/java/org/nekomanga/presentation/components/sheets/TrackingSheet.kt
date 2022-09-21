@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
+import java.text.DateFormat
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
@@ -58,7 +59,6 @@ import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
-import java.text.DateFormat
 
 @Composable
 fun TrackingSheet(
@@ -76,16 +76,12 @@ fun TrackingSheet(
     trackingStartDateClick: (TrackAndService, TrackingDate) -> Unit,
     trackingFinishDateClick: (TrackAndService, TrackingDate) -> Unit,
 ) {
-
     var statusDialog by remember { mutableStateOf<Dialog>(HideDialog) }
     var scoreDialog by remember { mutableStateOf<Dialog>(HideDialog) }
     var removeTrackDialog by remember { mutableStateOf<Dialog>(HideDialog) }
     var chapterTrackDialog by remember { mutableStateOf<Dialog>(HideDialog) }
     var calendarStartTrackDialog by remember { mutableStateOf<Dialog>(HideDialog) }
     var calendarFinishedTrackDialog by remember { mutableStateOf<Dialog>(HideDialog) }
-
-
-
 
     BaseSheet(themeColor = themeColor) {
         if (statusDialog is ShowDialog) {
@@ -136,8 +132,6 @@ fun TrackingSheet(
             val trackAndService = (calendarFinishedTrackDialog as ShowDialog).trackAndService
             trackingFinishDateClick(trackAndService, TrackingDate(readingDate = ReadingDate.Finish, trackAndService.track.finishedReadingDate, dateFormat = dateFormat))
         }
-
-
 
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(servicesProvider()) { service ->
@@ -199,7 +193,6 @@ private fun TrackingServiceItem(
     startDateClick: () -> Unit,
     finishDateClick: () -> Unit,
 ) {
-
     OutlinedCard(
         shape = RoundedCornerShape(Shapes.sheetRadius),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)),
@@ -236,7 +229,8 @@ private fun NoTrack(themeColor: ThemeColorState, service: TrackServiceItem, onLo
             .fillMaxSize()
             .height(48.dp)
             .clickable { searchTrackerClick() },
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Logo(service = service, track = null, onClick = onLogoClick)
         Text(text = stringResource(id = R.string.add_tracking), color = themeColor.buttonColor, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -260,12 +254,15 @@ private fun TrackRowOne(
             .conditional(!service.isMdList) {
                 clickable { searchTrackerClick(track) }
             },
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Logo(service = service, track = track, onClick = onLogoClick)
         if (service.isAutoAddTracker && inLibrary) {
             Text(
-                text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Start,
+                text = track.title,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Start,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp),
@@ -274,7 +271,8 @@ private fun TrackRowOne(
             )
         } else {
             Text(
-                text = track.title, color = MaterialTheme.colorScheme.onSurface,
+                text = track.title,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth(.85f),
@@ -283,7 +281,8 @@ private fun TrackRowOne(
             )
             IconButton(onClick = onRemoveClick) {
                 Icon(
-                    imageVector = Icons.Default.Cancel, contentDescription = null,
+                    imageVector = Icons.Default.Cancel,
+                    contentDescription = null,
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .size(24.dp),
@@ -332,7 +331,6 @@ private fun TrackRowTwo(track: TrackItem, service: TrackServiceItem, statusClick
                 }
 
                 Text(text = chapterText, style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-.3f).sp), color = MaterialTheme.colorScheme.onSurface)
-
             }
             VerticalDivider()
         }
@@ -369,7 +367,6 @@ fun TrackRowThree(track: TrackItem, dateFormat: DateFormat, startDateClick: () -
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-
         TrackingBox(clickable = startDateClick) {
             val (startText, startColor) = when (track.startedReadingDate != 0L) {
                 true -> dateFormat.format(track.startedReadingDate) to MaterialTheme.colorScheme.onSurface
@@ -381,14 +378,12 @@ fun TrackRowThree(track: TrackItem, dateFormat: DateFormat, startDateClick: () -
         VerticalDivider()
 
         TrackingBox(clickable = finishDateClick) {
-
             val (endText, endColor) = when (track.finishedReadingDate != 0L) {
                 true -> dateFormat.format(track.finishedReadingDate) to MaterialTheme.colorScheme.onSurface
                 false -> stringResource(id = R.string.finished_reading_date) to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
             }
             Text(text = endText, color = endColor, style = MaterialTheme.typography.bodyMedium)
         }
-
     }
 }
 

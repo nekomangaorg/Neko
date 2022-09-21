@@ -121,6 +121,13 @@ import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.doOnEnd
 import eu.kanade.tachiyomi.widget.doOnStart
+import java.io.File
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -133,13 +140,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nucleus.factory.RequiresPresenter
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.Locale
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
@@ -244,7 +244,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             val intent = newIntent(activity, manga, chapter)
             intent.putExtra(TRANSITION_NAME, sharedElement.transitionName)
             val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                activity, sharedElement, sharedElement.transitionName,
+                activity,
+                sharedElement,
+                sharedElement.transitionName,
             )
             return intent to activityOptions.toBundle()
         }
@@ -454,8 +456,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
             compatToolTipText =
                 getString(
-                    if (enabled) R.string.remove_crop
-                    else R.string.crop_borders,
+                    if (enabled) {
+                        R.string.remove_crop
+                    } else {
+                        R.string.crop_borders
+                    },
                 )
         }
     }
@@ -465,7 +470,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         with(binding.chaptersSheet) {
             readingMode.isVisible =
                 presenter?.manga?.isLongStrip() != true &&
-                    ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
                 ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&
@@ -607,8 +612,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         return MaterialContainerTransform(this, entering).apply {
             duration = (
                 resources?.getInteger(
-                    if (entering) android.R.integer.config_longAnimTime
-                    else android.R.integer.config_mediumAnimTime,
+                    if (entering) {
+                        android.R.integer.config_longAnimTime
+                    } else {
+                        android.R.integer.config_mediumAnimTime
+                    },
                 ) ?: 500
                 ).toLong()
             addTarget(android.R.id.content)
@@ -664,7 +672,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 val pref =
                     if ((viewer as? WebtoonViewer)?.hasMargins == true ||
                         (viewer is PagerViewer)
-                    ) preferences.cropBorders() else preferences.cropBordersWebtoon()
+                    ) {
+                        preferences.cropBorders()
+                    } else {
+                        preferences.cropBordersWebtoon()
+                    }
                 pref.toggle()
             }
 
@@ -900,15 +912,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
                 peek + if (fullscreen) {
-                    insets.getBottomGestureInsets()
-                } else {
-                    val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
-                    max(
-                        0,
-                        (rootInsets.getBottomGestureInsets()) -
-                            rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom,
-                    )
-                }
+                insets.getBottomGestureInsets()
+            } else {
+                val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
+                max(
+                    0,
+                    (rootInsets.getBottomGestureInsets()) -
+                        rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom,
+                )
+            }
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = systemInsets.bottom)
             binding.viewerContainer.requestLayout()
         }
@@ -1083,8 +1095,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 ),
                 4000,
             ) {
-                if (presenter.manga?.isLongStrip() != true) setAction(R.string.use_default) {
-                    presenter.setMangaReadingMode(0)
+                if (presenter.manga?.isLongStrip() != true) {
+                    setAction(R.string.use_default) {
+                        presenter.setMangaReadingMode(0)
+                    }
                 }
             }
         }
@@ -1499,10 +1513,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         val text = "${manga.title}: ${
-            getString(
-                R.string.chapter_,
-                decimalFormat.format(chapter.chapter_number),
-            )
+        getString(
+            R.string.chapter_,
+            decimalFormat.format(chapter.chapter_number),
+        )
         }, $pageNumber, <${MdUtil.baseUrl + manga.url}>"
 
         val stream = file.getUriCompat(this)
@@ -1616,7 +1630,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                         ColorUtils.setAlphaComponent(
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || isInNightMode()) {
                                 getResourceColor(R.attr.colorSurface)
-                            } else Color.BLACK,
+                            } else {
+                                Color.BLACK
+                            },
                             if (binding.root.rootWindowInsetsCompat?.hasSideNavBar() == true) {
                                 255
                             } else {
@@ -1898,10 +1914,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
-            val paint = if (grayscale || invertedColors) getCombinedPaint(
-                grayscale,
-                invertedColors,
-            ) else null
+            val paint = if (grayscale || invertedColors) {
+                getCombinedPaint(
+                    grayscale,
+                    invertedColors,
+                )
+            } else {
+                null
+            }
             binding.viewerContainer.setLayerType(View.LAYER_TYPE_HARDWARE, paint)
         }
     }

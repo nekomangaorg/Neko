@@ -40,8 +40,12 @@ fun WindowInsetsCompat.isImeVisible() = isVisible(WindowInsetsCompat.Type.ime())
 
 fun WindowInsets.topCutoutInset() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
     displayCutout?.safeInsetTop ?: 0
-} else 0
+} else {
+    0
+}
 
 fun WindowInsets.bottomCutoutInset() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
     displayCutout?.safeInsetBottom ?: 0
-} else 0
+} else {
+    0
+}

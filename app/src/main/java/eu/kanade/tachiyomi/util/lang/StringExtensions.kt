@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import java.util.Locale
 import kotlin.math.floor
+import org.nekomanga.domain.network.ResultError
 
 /**
  * Replaces the given string to have at most [count] characters using [replacement] at its end.
@@ -106,7 +107,9 @@ fun String.capitalized(): String {
     return this.replaceFirstChar {
         if (it.isLowerCase()) {
             it.titlecase(Locale.US)
-        } else it.toString()
+        } else {
+            it.toString()
+        }
     }
 }
 
@@ -209,3 +212,5 @@ fun String.isUUID() =
 fun String.htmlDecode(): String {
     return this.parseAsHtml().toString()
 }
+
+fun String.toResultError() = ResultError.Generic(errorString = this)

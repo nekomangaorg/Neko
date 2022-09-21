@@ -50,7 +50,6 @@ class BackupFileValidator(
             .map { context.getString(it.nameRes()) }
             .sorted()
 
-
         return Results(missingTrackers, !hasDexEntries)
     }
 

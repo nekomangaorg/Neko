@@ -12,7 +12,8 @@ enum class PageLayout(
     SINGLE_PAGE(0, 0, R.string.single_page),
     DOUBLE_PAGES(1, 2, R.string.double_pages),
     AUTOMATIC(2, 3, R.string.automatic, R.string.automatic_orientation),
-    SPLIT_PAGES(3, 1, R.string.split_double_pages)
+    SPLIT_PAGES(3, 1, R.string.split_double_pages),
+
     ;
 
     @StringRes

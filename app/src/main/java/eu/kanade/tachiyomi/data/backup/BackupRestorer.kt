@@ -74,7 +74,6 @@ class BackupRestorer(val context: Context, val job: Job?) {
             restoreCategories(backup.backupCategories)
         }
 
-
         dexManga.groupBy { MdUtil.getMangaUUID(it.url) }.forEach { (_, mangaList) ->
             restoreManga(mangaList.first().title, mangaList, backup.backupCategories)
         }
@@ -138,7 +137,7 @@ class BackupRestorer(val context: Context, val job: Job?) {
                     tracking = tempTracks,
                 )
             }
-            //always make it EN source
+            // always make it EN source
             backupManga.source = SourceManager.getId(MdLang.ENGLISH.lang)
 
             val manga = backupManga.getMangaImpl()
@@ -149,7 +148,6 @@ class BackupRestorer(val context: Context, val job: Job?) {
 
             val dbManga = backupManager.getMangaFromDatabase(manga)
             val dbMangaExists = dbManga != null
-
 
             if (dbMangaExists) {
                 backupManager.restoreMangaNoFetch(manga, dbManga!!)

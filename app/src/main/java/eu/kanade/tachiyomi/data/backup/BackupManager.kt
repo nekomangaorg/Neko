@@ -30,19 +30,16 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import java.io.FileOutputStream
+import kotlin.math.max
 import kotlinx.serialization.protobuf.ProtoBuf
 import okio.buffer
 import okio.gzip
 import okio.sink
 import uy.kohesive.injekt.injectLazy
-import java.io.FileOutputStream
-import kotlin.math.max
 
 class BackupManager(val context: Context) {
 
@@ -188,7 +185,6 @@ class BackupManager(val context: Context) {
                     databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url?.let {
                         BackupHistory(it, history.last_read, history.time_read)
                     }
-
                 }
                 if (history.isNotEmpty()) {
                     mangaObject.history = history
@@ -205,24 +201,6 @@ class BackupManager(val context: Context) {
         manga.initialized = false
         manga.favorite = dbManga.favorite || manga.favorite
         databaseHelper.insertManga(manga).executeAsBlocking()
-    }
-
-    /**
-     * Fetches manga information
-     *
-     * @param source source of manga
-     * @param manga manga that needs updating
-     * @return Updated manga info.
-     */
-    suspend fun restoreMangaFetch(source: Source, manga: Manga): Manga {
-        return withContext(Dispatchers.IO) {
-            val networkManga = source.getMangaDetails(manga)
-            manga.copyFrom(networkManga)
-            manga.favorite = true
-            manga.initialized = true
-            manga.id = databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
-            manga
-        }
     }
 
     /**

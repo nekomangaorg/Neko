@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import java.text.DateFormat
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackSearchItem
 import org.nekomanga.domain.track.TrackServiceItem
 import org.threeten.bp.LocalDate
-import java.text.DateFormat
 
 object TrackingConstants {
 
@@ -29,6 +29,6 @@ object TrackingConstants {
 
     enum class ReadingDate {
         Start,
-        Finish
+        Finish,
     }
 }

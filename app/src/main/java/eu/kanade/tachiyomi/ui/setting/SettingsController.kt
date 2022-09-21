@@ -19,6 +19,7 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import com.fredporciuncula.flow.preferences.Preference as FlowPreference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
@@ -29,14 +30,13 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
+import java.util.Locale
 import kotlinx.coroutines.MainScope
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Locale
-import com.fredporciuncula.flow.preferences.Preference as FlowPreference
 
 abstract class SettingsController : PreferenceController() {
 
@@ -118,7 +118,9 @@ abstract class SettingsController : PreferenceController() {
     open fun getSearchTitle(): String? {
         return if (this is FloatingSearchInterface) {
             searchTitle(preferenceScreen?.title?.toString()?.lowercase(Locale.ROOT))
-        } else null
+        } else {
+            null
+        }
     }
 
     fun setTitle() {

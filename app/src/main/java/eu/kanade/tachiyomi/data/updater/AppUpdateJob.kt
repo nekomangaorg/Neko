@@ -14,8 +14,8 @@ import androidx.work.WorkerParameters
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.notificationManager
-import kotlinx.coroutines.coroutineScope
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.coroutineScope
 
 class AppUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {

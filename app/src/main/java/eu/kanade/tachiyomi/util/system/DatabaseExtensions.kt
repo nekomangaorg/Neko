@@ -20,4 +20,3 @@ suspend fun PreparedDeleteByQuery.executeOnIO() = withContext(Dispatchers.IO) { 
 suspend fun <T> PreparedPutCollectionOfObjects<T>.executeOnIO() = withContext(Dispatchers.IO) { executeAsBlocking() }
 
 suspend fun <T> PreparedDeleteCollectionOfObjects<T>.executeOnIO() = withContext(Dispatchers.IO) { executeAsBlocking() }
-

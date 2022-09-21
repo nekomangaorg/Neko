@@ -21,7 +21,9 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.roundToTwoDecimal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
+import java.util.Calendar
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +35,6 @@ import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Calendar
 
 class StatsPresenter(
     private val db: DatabaseHelper = Injekt.get(),
@@ -107,15 +108,17 @@ class StatsPresenter(
                             tags = (it.getGenres() ?: emptyList()).toImmutableList(),
                             userScore = getUserScore(tracks),
                             trackers = tracks.mapNotNull { trackManager.getService(it.sync_id) }.map { prefs.context.getString(it.nameRes()) }.toImmutableList(),
-                            categories = (db.getCategoriesForManga(it).executeAsBlocking().map { category -> category.name }.takeUnless { it.isEmpty() }
-                                ?: listOf(prefs.context.getString(R.string.default_value))).sorted().toImmutableList(),
+                            categories = (
+                                db.getCategoriesForManga(it).executeAsBlocking().map { category -> category.name }.takeUnless { it.isEmpty() }
+                                    ?: listOf(prefs.context.getString(R.string.default_value))
+                                ).sorted().toImmutableList(),
                         )
                     }
-
                 }.awaitAll().sortedBy { it.title }
                 _detailState.value = DetailedState(
                     isLoading = false,
                     manga = detailedStatMangaList.toImmutableList(),
+                    categories = (db.getCategories().executeAsBlocking().map { it.name } + listOf(prefs.context.getString(R.string.default_value))).toPersistentList(),
                     tags = detailedStatMangaList.asSequence().map { it.tags }.flatten().distinct().filter { !it.contains("content rating:", true) }.sortedBy { it }.toImmutableList(),
                 )
 
@@ -135,7 +138,6 @@ class StatsPresenter(
 
     fun switchState() {
         presenterScope.launchIO {
-
             val newState = when (simpleState.value.screenState) {
                 is StatsConstants.ScreenState.Simple -> {
                     StatsConstants.ScreenState.Detailed

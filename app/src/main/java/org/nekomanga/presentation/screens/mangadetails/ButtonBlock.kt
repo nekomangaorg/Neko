@@ -64,7 +64,6 @@ fun ButtonBlock(
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
 ) {
-
     if (!isInitializedProvider()) {
         return
     }
@@ -82,7 +81,6 @@ fun ButtonBlock(
         false -> Triple(PaddingValues(horizontal = 12.dp, vertical = 8.dp), PaddingValues(horizontal = 12.dp, vertical = 4.dp), Modifier.height(48.dp))
     }
 
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -90,7 +88,6 @@ fun ButtonBlock(
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-
         val favConfig = when (inLibraryProvider()) {
             true -> ButtonConfig(icon = Icons.Filled.Favorite, buttonColors = checkedButtonColors, borderStroke = checkedBorderStroke, text = stringResource(R.string.in_library))
             false -> ButtonConfig(icon = Icons.Filled.FavoriteBorder, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.add_to_library))
@@ -119,7 +116,6 @@ fun ButtonBlock(
                 )
                 else -> ButtonConfig(icon = Icons.Filled.Sync, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.tracking))
             }
-
 
             OutlinedButton(
                 onClick = trackingClick,
@@ -171,7 +167,8 @@ fun ButtonBlock(
         Gap(gapBetweenButtons)
 
         OutlinedButton(
-            onClick = similarClick, modifier = buttonModifier,
+            onClick = similarClick,
+            modifier = buttonModifier,
             shape = shape,
             border = uncheckedBorderStroke,
             contentPadding = padding,
@@ -269,4 +266,3 @@ private fun RowScope.ButtonText(text: String, color: Color) {
 }
 
 private data class ButtonConfig(val icon: ImageVector? = null, val iIcon: IIcon? = null, val buttonColors: ButtonColors, val borderStroke: BorderStroke, val text: String)
-

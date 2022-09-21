@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.launchIO
+import java.util.Date
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,10 +17,10 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.network.ResultError
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Date
 
 class LatestPresenter(
     private val latestRepository: LatestRepository = Injekt.get(),
@@ -51,9 +52,15 @@ class LatestPresenter(
         getNextKey = {
             _latestScreenState.value.page + 1
         },
-        onError = { throwable ->
+        onError = { resultError ->
             _latestScreenState.update {
-                it.copy(isLoading = false, error = throwable?.localizedMessage)
+                it.copy(
+                    isLoading = false,
+                    error = when (resultError) {
+                        is ResultError.Generic -> resultError.errorString
+                        else -> (resultError as ResultError.HttpError).message
+                    },
+                )
             }
         },
         onSuccess = { hasNexPage, items, newKey ->
@@ -77,7 +84,6 @@ class LatestPresenter(
                     )
                 }
             }
-
         }
         presenterScope.launch {
             preferences.browseAsList().asFlow().collectLatest {
@@ -109,7 +115,6 @@ class LatestPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-
                 val defaultCategory = preferences.defaultCategory()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
@@ -158,4 +163,3 @@ class LatestPresenter(
         preferences.browseAsList().set(!latestScreenState.value.isList)
     }
 }
-

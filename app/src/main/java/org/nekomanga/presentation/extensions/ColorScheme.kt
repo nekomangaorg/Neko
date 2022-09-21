@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.ln
 
-//copied from material 3
+// copied from material 3
 fun ColorScheme.surfaceColorAtElevation(
     elevation: Dp,
 ): Color {
@@ -24,4 +24,3 @@ fun ColorScheme.surfaceColorAtElevationCustomColor(
     val alpha = ((4.5f * ln(elevation.value + 1)) + 2f) / 100f
     return color.copy(alpha = alpha).compositeOver(surface)
 }
-

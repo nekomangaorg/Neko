@@ -3,10 +3,10 @@ package eu.kanade.tachiyomi.network.services
 import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
-import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
@@ -64,6 +64,7 @@ interface MangaDexService {
         @Query("offset") offset: Int,
         @Query("translatedLanguage[]") translatedLanguages: List<String>,
         @Query("contentRating[]") contentRating: List<String>,
+        @Query("excludedGroups[]") blockedScanlators: List<String>,
     ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
@@ -82,15 +83,12 @@ interface MangaDexService {
     @GET("${MdApi.manga}/random")
     suspend fun randomManga(@Query("contentRating[]") contentRating: List<String>): ApiResponse<MangaDto>
 
+    @Headers("Cache-Control: no-cache")
+    @GET(MdApi.group)
+    suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
+
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
-
-    @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.atHomeServer}/{chapterId}")
-    suspend fun getAtHomeServer(
-        @Path("chapterId") chapterId: String,
-        @Query("forcePort443") forcePort443: Boolean,
-    ): ApiResponse<AtHomeDto>
 
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): ApiResponse<ResultDto>

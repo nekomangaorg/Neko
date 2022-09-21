@@ -11,10 +11,10 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import rx.Observable
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.zip.ZipFile
+import rx.Observable
+import uy.kohesive.injekt.injectLazy
 
 /**
  * Loader used to load a chapter from the downloaded chapters.
@@ -52,7 +52,9 @@ class DownloadPageLoader(
                     }
                 }
                 ZipFile(tmpFile.absolutePath)
-            } else ZipFile(chapterPath.filePath)
+            } else {
+                ZipFile(chapterPath.filePath)
+            }
             return zip.entries().toList()
                 .filter { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
                 .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }

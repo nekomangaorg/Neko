@@ -4,8 +4,8 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
-import rx.subjects.PublishSubject
 import kotlin.math.roundToInt
+import rx.subjects.PublishSubject
 
 class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
 
@@ -65,7 +65,8 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
         QUEUE,
         DOWNLOADING,
         DOWNLOADED,
-        ERROR
+        ERROR,
+
         ;
 
         companion object {

@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
+import eu.kanade.tachiyomi.data.database.tables.ScanlatorTable
 import eu.kanade.tachiyomi.data.database.tables.SimilarTable
 import eu.kanade.tachiyomi.data.database.tables.TrackTable
 
@@ -23,7 +24,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 32
+        const val DATABASE_VERSION = 33
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
@@ -35,6 +36,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         execSQL(HistoryTable.createTableQuery)
         execSQL(SimilarTable.createTableQuery)
         execSQL(ArtworkTable.createTableQuery)
+        execSQL(ScanlatorTable.createTableQuery)
 
         // DB indexes
         execSQL(MangaTable.createUrlIndexQuery)
@@ -141,6 +143,10 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
 
         if (oldVersion < 32) {
             db.execSQL(MangaTable.addLanguageFilterFlag)
+        }
+
+        if (oldVersion < 33) {
+            db.execSQL(ScanlatorTable.createTableQuery)
         }
     }
 

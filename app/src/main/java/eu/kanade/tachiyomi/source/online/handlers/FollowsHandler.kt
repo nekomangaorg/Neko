@@ -1,10 +1,11 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.get
-import com.github.michaelbull.result.getError
+import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.getOrElse
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
@@ -23,6 +24,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
+import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
@@ -46,52 +48,53 @@ class FollowsHandler {
      */
     suspend fun fetchAllFollows(): Result<Map<Int, List<SourceManga>>, ResultError> {
         return withContext(Dispatchers.IO) {
-            val readingFuture = async {
-                statusHandler.fetchReadingStatusForAllManga()
-            }
+            return@withContext runCatching {
+                val readingFuture = async {
+                    statusHandler.fetchReadingStatusForAllManga()
+                }
 
-            val response = fetchOffset(0)
-
-            if (response.getError() != null) {
-                return@withContext Err(response.getError()!!)
-            }
-
-            val mangaListDto = response.get()!!
-            val allResults = if (mangaListDto.total > mangaListDto.limit) {
-                val totalRequestNo = (mangaListDto.total / mangaListDto.limit)
-                (1..totalRequestNo).map { pos ->
-                    async {
-                        fetchOffset(pos * mangaListDto.limit)
+                fetchOffset(0).andThen { mangaListDto ->
+                    Ok(
+                        when (mangaListDto.total > mangaListDto.limit) {
+                            true -> fetchRestOfFollows(mangaListDto.limit, mangaListDto.total) + mangaListDto
+                            false -> listOf(mangaListDto)
+                        }.map { it.data }.flatten(),
+                    )
+                }
+                    .andThen { allResults ->
+                        Ok(allFollowsParser(allResults, readingFuture.await()))
                     }
-                }.awaitAll().mapNotNull { it.get() } + mangaListDto
-            } else {
-                listOf(mangaListDto)
-            }.map { it.data }.flatten()
+            }.getOrElse {
+                XLog.e("Error fetching all follows", it)
+                Err(ResultError.Generic("Unknown error fetching all follows"))
+            }
+        }
+    }
 
-            return@withContext Ok(allFollowsParser(allResults, readingFuture.await()))
+    private suspend fun fetchRestOfFollows(limit: Int, total: Int): List<MangaListDto> {
+        return withContext(Dispatchers.IO) {
+            val totalRequestNo = (total / limit)
 
+            (1..totalRequestNo).map { pos ->
+                async {
+                    fetchOffset(pos * limit)
+                }
+            }.awaitAll().mapNotNull { it.getOrElse { null } }
         }
     }
 
     private suspend fun fetchOffset(offset: Int): Result<MangaListDto, ResultError> {
-        val response = authService.userFollowList(offset).onFailure {
-            this.log("Failed to get follows with offset $offset")
-        }.getOrNull()
-
-        return when (response) {
-            null -> Err(ResultError.Generic(errorString = "Failure to get follows"))
-            else -> Ok(response)
-        }
+        return authService.userFollowList(offset).getOrResultError("Failed to get follows")
     }
 
     private fun allFollowsParser(mangaDataDtoList: List<MangaDataDto>, readingStatusMap: Map<String, String?>): Map<Int, List<SourceManga>> {
         val coverQuality = preferences.thumbnailQuality()
         return mangaDataDtoList.asSequence().map {
             val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
-            it.toSourceManga(coverQuality).copy(displayTextRes = followStatus.stringRes)
+            followStatus to it.toSourceManga(coverQuality)
         }
-            .sortedBy { it.title }
-            .groupBy { it.displayTextRes!! }
+            .sortedBy { it.second.title }
+            .groupBy({ it.first.int }, { it.second })
     }
 
     /**
@@ -181,7 +184,6 @@ class FollowsHandler {
             readingStatusResponse.onFailure {
                 this.log("trying to fetch reading status for $mangaUUID")
                 throw Exception("error trying to get tracking info")
-
             }
             val followStatus =
                 FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
@@ -193,7 +195,6 @@ class FollowsHandler {
                 score = rating?.rating?.toFloat() ?: 0f
             }
             return@withContext track
-
         }
     }
 }

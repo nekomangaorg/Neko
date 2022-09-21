@@ -38,10 +38,11 @@ fun RemovedChaptersDialog(themeColorState: ThemeColorState, chapters: ImmutableL
                                     (chapterNames.size - (4 - 1)),
                                     (chapterNames.size - (4 - 1)),
                                 )
-                        } else chapterNames.joinToString(", "),
+                        } else {
+                            chapterNames.joinToString(", ")
+                        },
                     ),
                 )
-
             },
             onDismissRequest = onDismiss,
             confirmButton = {
@@ -61,6 +62,5 @@ fun RemovedChaptersDialog(themeColorState: ThemeColorState, chapters: ImmutableL
                 }
             },
         )
-
     }
 }

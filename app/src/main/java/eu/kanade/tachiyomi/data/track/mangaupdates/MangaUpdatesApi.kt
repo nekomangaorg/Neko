@@ -43,7 +43,7 @@ class MangaUpdatesApi(
             .addInterceptor(interceptor)
             .build()
     }
-    
+
     suspend fun getSeriesListItem(track: Track): Pair<ListItem, Rating?> {
         val listItem =
             authClient.newCall(

@@ -84,7 +84,7 @@ enum class Language {
     INDONESIAN,
     PORTUGUESE_BR,
     RUSSIAN,
-    THAI
+    THAI,
 }
 
 @Serializable

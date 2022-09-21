@@ -62,39 +62,45 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
             val hopperGravity = (controller.binding.categoryHopperFrame.layoutParams as CoordinatorLayout.LayoutParams).gravity
             if (diffX <= 0) {
                 animator.translationX(
-                    if (hopperGravity == Gravity.TOP or Gravity.LEFT) 0f
-                    else (-(controller.view!!.width - controller.binding.categoryHopperFrame.width) / 2).toFloat(),
+                    if (hopperGravity == Gravity.TOP or Gravity.LEFT) {
+                        0f
+                    } else {
+                        (-(controller.view!!.width - controller.binding.categoryHopperFrame.width) / 2).toFloat()
+                    },
                 ).withEndAction {
                     hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =
                             Gravity.TOP or (
-                                if (gravity == Gravity.TOP or Gravity.RIGHT) {
-                                    controller.preferences.hopperGravity().set(1)
-                                    Gravity.CENTER
-                                } else {
-                                    controller.preferences.hopperGravity().set(0)
-                                    Gravity.LEFT
-                                }
-                                )
+                            if (gravity == Gravity.TOP or Gravity.RIGHT) {
+                                controller.preferences.hopperGravity().set(1)
+                                Gravity.CENTER
+                            } else {
+                                controller.preferences.hopperGravity().set(0)
+                                Gravity.LEFT
+                            }
+                            )
                     }
                     savePrefs()
                 }
             } else {
                 animator.translationX(
-                    if (hopperGravity == Gravity.TOP or Gravity.RIGHT) 0f
-                    else ((controller.view!!.width - hopperFrame.width) / 2).toFloat(),
+                    if (hopperGravity == Gravity.TOP or Gravity.RIGHT) {
+                        0f
+                    } else {
+                        ((controller.view!!.width - hopperFrame.width) / 2).toFloat()
+                    },
                 ).withEndAction {
                     hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =
                             Gravity.TOP or (
-                                if (gravity == Gravity.TOP or Gravity.LEFT) {
-                                    controller.preferences.hopperGravity().set(1)
-                                    Gravity.CENTER
-                                } else {
-                                    controller.preferences.hopperGravity().set(2)
-                                    Gravity.RIGHT
-                                }
-                                )
+                            if (gravity == Gravity.TOP or Gravity.LEFT) {
+                                controller.preferences.hopperGravity().set(1)
+                                Gravity.CENTER
+                            } else {
+                                controller.preferences.hopperGravity().set(2)
+                                Gravity.RIGHT
+                            }
+                            )
                     }
                     savePrefs()
                 }

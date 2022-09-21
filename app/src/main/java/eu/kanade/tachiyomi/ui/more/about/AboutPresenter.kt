@@ -9,6 +9,9 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.lang.toTimestampString
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,9 +22,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.snackbar.SnackbarState
 import uy.kohesive.injekt.injectLazy
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 
 class AboutPresenter : BaseCoroutinePresenter<AboutPresenter>() {
     private val updateChecker by lazy { AppUpdateChecker() }
@@ -74,7 +74,6 @@ class AboutPresenter : BaseCoroutinePresenter<AboutPresenter>() {
             _aboutScreenState.update {
                 it.copy(checkingForUpdates = false)
             }
-
         }
     }
 

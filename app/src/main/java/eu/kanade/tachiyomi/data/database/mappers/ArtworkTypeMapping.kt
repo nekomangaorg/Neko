@@ -30,7 +30,7 @@ class ArtWorkPutResolver : DefaultPutResolver<ArtworkImpl>() {
         .whereArgs(obj.id)
         .build()
 
-    override fun mapToContentValues(obj: ArtworkImpl) = ContentValues(3).apply {
+    override fun mapToContentValues(obj: ArtworkImpl) = ContentValues(6).apply {
         put(ArtworkTable.COL_ID, obj.id)
         put(ArtworkTable.COL_MANGA_ID, obj.mangaId)
         put(ArtworkTable.COL_FILENAME, obj.fileName)
@@ -50,7 +50,7 @@ class ArtWorkGetResolver : DefaultGetResolver<ArtworkImpl>() {
         locale = cursor.getString(cursor.getColumnIndex(ArtworkTable.COL_LOCALE)),
         description = cursor.getString(cursor.getColumnIndex(ArtworkTable.COL_DESCRIPTION)),
 
-        )
+    )
 }
 
 class ArtWorkDeleteResolver : DefaultDeleteResolver<ArtworkImpl>() {
@@ -61,4 +61,3 @@ class ArtWorkDeleteResolver : DefaultDeleteResolver<ArtworkImpl>() {
         .whereArgs(obj.id)
         .build()
 }
-

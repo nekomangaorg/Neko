@@ -25,7 +25,7 @@ fun HeaderCard(text: String) {
             .padding(8.dp),
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondary),
 
-        ) {
+    ) {
         Text(
             text = text,
             style = MaterialTheme.typography.titleMedium,
@@ -35,7 +35,6 @@ fun HeaderCard(text: String) {
                 .fillMaxWidth()
                 .padding(12.dp),
         )
-
     }
 }
 

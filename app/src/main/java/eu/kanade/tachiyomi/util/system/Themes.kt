@@ -74,7 +74,8 @@ enum class Themes(
         AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
         R.string.lime_time,
         R.string.flat_lime,
-    );
+    ),
+    ;
 
     val isDarkTheme = nightMode == AppCompatDelegate.MODE_NIGHT_YES
     val followsSystem = nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM

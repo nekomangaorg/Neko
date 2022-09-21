@@ -69,6 +69,5 @@ fun BaseSheet(
                 Gap(paddingAroundContent)
             }
         }
-
     }
 }

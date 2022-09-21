@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.launchIO
+import java.util.Date
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,10 +20,8 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
-import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Date
 
 /**
  * Presenter of [FollowsController]
@@ -58,7 +57,6 @@ class FollowsPresenter(
                     )
                 }
             }
-
         }
         presenterScope.launch {
             preferences.browseAsList().asFlow().collectLatest {
@@ -70,7 +68,6 @@ class FollowsPresenter(
     }
 
     fun getFollows() {
-
         presenterScope.launch {
             _followsScreenState.update {
                 it.copy(isLoading = true, error = null)
@@ -79,7 +76,7 @@ class FollowsPresenter(
             val result = repo.fetchFollows()
             result.onFailure { resultError ->
                 _followsScreenState.update {
-                    it.copy(isLoading = false, error = (resultError as? ResultError.Generic)?.errorString ?: "Error getting follows")
+                    it.copy(isLoading = false, error = resultError)
                 }
             }.onSuccess { displayManga ->
                 _followsScreenState.update {
@@ -104,7 +101,6 @@ class FollowsPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-
                 val defaultCategory = preferences.defaultCategory()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {

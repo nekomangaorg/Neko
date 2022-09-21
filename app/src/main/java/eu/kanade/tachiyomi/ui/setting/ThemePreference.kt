@@ -32,8 +32,8 @@ import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
-import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
+import uy.kohesive.injekt.injectLazy
 
 class ThemePreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     Preference(context, attrs) {
@@ -89,14 +89,14 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                 if (!selected) {
                     preferences.nightMode().set(nightMode)
                 } else if (preferences.nightMode()
-                        .get() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    .get() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 ) {
                     preferences.nightMode().set(nightMode)
                 }
                 if ((
-                        preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
-                            nightMode != context.appDelegateNightMode()
-                        ) ||
+                    preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                        nightMode != context.appDelegateNightMode()
+                    ) ||
                     (!selected && nightMode == context.appDelegateNightMode())
                 ) {
                     fastAdapterLight.notifyDataSetChanged()

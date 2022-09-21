@@ -17,7 +17,9 @@ abstract class ViewerNavigation {
         fun directionalRegion(LTR: Boolean): NavigationRegion {
             return if (this === LEFT || this === RIGHT) {
                 if (if (LTR) this === RIGHT else this === LEFT) NEXT else PREV
-            } else this
+            } else {
+                this
+            }
         }
     }
 
@@ -55,7 +57,7 @@ abstract class ViewerNavigation {
         NONE,
         HORIZONTAL(shouldInvertHorizontal = true),
         VERTICAL(shouldInvertVertical = true),
-        BOTH(shouldInvertHorizontal = true, shouldInvertVertical = true)
+        BOTH(shouldInvertHorizontal = true, shouldInvertVertical = true),
     }
 }
 

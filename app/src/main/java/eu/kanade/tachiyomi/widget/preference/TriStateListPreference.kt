@@ -82,16 +82,24 @@ class TriStateListPreference @JvmOverloads constructor(
     override fun MaterialAlertDialogBuilder.setListItems() {
         val set = sharedPreferences?.getStringSet(key, defValue) ?: defValue
         val items = if (allSelectionRes != null) {
-            if (showAllLast) entries + listOf(context.getString(allSelectionRes!!))
-            else listOf(context.getString(allSelectionRes!!)) + entries
-        } else entries
+            if (showAllLast) {
+                entries + listOf(context.getString(allSelectionRes!!))
+            } else {
+                listOf(context.getString(allSelectionRes!!)) + entries
+            }
+        } else {
+            entries
+        }
         val allPos = if (showAllLast) items.size - 1 else 0
         val excludedSet = excludeKey?.let {
             sharedPreferences?.getStringSet(it, defValue) ?: defValue
         }.orEmpty()
         val allValue = intArrayOf(
-            if (set.isEmpty()) TriStateCheckBox.State.CHECKED.ordinal
-            else TriStateCheckBox.State.UNCHECKED.ordinal,
+            if (set.isEmpty()) {
+                TriStateCheckBox.State.CHECKED.ordinal
+            } else {
+                TriStateCheckBox.State.UNCHECKED.ordinal
+            },
         )
         val preselected =
             if (allSelectionRes != null && !showAllLast) { allValue } else { intArrayOf() } + entryValues
@@ -132,8 +140,11 @@ class TriStateListPreference @JvmOverloads constructor(
                 .toSet()
 
             if (allSelectionRes != null && !allIsAlwaysSelected) {
-                if (includedItems.isEmpty()) adapter.checkItems(intArrayOf(allPos))
-                else adapter.uncheckItems(intArrayOf(allPos))
+                if (includedItems.isEmpty()) {
+                    adapter.checkItems(intArrayOf(allPos))
+                } else {
+                    adapter.uncheckItems(intArrayOf(allPos))
+                }
             }
         }
     }

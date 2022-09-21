@@ -29,11 +29,11 @@ import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.setTextColorAlpha
-import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import uy.kohesive.injekt.injectLazy
 
 class ExpandedAppBarLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     AppBarLayout(context, attrs) {
@@ -309,10 +309,14 @@ class ExpandedAppBarLayout @JvmOverloads constructor(context: Context, attrs: At
                     -realHeight.toFloat() + top + minTabletHeight,
                     max(
                         smallHeight,
-                        if (offset > realHeight - shortH - tabHeight) smallHeight else min(
-                            -offset.toFloat(),
-                            0f,
-                        ),
+                        if (offset > realHeight - shortH - tabHeight) {
+                            smallHeight
+                        } else {
+                            min(
+                                -offset.toFloat(),
+                                0f,
+                            )
+                        },
                     ) + top.toFloat(),
                 )
             }
@@ -345,7 +349,9 @@ class ExpandedAppBarLayout @JvmOverloads constructor(context: Context, attrs: At
         toolbarTextView.setTextColorAlpha(
             (
                 MathUtils.clamp(
-                    (1 - ((if (alpha.isNaN()) 1f else alpha) + 0.95f)) * 2, 0f, 1f,
+                    (1 - ((if (alpha.isNaN()) 1f else alpha) + 0.95f)) * 2,
+                    0f,
+                    1f,
                 ) * 255
                 ).roundToInt(),
         )
@@ -358,8 +364,11 @@ class ExpandedAppBarLayout @JvmOverloads constructor(context: Context, attrs: At
         val mainActivity = mainActivity ?: return
         val useSearchToolbar = mainToolbar.alpha <= 0.025f
         val idle = RecyclerView.SCROLL_STATE_IDLE
-        if (if (useSearchToolbar) -y >= height || (recyclerView is RecyclerView && recyclerView.scrollState <= idle) || context.isTablet()
-            else mainActivity.currentToolbar == searchToolbar
+        if (if (useSearchToolbar) {
+            -y >= height || (recyclerView is RecyclerView && recyclerView.scrollState <= idle) || context.isTablet()
+        } else {
+                mainActivity.currentToolbar == searchToolbar
+            }
         ) {
             useSearchToolbarForMenu(useSearchToolbar)
         }
@@ -376,8 +385,11 @@ class ExpandedAppBarLayout @JvmOverloads constructor(context: Context, attrs: At
         yAnimator?.cancel()
         val halfWay = compactAppBarHeight / 2
         val shortAnimationDuration = resources?.getInteger(
-            if (toolbarMode != ToolbarState.EXPANDED) android.R.integer.config_shortAnimTime
-            else android.R.integer.config_longAnimTime,
+            if (toolbarMode != ToolbarState.EXPANDED) {
+                android.R.integer.config_shortAnimTime
+            } else {
+                android.R.integer.config_longAnimTime
+            },
         ) ?: 0
         val realHeight = preLayoutHeightWhileSearching + paddingTop
         val closerToTop = abs(y) > realHeight - halfWay

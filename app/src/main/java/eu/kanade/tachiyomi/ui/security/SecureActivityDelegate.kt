@@ -9,8 +9,8 @@ import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
-import uy.kohesive.injekt.injectLazy
 import java.util.Date
+import uy.kohesive.injekt.injectLazy
 
 object SecureActivityDelegate {
 

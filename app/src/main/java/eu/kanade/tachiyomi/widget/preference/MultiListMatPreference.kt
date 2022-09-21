@@ -66,9 +66,14 @@ class MultiListMatPreference @JvmOverloads constructor(
     override fun MaterialAlertDialogBuilder.setListItems() {
         val set = sharedPreferences?.getStringSet(key, defValue) ?: defValue
         val items = if (allSelectionRes != null) {
-            if (showAllLast) entries + listOf(context.getString(allSelectionRes!!))
-            else listOf(context.getString(allSelectionRes!!)) + entries
-        } else entries
+            if (showAllLast) {
+                entries + listOf(context.getString(allSelectionRes!!))
+            } else {
+                listOf(context.getString(allSelectionRes!!)) + entries
+            }
+        } else {
+            entries
+        }
         val allPos = if (showAllLast) items.size - 1 else 0
 
         val allValue = booleanArrayOf(set.isEmpty() || allIsAlwaysSelected)
@@ -106,8 +111,9 @@ class MultiListMatPreference @JvmOverloads constructor(
             }
             selected[pos] = checked
             if (allSelectionRes != null && !allIsAlwaysSelected) {
-                if (checked) selected[allPos] = false
-                else if (selected.none { it }) selected[allPos] = true
+                if (checked) {
+                    selected[allPos] = false
+                } else if (selected.none { it }) selected[allPos] = true
                 (dialog as? AlertDialog)?.listView?.setItemChecked(pos, selected[allPos])
             }
         }

@@ -59,12 +59,17 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
 
 @Composable
 fun ChapterRow(
@@ -85,6 +90,7 @@ fun ChapterRow(
     onBookmark: () -> Unit,
     onWebView: () -> Unit,
     onRead: () -> Unit,
+    blockScanlator: (String) -> Unit,
     markPrevious: (Boolean) -> Unit,
     onDownload: (DownloadAction) -> Unit,
 ) {
@@ -116,7 +122,6 @@ fun ChapterRow(
                         Background(icon, Alignment.CenterStart, color, stringResource(id = text), themeColor.buttonColor)
                     }
                     else -> Unit
-
                 }
             },
             dismissContent = {
@@ -138,6 +143,7 @@ fun ChapterRow(
                     onWebView = onWebView,
                     onDownload = onDownload,
                     markPrevious = markPrevious,
+                    blockScanlator = blockScanlator,
                 )
             },
         )
@@ -145,7 +151,6 @@ fun ChapterRow(
             dismissState.isDismissed(DismissDirection.EndToStart) -> Reset(dismissState = dismissState, action = onRead)
             dismissState.isDismissed(DismissDirection.StartToEnd) -> Reset(dismissState = dismissState, action = onBookmark)
         }
-
     }
 }
 
@@ -182,7 +187,6 @@ private fun Background(icon: ImageVector, alignment: Alignment, color: Color, te
                 color = contentColor,
             )
         }
-
     }
 }
 
@@ -205,9 +209,19 @@ private fun ChapterInfo(
     onWebView: () -> Unit,
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
+    blockScanlator: (String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
     var chapterDropdown by remember { mutableStateOf(false) }
+
+    val splitScanlator = remember {
+        ChapterUtil.getScanlators(scanlator).map {
+            SimpleDropDownItem.Action(
+                text = it,
+                onClick = { blockScanlator(it) },
+            )
+        }.toImmutableList()
+    }
 
     val haptic = LocalHapticFeedback.current
 
@@ -226,27 +240,8 @@ private fun ChapterInfo(
         expanded = dropdown,
         themeColorState = themeColorState,
         onDismiss = { dropdown = false },
-        dropDownItems = listOf(
-            SimpleDropDownItem.Action(
-                text = stringResource(R.string.open_in_webview),
-                onClick = { onWebView() },
-            ),
-            SimpleDropDownItem.Parent(
-                text = stringResource(R.string.mark_previous_as),
-                children = listOf(
-                    SimpleDropDownItem.Action(
-                        text = stringResource(R.string.read),
-                        onClick = { markPrevious(true) },
-                    ),
-                    SimpleDropDownItem.Action(
-                        text = stringResource(R.string.unread),
-                        onClick = { markPrevious(false) },
-                    ),
-                ),
-            ),
-        ),
-
-        )
+        dropDownItems = getDropDownItems(scanlator.isNotBlank(), splitScanlator, onWebView, markPrevious),
+    )
 
     Row(
         modifier = Modifier
@@ -262,13 +257,11 @@ private fun ChapterInfo(
             .padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-
         Column(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .fillMaxWidth(.8f),
         ) {
-
             val titleText = when (shouldHideChapterTitles) {
                 true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapterNumber))
                 false -> title
@@ -277,7 +270,8 @@ private fun ChapterInfo(
             Row {
                 if (bookmark) {
                     Icon(
-                        imageVector = Icons.Filled.Bookmark, contentDescription = null,
+                        imageVector = Icons.Filled.Bookmark,
+                        contentDescription = null,
                         modifier = Modifier
                             .size(16.dp)
                             .align(Alignment.CenterVertically),
@@ -316,7 +310,6 @@ private fun ChapterInfo(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (language.isNotNullOrEmpty() && language.equals("en", true).not()) {
-
                     val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
 
                     when (iconRes == null) {
@@ -332,7 +325,6 @@ private fun ChapterInfo(
                             )
                         }
                         false -> {
-
                             val painter = rememberDrawablePainter(drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes))
                             Image(
                                 painter = painter,
@@ -357,14 +349,13 @@ private fun ChapterInfo(
                 )
 
                 statuses.joinToString(" • ")
-
             }
-
         }
         Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
-
             DownloadButton(
-                themeColorState.buttonColor, downloadStateProvider, downloadProgressProvider,
+                themeColorState.buttonColor,
+                downloadStateProvider,
+                downloadProgressProvider,
                 Modifier
                     .combinedClickable(
                         onClick = {
@@ -383,7 +374,7 @@ private fun ChapterInfo(
                 dropDownItems =
                 when (downloadStateProvider()) {
                     Download.State.DOWNLOADED -> {
-                        listOf(
+                        persistentListOf(
                             SimpleDropDownItem.Action(
                                 text = stringResource(R.string.remove),
                                 onClick = {
@@ -393,7 +384,7 @@ private fun ChapterInfo(
                         )
                     }
                     else -> {
-                        listOf(
+                        persistentListOf(
                             SimpleDropDownItem.Action(
                                 text = stringResource(R.string.start_downloading_now),
                                 onClick = {
@@ -414,9 +405,48 @@ private fun ChapterInfo(
     }
 }
 
+@Composable
+private fun getDropDownItems(
+    showScanlator: Boolean,
+    scanlators: ImmutableList<SimpleDropDownItem>,
+    onWebView: () -> Unit,
+    markPrevious: (Boolean) -> Unit,
+): PersistentList<SimpleDropDownItem> {
+    return (
+        listOf(
+            SimpleDropDownItem.Action(
+                text = stringResource(R.string.open_in_webview),
+                onClick = { onWebView() },
+            ),
+            SimpleDropDownItem.Parent(
+                text = stringResource(R.string.mark_previous_as),
+                children = listOf(
+                    SimpleDropDownItem.Action(
+                        text = stringResource(R.string.read),
+                        onClick = { markPrevious(true) },
+                    ),
+                    SimpleDropDownItem.Action(
+                        text = stringResource(R.string.unread),
+                        onClick = { markPrevious(false) },
+                    ),
+                ),
+            ),
+        ) +
+            if (showScanlator) {
+                listOf(
+                    SimpleDropDownItem.Parent(
+                        text = stringResource(R.string.block_scanlator),
+                        children = scanlators,
+                    ),
+                )
+            } else {
+                emptyList()
+            }
+        ).toPersistentList()
+}
+
 val decimalFormat = DecimalFormat(
     "#.###",
     DecimalFormatSymbols()
         .apply { decimalSeparator = '.' },
 )
-

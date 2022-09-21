@@ -23,13 +23,13 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import java.io.BufferedInputStream
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import java.io.BufferedInputStream
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.
@@ -277,8 +277,11 @@ class WebtoonPageHolder(
                         zoomDuration = viewer.config.doubleTapAnimDuration,
                         minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
                         cropBorders =
-                        if (viewer.hasMargins) viewer.config.verticalCropBorders
-                        else viewer.config.webtoonCropBorders,
+                        if (viewer.hasMargins) {
+                            viewer.config.verticalCropBorders
+                        } else {
+                            viewer.config.webtoonCropBorders
+                        },
                     ),
                 )
             }

@@ -403,6 +403,7 @@
     <string name="continuous_vertical">Continuous vertical</string>
     <string name="paged">Paged</string>
     <string name="scale_type">Scale type</string>
+    <string name="double_page_gap">Double page gap</string>
     <string name="tap_zones">Tap zones</string>
     <string name="fit_screen">Fit screen</string>
     <string name="stretch">Stretch</string>
@@ -412,6 +413,14 @@
     <string name="smart_fit">Smart fit</string>
     <string name="zoom_start_position">Zoom start position</string>
     <string name="split_double_pages">Split double pages</string>
+    <string name="double_page_gap_0">None</string>
+    <string name="double_page_gap_10">10</string>
+    <string name="double_page_gap_20">20</string>
+    <string name="double_page_gap_30">30</string>
+    <string name="double_page_gap_40">40</string>
+    <string name="double_page_gap_50">50</string>
+    <string name="double_page_gap_60">60</string>
+    <string name="double_page_gap_70">70</string>
     <string name="double_pages">Double pages</string>
     <string name="single_page">Single page</string>
     <string name="switch_to_double">Switch to double pages</string>
@@ -926,13 +935,13 @@
     <string name="chapters_read">Read chapters</string>
     <string name="most_entries">Most entries</string>
     <string name="read_chapter_count">Read chapters count</string>
-    <string name="average_score">Average manga score</string>
-    <string name="mean_score">Average user score</string>
+    <string name="average_score">Avg manga score</string>
+    <string name="mean_score">Avg user score</string>
     <string name="manga_tracked">Tracked manga</string>
     <string name="chapters_downloaded">Downloaded chapters</string>
     <string name="tags">Total tags</string>
     <string name="manga_local">Local manga</string>
-    <string name="global_update_manga">Globally updated manga</string>
+    <string name="global_update_manga">Globally updated</string>
     <string name="unable_to_generate_stats">Library empty, unable to generate stats</string>
     <string name="trackers">Logged in trackers</string>
     <string name="n_a">N/A</string>
@@ -1048,12 +1057,16 @@
     <string name="loading">Loading…</string>
     <string name="lock">Lock</string>
     <string name="mark_as_read">Mark as read</string>
+    <string name="mark_read">Mark read</string>
     <string name="mark_as_unread">Mark as unread</string>
     <string name="mark_all_as">Mark all as</string>
     <string name="mark_all_as_read">Mark all as read</string>
     <string name="mark_all_as_unread">Mark all as unread</string>
     <string name="mark_range_as">Mark range as</string>
     <string name="mark_previous_as">Mark Previous as</string>
+    <string name="block_scanlator">Block scanlator</string>
+    <string name="currently_blocked_scanlators">Currently blocked scanlators</string>
+    <string name="unblock_scanlator">Unblock scanlator</string>
     <string name="menu">menu</string>
     <string name="more">More</string>
     <string name="move_to_bottom">Move to bottom</string>
@@ -1120,6 +1133,7 @@
     <string name="view_log">View log</string>
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>
+    <string name="view">View</string>
     <string name="wifi">Wi-Fi</string>
 
 

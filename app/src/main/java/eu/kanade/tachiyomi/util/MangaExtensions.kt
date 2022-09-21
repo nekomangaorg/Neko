@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.util
 
 import android.app.Activity
-import android.content.Context
 import android.view.View
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -12,14 +11,15 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import java.util.Date
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
-import java.util.Date
 
 fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper): Boolean {
     if (!favorite) return false
@@ -239,7 +239,7 @@ fun Manga.toDisplayManga(displayText: String = ""): DisplayManga {
         title = this.title,
         inLibrary = this.favorite,
         displayText = displayText.replace("_", " ").capitalizeWords(),
-        currentArtwork = Artwork(mangaId = this.id!!, originalArtwork = this.thumbnail_url!!),
+        currentArtwork = Artwork(mangaId = this.id!!, originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl),
     )
 }
 
@@ -258,31 +258,4 @@ fun SManga.getSlug(): String {
     }
 
     return slug.joinToString("-")
-}
-
-fun Context.mapStatus(status: Int): String {
-    return getString(
-        when (status) {
-            SManga.ONGOING -> R.string.ongoing
-            SManga.COMPLETED -> R.string.completed
-            SManga.LICENSED -> R.string.licensed
-            SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
-            SManga.CANCELLED -> R.string.cancelled
-            SManga.HIATUS -> R.string.hiatus
-            else -> R.string.unknown
-        },
-    )
-}
-
-fun Context.mapSeriesType(seriesType: Int): String {
-    return getString(
-        when (seriesType) {
-            Manga.TYPE_MANGA -> R.string.manga
-            Manga.TYPE_MANHWA -> R.string.manhwa
-            Manga.TYPE_MANHUA -> R.string.manhua
-            Manga.TYPE_COMIC -> R.string.comic
-            Manga.TYPE_WEBTOON -> R.string.webtoon
-            else -> R.string.unknown
-        },
-    )
 }

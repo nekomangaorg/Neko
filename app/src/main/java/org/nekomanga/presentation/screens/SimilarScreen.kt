@@ -33,6 +33,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
@@ -54,7 +55,6 @@ fun SimilarScreen(
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     onRefresh: () -> Unit,
 ) {
-
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
 
@@ -68,7 +68,8 @@ fun SimilarScreen(
     }
 
     ModalBottomSheetLayout(
-        sheetState = sheetState, sheetShape = RoundedCornerShape(Shapes.sheetRadius),
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 EditCategorySheet(
@@ -86,7 +87,6 @@ fun SimilarScreen(
             }
         },
     ) {
-
         NekoScaffold(
             title = stringResource(id = R.string.similar),
             onNavigationIconClicked = onBackPress,
@@ -109,10 +109,9 @@ fun SimilarScreen(
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
 
-                        )
+                    )
                 },
             ) {
-
                 val haptic = LocalHapticFeedback.current
 
                 SimilarContent(
@@ -133,7 +132,6 @@ fun SimilarScreen(
                     },
                 )
             }
-
         }
     }
 }
@@ -148,11 +146,11 @@ private fun SimilarContent(
 ) {
     if (!similarScreenState.value.isRefreshing) {
         if (similarScreenState.value.displayManga.isEmpty()) {
-            IconicsEmptyScreen(
+            EmptyScreen(
                 iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                 iconSize = 176.dp,
                 message = stringResource(id = R.string.no_results_found),
-                actions = listOf(Action(R.string.retry, refreshing)),
+                actions = persistentListOf(Action(R.string.retry, refreshing)),
             )
         } else {
             val contentPadding = PaddingValues(
@@ -160,7 +158,6 @@ private fun SimilarContent(
                     .asPaddingValues().calculateBottomPadding(),
                 top = paddingValues.calculateTopPadding(),
             )
-
 
             if (similarScreenState.value.isList) {
                 MangaListWithHeader(
@@ -171,7 +168,6 @@ private fun SimilarContent(
                     onLongClick = mangaLongClick,
                 )
             } else {
-
                 MangaGridWithHeader(
                     groupedManga = similarScreenState.value.displayManga,
                     shouldOutlineCover = similarScreenState.value.outlineCovers,

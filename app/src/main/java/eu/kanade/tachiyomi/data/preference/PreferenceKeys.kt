@@ -76,6 +76,8 @@ object PreferenceKeys {
 
     const val invertDoublePages = "invert_double_pages"
 
+    const val doublePageGap = "double_page_gap"
+
     const val webtoonPageLayout = "webtoon_page_layout"
 
     const val webtoonInvertDoublePages = "webtoon_invert_double_pages"
@@ -157,6 +159,8 @@ object PreferenceKeys {
     const val filterMerged = "pref_filter_merged_key"
 
     const val filterMissingChapters = "pref_filter_missing_chapters_key"
+
+    const val blockedScanlators = "blocked_scanlators"
 
     const val showEmptyCategoriesFiltering = "show_empty_categories_filtering"
 

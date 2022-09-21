@@ -20,14 +20,12 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun TrackingSwitchDialog(themeColorState: ThemeColorState, name: String, oldName: String, newName: String, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-
         AlertDialog(
             title = {
                 Text(text = stringResource(id = R.string.remove_previous_tracker))
             },
             text = {
                 Column {
-
                     TextButton(
                         onClick = { onConfirm(true) },
                         modifier = Modifier
@@ -44,7 +42,6 @@ fun TrackingSwitchDialog(themeColorState: ThemeColorState, name: String, oldName
                     ) {
                         Text(text = stringResource(id = R.string.keep_both_on_service, name))
                     }
-
                 }
             },
             onDismissRequest = onDismiss,
@@ -54,6 +51,5 @@ fun TrackingSwitchDialog(themeColorState: ThemeColorState, name: String, oldName
                 }
             },
         )
-
     }
 }

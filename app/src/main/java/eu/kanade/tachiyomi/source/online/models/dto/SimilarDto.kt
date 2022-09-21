@@ -33,6 +33,8 @@ data class SimilarMangaDatabaseDto(
     var aniListManga: List<RelatedMangaDto>? = null,
     var myAnimelistApi: MalMangaRecommendationsDto? = null,
     var myAnimeListManga: List<RelatedMangaDto>? = null,
+    var mangaUpdatesApi: MUMangaDto? = null,
+    var mangaUpdatesListManga: List<RelatedMangaDto>? = null,
 )
 
 @Serializable
@@ -58,6 +60,7 @@ data class SimilarMangaMatchListDto(
     val title: Map<String, String>,
     val contentRating: String,
     val score: Double,
+    val languages: List<String>,
 )
 
 @Serializable
@@ -113,4 +116,42 @@ data class MalMangaRecommendationDto(
     val recommendation_url: String,
     val title: String,
     val recommendation_count: Int,
+)
+
+@Serializable
+data class MUMangaDto(
+    val recommendations: List<MURecommendationDto>,
+    val category_recommendations: List<MUCategoryRecommendationDto>,
+)
+
+@Serializable
+data class MURecommendationDto(
+    val series_name: String,
+    val series_id: Long,
+    val weight: Long,
+)
+
+@Serializable
+data class MUCategoryRecommendationDto(
+    val series_name: String,
+    val series_id: Long,
+    val weight: Long,
+)
+
+@Serializable
+data class MUListsDto(
+    val reading: Long,
+    val wish: Long,
+    val complete: Long,
+    val unfinished: Long,
+    val custom: Long,
+)
+
+@Serializable
+data class MUPositionDto(
+    val week: Long,
+    val month: Long,
+    val three_months: Long,
+    val six_months: Long,
+    val year: Long,
 )

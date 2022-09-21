@@ -69,7 +69,6 @@ internal fun DisplayText(
 
 @Composable
 internal fun InLibraryIcon(offset: Dp, outline: Boolean) {
-
     Box(modifier = Modifier.offset(x = offset, y = offset), contentAlignment = Alignment.Center) {
         if (outline) {
             Icon(

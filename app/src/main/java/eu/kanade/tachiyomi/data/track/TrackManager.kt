@@ -46,7 +46,7 @@ class TrackManager(context: Context) {
             MYANIMELIST -> manga.my_anime_list_id
             ANILIST -> manga.anilist_id
             KITSU -> manga.kitsu_id
-            //MANGA_UPDATES -> manga.manga_updates_id
+            // MANGA_UPDATES -> manga.manga_updates_id
             else -> null
         }
     }

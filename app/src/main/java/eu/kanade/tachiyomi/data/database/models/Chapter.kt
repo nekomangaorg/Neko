@@ -70,4 +70,3 @@ fun Chapter.fullUrl(): String {
 fun Chapter.uuid(): String {
     return MdUtil.getChapterUUID(this.url)
 }
-

@@ -36,7 +36,6 @@ fun AddCategoryDialog(themeColorState: ThemeColorState, currentCategories: List<
     var errorMessage by remember { mutableStateOf("") }
 
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-
         LaunchedEffect(categoryText, currentCategories) {
             if (categoryText.isEmpty()) {
                 saveEnabled = false
@@ -67,7 +66,7 @@ fun AddCategoryDialog(themeColorState: ThemeColorState, currentCategories: List<
                             focusedLabelColor = themeColorState.buttonColor,
                             focusedBorderColor = themeColorState.buttonColor,
 
-                            ),
+                        ),
                     )
                     Gap(2.dp)
                     Text(text = errorMessage, style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.error))
@@ -94,4 +93,3 @@ fun AddCategoryDialog(themeColorState: ThemeColorState, currentCategories: List<
         )
     }
 }
-

@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.latest.LatestScreenState
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
@@ -54,8 +57,8 @@ fun LatestScreen(
     addNewCategory: (String) -> Unit,
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     loadNextPage: () -> Unit,
+    retryClick: () -> Unit,
 ) {
-
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
 
@@ -69,7 +72,8 @@ fun LatestScreen(
     }
 
     ModalBottomSheetLayout(
-        sheetState = sheetState, sheetShape = RoundedCornerShape(Shapes.sheetRadius),
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 EditCategorySheet(
@@ -87,7 +91,6 @@ fun LatestScreen(
             }
         },
     ) {
-
         NekoScaffold(
             title = stringResource(id = R.string.latest),
             onNavigationIconClicked = onBackPress,
@@ -128,8 +131,15 @@ fun LatestScreen(
                             .align(Alignment.TopCenter),
                     )
                 }
+            } else if (latestScreenState.value.error != null) {
+                EmptyScreen(
+                    icon = Icons.Default.ErrorOutline,
+                    iconSize = 176.dp,
+                    message = latestScreenState.value.error,
+                    actions = if (latestScreenState.value.page == 1) persistentListOf(Action(R.string.retry, retryClick)) else persistentListOf(),
+                    contentPadding = incomingContentPadding,
+                )
             } else {
-
                 if (latestScreenState.value.isList) {
                     MangaList(
                         mangaList = latestScreenState.value.displayManga,
@@ -166,5 +176,3 @@ fun LatestScreen(
         }
     }
 }
-
-

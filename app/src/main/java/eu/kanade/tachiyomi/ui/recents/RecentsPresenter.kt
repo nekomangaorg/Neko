@@ -26,6 +26,11 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
+import java.util.Calendar
+import java.util.Date
+import java.util.TreeMap
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
@@ -36,11 +41,6 @@ import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.Calendar
-import java.util.Date
-import java.util.TreeMap
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 class RecentsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
@@ -220,7 +220,9 @@ class RecentsPresenter(
                 } else {
                     recentItems.none { mch.chapter.id == it.mch.chapter.id }
                 }
-            } else true
+            } else {
+                true
+            }
         }
         val pairs = mangaList.mapNotNull {
             val chapter = when {
@@ -242,9 +244,14 @@ class RecentsPresenter(
             }
             if (chapter == null) if ((query.isNotEmpty() || viewType > VIEW_TYPE_UNGROUP_ALL) &&
                 it.chapter.id != null
-            ) Pair(it, it.chapter)
-            else null
-            else Pair(it, chapter)
+            ) {
+                Pair(it, it.chapter)
+            } else {
+                null
+            }
+            else {
+                Pair(it, chapter)
+            }
         }
         val newItems = if (query.isEmpty() && !isUngrouped) {
             val nChaptersItems =
@@ -302,7 +309,9 @@ class RecentsPresenter(
                             if (preferences.sortFetchedTime().get()) item.date_fetch else item.date_upload
                         }
                 }
-            } else pairs.map { RecentMangaItem(it.first, it.second, null) }
+            } else {
+                pairs.map { RecentMangaItem(it.first, it.second, null) }
+            }
         }
         if (customViewType == null) {
             recentItems = if (isOnFirstPage || !updatePageCount) {

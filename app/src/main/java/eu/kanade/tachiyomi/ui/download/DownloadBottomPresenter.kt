@@ -37,8 +37,9 @@ class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
                 }
             val hasChanged = if (this@DownloadBottomPresenter.items.size != items.size ||
                 this@DownloadBottomPresenter.items.sumOf { it.subItemsCount } != items.sumOf { it.subItemsCount }
-            ) true
-            else {
+            ) {
+                true
+            } else {
                 val oldItemsIds = this@DownloadBottomPresenter.items.map { header ->
                     header.subItems.mapNotNull { it.download.chapter.id }
                 }

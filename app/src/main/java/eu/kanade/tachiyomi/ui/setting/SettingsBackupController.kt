@@ -269,14 +269,13 @@ class SettingsBackupController : SettingsController() {
 
                 var message = activity.getString(R.string.restore_neko)
 
-
                 if (results.missingMangaDexEntries) {
                     message += "\n\nNo MangaDex manga found in the backup."
                 }
 
                 if (results.missingTrackers.isNotEmpty()) {
                     message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${
-                        results.missingTrackers.joinToString("\n") { "- $it" }
+                    results.missingTrackers.joinToString("\n") { "- $it" }
                     }"
                 }
 

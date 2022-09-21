@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.setting
 import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
@@ -15,7 +16,6 @@ import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.view.activityBinding
 import kotlinx.coroutines.flow.launchIn
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsReaderController : SettingsController() {
 
@@ -280,6 +280,24 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = false
                 preferences.pageLayout()
                     .asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE.value }
+            }
+
+            intListPreference(activity) {
+                key = Keys.doublePageGap
+                titleRes = R.string.double_page_gap
+                entriesRes = arrayOf(
+                    R.string.double_page_gap_0,
+                    R.string.double_page_gap_10,
+                    R.string.double_page_gap_20,
+                    R.string.double_page_gap_30,
+                    R.string.double_page_gap_40,
+                    R.string.double_page_gap_50,
+                    R.string.double_page_gap_60,
+                    R.string.double_page_gap_70,
+
+                )
+                entryValues = listOf(0, 10, 20, 30, 40, 50, 60, 70)
+                defaultValue = "0"
             }
         }
         preferenceCategory {

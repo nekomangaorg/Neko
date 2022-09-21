@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -51,9 +53,9 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
+import kotlin.math.max
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
-import kotlin.math.max
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -363,12 +365,11 @@ open class BrowseSourceController(bundle: Bundle) :
                 sheet.dismiss()
                 showProgressBar()
                 adapter?.clear()
-                presenter.searchRandomManga().collect { manga ->
-                    if (manga == null) {
-                        onAddPageError(Exception("Error opening random manga"))
-                    } else {
-                        openManga(manga)
-                    }
+                val result = presenter.searchRandomManga()
+                result.onSuccess {
+                    openManga(it.mangaId)
+                }.onFailure {
+                    onAddPageError(Exception("Error opening random manga"))
                 }
             }
         }
@@ -414,8 +415,11 @@ open class BrowseSourceController(bundle: Bundle) :
             if (sourceFilter is Filter.Group<*>) {
                 for (filter in sourceFilter.state) {
                     if (filter is Filter<*> &&
-                        if (useContains) filter.name.contains(genreName, true)
-                        else filter.name.equals(genreName, true)
+                        if (useContains) {
+                            filter.name.contains(genreName, true)
+                        } else {
+                            filter.name.equals(genreName, true)
+                        }
                     ) {
                         when (filter) {
                             is Filter.TriState -> filter.state = 1
@@ -429,8 +433,11 @@ open class BrowseSourceController(bundle: Bundle) :
             } else if (sourceFilter is Filter.Select<*>) {
                 val index = sourceFilter.values.filterIsInstance<String>()
                     .indexOfFirst {
-                        if (useContains) it.contains(genreName, true)
-                        else it.equals(genreName, true)
+                        if (useContains) {
+                            it.contains(genreName, true)
+                        } else {
+                            it.equals(genreName, true)
+                        }
                     }
 
                 if (index != -1) {
@@ -699,7 +706,14 @@ open class BrowseSourceController(bundle: Bundle) :
      * opens a manga
      */
     private fun openManga(manga: Manga) {
-        router.pushController(MangaDetailController(manga.id!!).withFadeTransaction())
+        openManga(manga.id!!)
+    }
+
+    /**
+     * opens a manga
+     */
+    private fun openManga(mangaId: Long) {
+        router.pushController(MangaDetailController(mangaId).withFadeTransaction())
     }
 
     /**

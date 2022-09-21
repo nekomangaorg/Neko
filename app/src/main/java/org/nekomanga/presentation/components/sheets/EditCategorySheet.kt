@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
+import java.util.Locale
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -38,7 +39,6 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
-import java.util.Locale
 
 @Composable
 fun EditCategorySheet(
@@ -52,7 +52,6 @@ fun EditCategorySheet(
     addToLibraryClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
-
         val context = LocalContext.current
 
         val enabledCategories = remember { mangaCategories.associateBy { it.id }.toMutableMap() }
@@ -63,7 +62,6 @@ fun EditCategorySheet(
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .4
 
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-
             if (showAddCategoryDialog) {
                 AddCategoryDialog(themeColorState = themeColorState, currentCategories = categories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
             }
@@ -119,7 +117,6 @@ fun EditCategorySheet(
                         Gap(4.dp)
                         Text(text = category.name, color = MaterialTheme.colorScheme.onSurface)
                     }
-
                 }
             }
 
@@ -137,7 +134,6 @@ fun EditCategorySheet(
                     },
                     colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
                 ) {
-
                     Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                 }
             }

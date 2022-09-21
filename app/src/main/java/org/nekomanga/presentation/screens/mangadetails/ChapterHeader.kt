@@ -47,7 +47,6 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChaptersProvider: () -> I
 
             horizontalArrangement = Arrangement.End,
         ) {
-
             if (filterTextProvider().isNotBlank()) {
                 Text(
                     text = filterTextProvider(),
@@ -66,7 +65,6 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChaptersProvider: () -> I
                 modifier = Modifier
                     .align(Alignment.CenterVertically),
             )
-
         }
     }
 }
@@ -89,6 +87,7 @@ private fun FilterIcon(buttonColor: Color, modifier: Modifier = Modifier) {
         imageVector = Icons.Filled.FilterList,
         modifier = modifier
             .size(28.dp),
-        tint = buttonColor, contentDescription = null,
+        tint = buttonColor,
+        contentDescription = null,
     )
 }

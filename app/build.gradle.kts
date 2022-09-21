@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 157
-    const val versionName = "2.10.10"
+    const val versionCode = 159
+    const val versionName = "2.10.12"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -139,6 +139,7 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+    namespace = "eu.kanade.tachiyomi"
 }
 
 dependencies {
@@ -206,13 +207,11 @@ dependencies {
 
     implementation(libs.bundles.flexibleadapter)
 
-    implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
     implementation("me.saket.cascade:cascade:2.0.0-beta1")
     implementation("me.saket.cascade:cascade-compose:2.0.0-beta1")
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
 
     //Compose
     implementation(compose.bundles.compose)
@@ -232,9 +231,9 @@ dependencies {
     implementation(libs.aboutLibraries.compose)
     debugImplementation(libs.leakcanary)
 
-    testImplementation(libs.bundles.tests)
+    implementation(libs.bundles.results)
 
-    //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    testImplementation(libs.bundles.tests)
 
 }
 
@@ -271,7 +270,7 @@ tasks {
     }
 
     preBuild {
-// dependsOn(formatKotlin)
+        dependsOn(formatKotlin)
     }
 }
 

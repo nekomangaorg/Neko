@@ -11,6 +11,8 @@ import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.getOrThrow
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -24,6 +26,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -42,6 +45,10 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
+import java.io.File
+import java.util.Date
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
@@ -50,13 +57,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.util.Date
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * This class will take care of updating the chapters of the manga from the library. It can be
@@ -378,10 +382,8 @@ class LibraryUpdateService(
         manga: LibraryManga,
         progress: Int,
         shouldDownload: Boolean,
-    ):
-        Boolean {
+    ): Boolean {
         return runCatching {
-
             var hasDownloads = false
             if (job?.isCancelled == true) {
                 return@runCatching false
@@ -393,36 +395,35 @@ class LibraryUpdateService(
 
             val source = sourceManager.getMangadex()
 
-            val details = withIOContext {
+            val holder = withIOContext {
                 if (preferences.fasterLibraryUpdates().get()) {
-                    null to source.fetchChapterList(manga)
+                    MangaDetailChapterInformation(null, emptyList(), source.fetchChapterList(manga).getOrThrow { Exception(it.message()) })
                 } else {
-                    source.fetchMangaAndChapterDetails(manga)
+                    source.fetchMangaAndChapterDetails(manga, true).getOrThrow { Exception(it.message()) }
                 }
             }
 
-            val merged = if (manga.isMerged()) {
-                withIOContext {
-                    runCatching {
-                        sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!)
+            val merged = when (manga.isMerged()) {
+                true -> {
+                    withIOContext {
+                        sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!).getOrElse {
+                            errorFromMerged = true
+                            emptyList()
+                        }
                     }
-                }.getOrElse { e ->
-                    XLog.e("Error with mergedsource", e)
-                    errorFromMerged = true
-                    emptyList()
                 }
-            } else {
-                emptyList()
+                false -> emptyList()
             }
 
-            val fetchedChapters = details.second.toMutableList() + merged
+            val blockedGroups = preferences.blockedScanlators().get()
+
+            val fetchedChapters = (holder.sChapters + merged)
+                .filter { ChapterUtil.getScanlators(it.scanlator).none { scanlator -> scanlator in blockedGroups } }
 
             // delete cover cache image if the thumbnail from network is not empty
             // note: we preload the covers here so we can view everything offline if they change
 
-            val detailsManga = details.first
-
-            detailsManga?.let {
+            holder.sManga?.let {
                 val thumbnailUrl = manga.thumbnail_url
                 manga.copyFrom(it)
                 manga.initialized = true
@@ -430,7 +431,7 @@ class LibraryUpdateService(
                 withIOContext {
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                            .get()
+                        .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                         // load new covers in background
@@ -442,11 +443,12 @@ class LibraryUpdateService(
                 }
                 db.insertManga(manga).executeOnIO()
 
-                withIOContext {
-                    runCatching {
-                        val artwork = source.getArtwork(manga.id!!, MdUtil.getMangaUUID(manga.url))
-                        db.deleteArtworkForManga(manga).executeOnIO()
-                        db.insertArtWorkList(artwork).executeOnIO()
+                if (holder.sourceArtwork.isNotEmpty()) {
+                    holder.sourceArtwork.map { sourceArt -> sourceArt.toArtworkImpl(manga.id!!) }.let { art ->
+                        kotlin.runCatching {
+                            db.deleteArtworkForManga(manga).executeOnIO()
+                            db.insertArtWorkList(art).executeOnIO()
+                        }
                     }
                 }
 
@@ -460,7 +462,6 @@ class LibraryUpdateService(
                     }
                 }
             }
-
 
             if (fetchedChapters.isNotEmpty()) {
                 val newChapters =
@@ -496,9 +497,11 @@ class LibraryUpdateService(
                         downloadManager.deleteChapters(removedChapters, manga, source)
                     }
                 }
-                if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
-                    manga,
-                )
+                if (newChapters.first.size + newChapters.second.size > 0) {
+                    listener?.onUpdateManga(
+                        manga,
+                    )
+                }
 
                 if (newChapters.first.size + newChapters.second.size > 0) {
                     listener?.onUpdateManga(manga)
@@ -529,7 +532,6 @@ class LibraryUpdateService(
                 launch {
                     updateMissingChapterCount(manga)
                 }
-
             }
 
             hasDownloads
@@ -674,10 +676,12 @@ class LibraryUpdateService(
                     putExtra(KEY_TARGET, target)
                     category?.id?.let { id ->
                         putExtra(KEY_CATEGORY, id)
-                        if (mangaToUse != null) putExtra(
-                            KEY_MANGAS,
-                            mangaToUse.mapNotNull { it.id }.toLongArray(),
-                        )
+                        if (mangaToUse != null) {
+                            putExtra(
+                                KEY_MANGAS,
+                                mangaToUse.mapNotNull { it.id }.toLongArray(),
+                            )
+                        }
                     }
                 }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -687,9 +691,14 @@ class LibraryUpdateService(
                 }
                 true
             } else {
-                if (target == Target.CHAPTERS) category?.id?.let {
-                    if (mangaToUse != null) instance?.addMangaToQueue(it, mangaToUse)
-                    else instance?.addCategory(it)
+                if (target == Target.CHAPTERS) {
+                    category?.id?.let {
+                        if (mangaToUse != null) {
+                            instance?.addMangaToQueue(it, mangaToUse)
+                        } else {
+                            instance?.addCategory(it)
+                        }
+                    }
                 }
                 false
             }

@@ -90,7 +90,6 @@ fun MangaList(
     onLongClick: (DisplayManga) -> Unit = {},
     loadNextItems: () -> Unit = {},
 ) {
-
     val scrollState = rememberLazyListState()
 
     LazyColumn(
@@ -138,7 +137,7 @@ fun MangaListWithHeader(
             stickyHeader {
                 HeaderCard(stringResource(id = stringRes))
             }
-            itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { _, displayManga ->
+            itemsIndexed(mangaList) { _, displayManga ->
                 MangaRow(
                     displayManga = displayManga,
                     shouldOutlineCover,

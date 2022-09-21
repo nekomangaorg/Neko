@@ -5,8 +5,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.source.Source
@@ -14,10 +16,12 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -27,6 +31,7 @@ class SettingsSiteController :
     MangadexLogoutDialog.Listener {
 
     private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() }
+    private val db by lazy { Injekt.get<DatabaseHelper>() }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.site_specific_settings
@@ -73,7 +78,10 @@ class SettingsSiteController :
                 R.string.content_rating_pornographic,
             )
             entryValues = listOf(
-                MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic,
+                MdConstants.ContentRating.safe,
+                MdConstants.ContentRating.suggestive,
+                MdConstants.ContentRating.erotica,
+                MdConstants.ContentRating.pornographic,
             )
 
             defValue = setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
@@ -111,6 +119,46 @@ class SettingsSiteController :
             )
             entryRange = 0..2
             defaultValue = 0
+        }
+
+        preference {
+            preferences.blockedScanlators().asImmediateFlowIn(viewScope) {
+                isVisible = it.isNotEmpty()
+            }
+
+            titleRes = R.string.currently_blocked_scanlators
+            onClick {
+                activity!!.materialAlertDialog()
+                    .setTitle(R.string.unblock_scanlator)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setMultiChoiceItems(
+                        preferences.blockedScanlators().get().toTypedArray().sortedArrayDescending(),
+                        preferences.blockedScanlators().get().map { false }.toBooleanArray(),
+                    ) { dialog, position, bool ->
+                        val listView = (dialog as AlertDialog).listView
+                        listView.setItemChecked(position, bool)
+                    }
+                    .setPositiveButton(R.string.remove) { dialog, t ->
+                        val listView = (dialog as AlertDialog).listView
+                        val blockedScanlators = preferences.blockedScanlators().get().toList().sortedDescending()
+                        val selectedToRemove = HashSet<String>()
+                        for (i in 0 until listView.count) {
+                            if (listView.isItemChecked(i)) {
+                                selectedToRemove.add(blockedScanlators[i])
+                            }
+                        }
+                        if (selectedToRemove.size > 0) {
+                            val newBlocks = blockedScanlators.filter { it !in selectedToRemove }.toSet()
+                            preferences.blockedScanlators().set(newBlocks)
+                            selectedToRemove.map {
+                                viewScope.launch {
+                                    db.deleteScanlator(it).executeOnIO()
+                                }
+                            }
+                        }
+                    }
+                    .show()
+            }
         }
 
         switchPreference {
@@ -161,7 +209,6 @@ class SettingsSiteController :
                 StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
             }
         }
-        
 
         switchPreference {
             key = PreferenceKeys.addToLibraryAsPlannedToRead

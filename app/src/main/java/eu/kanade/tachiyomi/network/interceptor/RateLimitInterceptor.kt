@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.network.interceptor
 
+import java.io.IOException
+import java.util.concurrent.TimeUnit
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.isomorphism.util.TokenBuckets
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 /**
  * An OkHttp interceptor that handles rate limiting.

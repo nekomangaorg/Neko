@@ -148,7 +148,6 @@ interface BaseMangaGetResolver {
         user_cover = cursor.getString(cursor.getColumnIndex(COL_USER_COVER))
         user_title = cursor.getString(cursor.getColumnIndex(COL_USER_TITLE))
         filtered_language = cursor.getString(cursor.getColumnIndex(COL_LANGUAGE_FILTER_FLAG))
-
     }
 }
 

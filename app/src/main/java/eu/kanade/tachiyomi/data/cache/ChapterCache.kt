@@ -9,6 +9,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
+import java.io.File
+import java.io.IOException
+import kotlin.math.pow
+import kotlin.math.roundToLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,10 +26,6 @@ import okhttp3.Response
 import okio.buffer
 import okio.sink
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.io.IOException
-import kotlin.math.pow
-import kotlin.math.roundToLong
 
 /**
  * Class used to create chapter cache

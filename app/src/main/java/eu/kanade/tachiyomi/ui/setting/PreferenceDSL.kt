@@ -18,6 +18,7 @@ import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import com.fredporciuncula.flow.preferences.Preference as FlowPreference
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
@@ -29,7 +30,6 @@ import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
 import eu.kanade.tachiyomi.widget.preference.TriStateListPreference
-import com.fredporciuncula.flow.preferences.Preference as FlowPreference
 
 @DslMarker
 @Target(AnnotationTarget.TYPE)
@@ -59,8 +59,7 @@ inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).(
     return initThenAdd(EditTextPreference(context), block).also(::initDialog)
 }
 
-inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).() -> Unit):
-    DropDownPreference {
+inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).() -> Unit): DropDownPreference {
     return initThenAdd(DropDownPreference(context), block).also(::initDialog)
 }
 
@@ -68,16 +67,14 @@ inline fun PreferenceGroup.listPreference(
     activity: Activity?,
     block: (@DSL ListMatPreference).()
     -> Unit,
-):
-    ListMatPreference {
+): ListMatPreference {
     return initThenAdd(ListMatPreference(activity, context), block)
 }
 
 inline fun PreferenceGroup.intListPreference(
     activity: Activity?,
     block: (@DSL IntListMatPreference).() -> Unit,
-):
-    IntListMatPreference {
+): IntListMatPreference {
     return initThenAdd(IntListMatPreference(activity, context), block)
 }
 

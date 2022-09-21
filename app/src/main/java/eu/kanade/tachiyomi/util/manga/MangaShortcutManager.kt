@@ -18,10 +18,10 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.launchIO
+import kotlin.math.min
 import kotlinx.coroutines.GlobalScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.math.min
 
 class MangaShortcutManager(
     val preferences: PreferencesHelper = Injekt.get(),
@@ -78,7 +78,9 @@ class MangaShortcutManager(
                             } else {
                                 Icon.createWithBitmap(bitmap)
                             }
-                            else Icon.createWithResource(context, R.drawable.ic_book_24dp),
+                            else {
+                                Icon.createWithResource(context, R.drawable.ic_book_24dp)
+                            },
                         )
                         .setIntent(
                             SearchActivity.openMangaIntent(context, item.id, true)

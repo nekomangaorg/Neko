@@ -14,12 +14,12 @@ import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.throws
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.TimeUnit
 
 class MangaDexLoginHelper {
 
@@ -90,14 +90,14 @@ class MangaDexLoginHelper {
                 if (this is ApiResponse.Failure.Error && this.response.errorBody() != null) {
                     val error = json.decodeFromString<ErrorResponse>(this.response.errorBody()!!.string())
                     if (error.errors.isNotEmpty()) {
-                        this.log(error.errors.first().detail)
-                        throw Exception(error.errors.first().detail)
+                        val message = error.errors.first().detail ?: error.errors.first().title ?: "Unable to parse json error"
+                        this.log(message)
+                        throw Exception(message)
                     }
                 }
 
                 this.log(type)
                 this.throws(type)
-
             }.getOrThrow()
 
             preferences.setTokens(

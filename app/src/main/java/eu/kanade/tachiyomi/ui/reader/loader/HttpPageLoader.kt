@@ -10,6 +10,9 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.runAsObservable
 import eu.kanade.tachiyomi.util.system.withIOContext
+import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,9 +28,6 @@ import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.min
 
 /**
  * Loader used to load chapters from an online source.
@@ -173,7 +173,9 @@ class HttpPageLoader(
             .mapNotNull {
                 if (it.status == Page.QUEUE) {
                     PriorityPage(it, 0).apply { queue.offer(this) }
-                } else null
+                } else {
+                    null
+                }
             }
     }
 

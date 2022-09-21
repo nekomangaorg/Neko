@@ -13,6 +13,9 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.HttpSource
+import java.io.File
+import java.net.HttpURLConnection
+import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,9 +29,6 @@ import okio.Source
 import okio.buffer
 import okio.sink
 import org.nekomanga.domain.manga.Artwork
-import java.io.File
-import java.net.HttpURLConnection
-import java.util.Date
 
 class AlternativeMangaCoverFetcher(
     private val url: String,
@@ -250,7 +250,7 @@ class AlternativeMangaCoverFetcher(
             else -> null
         }
     }
-    
+
     private enum class Type {
         File, URL;
     }

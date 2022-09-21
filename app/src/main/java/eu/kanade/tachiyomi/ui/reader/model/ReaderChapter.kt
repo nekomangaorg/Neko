@@ -11,9 +11,9 @@ data class ReaderChapter(val chapter: Chapter) {
     var state: State =
         State.Wait
         set(value) {
-                field = value
-                stateRelay.call(value)
-            }
+            field = value
+            stateRelay.call(value)
+        }
 
     private val stateRelay by lazy { BehaviorRelay.create(state) }
 
@@ -50,7 +50,7 @@ data class ReaderChapter(val chapter: Chapter) {
     }
 
     override fun equals(other: Any?): Boolean {
-        return (other is ReaderChapter) && (other as ReaderChapter).urlAndName() == this.urlAndName()
+        return (other is ReaderChapter) && other.urlAndName() == this.urlAndName()
     }
 
     override fun hashCode(): Int {

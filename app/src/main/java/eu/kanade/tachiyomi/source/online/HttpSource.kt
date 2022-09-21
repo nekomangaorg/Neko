@@ -7,13 +7,13 @@ import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import java.security.MessageDigest
+import java.util.Locale
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import java.security.MessageDigest
-import java.util.Locale
 
 /**
  * A simple implementation for sources from a website.

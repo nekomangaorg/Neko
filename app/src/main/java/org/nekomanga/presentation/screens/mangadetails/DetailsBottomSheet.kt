@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
+import java.text.DateFormat
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
@@ -19,7 +20,6 @@ import org.nekomanga.presentation.components.sheets.TrackingDateSheet
 import org.nekomanga.presentation.components.sheets.TrackingSearchSheet
 import org.nekomanga.presentation.components.sheets.TrackingSheet
 import org.nekomanga.presentation.screens.ThemeColorState
-import java.text.DateFormat
 
 /**
  * Sealed class that holds the types of bottom sheets the details screen can show
@@ -104,7 +104,7 @@ fun DetailsBottomSheet(
             },
         )
         is DetailsBottomSheetScreen.TrackingSearchSheet -> {
-            //do the initial search this way we dont need to "reset" the state after the sheet closes
+            // do the initial search this way we dont need to "reset" the state after the sheet closes
             LaunchedEffect(key1 = currentScreen.trackingService.id) {
                 trackActions.search(mangaState.value.originalTitle, currentScreen.trackingService)
             }
@@ -148,7 +148,8 @@ fun DetailsBottomSheet(
         }
         is DetailsBottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
-                themeColorState = themeColorState, externalLinks = mangaState.value.externalLinks,
+                themeColorState = themeColorState,
+                externalLinks = mangaState.value.externalLinks,
                 onLinkClick = { url, title ->
                     closeSheet()
                     openInWebView(url, title)

@@ -67,10 +67,8 @@ fun MergeSheet(
     mergeMangaClick: (MergeManga) -> Unit,
     cancelClick: () -> Unit,
 ) {
-
     if (isMergedManga is IsMergedManga.Yes) {
         BaseSheet(themeColor = themeColorState) {
-
             TextButton(onClick = { openMergeSource(isMergedManga.url, isMergedManga.title) }, modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(id = R.string.open_merged_in_webview), color = themeColorState.buttonColor)
             }
@@ -83,7 +81,6 @@ fun MergeSheet(
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
 
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-
             var searchTitle by remember { mutableStateOf(title) }
 
             Header(stringResource(id = R.string.select_an_entry), cancelClick)
@@ -96,7 +93,10 @@ fun MergeSheet(
                     SuccessResults(mergeMangaList = mergeSearchResults.mergeMangaList, mergeMangaClick = mergeMangaClick)
                 }
                 NonSuccessResultsAndChips(
-                    themeColorState = themeColorState, searchResults = mergeSearchResults, title = title, altTitles = altTitles,
+                    themeColorState = themeColorState,
+                    searchResults = mergeSearchResults,
+                    title = title,
+                    altTitles = altTitles,
                     chipClick = { chipText ->
                         searchTitle = chipText
                         search(chipText)
@@ -105,7 +105,6 @@ fun MergeSheet(
             }
 
             SearchFooter(themeColorState = themeColorState, title = searchTitle, textChanged = { searchTitle = it }, search = search)
-
         }
     }
 }
@@ -119,8 +118,7 @@ private fun SuccessResults(mergeMangaList: List<MergeManga>, mergeMangaClick: (M
         contentPadding = PaddingValues(top = 16.dp, bottom = 48.dp, start = 8.dp, end = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-    )
-    {
+    ) {
         items(mergeMangaList) { item ->
             Box(
                 modifier = Modifier
@@ -130,7 +128,8 @@ private fun SuccessResults(mergeMangaList: List<MergeManga>, mergeMangaClick: (M
                     .clickable { mergeMangaClick(item) },
             ) {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current).data(item.thumbnail).crossfade(true).placeholder(Pastel.getColorLight()).build(), contentDescription = null,
+                    model = ImageRequest.Builder(LocalContext.current).data(item.thumbnail).crossfade(true).placeholder(Pastel.getColorLight()).build(),
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -159,7 +158,6 @@ private fun SuccessResults(mergeMangaList: List<MergeManga>, mergeMangaClick: (M
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                     )
-
                 }
             }
         }

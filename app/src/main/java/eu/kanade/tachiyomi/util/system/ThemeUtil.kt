@@ -68,7 +68,11 @@ fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
         (
             if ((applicationContext.isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
                 preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
-            ) preferences.darkTheme() else preferences.lightTheme()
+            ) {
+                preferences.darkTheme()
+            } else {
+                preferences.lightTheme()
+            }
             ).get()
     } catch (e: Exception) {
         ThemeUtil.convertNewThemes(preferences.context)

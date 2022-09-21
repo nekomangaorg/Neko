@@ -43,7 +43,6 @@ class TrackingCoordinator {
      * Update tracker with new score
      */
     suspend fun updateTrackScore(scoreIndex: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
-
         val trackItem = trackAndService.track.copy(
             score = trackAndService.service.indexToScore(scoreIndex),
         )
@@ -150,7 +149,6 @@ class TrackingCoordinator {
                 false -> TrackingConstants.TrackSearchResult.Success(results.map { it.toTrackSearchItem() }.toImmutableList())
             },
         )
-
     }.catch {
         XLog.e("error searching tracker", it)
         emit(TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker"))
@@ -177,4 +175,3 @@ sealed class TrackingUpdate {
     object Success : TrackingUpdate()
     data class Error(val message: String, val exception: Throwable) : TrackingUpdate()
 }
-

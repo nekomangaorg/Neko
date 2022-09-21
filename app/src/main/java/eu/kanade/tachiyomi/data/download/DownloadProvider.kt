@@ -237,8 +237,11 @@ class DownloadProvider(private val context: Context) {
 
     fun getJ2kChapterName(chapter: Chapter): String {
         return DiskUtil.buildValidFilename(
-            if (chapter.scanlator != null) "${chapter.scanlator}_${chapter.name}"
-            else chapter.name,
+            if (chapter.scanlator != null) {
+                "${chapter.scanlator}_${chapter.name}"
+            } else {
+                chapter.name
+            },
         )
     }
 

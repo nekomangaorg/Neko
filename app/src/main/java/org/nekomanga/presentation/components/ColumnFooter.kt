@@ -25,7 +25,6 @@ import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, textChanged: (String) -> Unit, search: (String) -> Unit) {
-
     val focusManager = LocalFocusManager.current
 
     Divider()

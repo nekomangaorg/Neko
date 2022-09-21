@@ -101,38 +101,39 @@ class TabbedReaderSettingsSheet(
         val attrs = window?.attributes
         val filterTabIndex = getTabViews().indexOf(filterView)
         binding.pager.adapter?.notifyDataSetChanged()
-        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                val isFilterTab = tab?.position == filterTabIndex
+        binding.tabs.addOnTabSelectedListener(
+            object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    val isFilterTab = tab?.position == filterTabIndex
 
-                // Remove dimmed backdrop so color filter changes can be previewed
-                backgroundDimAnimator.run {
-                    if (isFilterTab) {
-                        if (animatedFraction < 1f) {
-                            start()
+                    // Remove dimmed backdrop so color filter changes can be previewed
+                    backgroundDimAnimator.run {
+                        if (isFilterTab) {
+                            if (animatedFraction < 1f) {
+                                start()
+                            }
+                        } else if (animatedFraction > 0f) {
+                            reverse()
                         }
-                    } else if (animatedFraction > 0f) {
-                        reverse()
+                    }
+                    readerActivity.binding.appBar.isInvisible = tab?.position == filterTabIndex
+                    if (tab?.position == 2) {
+                        sheetBehavior.skipCollapsed = false
+                        sheetBehavior.peekHeight = 110.dpToPx
+                        filterView.setWindowBrightness()
+                    } else {
+                        sheetBehavior.expand()
+                        sheetBehavior.skipCollapsed = true
+                        window?.attributes = window?.attributes?.apply { screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE }
                     }
                 }
-                readerActivity.binding.appBar.isInvisible = tab?.position == filterTabIndex
-                if (tab?.position == 2) {
-                    sheetBehavior.skipCollapsed = false
-                    sheetBehavior.peekHeight = 110.dpToPx
-                    filterView.setWindowBrightness()
-                } else {
-                    sheetBehavior.expand()
-                    sheetBehavior.skipCollapsed = true
-                    window?.attributes = window?.attributes?.apply { screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
                 }
-            }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-            }
-        },
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+                }
+            },
         )
 
         if (showColorFilterSettings) {

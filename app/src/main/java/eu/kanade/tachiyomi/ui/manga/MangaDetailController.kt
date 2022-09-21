@@ -59,11 +59,13 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)
         val context = applicationContext ?: return
-        if (notificationId > -1) NotificationReceiver.dismissNotification(
-            context,
-            notificationId,
-            bundle.getInt("groupId", 0),
-        )
+        if (notificationId > -1) {
+            NotificationReceiver.dismissNotification(
+                context,
+                notificationId,
+                bundle.getInt("groupId", 0),
+            )
+        }
     }
 
     override val presenter = MangaDetailPresenter(mangaId!!)
@@ -116,7 +118,7 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
                 search = presenter::searchMergedManga,
                 add = presenter::addMergedManga,
             ),
-            similarClick = { router.pushController(SimilarController(presenter.manga.value.uuid()).withFadeTransaction()) },
+            similarClick = { router.pushController(SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction()) },
             shareClick = this::shareManga,
             coverActions = CoverActions(
                 share = this::shareCover,
@@ -143,12 +145,13 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
                     }
                 },
                 open = { context, chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
+                blockScanlator = presenter::blockScanlator,
             ),
         ) { activity?.onBackPressed() }
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {
-        startActivity(ReaderActivity.newIntent(context, presenter.manga.value, chapter))
+        startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
     }
 
     /**
@@ -205,9 +208,9 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
             withUIContext {
                 val stream = cover?.getUriCompat(context)
                 try {
-                    val manga = presenter.manga.value
+                    val manga = presenter.manga.value!!
                     var url = presenter.sourceManager.getMangadex().mangaDetailsRequest(manga).url.toString()
-                    url = "$url/" + presenter.manga.value.getSlug()
+                    url = "$url/" + manga.getSlug()
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/*"
                         putExtra(Intent.EXTRA_TEXT, url)

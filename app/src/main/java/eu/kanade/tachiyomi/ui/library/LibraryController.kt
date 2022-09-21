@@ -118,6 +118,12 @@ import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EmptyView
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.roundToInt
+import kotlin.random.Random
+import kotlin.random.nextInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
@@ -125,12 +131,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Locale
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.roundToInt
-import kotlin.random.Random
-import kotlin.random.nextInt
 
 class LibraryController(
     bundle: Bundle? = null,
@@ -312,7 +312,9 @@ class LibraryController(
                     binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.hide()
                     scrollDistance = 0f
                 }
-            } else scrollDistance = 0f
+            } else {
+                scrollDistance = 0f
+            }
             val currentCategory = getHeader()?.category ?: return
             if (currentCategory.order != activeCategory) {
                 saveActiveCategory(currentCategory)
@@ -820,7 +822,7 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                    binding.libraryGridRecycler.recycler.translationY
+                binding.libraryGridRecycler.recycler.translationY
         } else {
             binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
         }
@@ -861,8 +863,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                    newOffset > -1
-                } else {
+                newOffset > -1
+            } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -1074,15 +1076,20 @@ class LibraryController(
         } else {
             binding.emptyView.show(
                 CommunityMaterial.Icon2.cmd_heart_off,
-                if (hasActiveFilters) R.string.no_matches_for_filters
-                else R.string.library_is_empty_add_from_browse,
+                if (hasActiveFilters) {
+                    R.string.no_matches_for_filters
+                } else {
+                    R.string.library_is_empty_add_from_browse
+                },
                 if (!hasActiveFilters) {
                     listOf(
                         EmptyView.Action(R.string.getting_started_guide) {
                             activity?.openInBrowser("https://tachiyomi.org/help/guides/getting-started/#installing-an-extension")
                         },
                     )
-                } else emptyList(),
+                } else {
+                    emptyList()
+                },
             )
         }
         adapter.setItems(mangaMap)
@@ -1557,8 +1564,11 @@ class LibraryController(
 
     override fun onUpdateManga(manga: Manga?) {
         if (manga?.source == LibraryUpdateService.STARTING_UPDATE_SOURCE) return
-        if (manga == null) adapter.getHeaderPositions().forEach { adapter.notifyItemChanged(it) }
-        else presenter.updateManga()
+        if (manga == null) {
+            adapter.getHeaderPositions().forEach { adapter.notifyItemChanged(it) }
+        } else {
+            presenter.updateManga()
+        }
     }
 
     private fun setSelection(position: Int, selected: Boolean = true) {
@@ -1573,16 +1583,17 @@ class LibraryController(
         val fromItem = adapter.getItem(fromPosition)
         val toItem = adapter.getItem(toPosition)
         if (binding.libraryGridRecycler.recycler.layoutManager !is StaggeredGridLayoutManager && (
-                (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
-                )
+            (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
+            )
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
                 0,
                 binding.libraryGridRecycler.recycler.paddingTop,
             )
         }
-        if (lastItemPosition == toPosition) lastItemPosition = null
-        else if (lastItemPosition == null) lastItemPosition = fromPosition
+        if (lastItemPosition == toPosition) {
+            lastItemPosition = null
+        } else if (lastItemPosition == null) lastItemPosition = fromPosition
     }
 
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
@@ -1625,11 +1636,13 @@ class LibraryController(
                 }
                 return
             }
-            if (newHeader?.category != null) moveMangaToCategory(
-                item.manga,
-                newHeader.category,
-                mangaIds,
-            )
+            if (newHeader?.category != null) {
+                moveMangaToCategory(
+                    item.manga,
+                    newHeader.category,
+                    mangaIds,
+                )
+            }
         }
         lastItemPosition = null
     }
@@ -1693,13 +1706,17 @@ class LibraryController(
                 }
             }
         }
-        if (!inQueue) LibraryUpdateService.start(
-            view!!.context,
-            category,
-            mangaToUse = if (category.isDynamic) {
-                presenter.getMangaInCategories(category.id)
-            } else null,
-        )
+        if (!inQueue) {
+            LibraryUpdateService.start(
+                view!!.context,
+                category,
+                mangaToUse = if (category.isDynamic) {
+                    presenter.getMangaInCategories(category.id)
+                } else {
+                    null
+                },
+            )
+        }
         return true
     }
 
@@ -1883,8 +1900,11 @@ class LibraryController(
             R.id.action_filter -> {
                 hasExpanded = true
                 val sheetBehavior = binding.filterBottomSheet.filterBottomSheet.sheetBehavior
-                if (!sheetBehavior.isExpanded() && !sheetBehavior.isSettling()) sheetBehavior?.expand()
-                else showDisplayOptions()
+                if (!sheetBehavior.isExpanded() && !sheetBehavior.isSettling()) {
+                    sheetBehavior?.expand()
+                } else {
+                    showDisplayOptions()
+                }
             }
             else -> return super.onOptionsItemSelected(item)
         }
@@ -1939,8 +1959,11 @@ class LibraryController(
         categoryItem.isVisible = presenter.allCategories.size > 1
         categoryItem.isVisible = presenter.categories.size > 1
         shareItem.isVisible = true
-        if (count == 0) destroyActionModeIfNeeded()
-        else mode.title = resources?.getString(R.string.selected_, count)
+        if (count == 0) {
+            destroyActionModeIfNeeded()
+        } else {
+            mode.title = resources?.getString(R.string.selected_, count)
+        }
         return false
     }
     //endregion
@@ -2018,9 +2041,12 @@ class LibraryController(
                         event: Int,
                     ) {
                         super.onDismissed(transientBottomBar, event)
-                        if (!undoing) presenter.confirmMarkReadStatus(
-                            mapMangaChapters, markRead,
-                        )
+                        if (!undoing) {
+                            presenter.confirmMarkReadStatus(
+                                mapMangaChapters,
+                                markRead,
+                            )
+                        }
                     }
                 },
             )

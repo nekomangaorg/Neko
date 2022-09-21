@@ -66,6 +66,8 @@ class PagerConfig(
 
     var invertDoublePages = false
 
+    var doublePageGap = 0
+
     var autoDoublePages = preferences.pageLayout().get() == PageLayout.AUTOMATIC.value
 
     var splitPages = preferences.pageLayout().get() == PageLayout.SPLIT_PAGES.value
@@ -117,6 +119,13 @@ class PagerConfig(
 
         preferences.invertDoublePages()
             .register({ invertDoublePages = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.doublePageGap().register(
+            { doublePageGap = it },
+            {
+                imagePropertyChangedListener?.invoke()
+            },
+        )
 
         preferences.pageLayout()
             .asFlow()

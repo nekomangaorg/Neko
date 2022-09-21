@@ -2,11 +2,16 @@ package eu.kanade.tachiyomi.ui.source.browse
 
 import android.os.Bundle
 import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.onSuccess
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -30,18 +35,19 @@ import eu.kanade.tachiyomi.ui.source.filter.TriStateItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateSectionItem
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withUIContext
+import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.domain.network.ResultError
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -267,14 +273,15 @@ open class BrowseSourcePresenter(
      * @return the initialized manga
      */
     private suspend fun getMangaDetails(manga: Manga): Manga {
-        try {
-            val networkManga = source.getMangaDetails(manga)
-            manga.copyFrom(networkManga)
-            manga.initialized = true
-            db.insertManga(manga).executeAsBlocking()
-        } catch (e: Exception) {
-            XLog.e(e)
-        }
+        source.getMangaDetails(manga.uuid(), false)
+            .onSuccess {
+                runCatching {
+                    val networkManga = it.first
+                    manga.copyFrom(networkManga)
+                    manga.initialized = true
+                    db.insertManga(manga).executeAsBlocking()
+                }
+            }
         return manga
     }
 
@@ -289,13 +296,9 @@ open class BrowseSourcePresenter(
     /**
      * Search for manga based off of a random manga id by utilizing the [query] and the [restartPager].
      */
-    fun searchRandomManga(): Flow<Manga?> {
-        return source.getRandomManga().map { smanga ->
-            if (smanga == null) {
-                null
-            } else {
-                networkToLocalManga(smanga, source.id)
-            }
+    suspend fun searchRandomManga(): Result<DisplayManga, ResultError> {
+        return source.getRandomManga().andThen {
+            Ok(it.toDisplayManga(db, source.id))
         }
     }
 

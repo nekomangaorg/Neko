@@ -6,14 +6,14 @@ import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
-import kotlinx.coroutines.flow.launchIn
 import kotlin.math.max
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import kotlinx.coroutines.flow.launchIn
 
 class SettingsAppearanceController : SettingsController() {
 
@@ -59,7 +59,6 @@ class SettingsAppearanceController : SettingsController() {
                     isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }.launchIn(viewScope)
             }
-
         }
 
         preferenceCategory {

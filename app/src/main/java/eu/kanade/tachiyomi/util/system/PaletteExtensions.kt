@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.util.system
 import androidx.palette.graphics.Palette
 
 fun Palette.getBestColor(): Int? {
-
     val vibPopulation = vibrantSwatch?.population ?: -1
 
     val domLum = dominantSwatch?.hsl?.get(2) ?: -1f
@@ -34,5 +33,3 @@ fun Palette.getBestColor(): Int? {
         }
     }
 }
-
-

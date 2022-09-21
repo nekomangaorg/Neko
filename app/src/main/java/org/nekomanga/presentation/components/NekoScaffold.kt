@@ -189,4 +189,3 @@ fun getTopAppBarColor(title: String): Color {
         false -> MaterialTheme.colorScheme.surface.copy(alpha = .7f)
     }
 }
-

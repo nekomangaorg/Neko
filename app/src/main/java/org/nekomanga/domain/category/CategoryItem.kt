@@ -48,5 +48,3 @@ fun Category.toCategoryItem(): CategoryItem {
         sourceId = this.sourceId,
     )
 }
-
-

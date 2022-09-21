@@ -30,16 +30,16 @@ object MangaConstants {
         val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
         val chapterLanguageFilter: LanguageFilter = LanguageFilter(persistentListOf()),
         val currentCategories: ImmutableList<CategoryItem> = persistentListOf(),
-        val hasDefaultCategory: Boolean,
-        val hideButtonText: Boolean,
-        val extraLargeBackdrop: Boolean,
-        val hideChapterTitles: Boolean,
+        val hasDefaultCategory: Boolean = false,
+        val hideButtonText: Boolean = false,
+        val extraLargeBackdrop: Boolean = false,
+        val hideChapterTitles: Boolean = false,
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val removedChapters: ImmutableList<ChapterItem> = persistentListOf(),
-        val themeBasedOffCovers: Boolean,
+        val themeBasedOffCovers: Boolean = false,
         val trackServiceCount: Int = 0,
         val trackingSuggestedDates: TrackingConstants.TrackingSuggestedDates? = null,
-        val vibrantColor: Int?,
+        val vibrantColor: Int? = null,
     )
 
     data class MangaScreenMangaState(
@@ -123,25 +123,25 @@ object MangaConstants {
         All,
         Unread,
         Downloaded,
-        Bookmarked
+        Bookmarked,
     }
 
     enum class SortType {
         SourceOrder,
         ChapterNumber,
-        UploadDate
+        UploadDate,
     }
 
     enum class SortState {
         Ascending,
         Descending,
-        None
+        None,
     }
 
     enum class SetGlobal {
         HideTitles,
         Sort,
-        Filter
+        Filter,
     }
 
     class ChapterFilterActions(
@@ -218,6 +218,7 @@ object MangaConstants {
         val download: (List<ChapterItem>, DownloadAction) -> Unit,
         val delete: (List<ChapterItem>) -> Unit,
         val open: (Context, ChapterItem) -> Unit,
+        val blockScanlator: (String) -> Unit,
         val openNext: (Context) -> Unit,
     )
 }

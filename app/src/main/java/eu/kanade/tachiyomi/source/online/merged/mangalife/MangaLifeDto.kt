@@ -19,4 +19,3 @@ data class MangaLifeChapterDto(
     @SerialName("Directory") val directory: String? = null,
     @SerialName("Page") val totalPages: Int? = null,
 )
-

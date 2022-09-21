@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.SimpleDropDownItem
 import org.nekomanga.presentation.components.SimpleDropdownMenu
@@ -67,13 +68,12 @@ fun MangaDetailsHeader(
     quickReadClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
-        val isExpanded = rememberSaveable {
+        val isExpanded = rememberSaveable(mangaState.value.inLibrary) {
             when (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
-                false -> mutableStateOf(!mangaState.value.inLibrary)
                 true -> mutableStateOf(true)
+                false -> mutableStateOf(!mangaState.value.inLibrary)
             }
         }
 
@@ -81,7 +81,6 @@ fun MangaDetailsHeader(
             true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
             false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
         }
-
 
         Column {
             BoxWithConstraints {
@@ -216,7 +215,7 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeCo
         expanded = favoriteExpanded,
         themeColorState = themeColorState,
         onDismiss = onDismiss,
-        dropDownItems = listOf(
+        dropDownItems = persistentListOf(
             SimpleDropDownItem.Action(
                 text = stringResource(R.string.remove_from_library),
                 onClick = { toggleFavorite() },
@@ -227,6 +226,5 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeCo
             ),
         ),
 
-        )
+    )
 }
-

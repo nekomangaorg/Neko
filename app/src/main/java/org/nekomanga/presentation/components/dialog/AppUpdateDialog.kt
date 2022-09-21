@@ -76,5 +76,3 @@ private fun markdownTypography() =
         body1 = MaterialTheme.typography.bodyMedium,
         body2 = MaterialTheme.typography.bodySmall,
     )
-
-

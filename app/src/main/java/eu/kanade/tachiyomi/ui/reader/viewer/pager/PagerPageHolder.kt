@@ -38,6 +38,10 @@ import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Job
@@ -48,12 +52,7 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-
 import uy.kohesive.injekt.injectLazy
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 /**
  * View of the ViewPager that contains a page of a chapter.
@@ -131,8 +130,11 @@ class PagerPageHolder(
         )
         progressBar.foregroundTintList = ColorStateList.valueOf(
             context.getResourceColor(
-                if (isInvertedFromTheme()) R.attr.colorPrimaryInverse
-                else R.attr.colorPrimary,
+                if (isInvertedFromTheme()) {
+                    R.attr.colorPrimaryInverse
+                } else {
+                    R.attr.colorPrimary
+                },
             ),
         )
     }
@@ -274,10 +276,14 @@ class PagerPageHolder(
                         ZoomType.Center -> center.also { it?.y = 0F }
                     }
 
-                    val topInsets = if (viewer.activity.isSplitScreen) 0f else {
+                    val topInsets = if (viewer.activity.isSplitScreen) {
+                        0f
+                    } else {
                         viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
                     }
-                    val bottomInsets = if (viewer.activity.isSplitScreen) 0f else {
+                    val bottomInsets = if (viewer.activity.isSplitScreen) {
+                        0f
+                    } else {
                         viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
                     }
                     val targetScale = (height.toFloat() - topInsets - bottomInsets) / sHeight.toFloat()
@@ -837,7 +843,7 @@ class PagerPageHolder(
 
         imageStream.close()
         imageStream2.close()
-        return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg) {
+        return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg, viewer.config.doublePageGap) {
             scope?.launchUI {
                 if (it == 100) {
                     progressBar.completeAndFadeOut()
@@ -863,7 +869,9 @@ class PagerPageHolder(
         fun getBGType(readerTheme: Int, context: Context): Int {
             return if (readerTheme == 3) {
                 if (context.isInNightMode()) 2 else 1
-            } else 0 + (context.resources.configuration?.orientation ?: 0) * 10
+            } else {
+                0 + (context.resources.configuration?.orientation ?: 0) * 10
+            }
         }
     }
 }

@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

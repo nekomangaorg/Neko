@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.serialization.json.Json
-import org.jsoup.parser.Parser
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
+import kotlinx.serialization.json.Json
+import org.jsoup.parser.Parser
 
 class MdUtil {
 

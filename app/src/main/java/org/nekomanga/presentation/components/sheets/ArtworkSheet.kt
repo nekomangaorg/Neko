@@ -71,20 +71,19 @@ fun ArtworkSheet(
         if (alternativeArtwork.isEmpty()) {
             BaseSheet(themeColor = themeColorState) {
                 Text(
-                    text = "Please swipe refresh to pull latest artwork", textAlign = TextAlign.Center,
+                    text = "Please swipe refresh to pull latest artwork",
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth(),
                 )
             }
         } else {
-
             var currentImage by remember { mutableStateOf(alternativeArtwork.first { it.active }) }
 
             val screenHeight = LocalConfiguration.current.screenHeightDp
             val thumbnailSize = (screenHeight * .12f).dp
             val imageHeight = screenHeight * .7f
             val gradientHeight = (thumbnailSize / 2f)
-
 
             Column(
                 modifier = Modifier
@@ -95,7 +94,6 @@ fun ArtworkSheet(
                     .navigationBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(currentImage)
@@ -113,7 +111,6 @@ fun ArtworkSheet(
                         .padding(4.dp),
                     Arrangement.spacedBy(4.dp),
                 ) {
-
                     ArtworkButton(text = stringResource(id = R.string.save), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
                         saveClick(currentImage)
                     }
@@ -139,7 +136,8 @@ fun ArtworkSheet(
                             items(alternativeArtwork) { artwork ->
                                 Box {
                                     Thumbnail(
-                                        artwork = artwork, thumbnailSize = thumbnailSize,
+                                        artwork = artwork,
+                                        thumbnailSize = thumbnailSize,
                                     ) {
                                         currentImage = artwork
                                     }
@@ -232,4 +230,3 @@ private fun ActiveIndicator(themeColorState: ThemeColorState) {
         Icon(imageVector = Icons.Filled.Star, modifier = Modifier.padding(4.dp), contentDescription = null, tint = themeColorState.buttonColor)
     }
 }
-

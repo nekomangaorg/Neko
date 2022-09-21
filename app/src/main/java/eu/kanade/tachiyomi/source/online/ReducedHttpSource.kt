@@ -5,12 +5,10 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
+import java.util.concurrent.TimeUnit
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Response
-import java.util.concurrent.TimeUnit
 
 abstract class ReducedHttpSource : HttpSource() {
 
@@ -42,18 +40,6 @@ abstract class ReducedHttpSource : HttpSource() {
     }
 
     override suspend fun logout(): Logout {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getMangaDetails(manga: SManga): SManga {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         TODO("Not yet implemented")
     }
 }

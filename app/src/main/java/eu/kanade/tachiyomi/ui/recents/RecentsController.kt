@@ -526,13 +526,19 @@ class RecentsController(bundle: Bundle? = null) :
         }
         if (recents.isEmpty()) {
             binding.recentsEmptyView.show(
-                if (!isSearching()) R.drawable.ic_history_off_24dp
-                else R.drawable.ic_search_off_24dp,
-                if (isSearching()) R.string.no_results_found
-                else when (presenter.viewType) {
-                    RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> R.string.no_recent_chapters
-                    RecentsPresenter.VIEW_TYPE_ONLY_HISTORY -> R.string.no_recently_read_manga
-                    else -> R.string.no_recent_read_updated_manga
+                if (!isSearching()) {
+                    R.drawable.ic_history_off_24dp
+                } else {
+                    R.drawable.ic_search_off_24dp
+                },
+                if (isSearching()) {
+                    R.string.no_results_found
+                } else {
+                    when (presenter.viewType) {
+                        RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> R.string.no_recent_chapters
+                        RecentsPresenter.VIEW_TYPE_ONLY_HISTORY -> R.string.no_recently_read_manga
+                        else -> R.string.no_recent_read_updated_manga
+                    }
                 },
             )
         } else {
@@ -585,8 +591,11 @@ class RecentsController(bundle: Bundle? = null) :
         if (item.status != Download.State.NOT_DOWNLOADED && item.status != Download.State.ERROR) {
             presenter.deleteChapter(chapter, manga)
         } else {
-            if (item.status == Download.State.ERROR) DownloadService.start(view.context)
-            else presenter.downloadChapter(manga, chapter)
+            if (item.status == Download.State.ERROR) {
+                DownloadService.start(view.context)
+            } else {
+                presenter.downloadChapter(manga, chapter)
+            }
         }
     }
 
@@ -684,8 +693,11 @@ class RecentsController(bundle: Bundle? = null) :
         val wasRead = chapter.read
         presenter.markChapterRead(chapter, !wasRead)
         snack = view?.snack(
-            if (wasRead) R.string.marked_as_unread
-            else R.string.marked_as_read,
+            if (wasRead) {
+                R.string.marked_as_unread
+            } else {
+                R.string.marked_as_read
+            },
             Snackbar.LENGTH_INDEFINITE,
         ) {
             anchorView = activityBinding?.bottomNav
@@ -704,7 +716,6 @@ class RecentsController(bundle: Bundle? = null) :
                                 presenter.deleteChapter(chapter, manga)
                             }
                             updateTrackChapterMarkedAsRead(db, preferences, chapter, manga.id) {
-
                             }
                         }
                     }
@@ -814,8 +825,11 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     override fun toggleSheet() {
-        if (showingDownloads) binding.downloadBottomSheet.dlBottomSheet.dismiss()
-        else binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
+        if (showingDownloads) {
+            binding.downloadBottomSheet.dlBottomSheet.dismiss()
+        } else {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
+        }
     }
 
     override fun expandSearch() {

@@ -58,7 +58,9 @@ open class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs:
                     } else {
                         event.x > handle.width + handle.paddingStart
                     }
-                ) return false
+                ) {
+                    return false
+                }
                 val y = event.y
                 startY = event.y
                 if (canScroll) {

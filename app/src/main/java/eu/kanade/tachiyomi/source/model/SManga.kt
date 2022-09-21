@@ -2,8 +2,9 @@ package eu.kanade.tachiyomi.source.model
 
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import tachiyomi.source.model.MangaInfo
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.Serializable
+import tachiyomi.source.model.MangaInfo
 
 interface SManga : Serializable {
 
@@ -183,4 +184,8 @@ fun MangaInfo.toSManga(): SManga {
 
 fun SManga.isMerged(): Boolean {
     return merge_manga_url.isNullOrEmpty().not()
+}
+
+fun SManga.uuid(): String {
+    return MdUtil.getMangaUUID(this.url)
 }

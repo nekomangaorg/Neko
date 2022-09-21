@@ -68,7 +68,7 @@ open class MangaImpl : Manga {
     override var filtered_scanlators: String? = null
 
     override var filtered_language: String? = null
-    
+
     override var missing_chapters: String? = null
 
     override var rating: String? = null
@@ -110,7 +110,10 @@ open class MangaImpl : Manga {
     }
 
     override fun hashCode(): Int {
-        return if (::url.isInitialized) url.hashCode()
-        else (id ?: 0L).hashCode()
+        return if (::url.isInitialized) {
+            url.hashCode()
+        } else {
+            (id ?: 0L).hashCode()
+        }
     }
 }

@@ -46,7 +46,7 @@ data class BackupManga(
     @ProtoNumber(902) var mergedMangaImageUrl: String? = null,
     @ProtoNumber(903) var alternativeArtwork: String? = null,
 
-    ) {
+) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
             url = this@BackupManga.url.replace(
