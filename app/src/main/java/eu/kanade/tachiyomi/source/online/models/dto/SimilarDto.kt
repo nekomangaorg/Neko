@@ -60,6 +60,7 @@ data class SimilarMangaMatchListDto(
     val title: Map<String, String>,
     val contentRating: String,
     val score: Double,
+    val languages: List<String>,
 )
 
 @Serializable
