@@ -129,7 +129,12 @@ class MangaDetailPresenter(
 
         LibraryUpdateService.setListener(this)
         presenterScope.launch {
-            _currentManga.value = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = db.getManga(mangaId).executeAsBlocking()
+            if (dbManga == null) {
+                XLog.e("Error mangaId $mangaId found no manga in the db, popping back to root")
+                controller?.router?.popToRoot()
+            }
+            _currentManga.value = dbManga!!
             _generalState.value = MangaConstants.MangaScreenGeneralState(
                 hasDefaultCategory = preferences.defaultCategory() != -1,
                 hideButtonText = preferences.hideButtonText().get(),
