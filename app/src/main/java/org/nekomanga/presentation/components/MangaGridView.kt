@@ -17,11 +17,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -127,35 +125,36 @@ fun MangaGridItem(
     isComfortable: Boolean = true,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
 ) {
-        Box {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(Shapes.coverRadius))
-                    .combinedClickable(
-                        onClick = onClick,
-                        onLongClick = onLongClick,
+    Box(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(Shapes.coverRadius))
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                )
+                .padding(2.dp),
+        ) {
+            if (isComfortable) {
+                Column {
+                    ComfortableGridItem(
+                        displayManga,
+                        displayManga.displayText,
+                        shouldOutlineCover,
                     )
-                    .padding(2.dp),
-            ) {
-                if (isComfortable) {
-                    Column {
-                        ComfortableGridItem(
-                            displayManga,
-                            displayManga.displayText,
-                            shouldOutlineCover,
-                        )
-                    }
+                }
             } else {
-                    Box {
-                        CompactGridItem(
-                            displayManga,
-                            displayManga.displayText,
-                            shouldOutlineCover,
-                        )
-                    }
+                Box {
+                    CompactGridItem(
+                        displayManga,
+                        displayManga.displayText,
+                        shouldOutlineCover,
+                    )
                 }
             }
+        }
 
         if (displayManga.inLibrary) {
             val offset = (-2).dp
@@ -165,7 +164,7 @@ fun MangaGridItem(
 }
 
 @Composable
-private fun ColumnScope.ComfortableGridItem(
+fun ColumnScope.ComfortableGridItem(
     manga: DisplayManga,
     displayText: String,
     shouldOutlineCover: Boolean,
@@ -176,17 +175,17 @@ private fun ColumnScope.ComfortableGridItem(
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )
-    MangaTitle(
+    MangaGridTitle(
         title = manga.title,
         hasSubtitle = displayText.isNotBlank(),
 
-        )
+    )
 
-    DisplayText(displayText = displayText)
+    MangaGridSubtitle(displayText = displayText)
 }
 
 @Composable
-private fun BoxScope.CompactGridItem(
+fun BoxScope.CompactGridItem(
     manga: DisplayManga,
     displayText: String,
     shouldOutlineCover: Boolean,
@@ -215,12 +214,12 @@ private fun BoxScope.CompactGridItem(
                 .fillMaxWidth()
                 .align(Alignment.BottomStart),
         ) {
-            MangaTitle(
+            MangaGridTitle(
                 title = manga.title,
                 hasSubtitle = displayText.isNotBlank(),
                 isComfortable = false,
             )
-            DisplayText(
+            MangaGridSubtitle(
                 displayText = displayText,
                 isComfortable = false,
             )
@@ -229,7 +228,7 @@ private fun BoxScope.CompactGridItem(
 }
 
 @Composable
-private fun MangaTitle(
+fun MangaGridTitle(
     title: String,
     maxLines: Int = 2,
     isComfortable: Boolean = true,
@@ -252,7 +251,7 @@ private fun MangaTitle(
 }
 
 @Composable
-private fun DisplayText(displayText: String, isComfortable: Boolean = true) {
+fun MangaGridSubtitle(displayText: String, isComfortable: Boolean = true) {
     if (displayText.isNotBlank()) {
         Text(
             text = displayText,
