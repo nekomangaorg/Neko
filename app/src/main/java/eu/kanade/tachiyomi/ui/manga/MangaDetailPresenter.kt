@@ -1180,8 +1180,12 @@ class MangaDetailPresenter(
      */
     private fun updateMangaFlow() {
         presenterScope.launch {
-            val m = db.getManga(mangaId).executeOnIO()!!
-            _currentManga.value = m
+            val dbManga = db.getManga(mangaId).executeAsBlocking()
+            if (dbManga == null) {
+                XLog.e("Error mangaId $mangaId found no manga in the db, popping back to root")
+                controller?.router?.popToRoot()
+            }
+            _currentManga.value = dbManga
             _mangaState.update {
                 getMangaStateCopyFromManga(_currentManga.value!!)
             }
