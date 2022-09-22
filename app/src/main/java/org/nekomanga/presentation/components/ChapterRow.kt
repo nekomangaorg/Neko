@@ -63,7 +63,6 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -411,7 +410,7 @@ private fun getDropDownItems(
     scanlators: ImmutableList<SimpleDropDownItem>,
     onWebView: () -> Unit,
     markPrevious: (Boolean) -> Unit,
-): PersistentList<SimpleDropDownItem> {
+): ImmutableList<SimpleDropDownItem> {
     return (
         listOf(
             SimpleDropDownItem.Action(

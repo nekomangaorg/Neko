@@ -11,7 +11,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.ImmutableList
 import me.saket.cascade.CascadeColumnScope
 import me.saket.cascade.CascadeDropdownMenu
 import me.saket.cascade.DropdownMenuHeader
@@ -19,7 +19,7 @@ import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: PersistentList<SimpleDropDownItem>, themeColorState: ThemeColorState? = null) {
+fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: ImmutableList<SimpleDropDownItem>, themeColorState: ThemeColorState? = null) {
     val customColor: Color = themeColorState?.buttonColor ?: MaterialTheme.colorScheme.surface
     val background = Modifier.background(color = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(customColor, 8.dp))
     CascadeDropdownMenu(

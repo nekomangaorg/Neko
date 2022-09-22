@@ -1,13 +1,13 @@
 package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,31 +19,22 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.zedlabs.pastelplaceholder.Pastel
-import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
-import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -149,17 +140,21 @@ private fun MangaGridItem(
                     .padding(2.dp),
             ) {
                 if (isComfortable) {
-                    ComfortableGridItem(
-                        displayManga,
-                        displayManga.displayText,
-                        shouldOutlineCover,
-                    )
+                    Column {
+                        ComfortableGridItem(
+                            displayManga,
+                            displayManga.displayText,
+                            shouldOutlineCover,
+                        )
+                    }
                 } else {
-                    CompactGridItem(
-                        displayManga,
-                        displayManga.displayText,
-                        shouldOutlineCover,
-                    )
+                    Box {
+                        CompactGridItem(
+                            displayManga,
+                            displayManga.displayText,
+                            shouldOutlineCover,
+                        )
+                    }
                 }
             }
 
@@ -172,109 +167,109 @@ private fun MangaGridItem(
 }
 
 @Composable
-private fun ComfortableGridItem(
+private fun ColumnScope.ComfortableGridItem(
     manga: DisplayManga,
     displayText: String,
     shouldOutlineCover: Boolean,
+    modifier: Modifier = Modifier,
 ) {
-    Column {
-        GridCover(manga, shouldOutlineCover)
-        MangaTitle(
-            title = manga.title,
-            modifier = Modifier.padding(
-                top = 0.dp,
-                bottom = if (displayText.isNotBlank()) 0.dp else 4.dp,
-                start = 4.dp,
-                end = 4.dp,
-            ),
-            fontSize = MaterialTheme.typography.bodySmall.fontSize,
-            fontWeight = FontWeight.Medium,
+    MangaCover.Book.invoke(
+        manga = manga,
+        shouldOutlineCover = shouldOutlineCover,
+        modifier = modifier,
+    )
+    MangaTitle(
+        title = manga.title,
+        hasSubtitle = displayText.isNotBlank(),
+
         )
 
-        if (displayText.isNotBlank()) {
-            DisplayText(
-                displayText = displayText,
-                modifier = Modifier.padding(
-                    top = 0.dp,
-                    bottom = 4.dp,
-                    start = 4.dp,
-                    end = 4.dp,
-                ),
-                fontSize = MaterialTheme.typography.bodySmall.fontSize,
-            )
-        }
-    }
+    DisplayText(displayText = displayText)
 }
 
 @Composable
-private fun CompactGridItem(
+private fun BoxScope.CompactGridItem(
     manga: DisplayManga,
     displayText: String,
     shouldOutlineCover: Boolean,
+    modifier: Modifier = Modifier,
 ) {
-    Box {
-        GridCover(manga, shouldOutlineCover)
+    MangaCover.Book.invoke(
+        manga = manga,
+        shouldOutlineCover = shouldOutlineCover,
+        modifier = modifier,
+    )
+    Box(
+        modifier = Modifier
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black.copy(NekoColors.veryLowContrast), Color.Black.copy(NekoColors.highAlphaLowContrast)),
+                ),
+                shape = RoundedCornerShape(
+                    bottomStart = Shapes.coverRadius,
+                    bottomEnd = Shapes.coverRadius,
+                ),
+            )
+            .matchParentSize(),
+    ) {
         Column(
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomStart)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = .95f)),
-                    ),
-                    shape = RoundedCornerShape(
-                        bottomStart = Shapes.coverRadius,
-                        bottomEnd = Shapes.coverRadius,
-                    ),
-                )
-                .padding(top = 6.dp),
+                .align(Alignment.BottomStart),
         ) {
             MangaTitle(
                 title = manga.title,
-                modifier = Modifier.padding(
-                    top = 4.dp,
-                    bottom = if (displayText.isNotBlank()) 0.dp else 4.dp,
-                    start = 4.dp,
-                    end = 4.dp,
-                ),
-                fontWeight = FontWeight.Medium,
+                hasSubtitle = displayText.isNotBlank(),
+                isComfortable = false,
             )
-
-            if (displayText.isNotBlank()) {
-                DisplayText(
-                    displayText = displayText,
-                    modifier = Modifier
-                        .padding(
-                            top = 0.dp,
-                            bottom = 4.dp,
-                            start = 4.dp,
-                            end = 4.dp,
-                        ),
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    fontWeight = FontWeight.Medium,
-                )
-            }
+            DisplayText(
+                displayText = displayText,
+                isComfortable = false,
+            )
         }
     }
 }
 
 @Composable
-private fun GridCover(manga: DisplayManga, shouldOutlineCover: Boolean) {
-    val color by remember { mutableStateOf(Pastel.getColorLight()) }
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(manga.currentArtwork)
-            .memoryCacheKey(manga.mangaId.toMangaCacheKey())
-            .placeholder(color)
-            .setParameter(MangaCoverFetcher.useCustomCover, false)
-            .build(),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .aspectRatio(3f / 4f)
-            .clip(RoundedCornerShape(Shapes.coverRadius))
-            .conditional(shouldOutlineCover) {
-                this.border(width = Outline.thickness, color = Outline.color, shape = RoundedCornerShape(Shapes.coverRadius))
-            },
+private fun MangaTitle(
+    title: String,
+    maxLines: Int = 2,
+    isComfortable: Boolean = true,
+    hasSubtitle: Boolean = false,
+) {
+    Text(
+        text = title,
+        style = if (isComfortable) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
+        color = if (isComfortable) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surface,
+        fontWeight = FontWeight.Medium,
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(
+            top = 4.dp,
+            bottom = if (hasSubtitle) 0.dp else 4.dp,
+            start = 6.dp,
+            end = 6.dp,
+        ),
     )
+}
+
+@Composable
+private fun DisplayText(displayText: String, isComfortable: Boolean = true) {
+    if (displayText.isNotBlank()) {
+        Text(
+            text = displayText,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 1,
+            color = (if (isComfortable) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surface).copy(NekoColors.mediumAlphaLowContrast),
+            fontWeight = if (isComfortable) FontWeight.Normal else FontWeight.SemiBold,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(
+                    top = 0.dp,
+                    bottom = 4.dp,
+                    start = 6.dp,
+                    end = 6.dp,
+                ),
+        )
+    }
 }
