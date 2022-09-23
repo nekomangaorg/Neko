@@ -141,8 +141,6 @@ class AlternativeMangaCoverFetcher(
             // Support attaching custom data to the network request.
             .tag(Parameters::class.java, options.parameters)
 
-        val diskRead = options.diskCachePolicy.readEnabled
-        val networkRead = options.networkCachePolicy.readEnabled
         when {
             options.networkCachePolicy.readEnabled -> {
                 // don't take up okhttp cache
