@@ -5,7 +5,6 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -204,10 +203,6 @@ class MangaLife : ReducedHttpSource() {
             suffix = ".$path"
         }
         return "-chapter-$n$suffix$index.html"
-    }
-
-    override suspend fun fetchImage(page: Page): Response {
-        return client.newCallWithProgress(GET(page.imageUrl!!, headers), page).await()
     }
 
     companion object {
