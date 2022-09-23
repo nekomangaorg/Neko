@@ -182,7 +182,7 @@ private fun ColumnScope.ComfortableGridItem(
         title = manga.title,
         hasSubtitle = displayText.isNotBlank(),
 
-        )
+    )
 
     DisplayText(displayText = displayText)
 }
