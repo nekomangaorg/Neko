@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -28,6 +28,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -75,7 +76,11 @@ fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, co
 
     var sortType by remember { mutableStateOf(Sort.Entries) }
 
-    val splitScreen = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val viewType = when {
+        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded -> ViewType.Split
+        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Medium && windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact -> ViewType.Compact
+        else -> ViewType.Normal
+    }
 
     val sortChipClick = {
         sortType = when (sortType) {
@@ -104,30 +109,30 @@ fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, co
 
         when (filterState) {
             Filter.None -> {
-                DetailedCardView(detailedStats.manga, contentPadding = contentPadding, splitScreen)
+                DetailedCardView(detailedStats.manga, contentPadding = contentPadding, viewType)
             }
             Filter.Type -> {
-                TypeView(sortType, detailedStats, context, colors, contentPadding, splitScreen, sortChipClick)
+                TypeView(sortType, detailedStats, context, colors, contentPadding, viewType, sortChipClick)
             }
 
             Filter.Status -> {
-                StatusView(sortType, detailedStats, context, colors, contentPadding, splitScreen, sortChipClick)
+                StatusView(sortType, detailedStats, context, colors, contentPadding, viewType, sortChipClick)
             }
 
             Filter.ContentRating -> {
-                ContentRatingView(sortType, detailedStats, colors, contentPadding, splitScreen, sortChipClick)
+                ContentRatingView(sortType, detailedStats, colors, contentPadding, viewType, sortChipClick)
             }
 
             Filter.Category -> {
-                CategoryView(sortType, detailedStats, colors, contentPadding, splitScreen, sortChipClick)
+                CategoryView(sortType, detailedStats, colors, contentPadding, viewType, sortChipClick)
             }
 
             Filter.Tag -> {
-                TagView(sortType, detailedStats, colors, contentPadding, splitScreen, sortChipClick)
+                TagView(sortType, detailedStats, colors, contentPadding, viewType, sortChipClick)
             }
 
             Filter.StartYear -> {
-                StartYearView(detailedStats, colors, contentPadding, splitScreen)
+                StartYearView(detailedStats, colors, contentPadding, viewType)
             }
         }
     }
@@ -178,7 +183,7 @@ private fun TagView(
     detailedStats: DetailedState,
     colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
-    splitScreen: Boolean,
+    viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
     val tagStats = detailedStats.detailTagState
@@ -195,7 +200,7 @@ private fun TagView(
     }
     StatCardView(
         contentPadding = contentPadding,
-        splitScreen = splitScreen,
+        viewType = viewType,
         sortedSeries = sortedTagPairs,
         sortType = sortType,
         sortChipClick = sortChipClick,
@@ -212,7 +217,7 @@ private fun ContentRatingView(
     detailedStats: DetailedState,
     colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
-    splitScreen: Boolean,
+    viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
     val sortedSeries = remember(sortType) {
@@ -225,15 +230,15 @@ private fun ContentRatingView(
 
     DefaultView(
         contentPadding = contentPadding,
-        splitScreen = splitScreen,
+        viewType = viewType,
         sortType = sortType,
         sortChipClick = sortChipClick,
         sortedSeries = sortedSeries,
         colorMap = colorMap,
         totalCount = totalCount,
         totalDuration = totalDuration,
-    ) { width ->
-        Pie(pieData = pieData, chartWidth = width)
+    ) { modifier, chartWidth ->
+        Pie(pieData = pieData, chartWidth = chartWidth, modifier = modifier)
     }
 }
 
@@ -243,7 +248,7 @@ private fun CategoryView(
     detailedStats: DetailedState,
     colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
-    splitScreen: Boolean,
+    viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
     val defaultCategoryName = stringResource(id = R.string.default_value)
@@ -267,15 +272,15 @@ private fun CategoryView(
 
     DefaultView(
         contentPadding = contentPadding,
-        splitScreen = splitScreen,
+        viewType = viewType,
         sortType = sortType,
         sortChipClick = sortChipClick,
         sortedSeries = sortedSeries,
         colorMap = colorMap,
         totalCount = totalCount,
         totalDuration = totalDuration,
-    ) { width ->
-        Pie(pieData = pieData, chartWidth = width)
+    ) { modifier, chartWidth ->
+        Pie(pieData = pieData, chartWidth = chartWidth, modifier = modifier)
     }
 }
 
@@ -284,7 +289,7 @@ private fun StartYearView(
     detailedStats: DetailedState,
     colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
-    splitScreen: Boolean,
+    viewType: ViewType,
 ) {
     val notStartedString = stringResource(id = R.string.not_started)
     val sortedSeries = remember {
@@ -297,12 +302,12 @@ private fun StartYearView(
 
     DefaultView(
         contentPadding = contentPadding,
-        splitScreen = splitScreen,
+        viewType = viewType,
         colorMap = colorMap,
         sortedSeries = sortedSeries,
         showSortChip = false,
-    ) { width ->
-        Line(lineData = lineData, chartWidth = width, color = MaterialTheme.colorScheme.secondary)
+    ) { modifier, chartWidth ->
+        Line(lineData = lineData, chartWidth = chartWidth, modifier = modifier, color = MaterialTheme.colorScheme.secondary)
     }
 }
 
@@ -313,7 +318,7 @@ private fun StatusView(
     context: Context,
     colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
-    splitScreen: Boolean,
+    viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
     val sortedSeries = remember(sortType) {
@@ -326,15 +331,15 @@ private fun StatusView(
 
     DefaultView(
         contentPadding = contentPadding,
-        splitScreen = splitScreen,
+        viewType = viewType,
         sortType = sortType,
         sortChipClick = sortChipClick,
         sortedSeries = sortedSeries,
         colorMap = colorMap,
         totalCount = totalCount,
         totalDuration = totalDuration,
-    ) { width ->
-        Pie(pieData = pieData, chartWidth = width)
+    ) { modifier, chartWidth ->
+        Pie(pieData = pieData, chartWidth = chartWidth, modifier = modifier)
     }
 }
 
@@ -345,7 +350,7 @@ private fun TypeView(
     context: Context,
     colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
-    splitScreen: Boolean,
+    viewType: ViewType,
     sortChipClick: () -> Unit,
 ) {
     val sortedSeries = remember(sortType) {
@@ -358,15 +363,15 @@ private fun TypeView(
 
     DefaultView(
         contentPadding = contentPadding,
-        splitScreen = splitScreen,
+        viewType = viewType,
         sortType = sortType,
         sortChipClick = sortChipClick,
         sortedSeries = sortedSeries,
         colorMap = colorMap,
         totalCount = totalCount,
         totalDuration = totalDuration,
-    ) { width ->
-        Pie(pieData = pieData, chartWidth = width)
+    ) { modifier, chartWidth ->
+        Pie(pieData = pieData, chartWidth = chartWidth, modifier = modifier)
     }
 }
 
@@ -379,13 +384,14 @@ private fun DefaultView(
     colorMap: ImmutableMap<String, Color>,
     totalCount: Int = 0,
     totalDuration: Long = 0L,
-    splitScreen: Boolean,
+    viewType: ViewType,
     showSortChip: Boolean = true,
-    graph: @Composable (width: Float) -> Unit,
+    graph: @Composable (modifier: Modifier, chartWidth: Float) -> Unit,
 ) {
-    val chartWidth = when (splitScreen) {
-        true -> .5f
-        false -> 1f
+    val chartWidth = when (viewType) {
+        ViewType.Split -> .5f
+        ViewType.Normal -> .9f
+        ViewType.Compact -> .6f
     }
 
     LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())) {
@@ -395,7 +401,7 @@ private fun DefaultView(
             }
         }
 
-        if (splitScreen) {
+        if (viewType == ViewType.Split) {
             item {
                 Row(
                     modifier = Modifier
@@ -404,7 +410,7 @@ private fun DefaultView(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    graph(chartWidth)
+                    graph(chartWidth = chartWidth, modifier = Modifier)
                     Column(
                         Modifier
                             .fillMaxWidth(.9f)
@@ -427,7 +433,10 @@ private fun DefaultView(
             }
         } else {
             item {
-                graph(chartWidth)
+                graph(chartWidth = chartWidth, modifier = Modifier.fillMaxWidth())
+            }
+            item {
+                Gap(padding = 8.dp)
             }
             items(sortedSeries, key = { it.key }) { entry ->
                 StatCard(
@@ -446,8 +455,8 @@ private fun DefaultView(
 }
 
 @Composable
-private fun DetailedCardView(mangaList: ImmutableList<StatsConstants.DetailedStatManga>, contentPadding: PaddingValues, splitScreen: Boolean) {
-    if (splitScreen) {
+private fun DetailedCardView(mangaList: ImmutableList<StatsConstants.DetailedStatManga>, contentPadding: PaddingValues, viewType: ViewType) {
+    if (viewType == ViewType.Split) {
         LazyGridWrapper(contentPadding = contentPadding) {
             items(mangaList, key = { it.id }) {
                 DetailedCard(manga = it, modifier = Modifier.fillMaxWidth(.3f))
@@ -465,7 +474,7 @@ private fun DetailedCardView(mangaList: ImmutableList<StatsConstants.DetailedSta
 @Composable
 private fun StatCardView(
     contentPadding: PaddingValues,
-    splitScreen: Boolean,
+    viewType: ViewType,
     sortedSeries: ImmutableList<Pair<String, ImmutableList<StatsConstants.DetailedStatManga>>>,
     color: Color,
     totalCount: Int,
@@ -474,7 +483,7 @@ private fun StatCardView(
     sortType: Sort = Sort.Entries,
     sortChipClick: () -> Unit = {},
 ) {
-    if (splitScreen) {
+    if (viewType == ViewType.Split) {
         LazyGridWrapper(contentPadding = contentPadding, showSortChip = showSortChip, sortType = sortType, sortChipClick = sortChipClick) {
             items(sortedSeries, key = { it.first }) { entry ->
                 StatCard(
@@ -511,11 +520,7 @@ private fun StatCardView(
 private fun LazyGridWrapper(contentPadding: PaddingValues, showSortChip: Boolean = false, sortType: Sort = Sort.Entries, sortChipClick: () -> Unit = {}, content: LazyGridScope.() -> Unit) {
     LazyVerticalGrid(columns = GridCells.Adaptive(400.dp), contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())) {
         if (showSortChip) {
-            item {
-                Spacer(modifier = Modifier.fillMaxWidth(.75f))
-            }
-
-            item {
+            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                 SortChip(sortType = sortType, onClick = sortChipClick)
             }
         }
@@ -612,17 +617,14 @@ private fun Line(label: String, value: String) {
 }
 
 @Composable
-private fun Pie(pieData: List<PieData>, chartWidth: Float) {
+private fun Pie(pieData: List<PieData>, chartWidth: Float, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 0.dp)
-            .fillMaxWidth(chartWidth),
+        modifier = modifier.padding(16.dp),
         contentAlignment = Alignment.Center,
     ) {
         if (pieData.isNotEmpty()) {
             PieChart(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(chartWidth),
                 pieData = pieData,
                 config = PieConfig(isDonut = true, expandDonutOnClick = false),
             )
@@ -640,7 +642,7 @@ private fun Pie(pieData: List<PieData>, chartWidth: Float) {
 }
 
 @Composable
-private fun Line(lineData: List<LineData>, chartWidth: Float, color: Color) {
+private fun Line(lineData: List<LineData>, chartWidth: Float, modifier: Modifier = Modifier, color: Color) {
     Box(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 0.dp)
@@ -788,4 +790,10 @@ private enum class Sort(@StringRes val stringRes: Int) {
     Entries(R.string.most_entries),
     Chapters(R.string.chapters_read),
     Duration(R.string.read_duration),
+}
+
+private enum class ViewType {
+    Split,
+    Normal,
+    Compact,
 }
