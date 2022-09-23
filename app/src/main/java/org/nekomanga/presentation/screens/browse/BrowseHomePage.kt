@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import java.util.Objects
 import jp.wasabeef.gap.Gap
-import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.InLibraryBadge
 import org.nekomanga.presentation.components.MangaCover
@@ -36,7 +36,7 @@ import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun BrowseHomePage(
-    browseHomePageManga: PersistentList<HomePageManga>,
+    browseHomePageManga: ImmutableList<HomePageManga>,
     contentPadding: PaddingValues,
     shouldOutlineCover: Boolean,
     isComfortable: Boolean,

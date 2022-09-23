@@ -56,7 +56,7 @@ fun BrowseScreen(
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
-    toggleFavorite: (Long, List<CategoryItem>) -> Unit,
+    toggleFavorite: (Long, List<CategoryItem>, Boolean) -> Unit,
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
 ) {
@@ -85,7 +85,7 @@ fun BrowseScreen(
                     confirmClicked = { selectedCategories ->
                         scope.launch { sheetState.hide() }
                         longClickedMangaId?.let {
-                            toggleFavorite(it, selectedCategories)
+                            toggleFavorite(it, selectedCategories, browseScreenState.value.initialScreen)
                         }
                     },
                 )
@@ -118,7 +118,7 @@ fun BrowseScreen(
                         sheetState.show()
                     }
                 } else {
-                    toggleFavorite(displayManga.mangaId, emptyList())
+                    toggleFavorite(displayManga.mangaId, emptyList(), browseScreenState.value.initialScreen)
                 }
             }
 
