@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import okhttp3.internal.toImmutableList
 import org.nekomanga.domain.manga.DisplayManga
@@ -27,6 +28,7 @@ class LatestRepository(
             var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
             if (scanlatorImpl == null) {
                 mangaDex.getScanlator(scanlator = it).map { scanlator -> scanlatorImpl = scanlator.toScanlatorImpl() }
+                db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
             }
             scanlatorImpl
         }.map {

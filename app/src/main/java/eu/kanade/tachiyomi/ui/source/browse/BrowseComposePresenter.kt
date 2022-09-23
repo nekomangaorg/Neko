@@ -108,7 +108,7 @@ class BrowseComposePresenter(
 
     private fun loadInitialPage() {
         presenterScope.launch {
-            browseRepository.getInitialPage().onFailure {
+            browseRepository.getHomePage().onFailure {
                 _browseScreenState.update { state ->
                     state.copy(error = it.message())
                 }

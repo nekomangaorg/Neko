@@ -272,37 +272,7 @@ class ApiMangaParser {
         val attributes = networkChapter.attributes
         chapter.url = MdUtil.chapterSuffix + networkChapter.id
 
-        val chapterName = mutableListOf<String>()
-        // Build chapter name
-
-        if (attributes.volume != null) {
-            chapterName.add("Vol.${attributes.volume}")
-            chapter.vol = attributes.volume.toString()
-        }
-
-        if (attributes.chapter.isNullOrBlank().not()) {
-            val chp = "Ch.${attributes.chapter}"
-            chapterName.add(chp)
-            chapter.chapter_txt = chp
-        }
-
-        if (attributes.title.isNullOrBlank().not()) {
-            if (chapterName.isNotEmpty()) {
-                chapterName.add("-")
-            }
-            chapterName.add(attributes.title!!)
-            chapter.chapter_title = MdUtil.cleanString(attributes.title)
-        }
-
-        // if volume, chapter and title is empty its a oneshot
-        if (chapterName.isEmpty()) {
-            chapterName.add("Oneshot")
-        }
-        if (lastChapterNumber != null && attributes.chapter == lastChapterNumber.toString()) {
-            chapterName.add("[END]")
-        }
-
-        chapter.name = MdUtil.cleanString(chapterName.joinToString(" "))
+        chapter.name = networkChapter.buildChapterName(chapter, lastChapterNumber)
         // Convert from unix time
 
         chapter.date_upload = MdUtil.parseDate(attributes.readableAt)
@@ -324,4 +294,38 @@ class ApiMangaParser {
 
         return chapter
     }
+}
+
+fun ChapterDataDto.buildChapterName(chapter: SChapter? = null, lastChapterNumber: Int? = null): String {
+    val chapterName = mutableListOf<String>()
+    // Build chapter name
+
+    if (attributes.volume != null) {
+        chapterName.add("Vol.${attributes.volume}")
+        chapter?.vol = attributes.volume.toString()
+    }
+
+    if (attributes.chapter.isNullOrBlank().not()) {
+        val chp = "Ch.${attributes.chapter}"
+        chapterName.add(chp)
+        chapter?.chapter_txt = chp
+    }
+
+    if (attributes.title.isNullOrBlank().not()) {
+        if (chapterName.isNotEmpty()) {
+            chapterName.add("-")
+        }
+        chapterName.add(attributes.title!!)
+        chapter?.chapter_title = MdUtil.cleanString(attributes.title)
+    }
+
+    // if volume, chapter and title is empty its a oneshot
+    if (chapterName.isEmpty()) {
+        chapterName.add("Oneshot")
+    }
+    if (lastChapterNumber != null && attributes.chapter == lastChapterNumber.toString()) {
+        chapterName.add("[END]")
+    }
+
+    return MdUtil.cleanString(chapterName.joinToString(" "))
 }

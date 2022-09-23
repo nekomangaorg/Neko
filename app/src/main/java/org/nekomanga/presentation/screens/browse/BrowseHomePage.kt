@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,24 +30,23 @@ import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.InLibraryBadge
 import org.nekomanga.presentation.components.MangaCover
+import org.nekomanga.presentation.components.MangaGridSubtitle
 import org.nekomanga.presentation.components.MangaGridTitle
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun BrowseHomePage(
     browseHomePageManga: ImmutableList<HomePageManga>,
-    contentPadding: PaddingValues,
     shouldOutlineCover: Boolean,
     isComfortable: Boolean,
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
 ) {
-    val coverSize = (maxOf(LocalConfiguration.current.screenHeightDp, LocalConfiguration.current.screenWidthDp) / 3.5).dp
+    val coverSize = (maxOf(LocalConfiguration.current.screenHeightDp, LocalConfiguration.current.screenWidthDp) / 5).dp
 
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         browseHomePageManga.forEach { homePageManga ->
-
-            item(key = homePageManga.title + homePageManga.titleRes) {
+            item(key = Objects.hash(homePageManga.title)) {
                 val headerText = when (homePageManga.titleRes == null) {
                     true -> homePageManga.title ?: ""
                     false -> stringResource(id = homePageManga.titleRes)
@@ -63,9 +61,9 @@ fun BrowseHomePage(
             }
             item(key = Objects.hash(homePageManga.title, homePageManga.titleRes, browseHomePageManga.size)) {
                 LazyRow(
+                    modifier = Modifier.requiredHeight(coverSize + 60.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    item { Gap(8.dp) }
                     items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
                         Box(
                             modifier = Modifier
@@ -84,6 +82,7 @@ fun BrowseHomePage(
                                     modifier = Modifier.requiredHeight(coverSize),
                                 )
                                 MangaGridTitle(title = displayManga.title)
+                                MangaGridSubtitle(displayText = displayManga.displayText)
                             }
                             if (displayManga.inLibrary) {
                                 val offset = (-2).dp
@@ -91,7 +90,6 @@ fun BrowseHomePage(
                             }
                         }
                     }
-                    item { Gap(8.dp) }
                 }
             }
         }

@@ -1,7 +1,10 @@
 package org.nekomanga.presentation.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -12,19 +15,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
+import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
@@ -45,6 +56,7 @@ import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
+import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
 import org.nekomanga.presentation.theme.Shapes
@@ -62,6 +74,10 @@ fun BrowseScreen(
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+
+    var screenType by rememberSaveable { mutableStateOf(ScreenType.Homepage) }
+
+    // var sortType by remember { mutableStateOf(Sort.Entries) }
 
     var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
 
@@ -141,50 +157,99 @@ fun BrowseScreen(
                     contentPadding = incomingContentPadding,
                 )
             } else {
-                if (browseScreenState.value.initialScreen) {
-                    BrowseHomePage(
-                        browseHomePageManga = browseScreenState.value.homePageManga,
-                        contentPadding = contentPadding,
-                        shouldOutlineCover = browseScreenState.value.outlineCovers,
-                        isComfortable = browseScreenState.value.isComfortableGrid,
-                        onClick = { id -> openManga(id) },
-                        onLongClick = ::mangaLongClick,
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = contentPadding.calculateTopPadding()),
+                ) {
+                    ScreenTypeHeader(
+                        screenType = screenType,
+                        screenTypeClick = { newScreenType: ScreenType ->
+                            screenType = when (screenType == newScreenType) {
+                                true -> ScreenType.Homepage
+                                false -> newScreenType
+                            }
+                        },
                     )
-                } else {
-                    if (browseScreenState.value.isList) {
-                        MangaList(
-                            mangaList = browseScreenState.value.displayManga,
+
+                    if (browseScreenState.value.initialScreen) {
+                        BrowseHomePage(
+                            browseHomePageManga = browseScreenState.value.homePageManga,
                             shouldOutlineCover = browseScreenState.value.outlineCovers,
-                            contentPadding = contentPadding,
-                            onClick = openManga,
+                            isComfortable = browseScreenState.value.isComfortableGrid,
+                            onClick = { id -> openManga(id) },
                             onLongClick = ::mangaLongClick,
-                            loadNextItems = loadNextPage,
                         )
                     } else {
-                        MangaGrid(
-                            mangaList = browseScreenState.value.displayManga,
-                            shouldOutlineCover = browseScreenState.value.outlineCovers,
-                            columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
-                            isComfortable = browseScreenState.value.isComfortableGrid,
-                            contentPadding = contentPadding,
-                            onClick = openManga,
-                            onLongClick = ::mangaLongClick,
-                            loadNextItems = loadNextPage,
-                        )
-                    }
-                    if (browseScreenState.value.isLoading && browseScreenState.value.page != 1) {
-                        Box(Modifier.fillMaxSize()) {
-                            LinearProgressIndicator(
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .padding(bottom = contentPadding.calculateBottomPadding())
-                                    .align(Alignment.BottomCenter)
-                                    .fillMaxWidth(),
+                        if (browseScreenState.value.isList) {
+                            MangaList(
+                                mangaList = browseScreenState.value.displayManga,
+                                shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                contentPadding = contentPadding,
+                                onClick = openManga,
+                                onLongClick = ::mangaLongClick,
+                                loadNextItems = loadNextPage,
                             )
+                        } else {
+                            MangaGrid(
+                                mangaList = browseScreenState.value.displayManga,
+                                shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
+                                isComfortable = browseScreenState.value.isComfortableGrid,
+                                contentPadding = contentPadding,
+                                onClick = openManga,
+                                onLongClick = ::mangaLongClick,
+                                loadNextItems = loadNextPage,
+                            )
+                        }
+                        if (browseScreenState.value.isLoading && browseScreenState.value.page != 1) {
+                            Box(Modifier.fillMaxSize()) {
+                                LinearProgressIndicator(
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                        .padding(bottom = contentPadding.calculateBottomPadding())
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth(),
+                                )
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun ScreenTypeHeader(screenType: ScreenType, screenTypeClick: (ScreenType) -> Unit) {
+    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        item {
+            Gap(8.dp)
+        }
+        CustomChip(
+            isSelected = screenType == ScreenType.Homepage,
+            onClick = { screenTypeClick(ScreenType.Homepage) },
+            label = R.string.home_page,
+        )
+    }
+}
+
+private fun LazyListScope.CustomChip(isSelected: Boolean, onClick: () -> Unit, @StringRes label: Int) {
+    item(key = label) {
+        FilterChip(
+            selected = isSelected,
+            onClick = onClick,
+            label = { Text(text = stringResource(id = label)) },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                selectedLabelColor = MaterialTheme.colorScheme.primary,
+            ),
+        )
+    }
+}
+
+private enum class ScreenType {
+    Homepage,
+    Search,
+    Follows,
 }

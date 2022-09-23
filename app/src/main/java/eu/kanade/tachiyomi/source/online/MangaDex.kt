@@ -4,6 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.coroutines.binding.binding
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
@@ -33,6 +34,7 @@ import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
@@ -112,21 +114,22 @@ open class MangaDex : HttpSource() {
         return listHandler.retrieveList(listId)
     }
 
-    /*suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>): List<Result<ListResults, ResultError>> {
-        withIOContext {
-            async {
-                fetchList(listId)
+    suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>): Result<List<ListResults>, ResultError> {
+        return withIOContext {
+            binding {
+                val seasonal = async {
+                    fetchList(listId).bind()
+                }
+                val latestChapter = async {
+                    latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs)
+                        .andThen { mangaListPage ->
+                            Ok(ListResults(name = "Latest Updates", sourceManga = mangaListPage.sourceManga))
+                        }.bind()
+                }
+                listOf(seasonal.await(), latestChapter.await())
             }
-            async {
-
-            }
-
         }
     }
-
-    suspend fun latestChapters(blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
-        return latestChapterHandler.getPage(blockedScanlatorUUIDs)
-    }*/
 
     suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
         return latestChapterHandler.getPage(page, blockedScanlatorUUIDs)

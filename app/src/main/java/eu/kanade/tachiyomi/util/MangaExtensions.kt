@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -236,7 +237,7 @@ fun Manga.toDisplayManga(displayText: String = ""): DisplayManga {
     return DisplayManga(
         mangaId = this.id!!,
         url = this.url,
-        title = this.title,
+        title = (this as? MangaImpl)?.title ?: this.title,
         inLibrary = this.favorite,
         displayText = displayText.replace("_", " ").capitalizeWords(),
         currentArtwork = Artwork(mangaId = this.id!!, originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl),

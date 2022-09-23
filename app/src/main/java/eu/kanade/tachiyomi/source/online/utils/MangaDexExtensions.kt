@@ -23,7 +23,7 @@ fun MangaDataDto.toBasicManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = tr
     }
 }
 
-fun MangaDataDto.toSourceManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = true): SourceManga {
+fun MangaDataDto.toSourceManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = true, displayText: String = ""): SourceManga {
     val thumbnail = this@toSourceManga.relationships
         .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.Types.coverArt }
         ?.attributes?.fileName
@@ -39,6 +39,7 @@ fun MangaDataDto.toSourceManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = t
                 this@toSourceManga.attributes.originalLanguage,
             ),
         ),
+        displayText = displayText,
         currentThumbnail = thumbnail,
     )
 }
