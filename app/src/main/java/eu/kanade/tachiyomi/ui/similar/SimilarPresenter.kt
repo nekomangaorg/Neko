@@ -120,25 +120,25 @@ class SimilarPresenter(
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
         presenterScope.launch {
-            var mapKey = -1
-            var mangaIndex = -1
-
-            _similarScreenState.value.displayManga.onEach { entry ->
-                if (mapKey == -1) {
-                    val tempListIndex = entry.value.indexOfFirst { it.mangaId == mangaId }
-                    if (tempListIndex != -1) {
-                        mangaIndex = tempListIndex
-                        mapKey = entry.key
-                    }
+            val listOfKeyIndex = _similarScreenState.value.displayManga.mapNotNull { entry ->
+                val tempListIndex = entry.value.indexOfFirst { it.mangaId == mangaId }
+                when (tempListIndex == -1) {
+                    true -> null
+                    false -> entry.key to tempListIndex
                 }
             }
 
-            val tempList = _similarScreenState.value.displayManga[mapKey]!!.toMutableList()
-            val tempDisplayManga = tempList[mangaIndex].copy(inLibrary = favorite)
-            tempList[mangaIndex] = tempDisplayManga
             val tempMap = _similarScreenState.value.displayManga.toMutableMap()
 
-            tempMap[mapKey] = tempList.toImmutableList()
+            listOfKeyIndex.forEach { pair ->
+                val mapKey = pair.first
+                val mangaIndex = pair.second
+                val tempList = _similarScreenState.value.displayManga[mapKey]!!.toMutableList()
+                val tempDisplayManga = tempList[mangaIndex].copy(inLibrary = favorite)
+                tempList[mangaIndex] = tempDisplayManga
+
+                tempMap[mapKey] = tempList.toImmutableList()
+            }
 
             _similarScreenState.update {
                 it.copy(
