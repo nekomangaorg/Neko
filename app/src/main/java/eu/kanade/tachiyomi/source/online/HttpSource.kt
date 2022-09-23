@@ -89,6 +89,10 @@ abstract class HttpSource : Source {
         return Observable.just("")
     }
 
+    protected open fun imageRequest(page: Page): Request {
+        return GET(page.imageUrl!!, headers)
+    }
+
     /**
      * Returns the list of filters for the source.
      */
