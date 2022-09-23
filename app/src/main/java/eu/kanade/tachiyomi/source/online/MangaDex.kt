@@ -112,6 +112,22 @@ open class MangaDex : HttpSource() {
         return listHandler.retrieveList(listId)
     }
 
+    /*suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>): List<Result<ListResults, ResultError>> {
+        withIOContext {
+            async {
+                fetchList(listId)
+            }
+            async {
+
+            }
+
+        }
+    }
+
+    suspend fun latestChapters(blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
+        return latestChapterHandler.getPage(blockedScanlatorUUIDs)
+    }*/
+
     suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
         return latestChapterHandler.getPage(page, blockedScanlatorUUIDs)
     }
