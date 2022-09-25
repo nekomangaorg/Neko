@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.model.uuid
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
@@ -476,6 +477,7 @@ class RecentsPresenter(
      * @param read whether to mark chapters as read or unread.
      */
     fun markChapterRead(
+        manga: Manga,
         chapter: Chapter,
         read: Boolean,
         lastRead: Int? = null,
@@ -491,8 +493,15 @@ class RecentsPresenter(
             }
             if (preferences.readingSync() && chapter.isMergedChapter().not()) {
                 when (read) {
-                    true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
-                    false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
+                    true -> statusHandler.marksChaptersStatus(
+                        mangaId = manga.uuid(),
+                        chapterIds = listOf(chapter.mangadex_chapter_id),
+                    )
+                    false -> statusHandler.marksChaptersStatus(
+                        mangaId = manga.uuid(),
+                        chapterIds = listOf(chapter.mangadex_chapter_id),
+                        read = false,
+                    )
                 }
             }
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()

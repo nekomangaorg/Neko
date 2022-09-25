@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.model.uuid
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -499,7 +500,7 @@ class ReaderPresenter(
             if (!preferences.incognitoMode().get()) {
                 selectedChapter.chapter.read = true
                 updateTrackChapterAfterReading(selectedChapter)
-                updateReadingStatus(selectedChapter)
+                updateReadingStatus(manga ?: return, selectedChapter)
                 deleteChapterIfNeeded(selectedChapter)
             }
         }
@@ -1000,10 +1001,13 @@ class ReaderPresenter(
         class Error(val error: Throwable) : SaveImageResult()
     }
 
-    private fun updateReadingStatus(readerChapter: ReaderChapter) {
+    private fun updateReadingStatus(manga: Manga, readerChapter: ReaderChapter) {
         if (preferences.readingSync().not() && readerChapter.chapter.isMergedChapter().not()) return
         scope.launchIO {
-            statusHandler.markChapterRead(readerChapter.chapter.mangadex_chapter_id)
+            statusHandler.marksChaptersStatus(
+                mangaId = manga.uuid(),
+                chapterIds = listOf(readerChapter.chapter.mangadex_chapter_id),
+            )
         }
     }
 

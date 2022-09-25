@@ -78,12 +78,6 @@ interface MangaDexAuthService {
         @Body markStatusDto: MarkStatusDto,
     ): ApiResponse<ResultDto>
 
-    @POST("${MdApi.chapter}/{id}/read")
-    suspend fun markChapterRead(@Path("id") chapterId: String): ApiResponse<ResultDto>
-
-    @DELETE("${MdApi.chapter}/{id}/read")
-    suspend fun markChapterUnRead(@Path("id") chapterId: String): ApiResponse<ResultDto>
-
     @POST("${MdApi.manga}/{id}/follow")
     suspend fun followManga(@Path("id") mangaId: String): ApiResponse<ResultDto>
 
