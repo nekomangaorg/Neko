@@ -56,22 +56,6 @@ class StatusHandler {
         }
     }
 
-    suspend fun markChapterRead(chapterId: String) {
-        withIOContext {
-            authService.markChapterRead(chapterId).onFailure {
-                this.log("trying to mark chapter read")
-            }
-        }
-    }
-
-    suspend fun markChapterUnRead(chapterId: String) {
-        withIOContext {
-            authService.markChapterUnRead(chapterId).onFailure {
-                this.log("trying to mark chapter unread")
-            }
-        }
-    }
-
     suspend fun getReadChapterIds(mangaId: String) = flow<Set<String>> {
         if (mangaId.isDigitsOnly()) {
             emit(emptySet())
