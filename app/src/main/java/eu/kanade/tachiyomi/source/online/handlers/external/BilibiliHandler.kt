@@ -67,8 +67,6 @@ class BilibiliHandler {
 
         val newHeaders = headers
             .newBuilder()
-            .add("Content-Length", requestBody.contentLength().toString())
-            .add("Content-Type", requestBody.contentType().toString())
             .set("Referer", baseUrl + chapterUrl)
             .build()
 
