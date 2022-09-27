@@ -55,6 +55,25 @@ class SearchHandler {
         }
     }
 
+    suspend fun recentlyAdded(): Result<ListResults, ResultError> {
+        return withContext(Dispatchers.IO) {
+            val queryParameters = mutableMapOf<String, Any>()
+            queryParameters["limit"] = MdUtil.mangaLimit.toString()
+            val contentRatings = preferencesHelper.contentRatingSelections().toList()
+            if (contentRatings.isNotEmpty()) {
+                queryParameters["contentRating[]"] = contentRatings
+            }
+            val thumbQuality = preferencesHelper.thumbnailQuality()
+            service.getRecentlyAdded(ProxyRetrofitQueryMap(queryParameters))
+                .getOrResultError("Error getting recently added")
+                .andThen { mangaListDto ->
+                    Ok(
+                        ListResults(name = "Recently Added", mangaListDto.data.map { it.toSourceManga(thumbQuality) }),
+                    )
+                }
+        }
+    }
+
     suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
         return withContext(Dispatchers.IO) {
             if (query.startsWith(MdUtil.PREFIX_ID_SEARCH)) {

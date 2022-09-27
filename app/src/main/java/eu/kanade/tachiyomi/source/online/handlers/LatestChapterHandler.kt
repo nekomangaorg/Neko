@@ -29,10 +29,9 @@ class LatestChapterHandler {
 
     private val uniqueManga = mutableSetOf<String>()
 
-    suspend fun getPage(page: Int = 1, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
+    suspend fun getPage(page: Int = 1, blockedScanlatorUUIDs: List<String>, limit: Int = MdUtil.latestChapterLimit): Result<MangaListPage, ResultError> {
         if (page == 1) uniqueManga.clear()
         return withContext(Dispatchers.IO) {
-            val limit = MdUtil.latestChapterLimit
             val offset = MdUtil.getLatestChapterListOffset(page)
 
             val langs = MdUtil.getLangsToShow(preferencesHelper)

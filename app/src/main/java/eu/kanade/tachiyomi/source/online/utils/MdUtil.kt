@@ -31,6 +31,7 @@ class MdUtil {
         const val mangaLimit = 20
         const val artworkLimit = 100
         const val latestChapterLimit = 100
+        const val smallerLatestChapterLimit = 30
 
         /**
          * Get the manga offset pages are 1 based, so subtract 1

@@ -61,7 +61,7 @@ fun BrowseHomePage(
             }
             item(key = Objects.hash(homePageManga.title, homePageManga.titleRes, browseHomePageManga.size)) {
                 LazyRow(
-                    modifier = Modifier.requiredHeight(coverSize + 60.dp),
+                    modifier = Modifier.requiredHeight(coverSize + 70.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
