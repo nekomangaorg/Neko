@@ -68,6 +68,7 @@ fun DownloadButton(buttonColor: Color, downloadStateProvider: () -> Download.Sta
     }
 
     when (downloadState) {
+        Download.State.ERROR -> NotDownloaded(MaterialTheme.colorScheme.error, modifier)
         Download.State.NOT_DOWNLOADED -> NotDownloaded(buttonColor, modifier)
         Download.State.QUEUE -> Queued(modifier)
         Download.State.DOWNLOADED -> Downloaded(buttonColor, downloadComplete, modifier)

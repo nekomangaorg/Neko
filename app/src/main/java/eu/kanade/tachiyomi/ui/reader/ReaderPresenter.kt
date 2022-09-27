@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -1001,9 +1002,11 @@ class ReaderPresenter(
     }
 
     private fun updateReadingStatus(readerChapter: ReaderChapter) {
+        manga ?: return
+
         if (preferences.readingSync().not() && readerChapter.chapter.isMergedChapter().not()) return
         scope.launchIO {
-            statusHandler.markChapterRead(readerChapter.chapter.mangadex_chapter_id)
+            statusHandler.marksChaptersStatus(manga!!.uuid(), listOf(readerChapter.chapter.mangadex_chapter_id))
         }
     }
 

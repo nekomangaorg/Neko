@@ -50,7 +50,7 @@ class PageHandler {
                 val chapterDate = MdUtil.parseDate(chapterAttributesDto.readableAt)
                 val chapterDateNewer = chapterDate - currentDate > 0
 
-                if (externalUrl != null) {
+                if (externalUrl != null && chapterAttributesDto.pages == 0) {
                     when {
                         "azuki manga".equals(chapter.scanlator, true) -> {
                             return@withContext azukiHandler.fetchPageList(externalUrl)
@@ -65,11 +65,7 @@ class PageHandler {
                             return@withContext comikeyHandler.fetchPageList(externalUrl)
                         }*/
                         "bilibili comics".equals(chapter.scanlator, true) -> {
-                            if (chapterAttributesDto.pages > 0) {
-                                return@withContext bilibiliHandler.fetchPageList(externalUrl)
-                            } else {
-                                throw Exception("This chapter is currently unavailable on MangaDex, try reading with webview")
-                            }
+                            return@withContext bilibiliHandler.fetchPageList(externalUrl)
                         }
                         else -> throw Exception("${chapter.scanlator} not supported, try webview")
                     }
