@@ -4,10 +4,9 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.manga.MangaDetailPresenter
 import org.nekomanga.presentation.screens.StatsScreen
 
-class StatsController : BaseComposeController<MangaDetailPresenter>() {
+class StatsController : BaseComposeController<StatsPresenter>() {
 
     override val presenter = StatsPresenter()
 
