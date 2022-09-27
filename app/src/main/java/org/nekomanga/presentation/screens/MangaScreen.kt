@@ -27,6 +27,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -130,6 +131,7 @@ fun MangaScreen(
                 val result = snackbarHostState.showSnackbar(
                     message = state.getFormattedMessage(context),
                     actionLabel = state.getFormattedActionLabel(context),
+                    duration = SnackbarDuration.Short,
                     withDismissAction = true,
                 )
                 when (result) {
