@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.category.CategoryItem
@@ -12,6 +13,7 @@ data class BrowseScreenState(
     val homePageManga: ImmutableList<HomePageManga> = persistentListOf(),
     val error: String? = null,
     val endReached: Boolean = false,
+    val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val page: Int = 1,
     val isList: Boolean,
     val outlineCovers: Boolean,

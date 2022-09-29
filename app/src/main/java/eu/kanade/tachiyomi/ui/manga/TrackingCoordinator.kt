@@ -165,7 +165,7 @@ class TrackingCoordinator {
                 false -> TrackingConstants.TrackSearchResult.Success(results.map { it.toTrackSearchItem() }.toImmutableList())
             }
         }.getOrElse {
-            XLog.e("error searching tracker", it)
+            XLog.e("error searching tracker: ${service.nameRes}", it)
             TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker")
         }
     }

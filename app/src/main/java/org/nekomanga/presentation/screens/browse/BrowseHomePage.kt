@@ -38,7 +38,6 @@ import org.nekomanga.presentation.theme.Shapes
 fun BrowseHomePage(
     browseHomePageManga: ImmutableList<HomePageManga>,
     shouldOutlineCover: Boolean,
-    isComfortable: Boolean,
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
 ) {

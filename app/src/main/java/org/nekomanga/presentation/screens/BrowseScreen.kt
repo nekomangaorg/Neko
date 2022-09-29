@@ -28,6 +28,8 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -45,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
+import eu.kanade.tachiyomi.util.system.SideNavMode
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -59,12 +62,14 @@ import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
+import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun BrowseScreen(
     browseScreenState: State<BrowseScreenState>,
     switchDisplayClick: () -> Unit,
+    windowSizeClass: WindowSizeClass,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
@@ -88,6 +93,19 @@ fun BrowseScreen(
         scope.launch { sheetState.hide() }
     }
 
+    val sidePadding = remember(windowSizeClass.widthSizeClass) {
+        when (browseScreenState.value.sideNavMode) {
+            SideNavMode.NEVER -> PaddingValues()
+            SideNavMode.ALWAYS -> Padding.sideAppBarPaddingValues
+            SideNavMode.DEFAULT -> {
+                when (windowSizeClass.widthSizeClass) {
+                    WindowWidthSizeClass.Expanded -> Padding.sideAppBarPaddingValues
+                    else -> PaddingValues()
+                }
+            }
+        }
+    }
+
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetShape = RoundedCornerShape(Shapes.sheetRadius),
@@ -109,6 +127,7 @@ fun BrowseScreen(
         },
     ) {
         NekoScaffold(
+            modifier = Modifier.padding(sidePadding),
             title = stringResource(id = R.string.browse),
             onNavigationIconClicked = onBackPress,
             actions = {
@@ -176,7 +195,6 @@ fun BrowseScreen(
                         BrowseHomePage(
                             browseHomePageManga = browseScreenState.value.homePageManga,
                             shouldOutlineCover = browseScreenState.value.outlineCovers,
-                            isComfortable = browseScreenState.value.isComfortableGrid,
                             onClick = { id -> openManga(id) },
                             onLongClick = ::mangaLongClick,
                         )

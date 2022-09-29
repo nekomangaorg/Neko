@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
+import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.toImmutableList
@@ -80,6 +81,12 @@ class BrowseComposePresenter(
         super.onCreate()
 
         loadInitialPage()
+
+        presenterScope.launch {
+            _browseScreenState.update {
+                it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()))
+            }
+        }
 
         presenterScope.launch {
             if (browseScreenState.value.promptForCategories) {

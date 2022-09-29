@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -12,10 +13,13 @@ class BrowseComposeController(query: String? = null) : BaseComposeController<Bro
 
     @Composable
     override fun ScreenContent() {
+        val windowSizeClass = calculateWindowSizeClass(this.activity!!)
+
         BrowseScreen(
             browseScreenState = presenter.browseScreenState.collectAsState(),
             switchDisplayClick = presenter::switchDisplayMode,
             onBackPress = { activity?.onBackPressed() },
+            windowSizeClass = windowSizeClass,
             openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,

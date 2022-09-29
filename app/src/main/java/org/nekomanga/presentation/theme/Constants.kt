@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.theme
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 
 object Shapes {
@@ -9,4 +10,6 @@ object Shapes {
 
 object Padding {
     val horizontalPadding = 16.dp
+    val sideAppBarPaddingValues = PaddingValues(start = 96.dp)
+    val bottomAppBarPaddingValues = PaddingValues(bottom = 96.dp)
 }
