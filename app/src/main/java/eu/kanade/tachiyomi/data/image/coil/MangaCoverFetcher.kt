@@ -79,11 +79,10 @@ class MangaCoverFetcher(
         val networkRead = options.networkCachePolicy.readEnabled
         val onlyCache = !networkRead && diskRead
         val shouldFetchRemotely = networkRead && !diskRead && !onlyCache
-        val useCustomCover = options.parameters.value(useCustomCover) ?: true
         // Use custom cover if exists
         if (!shouldFetchRemotely) {
             val customCoverFile by lazy { coverCache.getCustomCoverFile(mangaId) }
-            if (useCustomCover && customCoverFile.exists()) {
+            if (customCoverFile.exists()) {
                 setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = customCoverFile)
                 return fileLoader(customCoverFile)
             }
@@ -325,8 +324,8 @@ class MangaCoverFetcher(
         private val sourceManager: SourceManager by injectLazy()
 
         override fun create(data: Artwork, options: Options, imageLoader: ImageLoader): Fetcher {
-            return if (data.url.isBlank()) {
-                return MangaCoverFetcher(
+            return when (data.url.isBlank()) {
+                true -> MangaCoverFetcher(
                     altUrl = data.url,
                     inLibrary = data.inLibrary,
                     mangaId = data.mangaId,
@@ -337,8 +336,7 @@ class MangaCoverFetcher(
                     callFactoryLazy = callFactoryLazy,
                     diskCacheLazy = diskCacheLazy,
                 )
-            } else {
-                AlternativeMangaCoverFetcher(
+                false -> AlternativeMangaCoverFetcher(
                     url = data.url,
                     mangaId = data.mangaId,
                     sourceLazy = lazy { sourceManager.getMangadex() },
@@ -356,8 +354,6 @@ class MangaCoverFetcher(
     }
 
     companion object {
-        const val useCustomCover = "use_custom_cover"
-
         private val CACHE_CONTROL_NO_NETWORK_NO_CACHE = CacheControl.Builder().noCache().onlyIfCached().build()
     }
 }

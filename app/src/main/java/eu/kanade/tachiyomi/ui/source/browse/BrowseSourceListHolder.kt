@@ -10,7 +10,6 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
-import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 import eu.kanade.tachiyomi.util.view.setCards
 
@@ -57,7 +56,6 @@ class BrowseSourceListHolder(
             manga.id ?: return
             val request = ImageRequest.Builder(view.context).data(manga)
                 .target(CoverViewTarget(binding.coverThumbnail))
-                .setParameter(MangaCoverFetcher.useCustomCover, false)
                 .build()
             Coil.imageLoader(view.context).enqueue(request)
         }

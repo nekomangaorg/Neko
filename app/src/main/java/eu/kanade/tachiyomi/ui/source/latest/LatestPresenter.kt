@@ -4,7 +4,9 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.toImmutableList
@@ -161,5 +163,19 @@ class LatestPresenter(
 
     fun switchDisplayMode() {
         preferences.browseAsList().set(!latestScreenState.value.isList)
+    }
+
+    fun updateCovers() {
+        if (isScopeInitialized) {
+            presenterScope.launch {
+                val newDisplayManga = _latestScreenState.value.displayManga.map {
+                    val dbManga = db.getManga(it.mangaId).executeOnIO()!!
+                    it.copy(currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
+                }.toImmutableList()
+                _latestScreenState.update {
+                    it.copy(displayManga = newDisplayManga)
+                }
+            }
+        }
     }
 }

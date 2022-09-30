@@ -6,7 +6,9 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
 import kotlinx.collections.immutable.toImmutableList
@@ -163,5 +165,24 @@ class FollowsPresenter(
 
     fun switchDisplayMode() {
         preferences.browseAsList().set(!followsScreenState.value.isList)
+    }
+
+    fun updateCovers() {
+        if (isScopeInitialized) {
+            presenterScope.launch {
+                val newDisplayManga = _followsScreenState.value.displayManga.map { entry ->
+                    Pair(
+                        entry.key,
+                        entry.value.map {
+                            val dbManga = db.getManga(it.mangaId).executeOnIO()!!
+                            it.copy(currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
+                        }.toImmutableList(),
+                    )
+                }.toMap().toImmutableMap()
+                _followsScreenState.update {
+                    it.copy(displayManga = newDisplayManga)
+                }
+            }
+        }
     }
 }
