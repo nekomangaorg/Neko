@@ -33,7 +33,8 @@ fun BaseSheet(
     themeColor: ThemeColorState,
     maxSheetHeightPercentage: Float = .7f,
     minSheetHeightPercentage: Float = 0f,
-    paddingAroundContent: Dp = 16.dp,
+    topPaddingAroundContent: Dp = 16.dp,
+    bottomPaddingAroundContent: Dp = 16.dp,
     showHandle: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -64,9 +65,9 @@ fun BaseSheet(
                     .navigationBarsPadding()
                     .imePadding(),
             ) {
-                Gap(paddingAroundContent)
+                Gap(topPaddingAroundContent)
                 content()
-                Gap(paddingAroundContent)
+                Gap(bottomPaddingAroundContent)
             }
         }
     }

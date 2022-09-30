@@ -112,6 +112,7 @@ fun BrowseScreen(
                     addingToLibrary = true,
                     categories = browseScreenState.value.categories,
                     cancelClick = { scope.launch { sheetState.hide() } },
+                    bottomPadding = Padding.bottomAppBarPaddingValues.calculateBottomPadding(),
                     addNewCategory = addNewCategory,
                     confirmClicked = { selectedCategories ->
                         scope.launch { sheetState.hide() }
