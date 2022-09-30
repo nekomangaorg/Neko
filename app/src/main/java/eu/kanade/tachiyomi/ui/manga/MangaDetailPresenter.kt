@@ -1583,6 +1583,23 @@ class MangaDetailPresenter(
             blockedScanlators.add(scanlator)
             preferences.blockedScanlators().set(blockedScanlators)
             updateChapterFlows()
+            _snackbarState.emit(
+                SnackbarState(
+                    messageRes = R.string.globally_blocked_group_,
+                    message = scanlator,
+                    actionLabelRes = R.string.undo,
+                    action = {
+                        presenterScope.launch {
+                            db.deleteScanlator(scanlator).executeOnIO()
+                            val allBlockedScanlators = preferences.blockedScanlators().get().toMutableSet()
+                            allBlockedScanlators.remove(scanlator)
+                            preferences.blockedScanlators().set(allBlockedScanlators)
+                            updateChapterFlows()
+                        }
+                    },
+
+                ),
+            )
         }
     }
 
