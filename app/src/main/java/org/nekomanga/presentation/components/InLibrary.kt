@@ -45,7 +45,7 @@ fun InLibraryIcon(offset: Dp, outline: Boolean) {
 }
 
 @Composable
-internal fun InLibraryBadge(offset: Dp, outline: Boolean) {
+internal fun InLibraryBadge(outline: Boolean, offset: Dp = (-2).dp) {
     Box(
         modifier = Modifier
             .offset(x = offset, y = offset)

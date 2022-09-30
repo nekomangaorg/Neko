@@ -6,6 +6,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,16 +22,31 @@ import org.nekomanga.presentation.theme.NekoTheme
 
 @Composable
 fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
-    when (isList.not()) {
+    when (isList) {
         true -> ToolTipIconButton(
+            toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
+            icon = Icons.Filled.ViewModule,
+            buttonClicked = buttonClicked,
+        )
+        false -> ToolTipIconButton(
             toolTipLabel = stringResource(id = R.string.display_as_, "list"),
             icon = Icons.Filled.ViewList,
             buttonClicked = buttonClicked,
         )
+    }
+}
 
+@Composable
+fun ShowLibraryEntriesActionButton(showEntries: Boolean, buttonClicked: () -> Unit) {
+    when (showEntries) {
+        true -> ToolTipIconButton(
+            toolTipLabel = stringResource(id = R.string.hide_library_manga),
+            icon = Icons.Filled.VisibilityOff,
+            buttonClicked = buttonClicked,
+        )
         false -> ToolTipIconButton(
-            toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
-            icon = Icons.Filled.ViewModule,
+            toolTipLabel = stringResource(id = R.string.show_library_manga),
+            icon = Icons.Filled.Visibility,
             buttonClicked = buttonClicked,
         )
     }

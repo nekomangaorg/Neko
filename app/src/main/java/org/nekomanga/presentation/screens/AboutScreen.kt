@@ -171,7 +171,7 @@ fun AboutScreen(
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(Padding.horizontalPadding),
+                        .padding(Padding.mediumHorizontalPadding),
                     mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
                 ) {
                     val modifier = Modifier.size(24.dp)

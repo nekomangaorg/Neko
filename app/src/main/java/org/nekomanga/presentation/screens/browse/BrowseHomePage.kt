@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +31,7 @@ import org.nekomanga.presentation.components.InLibraryBadge
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.MangaGridSubtitle
 import org.nekomanga.presentation.components.MangaGridTitle
+import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -45,6 +45,7 @@ fun BrowseHomePage(
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         browseHomePageManga.forEach { homePageManga ->
+
             item(key = Objects.hash(homePageManga.title)) {
                 val headerText = when (homePageManga.titleRes == null) {
                     true -> homePageManga.title ?: ""
@@ -57,38 +58,44 @@ fun BrowseHomePage(
                     style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                 )
                 Gap(4.dp)
-            }
-            item(key = Objects.hash(homePageManga.title, homePageManga.titleRes, browseHomePageManga.size)) {
                 LazyRow(
-                    modifier = Modifier.requiredHeight(coverSize + 70.dp),
+                    modifier = Modifier
+                        .requiredHeight(coverSize + 70.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
+                    item { Gap(Padding.smallHorizontalPadding) }
+
                     items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(Shapes.coverRadius))
-                                .combinedClickable(
-                                    onClick = { onClick(displayManga.mangaId) },
-                                    onLongClick = { onLongClick(displayManga) },
-                                )
-                                .padding(2.dp)
-                                .width(IntrinsicSize.Min),
-                        ) {
-                            Column {
-                                MangaCover.Square.invoke(
-                                    manga = displayManga,
-                                    shouldOutlineCover = shouldOutlineCover,
-                                    modifier = Modifier.requiredHeight(coverSize),
-                                )
-                                MangaGridTitle(title = displayManga.title)
-                                MangaGridSubtitle(displayText = displayManga.displayText)
-                            }
-                            if (displayManga.inLibrary) {
-                                val offset = (-2).dp
-                                InLibraryBadge(offset, shouldOutlineCover)
+                        if (displayManga.isVisible) {
+                            Box {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(Shapes.coverRadius))
+                                        .combinedClickable(
+                                            onClick = { onClick(displayManga.mangaId) },
+                                            onLongClick = { onLongClick(displayManga) },
+                                        )
+                                        .width(IntrinsicSize.Min),
+                                ) {
+                                    Column {
+                                        MangaCover.Square.invoke(
+                                            manga = displayManga,
+                                            shouldOutlineCover = shouldOutlineCover,
+                                            modifier = Modifier.requiredHeight(coverSize),
+                                        )
+                                        MangaGridTitle(title = displayManga.title)
+                                        MangaGridSubtitle(displayText = displayManga.displayText)
+                                    }
+                                }
+
+                                if (displayManga.inLibrary) {
+                                    InLibraryBadge(shouldOutlineCover)
+                                }
                             }
                         }
                     }
+
+                    item { Gap(Padding.smallHorizontalPadding) }
                 }
             }
         }

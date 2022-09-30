@@ -157,8 +157,7 @@ fun MangaGridItem(
         }
 
         if (displayManga.inLibrary) {
-            val offset = (-2).dp
-            InLibraryBadge(offset, shouldOutlineCover)
+            InLibraryBadge(shouldOutlineCover)
         }
     }
 }

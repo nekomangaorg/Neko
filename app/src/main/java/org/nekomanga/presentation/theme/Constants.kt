@@ -9,7 +9,8 @@ object Shapes {
 }
 
 object Padding {
-    val horizontalPadding = 16.dp
+    val smallHorizontalPadding = 8.dp
+    val mediumHorizontalPadding = 16.dp
     val sideAppBarPaddingValues = PaddingValues(start = 96.dp)
     val bottomAppBarPaddingValues = PaddingValues(bottom = 96.dp)
 }

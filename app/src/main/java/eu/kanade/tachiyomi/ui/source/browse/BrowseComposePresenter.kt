@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.util.paging.DefaultPaginator
@@ -38,6 +40,7 @@ class BrowseComposePresenter(
     private val _browseScreenState = MutableStateFlow(
         BrowseScreenState(
             isList = preferences.browseAsList().get(),
+            showLibraryEntries = preferences.browseShowLibrary().get(),
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
@@ -121,7 +124,7 @@ class BrowseComposePresenter(
                 }
             }.onSuccess {
                 _browseScreenState.update { state ->
-                    state.copy(homePageManga = it.toPersistentList(), isLoading = false)
+                    state.copy(homePageManga = it.updateVisibility(), isLoading = false)
                 }
             }
         }
@@ -204,6 +207,52 @@ class BrowseComposePresenter(
     }
 
     fun switchDisplayMode() {
-        preferences.browseAsList().set(!browseScreenState.value.isList)
+        presenterScope.launch {
+            preferences.browseAsList().set(!browseScreenState.value.isList)
+            _browseScreenState.update {
+                it.copy(isList = !it.isList)
+            }
+        }
+    }
+
+    fun switchLibraryVisibility() {
+        presenterScope.launch {
+            val showEntries = !browseScreenState.value.showLibraryEntries
+            preferences.browseShowLibrary().set(showEntries)
+            _browseScreenState.update {
+                it.copy(showLibraryEntries = showEntries)
+            }
+
+            _browseScreenState.update {
+                it.copy(homePageManga = it.homePageManga.updateVisibility())
+            }
+        }
+    }
+
+    /**
+     * Updates the visibility of HomePageManga
+     */
+    private fun List<HomePageManga>.updateVisibility(): ImmutableList<HomePageManga> {
+        return this.map { homePageManga ->
+            homePageManga.copy(
+                displayManga = homePageManga.displayManga.mapVisibility().toImmutableList(),
+            )
+        }.toImmutableList()
+    }
+
+    /**
+     * Marks display manga as visible when show library entries is enabled, otherwise hides library entries
+     */
+    private fun List<DisplayManga>.mapVisibility(): List<DisplayManga> {
+        return this.map { displayManga ->
+            when (preferences.browseShowLibrary().get()) {
+                true -> {
+                    displayManga.copy(isVisible = true)
+                }
+                false -> {
+                    displayManga.copy(isVisible = !displayManga.inLibrary)
+                }
+            }
+        }
     }
 }

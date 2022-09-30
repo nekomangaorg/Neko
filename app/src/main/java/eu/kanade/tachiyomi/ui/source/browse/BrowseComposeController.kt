@@ -18,6 +18,7 @@ class BrowseComposeController(query: String? = null) : BaseComposeController<Bro
         BrowseScreen(
             browseScreenState = presenter.browseScreenState.collectAsState(),
             switchDisplayClick = presenter::switchDisplayMode,
+            switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
             onBackPress = { activity?.onBackPressed() },
             windowSizeClass = windowSizeClass,
             openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },

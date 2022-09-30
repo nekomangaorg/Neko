@@ -6,14 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
@@ -58,6 +53,7 @@ import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 import org.nekomanga.presentation.functions.numberOfColumns
@@ -69,6 +65,7 @@ import org.nekomanga.presentation.theme.Shapes
 fun BrowseScreen(
     browseScreenState: State<BrowseScreenState>,
     switchDisplayClick: () -> Unit,
+    switchLibraryVisibilityClick: () -> Unit,
     windowSizeClass: WindowSizeClass,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
@@ -135,12 +132,15 @@ fun BrowseScreen(
                     isList = browseScreenState.value.isList,
                     buttonClicked = switchDisplayClick,
                 )
+                ShowLibraryEntriesActionButton(
+                    showEntries = browseScreenState.value.showLibraryEntries,
+                    buttonClicked = switchLibraryVisibilityClick,
+                )
             },
         ) { incomingContentPadding ->
             val contentPadding =
                 PaddingValues(
-                    bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                        .asPaddingValues().calculateBottomPadding(),
+                    bottom = Padding.bottomAppBarPaddingValues.calculateBottomPadding(),
                     top = incomingContentPadding.calculateTopPadding(),
                 )
 
@@ -179,7 +179,7 @@ fun BrowseScreen(
                 Column(
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = contentPadding.calculateTopPadding()),
+                        .padding(top = contentPadding.calculateTopPadding(), bottom = contentPadding.calculateBottomPadding()),
                 ) {
                     ScreenTypeHeader(
                         screenType = screenType,

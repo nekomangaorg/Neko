@@ -52,6 +52,7 @@ class BrowseRepository(
         }.map {
             it.uuid
         }
+
         return mangaDex.fetchHomePageInfo(MdConstants.currentSeasonalId, blockedScanlatorUUIDs)
             .andThen { listResults ->
                 Ok(

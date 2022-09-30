@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import org.nekomanga.presentation.theme.Padding.horizontalPadding
+import org.nekomanga.presentation.theme.Padding.mediumHorizontalPadding
 
 @Composable
 fun Divider() {
@@ -69,7 +69,7 @@ fun PreferenceRow(
             Icon(
                 painter = painter,
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontal = mediumHorizontalPadding)
                     .size(24.dp),
                 tint = MaterialTheme.colorScheme.primary,
                 contentDescription = null,
@@ -77,7 +77,7 @@ fun PreferenceRow(
         }
         Column(
             Modifier
-                .padding(horizontal = horizontalPadding)
+                .padding(horizontal = mediumHorizontalPadding)
                 .weight(1f),
         ) {
             Text(
