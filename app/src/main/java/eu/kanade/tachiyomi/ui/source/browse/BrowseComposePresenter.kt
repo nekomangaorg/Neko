@@ -108,6 +108,13 @@ class BrowseComposePresenter(
                 }
             }
         }
+        presenterScope.launch {
+            preferences.browseShowLibrary().asFlow().collectLatest {
+                _browseScreenState.update {
+                    it.copy(homePageManga = it.homePageManga.updateVisibility())
+                }
+            }
+        }
     }
 
     fun loadNextItems() {
@@ -221,10 +228,6 @@ class BrowseComposePresenter(
             preferences.browseShowLibrary().set(showEntries)
             _browseScreenState.update {
                 it.copy(showLibraryEntries = showEntries)
-            }
-
-            _browseScreenState.update {
-                it.copy(homePageManga = it.homePageManga.updateVisibility())
             }
         }
     }
