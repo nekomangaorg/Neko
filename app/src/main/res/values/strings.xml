@@ -548,6 +548,7 @@
         <item quantity="other">%1$s chapters have been removed from the source:\n%2$s\n\nDelete
             their downloads?</item>
     </plurals>
+    <string name="globally_blocked_group_">Globally blocked: %1s</string>
 
     <!-- Tracking -->
     <string name="tracking">Tracking</string>
