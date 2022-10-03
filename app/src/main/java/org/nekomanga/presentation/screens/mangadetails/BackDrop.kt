@@ -10,7 +10,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.ThemeColorState
 
@@ -29,7 +28,6 @@ fun BackDrop(themeColorState: ThemeColorState, artworkProvider: () -> Artwork, s
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(artworkProvider())
-                .memoryCacheKey(artworkProvider().mangaId.toMangaCacheKey())
                 .allowHardware(false)
                 .crossfade(true)
                 .crossfade(500)

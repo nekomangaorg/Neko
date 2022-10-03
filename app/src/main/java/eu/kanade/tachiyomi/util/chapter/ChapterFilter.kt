@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import uy.kohesive.injekt.Injekt
@@ -50,6 +51,13 @@ class ChapterFilter(
         selectedChapter: T? = null,
     ): List<T> {
         var filteredChapters = filterChaptersByScanlators(chapters, manga)
+
+        val blockedScanlator = preferences.blockedScanlators().get()
+
+        if (blockedScanlator.isNotEmpty()) {
+            filteredChapters = filteredChapters.filter { chp -> chp.scanlatorList().none { it in blockedScanlator } }
+        }
+
         // if neither preference is enabled don't even filter
         if (!preferences.skipRead() && !preferences.skipFiltered()) {
             return filteredChapters

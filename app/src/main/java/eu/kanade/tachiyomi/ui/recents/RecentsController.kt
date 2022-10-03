@@ -691,7 +691,7 @@ class RecentsController(bundle: Bundle? = null) :
         val pagesLeft = chapter.pages_left
         lastChapterId = chapter.id
         val wasRead = chapter.read
-        presenter.markChapterRead(chapter, !wasRead)
+        presenter.markChapterRead(manga, chapter, !wasRead)
         snack = view?.snack(
             if (wasRead) {
                 R.string.marked_as_unread
@@ -703,7 +703,7 @@ class RecentsController(bundle: Bundle? = null) :
             anchorView = activityBinding?.bottomNav
             var undoing = false
             setAction(R.string.undo) {
-                presenter.markChapterRead(chapter, wasRead, lastRead, pagesLeft)
+                presenter.markChapterRead(manga, chapter, wasRead, lastRead, pagesLeft)
                 undoing = true
             }
             addCallback(

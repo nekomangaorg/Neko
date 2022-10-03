@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
-import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.newCallWithProgress
@@ -28,7 +28,11 @@ abstract class ReducedHttpSource : HttpSource() {
         .build()
 
     override suspend fun fetchImage(page: Page): Response {
-        return client.newCallWithProgress(GET(page.imageUrl!!, headers), page).await()
+        val request = imageRequest(page).newBuilder()
+            // images will be cached or saved manually, so don't take up network cache
+            .cacheControl(CACHE_CONTROL_NO_STORE)
+            .build()
+        return client.newCallWithProgress(request, page).await()
     }
 
     override fun isLogged(): Boolean {

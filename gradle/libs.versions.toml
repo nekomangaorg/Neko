@@ -1,5 +1,5 @@
 [versions]
-aboutlib_version = "10.4.0"
+aboutlib_version = "10.5.0"
 chucker_version = "3.5.2"
 coil_version = "2.2.1"
 fast_adapter_version = "5.6.0"
@@ -106,7 +106,7 @@ retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serializati
 
 #test libs
 junit = "junit:junit:4.13.2"
-mockk = "io.mockk:mockk:1.12.8"
+mockk = "io.mockk:mockk:1.13.2"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.4.2"
 
 [plugins]

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import androidx.annotation.StringRes
 import java.text.DateFormat
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.track.TrackItem
@@ -24,7 +25,7 @@ object TrackingConstants {
         object Loading : TrackSearchResult()
         object NoResult : TrackSearchResult()
         class Success(val trackSearchResult: ImmutableList<TrackSearchItem>) : TrackSearchResult()
-        class Error(val errorMessage: String) : TrackSearchResult()
+        class Error(val errorMessage: String, @StringRes val trackerNameRes: Int) : TrackSearchResult()
     }
 
     enum class ReadingDate {

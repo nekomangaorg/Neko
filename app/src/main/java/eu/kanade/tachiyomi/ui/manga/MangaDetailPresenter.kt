@@ -129,7 +129,12 @@ class MangaDetailPresenter(
 
         LibraryUpdateService.setListener(this)
         presenterScope.launch {
-            _currentManga.value = db.getManga(mangaId).executeAsBlocking()!!
+            val dbManga = db.getManga(mangaId).executeAsBlocking()
+            if (dbManga == null) {
+                XLog.e("Error mangaId $mangaId found no manga in the db, popping back to root")
+                controller?.router?.popToRoot()
+            }
+            _currentManga.value = dbManga!!
             _generalState.value = MangaConstants.MangaScreenGeneralState(
                 hasDefaultCategory = preferences.defaultCategory() != -1,
                 hideButtonText = preferences.hideButtonText().get(),
@@ -824,7 +829,14 @@ class MangaDetailPresenter(
                                                     val trackingUpdate = trackingCoordinator.registerTracking(TrackAndService(trackSearchItem.trackItem, trackService), mangaId)
                                                     handleTrackingUpdate(trackingUpdate, false)
                                                 } else if (trackResult is TrackingConstants.TrackSearchResult.Error) {
-                                                    launchUI { _snackbarState.emit(SnackbarState(message = "Error trying to autolinking tracker.  ${trackResult.errorMessage}")) }
+                                                    launchUI {
+                                                        _snackbarState.emit(
+                                                            SnackbarState(
+                                                                prefixRes = trackResult.trackerNameRes,
+                                                                message = " error trying to autolink tracking.  ${trackResult.errorMessage}",
+                                                            ),
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
@@ -1175,8 +1187,12 @@ class MangaDetailPresenter(
      */
     private fun updateMangaFlow() {
         presenterScope.launch {
-            val m = db.getManga(mangaId).executeOnIO()!!
-            _currentManga.value = m
+            val dbManga = db.getManga(mangaId).executeAsBlocking()
+            if (dbManga == null) {
+                XLog.e("Error mangaId $mangaId found no manga in the db, popping back to root")
+                controller?.router?.popToRoot()
+            }
+            _currentManga.value = dbManga
             _mangaState.update {
                 getMangaStateCopyFromManga(_currentManga.value!!)
             }
@@ -1567,6 +1583,23 @@ class MangaDetailPresenter(
             blockedScanlators.add(scanlator)
             preferences.blockedScanlators().set(blockedScanlators)
             updateChapterFlows()
+            _snackbarState.emit(
+                SnackbarState(
+                    messageRes = R.string.globally_blocked_group_,
+                    message = scanlator,
+                    actionLabelRes = R.string.undo,
+                    action = {
+                        presenterScope.launch {
+                            db.deleteScanlator(scanlator).executeOnIO()
+                            val allBlockedScanlators = preferences.blockedScanlators().get().toMutableSet()
+                            allBlockedScanlators.remove(scanlator)
+                            preferences.blockedScanlators().set(allBlockedScanlators)
+                            updateChapterFlows()
+                        }
+                    },
+
+                ),
+            )
         }
     }
 

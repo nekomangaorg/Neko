@@ -130,6 +130,7 @@ fun MangaScreen(
                 val result = snackbarHostState.showSnackbar(
                     message = state.getFormattedMessage(context),
                     actionLabel = state.getFormattedActionLabel(context),
+                    duration = state.snackbarDuration,
                     withDismissAction = true,
                 )
                 when (result) {

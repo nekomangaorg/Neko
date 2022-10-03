@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -94,13 +95,6 @@ class MangaUpdateCoordinator {
                 }.onSuccess {
                     val resultingManga = it.first
                     val artwork = it.second
-                    if (artwork.isNotEmpty()) {
-                        artwork.map { art -> art.toArtworkImpl(manga.id!!) }.let { transformedArtwork ->
-                            db.deleteArtworkForManga(manga).executeOnIO()
-                            db.insertArtWorkList(transformedArtwork).executeOnIO()
-                            send(MangaResult.UpdatedArtwork)
-                        }
-                    }
 
                     val originalThumbnail = manga.thumbnail_url
 
@@ -113,12 +107,20 @@ class MangaUpdateCoordinator {
                                 manga.user_title = null
                             }
                         }
-                        if (networkManga.thumbnail_url != null && networkManga.thumbnail_url != originalThumbnail) {
+                        if (networkManga.thumbnail_url != null && networkManga.thumbnail_url != originalThumbnail && originalThumbnail != MdConstants.noCoverUrl) {
                             coverCache.deleteFromCache(originalThumbnail, manga.favorite)
                         }
                         db.insertManga(manga).executeOnIO()
                         send(MangaResult.UpdatedManga)
                     }
+
+                    if (artwork.isNotEmpty()) {
+                        artwork.map { art -> art.toArtworkImpl(manga.id!!) }.let { transformedArtwork ->
+                            db.deleteArtworkForManga(manga).executeOnIO()
+                            db.insertArtWorkList(transformedArtwork).executeOnIO()
+                        }
+                    }
+                    send(MangaResult.UpdatedArtwork)
                 }
         }
     }
