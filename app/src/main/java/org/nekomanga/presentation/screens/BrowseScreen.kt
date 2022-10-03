@@ -73,6 +73,7 @@ fun BrowseScreen(
     toggleFavorite: (Long, List<CategoryItem>, Boolean) -> Unit,
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
+    homeScreenTitleClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
@@ -196,6 +197,7 @@ fun BrowseScreen(
                         BrowseHomePage(
                             browseHomePageManga = browseScreenState.value.homePageManga,
                             shouldOutlineCover = browseScreenState.value.outlineCovers,
+                            titleClick = homeScreenTitleClick,
                             onClick = { id -> openManga(id) },
                             onLongClick = ::mangaLongClick,
                         )

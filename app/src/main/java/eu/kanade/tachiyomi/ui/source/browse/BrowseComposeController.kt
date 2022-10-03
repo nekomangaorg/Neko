@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
+import eu.kanade.tachiyomi.ui.source.latest.LatestController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.BrowseScreen
 
@@ -21,6 +22,7 @@ class BrowseComposeController(query: String? = null) : BaseComposeController<Bro
             switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
             onBackPress = { activity?.onBackPressed() },
             windowSizeClass = windowSizeClass,
+            homeScreenTitleClick = { router.pushController(LatestController().withFadeTransaction()) },
             openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
