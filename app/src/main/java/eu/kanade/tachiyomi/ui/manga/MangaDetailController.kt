@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.core.content.getSystemService
 import androidx.palette.graphics.Palette
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -47,14 +46,7 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy
 
-class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailPresenter>() {
-
-    init {
-        if (mangaId == null) {
-            XLog.e("Manga ID is NULL this shouldn't happen")
-            router.popToRoot()
-        }
-    }
+class MangaDetailController(private val mangaId: Long) : BaseComposeController<MangaDetailPresenter>(Bundle().apply { putLong(MANGA_EXTRA, mangaId) }) {
 
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)
@@ -68,7 +60,7 @@ class MangaDetailController(mangaId: Long?) : BaseComposeController<MangaDetailP
         }
     }
 
-    override val presenter = MangaDetailPresenter(mangaId!!)
+    override val presenter = MangaDetailPresenter(mangaId)
 
     private val preferences: PreferencesHelper by injectLazy()
 
