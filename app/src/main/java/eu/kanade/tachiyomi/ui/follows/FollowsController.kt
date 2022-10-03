@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.follows
 
 import android.os.Bundle
+import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -25,5 +26,10 @@ class FollowsController(bundle: Bundle? = null) : BaseComposeController<FollowsP
             toggleFavorite = presenter::toggleFavorite,
             retryClick = presenter::getFollows,
         )
+    }
+
+    override fun onViewCreated(view: View) {
+        super.onViewCreated(view)
+        presenter.updateCovers()
     }
 }
