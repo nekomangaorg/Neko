@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
-import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Shapes
@@ -43,7 +42,6 @@ enum class MangaCover(private val ratio: Float) {
             model = ImageRequest.Builder(LocalContext.current)
                 .data(manga.currentArtwork)
                 .placeholder(color)
-                .setParameter(MangaCoverFetcher.useCustomCover, false)
                 .build(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
