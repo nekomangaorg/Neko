@@ -1590,7 +1590,7 @@ class MangaDetailPresenter(
                         }
                     },
 
-                    ),
+                ),
             )
         }
     }
