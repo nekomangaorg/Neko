@@ -129,12 +129,8 @@ class MangaDetailPresenter(
 
         LibraryUpdateService.setListener(this)
         presenterScope.launch {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()
-            if (dbManga == null) {
-                XLog.e("Error mangaId $mangaId found no manga in the db, popping back to root")
-                controller?.router?.popToRoot()
-            }
-            _currentManga.value = dbManga!!
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
+            _currentManga.value = dbManga
             _generalState.value = MangaConstants.MangaScreenGeneralState(
                 hasDefaultCategory = preferences.defaultCategory() != -1,
                 hideButtonText = preferences.hideButtonText().get(),
@@ -1187,11 +1183,7 @@ class MangaDetailPresenter(
      */
     private fun updateMangaFlow() {
         presenterScope.launch {
-            val dbManga = db.getManga(mangaId).executeAsBlocking()
-            if (dbManga == null) {
-                XLog.e("Error mangaId $mangaId found no manga in the db, popping back to root")
-                controller?.router?.popToRoot()
-            }
+            val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             _mangaState.update {
                 getMangaStateCopyFromManga(_currentManga.value!!)
@@ -1598,7 +1590,7 @@ class MangaDetailPresenter(
                         }
                     },
 
-                ),
+                    ),
             )
         }
     }
