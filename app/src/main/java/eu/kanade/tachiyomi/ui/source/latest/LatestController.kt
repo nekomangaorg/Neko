@@ -30,6 +30,6 @@ class LatestController(bundle: Bundle? = null) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        presenter.updateCovers()
+        presenter.updateMangaForChanges()
     }
 }

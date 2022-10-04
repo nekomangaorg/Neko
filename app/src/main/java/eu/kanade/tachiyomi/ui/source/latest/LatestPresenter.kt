@@ -165,12 +165,12 @@ class LatestPresenter(
         preferences.browseAsList().set(!latestScreenState.value.isList)
     }
 
-    fun updateCovers() {
+    fun updateMangaForChanges() {
         if (isScopeInitialized) {
             presenterScope.launch {
                 val newDisplayManga = _latestScreenState.value.displayManga.map {
                     val dbManga = db.getManga(it.mangaId).executeOnIO()!!
-                    it.copy(currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
+                    it.copy(inLibrary = dbManga.favorite, currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
                 }.toImmutableList()
                 _latestScreenState.update {
                     it.copy(displayManga = newDisplayManga)
