@@ -178,7 +178,7 @@ dependencies {
     implementation("br.com.devsrsouza.compose.icons.android:simple-icons:1.0.0")
 
     //required outside bundle cause toml doesnt work with aar
-    implementation("com.mikepenz:community-material-typeface:6.4.95.0-kotlin@aar")
+    implementation("com.mikepenz:community-material-typeface:7.0.96.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
 
