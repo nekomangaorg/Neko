@@ -195,6 +195,7 @@ fun BoxScope.CompactGridItem(
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )
+
     Box(
         modifier = Modifier
             .background(
@@ -236,7 +237,7 @@ fun MangaGridTitle(
     Text(
         text = title,
         style = if (isComfortable) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
-        color = if (isComfortable) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surface,
+        color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White,
         fontWeight = FontWeight.Medium,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
@@ -256,7 +257,7 @@ fun MangaGridSubtitle(displayText: String, isComfortable: Boolean = true) {
             text = displayText,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
-            color = (if (isComfortable) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surface).copy(NekoColors.mediumAlphaLowContrast),
+            color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White,
             fontWeight = if (isComfortable) FontWeight.Normal else FontWeight.SemiBold,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
