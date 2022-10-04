@@ -36,7 +36,8 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
-import eu.kanade.tachiyomi.ui.source.latest.LatestController
+import eu.kanade.tachiyomi.ui.source.latest.DisplayController
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
@@ -393,7 +394,7 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.onLatestChapterClicked = {
             sheet.dismiss()
             adapter?.clear()
-            router.pushController(LatestController().withFadeTransaction())
+            router.pushController(DisplayController(DisplayScreenType.LatestChapters).withFadeTransaction())
         }
 
         sheet.show()

@@ -24,38 +24,42 @@ import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class LatestPresenter(
-    private val latestRepository: LatestRepository = Injekt.get(),
-    val preferences: PreferencesHelper = Injekt.get(),
-    val db: DatabaseHelper = Injekt.get(),
-) : BaseCoroutinePresenter<LatestController>() {
+class DisplayPresenter(
+    displayScreenType: DisplayScreenType,
+    title: String = "",
+    private val displayRepository: DisplayRepository = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get(),
+    private val db: DatabaseHelper = Injekt.get(),
+) : BaseCoroutinePresenter<DisplayController>() {
 
-    private val _latestScreenState = MutableStateFlow(
-        LatestScreenState(
+    private val _displayScreenState = MutableStateFlow(
+        DisplayScreenState(
             isList = preferences.browseAsList().get(),
+            title = title,
+            titleRes = displayScreenType.titleRes,
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
             promptForCategories = preferences.defaultCategory() == -1,
         ),
     )
-    val latestScreenState: StateFlow<LatestScreenState> = _latestScreenState.asStateFlow()
+    val displayScreenState: StateFlow<DisplayScreenState> = _displayScreenState.asStateFlow()
 
     private val paginator = DefaultPaginator(
-        initialKey = _latestScreenState.value.page,
+        initialKey = _displayScreenState.value.page,
         onLoadUpdated = {
-            _latestScreenState.update { state ->
+            _displayScreenState.update { state ->
                 state.copy(isLoading = it)
             }
         },
         onRequest = { nextPage ->
-            latestRepository.getPage(nextPage)
+            displayRepository.getPage(nextPage, displayScreenType)
         },
         getNextKey = {
-            _latestScreenState.value.page + 1
+            _displayScreenState.value.page + 1
         },
         onError = { resultError ->
-            _latestScreenState.update {
+            _displayScreenState.update {
                 it.copy(
                     isLoading = false,
                     error = when (resultError) {
@@ -66,8 +70,8 @@ class LatestPresenter(
             }
         },
         onSuccess = { hasNexPage, items, newKey ->
-            _latestScreenState.update {
-                it.copy(displayManga = (_latestScreenState.value.displayManga + items).toImmutableList(), page = newKey, endReached = hasNexPage)
+            _displayScreenState.update {
+                it.copy(displayManga = (_displayScreenState.value.displayManga + items).toImmutableList(), page = newKey, endReached = hasNexPage)
             }
         },
     )
@@ -78,9 +82,9 @@ class LatestPresenter(
         loadNextItems()
 
         presenterScope.launch {
-            if (latestScreenState.value.promptForCategories) {
+            if (displayScreenState.value.promptForCategories) {
                 val categories = db.getCategories().executeAsBlocking()
-                _latestScreenState.update {
+                _displayScreenState.update {
                     it.copy(
                         categories = categories.map { category -> category.toCategoryItem() }.toImmutableList(),
                     )
@@ -89,7 +93,7 @@ class LatestPresenter(
         }
         presenterScope.launch {
             preferences.browseAsList().asFlow().collectLatest {
-                _latestScreenState.update { state ->
+                _displayScreenState.update { state ->
                     state.copy(isList = it)
                 }
             }
@@ -120,7 +124,7 @@ class LatestPresenter(
                 val defaultCategory = preferences.defaultCategory()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
-                    _latestScreenState.value.categories.firstOrNull {
+                    _displayScreenState.value.categories.firstOrNull {
                         defaultCategory == it.id
                     }?.let {
                         val categories = listOf(MangaCategory.create(editManga, it.toDbCategory()))
@@ -136,11 +140,11 @@ class LatestPresenter(
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
         presenterScope.launch {
-            val index = _latestScreenState.value.displayManga.indexOfFirst { it.mangaId == mangaId }
-            val tempList = _latestScreenState.value.displayManga.toMutableList()
+            val index = _displayScreenState.value.displayManga.indexOfFirst { it.mangaId == mangaId }
+            val tempList = _displayScreenState.value.displayManga.toMutableList()
             val tempDisplayManga = tempList[index].copy(inLibrary = favorite)
             tempList[index] = tempDisplayManga
-            _latestScreenState.update {
+            _displayScreenState.update {
                 it.copy(
                     displayManga = tempList.toImmutableList(),
                 )
@@ -155,24 +159,24 @@ class LatestPresenter(
         presenterScope.launchIO {
             val category = Category.create(newCategory)
             db.insertCategory(category).executeAsBlocking()
-            _latestScreenState.update {
+            _displayScreenState.update {
                 it.copy(categories = db.getCategories().executeAsBlocking().map { category -> category.toCategoryItem() }.toImmutableList())
             }
         }
     }
 
     fun switchDisplayMode() {
-        preferences.browseAsList().set(!latestScreenState.value.isList)
+        preferences.browseAsList().set(!displayScreenState.value.isList)
     }
 
     fun updateCovers() {
         if (isScopeInitialized) {
             presenterScope.launch {
-                val newDisplayManga = _latestScreenState.value.displayManga.map {
+                val newDisplayManga = _displayScreenState.value.displayManga.map {
                     val dbManga = db.getManga(it.mangaId).executeOnIO()!!
                     it.copy(currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
                 }.toImmutableList()
-                _latestScreenState.update {
+                _displayScreenState.update {
                     it.copy(displayManga = newDisplayManga)
                 }
             }

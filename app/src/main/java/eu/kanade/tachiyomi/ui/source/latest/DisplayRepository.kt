@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import okhttp3.internal.toImmutableList
@@ -17,13 +18,20 @@ import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class LatestRepository(
+class DisplayRepository(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().getMangadex(),
     private val db: DatabaseHelper = Injekt.get(),
     private val preferenceHelper: PreferencesHelper = Injekt.get(),
 ) {
 
-    suspend fun getPage(page: Int): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+    suspend fun getPage(page: Int, displayScreenType: DisplayScreenType): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        return when (displayScreenType) {
+            DisplayScreenType.LatestChapters -> getLatestChapterPage(page)
+            else -> Err("Not Implemented".toResultError())
+        }
+    }
+
+    private suspend fun getLatestChapterPage(page: Int): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         val blockedScanlatorUUIDs = preferenceHelper.blockedScanlators().get().mapNotNull {
             var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
             if (scanlatorImpl == null) {
@@ -45,3 +53,4 @@ class LatestRepository(
         )
     }
 }
+

@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.lang.toResultError
@@ -68,7 +69,7 @@ class SearchHandler {
                 .getOrResultError("Error getting recently added")
                 .andThen { mangaListDto ->
                     Ok(
-                        ListResults(name = "Recently Added", mangaListDto.data.map { it.toSourceManga(thumbQuality) }),
+                        ListResults(displayScreenType = DisplayScreenType.RecentlyAdded, sourceManga = mangaListDto.data.map { it.toSourceManga(thumbQuality) }),
                     )
                 }
         }

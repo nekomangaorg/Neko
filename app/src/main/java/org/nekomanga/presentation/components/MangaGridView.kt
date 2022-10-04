@@ -257,7 +257,7 @@ fun MangaGridSubtitle(displayText: String, isComfortable: Boolean = true) {
             text = displayText,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
-            color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White,
+            color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White.copy(alpha = NekoColors.mediumAlphaLowContrast),
             fontWeight = if (isComfortable) FontWeight.Normal else FontWeight.SemiBold,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier

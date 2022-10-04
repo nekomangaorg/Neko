@@ -271,7 +271,7 @@ tasks {
     }
 
     preBuild {
-        dependsOn(formatKotlin)
+        //dependsOn(formatKotlin)
     }
 }
 

@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
@@ -124,7 +125,7 @@ open class MangaDex : HttpSource() {
                 val latestChapter = async {
                     latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs, limit = MdUtil.smallerLatestChapterLimit)
                         .andThen { mangaListPage ->
-                            Ok(ListResults(name = "Latest Updates", sourceManga = mangaListPage.sourceManga))
+                            Ok(ListResults(displayScreenType = DisplayScreenType.LatestChapters, sourceManga = mangaListPage.sourceManga))
                         }.bind()
                 }
 

@@ -7,17 +7,24 @@ import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import org.nekomanga.presentation.screens.LatestScreen
+import org.nekomanga.presentation.screens.DisplayScreen
 
-class LatestController(bundle: Bundle? = null) :
-    BaseComposeController<LatestPresenter>(bundle) {
+class DisplayController(private val displayScreenType: DisplayScreenType, private val headerTitle: String = "") :
+    BaseComposeController<DisplayPresenter>(
+        Bundle().apply {
+            putSerializable(Display_Type, displayScreenType)
+            putString(AppBar_Title, headerTitle)
+        },
+    ) {
 
-    override var presenter = LatestPresenter()
+    constructor(bundle: Bundle) : this(bundle.getSerializable(Display_Type)!! as DisplayScreenType, bundle.getString(AppBar_Title) ?: "")
+
+    override var presenter = DisplayPresenter(displayScreenType)
 
     @Composable
     override fun ScreenContent() {
-        LatestScreen(
-            latestScreenState = presenter.latestScreenState.collectAsState(),
+        DisplayScreen(
+            displayScreenState = presenter.displayScreenState.collectAsState(),
             switchDisplayClick = presenter::switchDisplayMode,
             onBackPress = { activity?.onBackPressed() },
             openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
@@ -31,5 +38,10 @@ class LatestController(bundle: Bundle? = null) :
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         presenter.updateCovers()
+    }
+
+    companion object {
+        const val Display_Type = "displayType"
+        const val AppBar_Title = "appBarTitle"
     }
 }

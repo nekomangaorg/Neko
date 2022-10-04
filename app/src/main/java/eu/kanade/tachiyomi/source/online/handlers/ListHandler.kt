@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,7 +30,7 @@ class ListHandler {
                 .andThen { listDto ->
                     val mangaIds = listDto.data.relationships.filter { it.type == MdConstants.Types.manga }.map { it.id }
                     when (mangaIds.isEmpty()) {
-                        true -> Ok(ListResults("", emptyList()))
+                        true -> Ok(ListResults("", DisplayScreenType.List, emptyList()))
                         false -> {
                             val allContentRating = listOf(
                                 MdConstants.ContentRating.safe,
@@ -51,6 +52,7 @@ class ListHandler {
                                     Ok(
                                         ListResults(
                                             name = listDto.data.attributes.name ?: "",
+                                            displayScreenType = DisplayScreenType.List,
                                             sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) },
                                         ),
                                     )
@@ -62,4 +64,4 @@ class ListHandler {
     }
 }
 
-data class ListResults(val name: String, val sourceManga: List<SourceManga>)
+data class ListResults(val name: String = "", val displayScreenType: DisplayScreenType, val sourceManga: List<SourceManga>)

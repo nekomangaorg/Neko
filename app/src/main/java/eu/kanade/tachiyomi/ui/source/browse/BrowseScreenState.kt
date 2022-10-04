@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -24,4 +25,4 @@ data class BrowseScreenState(
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 
-data class HomePageManga(val title: String? = null, val titleRes: Int? = null, val displayManga: ImmutableList<DisplayManga> = persistentListOf())
+data class HomePageManga(val altTitle: String = "", val displayScreenType: DisplayScreenType, val displayManga: ImmutableList<DisplayManga> = persistentListOf())

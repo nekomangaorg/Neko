@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,9 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import java.util.Objects
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
@@ -48,87 +47,68 @@ fun BrowseHomePage(
     shouldOutlineCover: Boolean,
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
-    titleClick: () -> Unit,
+    titleClick: (DisplayScreenType, String) -> Unit,
 ) {
     val coverSize = (maxOf(LocalConfiguration.current.screenHeightDp, LocalConfiguration.current.screenWidthDp) / 5).dp
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga.title) }) { homePageManga ->
-            nonExpanded(
-                homePageManga = homePageManga,
-                coverSize = coverSize,
-                shouldOutlineCover = shouldOutlineCover,
-                headerClick = titleClick,
-                onClick = onClick,
-                onLongClick = onLongClick,
-            )
-        }
-    }
-}
-
-@Composable
-private fun LazyItemScope.nonExpanded(
-    homePageManga: HomePageManga,
-    coverSize: Dp,
-    shouldOutlineCover: Boolean,
-    headerClick: () -> Unit,
-    onClick: (Long) -> Unit,
-    onLongClick: (DisplayManga) -> Unit,
-) {
-    val headerText = when (homePageManga.titleRes == null) {
-        true -> homePageManga.title ?: ""
-        false -> stringResource(id = homePageManga.titleRes)
-    }
-    TextButton(
-        onClick = headerClick,
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = headerText,
-                style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-            )
-            Gap(8.dp)
-            Icon(imageVector = Icons.Default.ArrowForward, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
-        }
-    }
-    Gap(4.dp)
-    LazyRow(
-        modifier = Modifier
-            .requiredHeight(coverSize + 70.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        item { Gap(Padding.smallHorizontalPadding) }
-
-        items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
-            if (displayManga.isVisible) {
-                Box {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(Shapes.coverRadius))
-                            .combinedClickable(
-                                onClick = { onClick(displayManga.mangaId) },
-                                onLongClick = { onLongClick(displayManga) },
-                            )
-                            .width(IntrinsicSize.Min),
-                    ) {
-                        Column {
-                            MangaCover.Square.invoke(
-                                manga = displayManga,
-                                shouldOutlineCover = shouldOutlineCover,
-                                modifier = Modifier.requiredHeight(coverSize),
-                            )
-                            MangaGridTitle(title = displayManga.title)
-                            MangaGridSubtitle(displayText = displayManga.displayText)
-                        }
-                    }
-
-                    if (displayManga.inLibrary) {
-                        InLibraryBadge(shouldOutlineCover)
-                    }
+        items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga) }) { homePageManga ->
+            val headerText = when (homePageManga.displayScreenType.titleRes == null) {
+                true -> homePageManga.altTitle
+                false -> stringResource(id = homePageManga.displayScreenType.titleRes)
+            }
+            TextButton(
+                onClick = { titleClick(homePageManga.displayScreenType, homePageManga.altTitle) },
+            ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = headerText,
+                        style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                    )
+                    Gap(8.dp)
+                    Icon(imageVector = Icons.Default.ArrowForward, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
-        }
+            Gap(4.dp)
+            LazyRow(
+                modifier = Modifier
+                    .requiredHeight(coverSize + 70.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                item { Gap(Padding.smallHorizontalPadding) }
 
-        item { Gap(Padding.smallHorizontalPadding) }
+                items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
+                    if (displayManga.isVisible) {
+                        Box {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(Shapes.coverRadius))
+                                    .combinedClickable(
+                                        onClick = { onClick(displayManga.mangaId) },
+                                        onLongClick = { onLongClick(displayManga) },
+                                    )
+                                    .width(IntrinsicSize.Min),
+                            ) {
+                                Column {
+                                    MangaCover.Square.invoke(
+                                        manga = displayManga,
+                                        shouldOutlineCover = shouldOutlineCover,
+                                        modifier = Modifier.requiredHeight(coverSize),
+                                    )
+                                    MangaGridTitle(title = displayManga.title)
+                                    MangaGridSubtitle(displayText = displayManga.displayText)
+                                }
+                            }
+
+                            if (displayManga.inLibrary) {
+                                InLibraryBadge(shouldOutlineCover)
+                            }
+                        }
+                    }
+                }
+
+                item { Gap(Padding.smallHorizontalPadding) }
+            }
+        }
     }
 }

@@ -303,7 +303,8 @@
     <string name="other">Other</string>
     <string name="global_search">Global search…</string>
     <string name="label_global_search">Global search</string>
-    <string name="latest">Latest</string>
+    <string name="latest">Latest uploads</string>
+    <string name="recently_added">Recently added</string>
     <string name="browse">Browse</string>
     <string name="in_library">In Library</string>
     <string name="search_extensions">Search extensions…</string>

@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ui.source.latest.LatestScreenState
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
@@ -49,8 +49,8 @@ import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun LatestScreen(
-    latestScreenState: State<LatestScreenState>,
+fun DisplayScreen(
+    displayScreenState: State<DisplayScreenState>,
     switchDisplayClick: () -> Unit,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
@@ -78,7 +78,7 @@ fun LatestScreen(
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 EditCategorySheet(
                     addingToLibrary = true,
-                    categories = latestScreenState.value.categories,
+                    categories = displayScreenState.value.categories,
                     cancelClick = { scope.launch { sheetState.hide() } },
                     addNewCategory = addNewCategory,
                     confirmClicked = { selectedCategories ->
@@ -92,11 +92,11 @@ fun LatestScreen(
         },
     ) {
         NekoScaffold(
-            title = stringResource(id = R.string.latest),
+            title = if (displayScreenState.value.titleRes != null) stringResource(id = displayScreenState.value.titleRes!!) else displayScreenState.value.title,
             onNavigationIconClicked = onBackPress,
             actions = {
                 ListGridActionButton(
-                    isList = latestScreenState.value.isList,
+                    isList = displayScreenState.value.isList,
                     buttonClicked = switchDisplayClick,
                 )
             },
@@ -111,7 +111,7 @@ fun LatestScreen(
             val haptic = LocalHapticFeedback.current
             fun mangaLongClick(displayManga: DisplayManga) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                if (!displayManga.inLibrary && latestScreenState.value.promptForCategories) {
+                if (!displayManga.inLibrary && displayScreenState.value.promptForCategories) {
                     scope.launch {
                         longClickedMangaId = displayManga.mangaId
                         sheetState.show()
@@ -121,7 +121,7 @@ fun LatestScreen(
                 }
             }
 
-            if (latestScreenState.value.isLoading && latestScreenState.value.page == 1) {
+            if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Loading(
                         Modifier
@@ -131,19 +131,19 @@ fun LatestScreen(
                             .align(Alignment.TopCenter),
                     )
                 }
-            } else if (latestScreenState.value.error != null) {
+            } else if (displayScreenState.value.error != null) {
                 EmptyScreen(
                     icon = Icons.Default.ErrorOutline,
                     iconSize = 176.dp,
-                    message = latestScreenState.value.error,
-                    actions = if (latestScreenState.value.page == 1) persistentListOf(Action(R.string.retry, retryClick)) else persistentListOf(),
+                    message = displayScreenState.value.error,
+                    actions = if (displayScreenState.value.page == 1) persistentListOf(Action(R.string.retry, retryClick)) else persistentListOf(),
                     contentPadding = incomingContentPadding,
                 )
             } else {
-                if (latestScreenState.value.isList) {
+                if (displayScreenState.value.isList) {
                     MangaList(
-                        mangaList = latestScreenState.value.displayManga,
-                        shouldOutlineCover = latestScreenState.value.outlineCovers,
+                        mangaList = displayScreenState.value.displayManga,
+                        shouldOutlineCover = displayScreenState.value.outlineCovers,
                         contentPadding = contentPadding,
                         onClick = openManga,
                         onLongClick = ::mangaLongClick,
@@ -151,17 +151,17 @@ fun LatestScreen(
                     )
                 } else {
                     MangaGrid(
-                        mangaList = latestScreenState.value.displayManga,
-                        shouldOutlineCover = latestScreenState.value.outlineCovers,
-                        columns = numberOfColumns(rawValue = latestScreenState.value.rawColumnCount),
-                        isComfortable = latestScreenState.value.isComfortableGrid,
+                        mangaList = displayScreenState.value.displayManga,
+                        shouldOutlineCover = displayScreenState.value.outlineCovers,
+                        columns = numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
+                        isComfortable = displayScreenState.value.isComfortableGrid,
                         contentPadding = contentPadding,
                         onClick = openManga,
                         onLongClick = ::mangaLongClick,
                         loadNextItems = loadNextPage,
                     )
                 }
-                if (latestScreenState.value.isLoading && latestScreenState.value.page != 1) {
+                if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
                     Box(Modifier.fillMaxSize()) {
                         LinearProgressIndicator(
                             modifier = Modifier

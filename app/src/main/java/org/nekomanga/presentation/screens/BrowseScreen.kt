@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
@@ -73,7 +74,7 @@ fun BrowseScreen(
     toggleFavorite: (Long, List<CategoryItem>, Boolean) -> Unit,
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
-    homeScreenTitleClick: () -> Unit,
+    homeScreenTitleClick: (DisplayScreenType, String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
