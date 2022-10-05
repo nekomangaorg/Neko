@@ -2,7 +2,7 @@ name: Release app
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   check_wrapper:
