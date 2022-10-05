@@ -8,6 +8,7 @@
         <item name="colorOnPrimary">@color/background</item>
         <item name="colorOnBackground">@color/md_white_1000</item>
         <item name="colorSecondaryVariant">@color/neko_green</item>
+        <item name="colorOnSecondary">@color/md_black_1000</item>
         <item name="unreadBadgeColor">@color/neko_green</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
         <item name="colorOnHopper">@color/md_black_1000</item>
