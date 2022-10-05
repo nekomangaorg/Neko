@@ -24,7 +24,6 @@ class BrowseSourceItem(
     private val catalogueAsList: Preference<Boolean>,
     private val catalogueListType: Preference<Int>,
     private val outlineOnCovers: Preference<Boolean>,
-    private val isFollows: Boolean = false,
 ) :
     AbstractFlexibleItem<BrowseSourceHolder>() {
 
@@ -70,7 +69,7 @@ class BrowseSourceItem(
             }
             BrowseSourceGridHolder(view, adapter, listType == LibraryItem.LAYOUT_COMPACT_GRID, outlineOnCovers.get())
         } else {
-            BrowseSourceListHolder(view, adapter, outlineOnCovers.get(), isFollows)
+            BrowseSourceListHolder(view, adapter, outlineOnCovers.get())
         }
     }
 

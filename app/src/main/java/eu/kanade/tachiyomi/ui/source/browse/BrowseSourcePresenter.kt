@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -70,8 +69,6 @@ open class BrowseSourcePresenter(
 
     var filtersChanged = false
 
-    var isFollows = false
-
     var shouldHideFab = false
 
     /**
@@ -105,8 +102,6 @@ open class BrowseSourcePresenter(
      * Subscription for one request from the pager.
      */
     private var nextPageJob: Job? = null
-
-    private val loggedServices by lazy { Injekt.get<TrackManager>().services.values.filter { it.isLogged() } }
 
     init {
         query = searchQuery
@@ -166,7 +161,6 @@ open class BrowseSourcePresenter(
                         browseAsList,
                         sourceListType,
                         outlineCovers,
-                        isFollows,
                     )
                 }
                     .filter { manga -> isDeepLink || isLibraryVisible || !manga.manga.favorite }
@@ -312,7 +306,7 @@ open class BrowseSourcePresenter(
     }
 
     open fun createPager(query: String, filters: FilterList): Pager {
-        return BrowseSourcePager(presenterScope, source, query, filters)
+        return BrowseSourcePager(source, query, filters)
     }
 
     private fun FilterList.toItems(): List<IFlexible<*>> {

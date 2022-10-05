@@ -147,7 +147,6 @@ class SearchActivity : MainActivity() {
                             BrowseSourceController(
                                 query,
                                 mangaDeepLink,
-                                mangaDeepLink,
                             ).withFadeTransaction(),
                         )
                     }

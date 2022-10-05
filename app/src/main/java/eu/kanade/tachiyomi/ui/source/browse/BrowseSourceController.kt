@@ -70,23 +70,15 @@ open class BrowseSourceController(bundle: Bundle) :
 
     constructor(
         searchQuery: String? = null,
-        applyInset: Boolean = true,
         deepLink: Boolean = false,
     ) : this(
         Bundle().apply
         {
-            putBoolean(APPLY_INSET, applyInset)
             putBoolean(DEEP_LINK, deepLink)
 
             if (searchQuery != null) {
                 putString(SEARCH_QUERY_KEY, searchQuery)
             }
-        },
-    )
-
-    constructor(applyInset: Boolean = true) : this(
-        Bundle().apply {
-            putBoolean(APPLY_INSET, applyInset)
         },
     )
 
@@ -203,7 +195,6 @@ open class BrowseSourceController(bundle: Bundle) :
         recycler.clipToPadding = false
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
-        var handleInsets = true
 
         scrollViewWith(
             recycler,
@@ -558,8 +549,7 @@ open class BrowseSourceController(bundle: Bundle) :
             actions += EmptyView.Action(R.string.retry, retryAction)
             actions += EmptyView.Action(
                 R.string.open_in_webview,
-                View.OnClickListener { openInWebView() },
-            )
+            ) { openInWebView() }
 
             binding.emptyView.show(
                 CommunityMaterial.Icon.cmd_compass_off,
@@ -747,7 +737,7 @@ open class BrowseSourceController(bundle: Bundle) :
         }
     }
 
-    fun updateFab(windowInsets: WindowInsets? = null) {
+    private fun updateFab(windowInsets: WindowInsets? = null) {
         val view = view ?: return
         val insets = windowInsets ?: view.rootWindowInsets
         binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -769,11 +759,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     companion object {
-        const val APPLY_INSET = "applyInset"
         const val DEEP_LINK = "deepLink"
-        const val FOLLOWS = "follows"
-        const val MANGA_ID = "mangaId"
-
         const val SEARCH_QUERY_KEY = "searchQuery"
     }
 }

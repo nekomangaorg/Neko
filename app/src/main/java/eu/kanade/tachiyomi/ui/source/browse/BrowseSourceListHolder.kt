@@ -25,7 +25,6 @@ class BrowseSourceListHolder(
     private val view: View,
     adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     showOutline: Boolean,
-    isFollows: Boolean = false,
 ) :
     BrowseSourceHolder(view, adapter) {
 
