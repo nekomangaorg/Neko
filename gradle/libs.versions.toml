@@ -35,7 +35,7 @@ disklrue = "com.jakewharton:disklrucache:2.0.2"
 iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconics_version" }
 iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconics_version" }
 iconics-compose = { module = "com.mikepenz:iconics-compose", version.ref = "iconics_version" }
-iconics-material = "com.mikepenz:community-material-typeface:6.4.95.0-kotlin"
+iconics-material = "com.mikepenz:community-material-typeface:7.0.96.0-kotlin"
 iconics-dx = "com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin"
 iconics-outlined = "com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin"
 
