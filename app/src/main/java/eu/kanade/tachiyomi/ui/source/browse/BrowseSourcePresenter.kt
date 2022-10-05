@@ -170,6 +170,7 @@ open class BrowseSourcePresenter(
                     if (isDeepLink) {
                         view.goDirectlyForDeepLink(mangaList.first().manga)
                     } else {
+                        mangaList.update(db)
                         view.onAddPage(page, mangaList)
                         if (mangaList.isEmpty()) {
                             requestNext()
@@ -352,5 +353,12 @@ open class BrowseSourcePresenter(
      */
     fun getCategories(): List<Category> {
         return db.getCategories().executeAsBlocking()
+    }
+}
+
+private fun List<BrowseSourceItem>.update(db: DatabaseHelper) {
+    this.map {
+        it.manga.favorite = db.getManga(it.manga.id!!).executeAsBlocking()!!.favorite
+        it
     }
 }
