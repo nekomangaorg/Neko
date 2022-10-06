@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -121,7 +122,7 @@ private fun MangaRow(
             }
 
             MangaListTitle(title = displayManga.title, maxLines = titleLineCount)
-            MangaListDisplay(displayText = displayManga.displayText)
+            MangaListSubtitle(text = displayManga.displayText, textRes = displayManga.displayTextRes)
         }
     }
 }
@@ -138,7 +139,12 @@ private fun MangaListTitle(title: String, maxLines: Int) {
 }
 
 @Composable
-private fun MangaListDisplay(displayText: String) {
+private fun MangaListSubtitle(text: String, @StringRes textRes: Int?) {
+
+    val displayText = when (textRes) {
+        null -> text
+        else -> stringResource(textRes)
+    }
     if (displayText.isNotBlank()) {
         Text(
             text = displayText,

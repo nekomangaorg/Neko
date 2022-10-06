@@ -75,7 +75,8 @@ class BrowseComposePresenter(
         },
         onSuccess = { hasNexPage, items, newKey ->
             _browseScreenState.update {
-                it.copy(isLoading = false, displayManga = (_browseScreenState.value.displayManga + items).toPersistentList(), page = newKey, endReached = hasNexPage)
+                val displayMangaHolder = it.displayMangaHolder.copy(displayManga = (it.displayMangaHolder.displayManga + items).toImmutableList())
+                it.copy(isLoading = false, displayMangaHolder = displayMangaHolder, page = newKey, endReached = hasNexPage)
             }
         },
     )
@@ -83,11 +84,11 @@ class BrowseComposePresenter(
     override fun onCreate() {
         super.onCreate()
 
-        loadInitialPage()
+        getHomepage()
 
         presenterScope.launch {
             _browseScreenState.update {
-                it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()))
+                it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()), isLoggedIn = browseRepository.isLoggedIn())
             }
         }
 
@@ -123,11 +124,11 @@ class BrowseComposePresenter(
         }
     }
 
-    private fun loadInitialPage() {
+    private fun getHomepage() {
         presenterScope.launch {
             browseRepository.getHomePage().onFailure {
                 _browseScreenState.update { state ->
-                    state.copy(error = it.message())
+                    state.copy(error = it.message(), isLoading = false)
                 }
             }.onSuccess {
                 _browseScreenState.update { state ->
@@ -137,7 +138,26 @@ class BrowseComposePresenter(
         }
     }
 
-    fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>, isInitialScreen: Boolean) {
+    private fun getFollows() {
+        presenterScope.launch {
+            if (_browseScreenState.value.displayMangaHolder.browseScreenType != BrowseScreenType.Follows) {
+                _browseScreenState.update { state ->
+                    state.copy(isLoading = true)
+                }
+                browseRepository.getFollows().onFailure {
+                    _browseScreenState.update { state ->
+                        state.copy(error = it.message(), isLoading = false)
+                    }
+                }.onSuccess {
+                    _browseScreenState.update { state ->
+                        state.copy(displayMangaHolder = DisplayMangaHolder(BrowseScreenType.Follows, it.updateVisibility().toImmutableList()), isLoading = false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>, browseScreenType: BrowseScreenType) {
         presenterScope.launch {
             val editManga = db.getManga(mangaId).executeAsBlocking()!!
             editManga.apply {
@@ -149,7 +169,7 @@ class BrowseComposePresenter(
             }
             db.insertManga(editManga).executeAsBlocking()
 
-            updateDisplayManga(mangaId, editManga.favorite, isInitialScreen)
+            updateDisplayManga(mangaId, editManga.favorite, browseScreenType)
 
             if (editManga.favorite) {
                 val defaultCategory = preferences.defaultCategory()
@@ -169,33 +189,37 @@ class BrowseComposePresenter(
         }
     }
 
-    private fun updateDisplayManga(mangaId: Long, favorite: Boolean, isInitialScreen: Boolean) {
+    private fun updateDisplayManga(mangaId: Long, favorite: Boolean, browseScreenType: BrowseScreenType) {
         presenterScope.launch {
-            if (isInitialScreen) {
-                val tempList = _browseScreenState.value.homePageManga.map { homePageManga ->
-                    val index = homePageManga.displayManga.indexOfFirst { it.mangaId == mangaId }
-                    if (index == -1) {
-                        homePageManga
-                    } else {
-                        val tempMangaList = homePageManga.displayManga.toMutableList()
-                        val tempDisplayManga = tempMangaList[index].copy(inLibrary = favorite)
-                        tempMangaList[index] = tempDisplayManga
-                        homePageManga.copy(displayManga = tempMangaList.toImmutableList())
+            when (browseScreenType) {
+                BrowseScreenType.Homepage -> {
+                    val tempList = _browseScreenState.value.homePageManga.map { homePageManga ->
+                        val index = homePageManga.displayManga.indexOfFirst { it.mangaId == mangaId }
+                        if (index == -1) {
+                            homePageManga
+                        } else {
+                            val tempMangaList = homePageManga.displayManga.toMutableList()
+                            val tempDisplayManga = tempMangaList[index].copy(inLibrary = favorite)
+                            tempMangaList[index] = tempDisplayManga
+                            homePageManga.copy(displayManga = tempMangaList.toImmutableList())
+                        }
+                    }.toImmutableList()
+                    _browseScreenState.update {
+                        it.copy(homePageManga = tempList)
                     }
-                }.toImmutableList()
-                _browseScreenState.update {
-                    it.copy(homePageManga = tempList)
                 }
-            } else {
-                val index = _browseScreenState.value.displayManga.indexOfFirst { it.mangaId == mangaId }
-                val tempList = _browseScreenState.value.displayManga.toMutableList()
-                val tempDisplayManga = tempList[index].copy(inLibrary = favorite)
-                tempList[index] = tempDisplayManga
-                _browseScreenState.update {
-                    it.copy(
-                        displayManga = tempList.toPersistentList(),
-                    )
+                else -> {
+                    val index = _browseScreenState.value.displayMangaHolder.displayManga.indexOfFirst { it.mangaId == mangaId }
+                    val tempList = _browseScreenState.value.displayMangaHolder.displayManga.toMutableList()
+                    val tempDisplayManga = tempList[index].copy(inLibrary = favorite)
+                    tempList[index] = tempDisplayManga
+                    _browseScreenState.update {
+                        it.copy(
+                            displayMangaHolder = it.displayMangaHolder.copy(displayManga = tempList.toPersistentList()),
+                        )
+                    }
                 }
+
             }
         }
     }
@@ -222,6 +246,18 @@ class BrowseComposePresenter(
         }
     }
 
+    fun changeScreenType(browseScreenType: BrowseScreenType) {
+        presenterScope.launch {
+            when (browseScreenType) {
+                BrowseScreenType.Follows -> getFollows()
+                else -> Unit
+            }
+            _browseScreenState.update {
+                it.copy(screenType = browseScreenType)
+            }
+        }
+    }
+
     fun switchLibraryVisibility() {
         presenterScope.launch {
             val showEntries = !browseScreenState.value.showLibraryEntries
@@ -238,7 +274,7 @@ class BrowseComposePresenter(
     private fun List<HomePageManga>.updateVisibility(): ImmutableList<HomePageManga> {
         return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.mapVisibility().toImmutableList(),
+                displayManga = homePageManga.displayManga.updateVisibility().toImmutableList(),
             )
         }.toImmutableList()
     }
@@ -246,7 +282,7 @@ class BrowseComposePresenter(
     /**
      * Marks display manga as visible when show library entries is enabled, otherwise hides library entries
      */
-    private fun List<DisplayManga>.mapVisibility(): List<DisplayManga> {
+    private fun List<DisplayManga>.updateVisibility(): List<DisplayManga> {
         return this.map { displayManga ->
             when (preferences.browseShowLibrary().get()) {
                 true -> {

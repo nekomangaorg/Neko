@@ -9,8 +9,9 @@ import org.nekomanga.domain.manga.DisplayManga
 
 data class BrowseScreenState(
     val isLoading: Boolean = true,
-    val initialScreen: Boolean = true,
-    val displayManga: ImmutableList<DisplayManga> = persistentListOf(),
+    val isLoggedIn: Boolean = false,
+    val screenType: BrowseScreenType = BrowseScreenType.Homepage,
+    val displayMangaHolder: DisplayMangaHolder = DisplayMangaHolder(),
     val homePageManga: ImmutableList<HomePageManga> = persistentListOf(),
     val error: String? = null,
     val endReached: Boolean = false,
@@ -26,3 +27,12 @@ data class BrowseScreenState(
 )
 
 data class HomePageManga(val altTitle: String = "", val displayScreenType: DisplayScreenType, val displayManga: ImmutableList<DisplayManga> = persistentListOf())
+
+data class DisplayMangaHolder(val browseScreenType: BrowseScreenType = BrowseScreenType.None, val displayManga: ImmutableList<DisplayManga> = persistentListOf())
+
+enum class BrowseScreenType {
+    Homepage,
+    Search,
+    Follows,
+    None,
+}

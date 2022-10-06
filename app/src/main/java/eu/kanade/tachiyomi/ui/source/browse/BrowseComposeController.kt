@@ -28,6 +28,7 @@ class BrowseComposeController(query: String? = null) : BaseComposeController<Bro
             toggleFavorite = presenter::toggleFavorite,
             loadNextPage = presenter::loadNextItems,
             retryClick = presenter::loadNextItems,
+            changeScreenType = presenter::changeScreenType,
         )
     }
 }

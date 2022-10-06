@@ -50,7 +50,7 @@ class FollowsSyncService {
                 errorNotification((it as? ResultError.Generic)?.errorString ?: "Error fetching follows")
             }.onSuccess { unfilteredManga ->
 
-                val listManga = unfilteredManga.filter { it.key in syncFollowStatusInts }.values.flatten()
+                val listManga = unfilteredManga.groupBy { FollowStatus.fromStringRes(it.displayTextRes).int }.filter { it.key in syncFollowStatusInts }.values.flatten()
 
                 XLog.d("total number from mangadex is ${listManga.size}")
 

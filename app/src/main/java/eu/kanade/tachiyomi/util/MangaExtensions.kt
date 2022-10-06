@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util
 
 import android.app.Activity
 import android.view.View
+import androidx.annotation.StringRes
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
@@ -230,16 +231,17 @@ fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga
         localManga.title = this.title
         db.insertManga(localManga).executeAsBlocking()
     }
-    return localManga.toDisplayManga(this.displayText)
+    return localManga.toDisplayManga(this.displayText, this.displayTextRes)
 }
 
-fun Manga.toDisplayManga(displayText: String = ""): DisplayManga {
+fun Manga.toDisplayManga(displayText: String = "", @StringRes displayTextRes: Int? = null): DisplayManga {
     return DisplayManga(
         mangaId = this.id!!,
         url = this.url,
         title = (this as? MangaImpl)?.title ?: this.title,
         inLibrary = this.favorite,
         displayText = displayText.replace("_", " ").capitalizeWords(),
+        displayTextRes = displayTextRes,
         currentArtwork = Artwork(mangaId = this.id!!, originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl),
     )
 }

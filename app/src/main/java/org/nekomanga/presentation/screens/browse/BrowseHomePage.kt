@@ -72,7 +72,7 @@ fun BrowseHomePage(
             Gap(4.dp)
             LazyRow(
                 modifier = Modifier
-                    .requiredHeight(coverSize + 70.dp),
+                    .requiredHeight(coverSize + 60.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 item { Gap(Padding.smallHorizontalPadding) }

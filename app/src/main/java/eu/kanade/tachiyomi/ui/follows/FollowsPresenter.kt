@@ -1,7 +1,5 @@
 package eu.kanade.tachiyomi.ui.follows
 
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -29,7 +27,6 @@ import uy.kohesive.injekt.api.get
  * Presenter of [FollowsController]
  */
 class FollowsPresenter(
-    private val repo: FollowsRepository = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<FollowsController>() {
@@ -70,22 +67,6 @@ class FollowsPresenter(
     }
 
     fun getFollows() {
-        presenterScope.launch {
-            _followsScreenState.update {
-                it.copy(isLoading = true, error = null)
-            }
-
-            val result = repo.fetchFollows()
-            result.onFailure { resultError ->
-                _followsScreenState.update {
-                    it.copy(isLoading = false, error = resultError)
-                }
-            }.onSuccess { displayManga ->
-                _followsScreenState.update {
-                    it.copy(isLoading = false, displayManga = displayManga)
-                }
-            }
-        }
     }
 
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {

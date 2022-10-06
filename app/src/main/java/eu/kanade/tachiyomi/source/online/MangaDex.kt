@@ -166,7 +166,7 @@ open class MangaDex : HttpSource() {
         return imageHandler.getImage(page, isLogged())
     }
 
-    suspend fun fetchAllFollows(): Result<Map<Int, List<SourceManga>>, ResultError> {
+    suspend fun fetchAllFollows(): Result<List<SourceManga>, ResultError> {
         return followsHandler.fetchAllFollows()
     }
 

@@ -14,6 +14,8 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
@@ -25,6 +27,8 @@ class BrowseRepository(
     private val db: DatabaseHelper = Injekt.get(),
     private val preferenceHelper: PreferencesHelper = Injekt.get(),
 ) {
+
+    fun isLoggedIn() = mangaDex.isLogged()
 
     suspend fun getSearchPage(page: Int, query: String, filter: FilterList): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.search2(page, query, filter)
@@ -64,6 +68,13 @@ class BrowseRepository(
                         )
                     },
                 )
+            }
+    }
+
+    suspend fun getFollows(): Result<ImmutableList<DisplayManga>, ResultError> {
+        return mangaDex.fetchAllFollows()
+            .andThen { sourceManga ->
+                Ok(sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList())
             }
     }
 }

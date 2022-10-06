@@ -8,7 +8,7 @@ object MdConstants {
     const val atHomeReportUrl = "https://api.mangadex.network/report"
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
 
-    const val currentSeasonalId = "7df1dabc-b1c5-4e8e-a757-de5a2a3d37e9"
+    const val currentSeasonalId = "4be9338a-3402-4f98-b467-43fb56663927"
 
     object Types {
         const val author = "author"

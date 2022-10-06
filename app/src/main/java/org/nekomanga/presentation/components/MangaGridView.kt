@@ -137,11 +137,16 @@ fun MangaGridItem(
                 )
                 .padding(2.dp),
         ) {
+            val subtitleText = when (displayManga.displayTextRes) {
+                null -> displayManga.displayText
+                else -> stringResource(displayManga.displayTextRes)
+            }
+
             if (isComfortable) {
                 Column {
                     ComfortableGridItem(
                         displayManga,
-                        displayManga.displayText,
+                        subtitleText,
                         shouldOutlineCover,
                     )
                 }
@@ -149,7 +154,7 @@ fun MangaGridItem(
                 Box {
                     CompactGridItem(
                         displayManga,
-                        displayManga.displayText,
+                        subtitleText,
                         shouldOutlineCover,
                     )
                 }
@@ -165,7 +170,7 @@ fun MangaGridItem(
 @Composable
 fun ColumnScope.ComfortableGridItem(
     manga: DisplayManga,
-    displayText: String,
+    subtitleText: String,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -176,17 +181,17 @@ fun ColumnScope.ComfortableGridItem(
     )
     MangaGridTitle(
         title = manga.title,
-        hasSubtitle = displayText.isNotBlank(),
+        hasSubtitle = subtitleText.isNotBlank(),
 
-    )
+        )
 
-    MangaGridSubtitle(displayText = displayText)
+    MangaGridSubtitle(subtitleText = subtitleText)
 }
 
 @Composable
 fun BoxScope.CompactGridItem(
     manga: DisplayManga,
-    displayText: String,
+    subtitleText: String,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -216,11 +221,11 @@ fun BoxScope.CompactGridItem(
         ) {
             MangaGridTitle(
                 title = manga.title,
-                hasSubtitle = displayText.isNotBlank(),
+                hasSubtitle = subtitleText.isNotBlank(),
                 isComfortable = false,
             )
             MangaGridSubtitle(
-                displayText = displayText,
+                subtitleText = subtitleText,
                 isComfortable = false,
             )
         }
@@ -251,10 +256,11 @@ fun MangaGridTitle(
 }
 
 @Composable
-fun MangaGridSubtitle(displayText: String, isComfortable: Boolean = true) {
-    if (displayText.isNotBlank()) {
+fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
+
+    if (subtitleText.isNotBlank()) {
         Text(
-            text = displayText,
+            text = subtitleText,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
             color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White.copy(alpha = NekoColors.mediumAlphaLowContrast),
