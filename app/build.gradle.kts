@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 161
-    const val versionName = "2.10.14"
+    const val versionCode = 162
+    const val versionName = "2.10.15"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -178,7 +178,7 @@ dependencies {
     implementation("br.com.devsrsouza.compose.icons.android:simple-icons:1.0.0")
 
     //required outside bundle cause toml doesnt work with aar
-    implementation("com.mikepenz:community-material-typeface:6.4.95.0-kotlin@aar")
+    implementation("com.mikepenz:community-material-typeface:7.0.96.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
 

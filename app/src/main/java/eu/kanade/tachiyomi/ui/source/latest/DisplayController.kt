@@ -37,7 +37,7 @@ class DisplayController(private val displayScreenType: DisplayScreenType, privat
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        presenter.updateCovers()
+        presenter.updateMangaForChanges()
     }
 
     companion object {
