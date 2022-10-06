@@ -16,13 +16,13 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
-import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.domain.network.ResultError
@@ -56,10 +56,11 @@ class SearchHandler {
         }
     }
 
-    suspend fun recentlyAdded(): Result<ListResults, ResultError> {
+    suspend fun recentlyAdded(page: Int): Result<MangaListPage, ResultError> {
         return withContext(Dispatchers.IO) {
             val queryParameters = mutableMapOf<String, Any>()
             queryParameters["limit"] = MdUtil.mangaLimit.toString()
+            queryParameters["offset"] = MdUtil.getMangaListOffset(page)
             val contentRatings = preferencesHelper.contentRatingSelections().toList()
             if (contentRatings.isNotEmpty()) {
                 queryParameters["contentRating[]"] = contentRatings
@@ -68,8 +69,10 @@ class SearchHandler {
             service.getRecentlyAdded(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error getting recently added")
                 .andThen { mangaListDto ->
+                    val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
+
                     Ok(
-                        ListResults(displayScreenType = DisplayScreenType.RecentlyAdded(), sourceManga = mangaListDto.data.map { it.toSourceManga(thumbQuality) }),
+                        MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()),
                     )
                 }
         }

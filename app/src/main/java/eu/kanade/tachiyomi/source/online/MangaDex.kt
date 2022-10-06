@@ -130,12 +130,18 @@ open class MangaDex : HttpSource() {
                 }
 
                 val recentlyAdded = async {
-                    searchHandler.recentlyAdded().bind()
+                    searchHandler.recentlyAdded(1).andThen { mangaListPage ->
+                        Ok(ListResults(displayScreenType = DisplayScreenType.RecentlyAdded(), sourceManga = mangaListPage.sourceManga))
+                    }.bind()
                 }
 
                 listOf(seasonal.await(), latestChapter.await(), recentlyAdded.await())
             }
         }
+    }
+
+    suspend fun recentlyAdded(page: Int): Result<MangaListPage, ResultError> {
+        return searchHandler.recentlyAdded(page)
     }
 
     suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {

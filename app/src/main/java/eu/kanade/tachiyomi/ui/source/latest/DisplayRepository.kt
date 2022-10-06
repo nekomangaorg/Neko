@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import okhttp3.internal.toImmutableList
@@ -28,7 +27,7 @@ class DisplayRepository(
         return when (displayScreenType) {
             is DisplayScreenType.LatestChapters -> getLatestChapterPage(page)
             is DisplayScreenType.List -> getListPage(displayScreenType.listUUID)
-            else -> Err("Not Implemented".toResultError())
+            is DisplayScreenType.RecentlyAdded -> getRecentlyAddedPage(page)
         }
     }
 
@@ -61,6 +60,19 @@ class DisplayRepository(
                     sourceManga.toDisplayManga(db, mangaDex.id)
                 }
                 Ok(false to displayMangaList.toImmutableList())
+
+            },
+            failure = { Err(it) },
+        )
+    }
+
+    private suspend fun getRecentlyAddedPage(page: Int): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        return mangaDex.recentlyAdded(page).mapBoth(
+            success = { listResults ->
+                val displayMangaList = listResults.sourceManga.map { sourceManga ->
+                    sourceManga.toDisplayManga(db, mangaDex.id)
+                }
+                Ok(listResults.hasNextPage to displayMangaList.toImmutableList())
 
             },
             failure = { Err(it) },

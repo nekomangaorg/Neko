@@ -11,6 +11,9 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.domain.manga.SourceManga
@@ -30,7 +33,7 @@ class ListHandler {
                 .andThen { listDto ->
                     val mangaIds = listDto.data.relationships.filter { it.type == MdConstants.Types.manga }.map { it.id }
                     when (mangaIds.isEmpty()) {
-                        true -> Ok(ListResults(DisplayScreenType.List("", listUUID), emptyList()))
+                        true -> Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
                         false -> {
                             val allContentRating = listOf(
                                 MdConstants.ContentRating.safe,
@@ -52,7 +55,7 @@ class ListHandler {
                                     Ok(
                                         ListResults(
                                             displayScreenType = DisplayScreenType.List(listDto.data.attributes.name ?: "", listUUID),
-                                            sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) },
+                                            sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) }.toImmutableList(),
                                         ),
                                     )
                                 }
@@ -63,4 +66,4 @@ class ListHandler {
     }
 }
 
-data class ListResults(val displayScreenType: DisplayScreenType, val sourceManga: List<SourceManga>)
+data class ListResults(val displayScreenType: DisplayScreenType, val sourceManga: ImmutableList<SourceManga>)
