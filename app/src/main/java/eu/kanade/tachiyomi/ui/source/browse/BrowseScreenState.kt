@@ -28,7 +28,11 @@ data class BrowseScreenState(
 
 data class HomePageManga(val displayScreenType: DisplayScreenType, val displayManga: ImmutableList<DisplayManga> = persistentListOf())
 
-data class DisplayMangaHolder(val browseScreenType: BrowseScreenType = BrowseScreenType.None, val displayManga: ImmutableList<DisplayManga> = persistentListOf())
+data class DisplayMangaHolder(
+    val browseScreenType: BrowseScreenType = BrowseScreenType.None,
+    val allDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
+    val filteredDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
+)
 
 enum class BrowseScreenType {
     Homepage,

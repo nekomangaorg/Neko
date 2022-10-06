@@ -213,7 +213,7 @@ fun BrowseScreen(
                             onLongClick = ::mangaLongClick,
                         )
                         BrowseScreenType.Follows -> {
-                            if (browseScreenState.value.displayMangaHolder.displayManga.isEmpty()) {
+                            if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
                                 EmptyScreen(
                                     iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                                     iconSize = 176.dp,
@@ -221,7 +221,7 @@ fun BrowseScreen(
                                 )
                             } else {
                                 val groupedManga = remember(browseScreenState.value.displayMangaHolder) {
-                                    browseScreenState.value.displayMangaHolder.displayManga
+                                    browseScreenState.value.displayMangaHolder.filteredDisplayManga
                                         .groupBy { it.displayTextRes!! }
                                         .map { entry ->
                                             entry.key to entry.value.map { it.copy(displayTextRes = null) }.toImmutableList()
@@ -251,7 +251,7 @@ fun BrowseScreen(
                         BrowseScreenType.Search -> {
                             if (browseScreenState.value.isList) {
                                 MangaList(
-                                    mangaList = browseScreenState.value.displayMangaHolder.displayManga,
+                                    mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
                                     shouldOutlineCover = browseScreenState.value.outlineCovers,
                                     contentPadding = contentPadding,
                                     onClick = openManga,
@@ -260,7 +260,7 @@ fun BrowseScreen(
                                 )
                             } else {
                                 MangaGrid(
-                                    mangaList = browseScreenState.value.displayMangaHolder.displayManga,
+                                    mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
                                     shouldOutlineCover = browseScreenState.value.outlineCovers,
                                     columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
                                     isComfortable = browseScreenState.value.isComfortableGrid,

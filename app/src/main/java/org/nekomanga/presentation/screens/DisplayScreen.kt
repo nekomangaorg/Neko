@@ -44,6 +44,7 @@ import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Shapes
@@ -52,6 +53,7 @@ import org.nekomanga.presentation.theme.Shapes
 fun DisplayScreen(
     displayScreenState: State<DisplayScreenState>,
     switchDisplayClick: () -> Unit,
+    switchLibraryVisibilityClick: () -> Unit,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
@@ -99,6 +101,10 @@ fun DisplayScreen(
                     isList = displayScreenState.value.isList,
                     buttonClicked = switchDisplayClick,
                 )
+                ShowLibraryEntriesActionButton(
+                    showEntries = displayScreenState.value.showLibraryEntries,
+                    buttonClicked = switchLibraryVisibilityClick,
+                )
             },
         ) { incomingContentPadding ->
             val contentPadding =
@@ -142,7 +148,7 @@ fun DisplayScreen(
             } else {
                 if (displayScreenState.value.isList) {
                     MangaList(
-                        mangaList = displayScreenState.value.displayManga,
+                        mangaList = displayScreenState.value.filteredDisplayManga,
                         shouldOutlineCover = displayScreenState.value.outlineCovers,
                         contentPadding = contentPadding,
                         onClick = openManga,
@@ -152,7 +158,7 @@ fun DisplayScreen(
                     )
                 } else {
                     MangaGrid(
-                        mangaList = displayScreenState.value.displayManga,
+                        mangaList = displayScreenState.value.filteredDisplayManga,
                         shouldOutlineCover = displayScreenState.value.outlineCovers,
                         columns = numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
                         isComfortable = displayScreenState.value.isComfortableGrid,

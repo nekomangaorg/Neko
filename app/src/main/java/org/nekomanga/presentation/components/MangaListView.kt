@@ -47,7 +47,6 @@ fun MangaList(
         contentPadding = contentPadding,
     ) {
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
-
             LaunchedEffect(scrollState) {
                 if (!lastPage && index >= mangaList.size - 1) {
                     loadNextItems()

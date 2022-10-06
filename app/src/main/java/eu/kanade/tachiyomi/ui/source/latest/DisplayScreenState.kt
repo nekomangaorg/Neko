@@ -12,7 +12,8 @@ data class DisplayScreenState(
     val isLoading: Boolean = false,
     val title: String = "",
     val titleRes: Int? = null,
-    val displayManga: ImmutableList<DisplayManga> = persistentListOf(),
+    val allDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
+    val filteredDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
     val error: String? = null,
     val endReached: Boolean = false,
     val page: Int = 1,
@@ -21,6 +22,7 @@ data class DisplayScreenState(
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
     val promptForCategories: Boolean,
+    val showLibraryEntries: Boolean,
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 

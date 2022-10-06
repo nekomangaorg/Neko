@@ -1,11 +1,13 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import android.view.View
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
+import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.BrowseScreen
 
@@ -30,5 +32,11 @@ class BrowseComposeController(query: String? = null) : BaseComposeController<Bro
             retryClick = presenter::loadNextItems,
             changeScreenType = presenter::changeScreenType,
         )
+    }
+
+    override fun onViewCreated(view: View) {
+        super.onViewCreated(view)
+        requestFilePermissionsSafe(301, presenter.preferences)
+        presenter.updateMangaForChanges()
     }
 }

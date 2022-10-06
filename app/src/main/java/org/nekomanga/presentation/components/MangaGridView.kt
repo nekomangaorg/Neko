@@ -100,6 +100,7 @@ fun MangaGrid(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
 
             LaunchedEffect(scrollState) {
