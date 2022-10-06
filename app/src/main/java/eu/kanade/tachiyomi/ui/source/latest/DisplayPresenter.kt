@@ -26,7 +26,6 @@ import uy.kohesive.injekt.api.get
 
 class DisplayPresenter(
     displayScreenType: DisplayScreenType,
-    title: String = "",
     private val displayRepository: DisplayRepository = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
@@ -35,8 +34,8 @@ class DisplayPresenter(
     private val _displayScreenState = MutableStateFlow(
         DisplayScreenState(
             isList = preferences.browseAsList().get(),
-            title = title,
-            titleRes = displayScreenType.titleRes,
+            title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
+            titleRes = (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes,
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
@@ -69,9 +68,9 @@ class DisplayPresenter(
                 )
             }
         },
-        onSuccess = { hasNexPage, items, newKey ->
+        onSuccess = { hasNextPage, items, newKey ->
             _displayScreenState.update {
-                it.copy(displayManga = (_displayScreenState.value.displayManga + items).toImmutableList(), page = newKey, endReached = hasNexPage)
+                it.copy(displayManga = (_displayScreenState.value.displayManga + items).toImmutableList(), page = newKey, endReached = !hasNextPage)
             }
         },
     )

@@ -9,15 +9,14 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.DisplayScreen
 
-class DisplayController(private val displayScreenType: DisplayScreenType, private val headerTitle: String = "") :
+class DisplayController(private val displayScreenType: DisplayScreenType) :
     BaseComposeController<DisplayPresenter>(
         Bundle().apply {
-            putSerializable(Display_Type, displayScreenType)
-            putString(AppBar_Title, headerTitle)
+            putParcelable(Display_Type, displayScreenType)
         },
     ) {
 
-    constructor(bundle: Bundle) : this(bundle.getSerializable(Display_Type)!! as DisplayScreenType, bundle.getString(AppBar_Title) ?: "")
+    constructor(bundle: Bundle) : this(bundle.getParcelable<DisplayScreenType>(Display_Type)!!)
 
     override var presenter = DisplayPresenter(displayScreenType)
 
@@ -42,6 +41,5 @@ class DisplayController(private val displayScreenType: DisplayScreenType, privat
 
     companion object {
         const val Display_Type = "displayType"
-        const val AppBar_Title = "appBarTitle"
     }
 }

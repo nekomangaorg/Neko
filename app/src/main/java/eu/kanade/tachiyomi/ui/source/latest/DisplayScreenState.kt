@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
+import android.os.Parcelable
 import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.parcelize.Parcelize
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 
@@ -22,8 +24,16 @@ data class DisplayScreenState(
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 
-enum class DisplayScreenType(val titleRes: Int? = null) {
-    LatestChapters(R.string.latest),
-    RecentlyAdded(R.string.recently_added),
-    List,
+@Parcelize
+sealed interface DisplayScreenType : Parcelable {
+    @Parcelize
+    data class LatestChapters(val titleRes: Int = R.string.latest) : DisplayScreenType
+
+    @Parcelize
+    data class RecentlyAdded(val titleRes: Int = R.string.recently_added) : DisplayScreenType
+
+    @Parcelize
+    data class List(val title: String, val listUUID: String) : DisplayScreenType
 }
+
+

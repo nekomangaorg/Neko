@@ -80,7 +80,7 @@ fun BrowseScreen(
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
     changeScreenType: (BrowseScreenType) -> Unit,
-    homeScreenTitleClick: (DisplayScreenType, String) -> Unit,
+    homeScreenTitleClick: (DisplayScreenType) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)

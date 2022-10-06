@@ -125,7 +125,7 @@ open class MangaDex : HttpSource() {
                 val latestChapter = async {
                     latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs, limit = MdUtil.smallerLatestChapterLimit)
                         .andThen { mangaListPage ->
-                            Ok(ListResults(displayScreenType = DisplayScreenType.LatestChapters, sourceManga = mangaListPage.sourceManga))
+                            Ok(ListResults(displayScreenType = DisplayScreenType.LatestChapters(), sourceManga = mangaListPage.sourceManga))
                         }.bind()
                 }
 

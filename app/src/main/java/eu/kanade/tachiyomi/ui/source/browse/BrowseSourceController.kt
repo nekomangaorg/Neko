@@ -385,7 +385,7 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.onLatestChapterClicked = {
             sheet.dismiss()
             adapter?.clear()
-            router.pushController(DisplayController(DisplayScreenType.LatestChapters).withFadeTransaction())
+            router.pushController(DisplayController(DisplayScreenType.LatestChapters()).withFadeTransaction())
         }
 
         sheet.show()

@@ -36,6 +36,7 @@ fun MangaList(
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
+    lastPage: Boolean = true,
     loadNextItems: () -> Unit = {},
 ) {
     val scrollState = rememberLazyListState()
@@ -48,7 +49,7 @@ fun MangaList(
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
 
             LaunchedEffect(scrollState) {
-                if (index >= mangaList.size - 1) {
+                if (!lastPage && index >= mangaList.size - 1) {
                     loadNextItems()
                 }
             }

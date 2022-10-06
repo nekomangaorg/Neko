@@ -147,6 +147,7 @@ fun DisplayScreen(
                         contentPadding = contentPadding,
                         onClick = openManga,
                         onLongClick = ::mangaLongClick,
+                        lastPage = displayScreenState.value.endReached,
                         loadNextItems = loadNextPage,
                     )
                 } else {
@@ -158,6 +159,7 @@ fun DisplayScreen(
                         contentPadding = contentPadding,
                         onClick = openManga,
                         onLongClick = ::mangaLongClick,
+                        lastPage = displayScreenState.value.endReached,
                         loadNextItems = loadNextPage,
                     )
                 }

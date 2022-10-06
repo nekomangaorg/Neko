@@ -47,18 +47,19 @@ fun BrowseHomePage(
     shouldOutlineCover: Boolean,
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
-    titleClick: (DisplayScreenType, String) -> Unit,
+    titleClick: (DisplayScreenType) -> Unit,
 ) {
     val coverSize = (maxOf(LocalConfiguration.current.screenHeightDp, LocalConfiguration.current.screenWidthDp) / 5).dp
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga) }) { homePageManga ->
-            val headerText = when (homePageManga.displayScreenType.titleRes == null) {
-                true -> homePageManga.altTitle
-                false -> stringResource(id = homePageManga.displayScreenType.titleRes)
+            val headerText = when (homePageManga.displayScreenType) {
+                is DisplayScreenType.LatestChapters -> stringResource(homePageManga.displayScreenType.titleRes)
+                is DisplayScreenType.RecentlyAdded -> stringResource(homePageManga.displayScreenType.titleRes)
+                is DisplayScreenType.List -> homePageManga.displayScreenType.title
             }
             TextButton(
-                onClick = { titleClick(homePageManga.displayScreenType, homePageManga.altTitle) },
+                onClick = { titleClick(homePageManga.displayScreenType) },
             ) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -96,7 +97,7 @@ fun BrowseHomePage(
                                         modifier = Modifier.requiredHeight(coverSize),
                                     )
                                     MangaGridTitle(title = displayManga.title)
-                                    MangaGridSubtitle(displayText = displayManga.displayText)
+                                    MangaGridSubtitle(subtitleText = displayManga.displayText)
                                 }
                             }
 

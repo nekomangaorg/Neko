@@ -26,7 +26,8 @@ class DisplayRepository(
 
     suspend fun getPage(page: Int, displayScreenType: DisplayScreenType): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return when (displayScreenType) {
-            DisplayScreenType.LatestChapters -> getLatestChapterPage(page)
+            is DisplayScreenType.LatestChapters -> getLatestChapterPage(page)
+            is DisplayScreenType.List -> getListPage(displayScreenType.listUUID)
             else -> Err("Not Implemented".toResultError())
         }
     }
@@ -48,6 +49,19 @@ class DisplayRepository(
                     sourceManga.toDisplayManga(db, mangaDex.id)
                 }
                 Ok(mangaListPage.hasNextPage to displayMangaList.toImmutableList())
+            },
+            failure = { Err(it) },
+        )
+    }
+
+    private suspend fun getListPage(listUUID: String): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        return mangaDex.fetchList(listUUID).mapBoth(
+            success = { listResults ->
+                val displayMangaList = listResults.sourceManga.map { sourceManga ->
+                    sourceManga.toDisplayManga(db, mangaDex.id)
+                }
+                Ok(false to displayMangaList.toImmutableList())
+
             },
             failure = { Err(it) },
         )

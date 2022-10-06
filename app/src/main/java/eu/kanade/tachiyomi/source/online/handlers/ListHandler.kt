@@ -30,7 +30,7 @@ class ListHandler {
                 .andThen { listDto ->
                     val mangaIds = listDto.data.relationships.filter { it.type == MdConstants.Types.manga }.map { it.id }
                     when (mangaIds.isEmpty()) {
-                        true -> Ok(ListResults("", DisplayScreenType.List, emptyList()))
+                        true -> Ok(ListResults(DisplayScreenType.List("", listUUID), emptyList()))
                         false -> {
                             val allContentRating = listOf(
                                 MdConstants.ContentRating.safe,
@@ -51,8 +51,7 @@ class ListHandler {
                                 .andThen { mangaListDto ->
                                     Ok(
                                         ListResults(
-                                            name = listDto.data.attributes.name ?: "",
-                                            displayScreenType = DisplayScreenType.List,
+                                            displayScreenType = DisplayScreenType.List(listDto.data.attributes.name ?: "", listUUID),
                                             sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) },
                                         ),
                                     )
@@ -64,4 +63,4 @@ class ListHandler {
     }
 }
 
-data class ListResults(val name: String = "", val displayScreenType: DisplayScreenType, val sourceManga: List<SourceManga>)
+data class ListResults(val displayScreenType: DisplayScreenType, val sourceManga: List<SourceManga>)

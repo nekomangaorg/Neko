@@ -69,7 +69,7 @@ class SearchHandler {
                 .getOrResultError("Error getting recently added")
                 .andThen { mangaListDto ->
                     Ok(
-                        ListResults(displayScreenType = DisplayScreenType.RecentlyAdded, sourceManga = mangaListDto.data.map { it.toSourceManga(thumbQuality) }),
+                        ListResults(displayScreenType = DisplayScreenType.RecentlyAdded(), sourceManga = mangaListDto.data.map { it.toSourceManga(thumbQuality) }),
                     )
                 }
         }

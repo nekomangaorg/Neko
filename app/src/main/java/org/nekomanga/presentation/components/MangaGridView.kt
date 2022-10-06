@@ -83,6 +83,7 @@ fun MangaGrid(
     isComfortable: Boolean = true,
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
+    lastPage: Boolean = true,
     loadNextItems: () -> Unit = {},
 ) {
     val cells = GridCells.Fixed(columns)
@@ -102,7 +103,7 @@ fun MangaGrid(
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
 
             LaunchedEffect(scrollState) {
-                if (index >= mangaList.size - 1) {
+                if (!lastPage && index >= mangaList.size - 1) {
                     loadNextItems()
                 }
             }

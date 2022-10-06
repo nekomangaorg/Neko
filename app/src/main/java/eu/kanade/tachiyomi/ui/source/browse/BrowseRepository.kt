@@ -62,7 +62,6 @@ class BrowseRepository(
                 Ok(
                     listResults.map { listResult ->
                         HomePageManga(
-                            altTitle = listResult.name,
                             displayScreenType = listResult.displayScreenType,
                             displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList(),
                         )
