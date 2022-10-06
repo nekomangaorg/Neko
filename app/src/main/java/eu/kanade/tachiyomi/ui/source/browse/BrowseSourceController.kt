@@ -31,7 +31,6 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.follows.FollowsController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
@@ -42,7 +41,6 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.inflate
@@ -370,16 +368,6 @@ open class BrowseSourceController(bundle: Bundle) :
         }
         sheet.setOnCancelListener {
             filterSheet = null
-        }
-
-        sheet.onFollowsClicked = {
-            sheet.dismiss()
-            if (presenter.source.isLogged().not()) {
-                view?.context?.toast("Please login to view follows")
-            } else {
-                adapter?.clear()
-                router.pushController(FollowsController().withFadeTransaction())
-            }
         }
 
         sheet.onLatestChapterClicked = {

@@ -36,8 +36,6 @@ class SourceFilterSheet(val activity: Activity) :
 
     var onRandomClicked = {}
 
-    var onFollowsClicked = {}
-
     var onLatestChapterClicked = {}
 
     override var recyclerView: RecyclerView? = binding.filtersRecycler
@@ -49,7 +47,7 @@ class SourceFilterSheet(val activity: Activity) :
         binding.searchBtn.setOnClickListener { dismiss() }
         binding.resetBtn.setOnClickListener { onResetClicked() }
         binding.randomMangaBtn.setOnClickListener { onRandomClicked() }
-        binding.followsBtn.setOnClickListener { onFollowsClicked() }
+        binding.followsBtn.setOnClickListener { }
         binding.latestChaptersBtn.setOnClickListener { onLatestChapterClicked() }
 
         binding.titleLayout.checkHeightThen {
@@ -61,7 +59,7 @@ class SourceFilterSheet(val activity: Activity) :
                 val fullHeight = activity.window.decorView.height
                 matchConstraintMaxHeight =
                     fullHeight - insets.getInsets(systemBars()).top -
-                    binding.titleLayout.height - 75.dpToPx
+                        binding.titleLayout.height - 75.dpToPx
             }
         }
 
