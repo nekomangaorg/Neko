@@ -166,42 +166,43 @@ fun BrowseScreen(
                 }
             }
 
-            if (browseScreenState.value.isLoading) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Loading(
-                        Modifier
-                            .zIndex(1f)
-                            .padding(8.dp)
-                            .padding(top = contentPadding.calculateTopPadding())
-                            .align(Alignment.TopCenter),
-                    )
-                }
-            } else if (browseScreenState.value.error != null) {
-                EmptyScreen(
-                    icon = Icons.Default.ErrorOutline,
-                    iconSize = 176.dp,
-                    message = browseScreenState.value.error,
-                    actions = if (browseScreenState.value.page == 1 || browseScreenType == BrowseScreenType.Homepage) persistentListOf(Action(R.string.retry, retryClick)) else persistentListOf(),
-                    contentPadding = incomingContentPadding,
-                )
-            } else {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = contentPadding.calculateTopPadding(), bottom = contentPadding.calculateBottomPadding()),
-                ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = contentPadding.calculateTopPadding(), bottom = contentPadding.calculateBottomPadding()),
+            ) {
 
-                    ScreenTypeHeader(
-                        screenType = browseScreenType,
-                        isLoggedIn = browseScreenState.value.isLoggedIn,
-                        screenTypeClick = { newScreenType: BrowseScreenType ->
-                            val updatedScreenType = when (browseScreenType == newScreenType) {
-                                true -> BrowseScreenType.Homepage
-                                false -> newScreenType
-                            }
-                            changeScreenType(updatedScreenType)
-                        },
+                ScreenTypeHeader(
+                    screenType = browseScreenType,
+                    isLoggedIn = browseScreenState.value.isLoggedIn,
+                    screenTypeClick = { newScreenType: BrowseScreenType ->
+                        val updatedScreenType = when (browseScreenType == newScreenType) {
+                            true -> BrowseScreenType.Homepage
+                            false -> newScreenType
+                        }
+                        changeScreenType(updatedScreenType)
+                    },
+                )
+
+                if (browseScreenState.value.isLoading) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Loading(
+                            Modifier
+                                .zIndex(1f)
+                                .padding(8.dp)
+                                .padding(top = contentPadding.calculateTopPadding())
+                                .align(Alignment.TopCenter),
+                        )
+                    }
+                } else if (browseScreenState.value.error != null) {
+                    EmptyScreen(
+                        icon = Icons.Default.ErrorOutline,
+                        iconSize = 176.dp,
+                        message = browseScreenState.value.error,
+                        actions = if (browseScreenState.value.page == 1 || browseScreenType == BrowseScreenType.Homepage) persistentListOf(Action(R.string.retry, retryClick)) else persistentListOf(),
+                        contentPadding = incomingContentPadding,
                     )
+                } else {
 
                     when (browseScreenType) {
                         BrowseScreenType.Homepage -> BrowseHomePage(
