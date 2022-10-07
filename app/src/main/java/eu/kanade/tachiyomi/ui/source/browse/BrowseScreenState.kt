@@ -41,3 +41,14 @@ enum class BrowseScreenType {
     Follows,
     None,
 }
+
+data class FilterActions(
+    val filterClick: () -> Unit,
+    val resetClick: () -> Unit,
+    val filterChanged: (String) -> Unit,
+)
+
+
+
+
+

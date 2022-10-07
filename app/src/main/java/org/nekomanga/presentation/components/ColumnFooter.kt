@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
@@ -24,7 +26,7 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, textChanged: (String) -> Unit, search: (String) -> Unit) {
+fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, @StringRes labelText: Int = R.string.title, textChanged: (String) -> Unit, search: (String) -> Unit) {
     val focusManager = LocalFocusManager.current
 
     Divider()
@@ -36,7 +38,7 @@ fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, te
             .padding(horizontal = 8.dp),
         value = title,
         label = {
-            Text(text = stringResource(id = R.string.title))
+            Text(text = stringResource(id = labelText), maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         trailingIcon = {
             if (title.isNotEmpty()) {

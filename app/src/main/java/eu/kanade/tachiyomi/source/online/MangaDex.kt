@@ -112,6 +112,10 @@ open class MangaDex : HttpSource() {
         return searchHandler.search2(page, query, filters)
     }
 
+    suspend fun searchForManga(uuid: String): Result<MangaListPage, ResultError> {
+        return searchHandler.searchForManga(uuid)
+    }
+
     suspend fun fetchList(listId: String): Result<ListResults, ResultError> {
         return listHandler.retrieveList(listId)
     }

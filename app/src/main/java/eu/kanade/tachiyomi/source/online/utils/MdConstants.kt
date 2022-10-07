@@ -26,5 +26,10 @@ object MdConstants {
         const val unknown = "unknown"
     }
 
+    object DeepLinkPrefix {
+        const val manga = "id:"
+        const val group = "grp:"
+    }
+
     val mdAtHomeTokenLifespan = TimeUnit.MINUTES.toMillis(5)
 }

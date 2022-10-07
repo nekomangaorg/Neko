@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.SideNavMode
@@ -33,11 +32,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class BrowseComposePresenter(
-    incomingQuery: String,
+    val incomingQuery: String,
     private val browseRepository: BrowseRepository = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-) : BaseCoroutinePresenter<MangaDetailController>() {
+) : BaseCoroutinePresenter<BrowseComposeController>() {
 
     private val _browseScreenState = MutableStateFlow(
         BrowseScreenState(
@@ -48,7 +47,7 @@ class BrowseComposePresenter(
             rawColumnCount = preferences.gridSize().get(),
             promptForCategories = preferences.defaultCategory() == -1,
             query = incomingQuery,
-            screenType = if (incomingQuery.isEmpty()) BrowseScreenType.Homepage else BrowseScreenType.Filter,
+            screenType = BrowseScreenType.Homepage,
         ),
     )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
@@ -90,7 +89,11 @@ class BrowseComposePresenter(
     override fun onCreate() {
         super.onCreate()
 
-        getHomepage()
+        if (browseScreenState.value.query.isNotBlank()) {
+            getSearchPage()
+        } else {
+            getHomepage()
+        }
 
         presenterScope.launch {
             _browseScreenState.update {
@@ -154,9 +157,9 @@ class BrowseComposePresenter(
         }
     }
 
-    private fun getFollows() {
+    private fun getFollows(forceUpdate: Boolean) {
         presenterScope.launch {
-            if (_browseScreenState.value.displayMangaHolder.browseScreenType != BrowseScreenType.Follows) {
+            if (forceUpdate || _browseScreenState.value.displayMangaHolder.browseScreenType != BrowseScreenType.Follows) {
                 _browseScreenState.update { state ->
                     state.copy(isLoading = true)
                 }
@@ -169,6 +172,50 @@ class BrowseComposePresenter(
                         state.copy(displayMangaHolder = DisplayMangaHolder(BrowseScreenType.Follows, it.toImmutableList(), it.filterVisibility(preferences).toImmutableList()), isLoading = false)
                     }
                 }
+            }
+        }
+    }
+
+    fun getSearchPage(clearQuery: Boolean = false) {
+        presenterScope.launchIO {
+            _browseScreenState.update { state ->
+                state.copy(isLoading = true)
+            }
+
+            val currentQuery = browseScreenState.value.query
+            val deepLinkType = DeepLinkType.getDeepLinkType(currentQuery)
+            val uuid = DeepLinkType.removePrefix(currentQuery, deepLinkType)
+
+            when (deepLinkType) {
+                DeepLinkType.None -> {
+                    browseRepository.getSearchPage(browseScreenState.value.page, browseScreenState.value.query).onFailure {
+                        _browseScreenState.update { state ->
+                            state.copy(error = it.message(), isLoading = false, displayMangaHolder = DisplayMangaHolder(BrowseScreenType.Filter), screenType = BrowseScreenType.Filter)
+                        }
+                    }.onSuccess { (hasNextPage, displayMangaList) ->
+                        _browseScreenState.update { state ->
+                            state.copy(
+                                displayMangaHolder = DisplayMangaHolder(
+                                    BrowseScreenType.Filter,
+                                    displayMangaList.toImmutableList(),
+                                    displayMangaList.filterVisibility(preferences).toImmutableList(),
+                                ),
+                                isLoading = false, endReached = !hasNextPage,
+                            )
+                        }
+                    }
+                }
+                DeepLinkType.Manga -> {
+                    browseRepository.getDeepLinkManga(uuid).onFailure {
+                        _browseScreenState.update { state ->
+                            state.copy(error = it.message(), isLoading = false)
+                        }
+                    }.onSuccess { dm ->
+                        _browseScreenState.update { it.copy(query = "") }
+                        controller?.openManga(dm.mangaId)
+                    }
+                }
+                else -> Unit
             }
         }
     }
@@ -248,6 +295,15 @@ class BrowseComposePresenter(
         }
     }
 
+    //TODO this eventually will take the list of filters
+    fun filterChanged(searchQuery: String) {
+        presenterScope.launch {
+            _browseScreenState.update {
+                it.copy(query = searchQuery)
+            }
+        }
+    }
+
     /**
      * Add New Category
      */
@@ -265,16 +321,21 @@ class BrowseComposePresenter(
         preferences.browseAsList().set(!browseScreenState.value.isList)
     }
 
-    fun changeScreenType(browseScreenType: BrowseScreenType) {
+    fun changeScreenType(browseScreenType: BrowseScreenType, forceUpdate: Boolean = false) {
         presenterScope.launch {
             when (browseScreenType) {
-                BrowseScreenType.Follows -> getFollows()
+                BrowseScreenType.Follows -> getFollows(forceUpdate)
+                BrowseScreenType.Filter -> getSearchPage()
                 else -> Unit
             }
             _browseScreenState.update {
-                it.copy(screenType = browseScreenType)
+                it.copy(screenType = browseScreenType, error = null)
             }
         }
+    }
+
+    fun retry() {
+        changeScreenType(browseScreenState.value.screenType, true)
     }
 
     fun switchLibraryVisibility() {

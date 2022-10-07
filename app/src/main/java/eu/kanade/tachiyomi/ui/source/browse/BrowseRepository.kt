@@ -30,7 +30,7 @@ class BrowseRepository(
 
     fun isLoggedIn() = mangaDex.isLogged()
 
-    suspend fun getSearchPage(page: Int, query: String, filter: FilterList): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+    suspend fun getSearchPage(page: Int, query: String, filter: FilterList = FilterList()): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.search2(page, query, filter)
             .andThen { mangaListPage ->
                 when (mangaListPage.sourceManga.isEmpty()) {
@@ -39,10 +39,22 @@ class BrowseRepository(
                         val displayMangaList = mangaListPage.sourceManga.map { sourceManga ->
                             sourceManga.toDisplayManga(db, mangaDex.id)
                         }
-                        Ok(mangaListPage.hasNextPage to displayMangaList)
+                        Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
                     }
                 }
             }
+    }
+
+    suspend fun getDeepLinkManga(uuid: String): Result<DisplayManga, ResultError> {
+        return mangaDex.searchForManga(uuid).andThen { mangaListPage ->
+            when (mangaListPage.sourceManga.isEmpty()) {
+                true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
+                false -> {
+                    val displayManga = mangaListPage.sourceManga.first().toDisplayManga(db, mangaDex.id)
+                    Ok(displayManga)
+                }
+            }
+        }
     }
 
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
@@ -75,5 +87,29 @@ class BrowseRepository(
             .andThen { sourceManga ->
                 Ok(sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList())
             }
+    }
+}
+
+enum class DeepLinkType {
+    Manga,
+    Group,
+    None;
+
+    companion object {
+        fun getDeepLinkType(query: String): DeepLinkType {
+            return when {
+                query.startsWith(MdConstants.DeepLinkPrefix.manga) -> Manga
+                query.startsWith(MdConstants.DeepLinkPrefix.group) -> Group
+                else -> None
+            }
+        }
+
+        fun removePrefix(query: String, deepLinkType: DeepLinkType): String {
+            return when (deepLinkType) {
+                Manga -> query.removePrefix(MdConstants.DeepLinkPrefix.manga)
+                Group -> query.removePrefix(MdConstants.DeepLinkPrefix.group)
+                None -> query
+            }
+        }
     }
 }

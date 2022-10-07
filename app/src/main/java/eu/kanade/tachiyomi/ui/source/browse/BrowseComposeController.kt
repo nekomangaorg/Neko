@@ -7,6 +7,8 @@ import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.BrowseScreen
@@ -24,14 +26,31 @@ class BrowseComposeController(incomingQuery: String = "") : BaseComposeControlle
             switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
             onBackPress = { activity?.onBackPressed() },
             windowSizeClass = windowSizeClass,
-            homeScreenTitleClick = { displayScreenType -> router.pushController(DisplayController(displayScreenType).withFadeTransaction()) },
-            openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
+            homeScreenTitleClick = ::openDisplayScreen,
+            openManga = ::openManga,
+            filterActions = FilterActions(
+                filterClick = presenter::getSearchPage,
+                filterChanged = presenter::filterChanged,
+                resetClick = {},
+            ),
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
             loadNextPage = presenter::loadNextItems,
             retryClick = presenter::loadNextItems,
             changeScreenType = presenter::changeScreenType,
         )
+    }
+
+    fun openDisplayScreen(displayScreenType: DisplayScreenType) {
+        viewScope.launchUI {
+            router.pushController(DisplayController(displayScreenType).withFadeTransaction())
+        }
+    }
+
+    fun openManga(mangaId: Long) {
+        viewScope.launchUI {
+            router.pushController(MangaDetailController(mangaId).withFadeTransaction())
+        }
     }
 
     override fun onViewCreated(view: View) {

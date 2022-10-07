@@ -36,7 +36,7 @@ class SearchHandler {
     private val apiMangaParser: ApiMangaParser by injectLazy()
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
-    private suspend fun searchForManga(mangaUUID: String): Result<MangaListPage, ResultError> {
+    suspend fun searchForManga(mangaUUID: String): Result<MangaListPage, ResultError> {
         return service.viewManga(mangaUUID)
             .getOrResultError("trying to view manga with UUID $mangaUUID")
             .andThen { mangaDto ->

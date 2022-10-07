@@ -44,6 +44,7 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
+import eu.kanade.tachiyomi.ui.source.browse.FilterActions
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import jp.wasabeef.gap.Gap
@@ -81,6 +82,7 @@ fun BrowseScreen(
     toggleFavorite: (Long, List<CategoryItem>, BrowseScreenType) -> Unit,
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
+    filterActions: FilterActions,
     changeScreenType: (BrowseScreenType) -> Unit,
     homeScreenTitleClick: (DisplayScreenType) -> Unit,
 ) {
@@ -141,6 +143,7 @@ fun BrowseScreen(
                         addNewCategory = addNewCategory,
                         bottomPadding = Padding.bottomAppBarPaddingValues.calculateBottomPadding(),
                         closeSheet = { scope.launch { sheetState.hide() } },
+                        filterActions = filterActions,
                     )
                 }
             }
@@ -200,13 +203,17 @@ fun BrowseScreen(
                     isLoggedIn = browseScreenState.value.isLoggedIn,
                     screenTypeClick = { newScreenType: BrowseScreenType ->
 
-                        if (browseScreenType == newScreenType && newScreenType == BrowseScreenType.Filter) {
-                            //show bottom sheet
-                        } else if (browseScreenType != newScreenType) {
+                        val sameScreen = browseScreenType == newScreenType
+                        val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
+
+                        if (sameScreen && !newIsFilterScreen) {
+                            //do nothing
+                        } else if ((sameScreen && newIsFilterScreen) || newIsFilterScreen) {
+                            openSheet(
+                                BrowseBottomSheetScreen.FilterSheet(),
+                            )
+                        } else {
                             changeScreenType(newScreenType)
-                            if (newScreenType == BrowseScreenType.Filter) {
-                                //show bottom sheet
-                            }
                         }
 
                     },
@@ -227,7 +234,7 @@ fun BrowseScreen(
                         icon = Icons.Default.ErrorOutline,
                         iconSize = 176.dp,
                         message = browseScreenState.value.error,
-                        actions = if (browseScreenState.value.page == 1 || browseScreenType == BrowseScreenType.Homepage) persistentListOf(Action(R.string.retry, retryClick)) else persistentListOf(),
+                        actions = persistentListOf(Action(R.string.retry, retryClick)),
                         contentPadding = incomingContentPadding,
                     )
                 } else {
@@ -277,36 +284,44 @@ fun BrowseScreen(
                             }
                         }
                         BrowseScreenType.Filter -> {
-                            if (browseScreenState.value.isList) {
-                                MangaList(
-                                    mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
-                                    shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                    contentPadding = contentPadding,
-                                    onClick = openManga,
-                                    onLongClick = ::mangaLongClick,
-                                    loadNextItems = loadNextPage,
+                            if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
+                                EmptyScreen(
+                                    iconicImage = CommunityMaterial.Icon.cmd_compass_off,
+                                    iconSize = 176.dp,
+                                    message = stringResource(id = R.string.no_results_found),
                                 )
                             } else {
-                                MangaGrid(
-                                    mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
-                                    shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                    columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
-                                    isComfortable = browseScreenState.value.isComfortableGrid,
-                                    contentPadding = contentPadding,
-                                    onClick = openManga,
-                                    onLongClick = ::mangaLongClick,
-                                    loadNextItems = loadNextPage,
-                                )
-                            }
-                            if (browseScreenState.value.isLoading && browseScreenState.value.page != 1) {
-                                Box(Modifier.fillMaxSize()) {
-                                    LinearProgressIndicator(
-                                        modifier = Modifier
-                                            .padding(8.dp)
-                                            .padding(bottom = contentPadding.calculateBottomPadding())
-                                            .align(Alignment.BottomCenter)
-                                            .fillMaxWidth(),
+                                if (browseScreenState.value.isList) {
+                                    MangaList(
+                                        mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
+                                        shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                        contentPadding = contentPadding,
+                                        onClick = openManga,
+                                        onLongClick = ::mangaLongClick,
+                                        loadNextItems = loadNextPage,
                                     )
+                                } else {
+                                    MangaGrid(
+                                        mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
+                                        shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                        columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
+                                        isComfortable = browseScreenState.value.isComfortableGrid,
+                                        contentPadding = contentPadding,
+                                        onClick = openManga,
+                                        onLongClick = ::mangaLongClick,
+                                        loadNextItems = loadNextPage,
+                                    )
+                                }
+                                if (browseScreenState.value.isLoading && browseScreenState.value.page != 1) {
+                                    Box(Modifier.fillMaxSize()) {
+                                        LinearProgressIndicator(
+                                            modifier = Modifier
+                                                .padding(8.dp)
+                                                .padding(bottom = contentPadding.calculateBottomPadding())
+                                                .align(Alignment.BottomCenter)
+                                                .fillMaxWidth(),
+                                        )
+                                    }
                                 }
                             }
                         }
