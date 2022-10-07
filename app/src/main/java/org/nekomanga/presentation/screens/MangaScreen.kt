@@ -167,7 +167,7 @@ fun MangaScreen(
     }
 
     // set the current sheet to null when bottom sheet is closed
-    if (sheetState.isVisible.not()) {
+    if (!sheetState.isVisible) {
         currentBottomSheet = null
     }
 
@@ -223,7 +223,7 @@ fun MangaScreen(
                         backgroundColor = themeColorState.buttonColor,
                         contentColor = MaterialTheme.colorScheme.surface,
 
-                    )
+                        )
                 },
             ) {
                 val mangaDetailContentPadding =

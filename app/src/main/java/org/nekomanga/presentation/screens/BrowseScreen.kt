@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -60,9 +61,10 @@ import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
-import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 import org.nekomanga.presentation.functions.numberOfColumns
+import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
+import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
 import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
@@ -84,6 +86,10 @@ fun BrowseScreen(
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+
+    var currentBottomSheet: BrowseBottomSheetScreen? by remember {
+        mutableStateOf(null)
+    }
 
     val browseScreenType = browseScreenState.value.screenType
 
@@ -111,24 +117,32 @@ fun BrowseScreen(
         }
     }
 
+    // set the current sheet to null when bottom sheet is closed
+    if (!sheetState.isVisible) {
+        currentBottomSheet = null
+    }
+
+    val openSheet: (BrowseBottomSheetScreen) -> Unit = {
+        scope.launch {
+            currentBottomSheet = it
+            sheetState.show()
+        }
+    }
+
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
-                EditCategorySheet(
-                    addingToLibrary = true,
-                    categories = browseScreenState.value.categories,
-                    cancelClick = { scope.launch { sheetState.hide() } },
-                    bottomPadding = Padding.bottomAppBarPaddingValues.calculateBottomPadding(),
-                    addNewCategory = addNewCategory,
-                    confirmClicked = { selectedCategories ->
-                        scope.launch { sheetState.hide() }
-                        longClickedMangaId?.let {
-                            toggleFavorite(it, selectedCategories, browseScreenType)
-                        }
-                    },
-                )
+                currentBottomSheet?.let { currentSheet ->
+                    BrowseBottomSheet(
+                        currentScreen = currentSheet,
+                        browseScreenState = browseScreenState,
+                        addNewCategory = addNewCategory,
+                        bottomPadding = Padding.bottomAppBarPaddingValues.calculateBottomPadding(),
+                        closeSheet = { scope.launch { sheetState.hide() } },
+                    )
+                }
             }
         },
     ) {
@@ -159,7 +173,16 @@ fun BrowseScreen(
                 if (!displayManga.inLibrary && browseScreenState.value.promptForCategories) {
                     scope.launch {
                         longClickedMangaId = displayManga.mangaId
-                        sheetState.show()
+                        openSheet(
+                            BrowseBottomSheetScreen.CategoriesSheet(
+                                setCategories = { selectedCategories ->
+                                    scope.launch { sheetState.hide() }
+                                    longClickedMangaId?.let {
+                                        toggleFavorite(it, selectedCategories, browseScreenType)
+                                    }
+                                },
+                            ),
+                        )
                     }
                 } else {
                     toggleFavorite(displayManga.mangaId, emptyList(), browseScreenType)
@@ -176,11 +199,16 @@ fun BrowseScreen(
                     screenType = browseScreenType,
                     isLoggedIn = browseScreenState.value.isLoggedIn,
                     screenTypeClick = { newScreenType: BrowseScreenType ->
-                        val updatedScreenType = when (browseScreenType == newScreenType) {
-                            true -> BrowseScreenType.Homepage
-                            false -> newScreenType
+
+                        if (browseScreenType == newScreenType && newScreenType == BrowseScreenType.Filter) {
+                            //show bottom sheet
+                        } else if (browseScreenType != newScreenType) {
+                            changeScreenType(newScreenType)
+                            if (newScreenType == BrowseScreenType.Filter) {
+                                //show bottom sheet
+                            }
                         }
-                        changeScreenType(updatedScreenType)
+
                     },
                 )
 
@@ -248,7 +276,7 @@ fun BrowseScreen(
                                 }
                             }
                         }
-                        BrowseScreenType.Search -> {
+                        BrowseScreenType.Filter -> {
                             if (browseScreenState.value.isList) {
                                 MangaList(
                                     mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
@@ -292,31 +320,38 @@ fun BrowseScreen(
 
 @Composable
 private fun ScreenTypeHeader(screenType: BrowseScreenType, isLoggedIn: Boolean, screenTypeClick: (BrowseScreenType) -> Unit) {
-    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         item {
             Gap(8.dp)
         }
-        CustomChip(
+        customChip(
             isSelected = screenType == BrowseScreenType.Homepage,
             onClick = { screenTypeClick(BrowseScreenType.Homepage) },
             label = R.string.home_page,
         )
         if (isLoggedIn) {
-            CustomChip(
+            customChip(
                 isSelected = screenType == BrowseScreenType.Follows,
                 onClick = { screenTypeClick(BrowseScreenType.Follows) },
                 label = R.string.follows,
             )
         }
+
+        customChip(
+            isSelected = screenType == BrowseScreenType.Filter,
+            onClick = { screenTypeClick(BrowseScreenType.Filter) },
+            label = R.string.filter,
+        )
     }
 }
 
-private fun LazyListScope.CustomChip(isSelected: Boolean, onClick: () -> Unit, @StringRes label: Int) {
+private fun LazyListScope.customChip(isSelected: Boolean, onClick: () -> Unit, @StringRes label: Int) {
     item(key = label) {
         FilterChip(
             selected = isSelected,
             onClick = onClick,
-            label = { Text(text = stringResource(id = label)) },
+            shape = RoundedCornerShape(100),
+            label = { Text(text = stringResource(id = label), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
             colors = FilterChipDefaults.filterChipColors(
                 selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                 selectedLabelColor = MaterialTheme.colorScheme.primary,

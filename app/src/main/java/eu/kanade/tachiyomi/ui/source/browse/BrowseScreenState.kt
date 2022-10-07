@@ -23,6 +23,7 @@ data class BrowseScreenState(
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
     val promptForCategories: Boolean,
+    val query: String = "",
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 
@@ -36,7 +37,7 @@ data class DisplayMangaHolder(
 
 enum class BrowseScreenType {
     Homepage,
-    Search,
+    Filter,
     Follows,
     None,
 }

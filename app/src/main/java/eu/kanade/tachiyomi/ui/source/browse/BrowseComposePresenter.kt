@@ -33,6 +33,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class BrowseComposePresenter(
+    incomingQuery: String,
     private val browseRepository: BrowseRepository = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
@@ -46,6 +47,8 @@ class BrowseComposePresenter(
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
             promptForCategories = preferences.defaultCategory() == -1,
+            query = incomingQuery,
+            screenType = if (incomingQuery.isEmpty()) BrowseScreenType.Homepage else BrowseScreenType.Filter,
         ),
     )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()

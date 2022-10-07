@@ -11,8 +11,8 @@ import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.BrowseScreen
 
-class BrowseComposeController(query: String? = null) : BaseComposeController<BrowseComposePresenter>() {
-    override val presenter = BrowseComposePresenter()
+class BrowseComposeController(incomingQuery: String = "") : BaseComposeController<BrowseComposePresenter>() {
+    override val presenter = BrowseComposePresenter(incomingQuery)
 
     @Composable
     override fun ScreenContent() {
