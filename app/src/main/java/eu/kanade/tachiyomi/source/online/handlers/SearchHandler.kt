@@ -1,9 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.github.michaelbull.result.Err
+import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.mapError
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -25,6 +26,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -45,14 +47,25 @@ class SearchHandler {
             }
     }
 
-    suspend fun search2(page: Int, query: String, filters: FilterList): Result<MangaListPage, ResultError> {
+    suspend fun search2(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
         return withContext(Dispatchers.IO) {
-            when (query.startsWith(MdUtil.PREFIX_ID_SEARCH)) {
-                true -> searchForManga(query.removePrefix(MdUtil.PREFIX_ID_SEARCH))
-                false -> {
-                    Err("test".toResultError())
-                }
+            val queryParameters = mutableMapOf<String, Any>()
+
+            queryParameters["limit"] = MdUtil.mangaLimit.toString()
+            queryParameters["offset"] = (MdUtil.getMangaListOffset(page))
+            val actualQuery = filters.titleQuery.query.replace(WHITESPACE_REGEX, " ")
+            if (actualQuery.isNotBlank()) {
+                queryParameters[filters.titleQuery.filterParam.queryParamName] = actualQuery
             }
+
+            //val additionalQueries = filterHandler.getQueryMap(filters)
+            // queryParameters.putAll(additionalQueries)
+
+            service.search(ProxyRetrofitQueryMap(queryParameters))
+                .getOrResultError("Trying to search")
+                .andThen { response ->
+                    searchMangaParse2(response)
+                }
         }
     }
 
@@ -121,6 +134,18 @@ class SearchHandler {
 
                 searchMangaParse(response)
             }
+        }
+    }
+
+    private fun searchMangaParse2(mangaListDto: MangaListDto): Result<MangaListPage, ResultError> {
+        return com.github.michaelbull.result.runCatching {
+            val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
+            val thumbQuality = preferencesHelper.thumbnailQuality()
+            val mangaList = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()
+            MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)
+        }.mapError {
+            XLog.e("error parsing search manga", it)
+            "error parsing search manga".toResultError()
         }
     }
 

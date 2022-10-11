@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
@@ -14,6 +13,7 @@ import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +25,8 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.filter.DexFilters
+import org.nekomanga.domain.filter.NewFilter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.util.paging.DefaultPaginator
@@ -46,7 +48,7 @@ class BrowseComposePresenter(
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
             promptForCategories = preferences.defaultCategory() == -1,
-            query = incomingQuery,
+            filters = DexFilters(titleQuery = NewFilter.TitleQuery(incomingQuery)),
             screenType = BrowseScreenType.Homepage,
         ),
     )
@@ -56,11 +58,11 @@ class BrowseComposePresenter(
         initialKey = _browseScreenState.value.page,
         onLoadUpdated = {
             _browseScreenState.update { state ->
-                state.copy(isLoading = it)
+                state.copy(pageLoading = it)
             }
         },
-        onRequest = { nextPage ->
-            browseRepository.getSearchPage(nextPage, "", FilterList())
+        onRequest = {
+            browseRepository.getSearchPage(browseScreenState.value.page, browseScreenState.value.filters)
         },
         getNextKey = {
             _browseScreenState.value.page + 1
@@ -68,7 +70,8 @@ class BrowseComposePresenter(
         onError = { resultError ->
             _browseScreenState.update {
                 it.copy(
-                    isLoading = false,
+                    initialLoading = false,
+                    pageLoading = false,
                     error = when (resultError) {
                         is ResultError.Generic -> resultError.errorString
                         else -> (resultError as ResultError.HttpError).message
@@ -76,12 +79,21 @@ class BrowseComposePresenter(
                 )
             }
         },
-        onSuccess = { hasNexPage, items, newKey ->
-            _browseScreenState.update {
-                val allDisplayManga = it.displayMangaHolder.allDisplayManga + items
-                val displayMangaHolder =
-                    it.displayMangaHolder.copy(allDisplayManga = allDisplayManga.toImmutableList(), filteredDisplayManga = allDisplayManga.filterVisibility(preferences).toImmutableList())
-                it.copy(isLoading = false, displayMangaHolder = displayMangaHolder, page = newKey, endReached = hasNexPage)
+        onSuccess = { hasNextPage, items, nextKey ->
+            _browseScreenState.update { state ->
+                val allDisplayManga = state.displayMangaHolder.allDisplayManga + items
+                state.copy(
+                    screenType = BrowseScreenType.Filter,
+                    displayMangaHolder = DisplayMangaHolder(
+                        BrowseScreenType.Filter,
+                        allDisplayManga.toImmutableList(),
+                        allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                    ),
+                    initialLoading = false,
+                    pageLoading = false,
+                    page = nextKey,
+                    endReached = !hasNextPage,
+                )
             }
         },
     )
@@ -89,7 +101,7 @@ class BrowseComposePresenter(
     override fun onCreate() {
         super.onCreate()
 
-        if (browseScreenState.value.query.isNotBlank()) {
+        if (browseScreenState.value.filters.titleQuery.query.isNotBlank()) {
             getSearchPage()
         } else {
             getHomepage()
@@ -147,11 +159,11 @@ class BrowseComposePresenter(
         presenterScope.launch {
             browseRepository.getHomePage().onFailure {
                 _browseScreenState.update { state ->
-                    state.copy(error = it.message(), isLoading = false)
+                    state.copy(error = it.message(), initialLoading = false)
                 }
             }.onSuccess {
                 _browseScreenState.update { state ->
-                    state.copy(homePageManga = it.updateVisibility(preferences), isLoading = false)
+                    state.copy(homePageManga = it.updateVisibility(preferences), initialLoading = false)
                 }
             }
         }
@@ -159,59 +171,54 @@ class BrowseComposePresenter(
 
     private fun getFollows(forceUpdate: Boolean) {
         presenterScope.launch {
-            if (forceUpdate || _browseScreenState.value.displayMangaHolder.browseScreenType != BrowseScreenType.Follows) {
+            if (forceUpdate || _browseScreenState.value.displayMangaHolder.resultType != BrowseScreenType.Follows) {
                 _browseScreenState.update { state ->
-                    state.copy(isLoading = true)
+                    state.copy(initialLoading = true)
                 }
                 browseRepository.getFollows().onFailure {
                     _browseScreenState.update { state ->
-                        state.copy(error = it.message(), isLoading = false)
+                        state.copy(error = it.message(), initialLoading = false)
                     }
                 }.onSuccess {
                     _browseScreenState.update { state ->
-                        state.copy(displayMangaHolder = DisplayMangaHolder(BrowseScreenType.Follows, it.toImmutableList(), it.filterVisibility(preferences).toImmutableList()), isLoading = false)
+                        state.copy(displayMangaHolder = DisplayMangaHolder(BrowseScreenType.Follows, it.toImmutableList(), it.filterVisibility(preferences).toImmutableList()), initialLoading = false)
                     }
                 }
             }
         }
     }
 
-    fun getSearchPage(clearQuery: Boolean = false) {
+    fun getSearchPage() {
         presenterScope.launchIO {
             _browseScreenState.update { state ->
-                state.copy(isLoading = true)
+                state.copy(initialLoading = true, page = 1)
             }
 
-            val currentQuery = browseScreenState.value.query
+            val currentQuery = browseScreenState.value.filters.titleQuery.query
             val deepLinkType = DeepLinkType.getDeepLinkType(currentQuery)
             val uuid = DeepLinkType.removePrefix(currentQuery, deepLinkType)
 
             when (deepLinkType) {
                 DeepLinkType.None -> {
-                    browseRepository.getSearchPage(browseScreenState.value.page, browseScreenState.value.query).onFailure {
-                        _browseScreenState.update { state ->
-                            state.copy(error = it.message(), isLoading = false, displayMangaHolder = DisplayMangaHolder(BrowseScreenType.Filter), screenType = BrowseScreenType.Filter)
-                        }
-                    }.onSuccess { (hasNextPage, displayMangaList) ->
-                        _browseScreenState.update { state ->
-                            state.copy(
-                                displayMangaHolder = DisplayMangaHolder(
-                                    BrowseScreenType.Filter,
-                                    displayMangaList.toImmutableList(),
-                                    displayMangaList.filterVisibility(preferences).toImmutableList(),
-                                ),
-                                isLoading = false, endReached = !hasNextPage,
-                            )
-                        }
+                    _browseScreenState.update {
+                        it.copy(
+                            pageLoading = false,
+                            initialLoading = true,
+                            screenType = BrowseScreenType.Filter,
+                            displayMangaHolder = DisplayMangaHolder(resultType = BrowseScreenType.Filter, allDisplayManga = persistentListOf(), filteredDisplayManga = persistentListOf()),
+                        )
                     }
+                    paginator.loadNextItems()
                 }
                 DeepLinkType.Manga -> {
                     browseRepository.getDeepLinkManga(uuid).onFailure {
                         _browseScreenState.update { state ->
-                            state.copy(error = it.message(), isLoading = false)
+                            state.copy(error = it.message(), initialLoading = false)
                         }
                     }.onSuccess { dm ->
-                        _browseScreenState.update { it.copy(query = "") }
+                        if (incomingQuery.isNotBlank() && !_browseScreenState.value.handledIncomingQuery) {
+                            _browseScreenState.update { it.copy(filters = it.filters.copy(titleQuery = NewFilter.TitleQuery("")), handledIncomingQuery = true) }
+                        }
                         controller?.openManga(dm.mangaId)
                     }
                 }
@@ -220,7 +227,7 @@ class BrowseComposePresenter(
         }
     }
 
-    fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>, browseScreenType: BrowseScreenType) {
+    fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         presenterScope.launch {
             val editManga = db.getManga(mangaId).executeAsBlocking()!!
             editManga.apply {
@@ -296,10 +303,14 @@ class BrowseComposePresenter(
     }
 
     //TODO this eventually will take the list of filters
-    fun filterChanged(searchQuery: String) {
+    fun filterChanged(newFilter: NewFilter) {
         presenterScope.launch {
+            val updatedFilters = when (newFilter) {
+                is NewFilter.TitleQuery -> browseScreenState.value.filters.copy(titleQuery = newFilter)
+            }
+
             _browseScreenState.update {
-                it.copy(query = searchQuery)
+                it.copy(filters = updatedFilters)
             }
         }
     }

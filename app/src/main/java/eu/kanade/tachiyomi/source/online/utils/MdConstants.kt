@@ -31,5 +31,19 @@ object MdConstants {
         const val group = "grp:"
     }
 
+    object SearchParameters {
+        object Title {
+            const val display = "Title"
+            const val param = "title"
+        }
+
+        object TagMode {
+            const val includesParam = "includedTagsMode"
+            const val excludesParam = "excludedTagsMode"
+            const val and = "AND"
+            const val or = "OR"
+        }
+    }
+
     val mdAtHomeTokenLifespan = TimeUnit.MINUTES.toMillis(5)
 }

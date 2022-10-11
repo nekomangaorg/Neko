@@ -104,7 +104,7 @@ fun MergeSheet(
                 )
             }
 
-            SearchFooter(themeColorState = themeColorState, title = searchTitle, textChanged = { searchTitle = it }, search = search)
+            SearchFooter(themeColorState = themeColorState, labelText = stringResource(id = R.string.title), title = searchTitle, textChanged = { searchTitle = it }, search = search)
         }
     }
 }

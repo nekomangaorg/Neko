@@ -79,7 +79,7 @@ fun BrowseScreen(
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
-    toggleFavorite: (Long, List<CategoryItem>, BrowseScreenType) -> Unit,
+    toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
     filterActions: FilterActions,
@@ -181,14 +181,14 @@ fun BrowseScreen(
                                 setCategories = { selectedCategories ->
                                     scope.launch { sheetState.hide() }
                                     longClickedMangaId?.let {
-                                        toggleFavorite(it, selectedCategories, browseScreenType)
+                                        toggleFavorite(it, selectedCategories)
                                     }
                                 },
                             ),
                         )
                     }
                 } else {
-                    toggleFavorite(displayManga.mangaId, emptyList(), browseScreenType)
+                    toggleFavorite(displayManga.mangaId, emptyList())
                 }
             }
 
@@ -218,9 +218,9 @@ fun BrowseScreen(
 
                     },
                 )
+                Box(modifier = Modifier.fillMaxSize()) {
 
-                if (browseScreenState.value.isLoading) {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    if (browseScreenState.value.initialLoading) {
                         Loading(
                             Modifier
                                 .zIndex(1f)
@@ -228,104 +228,103 @@ fun BrowseScreen(
                                 .padding(top = contentPadding.calculateTopPadding())
                                 .align(Alignment.TopCenter),
                         )
-                    }
-                } else if (browseScreenState.value.error != null) {
-                    EmptyScreen(
-                        icon = Icons.Default.ErrorOutline,
-                        iconSize = 176.dp,
-                        message = browseScreenState.value.error,
-                        actions = persistentListOf(Action(R.string.retry, retryClick)),
-                        contentPadding = incomingContentPadding,
-                    )
-                } else {
-
-                    when (browseScreenType) {
-                        BrowseScreenType.Homepage -> BrowseHomePage(
-                            browseHomePageManga = browseScreenState.value.homePageManga,
-                            shouldOutlineCover = browseScreenState.value.outlineCovers,
-                            titleClick = homeScreenTitleClick,
-                            onClick = { id -> openManga(id) },
-                            onLongClick = ::mangaLongClick,
+                    } else if (browseScreenState.value.error != null) {
+                        EmptyScreen(
+                            icon = Icons.Default.ErrorOutline,
+                            iconSize = 176.dp,
+                            message = browseScreenState.value.error,
+                            actions = persistentListOf(Action(R.string.retry, retryClick)),
+                            contentPadding = incomingContentPadding,
                         )
-                        BrowseScreenType.Follows -> {
-                            if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
-                                EmptyScreen(
-                                    iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-                                    iconSize = 176.dp,
-                                    message = stringResource(id = R.string.no_results_found),
-                                )
-                            } else {
-                                val groupedManga = remember(browseScreenState.value.displayMangaHolder) {
-                                    browseScreenState.value.displayMangaHolder.filteredDisplayManga
-                                        .groupBy { it.displayTextRes!! }
-                                        .map { entry ->
-                                            entry.key to entry.value.map { it.copy(displayTextRes = null) }.toImmutableList()
-                                        }.toMap()
-                                        .toImmutableMap()
-                                }
+                    } else {
 
-                                if (browseScreenState.value.isList) {
-                                    MangaListWithHeader(
-                                        groupedManga = groupedManga,
-                                        shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
+                        when (browseScreenType) {
+                            BrowseScreenType.Homepage -> BrowseHomePage(
+                                browseHomePageManga = browseScreenState.value.homePageManga,
+                                shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                titleClick = homeScreenTitleClick,
+                                onClick = { id -> openManga(id) },
+                                onLongClick = ::mangaLongClick,
+                            )
+                            BrowseScreenType.Follows -> {
+                                if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
+                                    EmptyScreen(
+                                        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
+                                        iconSize = 176.dp,
+                                        message = stringResource(id = R.string.no_results_found),
                                     )
                                 } else {
-                                    MangaGridWithHeader(
-                                        groupedManga = groupedManga,
-                                        shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                        columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
-                                        isComfortable = browseScreenState.value.isComfortableGrid,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
-                                    )
-                                }
-                            }
-                        }
-                        BrowseScreenType.Filter -> {
-                            if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
-                                EmptyScreen(
-                                    iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-                                    iconSize = 176.dp,
-                                    message = stringResource(id = R.string.no_results_found),
-                                )
-                            } else {
-                                if (browseScreenState.value.isList) {
-                                    MangaList(
-                                        mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
-                                        shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                        contentPadding = contentPadding,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
-                                        loadNextItems = loadNextPage,
-                                    )
-                                } else {
-                                    MangaGrid(
-                                        mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
-                                        shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                        columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
-                                        isComfortable = browseScreenState.value.isComfortableGrid,
-                                        contentPadding = contentPadding,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
-                                        loadNextItems = loadNextPage,
-                                    )
-                                }
-                                if (browseScreenState.value.isLoading && browseScreenState.value.page != 1) {
-                                    Box(Modifier.fillMaxSize()) {
-                                        LinearProgressIndicator(
-                                            modifier = Modifier
-                                                .padding(8.dp)
-                                                .padding(bottom = contentPadding.calculateBottomPadding())
-                                                .align(Alignment.BottomCenter)
-                                                .fillMaxWidth(),
+                                    val groupedManga = remember(browseScreenState.value.displayMangaHolder) {
+                                        browseScreenState.value.displayMangaHolder.filteredDisplayManga
+                                            .groupBy { it.displayTextRes!! }
+                                            .map { entry ->
+                                                entry.key to entry.value.map { it.copy(displayTextRes = null) }.toImmutableList()
+                                            }.toMap()
+                                            .toImmutableMap()
+                                    }
+
+                                    if (browseScreenState.value.isList) {
+                                        MangaListWithHeader(
+                                            groupedManga = groupedManga,
+                                            shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                            onClick = openManga,
+                                            onLongClick = ::mangaLongClick,
+                                        )
+                                    } else {
+                                        MangaGridWithHeader(
+                                            groupedManga = groupedManga,
+                                            shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                            columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
+                                            isComfortable = browseScreenState.value.isComfortableGrid,
+                                            onClick = openManga,
+                                            onLongClick = ::mangaLongClick,
                                         )
                                     }
                                 }
                             }
+                            BrowseScreenType.Filter -> {
+                                if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
+                                    EmptyScreen(
+                                        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
+                                        iconSize = 176.dp,
+                                        message = stringResource(id = R.string.no_results_found),
+                                    )
+                                } else {
+                                    if (browseScreenState.value.isList) {
+                                        MangaList(
+                                            mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
+                                            shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                            onClick = openManga,
+                                            onLongClick = ::mangaLongClick,
+                                            lastPage = browseScreenState.value.endReached,
+                                            loadNextItems = loadNextPage,
+                                        )
+                                    } else {
+                                        MangaGrid(
+                                            mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
+                                            shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                            columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
+                                            isComfortable = browseScreenState.value.isComfortableGrid,
+                                            onClick = openManga,
+                                            onLongClick = ::mangaLongClick,
+                                            lastPage = browseScreenState.value.endReached,
+                                            loadNextItems = loadNextPage,
+                                        )
+                                    }
+                                    if (browseScreenState.value.pageLoading) {
+                                        Box(Modifier.fillMaxSize()) {
+                                            LinearProgressIndicator(
+                                                modifier = Modifier
+                                                    .padding(bottom = 8.dp)
+                                                    .align(Alignment.BottomCenter)
+                                                    .fillMaxWidth(),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            BrowseScreenType.None -> Unit
                         }
-                        BrowseScreenType.None -> Unit
                     }
                 }
             }

@@ -5,10 +5,13 @@ import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.domain.filter.DexFilters
+import org.nekomanga.domain.filter.NewFilter
 import org.nekomanga.domain.manga.DisplayManga
 
 data class BrowseScreenState(
-    val isLoading: Boolean = true,
+    val initialLoading: Boolean = true,
+    val pageLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
     val screenType: BrowseScreenType = BrowseScreenType.Homepage,
     val displayMangaHolder: DisplayMangaHolder = DisplayMangaHolder(),
@@ -23,14 +26,15 @@ data class BrowseScreenState(
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
     val promptForCategories: Boolean,
-    val query: String = "",
+    val filters: DexFilters = DexFilters(),
+    val handledIncomingQuery: Boolean = false,
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 
 data class HomePageManga(val displayScreenType: DisplayScreenType, val displayManga: ImmutableList<DisplayManga> = persistentListOf())
 
 data class DisplayMangaHolder(
-    val browseScreenType: BrowseScreenType = BrowseScreenType.None,
+    val resultType: BrowseScreenType = BrowseScreenType.None,
     val allDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
     val filteredDisplayManga: ImmutableList<DisplayManga> = persistentListOf(),
 )
@@ -45,7 +49,7 @@ enum class BrowseScreenType {
 data class FilterActions(
     val filterClick: () -> Unit,
     val resetClick: () -> Unit,
-    val filterChanged: (String) -> Unit,
+    val filterChanged: (NewFilter) -> Unit,
 )
 
 

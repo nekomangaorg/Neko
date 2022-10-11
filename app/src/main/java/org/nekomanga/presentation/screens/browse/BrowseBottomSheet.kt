@@ -47,7 +47,7 @@ fun BrowseBottomSheet(
             confirmClicked = currentScreen.setCategories,
         )
         is BrowseBottomSheetScreen.FilterSheet -> FilterBrowseSheet(
-            query = browseScreenState.value.query,
+            filters = browseScreenState.value.filters,
             bottomPadding = bottomPadding,
             filterClick = {
                 keyboardController?.hide()

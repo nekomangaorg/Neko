@@ -22,17 +22,19 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
+import org.nekomanga.domain.filter.DexFilters
+import org.nekomanga.domain.filter.NewFilter
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 
 @Composable
 fun FilterBrowseSheet(
-    query: String = "",
+    filters: DexFilters,
     bottomPadding: Dp = 16.dp,
     filterClick: () -> Unit,
     resetClick: () -> Unit,
-    filterChanged: (String) -> Unit,
+    filterChanged: (NewFilter) -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
@@ -52,7 +54,13 @@ fun FilterBrowseSheet(
 
             }
 
-            SearchFooter(themeColorState = themeColorState, title = query, textChanged = filterChanged, search = { filterClick() })
+            SearchFooter(
+                themeColorState = themeColorState,
+                labelText = filters.titleQuery.filterParam.displayName,
+                title = filters.titleQuery.query,
+                textChanged = { text: String -> filterChanged(NewFilter.TitleQuery(text)) },
+                search = { filterClick() },
+            )
 
             Divider()
             Gap(4.dp)

@@ -40,6 +40,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
+import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
@@ -108,8 +109,8 @@ open class MangaDex : HttpSource() {
         return searchHandler.search(page, query, filters)
     }
 
-    suspend fun search2(page: Int, query: String, filters: FilterList): Result<MangaListPage, ResultError> {
-        return searchHandler.search2(page, query, filters)
+    suspend fun search2(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
+        return searchHandler.search2(page, filters)
     }
 
     suspend fun searchForManga(uuid: String): Result<MangaListPage, ResultError> {

@@ -131,7 +131,7 @@ fun TrackingSearchSheet(
                 else -> CenteredBox(themeColorState = themeColorState, trackSearchResult = trackSearchResult)
             }
             var searchText by remember { mutableStateOf(title) }
-            SearchFooter(themeColorState = themeColorState, title = searchText, textChanged = { searchText = it }, search = searchTracker)
+            SearchFooter(themeColorState = themeColorState, labelText = stringResource(id = R.string.title), title = searchText, textChanged = { searchText = it }, search = searchTracker)
         }
     }
 }

@@ -173,8 +173,7 @@ fun DisplayScreen(
                     Box(Modifier.fillMaxSize()) {
                         LinearProgressIndicator(
                             modifier = Modifier
-                                .padding(8.dp)
-                                .padding(bottom = contentPadding.calculateBottomPadding())
+                                .padding(bottom = contentPadding.calculateBottomPadding() + 8.dp)
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth(),
                         )

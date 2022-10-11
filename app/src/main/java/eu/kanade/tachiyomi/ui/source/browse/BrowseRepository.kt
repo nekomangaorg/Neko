@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -17,6 +16,7 @@ import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
@@ -30,8 +30,8 @@ class BrowseRepository(
 
     fun isLoggedIn() = mangaDex.isLogged()
 
-    suspend fun getSearchPage(page: Int, query: String, filter: FilterList = FilterList()): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
-        return mangaDex.search2(page, query, filter)
+    suspend fun getSearchPage(page: Int, filters: DexFilters): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        return mangaDex.search2(page, filters)
             .andThen { mangaListPage ->
                 when (mangaListPage.sourceManga.isEmpty()) {
                     true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
