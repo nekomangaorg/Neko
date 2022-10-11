@@ -14,12 +14,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -39,7 +36,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.ChapterNumber
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.SourceOrder
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.UploadDate
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.components.CheckboxRow
+import org.nekomanga.presentation.components.TriStateCheckboxRow
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -128,8 +126,7 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
                 val sortOption = state.copy(sortState = newState)
                 changeSort(sortOption)
             }
-            .padding(horizontal = 0.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = 4.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         when (state.sortState) {
@@ -143,6 +140,7 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
                 Gap(24.dp)
             }
         }
+        Gap(16.dp)
         Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
     }
 }
@@ -158,12 +156,12 @@ private fun Filter(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -217,75 +215,30 @@ private fun Filter(
 
 @Composable
 private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.FilterOption, text: String, changeFilter: (MangaConstants.FilterOption) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                changeFilter(
-                    state.copy(
-                        filterState = when (state.filterState) {
-                            ToggleableState.On -> ToggleableState.Indeterminate
-                            ToggleableState.Indeterminate -> ToggleableState.Off
-                            ToggleableState.Off -> ToggleableState.On
-                        },
-                    ),
-                )
-            },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TriStateCheckbox(
-            state = state.filterState,
-            colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
-            onClick = {
-                changeFilter(
-                    state.copy(
-                        filterState = when (state.filterState) {
-                            ToggleableState.On -> ToggleableState.Indeterminate
-                            ToggleableState.Indeterminate -> ToggleableState.Off
-                            ToggleableState.Off -> ToggleableState.On
-                        },
-                    ),
-                )
-            },
-        )
-        Gap(width = 8.dp)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-    }
+    TriStateCheckboxRow(
+        modifier = Modifier.fillMaxWidth(),
+        state = state.filterState,
+        toggleState = { newState -> changeFilter(state.copy(filterState = newState)) },
+        rowText = text,
+        themeColorState = themeColorState,
+    )
 }
 
 @Composable
 private fun CheckboxLine(themeColorState: ThemeColorState, checked: Boolean, disabledOnChecked: Boolean = false, text: String, onChecked: () -> Unit = {}) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                if (!(disabledOnChecked && checked)) {
-                    onChecked()
-                }
-            },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Checkbox(
-            checked = checked,
-            colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
-            onCheckedChange = { onChecked() },
-            enabled = if (disabledOnChecked) !checked else true,
-        )
-        Gap(width = 8.dp)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-    }
+    CheckboxRow(modifier = Modifier.fillMaxWidth(), checkedState = checked, checkedChange = { onChecked() }, rowText = text, themeColorState = themeColorState, disabled = disabledOnChecked && checked)
 }
 
 @Composable
 private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaConstants.ScanlatorFilter, changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -316,25 +269,14 @@ private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaCo
 
 @Composable
 private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: MangaConstants.ScanlatorOption, enabledButton: Boolean, changeScanlatorFilter: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .conditional(enabledButton) {
-                this.clickable {
-                    changeScanlatorFilter()
-                }
-            },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TriStateCheckbox(
-            state = if (scanlatorOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
-            enabled = enabledButton,
-            colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
-            onClick = changeScanlatorFilter,
-        )
-        Gap(width = 8.dp)
-        Text(text = scanlatorOption.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-    }
+    TriStateCheckboxRow(
+        modifier = Modifier.fillMaxWidth(),
+        disabled = !enabledButton,
+        state = if (scanlatorOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
+        toggleState = { changeScanlatorFilter() },
+        rowText = scanlatorOption.name,
+        themeColorState = themeColorState,
+    )
 }
 
 @Composable
@@ -342,7 +284,7 @@ private fun Language(themeColorState: ThemeColorState, languageFilter: MangaCons
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(horizontal = 8.dp),
     ) {
         Row(
             modifier = Modifier
@@ -377,23 +319,12 @@ private fun Language(themeColorState: ThemeColorState, languageFilter: MangaCons
 
 @Composable
 private fun LanguageLine(themeColorState: ThemeColorState, languageOption: MangaConstants.LanguageOption, enabledButton: Boolean, changeLanguageFilter: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .conditional(enabledButton) {
-                this.clickable {
-                    changeLanguageFilter()
-                }
-            },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TriStateCheckbox(
-            state = if (languageOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
-            enabled = enabledButton,
-            colors = CheckboxDefaults.colors(checkmarkColor = MaterialTheme.colorScheme.surface, uncheckedColor = themeColorState.buttonColor, checkedColor = themeColorState.buttonColor),
-            onClick = changeLanguageFilter,
-        )
-        Gap(width = 8.dp)
-        Text(text = MdLang.fromIsoCode(languageOption.name)?.prettyPrint ?: "", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-    }
+    TriStateCheckboxRow(
+        modifier = Modifier.fillMaxWidth(),
+        disabled = !enabledButton,
+        state = if (languageOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
+        toggleState = { changeLanguageFilter() },
+        rowText = MdLang.fromIsoCode(languageOption.name)?.prettyPrint ?: "",
+        themeColorState = themeColorState,
+    )
 }
