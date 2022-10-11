@@ -1,18 +1,12 @@
 package org.nekomanga.presentation.components.sheets
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,14 +23,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortState.Ascending
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortState.Descending
-import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortState.None
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.ChapterNumber
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.SourceOrder
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.UploadDate
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.CheckboxRow
+import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateCheckboxRow
 import org.nekomanga.presentation.screens.ThemeColorState
 
@@ -86,12 +78,12 @@ fun FilterChapterSheet(
 private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.SortFilter, changeSort: (SortOption?) -> Unit, setGlobal: () -> Unit) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -114,35 +106,13 @@ private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.So
 
 @Composable
 private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: String, changeSort: (SortOption) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                val newState = when (state.sortState) {
-                    Ascending -> Descending
-                    Descending -> Ascending
-                    None -> Descending
-                }
-                val sortOption = state.copy(sortState = newState)
-                changeSort(sortOption)
-            }
-            .padding(horizontal = 4.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        when (state.sortState) {
-            Ascending -> {
-                Icon(imageVector = Icons.Filled.ArrowUpward, contentDescription = null, tint = themeColorState.buttonColor, modifier = Modifier.size(24.dp))
-            }
-            Descending -> {
-                Icon(imageVector = Icons.Filled.ArrowDownward, contentDescription = null, tint = themeColorState.buttonColor, modifier = Modifier.size(24.dp))
-            }
-            None -> {
-                Gap(24.dp)
-            }
-        }
-        Gap(16.dp)
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-    }
+    SortRow(
+        modifier = Modifier.fillMaxWidth(),
+        sortState = state.sortState,
+        sortChanged = { newSortState -> changeSort(state.copy(sortState = newSortState)) },
+        rowText = text,
+        themeColorState = themeColorState,
+    )
 }
 
 @Composable
