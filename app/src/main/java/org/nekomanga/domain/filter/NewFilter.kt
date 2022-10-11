@@ -1,11 +1,13 @@
 package org.nekomanga.domain.filter
 
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import org.nekomanga.domain.manga.MangaContentRating
 
 data class DexFilters(
     val titleQuery: NewFilter.TitleQuery = NewFilter.TitleQuery(""),
     val contentRatings: List<NewFilter.ContentRating>,
+    val originalLanguage: List<NewFilter.OriginalLanguage> = MdLang.values().map { NewFilter.OriginalLanguage(it, false) },
 )
 
 enum class TagMode(val param: String) {
@@ -13,14 +15,10 @@ enum class TagMode(val param: String) {
     Or(MdConstants.SearchParameters.TagMode.or),
 }
 
-sealed class NewFilter(val filterParam: FilterParam, open val enabled: Boolean) {
-    data class TitleQuery(val query: String, override val enabled: Boolean = true) : NewFilter(FilterParam.Title, enabled)
-    data class ContentRating(val rating: MangaContentRating, val state: Boolean, override val enabled: Boolean = true) : NewFilter(FilterParam.ContentRating, enabled)
-}
-
-enum class FilterParam(val displayName: String, val queryParamName: String) {
-    Title(MdConstants.SearchParameters.Title.display, MdConstants.SearchParameters.Title.param),
-    ContentRating(MdConstants.SearchParameters.ContentRating.display, MdConstants.SearchParameters.ContentRating.param)
+sealed class NewFilter(open val enabled: Boolean) {
+    data class TitleQuery(val query: String, override val enabled: Boolean = true) : NewFilter(enabled)
+    data class OriginalLanguage(val language: MdLang, val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
+    data class ContentRating(val rating: MangaContentRating, val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
 }
 
 //title query

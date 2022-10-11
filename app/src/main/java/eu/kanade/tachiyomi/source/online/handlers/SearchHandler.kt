@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
@@ -55,7 +56,18 @@ class SearchHandler {
             queryParameters["offset"] = (MdUtil.getMangaListOffset(page))
             val actualQuery = filters.titleQuery.query.replace(WHITESPACE_REGEX, " ")
             if (actualQuery.isNotBlank()) {
-                queryParameters[filters.titleQuery.filterParam.queryParamName] = actualQuery
+                queryParameters[MdConstants.SearchParameters.titleParam] = actualQuery
+            }
+
+            val contentRating = filters.contentRatings.filter { it.state }.map { it.rating.key }
+
+            if (contentRating.isNotEmpty()) {
+                queryParameters[MdConstants.SearchParameters.contentRatingParam] = contentRating
+            }
+
+            val originalLanguage = filters.originalLanguage.filter { it.state }.map { it.language.lang }
+            if (originalLanguage.isNotEmpty()) {
+                queryParameters[MdConstants.SearchParameters.originalLanguageParam] = originalLanguage
             }
 
             //val additionalQueries = filterHandler.getQueryMap(filters)

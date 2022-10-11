@@ -313,6 +313,12 @@ class BrowseComposePresenter(
         }
     }
 
+    fun resetFilter() {
+        presenterScope.launch {
+            _browseScreenState.update { it.copy(filters = createInitialDexFilter("")) }
+        }
+    }
+
     fun filterChanged(newFilter: NewFilter) {
         presenterScope.launch {
             val updatedFilters = when (newFilter) {
@@ -323,6 +329,13 @@ class BrowseComposePresenter(
                     mutableList[index] = newFilter
                     browseScreenState.value.filters.copy(contentRatings = mutableList.toImmutableList())
                 }
+                is NewFilter.OriginalLanguage -> {
+                    val index = browseScreenState.value.filters.originalLanguage.indexOfFirst { it.language == newFilter.language }
+                    val mutableList = browseScreenState.value.filters.originalLanguage.toMutableList()
+                    mutableList[index] = newFilter
+                    browseScreenState.value.filters.copy(originalLanguage = mutableList.toImmutableList())
+                }
+
             }
 
             _browseScreenState.update {

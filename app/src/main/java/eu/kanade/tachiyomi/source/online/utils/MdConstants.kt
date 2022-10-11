@@ -32,19 +32,13 @@ object MdConstants {
     }
 
     object SearchParameters {
-        object Title {
-            const val display = "Title"
-            const val param = "title"
-        }
-
-        object ContentRating {
-            const val display = "Content Rating"
-            const val param = "contentRating[]"
-        }
+        const val titleParam = "title"
+        const val contentRatingParam = "contentRating[]"
+        const val originalLanguageParam = "originalLanguage[]"
+        const val includedTagModeParam = "includedTagsMode"
+        const val excludedTagModeParam = "excludedTagsMode"
 
         object TagMode {
-            const val includesParam = "includedTagsMode"
-            const val excludesParam = "excludedTagsMode"
             const val and = "AND"
             const val or = "OR"
         }

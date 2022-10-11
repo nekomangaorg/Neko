@@ -26,7 +26,7 @@ data class BrowseScreenState(
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
     val promptForCategories: Boolean,
-    val filters: DexFilters = DexFilters(),
+    val filters: DexFilters,
     val handledIncomingQuery: Boolean = false,
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
