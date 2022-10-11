@@ -27,6 +27,7 @@ import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.NewFilter
+import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
 import org.nekomanga.util.paging.DefaultPaginator
@@ -48,11 +49,21 @@ class BrowseComposePresenter(
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
             promptForCategories = preferences.defaultCategory() == -1,
-            filters = DexFilters(titleQuery = NewFilter.TitleQuery(incomingQuery)),
+            filters = createInitialDexFilter(incomingQuery),
             screenType = BrowseScreenType.Homepage,
         ),
     )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
+
+    private fun createInitialDexFilter(incomingQuery: String): DexFilters {
+        val enabledContentRatings = preferences.contentRatingSelections()
+        val contentRatings = MangaContentRating.getOrdered().map { NewFilter.ContentRating(it, enabledContentRatings.contains(it.key)) }
+
+        return DexFilters(
+            titleQuery = NewFilter.TitleQuery(incomingQuery),
+            contentRatings = contentRatings,
+        )
+    }
 
     private val paginator = DefaultPaginator(
         initialKey = _browseScreenState.value.page,
@@ -302,11 +313,16 @@ class BrowseComposePresenter(
         }
     }
 
-    //TODO this eventually will take the list of filters
     fun filterChanged(newFilter: NewFilter) {
         presenterScope.launch {
             val updatedFilters = when (newFilter) {
                 is NewFilter.TitleQuery -> browseScreenState.value.filters.copy(titleQuery = newFilter)
+                is NewFilter.ContentRating -> {
+                    val index = browseScreenState.value.filters.contentRatings.indexOfFirst { it.rating == newFilter.rating }
+                    val mutableList = browseScreenState.value.filters.contentRatings.toMutableList()
+                    mutableList[index] = newFilter
+                    browseScreenState.value.filters.copy(contentRatings = mutableList.toImmutableList())
+                }
             }
 
             _browseScreenState.update {

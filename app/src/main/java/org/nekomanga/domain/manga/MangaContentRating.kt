@@ -16,6 +16,10 @@ enum class MangaContentRating(val key: String) {
     }
 
     companion object {
+        fun getOrdered(): List<MangaContentRating> {
+            return listOf(Safe, Suggestive, Erotica, Pornographic)
+        }
+
         fun getContentRating(contentRating: String?): MangaContentRating {
             return when {
                 contentRating == null -> Unknown

@@ -1,9 +1,11 @@
 package org.nekomanga.domain.filter
 
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import org.nekomanga.domain.manga.MangaContentRating
 
 data class DexFilters(
     val titleQuery: NewFilter.TitleQuery = NewFilter.TitleQuery(""),
+    val contentRatings: List<NewFilter.ContentRating>,
 )
 
 enum class TagMode(val param: String) {
@@ -13,10 +15,12 @@ enum class TagMode(val param: String) {
 
 sealed class NewFilter(val filterParam: FilterParam, open val enabled: Boolean) {
     data class TitleQuery(val query: String, override val enabled: Boolean = true) : NewFilter(FilterParam.Title, enabled)
+    data class ContentRating(val rating: MangaContentRating, val state: Boolean, override val enabled: Boolean = true) : NewFilter(FilterParam.ContentRating, enabled)
 }
 
 enum class FilterParam(val displayName: String, val queryParamName: String) {
-    Title(MdConstants.SearchParameters.Title.display, MdConstants.SearchParameters.Title.param)
+    Title(MdConstants.SearchParameters.Title.display, MdConstants.SearchParameters.Title.param),
+    ContentRating(MdConstants.SearchParameters.ContentRating.display, MdConstants.SearchParameters.ContentRating.param)
 }
 
 //title query

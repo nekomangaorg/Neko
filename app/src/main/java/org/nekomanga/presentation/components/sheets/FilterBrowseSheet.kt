@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
@@ -14,12 +16,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.filter.DexFilters
@@ -54,6 +56,25 @@ fun FilterBrowseSheet(
 
             }
 
+            filters.contentRatings.forEach { contentRating ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Checkbox(
+                        checked = contentRating.state,
+                        onCheckedChange = { newState -> filterChanged(contentRating.copy(state = newState)) },
+                        colors = CheckboxDefaults.colors(checkedColor = themeColorState.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
+                    )
+                    Gap(4.dp)
+                    Text(text = contentRating.rating.prettyPrint(), color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+
+            Gap(4.dp)
+
             SearchFooter(
                 themeColorState = themeColorState,
                 labelText = filters.titleQuery.filterParam.displayName,
@@ -62,7 +83,6 @@ fun FilterBrowseSheet(
                 search = { filterClick() },
             )
 
-            Divider()
             Gap(4.dp)
             Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = resetClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {

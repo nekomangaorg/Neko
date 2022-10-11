@@ -37,6 +37,11 @@ object MdConstants {
             const val param = "title"
         }
 
+        object ContentRating {
+            const val display = "Content Rating"
+            const val param = "contentRating[]"
+        }
+
         object TagMode {
             const val includesParam = "includedTagsMode"
             const val excludesParam = "excludedTagsMode"
