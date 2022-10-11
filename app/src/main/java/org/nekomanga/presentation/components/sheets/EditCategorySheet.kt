@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.components.sheets
 
 import android.content.Context
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +34,7 @@ import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.category.CategoryItem
+import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
@@ -88,37 +86,21 @@ fun EditCategorySheet(
             ) {
                 items(categories) { category: CategoryItem ->
                     var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
-
-                    Row(
-                        modifier = paddingModifier
-                            .fillMaxWidth()
-                            .clickable {
-                                state = !state
-                                if (state) {
-                                    enabledCategories[category.id] = category
-                                } else {
-                                    enabledCategories.remove(category.id)
-                                }
-                                acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
-                            },
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(
-                            checked = state,
-                            onCheckedChange = {
-                                if (it) {
-                                    enabledCategories[category.id] = category
-                                } else {
-                                    enabledCategories.remove(category.id)
-                                }
-                                state = it
-                                acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
-                            },
-                            colors = CheckboxDefaults.colors(checkedColor = themeColorState.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
-                        )
-                        Gap(4.dp)
-                        Text(text = category.name, color = MaterialTheme.colorScheme.onSurface)
-                    }
+                    CheckboxRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        checkedState = state,
+                        checkedChange = { newState ->
+                            state = newState
+                            if (state) {
+                                enabledCategories[category.id] = category
+                            } else {
+                                enabledCategories.remove(category.id)
+                            }
+                            acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
+                        },
+                        rowText = category.name,
+                        themeColorState = themeColorState,
+                    )
                 }
             }
 
