@@ -2,6 +2,7 @@ package org.nekomanga.presentation.components.sheets
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,7 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,15 +22,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.NewFilter
+import org.nekomanga.domain.filter.TagMode
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
 import org.nekomanga.presentation.components.SearchFooter
@@ -60,6 +65,8 @@ fun FilterBrowseSheet(
             var statusExpanded by remember { mutableStateOf(false) }
             var sortExpanded by remember { mutableStateOf(false) }
             var tagExpanded by remember { mutableStateOf(false) }
+            var otherExpanded by remember { mutableStateOf(false) }
+
 
 
             LazyColumn(
@@ -159,6 +166,53 @@ fun FilterBrowseSheet(
                         )
                     }
                 }
+
+                item {
+                    ExpandableRow(isExpanded = otherExpanded, onClick = { otherExpanded = !otherExpanded }, rowText = stringResource(id = R.string.other))
+                }
+                item {
+                    AnimatedVisibility(visible = otherExpanded) {
+                        CheckboxRow(
+                            checkedState = filters.hasAvailableChapters.state,
+                            checkedChange = { newState -> filterChanged(filters.hasAvailableChapters.copy(state = newState)) },
+                            rowText = stringResource(
+                                id = R.string.has_available_chapters,
+                            ),
+                        )
+                    }
+                }
+
+                item {
+                    AnimatedVisibility(visible = otherExpanded) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(text = stringResource(id = R.string.tag_inclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(selected = filters.tagInclusionMode.mode == TagMode.And, onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.And)) })
+                                Text(text = TagMode.And.key.capitalizeWords())
+                                RadioButton(selected = filters.tagInclusionMode.mode == TagMode.Or, onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.Or)) })
+                                Text(text = TagMode.Or.key.capitalizeWords())
+                            }
+                        }
+
+                    }
+                }
+
+                item {
+                    AnimatedVisibility(visible = otherExpanded) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(text = stringResource(id = R.string.tag_exclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                RadioButton(selected = filters.tagExclusionMode.mode == TagMode.And, onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.And)) })
+                                Text(text = TagMode.And.key.capitalizeWords())
+                                RadioButton(selected = filters.tagExclusionMode.mode == TagMode.Or, onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.Or)) })
+                                Text(text = TagMode.Or.key.capitalizeWords())
+                            }
+                        }
+
+                    }
+                }
+
+
 
                 item {
                     SearchFooter(

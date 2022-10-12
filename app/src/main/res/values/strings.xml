@@ -306,6 +306,9 @@
     <string name="latest">Latest uploads</string>
     <string name="recently_added">Recently added</string>
     <string name="browse">Browse</string>
+    <string name="has_available_chapters">Has available chapters</string>
+    <string name="tag_inclusion_mode">Tag inclusion mode</string>
+    <string name="tag_exclusion_mode">Tag exclusion mode</string>
     <string name="original_language">Original Language</string>
     <string name="publication_demographic">Publication Demographic</string>
     <string name="tags">Tags</string>

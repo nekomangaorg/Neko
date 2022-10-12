@@ -18,9 +18,12 @@ data class DexFilters(
     val statuses: List<NewFilter.Status> = MangaStatus.getMangaDexStatus().map { NewFilter.Status(it, false) },
     val tags: List<NewFilter.Tag> = MangaTag.values().map { NewFilter.Tag(it, ToggleableState.Off) },
     val sort: List<NewFilter.Sort> = NewFilter.Sort.getSortList(MdSort.relevance, MangaConstants.SortState.Descending),
+    val hasAvailableChapters: NewFilter.HasAvailableChapters = NewFilter.HasAvailableChapters(false),
+    val tagInclusionMode: NewFilter.TagInclusionMode = NewFilter.TagInclusionMode(),
+    val tagExclusionMode: NewFilter.TagExclusionMode = NewFilter.TagExclusionMode(),
 )
 
-enum class TagMode(val param: String) {
+enum class TagMode(val key: String) {
     And(MdConstants.SearchParameters.TagMode.and),
     Or(MdConstants.SearchParameters.TagMode.or),
 }
@@ -32,6 +35,10 @@ sealed class NewFilter(open val enabled: Boolean) {
     data class PublicationDemographic(val demographic: MangaDemographic, val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
     data class Status(val status: MangaStatus, val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
     data class Tag(val tag: MangaTag, val state: ToggleableState, override val enabled: Boolean = true) : NewFilter(enabled)
+    data class HasAvailableChapters(val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
+    data class TagInclusionMode(val mode: TagMode = TagMode.And, override val enabled: Boolean = true) : NewFilter(enabled)
+    data class TagExclusionMode(val mode: TagMode = TagMode.Or, override val enabled: Boolean = true) : NewFilter(enabled)
+
     data class Sort(val sort: MdSort, val state: MangaConstants.SortState, override val enabled: Boolean = true) : NewFilter(enabled) {
         companion object {
             fun getSortList(sort: MdSort, state: MangaConstants.SortState): List<Sort> {
@@ -46,13 +53,11 @@ sealed class NewFilter(open val enabled: Boolean) {
     }
 }
 
-//title query
 //author query
 // group query
 // has available chapters checkbox
 //include tag mode drop down
 //exlcuded tag mode drop down
-//sort bi state only 1 selected
 
 
 

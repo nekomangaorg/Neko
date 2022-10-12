@@ -18,6 +18,7 @@ object MdConstants {
         const val updatedAt = "updatedAt"
         const val title = "title"
         const val rating = "rating"
+        const val year = "year"
         const val ascending = "asc"
         const val descending = "desc"
     }
@@ -60,9 +61,12 @@ object MdConstants {
 
     object SearchParameters {
         const val titleParam = "title"
+        const val availableTranslatedLanguage = "availableTranslatedLanguage[]"
         const val contentRatingParam = "contentRating[]"
         const val originalLanguageParam = "originalLanguage[]"
         const val publicationDemographicParam = "publicationDemographic[]"
+        const val limit = "limit"
+        const val offset = "offset"
         const val statusParam = "status[]"
         const val includedTagsParam = "includedTags[]"
         fun sortParam(sort: String) = "order[$sort]"

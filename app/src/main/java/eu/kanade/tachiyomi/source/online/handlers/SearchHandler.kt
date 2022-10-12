@@ -54,8 +54,8 @@ class SearchHandler {
         return withContext(Dispatchers.IO) {
             val queryParameters = mutableMapOf<String, Any>()
 
-            queryParameters["limit"] = MdUtil.mangaLimit.toString()
-            queryParameters["offset"] = (MdUtil.getMangaListOffset(page))
+            queryParameters[MdConstants.SearchParameters.limit] = MdUtil.mangaLimit.toString()
+            queryParameters[MdConstants.SearchParameters.offset] = (MdUtil.getMangaListOffset(page))
             val actualQuery = filters.titleQuery.query.replace(WHITESPACE_REGEX, " ")
             if (actualQuery.isNotBlank()) {
                 queryParameters[MdConstants.SearchParameters.titleParam] = actualQuery
@@ -94,8 +94,12 @@ class SearchHandler {
             val sortMode = filters.sort.first { it.state != MangaConstants.SortState.None }
             queryParameters[MdConstants.SearchParameters.sortParam(sortMode.sort.key)] = sortMode.state.key
 
-            //val additionalQueries = filterHandler.getQueryMap(filters)
-            // queryParameters.putAll(additionalQueries)
+            if (filters.hasAvailableChapters.state) {
+                queryParameters[MdConstants.SearchParameters.availableTranslatedLanguage] = MdUtil.getLangsToShow(preferencesHelper)
+            }
+
+            queryParameters[MdConstants.SearchParameters.includedTagModeParam] = filters.tagInclusionMode.mode.key
+            queryParameters[MdConstants.SearchParameters.excludedTagModeParam] = filters.tagExclusionMode.mode.key
 
             service.search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Trying to search")

@@ -348,6 +348,15 @@ class BrowseComposePresenter(
                 is NewFilter.Sort -> {
                     browseScreenState.value.filters.copy(sort = NewFilter.Sort.getSortList(newFilter.sort, newFilter.state))
                 }
+                is NewFilter.HasAvailableChapters -> {
+                    browseScreenState.value.filters.copy(hasAvailableChapters = newFilter)
+                }
+                is NewFilter.TagInclusionMode -> {
+                    browseScreenState.value.filters.copy(tagInclusionMode = newFilter)
+                }
+                is NewFilter.TagExclusionMode -> {
+                    browseScreenState.value.filters.copy(tagExclusionMode = newFilter)
+                }
 
             }
 
