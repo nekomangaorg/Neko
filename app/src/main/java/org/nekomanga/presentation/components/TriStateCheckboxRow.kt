@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -21,6 +22,7 @@ fun TriStateCheckboxRow(
     toggleState: (ToggleableState) -> Unit,
     rowText: String,
     modifier: Modifier = Modifier,
+    rowTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     disabled: Boolean = false,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
@@ -40,7 +42,7 @@ fun TriStateCheckboxRow(
             ),
         )
         Gap(4.dp)
-        Text(text = rowText, color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast))
+        Text(text = rowText, color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast), style = rowTextStyle)
     }
 }
 

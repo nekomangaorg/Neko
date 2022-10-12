@@ -2,6 +2,8 @@ package org.nekomanga.presentation.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -87,7 +89,12 @@ fun BrowseScreen(
     homeScreenTitleClick: (DisplayScreenType) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+    val sheetState =
+        rememberModalBottomSheetState(
+            initialValue = ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true,
+            animationSpec = tween(durationMillis = 150, easing = LinearEasing),
+        )
 
     var currentBottomSheet: BrowseBottomSheetScreen? by remember {
         mutableStateOf(null)

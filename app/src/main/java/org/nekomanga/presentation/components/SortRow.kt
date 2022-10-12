@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
@@ -25,6 +26,7 @@ fun SortRow(
     sortChanged: (MangaConstants.SortState) -> Unit,
     rowText: String,
     modifier: Modifier = Modifier,
+    rowTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     Row(
@@ -47,7 +49,7 @@ fun SortRow(
             }
         }
         Gap(16.dp)
-        Text(text = rowText, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = rowText, style = rowTextStyle, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 

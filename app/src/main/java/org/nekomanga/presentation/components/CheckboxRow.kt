@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -20,6 +21,7 @@ fun CheckboxRow(
     checkedChange: (Boolean) -> Unit,
     rowText: String,
     modifier: Modifier = Modifier,
+    rowTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     disabled: Boolean = false,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
@@ -43,7 +45,7 @@ fun CheckboxRow(
         Gap(4.dp)
         Text(
             text = rowText,
-            style = MaterialTheme.typography.bodyLarge,
+            style = rowTextStyle,
             color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
         )
     }
