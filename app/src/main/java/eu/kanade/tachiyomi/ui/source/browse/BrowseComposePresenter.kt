@@ -35,7 +35,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class BrowseComposePresenter(
-    val incomingQuery: String,
+    private val incomingQuery: String,
     private val browseRepository: BrowseRepository = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
@@ -315,7 +315,8 @@ class BrowseComposePresenter(
 
     fun resetFilter() {
         presenterScope.launch {
-            _browseScreenState.update { it.copy(filters = createInitialDexFilter("")) }
+            val resetFilters = createInitialDexFilter("")
+            _browseScreenState.update { it.copy(filters = resetFilters) }
         }
     }
 
