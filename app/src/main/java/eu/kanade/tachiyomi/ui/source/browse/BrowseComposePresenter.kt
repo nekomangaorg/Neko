@@ -324,7 +324,6 @@ class BrowseComposePresenter(
     fun filterChanged(newFilter: NewFilter) {
         presenterScope.launch {
             val updatedFilters = when (newFilter) {
-                is NewFilter.TitleQuery -> browseScreenState.value.filters.copy(titleQuery = newFilter)
                 is NewFilter.ContentRating -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.contentRatings, { it.rating == newFilter.rating }, newFilter)
                     browseScreenState.value.filters.copy(contentRatings = list)
@@ -356,6 +355,21 @@ class BrowseComposePresenter(
                 }
                 is NewFilter.TagExclusionMode -> {
                     browseScreenState.value.filters.copy(tagExclusionMode = newFilter)
+                }
+                is NewFilter.TitleQuery -> {
+                    if (newFilter.query.isNotBlank()) {
+                        DexFilters.disableQueries(browseScreenState.value.filters).copy(titleQuery = newFilter)
+                    } else {
+                        DexFilters.enableAll(browseScreenState.value.filters).copy(titleQuery = newFilter)
+                    }
+                }
+
+                is NewFilter.AuthorQuery -> {
+                    if (newFilter.query.isNotBlank()) {
+                        DexFilters.disableAll(browseScreenState.value.filters).copy(authorQuery = newFilter)
+                    } else {
+                        DexFilters.enableAll(browseScreenState.value.filters).copy(authorQuery = newFilter)
+                    }
                 }
 
             }

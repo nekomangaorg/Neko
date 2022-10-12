@@ -29,13 +29,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.NewFilter
 import org.nekomanga.domain.filter.TagMode
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateCheckboxRow
@@ -58,6 +58,9 @@ fun FilterBrowseSheet(
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = bottomPadding) {
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
+
+            val onSurface = MaterialTheme.colorScheme.onSurface
+            val disabledOnSurface = MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast)
 
             var originalLanguageExpanded by remember { mutableStateOf(false) }
             var contentRatingExpanded by remember { mutableStateOf(false) }
@@ -83,6 +86,7 @@ fun FilterBrowseSheet(
                         CheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             checkedState = originalLanguage.state,
+                            disabled = !originalLanguage.enabled,
                             checkedChange = { newState -> filterChanged(originalLanguage.copy(state = newState)) },
                             rowText = originalLanguage.language.prettyPrint,
                         )
@@ -98,6 +102,7 @@ fun FilterBrowseSheet(
                         CheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             checkedState = contentRating.state,
+                            disabled = !contentRating.enabled,
                             checkedChange = { newState -> filterChanged(contentRating.copy(state = newState)) },
                             rowText = contentRating.rating.prettyPrint(),
                         )
@@ -117,6 +122,7 @@ fun FilterBrowseSheet(
                         CheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             checkedState = demographic.state,
+                            disabled = !demographic.enabled,
                             checkedChange = { newState -> filterChanged(demographic.copy(state = newState)) },
                             rowText = demographic.demographic.prettyPrint(),
                         )
@@ -132,6 +138,7 @@ fun FilterBrowseSheet(
                         CheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             checkedState = status.state,
+                            disabled = !status.enabled,
                             checkedChange = { newState -> filterChanged(status.copy(state = newState)) },
                             rowText = stringResource(id = status.status.statusRes),
                         )
@@ -146,6 +153,7 @@ fun FilterBrowseSheet(
                         SortRow(
                             modifier = Modifier.fillMaxWidth(),
                             sortState = sort.state,
+                            disabled = !sort.enabled,
                             sortChanged = { sortState -> filterChanged(sort.copy(state = sortState)) },
                             rowText = sort.sort.displayName,
                         )
@@ -161,6 +169,7 @@ fun FilterBrowseSheet(
                         TriStateCheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             state = tag.state,
+                            disabled = !tag.enabled,
                             toggleState = { newState -> filterChanged(tag.copy(state = newState)) },
                             rowText = tag.tag.prettyPrint,
                         )
@@ -168,12 +177,17 @@ fun FilterBrowseSheet(
                 }
 
                 item {
-                    ExpandableRow(isExpanded = otherExpanded, onClick = { otherExpanded = !otherExpanded }, rowText = stringResource(id = R.string.other))
+                    ExpandableRow(
+                        isExpanded = otherExpanded,
+                        onClick = { otherExpanded = !otherExpanded },
+                        rowText = stringResource(id = R.string.other),
+                    )
                 }
                 item {
                     AnimatedVisibility(visible = otherExpanded) {
                         CheckboxRow(
                             checkedState = filters.hasAvailableChapters.state,
+                            disabled = !filters.hasAvailableChapters.enabled,
                             checkedChange = { newState -> filterChanged(filters.hasAvailableChapters.copy(state = newState)) },
                             rowText = stringResource(
                                 id = R.string.has_available_chapters,
@@ -187,10 +201,18 @@ fun FilterBrowseSheet(
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Text(text = stringResource(id = R.string.tag_inclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                RadioButton(selected = filters.tagInclusionMode.mode == TagMode.And, onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.And)) })
-                                Text(text = TagMode.And.key.capitalizeWords())
-                                RadioButton(selected = filters.tagInclusionMode.mode == TagMode.Or, onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.Or)) })
-                                Text(text = TagMode.Or.key.capitalizeWords())
+                                RadioButton(
+                                    selected = filters.tagInclusionMode.mode == TagMode.And,
+                                    enabled = filters.tagInclusionMode.enabled,
+                                    onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.And)) },
+                                )
+                                Text(text = stringResource(id = R.string.and), color = if (filters.tagInclusionMode.enabled) onSurface else disabledOnSurface)
+                                RadioButton(
+                                    selected = filters.tagInclusionMode.mode == TagMode.Or,
+                                    enabled = filters.tagInclusionMode.enabled,
+                                    onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.Or)) },
+                                )
+                                Text(text = stringResource(id = R.string.or), color = if (filters.tagInclusionMode.enabled) onSurface else disabledOnSurface)
                             }
                         }
 
@@ -202,10 +224,18 @@ fun FilterBrowseSheet(
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Text(text = stringResource(id = R.string.tag_exclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                RadioButton(selected = filters.tagExclusionMode.mode == TagMode.And, onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.And)) })
-                                Text(text = TagMode.And.key.capitalizeWords())
-                                RadioButton(selected = filters.tagExclusionMode.mode == TagMode.Or, onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.Or)) })
-                                Text(text = TagMode.Or.key.capitalizeWords())
+                                RadioButton(
+                                    selected = filters.tagExclusionMode.mode == TagMode.And,
+                                    enabled = filters.tagExclusionMode.enabled,
+                                    onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.And)) },
+                                )
+                                Text(text = stringResource(id = R.string.and), color = if (filters.tagInclusionMode.enabled) onSurface else disabledOnSurface)
+                                RadioButton(
+                                    selected = filters.tagExclusionMode.mode == TagMode.Or,
+                                    enabled = filters.tagExclusionMode.enabled,
+                                    onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.Or)) },
+                                )
+                                Text(text = stringResource(id = R.string.or), color = if (filters.tagInclusionMode.enabled) onSurface else disabledOnSurface)
                             }
                         }
 
@@ -220,7 +250,20 @@ fun FilterBrowseSheet(
                         labelText = stringResource(id = R.string.title),
                         showDivider = false,
                         title = filters.titleQuery.query,
+                        enabled = filters.titleQuery.enabled,
                         textChanged = { text: String -> filterChanged(NewFilter.TitleQuery(text)) },
+                        search = { filterClick() },
+                    )
+                }
+
+                item {
+                    SearchFooter(
+                        themeColorState = themeColorState,
+                        labelText = stringResource(id = R.string.author),
+                        showDivider = false,
+                        enabled = filters.authorQuery.enabled,
+                        title = filters.authorQuery.query,
+                        textChanged = { text: String -> filterChanged(NewFilter.AuthorQuery(text)) },
                         search = { filterClick() },
                     )
 

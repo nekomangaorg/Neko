@@ -12,6 +12,7 @@ import org.nekomanga.domain.manga.MangaStatus
 
 data class DexFilters(
     val titleQuery: NewFilter.TitleQuery = NewFilter.TitleQuery(""),
+    val authorQuery: NewFilter.AuthorQuery = NewFilter.AuthorQuery(""),
     val originalLanguage: List<NewFilter.OriginalLanguage> = MdLang.values().map { NewFilter.OriginalLanguage(it, false) },
     val contentRatings: List<NewFilter.ContentRating>,
     val publicationDemographics: List<NewFilter.PublicationDemographic> = MangaDemographic.getOrdered().map { NewFilter.PublicationDemographic(it, false) },
@@ -21,7 +22,48 @@ data class DexFilters(
     val hasAvailableChapters: NewFilter.HasAvailableChapters = NewFilter.HasAvailableChapters(false),
     val tagInclusionMode: NewFilter.TagInclusionMode = NewFilter.TagInclusionMode(),
     val tagExclusionMode: NewFilter.TagExclusionMode = NewFilter.TagExclusionMode(),
-)
+) {
+    companion object {
+        private fun setEnabledFilter(dexFilters: DexFilters, enabled: Boolean): DexFilters {
+            return dexFilters.copy(
+                titleQuery = dexFilters.titleQuery.copy(enabled = enabled),
+                authorQuery = dexFilters.authorQuery.copy(enabled = enabled),
+                originalLanguage = dexFilters.originalLanguage.map { it.copy(enabled = enabled) },
+                contentRatings = dexFilters.contentRatings.map { it.copy(enabled = enabled) },
+                publicationDemographics = dexFilters.publicationDemographics.map { it.copy(enabled = enabled) },
+                statuses = dexFilters.statuses.map { it.copy(enabled = enabled) },
+                tags = dexFilters.tags.map { it.copy(enabled = enabled) },
+                sort = dexFilters.sort.map { it.copy(enabled = enabled) },
+                hasAvailableChapters = dexFilters.hasAvailableChapters.copy(enabled = enabled),
+                tagInclusionMode = dexFilters.tagInclusionMode.copy(enabled = enabled),
+                tagExclusionMode = dexFilters.tagExclusionMode.copy(enabled = enabled),
+            )
+        }
+
+        fun disableAll(dexFilters: DexFilters): DexFilters {
+            return setEnabledFilter(dexFilters, false)
+        }
+
+        fun enableAll(dexFilters: DexFilters): DexFilters {
+            return setEnabledFilter(dexFilters, true)
+        }
+
+        private fun setEnabledQueryFilters(dexFilters: DexFilters, enabled: Boolean): DexFilters {
+            return dexFilters.copy(
+                titleQuery = dexFilters.titleQuery.copy(enabled = enabled),
+                authorQuery = dexFilters.authorQuery.copy(enabled = enabled),
+            )
+        }
+
+        fun disableQueries(dexFilters: DexFilters): DexFilters {
+            return setEnabledQueryFilters(dexFilters, false)
+        }
+
+        fun enableQueries(dexFilters: DexFilters): DexFilters {
+            return setEnabledQueryFilters(dexFilters, true)
+        }
+    }
+}
 
 enum class TagMode(val key: String) {
     And(MdConstants.SearchParameters.TagMode.and),
@@ -38,6 +80,7 @@ sealed class NewFilter(open val enabled: Boolean) {
     data class HasAvailableChapters(val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
     data class TagInclusionMode(val mode: TagMode = TagMode.And, override val enabled: Boolean = true) : NewFilter(enabled)
     data class TagExclusionMode(val mode: TagMode = TagMode.Or, override val enabled: Boolean = true) : NewFilter(enabled)
+    data class AuthorQuery(val query: String, override val enabled: Boolean = true) : NewFilter(enabled)
 
     data class Sort(val sort: MdSort, val state: MangaConstants.SortState, override val enabled: Boolean = true) : NewFilter(enabled) {
         companion object {
@@ -55,9 +98,6 @@ sealed class NewFilter(open val enabled: Boolean) {
 
 //author query
 // group query
-// has available chapters checkbox
-//include tag mode drop down
-//exlcuded tag mode drop down
 
 
 

@@ -23,7 +23,15 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, labelText: String, showDivider: Boolean = true, textChanged: (String) -> Unit, search: (String) -> Unit) {
+fun ColumnScope.SearchFooter(
+    themeColorState: ThemeColorState,
+    title: String,
+    labelText: String,
+    enabled: Boolean = true,
+    showDivider: Boolean = true,
+    textChanged: (String) -> Unit,
+    search: (String) -> Unit,
+) {
     val focusManager = LocalFocusManager.current
 
     if (showDivider) {
@@ -36,6 +44,7 @@ fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, la
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         value = title,
+        enabled = enabled,
         label = {
             Text(text = labelText, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
