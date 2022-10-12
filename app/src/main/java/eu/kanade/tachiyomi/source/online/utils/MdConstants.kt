@@ -10,6 +10,18 @@ object MdConstants {
 
     const val currentSeasonalId = "4be9338a-3402-4f98-b467-43fb56663927"
 
+    object Sort {
+        const val latest = "latestUploadedChapter"
+        const val relevance = "relevance"
+        const val followCount = "followedCount"
+        const val createdAt = "createdAt"
+        const val updatedAt = "updatedAt"
+        const val title = "title"
+        const val rating = "rating"
+        const val ascending = "asc"
+        const val descending = "desc"
+    }
+
     object Types {
         const val author = "author"
         const val artist = "artist"
@@ -53,6 +65,7 @@ object MdConstants {
         const val publicationDemographicParam = "publicationDemographic[]"
         const val statusParam = "status[]"
         const val includedTagsParam = "includedTags[]"
+        fun sortParam(sort: String) = "order[$sort]"
         const val excludedTagsParam = "excludedTags[]"
         const val includedTagModeParam = "includedTagsMode"
         const val excludedTagModeParam = "excludedTagsMode"

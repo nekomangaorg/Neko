@@ -345,6 +345,9 @@ class BrowseComposePresenter(
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.tags, { it.tag == newFilter.tag }, newFilter)
                     browseScreenState.value.filters.copy(tags = list)
                 }
+                is NewFilter.Sort -> {
+                    browseScreenState.value.filters.copy(sort = NewFilter.Sort.getSortList(newFilter.sort, newFilter.state))
+                }
 
             }
 

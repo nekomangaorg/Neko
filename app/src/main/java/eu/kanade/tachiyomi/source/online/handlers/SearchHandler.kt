@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.lang.toResultError
@@ -89,6 +90,9 @@ class SearchHandler {
             if (tagsToExclude.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.excludedTagsParam] = tagsToExclude
             }
+
+            val sortMode = filters.sort.first { it.state != MangaConstants.SortState.None }
+            queryParameters[MdConstants.SearchParameters.sortParam(sortMode.sort.key)] = sortMode.state.key
 
             //val additionalQueries = filterHandler.getQueryMap(filters)
             // queryParameters.putAll(additionalQueries)

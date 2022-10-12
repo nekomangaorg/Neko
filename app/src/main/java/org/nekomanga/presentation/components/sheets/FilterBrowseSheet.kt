@@ -26,6 +26,7 @@ import org.nekomanga.domain.filter.NewFilter
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
 import org.nekomanga.presentation.components.SearchFooter
+import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateCheckboxRow
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
@@ -100,6 +101,19 @@ fun FilterBrowseSheet(
                                 checkedState = status.state,
                                 checkedChange = { newState -> filterChanged(status.copy(state = newState)) },
                                 rowText = stringResource(id = status.status.statusRes),
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    ExpandableRow(modifier = Modifier.fillMaxWidth(), rowText = stringResource(id = R.string.sort)) {
+                        filters.sort.forEach { sort ->
+                            SortRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                sortState = sort.state,
+                                sortChanged = { sortState -> filterChanged(sort.copy(state = sortState)) },
+                                rowText = sort.sort.displayName,
                             )
                         }
                     }

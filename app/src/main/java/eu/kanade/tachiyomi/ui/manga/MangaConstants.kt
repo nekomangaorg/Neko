@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.external.ExternalLink
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
@@ -132,10 +133,10 @@ object MangaConstants {
         UploadDate,
     }
 
-    enum class SortState {
-        Ascending,
-        Descending,
-        None,
+    enum class SortState(val key: String) {
+        Ascending(MdConstants.Sort.ascending),
+        Descending(MdConstants.Sort.descending),
+        None("");
     }
 
     enum class SetGlobal {
