@@ -308,6 +308,7 @@
     <string name="browse">Browse</string>
     <string name="original_language">Original Language</string>
     <string name="publication_demographic">Publication Demographic</string>
+    <string name="tags">Tags</string>
     <string name="in_library">In Library</string>
     <string name="search_extensions">Search extensions…</string>
     <string name="all_sources">All sources</string>
@@ -944,7 +945,7 @@
     <string name="mean_score">Avg user score</string>
     <string name="manga_tracked">Tracked manga</string>
     <string name="chapters_downloaded">Downloaded chapters</string>
-    <string name="tags">Total tags</string>
+    <string name="total_tags">Total tags</string>
     <string name="manga_local">Local manga</string>
     <string name="global_update_manga">Globally updated</string>
     <string name="unable_to_generate_stats">Library empty, unable to generate stats</string>

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import androidx.compose.ui.state.ToggleableState
 import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -78,6 +79,15 @@ class SearchHandler {
             val status = filters.statuses.filter { it.state }.map { it.status.key }
             if (status.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.statusParam] = status
+            }
+            val tagsToInclude = filters.tags.filter { it.state == ToggleableState.On }.map { it.tag.uuid }
+            if (tagsToInclude.isNotEmpty()) {
+                queryParameters[MdConstants.SearchParameters.includedTagsParam] = tagsToInclude
+            }
+
+            val tagsToExclude = filters.tags.filter { it.state == ToggleableState.Indeterminate }.map { it.tag.uuid }
+            if (tagsToExclude.isNotEmpty()) {
+                queryParameters[MdConstants.SearchParameters.excludedTagsParam] = tagsToExclude
             }
 
             //val additionalQueries = filterHandler.getQueryMap(filters)

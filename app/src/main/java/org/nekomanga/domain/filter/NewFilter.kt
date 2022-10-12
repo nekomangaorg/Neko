@@ -1,5 +1,7 @@
 package org.nekomanga.domain.filter
 
+import androidx.compose.ui.state.ToggleableState
+import eu.kanade.tachiyomi.source.model.MangaTag
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import org.nekomanga.domain.manga.MangaContentRating
@@ -12,6 +14,7 @@ data class DexFilters(
     val contentRatings: List<NewFilter.ContentRating>,
     val publicationDemographics: List<NewFilter.PublicationDemographic> = MangaDemographic.getOrdered().map { NewFilter.PublicationDemographic(it, false) },
     val statuses: List<NewFilter.Status> = MangaStatus.getMangaDexStatus().map { NewFilter.Status(it, false) },
+    val tags: List<NewFilter.Tag> = MangaTag.values().map { NewFilter.Tag(it, ToggleableState.Off) },
 )
 
 enum class TagMode(val param: String) {
@@ -25,6 +28,7 @@ sealed class NewFilter(open val enabled: Boolean) {
     data class ContentRating(val rating: MangaContentRating, val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
     data class PublicationDemographic(val demographic: MangaDemographic, val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
     data class Status(val status: MangaStatus, val state: Boolean, override val enabled: Boolean = true) : NewFilter(enabled)
+    data class Tag(val tag: MangaTag, val state: ToggleableState, override val enabled: Boolean = true) : NewFilter(enabled)
 }
 
 //title query
@@ -35,7 +39,6 @@ sealed class NewFilter(open val enabled: Boolean) {
 //exlcuded tag mode drop down
 //tags tri state for each
 //sort bi state only 1 selected
-// status, demographic, content rating, original langauge, bi state for each
 
 
 

@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -325,28 +326,24 @@ class BrowseComposePresenter(
             val updatedFilters = when (newFilter) {
                 is NewFilter.TitleQuery -> browseScreenState.value.filters.copy(titleQuery = newFilter)
                 is NewFilter.ContentRating -> {
-                    val index = browseScreenState.value.filters.contentRatings.indexOfFirst { it.rating == newFilter.rating }
-                    val mutableList = browseScreenState.value.filters.contentRatings.toMutableList()
-                    mutableList[index] = newFilter
-                    browseScreenState.value.filters.copy(contentRatings = mutableList.toImmutableList())
+                    val list = lookupAndReplaceEntry(browseScreenState.value.filters.contentRatings, { it.rating == newFilter.rating }, newFilter)
+                    browseScreenState.value.filters.copy(contentRatings = list)
                 }
                 is NewFilter.OriginalLanguage -> {
-                    val index = browseScreenState.value.filters.originalLanguage.indexOfFirst { it.language == newFilter.language }
-                    val mutableList = browseScreenState.value.filters.originalLanguage.toMutableList()
-                    mutableList[index] = newFilter
-                    browseScreenState.value.filters.copy(originalLanguage = mutableList.toImmutableList())
+                    val list = lookupAndReplaceEntry(browseScreenState.value.filters.originalLanguage, { it.language == newFilter.language }, newFilter)
+                    browseScreenState.value.filters.copy(originalLanguage = list)
                 }
                 is NewFilter.PublicationDemographic -> {
-                    val index = browseScreenState.value.filters.publicationDemographics.indexOfFirst { it.demographic == newFilter.demographic }
-                    val mutableList = browseScreenState.value.filters.publicationDemographics.toMutableList()
-                    mutableList[index] = newFilter
-                    browseScreenState.value.filters.copy(publicationDemographics = mutableList.toImmutableList())
+                    val list = lookupAndReplaceEntry(browseScreenState.value.filters.publicationDemographics, { it.demographic == newFilter.demographic }, newFilter)
+                    browseScreenState.value.filters.copy(publicationDemographics = list)
                 }
                 is NewFilter.Status -> {
-                    val index = browseScreenState.value.filters.statuses.indexOfFirst { it.status == newFilter.status }
-                    val mutableList = browseScreenState.value.filters.statuses.toMutableList()
-                    mutableList[index] = newFilter
-                    browseScreenState.value.filters.copy(statuses = mutableList.toImmutableList())
+                    val list = lookupAndReplaceEntry(browseScreenState.value.filters.statuses, { it.status == newFilter.status }, newFilter)
+                    browseScreenState.value.filters.copy(statuses = list)
+                }
+                is NewFilter.Tag -> {
+                    val list = lookupAndReplaceEntry(browseScreenState.value.filters.tags, { it.tag == newFilter.tag }, newFilter)
+                    browseScreenState.value.filters.copy(tags = list)
                 }
 
             }
@@ -355,6 +352,13 @@ class BrowseComposePresenter(
                 it.copy(filters = updatedFilters)
             }
         }
+    }
+
+    private fun <T> lookupAndReplaceEntry(list: List<T>, indexMethod: (T) -> Boolean, newEntry: T): ImmutableList<T> {
+        val index = list.indexOfFirst { indexMethod(it) }
+        val mutableList = list.toMutableList()
+        mutableList[index] = newEntry
+        return mutableList.toImmutableList()
     }
 
     /**

@@ -52,6 +52,8 @@ object MdConstants {
         const val originalLanguageParam = "originalLanguage[]"
         const val publicationDemographicParam = "publicationDemographic[]"
         const val statusParam = "status[]"
+        const val includedTagsParam = "includedTags[]"
+        const val excludedTagsParam = "excludedTags[]"
         const val includedTagModeParam = "includedTagsMode"
         const val excludedTagModeParam = "excludedTagsMode"
 
