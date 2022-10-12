@@ -34,6 +34,13 @@ object MdConstants {
         const val josei = "josei"
     }
 
+    object Status {
+        const val cancelled = "cancelled"
+        const val ongoing = "ongoing"
+        const val completed = "completed"
+        const val hiatus = "hiatus"
+    }
+
     object DeepLinkPrefix {
         const val manga = "id:"
         const val group = "grp:"
@@ -44,6 +51,7 @@ object MdConstants {
         const val contentRatingParam = "contentRating[]"
         const val originalLanguageParam = "originalLanguage[]"
         const val publicationDemographicParam = "publicationDemographic[]"
+        const val statusParam = "status[]"
         const val includedTagModeParam = "includedTagsMode"
         const val excludedTagModeParam = "excludedTagsMode"
 

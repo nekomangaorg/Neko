@@ -92,6 +92,19 @@ fun FilterBrowseSheet(
                 }
 
                 item {
+                    ExpandableRow(modifier = Modifier.fillMaxWidth(), rowText = stringResource(id = R.string.status)) {
+                        filters.statuses.forEach { status ->
+                            CheckboxRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                checkedState = status.state,
+                                checkedChange = { newState -> filterChanged(status.copy(state = newState)) },
+                                rowText = stringResource(id = status.status.statusRes),
+                            )
+                        }
+                    }
+                }
+
+                item {
                     SearchFooter(
                         themeColorState = themeColorState,
                         labelText = stringResource(id = R.string.title),

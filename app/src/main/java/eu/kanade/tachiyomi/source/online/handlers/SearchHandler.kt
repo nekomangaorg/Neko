@@ -75,6 +75,11 @@ class SearchHandler {
                 queryParameters[MdConstants.SearchParameters.publicationDemographicParam] = demographics
             }
 
+            val status = filters.statuses.filter { it.state }.map { it.status.key }
+            if (status.isNotEmpty()) {
+                queryParameters[MdConstants.SearchParameters.statusParam] = status
+            }
+
             //val additionalQueries = filterHandler.getQueryMap(filters)
             // queryParameters.putAll(additionalQueries)
 
