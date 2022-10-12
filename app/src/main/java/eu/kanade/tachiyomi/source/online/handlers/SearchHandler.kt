@@ -70,6 +70,11 @@ class SearchHandler {
                 queryParameters[MdConstants.SearchParameters.originalLanguageParam] = originalLanguage
             }
 
+            val demographics = filters.publicationDemographics.filter { it.state }.map { it.demographic.key }
+            if (demographics.isNotEmpty()) {
+                queryParameters[MdConstants.SearchParameters.publicationDemographicParam] = demographics
+            }
+
             //val additionalQueries = filterHandler.getQueryMap(filters)
             // queryParameters.putAll(additionalQueries)
 

@@ -26,6 +26,14 @@ object MdConstants {
         const val unknown = "unknown"
     }
 
+    object Demographic {
+        const val none = "none"
+        const val shounen = "shounen"
+        const val shoujo = "shoujo"
+        const val seinen = "seinen"
+        const val josei = "josei"
+    }
+
     object DeepLinkPrefix {
         const val manga = "id:"
         const val group = "grp:"
@@ -35,6 +43,7 @@ object MdConstants {
         const val titleParam = "title"
         const val contentRatingParam = "contentRating[]"
         const val originalLanguageParam = "originalLanguage[]"
+        const val publicationDemographicParam = "publicationDemographic[]"
         const val includedTagModeParam = "includedTagsMode"
         const val excludedTagModeParam = "excludedTagsMode"
 

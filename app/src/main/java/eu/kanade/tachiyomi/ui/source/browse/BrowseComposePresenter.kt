@@ -336,6 +336,12 @@ class BrowseComposePresenter(
                     mutableList[index] = newFilter
                     browseScreenState.value.filters.copy(originalLanguage = mutableList.toImmutableList())
                 }
+                is NewFilter.PublicationDemographic -> {
+                    val index = browseScreenState.value.filters.publicationDemographics.indexOfFirst { it.demographic == newFilter.demographic }
+                    val mutableList = browseScreenState.value.filters.publicationDemographics.toMutableList()
+                    mutableList[index] = newFilter
+                    browseScreenState.value.filters.copy(publicationDemographics = mutableList.toImmutableList())
+                }
 
             }
 

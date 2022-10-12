@@ -23,11 +23,13 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, labelText: String, textChanged: (String) -> Unit, search: (String) -> Unit) {
+fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, labelText: String, showDivider: Boolean = true, textChanged: (String) -> Unit, search: (String) -> Unit) {
     val focusManager = LocalFocusManager.current
 
-    Divider()
-    Gap(4.dp)
+    if (showDivider) {
+        Divider()
+        Gap(4.dp)
+    }
 
     OutlinedTextField(
         modifier = Modifier

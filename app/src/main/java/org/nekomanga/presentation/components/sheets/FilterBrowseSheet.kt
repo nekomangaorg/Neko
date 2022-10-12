@@ -42,7 +42,7 @@ fun FilterBrowseSheet(
 
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .65
 
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f, bottomPaddingAroundContent = bottomPadding) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = bottomPadding) {
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
 
@@ -79,9 +79,23 @@ fun FilterBrowseSheet(
                 }
 
                 item {
+                    ExpandableRow(modifier = Modifier.fillMaxWidth(), rowText = stringResource(id = R.string.publication_demographic)) {
+                        filters.publicationDemographics.forEach { demographic ->
+                            CheckboxRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                checkedState = demographic.state,
+                                checkedChange = { newState -> filterChanged(demographic.copy(state = newState)) },
+                                rowText = demographic.demographic.prettyPrint(),
+                            )
+                        }
+                    }
+                }
+
+                item {
                     SearchFooter(
                         themeColorState = themeColorState,
                         labelText = stringResource(id = R.string.title),
+                        showDivider = false,
                         title = filters.titleQuery.query,
                         textChanged = { text: String -> filterChanged(NewFilter.TitleQuery(text)) },
                         search = { filterClick() },
@@ -90,6 +104,7 @@ fun FilterBrowseSheet(
                 }
             }
 
+            Gap(height = 4.dp)
             Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = resetClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
@@ -101,7 +116,6 @@ fun FilterBrowseSheet(
                     Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                 }
             }
-            Gap(16.dp)
         }
     }
 }
