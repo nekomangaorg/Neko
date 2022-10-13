@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
@@ -27,7 +28,7 @@ import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -117,6 +118,10 @@ open class MangaDex : HttpSource() {
         return searchHandler.searchForManga(uuid)
     }
 
+    suspend fun searchForAuthor(authorQuery: String): Result<ResultListPage, ResultError> {
+        return searchHandler.searchForAuthor(authorQuery)
+    }
+
     suspend fun fetchList(listId: String): Result<ListResults, ResultError> {
         return listHandler.retrieveList(listId)
     }
@@ -128,7 +133,7 @@ open class MangaDex : HttpSource() {
                     fetchList(listId).bind()
                 }
                 val latestChapter = async {
-                    latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs, limit = MdUtil.smallerLatestChapterLimit)
+                    latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs, limit = MdConstants.Limits.latestSmaller)
                         .andThen { mangaListPage ->
                             Ok(ListResults(displayScreenType = DisplayScreenType.LatestChapters(), sourceManga = mangaListPage.sourceManga))
                         }.bind()

@@ -37,6 +37,7 @@ class BrowseComposeController(incomingQuery: String = "") : BaseComposeControlle
             toggleFavorite = presenter::toggleFavorite,
             loadNextPage = presenter::loadNextItems,
             retryClick = presenter::loadNextItems,
+            otherClick = presenter::otherClick,
             changeScreenType = presenter::changeScreenType,
         )
     }

@@ -28,6 +28,7 @@ fun ColumnScope.SearchFooter(
     title: String,
     labelText: String,
     enabled: Boolean = true,
+    isError: Boolean = false,
     showDivider: Boolean = true,
     textChanged: (String) -> Unit,
     search: (String) -> Unit,
@@ -55,6 +56,7 @@ fun ColumnScope.SearchFooter(
                 }
             }
         },
+        isError = isError,
         onValueChange = { textChanged(it) },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedLabelColor = themeColorState.buttonColor,

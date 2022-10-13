@@ -310,6 +310,8 @@
     <string name="tag_inclusion_mode">Tag inclusion mode</string>
     <string name="tag_exclusion_mode">Tag exclusion mode</string>
     <string name="original_language">Original Language</string>
+    <string name="author_id">Author id</string>
+
     <string name="and">And</string>
     <string name="or">Or</string>
     <string name="publication_demographic">Publication Demographic</string>

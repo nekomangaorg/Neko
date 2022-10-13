@@ -63,6 +63,7 @@ import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.ResultList
 import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
 import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 import org.nekomanga.presentation.functions.numberOfColumns
@@ -84,6 +85,7 @@ fun BrowseScreen(
     toggleFavorite: (Long, List<CategoryItem>) -> Unit,
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
+    otherClick: (String) -> Unit,
     filterActions: FilterActions,
     changeScreenType: (BrowseScreenType) -> Unit,
     homeScreenTitleClick: (DisplayScreenType) -> Unit,
@@ -289,6 +291,22 @@ fun BrowseScreen(
                                     }
                                 }
                             }
+
+                            BrowseScreenType.Other -> {
+                                if (browseScreenState.value.otherResults.isEmpty()) {
+                                    EmptyScreen(
+                                        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
+                                        iconSize = 176.dp,
+                                        message = stringResource(id = R.string.no_results_found),
+                                    )
+                                } else {
+                                    ResultList(
+                                        results = browseScreenState.value.otherResults,
+                                        onClick = otherClick,
+                                    )
+                                }
+                            }
+
                             BrowseScreenType.Filter -> {
                                 if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
                                     EmptyScreen(

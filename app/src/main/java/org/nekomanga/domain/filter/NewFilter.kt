@@ -22,6 +22,7 @@ data class DexFilters(
     val hasAvailableChapters: NewFilter.HasAvailableChapters = NewFilter.HasAvailableChapters(false),
     val tagInclusionMode: NewFilter.TagInclusionMode = NewFilter.TagInclusionMode(),
     val tagExclusionMode: NewFilter.TagExclusionMode = NewFilter.TagExclusionMode(),
+    val authorId: NewFilter.AuthorId = NewFilter.AuthorId(),
 ) {
     companion object {
         private fun setEnabledFilter(dexFilters: DexFilters, enabled: Boolean): DexFilters {
@@ -81,6 +82,7 @@ sealed class NewFilter(open val enabled: Boolean) {
     data class TagInclusionMode(val mode: TagMode = TagMode.And, override val enabled: Boolean = true) : NewFilter(enabled)
     data class TagExclusionMode(val mode: TagMode = TagMode.Or, override val enabled: Boolean = true) : NewFilter(enabled)
     data class AuthorQuery(val query: String, override val enabled: Boolean = true) : NewFilter(enabled)
+    data class AuthorId(val uuid: String = "") : NewFilter(true)
 
     data class Sort(val sort: MdSort, val state: MangaConstants.SortState, override val enabled: Boolean = true) : NewFilter(enabled) {
         companion object {

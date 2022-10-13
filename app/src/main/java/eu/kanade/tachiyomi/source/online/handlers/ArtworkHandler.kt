@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.getOrResultError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -62,7 +62,7 @@ class ArtworkHandler {
     }
 
     private suspend fun fetchArtwork(mangaUUID: String, offset: Int): Result<RelationshipDtoList, ResultError> {
-        return service.viewArtwork(mangaUUID = mangaUUID, limit = MdUtil.artworkLimit, offset = offset)
+        return service.viewArtwork(mangaUUID = mangaUUID, limit = MdConstants.Limits.artwork, offset = offset)
             .getOrResultError("Failed to get artwork")
     }
 }

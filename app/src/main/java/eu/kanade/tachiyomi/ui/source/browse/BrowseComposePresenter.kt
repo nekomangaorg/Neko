@@ -220,7 +220,19 @@ class BrowseComposePresenter(
                             displayMangaHolder = DisplayMangaHolder(resultType = BrowseScreenType.Filter, allDisplayManga = persistentListOf(), filteredDisplayManga = persistentListOf()),
                         )
                     }
-                    paginator.loadNextItems()
+                    if (browseScreenState.value.filters.authorQuery.query.isNotBlank()) {
+                        browseRepository.getAuthors(browseScreenState.value.filters.authorQuery.query).onFailure {
+                            _browseScreenState.update { state ->
+                                state.copy(error = it.message(), initialLoading = false)
+                            }
+                        }.onSuccess { dr ->
+                            _browseScreenState.update {
+                                it.copy(otherResults = dr.toImmutableList(), screenType = BrowseScreenType.Other, initialLoading = false)
+                            }
+                        }
+                    } else {
+                        paginator.loadNextItems()
+                    }
                 }
                 DeepLinkType.Manga -> {
                     browseRepository.getDeepLinkManga(uuid).onFailure {
@@ -236,6 +248,20 @@ class BrowseComposePresenter(
                 }
                 else -> Unit
             }
+        }
+    }
+
+    fun otherClick(uuid: String) {
+        presenterScope.launch {
+            if (browseScreenState.value.filters.authorQuery.query.isNotBlank()) {
+                _browseScreenState.update {
+                    it.copy(
+                        filters = createInitialDexFilter("").copy(authorId = NewFilter.AuthorId(uuid)),
+                    )
+                }
+                getSearchPage()
+            }
+
         }
     }
 
@@ -371,6 +397,13 @@ class BrowseComposePresenter(
                         DexFilters.enableAll(browseScreenState.value.filters).copy(authorQuery = newFilter)
                     }
                 }
+                is NewFilter.AuthorId -> {
+                    if (newFilter.uuid.isNotBlank()) {
+                        DexFilters.disableQueries(browseScreenState.value.filters).copy(authorId = newFilter)
+                    } else {
+                        DexFilters.enableAll(browseScreenState.value.filters).copy(authorId = newFilter)
+                    }
+                }
 
             }
 
@@ -447,3 +480,5 @@ class BrowseComposePresenter(
         }
     }
 }
+
+

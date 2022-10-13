@@ -16,9 +16,11 @@ import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.toDisplayResult
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -51,6 +53,18 @@ class BrowseRepository(
                 true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
                 false -> {
                     val displayManga = mangaListPage.sourceManga.first().toDisplayManga(db, mangaDex.id)
+                    Ok(displayManga)
+                }
+            }
+        }
+    }
+
+    suspend fun getAuthors(authorQuery: String): Result<List<DisplayResult>, ResultError> {
+        return mangaDex.searchForAuthor(authorQuery).andThen { resultListPage ->
+            when (resultListPage.results.isEmpty()) {
+                true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
+                false -> {
+                    val displayManga = resultListPage.results.map { it.toDisplayResult() }
                     Ok(displayManga)
                 }
             }

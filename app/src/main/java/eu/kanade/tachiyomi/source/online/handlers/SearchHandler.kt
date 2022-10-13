@@ -14,7 +14,9 @@ import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
+import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
@@ -29,6 +31,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.SourceResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
@@ -50,11 +53,27 @@ class SearchHandler {
             }
     }
 
+    suspend fun searchForAuthor(authorQuery: String): Result<ResultListPage, ResultError> {
+        return service.searchAuthor(query = authorQuery, limit = MdConstants.Limits.author)
+            .getOrResultError("trying to search author $authorQuery")
+            .andThen { authorListDto ->
+
+                val results = authorListDto.data.map {
+                    SourceResult(
+                        title = it.attributes.name,
+                        uuid = it.id,
+                        biography = it.attributes.biography.asMdMap<String>()["en"] ?: "",
+                    )
+                }.toImmutableList()
+                Ok(ResultListPage(hasNextPage = false, results = results))
+            }
+    }
+
     suspend fun search2(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
         return withContext(Dispatchers.IO) {
             val queryParameters = mutableMapOf<String, Any>()
 
-            queryParameters[MdConstants.SearchParameters.limit] = MdUtil.mangaLimit.toString()
+            queryParameters[MdConstants.SearchParameters.limit] = MdConstants.Limits.manga
             queryParameters[MdConstants.SearchParameters.offset] = (MdUtil.getMangaListOffset(page))
             val actualQuery = filters.titleQuery.query.replace(WHITESPACE_REGEX, " ")
             if (actualQuery.isNotBlank()) {
@@ -101,6 +120,11 @@ class SearchHandler {
             queryParameters[MdConstants.SearchParameters.includedTagModeParam] = filters.tagInclusionMode.mode.key
             queryParameters[MdConstants.SearchParameters.excludedTagModeParam] = filters.tagExclusionMode.mode.key
 
+            if (filters.authorId.uuid.isNotBlank()) {
+                queryParameters[MdConstants.SearchParameters.authors] = filters.authorId.uuid
+                queryParameters[MdConstants.SearchParameters.artists] = filters.authorId.uuid
+            }
+
             service.search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Trying to search")
                 .andThen { response ->
@@ -112,7 +136,7 @@ class SearchHandler {
     suspend fun recentlyAdded(page: Int): Result<MangaListPage, ResultError> {
         return withContext(Dispatchers.IO) {
             val queryParameters = mutableMapOf<String, Any>()
-            queryParameters["limit"] = MdUtil.mangaLimit.toString()
+            queryParameters["limit"] = MdConstants.Limits.manga
             queryParameters["offset"] = MdUtil.getMangaListOffset(page)
             val contentRatings = preferencesHelper.contentRatingSelections().toList()
             if (contentRatings.isNotEmpty()) {
@@ -147,7 +171,7 @@ class SearchHandler {
             } else {
                 val queryParameters = mutableMapOf<String, Any>()
 
-                queryParameters["limit"] = MdUtil.mangaLimit.toString()
+                queryParameters["limit"] = MdConstants.Limits.manga
                 queryParameters["offset"] = (MdUtil.getMangaListOffset(page))
                 if (query.startsWith(MdUtil.PREFIX_GROUP_ID_SEARCH)) {
                     val groupId = query.removePrefix(MdUtil.PREFIX_GROUP_ID_SEARCH)

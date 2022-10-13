@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.lang.isUUID
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.NewFilter
@@ -240,6 +241,34 @@ fun FilterBrowseSheet(
                         }
 
                     }
+                }
+
+                item {
+                    AnimatedVisibility(visible = otherExpanded) {
+                        val isError = remember(filters.authorId.uuid) {
+                            if (filters.authorId.uuid.isBlank()) {
+                                false
+                            } else {
+                                !filters.authorId.uuid.isUUID()
+                            }
+                        }
+                        SearchFooter(
+                            themeColorState = themeColorState,
+                            labelText = stringResource(id = R.string.author_id),
+                            showDivider = false,
+                            title = filters.authorId.uuid,
+                            isError = isError,
+                            enabled = filters.authorId.enabled,
+                            textChanged = { text: String -> filterChanged(NewFilter.AuthorId(text)) },
+                            search = { filterClick() },
+                        )
+
+                    }
+                }
+
+                item {
+                    Gap(4.dp)
+                    eu.kanade.presentation.components.Divider()
                 }
 
 

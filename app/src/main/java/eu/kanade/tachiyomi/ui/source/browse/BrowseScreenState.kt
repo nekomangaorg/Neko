@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.NewFilter
@@ -16,6 +17,7 @@ data class BrowseScreenState(
     val screenType: BrowseScreenType = BrowseScreenType.Homepage,
     val displayMangaHolder: DisplayMangaHolder = DisplayMangaHolder(),
     val homePageManga: ImmutableList<HomePageManga> = persistentListOf(),
+    val otherResults: ImmutableList<DisplayResult> = persistentListOf(),
     val error: String? = null,
     val endReached: Boolean = false,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
@@ -41,6 +43,7 @@ data class DisplayMangaHolder(
 
 enum class BrowseScreenType {
     Homepage,
+    Other,
     Filter,
     Follows,
     None,

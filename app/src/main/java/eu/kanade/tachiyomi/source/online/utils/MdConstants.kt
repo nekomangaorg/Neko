@@ -10,6 +10,14 @@ object MdConstants {
 
     const val currentSeasonalId = "4be9338a-3402-4f98-b467-43fb56663927"
 
+    object Limits {
+        const val manga = 20
+        const val artwork = 100
+        const val author = 100
+        const val latest = 100
+        const val latestSmaller = 50
+    }
+
     object Sort {
         const val latest = "latestUploadedChapter"
         const val relevance = "relevance"
@@ -68,6 +76,8 @@ object MdConstants {
         const val limit = "limit"
         const val offset = "offset"
         const val statusParam = "status[]"
+        const val authors = "authors[]"
+        const val artists = "artists[]"
         const val includedTagsParam = "includedTags[]"
         fun sortParam(sort: String) = "order[$sort]"
         const val excludedTagsParam = "excludedTags[]"
