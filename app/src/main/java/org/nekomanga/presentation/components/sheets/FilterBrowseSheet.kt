@@ -4,14 +4,18 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -26,8 +30,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.flowlayout.FlowRow
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.isUUID
 import jp.wasabeef.gap.Gap
@@ -40,6 +46,8 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateCheckboxRow
+import org.nekomanga.presentation.components.dialog.SaveFilterDialog
+import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 
@@ -48,15 +56,17 @@ fun FilterBrowseSheet(
     filters: DexFilters,
     bottomPadding: Dp = 16.dp,
     filterClick: () -> Unit,
+    saveClick: (String) -> Unit,
     resetClick: () -> Unit,
     filterChanged: (NewFilter) -> Unit,
+    savedFilters: List<String>,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
-        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .65
+        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .75
 
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = bottomPadding) {
+        BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .9f, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = bottomPadding) {
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
 
@@ -69,9 +79,13 @@ fun FilterBrowseSheet(
             var statusExpanded by remember { mutableStateOf(false) }
             var sortExpanded by remember { mutableStateOf(false) }
             var tagExpanded by remember { mutableStateOf(false) }
+            var saveExpanded by remember { mutableStateOf(false) }
             var otherExpanded by remember { mutableStateOf(false) }
+            var showSaveFilterDialog by remember { mutableStateOf(false) }
 
-
+            if (showSaveFilterDialog) {
+                SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
+            }
 
             LazyColumn(
                 modifier = Modifier
@@ -80,7 +94,11 @@ fun FilterBrowseSheet(
             ) {
 
                 item {
-                    ExpandableRow(isExpanded = originalLanguageExpanded, onClick = { originalLanguageExpanded = !originalLanguageExpanded }, rowText = stringResource(id = R.string.original_language))
+                    ExpandableRow(
+                        isExpanded = originalLanguageExpanded,
+                        onClick = { originalLanguageExpanded = !originalLanguageExpanded },
+                        rowText = stringResource(id = R.string.original_language),
+                    )
                 }
                 items(filters.originalLanguage) { originalLanguage ->
                     AnimatedVisibility(visible = originalLanguageExpanded) {
@@ -197,6 +215,18 @@ fun FilterBrowseSheet(
                     }
                 }
 
+                items(filters.tags) { tag ->
+                    AnimatedVisibility(visible = tagExpanded) {
+                        TriStateCheckboxRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            state = tag.state,
+                            disabled = !tag.enabled,
+                            toggleState = { newState -> filterChanged(tag.copy(state = newState)) },
+                            rowText = tag.tag.prettyPrint,
+                        )
+                    }
+                }
+
                 item {
                     AnimatedVisibility(visible = otherExpanded) {
                         Column(modifier = Modifier.fillMaxWidth()) {
@@ -245,6 +275,29 @@ fun FilterBrowseSheet(
 
                 item {
                     AnimatedVisibility(visible = otherExpanded) {
+                        val isError = remember(filters.groupId.uuid) {
+                            if (filters.groupId.uuid.isBlank()) {
+                                false
+                            } else {
+                                !filters.groupId.uuid.isUUID()
+                            }
+                        }
+                        SearchFooter(
+                            themeColorState = themeColorState,
+                            labelText = stringResource(id = R.string.scanlator_group_id),
+                            showDivider = false,
+                            title = filters.groupId.uuid,
+                            isError = isError,
+                            enabled = filters.groupId.enabled,
+                            textChanged = { text: String -> filterChanged(NewFilter.GroupId(text)) },
+                            search = { filterClick() },
+                        )
+                        Gap(4.dp)
+                    }
+                }
+
+                item {
+                    AnimatedVisibility(visible = otherExpanded) {
                         val isError = remember(filters.authorId.uuid) {
                             if (filters.authorId.uuid.isBlank()) {
                                 false
@@ -262,16 +315,37 @@ fun FilterBrowseSheet(
                             textChanged = { text: String -> filterChanged(NewFilter.AuthorId(text)) },
                             search = { filterClick() },
                         )
+                    }
+                }
 
+                if (savedFilters.isNotEmpty()) {
+                    item {
+                        ExpandableRow(
+                            isExpanded = saveExpanded,
+                            onClick = { saveExpanded = !saveExpanded },
+                            rowText = stringResource(id = R.string.saved_filter),
+                        )
                     }
                 }
 
                 item {
-                    Gap(4.dp)
-                    eu.kanade.presentation.components.Divider()
+                    AnimatedVisibility(visible = saveExpanded) {
+                        FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisSpacing = 4.dp) {
+                            savedFilters.forEach { name ->
+                                FilterChip(
+                                    selected = false,
+                                    onClick = { showSaveFilterDialog = true },
+                                    shape = RoundedCornerShape(100),
+                                    label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                                        selectedLabelColor = MaterialTheme.colorScheme.primary,
+                                    ),
+                                )
+                            }
+                        }
+                    }
                 }
-
-
 
                 item {
                     SearchFooter(
@@ -295,15 +369,38 @@ fun FilterBrowseSheet(
                         textChanged = { text: String -> filterChanged(NewFilter.AuthorQuery(text)) },
                         search = { filterClick() },
                     )
+                }
+
+                item {
+                    SearchFooter(
+                        themeColorState = themeColorState,
+                        labelText = stringResource(id = R.string.scanlator_group),
+                        showDivider = false,
+                        enabled = filters.groupQuery.enabled,
+                        title = filters.groupQuery.query,
+                        textChanged = { text: String -> filterChanged(NewFilter.GroupQuery(text)) },
+                        search = { filterClick() },
+                    )
 
                 }
+
             }
 
-            Gap(height = 4.dp)
-            Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Spacer(modifier = Modifier.weight(1f))
+            Row(
+                modifier = paddingModifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 TextButton(onClick = resetClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
                 }
+
+
+                TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                    Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
+                }
+
                 ElevatedButton(
                     onClick = filterClick,
                     colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),

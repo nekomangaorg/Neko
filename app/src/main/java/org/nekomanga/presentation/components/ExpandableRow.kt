@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,10 +21,10 @@ fun ExpandableRow(rowText: String, isExpanded: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(8.dp),
+            .padding(8.dp, 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = rowText)
+        Text(text = rowText, style = MaterialTheme.typography.bodyLarge)
         val icon = when (isExpanded) {
             true -> Icons.Default.ExpandLess
             false -> Icons.Default.ExpandMore

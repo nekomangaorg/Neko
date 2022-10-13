@@ -122,6 +122,10 @@ open class MangaDex : HttpSource() {
         return searchHandler.searchForAuthor(authorQuery)
     }
 
+    suspend fun searchForGroup(groupQuery: String): Result<ResultListPage, ResultError> {
+        return searchHandler.searchForGroup(groupQuery)
+    }
+
     suspend fun fetchList(listId: String): Result<ListResults, ResultError> {
         return listHandler.retrieveList(listId)
     }

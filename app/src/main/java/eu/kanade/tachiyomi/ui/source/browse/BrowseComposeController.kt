@@ -32,6 +32,7 @@ class BrowseComposeController(incomingQuery: String = "") : BaseComposeControlle
                 filterClick = presenter::getSearchPage,
                 filterChanged = presenter::filterChanged,
                 resetClick = presenter::resetFilter,
+                saveClick = presenter::saveFilter,
             ),
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,

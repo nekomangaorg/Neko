@@ -52,6 +52,7 @@ class BrowseComposePresenter(
             promptForCategories = preferences.defaultCategory() == -1,
             filters = createInitialDexFilter(incomingQuery),
             screenType = BrowseScreenType.Homepage,
+            savedFilters = persistentListOf("test", "another test", "another really long test"),
         ),
     )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
@@ -124,6 +125,7 @@ class BrowseComposePresenter(
                 it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()), isLoggedIn = browseRepository.isLoggedIn())
             }
         }
+
 
         presenterScope.launch {
             if (browseScreenState.value.promptForCategories) {
@@ -220,8 +222,15 @@ class BrowseComposePresenter(
                             displayMangaHolder = DisplayMangaHolder(resultType = BrowseScreenType.Filter, allDisplayManga = persistentListOf(), filteredDisplayManga = persistentListOf()),
                         )
                     }
-                    if (browseScreenState.value.filters.authorQuery.query.isNotBlank()) {
-                        browseRepository.getAuthors(browseScreenState.value.filters.authorQuery.query).onFailure {
+
+                    val authorQuery = browseScreenState.value.filters.authorQuery.query.isNotBlank()
+                    val groupQuery = browseScreenState.value.filters.groupQuery.query.isNotBlank()
+
+                    if (authorQuery || groupQuery) {
+                        when {
+                            authorQuery -> browseRepository.getAuthors(browseScreenState.value.filters.authorQuery.query)
+                            else -> browseRepository.getGroups(browseScreenState.value.filters.groupQuery.query)
+                        }.onFailure {
                             _browseScreenState.update { state ->
                                 state.copy(error = it.message(), initialLoading = false)
                             }
@@ -257,6 +266,13 @@ class BrowseComposePresenter(
                 _browseScreenState.update {
                     it.copy(
                         filters = createInitialDexFilter("").copy(authorId = NewFilter.AuthorId(uuid)),
+                    )
+                }
+                getSearchPage()
+            } else if (browseScreenState.value.filters.groupQuery.query.isNotBlank()) {
+                _browseScreenState.update {
+                    it.copy(
+                        filters = createInitialDexFilter("").copy(groupId = NewFilter.GroupId(uuid)),
                     )
                 }
                 getSearchPage()
@@ -340,6 +356,12 @@ class BrowseComposePresenter(
         }
     }
 
+    fun saveFilter(name: String) {
+        presenterScope.launch {
+
+        }
+    }
+
     fun resetFilter() {
         presenterScope.launch {
             val resetFilters = createInitialDexFilter("")
@@ -402,6 +424,20 @@ class BrowseComposePresenter(
                         DexFilters.disableQueries(browseScreenState.value.filters).copy(authorId = newFilter)
                     } else {
                         DexFilters.enableAll(browseScreenState.value.filters).copy(authorId = newFilter)
+                    }
+                }
+                is NewFilter.GroupQuery -> {
+                    if (newFilter.query.isNotBlank()) {
+                        DexFilters.disableAll(browseScreenState.value.filters).copy(groupQuery = newFilter)
+                    } else {
+                        DexFilters.enableAll(browseScreenState.value.filters).copy(groupQuery = newFilter)
+                    }
+                }
+                is NewFilter.GroupId -> {
+                    if (newFilter.uuid.isNotBlank()) {
+                        DexFilters.disableQueries(browseScreenState.value.filters).copy(groupId = newFilter, titleQuery = browseScreenState.value.filters.titleQuery)
+                    } else {
+                        DexFilters.enableQueries(browseScreenState.value.filters).copy(groupId = newFilter)
                     }
                 }
 

@@ -71,6 +71,18 @@ class BrowseRepository(
         }
     }
 
+    suspend fun getGroups(groupQuery: String): Result<List<DisplayResult>, ResultError> {
+        return mangaDex.searchForGroup(groupQuery).andThen { resultListPage ->
+            when (resultListPage.results.isEmpty()) {
+                true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
+                false -> {
+                    val displayManga = resultListPage.results.map { it.toDisplayResult() }
+                    Ok(displayManga)
+                }
+            }
+        }
+    }
+
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
         val blockedScanlatorUUIDs = preferenceHelper.blockedScanlators().get().mapNotNull {
             var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()

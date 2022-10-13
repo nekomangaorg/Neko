@@ -40,6 +40,12 @@ interface MangaDexService {
         @Query(value = "limit") limit: Int,
     ): ApiResponse<AuthorListDto>
 
+    @GET(MdApi.group)
+    suspend fun searchGroup(
+        @Query(value = "name") query: String,
+        @Query(value = "limit") limit: Int,
+    ): ApiResponse<GroupListDto>
+
     @GET("${MdApi.manga}?&order[createdAt]=desc&includes[]=${MdConstants.Types.coverArt}")
     suspend fun getRecentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 

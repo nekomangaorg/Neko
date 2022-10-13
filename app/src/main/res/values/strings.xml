@@ -311,12 +311,17 @@
     <string name="tag_exclusion_mode">Tag exclusion mode</string>
     <string name="original_language">Original Language</string>
     <string name="author_id">Author id</string>
-
+    <string name="scanlator_group_id">Scanlator group id</string>
+    <string name="scanlator_group">Scanlator group</string>
     <string name="and">And</string>
     <string name="or">Or</string>
     <string name="publication_demographic">Publication Demographic</string>
     <string name="tags">Tags</string>
     <string name="in_library">In Library</string>
+    <string name="save_filter">Save filter</string>
+    <string name="saved_filter">Saved filter</string>
+    <string name="filter_with_name_exists">A filter with that name already exists</string>
+    <string name="filter_cannot_be_blank">Category name cannot be blank</string>
     <string name="search_extensions">Search extensions…</string>
     <string name="all_sources">All sources</string>
     <string name="sources">Sources</string>

@@ -30,6 +30,7 @@ data class BrowseScreenState(
     val promptForCategories: Boolean,
     val filters: DexFilters,
     val handledIncomingQuery: Boolean = false,
+    val savedFilters: ImmutableList<String> = persistentListOf(),
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 
@@ -51,6 +52,7 @@ enum class BrowseScreenType {
 
 data class FilterActions(
     val filterClick: () -> Unit,
+    val saveClick: (String) -> Unit,
     val resetClick: () -> Unit,
     val filterChanged: (NewFilter) -> Unit,
 )

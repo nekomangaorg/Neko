@@ -48,6 +48,7 @@ fun BrowseBottomSheet(
         )
         is BrowseBottomSheetScreen.FilterSheet -> FilterBrowseSheet(
             filters = browseScreenState.value.filters,
+            savedFilters = browseScreenState.value.savedFilters,
             bottomPadding = bottomPadding,
             filterClick = {
                 keyboardController?.hide()
@@ -59,6 +60,7 @@ fun BrowseBottomSheet(
                 filterActions.resetClick()
             },
             filterChanged = filterActions.filterChanged,
+            saveClick = filterActions.saveClick,
         )
     }
 }

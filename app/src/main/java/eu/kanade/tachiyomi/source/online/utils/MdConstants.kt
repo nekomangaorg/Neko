@@ -14,6 +14,7 @@ object MdConstants {
         const val manga = 20
         const val artwork = 100
         const val author = 100
+        const val group = 100
         const val latest = 100
         const val latestSmaller = 50
     }
@@ -78,6 +79,7 @@ object MdConstants {
         const val statusParam = "status[]"
         const val authors = "authors[]"
         const val artists = "artists[]"
+        const val group = "group"
         const val includedTagsParam = "includedTags[]"
         fun sortParam(sort: String) = "order[$sort]"
         const val excludedTagsParam = "excludedTags[]"

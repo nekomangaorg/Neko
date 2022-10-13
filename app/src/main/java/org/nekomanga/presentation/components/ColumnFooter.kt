@@ -46,6 +46,7 @@ fun ColumnScope.SearchFooter(
             .padding(horizontal = 8.dp),
         value = title,
         enabled = enabled,
+        singleLine = true,
         label = {
             Text(text = labelText, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },

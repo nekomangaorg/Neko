@@ -62,7 +62,23 @@ class SearchHandler {
                     SourceResult(
                         title = it.attributes.name,
                         uuid = it.id,
-                        biography = it.attributes.biography.asMdMap<String>()["en"] ?: "",
+                        information = it.attributes.biography.asMdMap<String>()["en"] ?: "",
+                    )
+                }.toImmutableList()
+                Ok(ResultListPage(hasNextPage = false, results = results))
+            }
+    }
+
+    suspend fun searchForGroup(groupQuery: String): Result<ResultListPage, ResultError> {
+        return service.searchGroup(query = groupQuery, limit = MdConstants.Limits.group)
+            .getOrResultError("trying to search group $groupQuery")
+            .andThen { authorListDto ->
+
+                val results = authorListDto.data.map {
+                    SourceResult(
+                        title = it.attributes.name,
+                        uuid = it.id,
+                        information = it.attributes.description ?: "",
                     )
                 }.toImmutableList()
                 Ok(ResultListPage(hasNextPage = false, results = results))
@@ -123,6 +139,10 @@ class SearchHandler {
             if (filters.authorId.uuid.isNotBlank()) {
                 queryParameters[MdConstants.SearchParameters.authors] = filters.authorId.uuid
                 queryParameters[MdConstants.SearchParameters.artists] = filters.authorId.uuid
+            }
+
+            if (filters.groupId.uuid.isNotBlank()) {
+                queryParameters[MdConstants.SearchParameters.group] = filters.groupId.uuid
             }
 
             service.search(ProxyRetrofitQueryMap(queryParameters))
