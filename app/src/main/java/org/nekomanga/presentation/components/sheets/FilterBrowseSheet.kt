@@ -97,6 +97,17 @@ fun FilterBrowseSheet(
                     savedFilters.firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }?.name ?: "",
                 )
             }
+            var searchTypeShown by rememberSaveable(filters) {
+                val type = if (filters.authorQuery.query.isNotBlank()) {
+                    SearchType.Author
+                } else if (filters.groupQuery.query.isNotBlank()) {
+                    SearchType.Group
+                } else {
+                    SearchType.Title
+                }
+                mutableStateOf(type)
+            }
+
 
             if (showSaveFilterDialog) {
                 SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
@@ -344,72 +355,64 @@ fun FilterBrowseSheet(
                     AnimatedVisibility(visible = savedFilters.isNotEmpty()) {
                         Column(modifier = Modifier.fillMaxWidth()) {
 
-                            Text(text = stringResource(id = R.string.saved_filter), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                            Text(text = stringResource(id = R.string.saved_filter), modifier = Modifier.padding(start = 16.dp), style = MaterialTheme.typography.labelMedium)
 
                             LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 item { Gap(4.dp) }
                                 items(savedFilters) { filter ->
-                                    val selected = nameOfEnabledFilter.equals(filter.name, true)
-                                    FilterChip(
-                                        selected = selected,
-                                        onClick = { loadFilter(filter) },
-                                        leadingIcon = {
-                                            if (selected) {
-                                                Icon(imageVector = Icons.Default.Check, contentDescription = null)
-                                            }
-                                        },
-                                        shape = RoundedCornerShape(100),
-                                        label = { Text(text = filter.name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-                                        colors = FilterChipDefaults.filterChipColors(
-                                            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                                            selectedLabelColor = MaterialTheme.colorScheme.primary,
-                                            selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                                        ),
-                                    )
+                                    FilterSheetChip(nameOfEnabledFilter.equals(filter.name, true), { loadFilter(filter) }, filter.name)
                                 }
                                 item { Gap(4.dp) }
                             }
                         }
                     }
                 }
-
                 item {
-                    SearchFooter(
-                        themeColorState = themeColorState,
-                        labelText = stringResource(id = R.string.title),
-                        showDivider = false,
-                        title = filters.titleQuery.query,
-                        enabled = filters.titleQuery.enabled,
-                        textChanged = { text: String -> filterChanged(NewFilter.TitleQuery(text)) },
-                        search = { filterClick() },
-                    )
+                    Row(Modifier.fillMaxWidth(), Arrangement.Center) {
+                        FilterSheetChip(searchTypeShown == SearchType.Title, { searchTypeShown = SearchType.Title }, stringResource(id = R.string.title))
+                        FilterSheetChip(searchTypeShown == SearchType.Author, { searchTypeShown = SearchType.Author }, stringResource(id = R.string.author))
+                        FilterSheetChip(searchTypeShown == SearchType.Group, { searchTypeShown = SearchType.Group }, stringResource(id = R.string.scanlator_group))
+                    }
                 }
 
                 item {
-                    SearchFooter(
-                        themeColorState = themeColorState,
-                        labelText = stringResource(id = R.string.author),
-                        showDivider = false,
-                        enabled = filters.authorQuery.enabled,
-                        title = filters.authorQuery.query,
-                        textChanged = { text: String -> filterChanged(NewFilter.AuthorQuery(text)) },
-                        search = { filterClick() },
-                    )
+                    when (searchTypeShown) {
+                        SearchType.Title -> {
+                            SearchFooter(
+                                themeColorState = themeColorState,
+                                labelText = stringResource(id = R.string.title),
+                                showDivider = false,
+                                title = filters.titleQuery.query,
+                                enabled = filters.titleQuery.enabled,
+                                textChanged = { text: String -> filterChanged(NewFilter.TitleQuery(text)) },
+                                search = { filterClick() },
+                            )
+                        }
+                        SearchType.Author -> {
+                            SearchFooter(
+                                themeColorState = themeColorState,
+                                labelText = stringResource(id = R.string.author),
+                                showDivider = false,
+                                enabled = filters.authorQuery.enabled,
+                                title = filters.authorQuery.query,
+                                textChanged = { text: String -> filterChanged(NewFilter.AuthorQuery(text)) },
+                                search = { filterClick() },
+                            )
+                        }
+                        SearchType.Group -> {
+                            SearchFooter(
+                                themeColorState = themeColorState,
+                                labelText = stringResource(id = R.string.scanlator_group),
+                                showDivider = false,
+                                enabled = filters.groupQuery.enabled,
+                                title = filters.groupQuery.query,
+                                textChanged = { text: String -> filterChanged(NewFilter.GroupQuery(text)) },
+                                search = { filterClick() },
+                            )
+                        }
+
+                    }
                 }
-
-                item {
-                    SearchFooter(
-                        themeColorState = themeColorState,
-                        labelText = stringResource(id = R.string.scanlator_group),
-                        showDivider = false,
-                        enabled = filters.groupQuery.enabled,
-                        title = filters.groupQuery.query,
-                        textChanged = { text: String -> filterChanged(NewFilter.GroupQuery(text)) },
-                        search = { filterClick() },
-                    )
-
-                }
-
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -462,4 +465,34 @@ fun FilterBrowseSheet(
             }
         }
     }
+}
+
+@Composable
+private fun FilterSheetChip(selected: Boolean, onClick: () -> Unit, name: String) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        leadingIcon = {
+            if (selected) {
+                Icon(imageVector = Icons.Default.Check, contentDescription = null)
+            }
+        },
+        shape = RoundedCornerShape(100),
+        label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            selectedLabelColor = MaterialTheme.colorScheme.primary,
+            selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+        ),
+        border = FilterChipDefaults.filterChipBorder(
+            borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
+            selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+        ),
+    )
+}
+
+private enum class SearchType {
+    Title,
+    Author,
+    Group
 }

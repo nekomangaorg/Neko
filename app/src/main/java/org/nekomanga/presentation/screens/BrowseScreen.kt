@@ -63,6 +63,7 @@ import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.MangaListWithHeader
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.ResultList
 import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
@@ -394,6 +395,10 @@ private fun LazyListScope.customChip(isSelected: Boolean, onClick: () -> Unit, @
             colors = FilterChipDefaults.filterChipColors(
                 selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                 selectedLabelColor = MaterialTheme.colorScheme.primary,
+            ),
+            border = FilterChipDefaults.filterChipBorder(
+                borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
+                selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             ),
         )
     }
