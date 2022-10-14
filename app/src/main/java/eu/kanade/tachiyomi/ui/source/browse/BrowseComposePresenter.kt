@@ -379,11 +379,11 @@ class BrowseComposePresenter(
         }
     }
 
-    fun markFilterAsDefault(name: String) {
+    fun markFilterAsDefault(name: String, makeDefault: Boolean) {
         presenterScope.launch {
             val updatedFilters = browseScreenState.value.savedFilters.map {
                 if (it.name == name) {
-                    it.copy(default = true)
+                    it.copy(default = makeDefault)
                 } else {
                     it.copy(default = false)
                 }

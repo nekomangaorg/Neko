@@ -62,7 +62,7 @@ fun BrowseBottomSheet(
             filterChanged = filterActions.filterChanged,
             saveClick = filterActions.saveFilterClick,
             deleteFilterClick = filterActions.deleteFilterClick,
-            markFilterDefaultClick = filterActions.markDefaultClick,
+            filterDefaultClick = filterActions.filterDefaultClick,
             loadFilter = filterActions.loadFilter,
         )
     }

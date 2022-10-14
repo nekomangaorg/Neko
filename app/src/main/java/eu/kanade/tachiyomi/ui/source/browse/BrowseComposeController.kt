@@ -34,7 +34,7 @@ class BrowseComposeController(incomingQuery: String = "") : BaseComposeControlle
                 resetClick = presenter::resetFilter,
                 saveFilterClick = presenter::saveFilter,
                 deleteFilterClick = presenter::deleteFilter,
-                markDefaultClick = presenter::markFilterAsDefault,
+                filterDefaultClick = presenter::markFilterAsDefault,
                 loadFilter = presenter::loadFilter,
             ),
             addNewCategory = presenter::addNewCategory,

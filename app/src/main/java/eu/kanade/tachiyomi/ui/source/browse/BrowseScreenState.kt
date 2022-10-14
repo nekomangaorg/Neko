@@ -55,7 +55,7 @@ data class FilterActions(
     val filterClick: () -> Unit,
     val saveFilterClick: (String) -> Unit,
     val deleteFilterClick: (String) -> Unit,
-    val markDefaultClick: (String) -> Unit,
+    val filterDefaultClick: (String, Boolean) -> Unit,
     val loadFilter: (BrowseFilterImpl) -> Unit,
     val resetClick: () -> Unit,
     val filterChanged: (NewFilter) -> Unit,

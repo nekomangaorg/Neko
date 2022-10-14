@@ -1,8 +1,6 @@
 package org.nekomanga.presentation.components.sheets
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -69,7 +67,7 @@ fun FilterBrowseSheet(
     saveClick: (String) -> Unit,
     resetClick: () -> Unit,
     deleteFilterClick: (String) -> Unit,
-    markFilterDefaultClick: (String) -> Unit,
+    filterDefaultClick: (String, Boolean) -> Unit,
     loadFilter: (BrowseFilterImpl) -> Unit,
     filterChanged: (NewFilter) -> Unit,
     savedFilters: List<BrowseFilterImpl>,
@@ -342,6 +340,38 @@ fun FilterBrowseSheet(
                     }
                 }
 
+                item {
+                    AnimatedVisibility(visible = savedFilters.isNotEmpty()) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+
+                            Text(text = stringResource(id = R.string.saved_filter), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+
+                            LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                item { Gap(4.dp) }
+                                items(savedFilters) { filter ->
+                                    val selected = nameOfEnabledFilter.equals(filter.name, true)
+                                    FilterChip(
+                                        selected = selected,
+                                        onClick = { loadFilter(filter) },
+                                        leadingIcon = {
+                                            if (selected) {
+                                                Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                                            }
+                                        },
+                                        shape = RoundedCornerShape(100),
+                                        label = { Text(text = filter.name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                                            selectedLabelColor = MaterialTheme.colorScheme.primary,
+                                            selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                                        ),
+                                    )
+                                }
+                                item { Gap(4.dp) }
+                            }
+                        }
+                    }
+                }
 
                 item {
                     SearchFooter(
@@ -383,76 +413,51 @@ fun FilterBrowseSheet(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Column(
+
+
+            Row(
                 modifier = paddingModifier
                     .fillMaxWidth()
                     .padding(bottom = bottomPadding),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                AnimatedVisibility(visible = savedFilters.isNotEmpty()) {
-                    Text(text = stringResource(id = R.string.saved_filter), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
-                    Gap(4.dp)
-                    LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        item { Gap(4.dp) }
-                        if (nameOfEnabledFilter.isNotBlank() && !savedFilters.first { nameOfEnabledFilter.equals(it.name, true) }.default) {
-                            item {
-                                ElevatedButton(
-                                    onClick = { markFilterDefaultClick(nameOfEnabledFilter) },
-                                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
-                                ) {
-                                    Text(text = stringResource(id = R.string.make_default), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
-                                }
-                            }
-                        }
-                        items(savedFilters) { filter ->
-                            val selected = nameOfEnabledFilter.equals(filter.name, true)
-                            FilterChip(
-                                selected = selected,
-                                onClick = { loadFilter(filter) },
-                                leadingIcon = {
-                                    if (selected) {
-                                        Icon(imageVector = Icons.Default.Check, contentDescription = null)
-                                    }
-                                },
-                                shape = RoundedCornerShape(100),
-                                label = { Text(text = filter.name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                                    selectedLabelColor = MaterialTheme.colorScheme.primary,
-                                    selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                                ),
-                            )
-                        }
-                        item { Gap(4.dp) }
-                    }
+                TextButton(
+                    onClick = resetClick,
+                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
+                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
                 }
 
-                Row(
-                    modifier = paddingModifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    TextButton(
-                        onClick = resetClick,
-                        colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
-                    ) {
-                        Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
-                    }
+                when (nameOfEnabledFilter.isNotBlank()) {
+                    true -> {
+                        val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
 
-                    AnimatedVisibility(visible = nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
+                        val (textRes, makeDefault) = when (isDefault) {
+                            true -> R.string.remove_default to false
+                            false -> R.string.make_default to true
+                        }
+
+                        ElevatedButton(
+                            onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
+                            colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                        ) {
+                            Text(text = stringResource(id = textRes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                        }
+                    }
+                    false -> {
                         TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                             Icon(imageVector = Icons.Default.Save, contentDescription = null)
                             Gap(4.dp)
                             Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
                         }
                     }
+                }
 
-
-                    ElevatedButton(
-                        onClick = filterClick,
-                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
-                    ) {
-                        Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
-                    }
+                ElevatedButton(
+                    onClick = filterClick,
+                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                ) {
+                    Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                 }
             }
         }

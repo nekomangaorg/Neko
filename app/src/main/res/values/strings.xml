@@ -319,6 +319,7 @@
     <string name="tags">Tags</string>
     <string name="in_library">In Library</string>
     <string name="make_default">Make default</string>
+    <string name="remove_default">Remove default</string>
     <string name="save_filter">Save filter</string>
     <string name="saved_filter">Saved filter</string>
     <string name="filter_with_name_exists">A filter with that name already exists</string>
