@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,7 +42,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowRow
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.util.lang.isUUID
@@ -92,7 +92,6 @@ fun FilterBrowseSheet(
             var statusExpanded by remember { mutableStateOf(false) }
             var sortExpanded by remember { mutableStateOf(false) }
             var tagExpanded by remember { mutableStateOf(false) }
-            var saveExpanded by remember { mutableStateOf(false) }
             var otherExpanded by remember { mutableStateOf(false) }
             var showSaveFilterDialog by remember { mutableStateOf(false) }
             var nameOfEnabledFilter by rememberSaveable(filters) {
@@ -114,6 +113,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = originalLanguageExpanded,
+                        disabled = filters.originalLanguage.any { !it.enabled },
                         onClick = { originalLanguageExpanded = !originalLanguageExpanded },
                         rowText = stringResource(id = R.string.original_language),
                     )
@@ -131,7 +131,11 @@ fun FilterBrowseSheet(
                 }
 
                 item {
-                    ExpandableRow(isExpanded = contentRatingExpanded, onClick = { contentRatingExpanded = !contentRatingExpanded }, rowText = stringResource(id = R.string.content_rating))
+                    ExpandableRow(
+                        isExpanded = contentRatingExpanded,
+                        disabled = filters.contentRatings.any { !it.enabled },
+                        onClick = { contentRatingExpanded = !contentRatingExpanded }, rowText = stringResource(id = R.string.content_rating),
+                    )
                 }
                 items(filters.contentRatings) { contentRating ->
                     AnimatedVisibility(visible = contentRatingExpanded) {
@@ -150,6 +154,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = publicationDemographicExpanded,
+                        disabled = filters.publicationDemographics.any { !it.enabled },
                         onClick = { publicationDemographicExpanded = !publicationDemographicExpanded },
                         rowText = stringResource(id = R.string.publication_demographic),
                     )
@@ -167,7 +172,11 @@ fun FilterBrowseSheet(
                 }
 
                 item {
-                    ExpandableRow(isExpanded = statusExpanded, onClick = { statusExpanded = !statusExpanded }, rowText = stringResource(id = R.string.status))
+                    ExpandableRow(
+                        isExpanded = statusExpanded,
+                        disabled = filters.statuses.any { !it.enabled },
+                        onClick = { statusExpanded = !statusExpanded }, rowText = stringResource(id = R.string.status),
+                    )
                 }
 
                 items(filters.statuses) { status ->
@@ -183,7 +192,11 @@ fun FilterBrowseSheet(
                 }
 
                 item {
-                    ExpandableRow(isExpanded = sortExpanded, onClick = { sortExpanded = !sortExpanded }, rowText = stringResource(id = R.string.sort))
+                    ExpandableRow(
+                        isExpanded = sortExpanded,
+                        disabled = filters.sort.any { !it.enabled },
+                        onClick = { sortExpanded = !sortExpanded }, rowText = stringResource(id = R.string.sort),
+                    )
                 }
                 items(filters.sort) { sort ->
                     AnimatedVisibility(visible = sortExpanded) {
@@ -198,7 +211,11 @@ fun FilterBrowseSheet(
                 }
 
                 item {
-                    ExpandableRow(isExpanded = tagExpanded, onClick = { tagExpanded = !tagExpanded }, rowText = stringResource(id = R.string.tag))
+                    ExpandableRow(
+                        isExpanded = tagExpanded,
+                        disabled = filters.tags.any { !it.enabled },
+                        onClick = { tagExpanded = !tagExpanded }, rowText = stringResource(id = R.string.tag),
+                    )
                 }
 
                 items(filters.tags) { tag ->
@@ -216,6 +233,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = otherExpanded,
+                        disabled = !filters.hasAvailableChapters.enabled || !filters.authorId.enabled || !filters.groupId.enabled || !filters.tagInclusionMode.enabled || !filters.tagExclusionMode.enabled,
                         onClick = { otherExpanded = !otherExpanded },
                         rowText = stringResource(id = R.string.other),
                     )
@@ -324,46 +342,6 @@ fun FilterBrowseSheet(
                     }
                 }
 
-                if (savedFilters.isNotEmpty()) {
-                    item {
-                        ExpandableRow(
-                            isExpanded = saveExpanded,
-                            onClick = { saveExpanded = !saveExpanded },
-                            rowText = stringResource(id = R.string.saved_filter),
-                        )
-                    }
-                }
-
-                item {
-                    AnimatedVisibility(visible = saveExpanded) {
-                        FlowRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp),
-                            mainAxisSpacing = 4.dp,
-                        ) {
-                            savedFilters.forEach { filter ->
-                                val selected = nameOfEnabledFilter.equals(filter.name, true)
-                                FilterChip(
-                                    selected = selected,
-                                    onClick = { loadFilter(filter) },
-                                    leadingIcon = {
-                                        if (selected) {
-                                            Icon(imageVector = Icons.Default.Check, contentDescription = null)
-                                        }
-                                    },
-                                    shape = RoundedCornerShape(100),
-                                    label = { Text(text = filter.name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                                        selectedLabelColor = MaterialTheme.colorScheme.primary,
-                                        selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                }
 
                 item {
                     SearchFooter(
@@ -405,33 +383,76 @@ fun FilterBrowseSheet(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Row(
+            Column(
                 modifier = paddingModifier
                     .fillMaxWidth()
                     .padding(bottom = bottomPadding),
-                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                TextButton(
-                    onClick = resetClick,
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
-                ) {
-                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
-                }
-
-                AnimatedVisibility(visible = nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
-                    TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                        Icon(imageVector = Icons.Default.Save, contentDescription = null)
-                        Gap(4.dp)
-                        Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
+                AnimatedVisibility(visible = savedFilters.isNotEmpty()) {
+                    Text(text = stringResource(id = R.string.saved_filter), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                    Gap(4.dp)
+                    LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        item { Gap(4.dp) }
+                        if (nameOfEnabledFilter.isNotBlank() && !savedFilters.first { nameOfEnabledFilter.equals(it.name, true) }.default) {
+                            item {
+                                ElevatedButton(
+                                    onClick = { markFilterDefaultClick(nameOfEnabledFilter) },
+                                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                                ) {
+                                    Text(text = stringResource(id = R.string.make_default), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                                }
+                            }
+                        }
+                        items(savedFilters) { filter ->
+                            val selected = nameOfEnabledFilter.equals(filter.name, true)
+                            FilterChip(
+                                selected = selected,
+                                onClick = { loadFilter(filter) },
+                                leadingIcon = {
+                                    if (selected) {
+                                        Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                                    }
+                                },
+                                shape = RoundedCornerShape(100),
+                                label = { Text(text = filter.name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                                    selectedLabelColor = MaterialTheme.colorScheme.primary,
+                                    selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            )
+                        }
+                        item { Gap(4.dp) }
                     }
                 }
 
-
-                ElevatedButton(
-                    onClick = filterClick,
-                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                Row(
+                    modifier = paddingModifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                    TextButton(
+                        onClick = resetClick,
+                        colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                    ) {
+                        Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
+                    }
+
+                    AnimatedVisibility(visible = nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
+                        TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                            Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                            Gap(4.dp)
+                            Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
+                        }
+                    }
+
+
+                    ElevatedButton(
+                        onClick = filterClick,
+                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                    ) {
+                        Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                    }
                 }
             }
         }

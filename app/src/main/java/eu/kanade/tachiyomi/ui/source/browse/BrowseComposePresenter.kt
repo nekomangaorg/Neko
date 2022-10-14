@@ -129,7 +129,7 @@ class BrowseComposePresenter(
             }
         }
 
-        updateBrowseFilters()
+        updateBrowseFilters(true)
 
 
         presenterScope.launch {
@@ -532,9 +532,16 @@ class BrowseComposePresenter(
         preferences.browseShowLibrary().set(!browseScreenState.value.showLibraryEntries)
     }
 
-    fun updateBrowseFilters() {
+    private fun updateBrowseFilters(initialLoad: Boolean = false) {
         presenterScope.launch {
-            _browseScreenState.update { it.copy(savedFilters = db.getBrowseFilters().executeAsBlocking().toImmutableList()) }
+            val filters = db.getBrowseFilters().executeAsBlocking().toImmutableList()
+            _browseScreenState.update { it.copy(savedFilters = filters) }
+            if (initialLoad) {
+                filters.firstOrNull { it.default }?.let { filter ->
+                    val dexFilters = Json.decodeFromString<DexFilters>(filter.dexFilters)
+                    _browseScreenState.update { it.copy(filters = dexFilters) }
+                }
+            }
         }
     }
 

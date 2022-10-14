@@ -13,22 +13,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ExpandableRow(rowText: String, isExpanded: Boolean, onClick: () -> Unit) {
+fun ExpandableRow(rowText: String, isExpanded: Boolean, disabled: Boolean, onClick: () -> Unit) {
+    val focusManager = LocalFocusManager.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable {
+                if (!disabled) {
+                    focusManager.clearFocus()
+                    onClick()
+                }
+            }
             .padding(8.dp, 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = rowText, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            text = rowText,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
+        )
         val icon = when (isExpanded) {
             true -> Icons.Default.ExpandLess
             false -> Icons.Default.ExpandMore
         }
-        Icon(imageVector = icon, contentDescription = null)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
+        )
     }
 }

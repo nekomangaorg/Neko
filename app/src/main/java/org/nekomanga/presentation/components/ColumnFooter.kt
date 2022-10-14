@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,6 +64,7 @@ fun ColumnScope.SearchFooter(
             focusedLabelColor = themeColorState.buttonColor,
             focusedBorderColor = themeColorState.buttonColor,
             cursorColor = themeColorState.buttonColor,
+            disabledBorderColor = Color.Cyan,
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Search,
