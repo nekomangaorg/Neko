@@ -91,7 +91,7 @@ class SearchHandler {
 
             queryParameters[MdConstants.SearchParameters.limit] = MdConstants.Limits.manga
             queryParameters[MdConstants.SearchParameters.offset] = (MdUtil.getMangaListOffset(page))
-            val actualQuery = filters.titleQuery.query.replace(WHITESPACE_REGEX, " ")
+            val actualQuery = filters.query.text.replace(WHITESPACE_REGEX, " ")
             if (actualQuery.isNotBlank()) {
                 queryParameters[MdConstants.SearchParameters.titleParam] = actualQuery
             }

@@ -32,6 +32,7 @@ import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.NewFilter
+import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
@@ -65,7 +66,7 @@ class BrowseComposePresenter(
         val contentRatings = MangaContentRating.getOrdered().map { NewFilter.ContentRating(it, enabledContentRatings.contains(it.key)) }
 
         return DexFilters(
-            titleQuery = NewFilter.TitleQuery(incomingQuery),
+            query = NewFilter.Query(incomingQuery, QueryType.Title),
             contentRatings = contentRatings,
         )
     }
@@ -117,7 +118,7 @@ class BrowseComposePresenter(
     override fun onCreate() {
         super.onCreate()
 
-        if (browseScreenState.value.filters.titleQuery.query.isNotBlank()) {
+        if (browseScreenState.value.filters.query.text.isNotBlank()) {
             getSearchPage()
         } else {
             getHomepage()
@@ -213,7 +214,7 @@ class BrowseComposePresenter(
                 state.copy(initialLoading = true, page = 1)
             }
 
-            val currentQuery = browseScreenState.value.filters.titleQuery.query
+            val currentQuery = browseScreenState.value.filters.query.text
             val deepLinkType = DeepLinkType.getDeepLinkType(currentQuery)
             val uuid = DeepLinkType.removePrefix(currentQuery, deepLinkType)
 
@@ -228,13 +229,12 @@ class BrowseComposePresenter(
                         )
                     }
 
-                    val authorQuery = browseScreenState.value.filters.authorQuery.query.isNotBlank()
-                    val groupQuery = browseScreenState.value.filters.groupQuery.query.isNotBlank()
+                    val queryMode = browseScreenState.value.filters.queryMode
 
-                    if (authorQuery || groupQuery) {
-                        when {
-                            authorQuery -> browseRepository.getAuthors(browseScreenState.value.filters.authorQuery.query)
-                            else -> browseRepository.getGroups(browseScreenState.value.filters.groupQuery.query)
+                    if (queryMode == QueryType.Author || queryMode == QueryType.Group) {
+                        when (queryMode) {
+                            QueryType.Author -> browseRepository.getAuthors(currentQuery)
+                            else -> browseRepository.getGroups(currentQuery)
                         }.onFailure {
                             _browseScreenState.update { state ->
                                 state.copy(error = it.message(), initialLoading = false)
@@ -255,7 +255,7 @@ class BrowseComposePresenter(
                         }
                     }.onSuccess { dm ->
                         if (incomingQuery.isNotBlank() && !_browseScreenState.value.handledIncomingQuery) {
-                            _browseScreenState.update { it.copy(filters = it.filters.copy(titleQuery = NewFilter.TitleQuery("")), handledIncomingQuery = true) }
+                            _browseScreenState.update { it.copy(filters = it.filters.copy(query = NewFilter.Query("", QueryType.Title)), handledIncomingQuery = true) }
                         }
                         controller?.openManga(dm.mangaId)
                     }
@@ -267,14 +267,14 @@ class BrowseComposePresenter(
 
     fun otherClick(uuid: String) {
         presenterScope.launch {
-            if (browseScreenState.value.filters.authorQuery.query.isNotBlank()) {
+            if (browseScreenState.value.filters.queryMode == QueryType.Author) {
                 _browseScreenState.update {
                     it.copy(
                         filters = createInitialDexFilter("").copy(authorId = NewFilter.AuthorId(uuid)),
                     )
                 }
                 getSearchPage()
-            } else if (browseScreenState.value.filters.groupQuery.query.isNotBlank()) {
+            } else if (browseScreenState.value.filters.queryMode == QueryType.Group) {
                 _browseScreenState.update {
                     it.copy(
                         filters = createInitialDexFilter("").copy(groupId = NewFilter.GroupId(uuid)),
@@ -442,41 +442,26 @@ class BrowseComposePresenter(
                 is NewFilter.TagExclusionMode -> {
                     browseScreenState.value.filters.copy(tagExclusionMode = newFilter)
                 }
-                is NewFilter.TitleQuery -> {
-                    if (newFilter.query.isNotBlank()) {
-                        DexFilters.disableQueries(browseScreenState.value.filters).copy(titleQuery = newFilter)
-                    } else {
-                        DexFilters.enableAll(browseScreenState.value.filters).copy(titleQuery = newFilter)
+                is NewFilter.Query -> {
+                    when (newFilter.type) {
+                        QueryType.Title -> {
+                            browseScreenState.value.filters.copy(queryMode = QueryType.Title, query = newFilter)
+                        }
+                        QueryType.Author -> {
+                            browseScreenState.value.filters.copy(queryMode = QueryType.Author, query = newFilter)
+                        }
+                        QueryType.Group -> {
+                            browseScreenState.value.filters.copy(queryMode = QueryType.Group, query = newFilter)
+                        }
                     }
                 }
 
-                is NewFilter.AuthorQuery -> {
-                    if (newFilter.query.isNotBlank()) {
-                        DexFilters.disableAll(browseScreenState.value.filters).copy(authorQuery = newFilter)
-                    } else {
-                        DexFilters.enableAll(browseScreenState.value.filters).copy(authorQuery = newFilter)
-                    }
-                }
                 is NewFilter.AuthorId -> {
-                    if (newFilter.uuid.isNotBlank()) {
-                        DexFilters.disableQueries(browseScreenState.value.filters).copy(authorId = newFilter)
-                    } else {
-                        DexFilters.enableAll(browseScreenState.value.filters).copy(authorId = newFilter)
-                    }
+                    browseScreenState.value.filters.copy(authorId = newFilter)
                 }
-                is NewFilter.GroupQuery -> {
-                    if (newFilter.query.isNotBlank()) {
-                        DexFilters.disableAll(browseScreenState.value.filters).copy(groupQuery = newFilter)
-                    } else {
-                        DexFilters.enableAll(browseScreenState.value.filters).copy(groupQuery = newFilter)
-                    }
-                }
+
                 is NewFilter.GroupId -> {
-                    if (newFilter.uuid.isNotBlank()) {
-                        DexFilters.disableQueries(browseScreenState.value.filters).copy(groupId = newFilter, titleQuery = browseScreenState.value.filters.titleQuery)
-                    } else {
-                        DexFilters.enableQueries(browseScreenState.value.filters).copy(groupId = newFilter)
-                    }
+                    browseScreenState.value.filters.copy(groupId = newFilter)
                 }
 
             }

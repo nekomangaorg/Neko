@@ -12,9 +12,8 @@ import org.nekomanga.domain.manga.MangaStatus
 
 @kotlinx.serialization.Serializable
 data class DexFilters(
-    val titleQuery: NewFilter.TitleQuery = NewFilter.TitleQuery(""),
-    val authorQuery: NewFilter.AuthorQuery = NewFilter.AuthorQuery(""),
-    val groupQuery: NewFilter.GroupQuery = NewFilter.GroupQuery(""),
+    val queryMode: QueryType = QueryType.Title,
+    val query: NewFilter.Query = NewFilter.Query("", QueryType.Title),
     val originalLanguage: List<NewFilter.OriginalLanguage> = MdLang.values().map { NewFilter.OriginalLanguage(it, false) },
     val contentRatings: List<NewFilter.ContentRating>,
     val publicationDemographics: List<NewFilter.PublicationDemographic> = MangaDemographic.getOrdered().map { NewFilter.PublicationDemographic(it, false) },
@@ -27,52 +26,7 @@ data class DexFilters(
     val authorId: NewFilter.AuthorId = NewFilter.AuthorId(),
     val groupId: NewFilter.GroupId = NewFilter.GroupId(),
 
-    ) {
-    companion object {
-        private fun setEnabledFilter(dexFilters: DexFilters, enabled: Boolean): DexFilters {
-            return dexFilters.copy(
-                titleQuery = dexFilters.titleQuery.copy(enabled = enabled),
-                authorQuery = dexFilters.authorQuery.copy(enabled = enabled),
-                groupQuery = dexFilters.groupQuery.copy(enabled = enabled),
-                originalLanguage = dexFilters.originalLanguage.map { it.copy(enabled = enabled) },
-                contentRatings = dexFilters.contentRatings.map { it.copy(enabled = enabled) },
-                publicationDemographics = dexFilters.publicationDemographics.map { it.copy(enabled = enabled) },
-                statuses = dexFilters.statuses.map { it.copy(enabled = enabled) },
-                tags = dexFilters.tags.map { it.copy(enabled = enabled) },
-                sort = dexFilters.sort.map { it.copy(enabled = enabled) },
-                hasAvailableChapters = dexFilters.hasAvailableChapters.copy(enabled = enabled),
-                tagInclusionMode = dexFilters.tagInclusionMode.copy(enabled = enabled),
-                tagExclusionMode = dexFilters.tagExclusionMode.copy(enabled = enabled),
-                groupId = dexFilters.groupId.copy(enabled = enabled),
-                authorId = dexFilters.authorId.copy(enabled = enabled),
-            )
-        }
-
-        fun disableAll(dexFilters: DexFilters): DexFilters {
-            return setEnabledFilter(dexFilters, false)
-        }
-
-        fun enableAll(dexFilters: DexFilters): DexFilters {
-            return setEnabledFilter(dexFilters, true)
-        }
-
-        private fun setEnabledQueryFilters(dexFilters: DexFilters, enabled: Boolean): DexFilters {
-            return dexFilters.copy(
-                titleQuery = dexFilters.titleQuery.copy(enabled = enabled),
-                authorQuery = dexFilters.authorQuery.copy(enabled = enabled),
-                groupQuery = dexFilters.groupQuery.copy(enabled = enabled),
-            )
-        }
-
-        fun disableQueries(dexFilters: DexFilters): DexFilters {
-            return setEnabledQueryFilters(dexFilters, false)
-        }
-
-        fun enableQueries(dexFilters: DexFilters): DexFilters {
-            return setEnabledQueryFilters(dexFilters, true)
-        }
-    }
-}
+    )
 
 enum class TagMode(val key: String) {
     And(MdConstants.SearchParameters.TagMode.and),
@@ -82,46 +36,40 @@ enum class TagMode(val key: String) {
 @kotlinx.serialization.Serializable
 sealed class NewFilter {
     @kotlinx.serialization.Serializable
-    data class TitleQuery(val query: String, val enabled: Boolean = true) : NewFilter()
+    data class Query(val text: String, val type: QueryType) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class OriginalLanguage(val language: MdLang, val state: Boolean, val enabled: Boolean = true) : NewFilter()
+    data class OriginalLanguage(val language: MdLang, val state: Boolean) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class ContentRating(val rating: MangaContentRating, val state: Boolean, val enabled: Boolean = true) : NewFilter()
+    data class ContentRating(val rating: MangaContentRating, val state: Boolean) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class PublicationDemographic(val demographic: MangaDemographic, val state: Boolean, val enabled: Boolean = true) : NewFilter()
+    data class PublicationDemographic(val demographic: MangaDemographic, val state: Boolean) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class Status(val status: MangaStatus, val state: Boolean, val enabled: Boolean = true) : NewFilter()
+    data class Status(val status: MangaStatus, val state: Boolean) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class Tag(val tag: MangaTag, val state: ToggleableState, val enabled: Boolean = true) : NewFilter()
+    data class Tag(val tag: MangaTag, val state: ToggleableState) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class HasAvailableChapters(val state: Boolean, val enabled: Boolean = true) : NewFilter()
+    data class HasAvailableChapters(val state: Boolean) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class TagInclusionMode(val mode: TagMode = TagMode.And, val enabled: Boolean = true) : NewFilter()
+    data class TagInclusionMode(val mode: TagMode = TagMode.And) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class TagExclusionMode(val mode: TagMode = TagMode.Or, val enabled: Boolean = true) : NewFilter()
+    data class TagExclusionMode(val mode: TagMode = TagMode.Or) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class AuthorQuery(val query: String, val enabled: Boolean = true) : NewFilter()
+    data class AuthorId(val uuid: String = "") : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class AuthorId(val uuid: String = "", val enabled: Boolean = true) : NewFilter()
+    data class GroupId(val uuid: String = "") : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class GroupQuery(val query: String, val enabled: Boolean = true) : NewFilter()
-
-    @kotlinx.serialization.Serializable
-    data class GroupId(val uuid: String = "", val enabled: Boolean = true) : NewFilter()
-
-    @kotlinx.serialization.Serializable
-    data class Sort(val sort: MdSort, val state: MangaConstants.SortState, val enabled: Boolean = true) : NewFilter() {
+    data class Sort(val sort: MdSort, val state: MangaConstants.SortState) : NewFilter() {
         companion object {
             fun getSortList(sort: MdSort, state: MangaConstants.SortState): List<Sort> {
                 return MdSort.values().map {
@@ -135,8 +83,9 @@ sealed class NewFilter {
     }
 }
 
-//author query
-// group query
-
-
+enum class QueryType {
+    Title,
+    Author,
+    Group
+}
 

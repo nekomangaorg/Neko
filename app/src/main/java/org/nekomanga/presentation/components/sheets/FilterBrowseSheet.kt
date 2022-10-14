@@ -1,6 +1,8 @@
 package org.nekomanga.presentation.components.sheets
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +51,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.NewFilter
+import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.filter.TagMode
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
@@ -82,7 +86,6 @@ fun FilterBrowseSheet(
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
 
             val onSurface = MaterialTheme.colorScheme.onSurface
-            val disabledOnSurface = MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast)
 
             var originalLanguageExpanded by remember { mutableStateOf(false) }
             var contentRatingExpanded by remember { mutableStateOf(false) }
@@ -91,21 +94,29 @@ fun FilterBrowseSheet(
             var sortExpanded by remember { mutableStateOf(false) }
             var tagExpanded by remember { mutableStateOf(false) }
             var otherExpanded by remember { mutableStateOf(false) }
+
             var showSaveFilterDialog by remember { mutableStateOf(false) }
-            var nameOfEnabledFilter by rememberSaveable(filters) {
+
+            var nameOfEnabledFilter by rememberSaveable(filters, savedFilters) {
                 mutableStateOf(
                     savedFilters.firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }?.name ?: "",
                 )
             }
-            var searchTypeShown by rememberSaveable(filters) {
-                val type = if (filters.authorQuery.query.isNotBlank()) {
-                    SearchType.Author
-                } else if (filters.groupQuery.query.isNotBlank()) {
-                    SearchType.Group
-                } else {
-                    SearchType.Title
+
+            val disabled by remember(filters.queryMode) {
+                mutableStateOf(filters.queryMode != QueryType.Title)
+            }
+
+            LaunchedEffect(key1 = filters.queryMode) {
+                if (filters.queryMode != QueryType.Title) {
+                    originalLanguageExpanded = false
+                    contentRatingExpanded = false
+                    publicationDemographicExpanded = false
+                    statusExpanded = false
+                    sortExpanded = false
+                    tagExpanded = false
+                    otherExpanded = false
                 }
-                mutableStateOf(type)
             }
 
 
@@ -122,7 +133,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = originalLanguageExpanded,
-                        disabled = filters.originalLanguage.any { !it.enabled },
+                        disabled = disabled,
                         onClick = { originalLanguageExpanded = !originalLanguageExpanded },
                         rowText = stringResource(id = R.string.original_language),
                     )
@@ -132,7 +143,6 @@ fun FilterBrowseSheet(
                         CheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             checkedState = originalLanguage.state,
-                            disabled = !originalLanguage.enabled,
                             checkedChange = { newState -> filterChanged(originalLanguage.copy(state = newState)) },
                             rowText = originalLanguage.language.prettyPrint,
                         )
@@ -142,7 +152,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = contentRatingExpanded,
-                        disabled = filters.contentRatings.any { !it.enabled },
+                        disabled = disabled,
                         onClick = { contentRatingExpanded = !contentRatingExpanded }, rowText = stringResource(id = R.string.content_rating),
                     )
                 }
@@ -152,7 +162,6 @@ fun FilterBrowseSheet(
                         CheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             checkedState = contentRating.state,
-                            disabled = !contentRating.enabled,
                             checkedChange = { newState -> filterChanged(contentRating.copy(state = newState)) },
                             rowText = contentRating.rating.prettyPrint(),
                         )
@@ -163,7 +172,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = publicationDemographicExpanded,
-                        disabled = filters.publicationDemographics.any { !it.enabled },
+                        disabled = disabled,
                         onClick = { publicationDemographicExpanded = !publicationDemographicExpanded },
                         rowText = stringResource(id = R.string.publication_demographic),
                     )
@@ -173,7 +182,6 @@ fun FilterBrowseSheet(
                         CheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             checkedState = demographic.state,
-                            disabled = !demographic.enabled,
                             checkedChange = { newState -> filterChanged(demographic.copy(state = newState)) },
                             rowText = demographic.demographic.prettyPrint(),
                         )
@@ -183,7 +191,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = statusExpanded,
-                        disabled = filters.statuses.any { !it.enabled },
+                        disabled = disabled,
                         onClick = { statusExpanded = !statusExpanded }, rowText = stringResource(id = R.string.status),
                     )
                 }
@@ -193,7 +201,6 @@ fun FilterBrowseSheet(
                         CheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             checkedState = status.state,
-                            disabled = !status.enabled,
                             checkedChange = { newState -> filterChanged(status.copy(state = newState)) },
                             rowText = stringResource(id = status.status.statusRes),
                         )
@@ -203,7 +210,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = sortExpanded,
-                        disabled = filters.sort.any { !it.enabled },
+                        disabled = disabled,
                         onClick = { sortExpanded = !sortExpanded }, rowText = stringResource(id = R.string.sort),
                     )
                 }
@@ -212,7 +219,6 @@ fun FilterBrowseSheet(
                         SortRow(
                             modifier = Modifier.fillMaxWidth(),
                             sortState = sort.state,
-                            disabled = !sort.enabled,
                             sortChanged = { sortState -> filterChanged(sort.copy(state = sortState)) },
                             rowText = sort.sort.displayName,
                         )
@@ -222,7 +228,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = tagExpanded,
-                        disabled = filters.tags.any { !it.enabled },
+                        disabled = disabled,
                         onClick = { tagExpanded = !tagExpanded }, rowText = stringResource(id = R.string.tag),
                     )
                 }
@@ -232,7 +238,6 @@ fun FilterBrowseSheet(
                         TriStateCheckboxRow(
                             modifier = Modifier.fillMaxWidth(),
                             state = tag.state,
-                            disabled = !tag.enabled,
                             toggleState = { newState -> filterChanged(tag.copy(state = newState)) },
                             rowText = tag.tag.prettyPrint,
                         )
@@ -242,7 +247,7 @@ fun FilterBrowseSheet(
                 item {
                     ExpandableRow(
                         isExpanded = otherExpanded,
-                        disabled = !filters.hasAvailableChapters.enabled || !filters.authorId.enabled || !filters.groupId.enabled || !filters.tagInclusionMode.enabled || !filters.tagExclusionMode.enabled,
+                        disabled = disabled,
                         onClick = { otherExpanded = !otherExpanded },
                         rowText = stringResource(id = R.string.other),
                     )
@@ -251,7 +256,6 @@ fun FilterBrowseSheet(
                     AnimatedVisibility(visible = otherExpanded) {
                         CheckboxRow(
                             checkedState = filters.hasAvailableChapters.state,
-                            disabled = !filters.hasAvailableChapters.enabled,
                             checkedChange = { newState -> filterChanged(filters.hasAvailableChapters.copy(state = newState)) },
                             rowText = stringResource(
                                 id = R.string.has_available_chapters,
@@ -267,16 +271,14 @@ fun FilterBrowseSheet(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 RadioButton(
                                     selected = filters.tagInclusionMode.mode == TagMode.And,
-                                    enabled = filters.tagInclusionMode.enabled,
                                     onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.And)) },
                                 )
-                                Text(text = stringResource(id = R.string.and), color = if (filters.tagInclusionMode.enabled) onSurface else disabledOnSurface)
+                                Text(text = stringResource(id = R.string.and), color = onSurface)
                                 RadioButton(
                                     selected = filters.tagInclusionMode.mode == TagMode.Or,
-                                    enabled = filters.tagInclusionMode.enabled,
                                     onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.Or)) },
                                 )
-                                Text(text = stringResource(id = R.string.or), color = if (filters.tagInclusionMode.enabled) onSurface else disabledOnSurface)
+                                Text(text = stringResource(id = R.string.or), color = onSurface)
                             }
                         }
 
@@ -290,16 +292,14 @@ fun FilterBrowseSheet(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 RadioButton(
                                     selected = filters.tagExclusionMode.mode == TagMode.And,
-                                    enabled = filters.tagExclusionMode.enabled,
                                     onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.And)) },
                                 )
-                                Text(text = stringResource(id = R.string.and), color = if (filters.tagInclusionMode.enabled) onSurface else disabledOnSurface)
+                                Text(text = stringResource(id = R.string.and), color = onSurface)
                                 RadioButton(
                                     selected = filters.tagExclusionMode.mode == TagMode.Or,
-                                    enabled = filters.tagExclusionMode.enabled,
                                     onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.Or)) },
                                 )
-                                Text(text = stringResource(id = R.string.or), color = if (filters.tagInclusionMode.enabled) onSurface else disabledOnSurface)
+                                Text(text = stringResource(id = R.string.or), color = onSurface)
                             }
                         }
 
@@ -321,7 +321,6 @@ fun FilterBrowseSheet(
                             showDivider = false,
                             title = filters.groupId.uuid,
                             isError = isError,
-                            enabled = filters.groupId.enabled,
                             textChanged = { text: String -> filterChanged(NewFilter.GroupId(text)) },
                             search = { filterClick() },
                         )
@@ -344,10 +343,10 @@ fun FilterBrowseSheet(
                             showDivider = false,
                             title = filters.authorId.uuid,
                             isError = isError,
-                            enabled = filters.authorId.enabled,
                             textChanged = { text: String -> filterChanged(NewFilter.AuthorId(text)) },
                             search = { filterClick() },
                         )
+                        Gap(8.dp)
                     }
                 }
 
@@ -364,59 +363,76 @@ fun FilterBrowseSheet(
                                 }
                                 item { Gap(4.dp) }
                             }
+                            AnimatedVisibility(visible = nameOfEnabledFilter.isNotBlank()) {
+
+                                Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
+
+                                    val (textRes, makeDefault) = when (isDefault) {
+                                        true -> R.string.remove_default to false
+                                        false -> R.string.make_default to true
+                                    }
+
+                                    TextButton(onClick = { deleteFilterClick(nameOfEnabledFilter) }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                                        Text(text = stringResource(id = R.string.delete_filter), style = MaterialTheme.typography.titleSmall)
+                                    }
+
+                                    ElevatedButton(
+                                        onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
+                                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                                    ) {
+                                        Text(text = stringResource(id = textRes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                                    }
+                                }
+                            }
                         }
                     }
+                }
+
+                item {
+                    val titleRes = when (filters.queryMode) {
+                        QueryType.Title -> {
+                            R.string.title
+                        }
+                        QueryType.Author -> {
+                            R.string.author
+                        }
+                        QueryType.Group -> {
+                            R.string.scanlator_group
+                        }
+                    }
+                    SearchFooter(
+                        themeColorState = themeColorState,
+                        labelText = stringResource(id = titleRes),
+                        showDivider = false,
+                        title = filters.query.text,
+                        textChanged = { text: String -> filterChanged(filters.query.copy(text = text)) },
+                        search = { filterClick() },
+                    )
+
                 }
                 item {
                     Row(Modifier.fillMaxWidth(), Arrangement.Center) {
-                        FilterSheetChip(searchTypeShown == SearchType.Title, { searchTypeShown = SearchType.Title }, stringResource(id = R.string.title))
-                        FilterSheetChip(searchTypeShown == SearchType.Author, { searchTypeShown = SearchType.Author }, stringResource(id = R.string.author))
-                        FilterSheetChip(searchTypeShown == SearchType.Group, { searchTypeShown = SearchType.Group }, stringResource(id = R.string.scanlator_group))
-                    }
-                }
-
-                item {
-                    when (searchTypeShown) {
-                        SearchType.Title -> {
-                            SearchFooter(
-                                themeColorState = themeColorState,
-                                labelText = stringResource(id = R.string.title),
-                                showDivider = false,
-                                title = filters.titleQuery.query,
-                                enabled = filters.titleQuery.enabled,
-                                textChanged = { text: String -> filterChanged(NewFilter.TitleQuery(text)) },
-                                search = { filterClick() },
-                            )
-                        }
-                        SearchType.Author -> {
-                            SearchFooter(
-                                themeColorState = themeColorState,
-                                labelText = stringResource(id = R.string.author),
-                                showDivider = false,
-                                enabled = filters.authorQuery.enabled,
-                                title = filters.authorQuery.query,
-                                textChanged = { text: String -> filterChanged(NewFilter.AuthorQuery(text)) },
-                                search = { filterClick() },
-                            )
-                        }
-                        SearchType.Group -> {
-                            SearchFooter(
-                                themeColorState = themeColorState,
-                                labelText = stringResource(id = R.string.scanlator_group),
-                                showDivider = false,
-                                enabled = filters.groupQuery.enabled,
-                                title = filters.groupQuery.query,
-                                textChanged = { text: String -> filterChanged(NewFilter.GroupQuery(text)) },
-                                search = { filterClick() },
-                            )
-                        }
-
+                        FilterSheetChip(
+                            filters.queryMode == QueryType.Title,
+                            { filterChanged(NewFilter.Query("", QueryType.Title)) },
+                            stringResource(id = R.string.title),
+                        )
+                        FilterSheetChip(
+                            filters.queryMode == QueryType.Author,
+                            { filterChanged(NewFilter.Query("", QueryType.Author)) },
+                            stringResource(id = R.string.author),
+                        )
+                        FilterSheetChip(
+                            filters.queryMode == QueryType.Group,
+                            { filterChanged(NewFilter.Query("", QueryType.Group)) },
+                            stringResource(id = R.string.scanlator_group),
+                        )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.weight(1f))
-
 
             Row(
                 modifier = paddingModifier
@@ -431,28 +447,11 @@ fun FilterBrowseSheet(
                     Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
                 }
 
-                when (nameOfEnabledFilter.isNotBlank()) {
-                    true -> {
-                        val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
-
-                        val (textRes, makeDefault) = when (isDefault) {
-                            true -> R.string.remove_default to false
-                            false -> R.string.make_default to true
-                        }
-
-                        ElevatedButton(
-                            onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
-                            colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
-                        ) {
-                            Text(text = stringResource(id = textRes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
-                        }
-                    }
-                    false -> {
-                        TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                            Icon(imageVector = Icons.Default.Save, contentDescription = null)
-                            Gap(4.dp)
-                            Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
-                        }
+                AnimatedVisibility(nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
+                    TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                        Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                        Gap(4.dp)
+                        Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
                     }
                 }
 
@@ -489,10 +488,4 @@ private fun FilterSheetChip(selected: Boolean, onClick: () -> Unit, name: String
             selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
         ),
     )
-}
-
-private enum class SearchType {
-    Title,
-    Author,
-    Group
 }

@@ -1,11 +1,9 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.map
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
@@ -35,51 +33,32 @@ class BrowseRepository(
     suspend fun getSearchPage(page: Int, filters: DexFilters): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.search2(page, filters)
             .andThen { mangaListPage ->
-                when (mangaListPage.sourceManga.isEmpty()) {
-                    true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
-                    false -> {
-                        val displayMangaList = mangaListPage.sourceManga.map { sourceManga ->
-                            sourceManga.toDisplayManga(db, mangaDex.id)
-                        }
-                        Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
-                    }
+                val displayMangaList = mangaListPage.sourceManga.map { sourceManga ->
+                    sourceManga.toDisplayManga(db, mangaDex.id)
                 }
+                Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
             }
     }
 
     suspend fun getDeepLinkManga(uuid: String): Result<DisplayManga, ResultError> {
         return mangaDex.searchForManga(uuid).andThen { mangaListPage ->
-            when (mangaListPage.sourceManga.isEmpty()) {
-                true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
-                false -> {
-                    val displayManga = mangaListPage.sourceManga.first().toDisplayManga(db, mangaDex.id)
-                    Ok(displayManga)
-                }
-            }
+            val displayManga = mangaListPage.sourceManga.first().toDisplayManga(db, mangaDex.id)
+            Ok(displayManga)
+
         }
     }
 
     suspend fun getAuthors(authorQuery: String): Result<List<DisplayResult>, ResultError> {
         return mangaDex.searchForAuthor(authorQuery).andThen { resultListPage ->
-            when (resultListPage.results.isEmpty()) {
-                true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
-                false -> {
-                    val displayManga = resultListPage.results.map { it.toDisplayResult() }
-                    Ok(displayManga)
-                }
-            }
+            val displayManga = resultListPage.results.map { it.toDisplayResult() }
+            Ok(displayManga)
         }
     }
 
     suspend fun getGroups(groupQuery: String): Result<List<DisplayResult>, ResultError> {
         return mangaDex.searchForGroup(groupQuery).andThen { resultListPage ->
-            when (resultListPage.results.isEmpty()) {
-                true -> Err(ResultError.Generic(errorRes = R.string.no_results_found))
-                false -> {
-                    val displayManga = resultListPage.results.map { it.toDisplayResult() }
-                    Ok(displayManga)
-                }
-            }
+            val displayManga = resultListPage.results.map { it.toDisplayResult() }
+            Ok(displayManga)
         }
     }
 
