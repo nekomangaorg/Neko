@@ -59,7 +59,7 @@ fun BrowseBottomSheet(
                 keyboardController?.hide()
                 filterActions.resetClick()
             },
-            newFilterChange = filterActions.filterChanged,
+            filterChanged = filterActions.filterChanged,
             saveClick = filterActions.saveFilterClick,
             deleteFilterClick = filterActions.deleteFilterClick,
             markFilterDefaultClick = filterActions.markDefaultClick,

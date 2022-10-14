@@ -1,6 +1,8 @@
 package org.nekomanga.presentation.components.sheets
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
@@ -43,6 +46,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.util.lang.isUUID
 import jp.wasabeef.gap.Gap
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.NewFilter
 import org.nekomanga.domain.filter.TagMode
@@ -66,7 +71,7 @@ fun FilterBrowseSheet(
     deleteFilterClick: (String) -> Unit,
     markFilterDefaultClick: (String) -> Unit,
     loadFilter: (BrowseFilterImpl) -> Unit,
-    newFilterChange: (NewFilter) -> Unit,
+    filterChanged: (NewFilter) -> Unit,
     savedFilters: List<BrowseFilterImpl>,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
@@ -90,14 +95,10 @@ fun FilterBrowseSheet(
             var saveExpanded by remember { mutableStateOf(false) }
             var otherExpanded by remember { mutableStateOf(false) }
             var showSaveFilterDialog by remember { mutableStateOf(false) }
-            var enabledSavedFilterName by rememberSaveable { mutableStateOf("") }
-
-            fun filterChanged(newFilter: NewFilter) {
-                enabledSavedFilterName = ""
-                newFilterChange(newFilter)
-                if (enabledSavedFilterName != "") {
-                    enabledSavedFilterName = ""
-                }
+            var nameOfEnabledFilter by rememberSaveable(filters) {
+                mutableStateOf(
+                    savedFilters.firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }?.name ?: "",
+                )
             }
 
             if (showSaveFilterDialog) {
@@ -335,19 +336,19 @@ fun FilterBrowseSheet(
 
                 item {
                     AnimatedVisibility(visible = saveExpanded) {
-                        FlowRow(modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp), mainAxisSpacing = 4.dp) {
+                        FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
+                            mainAxisSpacing = 4.dp,
+                        ) {
                             savedFilters.forEach { filter ->
-
+                                val selected = nameOfEnabledFilter.equals(filter.name, true)
                                 FilterChip(
-                                    selected = filter.name.equals(enabledSavedFilterName, true),
-                                    onClick = {
-                                        enabledSavedFilterName = filter.name
-                                        loadFilter(filter)
-                                    },
+                                    selected = selected,
+                                    onClick = { loadFilter(filter) },
                                     leadingIcon = {
-                                        if (filter.name.equals(enabledSavedFilterName, true)) {
+                                        if (selected) {
                                             Icon(imageVector = Icons.Default.Check, contentDescription = null)
                                         }
                                     },
@@ -411,21 +412,20 @@ fun FilterBrowseSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(
-                    onClick = {
-                        if (enabledSavedFilterName != "") {
-                            enabledSavedFilterName = ""
-                        }
-                        resetClick()
-                    },
+                    onClick = resetClick,
                     colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
                 }
 
-
-                TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                    Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
+                AnimatedVisibility(visible = nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
+                    TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                        Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                        Gap(4.dp)
+                        Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
+                    }
                 }
+
 
                 ElevatedButton(
                     onClick = filterClick,
