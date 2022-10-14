@@ -11,20 +11,25 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.util.lang.isUUID
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.filter.DexFilters
@@ -47,7 +53,6 @@ import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateCheckboxRow
 import org.nekomanga.presentation.components.dialog.SaveFilterDialog
-import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 
@@ -58,15 +63,18 @@ fun FilterBrowseSheet(
     filterClick: () -> Unit,
     saveClick: (String) -> Unit,
     resetClick: () -> Unit,
-    filterChanged: (NewFilter) -> Unit,
-    savedFilters: List<String>,
+    deleteFilterClick: (String) -> Unit,
+    markFilterDefaultClick: (String) -> Unit,
+    loadFilter: (BrowseFilterImpl) -> Unit,
+    newFilterChange: (NewFilter) -> Unit,
+    savedFilters: List<BrowseFilterImpl>,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .75
 
-        BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .9f, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = bottomPadding) {
+        BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .75f, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = 0.dp) {
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
 
@@ -82,6 +90,15 @@ fun FilterBrowseSheet(
             var saveExpanded by remember { mutableStateOf(false) }
             var otherExpanded by remember { mutableStateOf(false) }
             var showSaveFilterDialog by remember { mutableStateOf(false) }
+            var enabledSavedFilterName by rememberSaveable { mutableStateOf("") }
+
+            fun filterChanged(newFilter: NewFilter) {
+                enabledSavedFilterName = ""
+                newFilterChange(newFilter)
+                if (enabledSavedFilterName != "") {
+                    enabledSavedFilterName = ""
+                }
+            }
 
             if (showSaveFilterDialog) {
                 SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
@@ -215,18 +232,6 @@ fun FilterBrowseSheet(
                     }
                 }
 
-                items(filters.tags) { tag ->
-                    AnimatedVisibility(visible = tagExpanded) {
-                        TriStateCheckboxRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            state = tag.state,
-                            disabled = !tag.enabled,
-                            toggleState = { newState -> filterChanged(tag.copy(state = newState)) },
-                            rowText = tag.tag.prettyPrint,
-                        )
-                    }
-                }
-
                 item {
                     AnimatedVisibility(visible = otherExpanded) {
                         Column(modifier = Modifier.fillMaxWidth()) {
@@ -330,16 +335,28 @@ fun FilterBrowseSheet(
 
                 item {
                     AnimatedVisibility(visible = saveExpanded) {
-                        FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisSpacing = 4.dp) {
-                            savedFilters.forEach { name ->
+                        FlowRow(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp), mainAxisSpacing = 4.dp) {
+                            savedFilters.forEach { filter ->
+
                                 FilterChip(
-                                    selected = false,
-                                    onClick = { showSaveFilterDialog = true },
+                                    selected = filter.name.equals(enabledSavedFilterName, true),
+                                    onClick = {
+                                        enabledSavedFilterName = filter.name
+                                        loadFilter(filter)
+                                    },
+                                    leadingIcon = {
+                                        if (filter.name.equals(enabledSavedFilterName, true)) {
+                                            Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                                        }
+                                    },
                                     shape = RoundedCornerShape(100),
-                                    label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
+                                    label = { Text(text = filter.name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
                                         selectedLabelColor = MaterialTheme.colorScheme.primary,
+                                        selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
                                     ),
                                 )
                             }
@@ -389,10 +406,19 @@ fun FilterBrowseSheet(
             Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = paddingModifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(bottom = bottomPadding),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                TextButton(onClick = resetClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                TextButton(
+                    onClick = {
+                        if (enabledSavedFilterName != "") {
+                            enabledSavedFilterName = ""
+                        }
+                        resetClick()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
                     Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
                 }
 

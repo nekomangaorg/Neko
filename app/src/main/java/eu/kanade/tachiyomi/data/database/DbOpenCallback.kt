@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.database
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import eu.kanade.tachiyomi.data.database.tables.ArtworkTable
+import eu.kanade.tachiyomi.data.database.tables.BrowseFilterTable
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
@@ -24,7 +25,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 33
+        const val DATABASE_VERSION = 34
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
@@ -37,6 +38,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         execSQL(SimilarTable.createTableQuery)
         execSQL(ArtworkTable.createTableQuery)
         execSQL(ScanlatorTable.createTableQuery)
+        execSQL(BrowseFilterTable.createTableQuery)
 
         // DB indexes
         execSQL(MangaTable.createUrlIndexQuery)
@@ -147,6 +149,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
 
         if (oldVersion < 33) {
             db.execSQL(ScanlatorTable.createTableQuery)
+        }
+        if (oldVersion < 34) {
+            db.execSQL(BrowseFilterTable.createTableQuery)
         }
     }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.pushtorefresh.storio.sqlite.impl.DefaultStorIOSQLite
 import eu.kanade.tachiyomi.data.database.mappers.ArtworkTypeMapping
+import eu.kanade.tachiyomi.data.database.mappers.BrowseFilterTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.CategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.ChapterTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.HistoryTypeMapping
@@ -14,6 +15,7 @@ import eu.kanade.tachiyomi.data.database.mappers.SearchMetadataTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.SimilarTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.TrackTypeMapping
 import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
+import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
@@ -24,6 +26,7 @@ import eu.kanade.tachiyomi.data.database.models.ScanlatorImpl
 import eu.kanade.tachiyomi.data.database.models.SearchMetadata
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.queries.ArtworkQueries
+import eu.kanade.tachiyomi.data.database.queries.BrowseFilterQueries
 import eu.kanade.tachiyomi.data.database.queries.CategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.ChapterQueries
 import eu.kanade.tachiyomi.data.database.queries.HistoryQueries
@@ -40,6 +43,7 @@ import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
  */
 open class DatabaseHelper(context: Context) :
     ArtworkQueries,
+    BrowseFilterQueries,
     MangaQueries,
     ChapterQueries,
     TrackQueries,
@@ -68,6 +72,7 @@ open class DatabaseHelper(context: Context) :
         .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
         .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
         .addTypeMapping(ScanlatorImpl::class.java, ScanlatorTypeMapping())
+        .addTypeMapping(BrowseFilterImpl::class.java, BrowseFilterTypeMapping())
         .build()
 
     inline fun inTransaction(block: () -> Unit) = db.inTransaction(block)

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.source.browse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -23,6 +24,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -52,7 +56,6 @@ class BrowseComposePresenter(
             promptForCategories = preferences.defaultCategory() == -1,
             filters = createInitialDexFilter(incomingQuery),
             screenType = BrowseScreenType.Homepage,
-            savedFilters = persistentListOf("test", "another test", "another really long test"),
         ),
     )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
@@ -125,6 +128,8 @@ class BrowseComposePresenter(
                 it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()), isLoggedIn = browseRepository.isLoggedIn())
             }
         }
+
+        updateBrowseFilters()
 
 
         presenterScope.launch {
@@ -358,7 +363,40 @@ class BrowseComposePresenter(
 
     fun saveFilter(name: String) {
         presenterScope.launch {
+            val browseFilter = BrowseFilterImpl(
+                name = name,
+                dexFilters = Json.encodeToString(browseScreenState.value.filters),
+            )
+            db.insertBrowseFilter(browseFilter).executeAsBlocking()
+            updateBrowseFilters()
+        }
+    }
 
+    fun loadFilter(browseFilterImpl: BrowseFilterImpl) {
+        presenterScope.launch {
+            val dexFilters = Json.decodeFromString<DexFilters>(browseFilterImpl.dexFilters)
+            _browseScreenState.update { it.copy(filters = dexFilters) }
+        }
+    }
+
+    fun markFilterAsDefault(name: String) {
+        presenterScope.launch {
+            val updatedFilters = browseScreenState.value.savedFilters.map {
+                if (it.name == name) {
+                    it.copy(default = true)
+                } else {
+                    it.copy(default = false)
+                }
+            }
+            db.insertBrowseFilters(updatedFilters).executeAsBlocking()
+            updateBrowseFilters()
+        }
+    }
+
+    fun deleteFilter(name: String) {
+        presenterScope.launch {
+            db.deleteBrowseFilter(name).executeAsBlocking()
+            updateBrowseFilters()
         }
     }
 
@@ -492,6 +530,12 @@ class BrowseComposePresenter(
 
     fun switchLibraryVisibility() {
         preferences.browseShowLibrary().set(!browseScreenState.value.showLibraryEntries)
+    }
+
+    fun updateBrowseFilters() {
+        presenterScope.launch {
+            _browseScreenState.update { it.copy(savedFilters = db.getBrowseFilters().executeAsBlocking().toImmutableList()) }
+        }
     }
 
     fun updateMangaForChanges() {

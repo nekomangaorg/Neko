@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
@@ -30,7 +31,7 @@ data class BrowseScreenState(
     val promptForCategories: Boolean,
     val filters: DexFilters,
     val handledIncomingQuery: Boolean = false,
-    val savedFilters: ImmutableList<String> = persistentListOf(),
+    val savedFilters: ImmutableList<BrowseFilterImpl> = persistentListOf(),
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 
@@ -52,7 +53,10 @@ enum class BrowseScreenType {
 
 data class FilterActions(
     val filterClick: () -> Unit,
-    val saveClick: (String) -> Unit,
+    val saveFilterClick: (String) -> Unit,
+    val deleteFilterClick: (String) -> Unit,
+    val markDefaultClick: (String) -> Unit,
+    val loadFilter: (BrowseFilterImpl) -> Unit,
     val resetClick: () -> Unit,
     val filterChanged: (NewFilter) -> Unit,
 )

@@ -59,8 +59,11 @@ fun BrowseBottomSheet(
                 keyboardController?.hide()
                 filterActions.resetClick()
             },
-            filterChanged = filterActions.filterChanged,
-            saveClick = filterActions.saveClick,
+            newFilterChange = filterActions.filterChanged,
+            saveClick = filterActions.saveFilterClick,
+            deleteFilterClick = filterActions.deleteFilterClick,
+            markFilterDefaultClick = filterActions.markDefaultClick,
+            loadFilter = filterActions.loadFilter,
         )
     }
 }
