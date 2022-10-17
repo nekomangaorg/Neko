@@ -34,6 +34,19 @@
     <string name="licensed">Licensed</string>
     <string name="completed">Completed</string>
 
+    <!-- Demographic -->
+    <string name="shounen">Shounen</string>
+    <string name="shoujo">Shoujo</string>
+    <string name="seinen">Seinen</string>
+    <string name="josei">Josei</string>
+
+    <!-- Content Rating -->
+    <string name="safe">Safe</string>
+    <string name="suggestive">Suggestive</string>
+    <string name="erotica">Erotica</string>
+    <string name="pornographic">Pornographic</string>
+
+
     <!-- Security -->
     <string name="unlock_library">Unlock to access Library</string>
     <string name="unlock">Unlock</string>

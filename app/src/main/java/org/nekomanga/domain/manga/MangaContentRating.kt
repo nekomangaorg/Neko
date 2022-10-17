@@ -1,14 +1,15 @@
 package org.nekomanga.domain.manga
 
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 
-enum class MangaContentRating(val key: String) {
-    Safe(MdConstants.ContentRating.safe),
-    Suggestive(MdConstants.ContentRating.suggestive),
-    Erotica(MdConstants.ContentRating.erotica),
-    Pornographic(MdConstants.ContentRating.pornographic),
-    Unknown(MdConstants.ContentRating.unknown),
+enum class MangaContentRating(val key: String, val nameRes: Int) {
+    Safe(MdConstants.ContentRating.safe, R.string.safe),
+    Suggestive(MdConstants.ContentRating.suggestive, R.string.suggestive),
+    Erotica(MdConstants.ContentRating.erotica, R.string.erotica),
+    Pornographic(MdConstants.ContentRating.pornographic, R.string.pornographic),
+    Unknown(MdConstants.ContentRating.unknown, R.string.unknown),
     ;
 
     fun prettyPrint(): String {

@@ -1,19 +1,15 @@
 package org.nekomanga.domain.manga
 
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import eu.kanade.tachiyomi.util.lang.capitalizeWords
 
-enum class MangaDemographic(val key: String) {
-    None(MdConstants.Demographic.none),
-    Shounen(MdConstants.Demographic.shounen),
-    Shoujo(MdConstants.Demographic.shoujo),
-    Seinen(MdConstants.Demographic.seinen),
-    Josei(MdConstants.Demographic.josei)
+enum class MangaDemographic(val key: String, val nameRes: Int) {
+    None(MdConstants.Demographic.none, R.string.none),
+    Shounen(MdConstants.Demographic.shounen, R.string.shounen),
+    Shoujo(MdConstants.Demographic.shoujo, R.string.shoujo),
+    Seinen(MdConstants.Demographic.seinen, R.string.seinen),
+    Josei(MdConstants.Demographic.josei, R.string.josei)
     ;
-
-    fun prettyPrint(): String {
-        return key.capitalizeWords()
-    }
 
     companion object {
         fun getOrdered(): List<MangaDemographic> {

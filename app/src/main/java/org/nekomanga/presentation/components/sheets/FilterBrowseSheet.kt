@@ -1,8 +1,14 @@
 package org.nekomanga.presentation.components.sheets
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,23 +17,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -39,10 +41,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.flowlayout.MainAxisAlignment
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.util.lang.isUUID
@@ -55,10 +60,10 @@ import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.filter.TagMode
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
-import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.FilterChipWrapper
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.SortRow
-import org.nekomanga.presentation.components.TriStateCheckboxRow
+import org.nekomanga.presentation.components.TriStateFilterChip
 import org.nekomanga.presentation.components.dialog.SaveFilterDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
@@ -130,82 +135,50 @@ fun FilterBrowseSheet(
                     .requiredHeightIn(0.dp, maxLazyHeight.dp),
             ) {
 
-                item {
-                    ExpandableRow(
-                        isExpanded = originalLanguageExpanded,
-                        disabled = disabled,
-                        onClick = { originalLanguageExpanded = !originalLanguageExpanded },
-                        rowText = stringResource(id = R.string.original_language),
-                    )
-                }
-                items(filters.originalLanguage) { originalLanguage ->
-                    AnimatedVisibility(visible = originalLanguageExpanded) {
-                        CheckboxRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            checkedState = originalLanguage.state,
-                            checkedChange = { newState -> filterChanged(originalLanguage.copy(state = newState)) },
-                            rowText = originalLanguage.language.prettyPrint,
-                        )
-                    }
-                }
+                filterRow(
+                    items = filters.originalLanguage,
+                    expanded = originalLanguageExpanded,
+                    disabled = disabled,
+                    headerClicked = { originalLanguageExpanded = !originalLanguageExpanded },
+                    headerRes = R.string.original_language,
+                    onClick = { originalLanguage -> filterChanged(originalLanguage.copy(state = !originalLanguage.state)) },
+                    selected = { originalLanguage -> originalLanguage.state },
+                    name = { originalLanguage -> originalLanguage.language.prettyPrint },
+                )
 
-                item {
-                    ExpandableRow(
-                        isExpanded = contentRatingExpanded,
-                        disabled = disabled,
-                        onClick = { contentRatingExpanded = !contentRatingExpanded }, rowText = stringResource(id = R.string.content_rating),
-                    )
-                }
-                items(filters.contentRatings) { contentRating ->
-                    AnimatedVisibility(visible = contentRatingExpanded) {
+                filterRow(
+                    items = filters.contentRatings,
+                    expanded = contentRatingExpanded,
+                    disabled = disabled,
+                    headerClicked = { contentRatingExpanded = !contentRatingExpanded },
+                    headerRes = R.string.content_rating,
+                    onClick = { rating -> filterChanged(rating.copy(state = !rating.state)) },
+                    selected = { rating -> rating.state },
+                    nameRes = { rating -> rating.rating.nameRes },
+                )
 
-                        CheckboxRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            checkedState = contentRating.state,
-                            checkedChange = { newState -> filterChanged(contentRating.copy(state = newState)) },
-                            rowText = contentRating.rating.prettyPrint(),
-                        )
-                    }
-                }
+                filterRow(
+                    items = filters.publicationDemographics,
+                    expanded = publicationDemographicExpanded,
+                    disabled = disabled,
+                    headerClicked = { publicationDemographicExpanded = !publicationDemographicExpanded },
+                    headerRes = R.string.publication_demographic,
+                    onClick = { demo -> filterChanged(demo.copy(state = !demo.state)) },
+                    selected = { demo -> demo.state },
+                    nameRes = { demo -> demo.demographic.nameRes },
+                )
 
+                filterRow(
+                    items = filters.statuses,
+                    expanded = statusExpanded,
+                    disabled = disabled,
+                    headerClicked = { statusExpanded = !statusExpanded },
+                    headerRes = R.string.status,
+                    onClick = { status -> filterChanged(status.copy(state = !status.state)) },
+                    selected = { status -> status.state },
+                    nameRes = { status -> status.status.statusRes },
+                )
 
-                item {
-                    ExpandableRow(
-                        isExpanded = publicationDemographicExpanded,
-                        disabled = disabled,
-                        onClick = { publicationDemographicExpanded = !publicationDemographicExpanded },
-                        rowText = stringResource(id = R.string.publication_demographic),
-                    )
-                }
-                items(filters.publicationDemographics) { demographic ->
-                    AnimatedVisibility(visible = publicationDemographicExpanded) {
-                        CheckboxRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            checkedState = demographic.state,
-                            checkedChange = { newState -> filterChanged(demographic.copy(state = newState)) },
-                            rowText = demographic.demographic.prettyPrint(),
-                        )
-                    }
-                }
-
-                item {
-                    ExpandableRow(
-                        isExpanded = statusExpanded,
-                        disabled = disabled,
-                        onClick = { statusExpanded = !statusExpanded }, rowText = stringResource(id = R.string.status),
-                    )
-                }
-
-                items(filters.statuses) { status ->
-                    AnimatedVisibility(visible = statusExpanded) {
-                        CheckboxRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            checkedState = status.state,
-                            checkedChange = { newState -> filterChanged(status.copy(state = newState)) },
-                            rowText = stringResource(id = status.status.statusRes),
-                        )
-                    }
-                }
 
                 item {
                     ExpandableRow(
@@ -225,24 +198,17 @@ fun FilterBrowseSheet(
                     }
                 }
 
-                item {
-                    ExpandableRow(
-                        isExpanded = tagExpanded,
-                        disabled = disabled,
-                        onClick = { tagExpanded = !tagExpanded }, rowText = stringResource(id = R.string.tag),
-                    )
-                }
+                filterTriStateRow(
+                    items = filters.tags,
+                    expanded = tagExpanded,
+                    disabled = disabled,
+                    headerClicked = { tagExpanded = !tagExpanded },
+                    headerRes = R.string.tag,
+                    toggleState = { newState, tag -> filterChanged(tag.copy(state = newState)) },
+                    selected = { tag -> tag.state },
+                    name = { tag -> tag.tag.prettyPrint },
+                )
 
-                items(filters.tags) { tag ->
-                    AnimatedVisibility(visible = tagExpanded) {
-                        TriStateCheckboxRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            state = tag.state,
-                            toggleState = { newState -> filterChanged(tag.copy(state = newState)) },
-                            rowText = tag.tag.prettyPrint,
-                        )
-                    }
-                }
 
                 item {
                     ExpandableRow(
@@ -359,7 +325,7 @@ fun FilterBrowseSheet(
                             LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 item { Gap(4.dp) }
                                 items(savedFilters) { filter ->
-                                    FilterSheetChip(nameOfEnabledFilter.equals(filter.name, true), { loadFilter(filter) }, filter.name)
+                                    FilterChipWrapper(nameOfEnabledFilter.equals(filter.name, true), { loadFilter(filter) }, filter.name)
                                 }
                                 item { Gap(4.dp) }
                             }
@@ -413,17 +379,19 @@ fun FilterBrowseSheet(
                 }
                 item {
                     Row(Modifier.fillMaxWidth(), Arrangement.Center) {
-                        FilterSheetChip(
+                        FilterChipWrapper(
                             filters.queryMode == QueryType.Title,
                             { filterChanged(NewFilter.Query("", QueryType.Title)) },
                             stringResource(id = R.string.title),
                         )
-                        FilterSheetChip(
+                        Gap(8.dp)
+                        FilterChipWrapper(
                             filters.queryMode == QueryType.Author,
                             { filterChanged(NewFilter.Query("", QueryType.Author)) },
                             stringResource(id = R.string.author),
                         )
-                        FilterSheetChip(
+                        Gap(8.dp)
+                        FilterChipWrapper(
                             filters.queryMode == QueryType.Group,
                             { filterChanged(NewFilter.Query("", QueryType.Group)) },
                             stringResource(id = R.string.scanlator_group),
@@ -466,26 +434,124 @@ fun FilterBrowseSheet(
     }
 }
 
-@Composable
-private fun FilterSheetChip(selected: Boolean, onClick: () -> Unit, name: String) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        leadingIcon = {
-            if (selected) {
-                Icon(imageVector = Icons.Default.Check, contentDescription = null)
+private fun <T> LazyListScope.filterRow(
+    items: List<T>,
+    expanded: Boolean,
+    disabled: Boolean,
+    headerClicked: () -> Unit,
+    @StringRes headerRes: Int,
+    onClick: (T) -> Unit,
+    selected: (T) -> Boolean,
+    nameRes: ((T) -> Int)? = null,
+    name: ((T) -> String)? = null,
+) {
+
+    item {
+        Column(
+            modifier = Modifier
+                .animateContentSize()
+                .fillMaxWidth(),
+        ) {
+            ExpandableRow(
+                isExpanded = expanded,
+                disabled = disabled,
+                onClick = headerClicked,
+                rowText = stringResource(id = headerRes),
+            )
+            val density = LocalDensity.current
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = slideInVertically {
+                    // Slide in from 40 dp from the top.
+                    with(density) { -60.dp.roundToPx() }
+                } + expandVertically(
+                    // Expand from the top.
+                    clip = true,
+                    expandFrom = Alignment.Top,
+                ) + fadeIn(),
+                exit = slideOutVertically() + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+            ) {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    mainAxisSpacing = 8.dp,
+                    mainAxisAlignment = MainAxisAlignment.Start,
+                ) {
+
+                    items.forEach { item ->
+                        val itemName = when {
+                            nameRes != null -> stringResource(id = nameRes(item))
+                            name != null -> name(item)
+                            else -> ""
+                        }
+                        FilterChipWrapper(selected = selected(item), onClick = { onClick(item) }, name = itemName)
+                    }
+                }
             }
-        },
-        shape = RoundedCornerShape(100),
-        label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-        colors = FilterChipDefaults.filterChipColors(
-            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            selectedLabelColor = MaterialTheme.colorScheme.primary,
-            selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
-        ),
-        border = FilterChipDefaults.filterChipBorder(
-            borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
-            selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-        ),
-    )
+        }
+    }
 }
+
+private fun <T> LazyListScope.filterTriStateRow(
+    items: List<T>,
+    expanded: Boolean,
+    disabled: Boolean,
+    headerClicked: () -> Unit,
+    @StringRes headerRes: Int,
+    toggleState: (ToggleableState, T) -> Unit,
+    selected: (T) -> ToggleableState,
+    nameRes: ((T) -> Int)? = null,
+    name: ((T) -> String)? = null,
+) {
+
+    item {
+        Column(
+            modifier = Modifier
+                .animateContentSize()
+                .fillMaxWidth(),
+        ) {
+            ExpandableRow(
+                isExpanded = expanded,
+                disabled = disabled,
+                onClick = headerClicked,
+                rowText = stringResource(id = headerRes),
+            )
+            val density = LocalDensity.current
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = slideInVertically {
+                    // Slide in from 40 dp from the top.
+                    with(density) { -60.dp.roundToPx() }
+                } + expandVertically(
+                    // Expand from the top.
+                    clip = true,
+                    expandFrom = Alignment.Top,
+                ) + fadeIn(),
+                exit = slideOutVertically() + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+            ) {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    mainAxisSpacing = 8.dp,
+                    mainAxisAlignment = MainAxisAlignment.Start,
+                ) {
+
+                    items.forEach { item ->
+                        val itemName = when {
+                            nameRes != null -> stringResource(id = nameRes(item))
+                            name != null -> name(item)
+                            else -> ""
+                        }
+                        TriStateFilterChip(state = selected(item), toggleState = { state -> toggleState(state, item) }, name = itemName)
+                    }
+                }
+            }
+        }
+    }
+}
+
+

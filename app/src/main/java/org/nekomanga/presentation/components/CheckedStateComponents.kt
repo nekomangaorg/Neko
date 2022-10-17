@@ -9,7 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -49,4 +51,12 @@ fun CheckboxRow(
             color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
         )
     }
+}
+
+@Composable
+fun FilterChipWrapper(selected: Boolean, onClick: () -> Unit, name: String, labelStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) {
+    TriStateFilterChip(
+        state = ToggleableState(selected),
+        toggleState = { _ -> onClick() }, name = name, labelTextStyle = labelStyle,
+    )
 }
