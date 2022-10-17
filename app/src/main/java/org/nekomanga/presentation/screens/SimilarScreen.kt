@@ -1,6 +1,8 @@
 package org.nekomanga.presentation.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -56,8 +58,12 @@ fun SimilarScreen(
     onRefresh: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
-
+    val sheetState =
+        rememberModalBottomSheetState(
+            initialValue = ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true,
+            animationSpec = tween(durationMillis = 150, easing = LinearEasing),
+        )
     var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
 
     /**
@@ -109,7 +115,7 @@ fun SimilarScreen(
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
 
-                    )
+                        )
                 },
             ) {
                 val haptic = LocalHapticFeedback.current

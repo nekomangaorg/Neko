@@ -126,7 +126,7 @@ class SearchHandler {
             }
 
             val sortMode = filters.sort.first { it.state }
-            queryParameters[MdConstants.SearchParameters.sortParam(sortMode.sort.key)] = sortMode.sort.key
+            queryParameters[MdConstants.SearchParameters.sortParam(sortMode.sort.key)] = sortMode.sort.state.key
 
             if (filters.hasAvailableChapters.state) {
                 queryParameters[MdConstants.SearchParameters.availableTranslatedLanguage] = MdUtil.getLangsToShow(preferencesHelper)

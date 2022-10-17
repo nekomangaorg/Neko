@@ -11,15 +11,14 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.ripple.LocalRippleTheme
@@ -40,7 +39,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
@@ -67,6 +65,7 @@ import org.nekomanga.presentation.components.dialog.SaveFilterDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterBrowseSheet(
     filters: DexFilters,
@@ -82,8 +81,6 @@ fun FilterBrowseSheet(
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
-
-        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .75
 
         BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .75f, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = 0.dp) {
 
@@ -128,13 +125,14 @@ fun FilterBrowseSheet(
                 SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
             }
 
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredHeightIn(0.dp, maxLazyHeight.dp),
+                    .verticalScroll(rememberScrollState())
+                    .weight(weight = 1f, fill = false),
             ) {
 
-                filterRow(
+                FilterRow(
                     items = filters.originalLanguage,
                     expanded = originalLanguageExpanded,
                     disabled = disabled,
@@ -145,7 +143,7 @@ fun FilterBrowseSheet(
                     name = { originalLanguage -> originalLanguage.language.prettyPrint },
                 )
 
-                filterRow(
+                FilterRow(
                     items = filters.contentRatings,
                     expanded = contentRatingExpanded,
                     disabled = disabled,
@@ -156,7 +154,7 @@ fun FilterBrowseSheet(
                     nameRes = { rating -> rating.rating.nameRes },
                 )
 
-                filterRow(
+                FilterRow(
                     items = filters.publicationDemographics,
                     expanded = publicationDemographicExpanded,
                     disabled = disabled,
@@ -167,7 +165,7 @@ fun FilterBrowseSheet(
                     nameRes = { demo -> demo.demographic.nameRes },
                 )
 
-                filterRow(
+                FilterRow(
                     items = filters.statuses,
                     expanded = statusExpanded,
                     disabled = disabled,
@@ -179,7 +177,7 @@ fun FilterBrowseSheet(
                 )
 
 
-                filterRow(
+                FilterRow(
                     items = filters.sort,
                     expanded = sortExpanded,
                     disabled = disabled,
@@ -202,197 +200,178 @@ fun FilterBrowseSheet(
                 )
 
 
-                item {
-                    ExpandableRow(
-                        isExpanded = otherExpanded,
-                        disabled = disabled,
-                        onClick = { otherExpanded = !otherExpanded },
-                        rowText = stringResource(id = R.string.other),
+                ExpandableRow(
+                    isExpanded = otherExpanded,
+                    disabled = disabled,
+                    onClick = { otherExpanded = !otherExpanded },
+                    rowText = stringResource(id = R.string.other),
+                )
+                AnimatedVisibility(visible = otherExpanded) {
+                    CheckboxRow(
+                        checkedState = filters.hasAvailableChapters.state,
+                        checkedChange = { newState -> filterChanged(filters.hasAvailableChapters.copy(state = newState)) },
+                        rowText = stringResource(
+                            id = R.string.has_available_chapters,
+                        ),
                     )
                 }
-                item {
-                    AnimatedVisibility(visible = otherExpanded) {
-                        CheckboxRow(
-                            checkedState = filters.hasAvailableChapters.state,
-                            checkedChange = { newState -> filterChanged(filters.hasAvailableChapters.copy(state = newState)) },
-                            rowText = stringResource(
-                                id = R.string.has_available_chapters,
-                            ),
-                        )
-                    }
-                }
 
-                item {
-                    AnimatedVisibility(visible = otherExpanded) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(text = stringResource(id = R.string.tag_inclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                RadioButton(
-                                    selected = filters.tagInclusionMode.mode == TagMode.And,
-                                    onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.And)) },
-                                )
-                                Text(text = stringResource(id = R.string.and), color = onSurface)
-                                RadioButton(
-                                    selected = filters.tagInclusionMode.mode == TagMode.Or,
-                                    onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.Or)) },
-                                )
-                                Text(text = stringResource(id = R.string.or), color = onSurface)
-                            }
+                AnimatedVisibility(visible = otherExpanded) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(text = stringResource(id = R.string.tag_inclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(
+                                selected = filters.tagInclusionMode.mode == TagMode.And,
+                                onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.And)) },
+                            )
+                            Text(text = stringResource(id = R.string.and), color = onSurface)
+                            RadioButton(
+                                selected = filters.tagInclusionMode.mode == TagMode.Or,
+                                onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.Or)) },
+                            )
+                            Text(text = stringResource(id = R.string.or), color = onSurface)
                         }
-
                     }
+
                 }
 
-                item {
-                    AnimatedVisibility(visible = otherExpanded) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Text(text = stringResource(id = R.string.tag_exclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                RadioButton(
-                                    selected = filters.tagExclusionMode.mode == TagMode.And,
-                                    onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.And)) },
-                                )
-                                Text(text = stringResource(id = R.string.and), color = onSurface)
-                                RadioButton(
-                                    selected = filters.tagExclusionMode.mode == TagMode.Or,
-                                    onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.Or)) },
-                                )
-                                Text(text = stringResource(id = R.string.or), color = onSurface)
-                            }
-                        }
-
-                    }
-                }
-
-                item {
-                    AnimatedVisibility(visible = otherExpanded) {
-                        val isError = remember(filters.groupId.uuid) {
-                            if (filters.groupId.uuid.isBlank()) {
-                                false
-                            } else {
-                                !filters.groupId.uuid.isUUID()
-                            }
-                        }
-                        SearchFooter(
-                            themeColorState = themeColorState,
-                            labelText = stringResource(id = R.string.scanlator_group_id),
-                            showDivider = false,
-                            title = filters.groupId.uuid,
-                            isError = isError,
-                            textChanged = { text: String -> filterChanged(NewFilter.GroupId(text)) },
-                            search = { filterClick() },
-                        )
-                        Gap(4.dp)
-                    }
-                }
-
-                item {
-                    AnimatedVisibility(visible = otherExpanded) {
-                        val isError = remember(filters.authorId.uuid) {
-                            if (filters.authorId.uuid.isBlank()) {
-                                false
-                            } else {
-                                !filters.authorId.uuid.isUUID()
-                            }
-                        }
-                        SearchFooter(
-                            themeColorState = themeColorState,
-                            labelText = stringResource(id = R.string.author_id),
-                            showDivider = false,
-                            title = filters.authorId.uuid,
-                            isError = isError,
-                            textChanged = { text: String -> filterChanged(NewFilter.AuthorId(text)) },
-                            search = { filterClick() },
-                        )
-                        Gap(8.dp)
-                    }
-                }
-
-                item {
-                    AnimatedVisibility(visible = savedFilters.isNotEmpty()) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-
-                            Text(text = stringResource(id = R.string.saved_filter), modifier = Modifier.padding(start = 16.dp), style = MaterialTheme.typography.labelMedium)
-
-                            LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                item { Gap(4.dp) }
-                                items(savedFilters) { filter ->
-                                    FilterChipWrapper(nameOfEnabledFilter.equals(filter.name, true), { loadFilter(filter) }, filter.name)
-                                }
-                                item { Gap(4.dp) }
-                            }
-                            AnimatedVisibility(visible = nameOfEnabledFilter.isNotBlank()) {
-
-                                Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
-
-                                    val (textRes, makeDefault) = when (isDefault) {
-                                        true -> R.string.remove_default to false
-                                        false -> R.string.make_default to true
-                                    }
-
-                                    TextButton(onClick = { deleteFilterClick(nameOfEnabledFilter) }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                                        Text(text = stringResource(id = R.string.delete_filter), style = MaterialTheme.typography.titleSmall)
-                                    }
-
-                                    ElevatedButton(
-                                        onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
-                                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
-                                    ) {
-                                        Text(text = stringResource(id = textRes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
-                                    }
-                                }
-                            }
+                AnimatedVisibility(visible = otherExpanded) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(text = stringResource(id = R.string.tag_exclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(
+                                selected = filters.tagExclusionMode.mode == TagMode.And,
+                                onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.And)) },
+                            )
+                            Text(text = stringResource(id = R.string.and), color = onSurface)
+                            RadioButton(
+                                selected = filters.tagExclusionMode.mode == TagMode.Or,
+                                onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.Or)) },
+                            )
+                            Text(text = stringResource(id = R.string.or), color = onSurface)
                         }
                     }
                 }
 
-                item {
-                    val titleRes = when (filters.queryMode) {
-                        QueryType.Title -> {
-                            R.string.title
-                        }
-                        QueryType.Author -> {
-                            R.string.author
-                        }
-                        QueryType.Group -> {
-                            R.string.scanlator_group
+                AnimatedVisibility(visible = otherExpanded) {
+                    val isError = remember(filters.groupId.uuid) {
+                        if (filters.groupId.uuid.isBlank()) {
+                            false
+                        } else {
+                            !filters.groupId.uuid.isUUID()
                         }
                     }
                     SearchFooter(
                         themeColorState = themeColorState,
-                        labelText = stringResource(id = titleRes),
+                        labelText = stringResource(id = R.string.scanlator_group_id),
                         showDivider = false,
-                        title = filters.query.text,
-                        textChanged = { text: String -> filterChanged(filters.query.copy(text = text)) },
+                        title = filters.groupId.uuid,
+                        isError = isError,
+                        textChanged = { text: String -> filterChanged(NewFilter.GroupId(text)) },
                         search = { filterClick() },
                     )
-
+                    Gap(4.dp)
                 }
-                item {
-                    Row(Modifier.fillMaxWidth(), Arrangement.Center) {
-                        FilterChipWrapper(
-                            filters.queryMode == QueryType.Title,
-                            { filterChanged(NewFilter.Query("", QueryType.Title)) },
-                            stringResource(id = R.string.title),
-                        )
-                        Gap(8.dp)
-                        FilterChipWrapper(
-                            filters.queryMode == QueryType.Author,
-                            { filterChanged(NewFilter.Query("", QueryType.Author)) },
-                            stringResource(id = R.string.author),
-                        )
-                        Gap(8.dp)
-                        FilterChipWrapper(
-                            filters.queryMode == QueryType.Group,
-                            { filterChanged(NewFilter.Query("", QueryType.Group)) },
-                            stringResource(id = R.string.scanlator_group),
-                        )
+
+                AnimatedVisibility(visible = otherExpanded) {
+                    val isError = remember(filters.authorId.uuid) {
+                        if (filters.authorId.uuid.isBlank()) {
+                            false
+                        } else {
+                            !filters.authorId.uuid.isUUID()
+                        }
                     }
+                    SearchFooter(
+                        themeColorState = themeColorState,
+                        labelText = stringResource(id = R.string.author_id),
+                        showDivider = false,
+                        title = filters.authorId.uuid,
+                        isError = isError,
+                        textChanged = { text: String -> filterChanged(NewFilter.AuthorId(text)) },
+                        search = { filterClick() },
+                    )
+                    Gap(8.dp)
+                }
+
+                AnimatedVisibility(visible = savedFilters.isNotEmpty()) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+
+                        Text(text = stringResource(id = R.string.saved_filter), modifier = Modifier.padding(start = 16.dp), style = MaterialTheme.typography.labelMedium)
+
+                        LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            item { Gap(4.dp) }
+                            items(savedFilters) { filter ->
+                                FilterChipWrapper(nameOfEnabledFilter.equals(filter.name, true), { loadFilter(filter) }, filter.name)
+                            }
+                            item { Gap(4.dp) }
+                        }
+                        AnimatedVisibility(visible = nameOfEnabledFilter.isNotBlank()) {
+
+                            Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
+
+                                val (textRes, makeDefault) = when (isDefault) {
+                                    true -> R.string.remove_default to false
+                                    false -> R.string.make_default to true
+                                }
+
+                                TextButton(onClick = { deleteFilterClick(nameOfEnabledFilter) }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                                    Text(text = stringResource(id = R.string.delete_filter), style = MaterialTheme.typography.titleSmall)
+                                }
+
+                                ElevatedButton(
+                                    onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
+                                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                                ) {
+                                    Text(text = stringResource(id = textRes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                val titleRes = when (filters.queryMode) {
+                    QueryType.Title -> {
+                        R.string.title
+                    }
+                    QueryType.Author -> {
+                        R.string.author
+                    }
+                    QueryType.Group -> {
+                        R.string.scanlator_group
+                    }
+                }
+                SearchFooter(
+                    themeColorState = themeColorState,
+                    labelText = stringResource(id = titleRes),
+                    showDivider = false,
+                    title = filters.query.text,
+                    textChanged = { text: String -> filterChanged(filters.query.copy(text = text)) },
+                    search = { filterClick() },
+                )
+
+                Row(Modifier.fillMaxWidth(), Arrangement.Center) {
+                    FilterChipWrapper(
+                        filters.queryMode == QueryType.Title,
+                        { filterChanged(NewFilter.Query("", QueryType.Title)) },
+                        stringResource(id = R.string.title),
+                    )
+                    Gap(8.dp)
+                    FilterChipWrapper(
+                        filters.queryMode == QueryType.Author,
+                        { filterChanged(NewFilter.Query("", QueryType.Author)) },
+                        stringResource(id = R.string.author),
+                    )
+                    Gap(8.dp)
+                    FilterChipWrapper(
+                        filters.queryMode == QueryType.Group,
+                        { filterChanged(NewFilter.Query("", QueryType.Group)) },
+                        stringResource(id = R.string.scanlator_group),
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Gap(8.dp)
 
             Row(
                 modifier = paddingModifier
@@ -426,7 +405,8 @@ fun FilterBrowseSheet(
     }
 }
 
-private fun <T> LazyListScope.filterRow(
+@Composable
+private fun <T> FilterRow(
     items: List<T>,
     expanded: Boolean,
     disabled: Boolean,
@@ -437,56 +417,55 @@ private fun <T> LazyListScope.filterRow(
     nameRes: ((T) -> Int)? = null,
     name: ((T) -> String)? = null,
 ) {
+    Column(
+        modifier = Modifier
+            .animateContentSize()
+            .fillMaxWidth(),
+    ) {
+        ExpandableRow(
+            isExpanded = expanded,
+            disabled = disabled,
+            onClick = headerClicked,
+            rowText = stringResource(id = headerRes),
+        )
+        val density = LocalDensity.current
 
-    item {
-        Column(
-            modifier = Modifier
-                .animateContentSize()
-                .fillMaxWidth(),
+        AnimatedVisibility(
+            visible = expanded,
+            enter = slideInVertically {
+                // Slide in from 40 dp from the top.
+                with(density) { -60.dp.roundToPx() }
+            } + expandVertically(
+                // Expand from the top.
+                clip = true,
+                expandFrom = Alignment.Top,
+            ) + fadeIn(),
+            exit = slideOutVertically() + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
         ) {
-            ExpandableRow(
-                isExpanded = expanded,
-                disabled = disabled,
-                onClick = headerClicked,
-                rowText = stringResource(id = headerRes),
-            )
-            val density = LocalDensity.current
-
-            AnimatedVisibility(
-                visible = expanded,
-                enter = slideInVertically {
-                    // Slide in from 40 dp from the top.
-                    with(density) { -60.dp.roundToPx() }
-                } + expandVertically(
-                    // Expand from the top.
-                    clip = true,
-                    expandFrom = Alignment.Top,
-                ) + fadeIn(),
-                exit = slideOutVertically() + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                mainAxisSpacing = 8.dp,
+                mainAxisAlignment = MainAxisAlignment.Start,
             ) {
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    mainAxisSpacing = 8.dp,
-                    mainAxisAlignment = MainAxisAlignment.Start,
-                ) {
 
-                    items.forEach { item ->
-                        val itemName = when {
-                            nameRes != null -> stringResource(id = nameRes(item))
-                            name != null -> name(item)
-                            else -> ""
-                        }
-                        FilterChipWrapper(selected = selected(item), onClick = { onClick(item) }, name = itemName)
+                items.forEach { item ->
+                    val itemName = when {
+                        nameRes != null -> stringResource(id = nameRes(item))
+                        name != null -> name(item)
+                        else -> ""
                     }
+                    FilterChipWrapper(selected = selected(item), onClick = { onClick(item) }, name = itemName)
                 }
             }
         }
     }
 }
 
-private fun <T> LazyListScope.filterTriStateRow(
+@Composable
+
+private fun <T> filterTriStateRow(
     items: List<T>,
     expanded: Boolean,
     disabled: Boolean,
@@ -498,48 +477,46 @@ private fun <T> LazyListScope.filterTriStateRow(
     name: ((T) -> String)? = null,
 ) {
 
-    item {
-        Column(
-            modifier = Modifier
-                .animateContentSize()
-                .fillMaxWidth(),
+    Column(
+        modifier = Modifier
+            .animateContentSize()
+            .fillMaxWidth(),
+    ) {
+        ExpandableRow(
+            isExpanded = expanded,
+            disabled = disabled,
+            onClick = headerClicked,
+            rowText = stringResource(id = headerRes),
+        )
+        val density = LocalDensity.current
+
+        AnimatedVisibility(
+            visible = expanded,
+            enter = slideInVertically {
+                // Slide in from 40 dp from the top.
+                with(density) { -60.dp.roundToPx() }
+            } + expandVertically(
+                // Expand from the top.
+                clip = true,
+                expandFrom = Alignment.Top,
+            ) + fadeIn(),
+            exit = slideOutVertically() + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
         ) {
-            ExpandableRow(
-                isExpanded = expanded,
-                disabled = disabled,
-                onClick = headerClicked,
-                rowText = stringResource(id = headerRes),
-            )
-            val density = LocalDensity.current
-
-            AnimatedVisibility(
-                visible = expanded,
-                enter = slideInVertically {
-                    // Slide in from 40 dp from the top.
-                    with(density) { -60.dp.roundToPx() }
-                } + expandVertically(
-                    // Expand from the top.
-                    clip = true,
-                    expandFrom = Alignment.Top,
-                ) + fadeIn(),
-                exit = slideOutVertically() + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut(),
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                mainAxisSpacing = 8.dp,
+                mainAxisAlignment = MainAxisAlignment.Start,
             ) {
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    mainAxisSpacing = 8.dp,
-                    mainAxisAlignment = MainAxisAlignment.Start,
-                ) {
 
-                    items.forEach { item ->
-                        val itemName = when {
-                            nameRes != null -> stringResource(id = nameRes(item))
-                            name != null -> name(item)
-                            else -> ""
-                        }
-                        TriStateFilterChip(state = selected(item), toggleState = { state -> toggleState(state, item) }, name = itemName)
+                items.forEach { item ->
+                    val itemName = when {
+                        nameRes != null -> stringResource(id = nameRes(item))
+                        name != null -> name(item)
+                        else -> ""
                     }
+                    TriStateFilterChip(state = selected(item), toggleState = { state -> toggleState(state, item) }, name = itemName)
                 }
             }
         }
