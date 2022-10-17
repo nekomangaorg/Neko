@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
@@ -431,7 +432,12 @@ class BrowseComposePresenter(
                     browseScreenState.value.filters.copy(tags = list)
                 }
                 is NewFilter.Sort -> {
-                    browseScreenState.value.filters.copy(sort = NewFilter.Sort.getSortList(newFilter.sort, newFilter.state))
+                    val filterMode = when (newFilter.state) {
+                        true -> newFilter.sort
+                        false -> MdSort.Best
+                    }
+
+                    browseScreenState.value.filters.copy(sort = NewFilter.Sort.getSortList(filterMode))
                 }
                 is NewFilter.HasAvailableChapters -> {
                     browseScreenState.value.filters.copy(hasAvailableChapters = newFilter)

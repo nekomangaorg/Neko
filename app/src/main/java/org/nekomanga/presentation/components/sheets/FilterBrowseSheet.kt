@@ -62,7 +62,6 @@ import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.ExpandableRow
 import org.nekomanga.presentation.components.FilterChipWrapper
 import org.nekomanga.presentation.components.SearchFooter
-import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateFilterChip
 import org.nekomanga.presentation.components.dialog.SaveFilterDialog
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -180,23 +179,16 @@ fun FilterBrowseSheet(
                 )
 
 
-                item {
-                    ExpandableRow(
-                        isExpanded = sortExpanded,
-                        disabled = disabled,
-                        onClick = { sortExpanded = !sortExpanded }, rowText = stringResource(id = R.string.sort),
-                    )
-                }
-                items(filters.sort) { sort ->
-                    AnimatedVisibility(visible = sortExpanded) {
-                        SortRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            sortState = sort.state,
-                            sortChanged = { sortState -> filterChanged(sort.copy(state = sortState)) },
-                            rowText = sort.sort.displayName,
-                        )
-                    }
-                }
+                filterRow(
+                    items = filters.sort,
+                    expanded = sortExpanded,
+                    disabled = disabled,
+                    headerClicked = { sortExpanded = !sortExpanded },
+                    headerRes = R.string.sort,
+                    onClick = { sort -> filterChanged(sort.copy(state = !sort.state)) },
+                    selected = { sort -> sort.state },
+                    name = { sort -> sort.sort.displayName },
+                )
 
                 filterTriStateRow(
                     items = filters.tags,

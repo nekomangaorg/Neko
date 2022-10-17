@@ -1,12 +1,20 @@
 package eu.kanade.tachiyomi.source.online.utils
 
-enum class MdSort(val displayName: String, val key: String) {
-    latest("Latest uploaded (Any language)", MdConstants.Sort.latest),
-    relevance("Relevance", MdConstants.Sort.relevance),
-    followCount("Number of follows", MdConstants.Sort.followCount),
-    createdAt("Recently added", MdConstants.Sort.createdAt),
-    updatedAt("Information updated", MdConstants.Sort.updatedAt),
-    title("Title", MdConstants.Sort.title),
-    rating("Rating", MdConstants.Sort.rating),
-    year("Year", MdConstants.Sort.year)
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
+
+enum class MdSort(val displayName: String, val key: String, val state: MangaConstants.SortState) {
+    Best("Best Match", MdConstants.Sort.relevance, MangaConstants.SortState.Descending),
+    LatestUploads("Latest uploads", MdConstants.Sort.latest, MangaConstants.SortState.Descending),
+    OldestUploads("Oldest uploads", MdConstants.Sort.latest, MangaConstants.SortState.Ascending),
+    TitleDescending("Title asc", MdConstants.Sort.title, MangaConstants.SortState.Ascending),
+    TitleAscending("Title desc", MdConstants.Sort.title, MangaConstants.SortState.Descending),
+    HighestRating("Highest rating", MdConstants.Sort.rating, MangaConstants.SortState.Descending),
+    LowestRating("lowest rating", MdConstants.Sort.rating, MangaConstants.SortState.Ascending),
+    MostFollows("Most follows", MdConstants.Sort.followCount, MangaConstants.SortState.Descending),
+    LeastFollows("Fewest follows", MdConstants.Sort.followCount, MangaConstants.SortState.Ascending),
+    RecentlyAdded("Recently added", MdConstants.Sort.createdAt, MangaConstants.SortState.Descending),
+    OldestAdded("Oldest added", MdConstants.Sort.createdAt, MangaConstants.SortState.Descending),
+    YearAscending("Year asc", MdConstants.Sort.year, MangaConstants.SortState.Ascending),
+    YearDescending("Year desc", MdConstants.Sort.year, MangaConstants.SortState.Descending),
+    //updatedAt("Information updated", MdConstants.Sort.updatedAt),
 }

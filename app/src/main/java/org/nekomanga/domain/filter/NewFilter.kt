@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.source.model.MangaTag
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdSort
-import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaDemographic
 import org.nekomanga.domain.manga.MangaStatus
@@ -19,7 +18,7 @@ data class DexFilters(
     val publicationDemographics: List<NewFilter.PublicationDemographic> = MangaDemographic.getOrdered().map { NewFilter.PublicationDemographic(it, false) },
     val statuses: List<NewFilter.Status> = MangaStatus.getMangaDexStatus().map { NewFilter.Status(it, false) },
     val tags: List<NewFilter.Tag> = MangaTag.values().map { NewFilter.Tag(it, ToggleableState.Off) },
-    val sort: List<NewFilter.Sort> = NewFilter.Sort.getSortList(MdSort.relevance, MangaConstants.SortState.Descending),
+    val sort: List<NewFilter.Sort> = NewFilter.Sort.getSortList(),
     val hasAvailableChapters: NewFilter.HasAvailableChapters = NewFilter.HasAvailableChapters(false),
     val tagInclusionMode: NewFilter.TagInclusionMode = NewFilter.TagInclusionMode(),
     val tagExclusionMode: NewFilter.TagExclusionMode = NewFilter.TagExclusionMode(),
@@ -69,16 +68,9 @@ sealed class NewFilter {
     data class GroupId(val uuid: String = "") : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class Sort(val sort: MdSort, val state: MangaConstants.SortState) : NewFilter() {
+    data class Sort(val sort: MdSort, val state: Boolean) : NewFilter() {
         companion object {
-            fun getSortList(sort: MdSort, state: MangaConstants.SortState): List<Sort> {
-                return MdSort.values().map {
-                    Sort(
-                        sort = it,
-                        state = if (sort == it) state else MangaConstants.SortState.None,
-                    )
-                }
-            }
+            fun getSortList(mdSortToEnable: MdSort = MdSort.Best) = MdSort.values().map { Sort(it, it == mdSortToEnable) }
         }
     }
 }
