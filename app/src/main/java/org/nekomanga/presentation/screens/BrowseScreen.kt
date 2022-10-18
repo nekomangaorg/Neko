@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -214,53 +215,54 @@ fun BrowseScreen(
                             contentPadding = recyclerContentPadding,
                         )
                     } else {
-
-                        when (browseScreenType) {
-                            BrowseScreenType.Homepage -> BrowseHomePage(
-                                browseHomePageManga = browseScreenState.value.homePageManga,
-                                shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                titleClick = homeScreenTitleClick,
-                                onClick = { id -> openManga(id) },
-                                onLongClick = ::mangaLongClick,
-                                contentPadding = recyclerContentPadding,
-                            )
-                            BrowseScreenType.Follows -> {
-                                BrowseFollowsPage(
-                                    displayMangaHolder = browseScreenState.value.displayMangaHolder,
-                                    isList = browseScreenState.value.isList,
-                                    isComfortableGrid = browseScreenState.value.isComfortableGrid,
-                                    outlineCovers = browseScreenState.value.outlineCovers,
-                                    rawColumnCount = browseScreenState.value.rawColumnCount,
-                                    contentPadding = recyclerContentPadding,
-                                    onClick = openManga,
+                        Crossfade(targetState = browseScreenType) { type ->
+                            when (type) {
+                                BrowseScreenType.Homepage -> BrowseHomePage(
+                                    browseHomePageManga = browseScreenState.value.homePageManga,
+                                    shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                    titleClick = homeScreenTitleClick,
+                                    onClick = { id -> openManga(id) },
                                     onLongClick = ::mangaLongClick,
-                                )
-                            }
-
-                            BrowseScreenType.Other -> {
-                                BrowseOtherPage(
-                                    results = browseScreenState.value.otherResults,
                                     contentPadding = recyclerContentPadding,
-                                    onClick = otherClick,
                                 )
-                            }
+                                BrowseScreenType.Follows -> {
+                                    BrowseFollowsPage(
+                                        displayMangaHolder = browseScreenState.value.displayMangaHolder,
+                                        isList = browseScreenState.value.isList,
+                                        isComfortableGrid = browseScreenState.value.isComfortableGrid,
+                                        outlineCovers = browseScreenState.value.outlineCovers,
+                                        rawColumnCount = browseScreenState.value.rawColumnCount,
+                                        contentPadding = recyclerContentPadding,
+                                        onClick = openManga,
+                                        onLongClick = ::mangaLongClick,
+                                    )
+                                }
 
-                            BrowseScreenType.Filter -> {
-                                BrowseFilterPage(
-                                    displayMangaHolder = browseScreenState.value.displayMangaHolder,
-                                    isList = browseScreenState.value.isList,
-                                    isComfortableGrid = browseScreenState.value.isComfortableGrid,
-                                    outlineCovers = browseScreenState.value.outlineCovers,
-                                    rawColumnCount = browseScreenState.value.rawColumnCount,
-                                    pageLoading = browseScreenState.value.pageLoading,
-                                    lastPage = browseScreenState.value.endReached,
-                                    contentPadding = recyclerContentPadding,
-                                    onClick = openManga,
-                                    onLongClick = ::mangaLongClick,
-                                    loadNextPage = loadNextPage,
-                                )
+                                BrowseScreenType.Other -> {
+                                    BrowseOtherPage(
+                                        results = browseScreenState.value.otherResults,
+                                        contentPadding = recyclerContentPadding,
+                                        onClick = otherClick,
+                                    )
+                                }
+
+                                BrowseScreenType.Filter -> {
+                                    BrowseFilterPage(
+                                        displayMangaHolder = browseScreenState.value.displayMangaHolder,
+                                        isList = browseScreenState.value.isList,
+                                        isComfortableGrid = browseScreenState.value.isComfortableGrid,
+                                        outlineCovers = browseScreenState.value.outlineCovers,
+                                        rawColumnCount = browseScreenState.value.rawColumnCount,
+                                        pageLoading = browseScreenState.value.pageLoading,
+                                        lastPage = browseScreenState.value.endReached,
+                                        contentPadding = recyclerContentPadding,
+                                        onClick = openManga,
+                                        onLongClick = ::mangaLongClick,
+                                        loadNextPage = loadNextPage,
+                                    )
+                                }
+                                BrowseScreenType.None -> Unit
                             }
-                            BrowseScreenType.None -> Unit
                         }
                     }
 
