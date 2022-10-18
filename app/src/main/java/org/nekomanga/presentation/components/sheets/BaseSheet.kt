@@ -4,10 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -35,6 +37,7 @@ fun BaseSheet(
     minSheetHeightPercentage: Float = 0f,
     topPaddingAroundContent: Dp = 16.dp,
     bottomPaddingAroundContent: Dp = 16.dp,
+    contentPadding: PaddingValues = PaddingValues(),
     showHandle: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -49,22 +52,24 @@ fun BaseSheet(
                 .requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
             shape = RoundedCornerShape(Shapes.sheetRadius),
         ) {
-            if (showHandle) {
-                Gap(16.dp)
-                Box(
-                    modifier = Modifier
-                        .width(50.dp)
-                        .height(4.dp)
-                        .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast), CircleShape)
-                        .align(Alignment.CenterHorizontally),
-                )
-            }
-
             Column(
                 modifier = Modifier
+                    .padding(contentPadding)
                     .navigationBarsPadding()
                     .imePadding(),
             ) {
+                if (showHandle) {
+                    Gap(16.dp)
+                    Box(
+                        modifier = Modifier
+                            .width(50.dp)
+                            .height(4.dp)
+                            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast), CircleShape)
+                            .align(Alignment.CenterHorizontally),
+                    )
+                }
+
+
                 Gap(topPaddingAroundContent)
                 content()
                 Gap(bottomPaddingAroundContent)

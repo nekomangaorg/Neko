@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
@@ -53,7 +52,11 @@ fun BrowseHomePage(
 ) {
     val coverSize = (maxOf(LocalConfiguration.current.screenHeightDp, LocalConfiguration.current.screenWidthDp) / 5).dp
 
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth(),
+        contentPadding = contentPadding,
+    ) {
         items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga) }) { homePageManga ->
             val headerText = when (homePageManga.displayScreenType) {
                 is DisplayScreenType.LatestChapters -> stringResource(homePageManga.displayScreenType.titleRes)
@@ -63,7 +66,11 @@ fun BrowseHomePage(
             TextButton(
                 onClick = { titleClick(homePageManga.displayScreenType) },
             ) {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         text = headerText,
                         style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),

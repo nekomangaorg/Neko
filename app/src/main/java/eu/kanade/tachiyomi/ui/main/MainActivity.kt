@@ -1162,6 +1162,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.sideNav?.let { sideNav ->
             val controllers = (router.backstack.map { it?.controller } + extraController)
                 .filterNotNull()
+                .filterNot { it is BrowseComposeController }
                 .distinct()
             val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
             controllers.forEach { controller ->

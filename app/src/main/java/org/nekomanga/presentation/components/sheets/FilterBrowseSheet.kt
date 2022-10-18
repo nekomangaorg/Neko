@@ -13,6 +13,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
@@ -72,7 +72,7 @@ import org.nekomanga.presentation.screens.defaultThemeColorState
 @Composable
 fun FilterBrowseSheet(
     filters: DexFilters,
-    bottomPadding: Dp = 16.dp,
+    contentPadding: PaddingValues = PaddingValues(),
     filterClick: () -> Unit,
     saveClick: (String) -> Unit,
     resetClick: () -> Unit,
@@ -86,7 +86,7 @@ fun FilterBrowseSheet(
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
-        BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .75f, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = 0.dp) {
+        BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .75f, maxSheetHeightPercentage = 1f, contentPadding = contentPadding) {
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
 
@@ -278,8 +278,7 @@ fun FilterBrowseSheet(
 
             Row(
                 modifier = paddingModifier
-                    .fillMaxWidth()
-                    .padding(bottom = bottomPadding),
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(

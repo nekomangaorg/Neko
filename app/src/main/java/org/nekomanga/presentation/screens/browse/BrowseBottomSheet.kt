@@ -1,10 +1,10 @@
 package org.nekomanga.presentation.screens.browse
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
 import org.nekomanga.domain.category.CategoryItem
@@ -29,7 +29,7 @@ fun BrowseBottomSheet(
     currentScreen: BrowseBottomSheetScreen,
     browseScreenState: State<BrowseScreenState>,
     addNewCategory: (String) -> Unit,
-    bottomPadding: Dp,
+    contentPadding: PaddingValues,
     filterActions: FilterActions,
     closeSheet: () -> Unit,
 ) {
@@ -41,7 +41,7 @@ fun BrowseBottomSheet(
         is BrowseBottomSheetScreen.CategoriesSheet -> EditCategorySheet(
             addingToLibrary = currentScreen.addingToLibrary,
             categories = browseScreenState.value.categories,
-            bottomPadding = bottomPadding,
+            contentPadding = contentPadding,
             cancelClick = closeSheet,
             addNewCategory = addNewCategory,
             confirmClicked = currentScreen.setCategories,
@@ -49,7 +49,7 @@ fun BrowseBottomSheet(
         is BrowseBottomSheetScreen.FilterSheet -> FilterBrowseSheet(
             filters = browseScreenState.value.filters,
             savedFilters = browseScreenState.value.savedFilters,
-            bottomPadding = bottomPadding,
+            contentPadding = contentPadding,
             defaultContentRatings = browseScreenState.value.defaultContentRatings,
             filterClick = {
                 keyboardController?.hide()

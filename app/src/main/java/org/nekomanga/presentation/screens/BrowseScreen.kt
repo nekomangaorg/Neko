@@ -7,11 +7,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -34,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -42,7 +45,6 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
 import eu.kanade.tachiyomi.ui.source.browse.FilterActions
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
-import eu.kanade.tachiyomi.util.system.SideNavMode
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
@@ -53,6 +55,8 @@ import org.nekomanga.presentation.components.ListGridActionButton
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
+import org.nekomanga.presentation.components.rememberNavBarPadding
+import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
 import org.nekomanga.presentation.screens.browse.BrowseFilterPage
@@ -104,18 +108,7 @@ fun BrowseScreen(
         scope.launch { sheetState.hide() }
     }
 
-    val sidePadding = remember(windowSizeClass.widthSizeClass) {
-        when (browseScreenState.value.sideNavMode) {
-            SideNavMode.NEVER -> PaddingValues()
-            SideNavMode.ALWAYS -> Padding.sideAppBarPaddingValues
-            SideNavMode.DEFAULT -> {
-                when (windowSizeClass.widthSizeClass) {
-                    WindowWidthSizeClass.Expanded -> Padding.sideAppBarPaddingValues
-                    else -> PaddingValues()
-                }
-            }
-        }
-    }
+    val navBarPadding = rememberNavBarPadding(windowSizeClass, browseScreenState.value.sideNavMode)
 
     // set the current sheet to null when bottom sheet is closed
     if (!sheetState.isVisible) {
@@ -139,7 +132,7 @@ fun BrowseScreen(
                         currentScreen = currentSheet,
                         browseScreenState = browseScreenState,
                         addNewCategory = addNewCategory,
-                        bottomPadding = Padding.bottomAppBarPaddingValues.calculateBottomPadding(),
+                        contentPadding = navBarPadding,
                         closeSheet = { scope.launch { sheetState.hide() } },
                         filterActions = filterActions,
                     )
@@ -148,7 +141,6 @@ fun BrowseScreen(
         },
     ) {
         NekoScaffold(
-            modifier = Modifier.padding(sidePadding),
             title = stringResource(id = R.string.browse),
             onNavigationIconClicked = onBackPress,
             actions = {
@@ -163,7 +155,8 @@ fun BrowseScreen(
             },
         ) { incomingContentPadding ->
 
-            val recyclerContentPadding = PaddingValues(top = incomingContentPadding.calculateTopPadding(), bottom = 48.dp)
+            val recyclerContentPadding =
+                PaddingValues(top = incomingContentPadding.calculateTopPadding(), bottom = Padding.navBarSize + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
 
             val haptic = LocalHapticFeedback.current
             fun mangaLongClick(displayManga: DisplayManga) {
@@ -188,113 +181,111 @@ fun BrowseScreen(
             }
 
 
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(Padding.bottomAppBarPaddingValues),
+            Box(
+                modifier = Modifier
+                    .padding(bottom = navBarPadding.calculateBottomPadding())
+                    .fillMaxSize(),
             ) {
 
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-
-                    if (browseScreenState.value.initialLoading) {
-                        Loading(
-                            Modifier
-                                .zIndex(1f)
-                                .padding(8.dp)
-                                .padding(recyclerContentPadding)
-                                .align(Alignment.TopCenter),
-                        )
-                    } else if (browseScreenState.value.error != null) {
-                        EmptyScreen(
-                            icon = Icons.Default.ErrorOutline,
-                            iconSize = 176.dp,
-                            message = browseScreenState.value.error,
-                            actions = persistentListOf(Action(R.string.retry, retryClick)),
-                            contentPadding = recyclerContentPadding,
-                        )
-                    } else {
-                        Crossfade(targetState = browseScreenType) { type ->
-                            when (type) {
-                                BrowseScreenType.Homepage -> BrowseHomePage(
-                                    browseHomePageManga = browseScreenState.value.homePageManga,
-                                    shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                    titleClick = homeScreenTitleClick,
-                                    onClick = { id -> openManga(id) },
-                                    onLongClick = ::mangaLongClick,
+                if (browseScreenState.value.initialLoading) {
+                    Loading(
+                        Modifier
+                            .zIndex(1f)
+                            .padding(8.dp)
+                            .padding(recyclerContentPadding)
+                            .align(Alignment.TopCenter),
+                    )
+                } else if (browseScreenState.value.error != null) {
+                    EmptyScreen(
+                        icon = Icons.Default.ErrorOutline,
+                        iconSize = 176.dp,
+                        message = browseScreenState.value.error,
+                        actions = persistentListOf(Action(R.string.retry, retryClick)),
+                        contentPadding = recyclerContentPadding,
+                    )
+                } else {
+                    Crossfade(targetState = browseScreenType) { type ->
+                        when (type) {
+                            BrowseScreenType.Homepage -> BrowseHomePage(
+                                browseHomePageManga = browseScreenState.value.homePageManga,
+                                shouldOutlineCover = browseScreenState.value.outlineCovers,
+                                titleClick = homeScreenTitleClick,
+                                onClick = { id -> openManga(id) },
+                                onLongClick = ::mangaLongClick,
+                                contentPadding = recyclerContentPadding,
+                            )
+                            BrowseScreenType.Follows -> {
+                                BrowseFollowsPage(
+                                    displayMangaHolder = browseScreenState.value.displayMangaHolder,
+                                    isList = browseScreenState.value.isList,
+                                    isComfortableGrid = browseScreenState.value.isComfortableGrid,
+                                    outlineCovers = browseScreenState.value.outlineCovers,
+                                    rawColumnCount = browseScreenState.value.rawColumnCount,
                                     contentPadding = recyclerContentPadding,
+                                    onClick = openManga,
+                                    onLongClick = ::mangaLongClick,
                                 )
-                                BrowseScreenType.Follows -> {
-                                    BrowseFollowsPage(
-                                        displayMangaHolder = browseScreenState.value.displayMangaHolder,
-                                        isList = browseScreenState.value.isList,
-                                        isComfortableGrid = browseScreenState.value.isComfortableGrid,
-                                        outlineCovers = browseScreenState.value.outlineCovers,
-                                        rawColumnCount = browseScreenState.value.rawColumnCount,
-                                        contentPadding = recyclerContentPadding,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
-                                    )
-                                }
-
-                                BrowseScreenType.Other -> {
-                                    BrowseOtherPage(
-                                        results = browseScreenState.value.otherResults,
-                                        contentPadding = recyclerContentPadding,
-                                        onClick = otherClick,
-                                    )
-                                }
-
-                                BrowseScreenType.Filter -> {
-                                    BrowseFilterPage(
-                                        displayMangaHolder = browseScreenState.value.displayMangaHolder,
-                                        isList = browseScreenState.value.isList,
-                                        isComfortableGrid = browseScreenState.value.isComfortableGrid,
-                                        outlineCovers = browseScreenState.value.outlineCovers,
-                                        rawColumnCount = browseScreenState.value.rawColumnCount,
-                                        pageLoading = browseScreenState.value.pageLoading,
-                                        lastPage = browseScreenState.value.endReached,
-                                        contentPadding = recyclerContentPadding,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
-                                        loadNextPage = loadNextPage,
-                                    )
-                                }
-                                BrowseScreenType.None -> Unit
                             }
+
+                            BrowseScreenType.Other -> {
+                                BrowseOtherPage(
+                                    results = browseScreenState.value.otherResults,
+                                    contentPadding = recyclerContentPadding,
+                                    onClick = otherClick,
+                                )
+                            }
+
+                            BrowseScreenType.Filter -> {
+                                BrowseFilterPage(
+                                    displayMangaHolder = browseScreenState.value.displayMangaHolder,
+                                    isList = browseScreenState.value.isList,
+                                    isComfortableGrid = browseScreenState.value.isComfortableGrid,
+                                    outlineCovers = browseScreenState.value.outlineCovers,
+                                    rawColumnCount = browseScreenState.value.rawColumnCount,
+                                    pageLoading = browseScreenState.value.pageLoading,
+                                    lastPage = browseScreenState.value.endReached,
+                                    contentPadding = recyclerContentPadding,
+                                    onClick = openManga,
+                                    onLongClick = ::mangaLongClick,
+                                    loadNextPage = loadNextPage,
+                                )
+                            }
+                            BrowseScreenType.None -> Unit
                         }
                     }
-
-                    ScreenTypeHeader(
-                        screenType = browseScreenType,
-                        modifier = Modifier.align(Alignment.BottomStart),
-                        isLoggedIn = browseScreenState.value.isLoggedIn,
-                        screenTypeClick = { newScreenType: BrowseScreenType ->
-
-                            val sameScreen = browseScreenType == newScreenType
-                            val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
-
-                            if (sameScreen && !newIsFilterScreen) {
-                                //do nothing
-                            } else if ((sameScreen && newIsFilterScreen) || newIsFilterScreen) {
-                                openSheet(
-                                    BrowseBottomSheetScreen.FilterSheet(),
-                                )
-                            } else {
-                                changeScreenType(newScreenType)
-                            }
-
-                        },
-                    )
                 }
+                ScreenTypeFooter(
+                    screenType = browseScreenType,
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .conditional(navBarPadding.calculateLeftPadding(LocalLayoutDirection.current) != 0.dp) {
+                            this.navigationBarsPadding()
+                        },
+                    isLoggedIn = browseScreenState.value.isLoggedIn,
+                    screenTypeClick = { newScreenType: BrowseScreenType ->
+                        scope.launch { sheetState.hide() }
+                        val sameScreen = browseScreenType == newScreenType
+                        val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
+
+                        if (sameScreen && !newIsFilterScreen) {
+                            //do nothing
+                        } else if (newIsFilterScreen) {
+                            openSheet(
+                                BrowseBottomSheetScreen.FilterSheet(),
+                            )
+                        } else {
+                            changeScreenType(newScreenType)
+                        }
+
+                    },
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ScreenTypeHeader(screenType: BrowseScreenType, modifier: Modifier = Modifier, isLoggedIn: Boolean, screenTypeClick: (BrowseScreenType) -> Unit) {
+private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = Modifier, isLoggedIn: Boolean, screenTypeClick: (BrowseScreenType) -> Unit) {
     LazyRow(
         modifier = modifier
             .fillMaxWidth()

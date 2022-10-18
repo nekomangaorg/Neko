@@ -11,8 +11,8 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -50,7 +50,8 @@ fun NekoScaffold(
         systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
     }
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
         topBar =
         {
@@ -82,12 +83,7 @@ private fun TitleAndSubtitleTopAppBar(
     actions: @Composable() (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    SmallTopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = color,
-            scrolledContainerColor = color,
-        ),
-        modifier = Modifier.statusBarsPadding(),
+    TopAppBar(
         title = {
             Column {
                 Text(
@@ -106,6 +102,7 @@ private fun TitleAndSubtitleTopAppBar(
                 }
             }
         },
+        modifier = Modifier.statusBarsPadding(),
         navigationIcon = {
             ToolTipIconButton(
                 toolTipLabel = navigationIconLabel,
@@ -114,6 +111,10 @@ private fun TitleAndSubtitleTopAppBar(
             )
         },
         actions = actions,
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = color,
+            scrolledContainerColor = color,
+        ),
         scrollBehavior = scrollBehavior,
     )
 }
@@ -127,13 +128,9 @@ private fun NoTitleTopAppBar(
     actions: @Composable() (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    SmallTopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = color,
-            scrolledContainerColor = color,
-        ),
-        modifier = Modifier.statusBarsPadding(),
+    TopAppBar(
         title = {},
+        modifier = Modifier.statusBarsPadding(),
         navigationIcon = {
             ToolTipIconButton(
                 toolTipLabel = navigationIconLabel,
@@ -142,6 +139,10 @@ private fun NoTitleTopAppBar(
             )
         },
         actions = actions,
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = color,
+            scrolledContainerColor = color,
+        ),
         scrollBehavior = scrollBehavior,
     )
 }
