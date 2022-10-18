@@ -50,6 +50,7 @@ fun BrowseBottomSheet(
             filters = browseScreenState.value.filters,
             savedFilters = browseScreenState.value.savedFilters,
             bottomPadding = bottomPadding,
+            defaultContentRatings = browseScreenState.value.defaultContentRatings,
             filterClick = {
                 keyboardController?.hide()
                 closeSheet()

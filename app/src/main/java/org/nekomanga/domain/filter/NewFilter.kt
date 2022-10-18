@@ -19,13 +19,12 @@ data class DexFilters(
     val statuses: List<NewFilter.Status> = MangaStatus.getMangaDexStatus().map { NewFilter.Status(it, false) },
     val tags: List<NewFilter.Tag> = MangaTag.values().map { NewFilter.Tag(it, ToggleableState.Off) },
     val sort: List<NewFilter.Sort> = NewFilter.Sort.getSortList(),
-    val hasAvailableChapters: NewFilter.HasAvailableChapters = NewFilter.HasAvailableChapters(false),
+    val hasAvailableChapters: NewFilter.HasAvailableChapters = NewFilter.HasAvailableChapters(),
     val tagInclusionMode: NewFilter.TagInclusionMode = NewFilter.TagInclusionMode(),
     val tagExclusionMode: NewFilter.TagExclusionMode = NewFilter.TagExclusionMode(),
     val authorId: NewFilter.AuthorId = NewFilter.AuthorId(),
     val groupId: NewFilter.GroupId = NewFilter.GroupId(),
-
-    )
+)
 
 enum class TagMode(val key: String) {
     And(MdConstants.SearchParameters.TagMode.and),
@@ -53,7 +52,7 @@ sealed class NewFilter {
     data class Tag(val tag: MangaTag, val state: ToggleableState) : NewFilter()
 
     @kotlinx.serialization.Serializable
-    data class HasAvailableChapters(val state: Boolean) : NewFilter()
+    data class HasAvailableChapters(val state: Boolean = false) : NewFilter()
 
     @kotlinx.serialization.Serializable
     data class TagInclusionMode(val mode: TagMode = TagMode.And) : NewFilter()

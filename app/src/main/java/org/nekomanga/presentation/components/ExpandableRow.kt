@@ -13,11 +13,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ExpandableRow(rowText: String, isExpanded: Boolean, disabled: Boolean, onClick: () -> Unit) {
+fun ExpandableRow(rowText: String, isExpanded: Boolean, disabled: Boolean, textColor: Color = MaterialTheme.colorScheme.onSurface, onClick: () -> Unit) {
     val focusManager = LocalFocusManager.current
     Row(
         modifier = Modifier
@@ -34,7 +35,7 @@ fun ExpandableRow(rowText: String, isExpanded: Boolean, disabled: Boolean, onCli
         Text(
             text = rowText,
             style = MaterialTheme.typography.bodyLarge,
-            color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
+            color = if (!disabled) textColor else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
         )
         val icon = when (isExpanded) {
             true -> Icons.Default.ExpandLess
@@ -43,7 +44,7 @@ fun ExpandableRow(rowText: String, isExpanded: Boolean, disabled: Boolean, onCli
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
+            tint = if (!disabled) textColor else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
         )
     }
 }

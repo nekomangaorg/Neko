@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.category.CategoryItem
@@ -30,6 +31,7 @@ data class BrowseScreenState(
     val rawColumnCount: Float,
     val promptForCategories: Boolean,
     val filters: DexFilters,
+    val defaultContentRatings: ImmutableSet<String>,
     val handledIncomingQuery: Boolean = false,
     val savedFilters: ImmutableList<BrowseFilterImpl> = persistentListOf(),
     val categories: ImmutableList<CategoryItem> = persistentListOf(),

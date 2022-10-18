@@ -18,6 +18,7 @@ import java.util.Date
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +58,7 @@ class BrowseComposePresenter(
             rawColumnCount = preferences.gridSize().get(),
             promptForCategories = preferences.defaultCategory() == -1,
             filters = createInitialDexFilter(incomingQuery),
+            defaultContentRatings = preferences.contentRatingSelections().toImmutableSet(),
             screenType = BrowseScreenType.Homepage,
         ),
     )
@@ -64,7 +66,7 @@ class BrowseComposePresenter(
 
     private fun createInitialDexFilter(incomingQuery: String): DexFilters {
         val enabledContentRatings = preferences.contentRatingSelections()
-        val contentRatings = MangaContentRating.getOrdered().map { NewFilter.ContentRating(it, enabledContentRatings.contains(it.key)) }
+        val contentRatings = MangaContentRating.getOrdered().map { NewFilter.ContentRating(it, enabledContentRatings.contains(it.key)) }.toImmutableList()
 
         return DexFilters(
             query = NewFilter.Query(incomingQuery, QueryType.Title),
@@ -132,7 +134,6 @@ class BrowseComposePresenter(
         }
 
         updateBrowseFilters(true)
-
 
         presenterScope.launch {
             if (browseScreenState.value.promptForCategories) {
@@ -413,7 +414,12 @@ class BrowseComposePresenter(
             val updatedFilters = when (newFilter) {
                 is NewFilter.ContentRating -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.contentRatings, { it.rating == newFilter.rating }, newFilter)
-                    browseScreenState.value.filters.copy(contentRatings = list)
+                    if (list.none { it.state }) {
+                        val default = lookupAndReplaceEntry(list, { it.rating == MangaContentRating.Safe }, NewFilter.ContentRating(MangaContentRating.Safe, true))
+                        browseScreenState.value.filters.copy(contentRatings = default)
+                    } else {
+                        browseScreenState.value.filters.copy(contentRatings = list)
+                    }
                 }
                 is NewFilter.OriginalLanguage -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.originalLanguage, { it.language == newFilter.language }, newFilter)

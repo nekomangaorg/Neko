@@ -48,8 +48,12 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
+import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.util.lang.isUUID
 import jp.wasabeef.gap.Gap
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.nekomanga.domain.filter.DexFilters
@@ -76,7 +80,8 @@ fun FilterBrowseSheet(
     filterDefaultClick: (String, Boolean) -> Unit,
     loadFilter: (BrowseFilterImpl) -> Unit,
     filterChanged: (NewFilter) -> Unit,
-    savedFilters: List<BrowseFilterImpl>,
+    defaultContentRatings: ImmutableSet<String>,
+    savedFilters: ImmutableList<BrowseFilterImpl>,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
@@ -130,44 +135,48 @@ fun FilterBrowseSheet(
             ) {
 
                 FilterRow(
-                    items = filters.originalLanguage,
+                    items = filters.originalLanguage.toImmutableList(),
                     expanded = originalLanguageExpanded,
                     disabled = disabled,
                     headerClicked = { originalLanguageExpanded = !originalLanguageExpanded },
                     headerRes = R.string.original_language,
+                    anyEnabled = filters.originalLanguage.any { it.state },
                     onClick = { originalLanguage -> filterChanged(originalLanguage.copy(state = !originalLanguage.state)) },
                     selected = { originalLanguage -> originalLanguage.state },
                     name = { originalLanguage -> originalLanguage.language.prettyPrint },
                 )
 
                 FilterRow(
-                    items = filters.contentRatings,
+                    items = filters.contentRatings.toImmutableList(),
                     expanded = contentRatingExpanded,
                     disabled = disabled,
                     headerClicked = { contentRatingExpanded = !contentRatingExpanded },
                     headerRes = R.string.content_rating,
+                    anyEnabled = filters.contentRatings.any { (it.rating.key in defaultContentRatings && !it.state) || it.rating.key !in defaultContentRatings && it.state },
                     onClick = { rating -> filterChanged(rating.copy(state = !rating.state)) },
                     selected = { rating -> rating.state },
                     nameRes = { rating -> rating.rating.nameRes },
                 )
 
                 FilterRow(
-                    items = filters.publicationDemographics,
+                    items = filters.publicationDemographics.toImmutableList(),
                     expanded = publicationDemographicExpanded,
                     disabled = disabled,
                     headerClicked = { publicationDemographicExpanded = !publicationDemographicExpanded },
                     headerRes = R.string.publication_demographic,
+                    anyEnabled = filters.publicationDemographics.any { it.state },
                     onClick = { demo -> filterChanged(demo.copy(state = !demo.state)) },
                     selected = { demo -> demo.state },
                     nameRes = { demo -> demo.demographic.nameRes },
                 )
 
                 FilterRow(
-                    items = filters.statuses,
+                    items = filters.statuses.toImmutableList(),
                     expanded = statusExpanded,
                     disabled = disabled,
                     headerClicked = { statusExpanded = !statusExpanded },
                     headerRes = R.string.status,
+                    anyEnabled = filters.statuses.any { it.state },
                     onClick = { status -> filterChanged(status.copy(state = !status.state)) },
                     selected = { status -> status.state },
                     nameRes = { status -> status.status.statusRes },
@@ -175,22 +184,24 @@ fun FilterBrowseSheet(
 
 
                 FilterRow(
-                    items = filters.sort,
+                    items = filters.sort.toImmutableList(),
                     expanded = sortExpanded,
                     disabled = disabled,
                     headerClicked = { sortExpanded = !sortExpanded },
                     headerRes = R.string.sort,
+                    anyEnabled = filters.sort.any { it.state && it.sort != MdSort.Best },
                     onClick = { sort -> filterChanged(sort.copy(state = !sort.state)) },
                     selected = { sort -> sort.state },
                     name = { sort -> sort.sort.displayName },
                 )
 
                 FilterTriStateRow(
-                    items = filters.tags,
+                    items = filters.tags.toImmutableList(),
                     expanded = tagExpanded,
                     disabled = disabled,
                     headerClicked = { tagExpanded = !tagExpanded },
                     headerRes = R.string.tag,
+                    anyEnabled = filters.tags.any { it.state != ToggleableState.Off },
                     toggleState = { newState, tag -> filterChanged(tag.copy(state = newState)) },
                     selected = { tag -> tag.state },
                     name = { tag -> tag.tag.prettyPrint },
@@ -202,6 +213,12 @@ fun FilterBrowseSheet(
                     themeColorState = themeColorState,
                     onHeaderClick = { otherExpanded = !otherExpanded },
                     filters = filters,
+                    anyEnabled = (filters.tagExclusionMode != NewFilter.TagExclusionMode() ||
+                        filters.tagInclusionMode != NewFilter.TagInclusionMode() ||
+                        filters.hasAvailableChapters != NewFilter.HasAvailableChapters() ||
+                        filters.authorId.uuid.isNotBlank() ||
+                        filters.groupId.uuid.isNotBlank()),
+
                     filterChanged = filterChanged,
                     filterClick = filterClick,
                 )
@@ -293,9 +310,10 @@ fun FilterBrowseSheet(
 
 @Composable
 private fun <T> FilterRow(
-    items: List<T>,
+    items: ImmutableList<T>,
     expanded: Boolean,
     disabled: Boolean,
+    anyEnabled: Boolean,
     headerClicked: () -> Unit,
     @StringRes headerRes: Int,
     onClick: (T) -> Unit,
@@ -312,6 +330,7 @@ private fun <T> FilterRow(
             isExpanded = expanded,
             disabled = disabled,
             onClick = headerClicked,
+            textColor = if (anyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             rowText = stringResource(id = headerRes),
         )
 
@@ -344,10 +363,11 @@ private fun <T> FilterRow(
 @Composable
 
 private fun <T> FilterTriStateRow(
-    items: List<T>,
+    items: ImmutableList<T>,
     expanded: Boolean,
     disabled: Boolean,
     headerClicked: () -> Unit,
+    anyEnabled: Boolean,
     @StringRes headerRes: Int,
     toggleState: (ToggleableState, T) -> Unit,
     selected: (T) -> ToggleableState,
@@ -364,6 +384,7 @@ private fun <T> FilterTriStateRow(
             isExpanded = expanded,
             disabled = disabled,
             onClick = headerClicked,
+            textColor = if (anyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             rowText = stringResource(id = headerRes),
         )
 
@@ -399,6 +420,7 @@ fun OtherRow(
     disabled: Boolean,
     themeColorState: ThemeColorState,
     onHeaderClick: () -> Unit,
+    anyEnabled: Boolean,
     filters: DexFilters,
     filterChanged: (NewFilter) -> Unit,
     filterClick: () -> Unit,
@@ -412,6 +434,7 @@ fun OtherRow(
             isExpanded = isExpanded,
             disabled = disabled,
             onClick = onHeaderClick,
+            textColor = if (anyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             rowText = stringResource(id = R.string.other),
         )
         AnimatedVisibility(visible = isExpanded, enter = slideEnter(), exit = slideExit()) {
@@ -503,7 +526,7 @@ fun OtherRow(
 @Composable
 fun SavedFilters(
     visible: Boolean,
-    savedFilters: List<BrowseFilterImpl>,
+    savedFilters: ImmutableList<BrowseFilterImpl>,
     nameOfEnabledFilter: String,
     themeColorState: ThemeColorState,
     loadFilter: (BrowseFilterImpl) -> Unit,
