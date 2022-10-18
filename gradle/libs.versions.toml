@@ -1,5 +1,5 @@
 [versions]
-aboutlib_version = "10.5.0"
+aboutlib_version = "10.5.1"
 chucker_version = "3.5.2"
 coil_version = "2.2.2"
 fast_adapter_version = "5.7.0"
