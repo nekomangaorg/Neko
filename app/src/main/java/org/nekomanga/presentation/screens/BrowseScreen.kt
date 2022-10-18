@@ -19,7 +19,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -37,7 +36,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenState
 import eu.kanade.tachiyomi.ui.source.browse.BrowseScreenType
@@ -46,25 +44,20 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.FilterChipWrapper
 import org.nekomanga.presentation.components.ListGridActionButton
 import org.nekomanga.presentation.components.Loading
-import org.nekomanga.presentation.components.MangaGrid
-import org.nekomanga.presentation.components.MangaGridWithHeader
-import org.nekomanga.presentation.components.MangaList
-import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.ResultList
 import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
-import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
+import org.nekomanga.presentation.screens.browse.BrowseFilterPage
+import org.nekomanga.presentation.screens.browse.BrowseFollowsPage
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
+import org.nekomanga.presentation.screens.browse.BrowseOtherPage
 import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
 
@@ -169,7 +162,7 @@ fun BrowseScreen(
             },
         ) { incomingContentPadding ->
 
-            val recyclerContentPadding = PaddingValues(top = incomingContentPadding.calculateTopPadding(), bottom = 24.dp)
+            val recyclerContentPadding = PaddingValues(top = incomingContentPadding.calculateTopPadding(), bottom = 48.dp)
 
             val haptic = LocalHapticFeedback.current
             fun mangaLongClick(displayManga: DisplayManga) {
@@ -232,93 +225,40 @@ fun BrowseScreen(
                                 contentPadding = recyclerContentPadding,
                             )
                             BrowseScreenType.Follows -> {
-                                if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
-                                    NoResults(recyclerContentPadding)
-                                } else {
-                                    val groupedManga = remember(browseScreenState.value.displayMangaHolder) {
-                                        browseScreenState.value.displayMangaHolder.filteredDisplayManga
-                                            .groupBy { it.displayTextRes!! }
-                                            .map { entry ->
-                                                entry.key to entry.value.map { it.copy(displayTextRes = null) }.toImmutableList()
-                                            }.toMap()
-                                            .toImmutableMap()
-                                    }
-
-                                    if (browseScreenState.value.isList) {
-                                        MangaListWithHeader(
-                                            groupedManga = groupedManga,
-                                            shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                            onClick = openManga,
-                                            onLongClick = ::mangaLongClick,
-                                        )
-                                    } else {
-                                        MangaGridWithHeader(
-                                            groupedManga = groupedManga,
-                                            shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                            columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
-                                            isComfortable = browseScreenState.value.isComfortableGrid,
-                                            onClick = openManga,
-                                            onLongClick = ::mangaLongClick,
-                                        )
-                                    }
-                                }
+                                BrowseFollowsPage(
+                                    displayMangaHolder = browseScreenState.value.displayMangaHolder,
+                                    isList = browseScreenState.value.isList,
+                                    isComfortableGrid = browseScreenState.value.isComfortableGrid,
+                                    outlineCovers = browseScreenState.value.outlineCovers,
+                                    rawColumnCount = browseScreenState.value.rawColumnCount,
+                                    contentPadding = recyclerContentPadding,
+                                    onClick = openManga,
+                                    onLongClick = ::mangaLongClick,
+                                )
                             }
 
                             BrowseScreenType.Other -> {
-                                if (browseScreenState.value.otherResults.isEmpty()) {
-                                    EmptyScreen(
-                                        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-                                        iconSize = 176.dp,
-                                        message = stringResource(id = R.string.no_results_found),
-                                    )
-                                } else {
-                                    ResultList(
-                                        results = browseScreenState.value.otherResults,
-                                        onClick = otherClick,
-                                    )
-                                }
+                                BrowseOtherPage(
+                                    results = browseScreenState.value.otherResults,
+                                    contentPadding = recyclerContentPadding,
+                                    onClick = otherClick,
+                                )
                             }
 
                             BrowseScreenType.Filter -> {
-                                if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
-                                    EmptyScreen(
-                                        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-                                        iconSize = 176.dp,
-                                        message = stringResource(id = R.string.no_results_found),
-                                    )
-                                } else {
-                                    if (browseScreenState.value.isList) {
-                                        MangaList(
-                                            mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
-                                            shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                            onClick = openManga,
-                                            onLongClick = ::mangaLongClick,
-                                            lastPage = browseScreenState.value.endReached,
-                                            loadNextItems = loadNextPage,
-                                        )
-                                    } else {
-                                        MangaGrid(
-                                            mangaList = browseScreenState.value.displayMangaHolder.filteredDisplayManga,
-                                            shouldOutlineCover = browseScreenState.value.outlineCovers,
-                                            columns = numberOfColumns(rawValue = browseScreenState.value.rawColumnCount),
-                                            isComfortable = browseScreenState.value.isComfortableGrid,
-                                            onClick = openManga,
-                                            onLongClick = ::mangaLongClick,
-                                            lastPage = browseScreenState.value.endReached,
-                                            loadNextItems = loadNextPage,
-                                        )
-                                    }
-                                    if (browseScreenState.value.pageLoading) {
-                                        Box(Modifier.fillMaxSize()) {
-                                            LinearProgressIndicator(
-                                                modifier = Modifier
-                                                    .padding(bottom = 8.dp)
-                                                    .align(Alignment.BottomCenter)
-                                                    .fillMaxWidth(),
-                                            )
-                                        }
-                                    }
-                                }
+                                BrowseFilterPage(
+                                    displayMangaHolder = browseScreenState.value.displayMangaHolder,
+                                    isList = browseScreenState.value.isList,
+                                    isComfortableGrid = browseScreenState.value.isComfortableGrid,
+                                    outlineCovers = browseScreenState.value.outlineCovers,
+                                    rawColumnCount = browseScreenState.value.rawColumnCount,
+                                    pageLoading = browseScreenState.value.pageLoading,
+                                    lastPage = browseScreenState.value.endReached,
+                                    contentPadding = recyclerContentPadding,
+                                    onClick = openManga,
+                                    onLongClick = ::mangaLongClick,
+                                    loadNextPage = loadNextPage,
+                                )
                             }
                             BrowseScreenType.None -> Unit
                         }
@@ -349,16 +289,6 @@ fun BrowseScreen(
             }
         }
     }
-}
-
-@Composable
-private fun NoResults(contentPaddingValues: PaddingValues) {
-    EmptyScreen(
-        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-        iconSize = 176.dp,
-        message = stringResource(id = R.string.no_results_found),
-        contentPadding = contentPaddingValues,
-    )
 }
 
 @Composable
