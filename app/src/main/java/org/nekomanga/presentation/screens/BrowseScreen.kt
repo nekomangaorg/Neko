@@ -1,9 +1,9 @@
 package org.nekomanga.presentation.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.annotation.StringRes
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
@@ -20,12 +19,7 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -37,10 +31,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -57,13 +51,13 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.components.FilterChipWrapper
 import org.nekomanga.presentation.components.ListGridActionButton
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.MangaListWithHeader
-import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.ResultList
 import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
@@ -174,11 +168,8 @@ fun BrowseScreen(
                 )
             },
         ) { incomingContentPadding ->
-            val contentPadding =
-                PaddingValues(
-                    bottom = Padding.bottomAppBarPaddingValues.calculateBottomPadding(),
-                    top = incomingContentPadding.calculateTopPadding(),
-                )
+
+            val recyclerContentPadding = PaddingValues(top = incomingContentPadding.calculateTopPadding(), bottom = 24.dp)
 
             val haptic = LocalHapticFeedback.current
             fun mangaLongClick(displayManga: DisplayManga) {
@@ -202,40 +193,23 @@ fun BrowseScreen(
                 }
             }
 
+
             Column(
                 Modifier
-                    .fillMaxWidth()
-                    .padding(top = contentPadding.calculateTopPadding(), bottom = contentPadding.calculateBottomPadding()),
+                    .fillMaxSize()
+                    .padding(Padding.bottomAppBarPaddingValues),
             ) {
 
-                ScreenTypeHeader(
-                    screenType = browseScreenType,
-                    isLoggedIn = browseScreenState.value.isLoggedIn,
-                    screenTypeClick = { newScreenType: BrowseScreenType ->
-
-                        val sameScreen = browseScreenType == newScreenType
-                        val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
-
-                        if (sameScreen && !newIsFilterScreen) {
-                            //do nothing
-                        } else if ((sameScreen && newIsFilterScreen) || newIsFilterScreen) {
-                            openSheet(
-                                BrowseBottomSheetScreen.FilterSheet(),
-                            )
-                        } else {
-                            changeScreenType(newScreenType)
-                        }
-
-                    },
-                )
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
 
                     if (browseScreenState.value.initialLoading) {
                         Loading(
                             Modifier
                                 .zIndex(1f)
                                 .padding(8.dp)
-                                .padding(top = contentPadding.calculateTopPadding())
+                                .padding(recyclerContentPadding)
                                 .align(Alignment.TopCenter),
                         )
                     } else if (browseScreenState.value.error != null) {
@@ -244,7 +218,7 @@ fun BrowseScreen(
                             iconSize = 176.dp,
                             message = browseScreenState.value.error,
                             actions = persistentListOf(Action(R.string.retry, retryClick)),
-                            contentPadding = incomingContentPadding,
+                            contentPadding = recyclerContentPadding,
                         )
                     } else {
 
@@ -255,14 +229,11 @@ fun BrowseScreen(
                                 titleClick = homeScreenTitleClick,
                                 onClick = { id -> openManga(id) },
                                 onLongClick = ::mangaLongClick,
+                                contentPadding = recyclerContentPadding,
                             )
                             BrowseScreenType.Follows -> {
                                 if (browseScreenState.value.displayMangaHolder.allDisplayManga.isEmpty()) {
-                                    EmptyScreen(
-                                        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
-                                        iconSize = 176.dp,
-                                        message = stringResource(id = R.string.no_results_found),
-                                    )
+                                    NoResults(recyclerContentPadding)
                                 } else {
                                     val groupedManga = remember(browseScreenState.value.displayMangaHolder) {
                                         browseScreenState.value.displayMangaHolder.filteredDisplayManga
@@ -352,6 +323,28 @@ fun BrowseScreen(
                             BrowseScreenType.None -> Unit
                         }
                     }
+
+                    ScreenTypeHeader(
+                        screenType = browseScreenType,
+                        modifier = Modifier.align(Alignment.BottomStart),
+                        isLoggedIn = browseScreenState.value.isLoggedIn,
+                        screenTypeClick = { newScreenType: BrowseScreenType ->
+
+                            val sameScreen = browseScreenType == newScreenType
+                            val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
+
+                            if (sameScreen && !newIsFilterScreen) {
+                                //do nothing
+                            } else if ((sameScreen && newIsFilterScreen) || newIsFilterScreen) {
+                                openSheet(
+                                    BrowseBottomSheetScreen.FilterSheet(),
+                                )
+                            } else {
+                                changeScreenType(newScreenType)
+                            }
+
+                        },
+                    )
                 }
             }
         }
@@ -359,48 +352,52 @@ fun BrowseScreen(
 }
 
 @Composable
-private fun ScreenTypeHeader(screenType: BrowseScreenType, isLoggedIn: Boolean, screenTypeClick: (BrowseScreenType) -> Unit) {
-    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+private fun NoResults(contentPaddingValues: PaddingValues) {
+    EmptyScreen(
+        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
+        iconSize = 176.dp,
+        message = stringResource(id = R.string.no_results_found),
+        contentPadding = contentPaddingValues,
+    )
+}
+
+@Composable
+private fun ScreenTypeHeader(screenType: BrowseScreenType, modifier: Modifier = Modifier, isLoggedIn: Boolean, screenTypeClick: (BrowseScreenType) -> Unit) {
+    LazyRow(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color.Transparent),
+        horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically,
+    ) {
         item {
             Gap(8.dp)
         }
-        customChip(
-            isSelected = screenType == BrowseScreenType.Homepage,
-            onClick = { screenTypeClick(BrowseScreenType.Homepage) },
-            label = R.string.home_page,
-        )
-        if (isLoggedIn) {
-            customChip(
-                isSelected = screenType == BrowseScreenType.Follows,
-                onClick = { screenTypeClick(BrowseScreenType.Follows) },
-                label = R.string.follows,
+        item {
+            FilterChipWrapper(
+                selected = screenType == BrowseScreenType.Homepage,
+                alwaysElevated = true,
+                onClick = { screenTypeClick(BrowseScreenType.Homepage) },
+                name = stringResource(id = R.string.home_page),
             )
         }
-
-        customChip(
-            isSelected = screenType == BrowseScreenType.Filter,
-            onClick = { screenTypeClick(BrowseScreenType.Filter) },
-            label = R.string.filter,
-        )
-    }
-}
-
-private fun LazyListScope.customChip(isSelected: Boolean, onClick: () -> Unit, @StringRes label: Int) {
-    item(key = label) {
-        FilterChip(
-            selected = isSelected,
-            onClick = onClick,
-            shape = RoundedCornerShape(100),
-            label = { Text(text = stringResource(id = label), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-            colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-                selectedLabelColor = MaterialTheme.colorScheme.primary,
-            ),
-            border = FilterChipDefaults.filterChipBorder(
-                borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
-                selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            ),
-        )
+        if (isLoggedIn) {
+            item {
+                FilterChipWrapper(
+                    selected = screenType == BrowseScreenType.Follows,
+                    alwaysElevated = true,
+                    onClick = { screenTypeClick(BrowseScreenType.Follows) },
+                    name = stringResource(R.string.follows),
+                )
+            }
+        }
+        item {
+            FilterChipWrapper(
+                selected = screenType == BrowseScreenType.Filter,
+                alwaysElevated = true,
+                onClick = { screenTypeClick(BrowseScreenType.Filter) },
+                name = stringResource(R.string.filter),
+            )
+        }
     }
 }
 

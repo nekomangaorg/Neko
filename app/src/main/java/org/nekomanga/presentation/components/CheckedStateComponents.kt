@@ -54,9 +54,18 @@ fun CheckboxRow(
 }
 
 @Composable
-fun FilterChipWrapper(selected: Boolean, onClick: () -> Unit, name: String, labelStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) {
+fun FilterChipWrapper(
+    selected: Boolean,
+    onClick: () -> Unit,
+    name: String,
+    hideIcons: Boolean = false,
+    alwaysElevated: Boolean = false,
+    labelStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+) {
     TriStateFilterChip(
         state = ToggleableState(selected),
+        hideIcons = hideIcons,
+        alwaysElevated = alwaysElevated,
         toggleState = { _ -> onClick() }, name = name, labelTextStyle = labelStyle,
     )
 }

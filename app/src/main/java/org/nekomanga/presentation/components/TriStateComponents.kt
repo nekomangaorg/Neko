@@ -60,27 +60,33 @@ fun TriStateFilterChip(
     state: ToggleableState,
     toggleState: (ToggleableState) -> Unit,
     name: String,
+    hideIcons: Boolean = false,
+    alwaysElevated: Boolean = false,
     labelTextStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
 ) {
     FilterChip(
         selected = state == ToggleableState.On || state == ToggleableState.Indeterminate,
         onClick = { toggleStateIfAble(false, state, toggleState) },
         leadingIcon = {
-            if (state == ToggleableState.On) {
-                Icon(imageVector = Icons.Default.Check, contentDescription = null)
-            } else if (state == ToggleableState.Indeterminate) {
-                Icon(imageVector = Icons.Default.Remove, contentDescription = null)
+            if (!hideIcons) {
+                if (state == ToggleableState.On) {
+                    Icon(imageVector = Icons.Default.Check, contentDescription = null)
+                } else if (state == ToggleableState.Indeterminate) {
+                    Icon(imageVector = Icons.Default.Remove, contentDescription = null)
+                }
             }
         },
         shape = RoundedCornerShape(100),
         label = { Text(text = name, style = labelTextStyle) },
         colors = FilterChipDefaults.filterChipColors(
+            containerColor = if (alwaysElevated) MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) else MaterialTheme.colorScheme.surface,
+
             selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             selectedLabelColor = MaterialTheme.colorScheme.primary,
             selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
         ),
         border = FilterChipDefaults.filterChipBorder(
-            borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
+            borderColor = if (alwaysElevated) MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) else MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
             selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
         ),
     )
