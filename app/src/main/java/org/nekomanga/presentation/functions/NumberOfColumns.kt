@@ -14,6 +14,7 @@ import kotlin.math.roundToInt
 fun numberOfColumns(rawValue: Float): Int {
     val size = 1.5f.pow(rawValue)
     val trueSize = AutofitRecyclerView.MULTIPLE * ((size * 100 / AutofitRecyclerView.MULTIPLE).roundToInt()) / 100f
-    val math = (LocalConfiguration.current.screenWidthDp / trueSize / 100).roundToInt()
+    val dpWidth = (LocalConfiguration.current.screenWidthDp / 100f).roundToInt()
+    val math = (dpWidth / trueSize).roundToInt()
     return max(1, math)
 }
