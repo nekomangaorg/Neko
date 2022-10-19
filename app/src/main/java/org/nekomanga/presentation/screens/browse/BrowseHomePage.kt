@@ -4,7 +4,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -83,7 +82,7 @@ fun BrowseHomePage(
             LazyRow(
                 modifier = Modifier
                     .requiredHeight(coverSize + 60.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 item { Gap(Padding.smallHorizontalPadding) }
 
@@ -96,10 +95,9 @@ fun BrowseHomePage(
                                     .combinedClickable(
                                         onClick = { onClick(displayManga.mangaId) },
                                         onLongClick = { onLongClick(displayManga) },
-                                    )
-                                    .width(IntrinsicSize.Min),
+                                    ),
                             ) {
-                                Column {
+                                Column(modifier = Modifier.width(coverSize)) {
                                     MangaCover.Square.invoke(
                                         manga = displayManga,
                                         shouldOutlineCover = shouldOutlineCover,
