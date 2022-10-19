@@ -4,12 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -37,7 +35,6 @@ fun BaseSheet(
     minSheetHeightPercentage: Float = 0f,
     topPaddingAroundContent: Dp = 16.dp,
     bottomPaddingAroundContent: Dp = 16.dp,
-    contentPadding: PaddingValues = PaddingValues(),
     showHandle: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -54,7 +51,6 @@ fun BaseSheet(
         ) {
             Column(
                 modifier = Modifier
-                    .padding(contentPadding)
                     .navigationBarsPadding()
                     .imePadding(),
             ) {

@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,7 +12,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
@@ -72,7 +71,6 @@ import org.nekomanga.presentation.screens.defaultThemeColorState
 @Composable
 fun FilterBrowseSheet(
     filters: DexFilters,
-    contentPadding: PaddingValues = PaddingValues(),
     filterClick: () -> Unit,
     saveClick: (String) -> Unit,
     resetClick: () -> Unit,
@@ -82,11 +80,12 @@ fun FilterBrowseSheet(
     filterChanged: (NewFilter) -> Unit,
     defaultContentRatings: ImmutableSet<String>,
     savedFilters: ImmutableList<BrowseFilterImpl>,
+    bottomContentPadding: Dp = 16.dp,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
-        BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .75f, maxSheetHeightPercentage = 1f, contentPadding = contentPadding) {
+        BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .75f, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = bottomContentPadding) {
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
 
@@ -128,7 +127,7 @@ fun FilterBrowseSheet(
             }
 
             Column(
-                modifier = Modifier
+                modifier = paddingModifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .weight(weight = 1f, fill = false),
@@ -317,12 +316,12 @@ private fun <T> FilterRow(
     @StringRes headerRes: Int,
     onClick: (T) -> Unit,
     selected: (T) -> Boolean,
+    modifier: Modifier = Modifier,
     nameRes: ((T) -> Int)? = null,
     name: ((T) -> String)? = null,
 ) {
     Column(
-        modifier = Modifier
-            .animateContentSize()
+        modifier = modifier
             .fillMaxWidth(),
     ) {
         ExpandableRow(
@@ -370,13 +369,13 @@ private fun <T> FilterTriStateRow(
     @StringRes headerRes: Int,
     toggleState: (ToggleableState, T) -> Unit,
     selected: (T) -> ToggleableState,
+    modifier: Modifier = Modifier,
     nameRes: ((T) -> Int)? = null,
     name: ((T) -> String)? = null,
 ) {
 
     Column(
-        modifier = Modifier
-            .animateContentSize()
+        modifier = modifier
             .fillMaxWidth(),
     ) {
         ExpandableRow(
@@ -426,7 +425,6 @@ fun OtherRow(
 ) {
     Column(
         modifier = Modifier
-            .animateContentSize()
             .fillMaxWidth(),
     ) {
         ExpandableRow(

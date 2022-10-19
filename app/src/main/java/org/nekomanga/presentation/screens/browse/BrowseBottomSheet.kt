@@ -41,16 +41,16 @@ fun BrowseBottomSheet(
         is BrowseBottomSheetScreen.CategoriesSheet -> EditCategorySheet(
             addingToLibrary = currentScreen.addingToLibrary,
             categories = browseScreenState.value.categories,
-            contentPadding = contentPadding,
             cancelClick = closeSheet,
+            bottomContentPadding = contentPadding.calculateBottomPadding(),
             addNewCategory = addNewCategory,
             confirmClicked = currentScreen.setCategories,
         )
         is BrowseBottomSheetScreen.FilterSheet -> FilterBrowseSheet(
             filters = browseScreenState.value.filters,
             savedFilters = browseScreenState.value.savedFilters,
-            contentPadding = contentPadding,
             defaultContentRatings = browseScreenState.value.defaultContentRatings,
+            bottomContentPadding = contentPadding.calculateBottomPadding(),
             filterClick = {
                 keyboardController?.hide()
                 closeSheet()
