@@ -33,7 +33,7 @@ class MangaLife : ReducedHttpSource() {
 
     private lateinit var thumbnailUrl: String
 
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:SS Z", Locale.getDefault())
 
     suspend fun searchManga(query: String): List<SManga> {
         return withContext(Dispatchers.IO) {
@@ -107,8 +107,10 @@ class MangaLife : ReducedHttpSource() {
                         date_upload = runCatching {
                             when (chp.date.isEmpty()) {
                                 true -> 0L
-                                false -> dateFormat.parse("$chp.date +0600")?.time!!
+                                false -> dateFormat.parse("${chp.date} +0600")?.time!!
                             }
+                        }.onFailure {
+                            XLog.e(it)
                         }.getOrElse { 0L }
 
                         scanlator = this@MangaLife.name
