@@ -28,6 +28,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -38,7 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -350,13 +351,17 @@ private fun FooterFilterChip(
         shape = RoundedCornerShape(100),
         label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.secondary.compositeOver(MaterialTheme.colorScheme.surface),
-            labelColor = MaterialTheme.colorScheme.onSecondary,
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            labelColor = MaterialTheme.colorScheme.secondary,
             selectedContainerColor = MaterialTheme.colorScheme.secondary,
             selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
             selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondary,
         ),
-        border = null,
+        border = FilterChipDefaults.filterChipBorder(
+            borderColor = MaterialTheme.colorScheme.secondary,
+            selectedBorderColor = Color.Transparent,
+            borderWidth = 2.dp,
+        ),
     )
 }
 
