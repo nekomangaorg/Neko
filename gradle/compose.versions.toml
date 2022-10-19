@@ -1,7 +1,7 @@
 [versions]
 accompanist_version = "0.26.1-alpha"
-compose_version = "1.3.0-beta03"
-compose_material3_version = "1.0.0-beta03"
+compose_version = "1.3.0-rc01"
+compose_material3_version = "1.0.0-rc01"
 compose_compiler_version = "1.3.0"
 
 [libraries]
@@ -15,7 +15,7 @@ accompainist-webview = { module = "com.google.accompanist:accompanist-webview", 
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
-material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.19"
+material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.20"
 
 activity = "androidx.activity:activity-compose:1.6.0"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }

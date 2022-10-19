@@ -36,7 +36,7 @@
         <item name="colorPrimaryVariant">@color/outrun_dark_purple</item>
         <item name="colorSurface">@color/outrun_black</item>
         <item name="background">@color/outrun_black</item>
-        <item name="colorOnSecondary">@color/md_white_1000</item>
+        <item name="colorOnSecondary">@color/md_black_1000</item>
         <item name="colorOnUnreadBadge">@color/outrun_black</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
