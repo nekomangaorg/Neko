@@ -149,6 +149,7 @@ fun BrowseScreen(
         },
     ) {
         NekoScaffold(
+            incognitoMode = browseScreenState.value.incognitoMode,
             title = stringResource(id = R.string.browse),
             onNavigationIconClicked = onBackPress,
             actions = {

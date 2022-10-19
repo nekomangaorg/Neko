@@ -3,12 +3,15 @@ package org.nekomanga.presentation.components
 import ToolTipIconButton
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,6 +21,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -25,8 +29,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import eu.kanade.tachiyomi.R
+import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -35,6 +41,7 @@ fun NekoScaffold(
     onNavigationIconClicked: () -> Unit,
     modifier: Modifier = Modifier,
     themeColorState: ThemeColorState? = null,
+    incognitoMode: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
@@ -57,7 +64,7 @@ fun NekoScaffold(
         {
             CompositionLocalProvider(LocalRippleTheme provides (themeColorState?.rippleTheme ?: PrimaryColorRippleTheme)) {
                 if (subtitle.isEmpty() && title.isNotEmpty()) {
-                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
+                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, scrollBehavior)
                 } else if (title.isEmpty()) {
                     NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
                 } else {
@@ -155,6 +162,7 @@ private fun TitleOnlyTopAppBar(
     navigationIcon: ImageVector,
     onNavigationIconClicked: () -> Unit,
     actions: @Composable() (RowScope.() -> Unit),
+    incognitoMode: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     CenterAlignedTopAppBar(
@@ -164,12 +172,18 @@ private fun TitleOnlyTopAppBar(
         ),
         modifier = Modifier.statusBarsPadding(),
         title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (incognitoMode) {
+                    Icon(imageVector = Icons.Default.TripOrigin, contentDescription = null)
+                    Gap(8.dp)
+                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         },
         navigationIcon = {
             ToolTipIconButton(

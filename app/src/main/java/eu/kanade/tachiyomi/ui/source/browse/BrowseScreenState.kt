@@ -16,6 +16,7 @@ data class BrowseScreenState(
     val initialLoading: Boolean = true,
     val pageLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
+    val incognitoMode: Boolean = false,
     val screenType: BrowseScreenType = BrowseScreenType.Homepage,
     val displayMangaHolder: DisplayMangaHolder = DisplayMangaHolder(),
     val homePageManga: ImmutableList<HomePageManga> = persistentListOf(),

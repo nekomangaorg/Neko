@@ -52,6 +52,7 @@ class BrowseComposePresenter(
     private val _browseScreenState = MutableStateFlow(
         BrowseScreenState(
             isList = preferences.browseAsList().get(),
+            incognitoMode = preferences.incognitoMode().get(),
             showLibraryEntries = preferences.browseShowLibrary().get(),
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
