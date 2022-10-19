@@ -43,6 +43,7 @@ class BrowseComposeController(incomingQuery: String = "") : BaseComposeControlle
             retryClick = presenter::loadNextItems,
             otherClick = presenter::otherClick,
             changeScreenType = presenter::changeScreenType,
+            randomClick = presenter::randomManga,
         )
     }
 

@@ -289,6 +289,27 @@ class BrowseComposePresenter(
         }
     }
 
+    fun randomManga() {
+        presenterScope.launch {
+            _browseScreenState.update {
+                it.copy(
+                    initialLoading = true,
+                )
+            }
+            browseRepository.getRandomManga().onFailure { error ->
+                _browseScreenState.update {
+                    it.copy(initialLoading = false, error = error.message())
+                }
+            }.onSuccess { displayManga ->
+                _browseScreenState.update {
+                    it.copy(initialLoading = false)
+                }
+                controller?.openManga(displayManga.mangaId)
+            }
+
+        }
+    }
+
     fun toggleFavorite(mangaId: Long, categoryItems: List<CategoryItem>) {
         presenterScope.launch {
             val editManga = db.getManga(mangaId).executeAsBlocking()!!

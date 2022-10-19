@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import java.util.Objects
@@ -47,6 +48,7 @@ fun BrowseHomePage(
     onClick: (Long) -> Unit,
     onLongClick: (DisplayManga) -> Unit,
     titleClick: (DisplayScreenType) -> Unit,
+    randomClick: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
 ) {
     val coverSize = (maxOf(LocalConfiguration.current.screenHeightDp, LocalConfiguration.current.screenWidthDp) / 5).dp
@@ -114,8 +116,25 @@ fun BrowseHomePage(
                         }
                     }
                 }
-
                 item { Gap(Padding.smallHorizontalPadding) }
+            }
+        }
+        item {
+            TextButton(
+                onClick = randomClick,
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.random_manga),
+                        style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                    )
+                    Gap(8.dp)
+                    Icon(imageVector = Icons.Default.ArrowForward, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                }
             }
         }
     }

@@ -88,6 +88,7 @@ fun BrowseScreen(
     filterActions: FilterActions,
     changeScreenType: (BrowseScreenType) -> Unit,
     homeScreenTitleClick: (DisplayScreenType) -> Unit,
+    randomClick: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState =
@@ -223,6 +224,7 @@ fun BrowseScreen(
                                 browseHomePageManga = browseScreenState.value.homePageManga,
                                 shouldOutlineCover = browseScreenState.value.outlineCovers,
                                 titleClick = homeScreenTitleClick,
+                                randomClick = randomClick,
                                 onClick = { id -> openManga(id) },
                                 onLongClick = ::mangaLongClick,
                                 contentPadding = recyclerContentPadding,

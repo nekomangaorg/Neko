@@ -30,6 +30,13 @@ class BrowseRepository(
 
     fun isLoggedIn() = mangaDex.isLogged()
 
+    suspend fun getRandomManga(): Result<DisplayManga, ResultError> {
+        return mangaDex.getRandomManga().andThen {
+            val displayManga = it.toDisplayManga(db, mangaDex.id)
+            Ok(displayManga)
+        }
+    }
+
     suspend fun getSearchPage(page: Int, filters: DexFilters): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.search2(page, filters)
             .andThen { mangaListPage ->
