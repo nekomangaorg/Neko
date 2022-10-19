@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -33,10 +32,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -56,6 +53,7 @@ import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
 import org.nekomanga.presentation.components.rememberNavBarPadding
+import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
@@ -108,7 +106,8 @@ fun BrowseScreen(
         scope.launch { sheetState.hide() }
     }
 
-    val navBarPadding = rememberNavBarPadding(windowSizeClass, browseScreenState.value.sideNavMode)
+    val sideNav = rememberSideBarVisible(windowSizeClass, browseScreenState.value.sideNavMode)
+    val navBarPadding = rememberNavBarPadding(sideNav)
 
     // set the current sheet to null when bottom sheet is closed
     if (!sheetState.isVisible) {
@@ -156,7 +155,10 @@ fun BrowseScreen(
         ) { incomingContentPadding ->
 
             val recyclerContentPadding =
-                PaddingValues(top = incomingContentPadding.calculateTopPadding(), bottom = Padding.navBarSize + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                PaddingValues(
+                    top = incomingContentPadding.calculateTopPadding(),
+                    bottom = Padding.navBarSize + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                )
 
             val haptic = LocalHapticFeedback.current
             fun mangaLongClick(displayManga: DisplayManga) {
@@ -183,7 +185,10 @@ fun BrowseScreen(
 
             Box(
                 modifier = Modifier
+                    //.conditional(!sideNav) {
+                    //need to add bottom padding since navbar doesnt hide
                     .padding(bottom = navBarPadding.calculateBottomPadding())
+                    //}
                     .fillMaxSize(),
             ) {
 
@@ -258,7 +263,7 @@ fun BrowseScreen(
                     screenType = browseScreenType,
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .conditional(navBarPadding.calculateLeftPadding(LocalLayoutDirection.current) != 0.dp) {
+                        .conditional(sideNav) {
                             this.navigationBarsPadding()
                         },
                     isLoggedIn = browseScreenState.value.isLoggedIn,
@@ -288,8 +293,7 @@ fun BrowseScreen(
 private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = Modifier, isLoggedIn: Boolean, screenTypeClick: (BrowseScreenType) -> Unit) {
     LazyRow(
         modifier = modifier
-            .fillMaxWidth()
-            .background(Color.Transparent),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically,
     ) {
         item {

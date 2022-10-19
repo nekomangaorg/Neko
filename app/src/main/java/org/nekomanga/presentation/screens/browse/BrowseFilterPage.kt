@@ -1,15 +1,14 @@
 package org.nekomanga.presentation.screens.browse
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.source.browse.DisplayMangaHolder
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.MangaGrid
@@ -59,11 +58,10 @@ fun BrowseFilterPage(
             )
         }
         if (pageLoading) {
-            Box(Modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize()) {
+                Spacer(modifier = Modifier.fillMaxHeight(.92f))
                 LinearProgressIndicator(
                     modifier = Modifier
-                        .padding(bottom = 8.dp + contentPadding.calculateBottomPadding(), top = contentPadding.calculateTopPadding())
-                        .align(Alignment.BottomCenter)
                         .fillMaxWidth(),
                 )
             }
