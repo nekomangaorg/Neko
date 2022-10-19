@@ -71,6 +71,7 @@ class BrowseComposePresenter(
         return DexFilters(
             query = NewFilter.Query(incomingQuery, QueryType.Title),
             contentRatings = contentRatings,
+            contentRatingVisible = preferences.showContentRatingFilter(),
         )
     }
 

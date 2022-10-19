@@ -15,6 +15,7 @@ data class DexFilters(
     val query: NewFilter.Query = NewFilter.Query("", QueryType.Title),
     val originalLanguage: List<NewFilter.OriginalLanguage> = MdLang.values().map { NewFilter.OriginalLanguage(it, false) },
     val contentRatings: List<NewFilter.ContentRating>,
+    val contentRatingVisible: Boolean = true,
     val publicationDemographics: List<NewFilter.PublicationDemographic> = MangaDemographic.getOrdered().map { NewFilter.PublicationDemographic(it, false) },
     val statuses: List<NewFilter.Status> = MangaStatus.getMangaDexStatus().map { NewFilter.Status(it, false) },
     val tags: List<NewFilter.Tag> = MangaTag.values().map { NewFilter.Tag(it, ToggleableState.Off) },

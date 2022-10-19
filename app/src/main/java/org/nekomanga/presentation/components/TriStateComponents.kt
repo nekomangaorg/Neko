@@ -17,6 +17,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +65,7 @@ fun TriStateFilterChip(
     alwaysElevated: Boolean = false,
     labelTextStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
 ) {
+
     FilterChip(
         selected = state == ToggleableState.On || state == ToggleableState.Indeterminate,
         onClick = { toggleStateIfAble(false, state, toggleState) },
@@ -80,13 +82,12 @@ fun TriStateFilterChip(
         label = { Text(text = name, style = labelTextStyle) },
         colors = FilterChipDefaults.filterChipColors(
             containerColor = if (alwaysElevated) MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) else MaterialTheme.colorScheme.surface,
-
             selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
             selectedLabelColor = MaterialTheme.colorScheme.primary,
             selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
         ),
         border = FilterChipDefaults.filterChipBorder(
-            borderColor = if (alwaysElevated) MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp) else MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
+            borderColor = if (alwaysElevated) Color.Transparent else MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
             selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
         ),
     )

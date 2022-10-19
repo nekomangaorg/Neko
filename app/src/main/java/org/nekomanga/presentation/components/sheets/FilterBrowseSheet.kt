@@ -145,17 +145,19 @@ fun FilterBrowseSheet(
                     name = { originalLanguage -> originalLanguage.language.prettyPrint },
                 )
 
-                FilterRow(
-                    items = filters.contentRatings.toImmutableList(),
-                    expanded = contentRatingExpanded,
-                    disabled = disabled,
-                    headerClicked = { contentRatingExpanded = !contentRatingExpanded },
-                    headerRes = R.string.content_rating,
-                    anyEnabled = filters.contentRatings.any { (it.rating.key in defaultContentRatings && !it.state) || it.rating.key !in defaultContentRatings && it.state },
-                    onClick = { rating -> filterChanged(rating.copy(state = !rating.state)) },
-                    selected = { rating -> rating.state },
-                    nameRes = { rating -> rating.rating.nameRes },
-                )
+                if (filters.contentRatingVisible) {
+                    FilterRow(
+                        items = filters.contentRatings.toImmutableList(),
+                        expanded = contentRatingExpanded,
+                        disabled = disabled,
+                        headerClicked = { contentRatingExpanded = !contentRatingExpanded },
+                        headerRes = R.string.content_rating,
+                        anyEnabled = filters.contentRatings.any { (it.rating.key in defaultContentRatings && !it.state) || it.rating.key !in defaultContentRatings && it.state },
+                        onClick = { rating -> filterChanged(rating.copy(state = !rating.state)) },
+                        selected = { rating -> rating.state },
+                        nameRes = { rating -> rating.rating.nameRes },
+                    )
+                }
 
                 FilterRow(
                     items = filters.publicationDemographics.toImmutableList(),
