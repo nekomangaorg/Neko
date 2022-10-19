@@ -80,7 +80,7 @@ private fun TitleAndSubtitleTopAppBar(
     navigationIconLabel: String,
     navigationIcon: ImageVector,
     onNavigationIconClicked: () -> Unit,
-    actions: @Composable() (RowScope.() -> Unit),
+    actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     TopAppBar(
