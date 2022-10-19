@@ -3,15 +3,15 @@ package org.nekomanga.presentation.components
 import ToolTipIconButton
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,9 +21,9 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -31,8 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.mikepenz.iconics.compose.Image
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
-import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -161,7 +162,7 @@ private fun TitleOnlyTopAppBar(
     navigationIconLabel: String,
     navigationIcon: ImageVector,
     onNavigationIconClicked: () -> Unit,
-    actions: @Composable() (RowScope.() -> Unit),
+    actions: @Composable (RowScope.() -> Unit),
     incognitoMode: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
@@ -172,25 +173,29 @@ private fun TitleOnlyTopAppBar(
         ),
         modifier = Modifier.statusBarsPadding(),
         title = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (incognitoMode) {
-                    Icon(imageVector = Icons.Default.TripOrigin, contentDescription = null)
-                    Gap(8.dp)
-                }
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         },
         navigationIcon = {
-            ToolTipIconButton(
-                toolTipLabel = navigationIconLabel,
-                icon = navigationIcon,
-                buttonClicked = onNavigationIconClicked,
-            )
+            if (incognitoMode) {
+                Image(
+                    CommunityMaterial.Icon2.cmd_incognito_circle,
+                    colorFilter = ColorFilter.tint(LocalContentColor.current),
+                    modifier = Modifier
+                        .padding(start = 12.dp)
+                        .size(32.dp),
+                )
+            } else {
+                ToolTipIconButton(
+                    toolTipLabel = navigationIconLabel,
+                    icon = navigationIcon,
+                    buttonClicked = onNavigationIconClicked,
+                )
+            }
         },
         actions = actions,
         scrollBehavior = scrollBehavior,
