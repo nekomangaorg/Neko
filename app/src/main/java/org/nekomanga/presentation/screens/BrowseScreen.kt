@@ -20,8 +20,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -32,9 +38,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
@@ -47,7 +55,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.presentation.components.FilterChipWrapper
 import org.nekomanga.presentation.components.ListGridActionButton
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoScaffold
@@ -300,31 +307,56 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
             Gap(8.dp)
         }
         item {
-            FilterChipWrapper(
+            FooterFilterChip(
                 selected = screenType == BrowseScreenType.Homepage,
-                alwaysElevated = true,
                 onClick = { screenTypeClick(BrowseScreenType.Homepage) },
                 name = stringResource(id = R.string.home_page),
             )
         }
         if (isLoggedIn) {
             item {
-                FilterChipWrapper(
+                FooterFilterChip(
                     selected = screenType == BrowseScreenType.Follows,
-                    alwaysElevated = true,
                     onClick = { screenTypeClick(BrowseScreenType.Follows) },
                     name = stringResource(R.string.follows),
                 )
             }
         }
         item {
-            FilterChipWrapper(
+            FooterFilterChip(
                 selected = screenType == BrowseScreenType.Filter,
-                alwaysElevated = true,
                 onClick = { screenTypeClick(BrowseScreenType.Filter) },
                 name = stringResource(R.string.filter),
             )
         }
     }
+}
+
+@Composable
+private fun FooterFilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    name: String,
+) {
+
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        leadingIcon = {
+            if (selected) {
+                Icon(imageVector = Icons.Default.Check, contentDescription = null)
+            }
+        },
+        shape = RoundedCornerShape(100),
+        label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.secondary.compositeOver(MaterialTheme.colorScheme.surface),
+            labelColor = MaterialTheme.colorScheme.onSecondary,
+            selectedContainerColor = MaterialTheme.colorScheme.secondary,
+            selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
+            selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondary,
+        ),
+        border = null,
+    )
 }
 
