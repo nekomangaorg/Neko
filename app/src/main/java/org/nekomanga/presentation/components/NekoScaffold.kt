@@ -11,8 +11,8 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -28,13 +28,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 
 @Composable
 fun NekoScaffold(
     title: String,
     onNavigationIconClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    themeColorState: ThemeColorState? = null,
+    themeColorState: ThemeColorState = defaultThemeColorState(),
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
@@ -54,7 +55,7 @@ fun NekoScaffold(
         snackbarHost = snackBarHost,
         topBar =
         {
-            CompositionLocalProvider(LocalRippleTheme provides (themeColorState?.rippleTheme ?: PrimaryColorRippleTheme)) {
+            CompositionLocalProvider(LocalRippleTheme provides (themeColorState.rippleTheme)) {
                 if (subtitle.isEmpty() && title.isNotEmpty()) {
                     TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
                 } else if (title.isEmpty()) {
@@ -79,15 +80,10 @@ private fun TitleAndSubtitleTopAppBar(
     navigationIconLabel: String,
     navigationIcon: ImageVector,
     onNavigationIconClicked: () -> Unit,
-    actions: @Composable() (RowScope.() -> Unit),
+    actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    SmallTopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = color,
-            scrolledContainerColor = color,
-        ),
-        modifier = Modifier.statusBarsPadding(),
+    TopAppBar(
         title = {
             Column {
                 Text(
@@ -106,6 +102,7 @@ private fun TitleAndSubtitleTopAppBar(
                 }
             }
         },
+        modifier = Modifier.statusBarsPadding(),
         navigationIcon = {
             ToolTipIconButton(
                 toolTipLabel = navigationIconLabel,
@@ -114,6 +111,10 @@ private fun TitleAndSubtitleTopAppBar(
             )
         },
         actions = actions,
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = color,
+            scrolledContainerColor = color,
+        ),
         scrollBehavior = scrollBehavior,
     )
 }
@@ -127,13 +128,9 @@ private fun NoTitleTopAppBar(
     actions: @Composable() (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    SmallTopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = color,
-            scrolledContainerColor = color,
-        ),
-        modifier = Modifier.statusBarsPadding(),
+    TopAppBar(
         title = {},
+        modifier = Modifier.statusBarsPadding(),
         navigationIcon = {
             ToolTipIconButton(
                 toolTipLabel = navigationIconLabel,
@@ -142,6 +139,10 @@ private fun NoTitleTopAppBar(
             )
         },
         actions = actions,
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = color,
+            scrolledContainerColor = color,
+        ),
         scrollBehavior = scrollBehavior,
     )
 }
