@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.UiText
 
 @Composable
 fun WebViewScreen(
@@ -55,7 +56,7 @@ fun WebViewScreen(
                 actions = listOf(
                     if (navigator.canGoBack) {
                         AppBar.Action(
-                            title = stringResource(id = R.string.back),
+                            title = UiText.StringResource(R.string.back),
                             icon = Icons.Filled.ArrowBack,
                             onClick = {
                                 navigator.navigateBack()
@@ -67,7 +68,7 @@ fun WebViewScreen(
                 ) + listOf(
                     if (navigator.canGoForward) {
                         AppBar.Action(
-                            title = stringResource(R.string.forward),
+                            title = UiText.StringResource(R.string.forward),
                             icon = Icons.Default.ArrowForward,
                             onClick = {
                                 navigator.navigateForward()
@@ -78,21 +79,21 @@ fun WebViewScreen(
                     },
                 ) + listOf(
                     AppBar.OverflowAction(
-                        title = stringResource(R.string.refresh),
+                        title = UiText.StringResource(R.string.refresh),
                         onClick = { navigator.reload() },
                     ),
                     AppBar.OverflowAction(
-                        title = stringResource(R.string.share),
+                        title = UiText.StringResource(R.string.share),
                         onClick = { onShare(state.content.getCurrentUrl()!!) },
                     ),
                     AppBar.OverflowAction(
-                        title = stringResource(R.string.open_in_browser),
+                        title = UiText.StringResource(R.string.open_in_browser),
                         onClick = { onOpenInBrowser(state.content.getCurrentUrl()!!) },
                     ),
                 ) + listOf(
                     if (navigator.canGoBack && canOpenInApp(state.content.getCurrentUrl()!!)) {
                         AppBar.OverflowAction(
-                            title = stringResource(id = R.string.open_in_app),
+                            title = UiText.StringResource(R.string.open_in_app),
                             onClick = { onOpenInApp(state.content.getCurrentUrl()!!) },
                         )
                     } else {

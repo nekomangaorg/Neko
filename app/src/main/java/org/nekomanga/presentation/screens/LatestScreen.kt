@@ -39,7 +39,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.presentation.components.ListGridActionButton
+import org.nekomanga.presentation.components.AppBarActions
+import org.nekomanga.presentation.components.ListGridAppBarAction
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
@@ -95,9 +96,14 @@ fun LatestScreen(
             title = stringResource(id = R.string.latest),
             onNavigationIconClicked = onBackPress,
             actions = {
-                ListGridActionButton(
-                    isList = latestScreenState.value.isList,
-                    buttonClicked = switchDisplayClick,
+                AppBarActions(
+                    actions =
+                    listOf(
+                        ListGridAppBarAction(
+                            isList = latestScreenState.value.isList,
+                            onClick = switchDisplayClick,
+                        ),
+                    ),
                 )
             },
         ) { incomingContentPadding ->

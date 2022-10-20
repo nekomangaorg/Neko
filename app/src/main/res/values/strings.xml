@@ -197,6 +197,8 @@
     <string name="tap_library_to_show_filters">Tap the Library icon to show filters</string>
     <string name="display_as">Display as</string>
     <string name="display_as_">Display as %1$s</string>
+    <string name="display_as_grid">Display as grid</string>
+    <string name="display_as_list">Display as list</string>
     <string name="hide_library_manga">Hide library entries</string>
     <string name="show_library_manga">Show library entries</string>
     <string name="hide_category_hopper">Hide category hopper</string>

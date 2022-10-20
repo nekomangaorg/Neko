@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.components
 
 import ToolTipIconButton
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewList
@@ -13,38 +12,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.toPersistentList
-import org.nekomanga.presentation.theme.NekoTheme
 
-@Composable
-fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
-    when (isList.not()) {
-        true -> ToolTipIconButton(
-            toolTipLabel = stringResource(id = R.string.display_as_, "list"),
-            icon = Icons.Filled.ViewList,
-            buttonClicked = buttonClicked,
-        )
-
-        false -> ToolTipIconButton(
-            toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
-            icon = Icons.Filled.ViewModule,
-            buttonClicked = buttonClicked,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun ListGridActionButton() {
-    Row {
-        NekoTheme {
-            ListGridActionButton(isList = false) {}
-        }
-        NekoTheme {
-            ListGridActionButton(isList = true) {}
-        }
+fun ListGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
+    return when (isList) {
+        true -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_grid), icon = Icons.Filled.ViewModule, onClick = onClick, isEnabled = isEnabled)
+        false -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_list), icon = Icons.Filled.ViewList, onClick = onClick, isEnabled = isEnabled)
     }
 }
 
@@ -56,7 +30,7 @@ fun AppBarActions(
 
     actions.filterIsInstance<AppBar.Action>().map {
         ToolTipIconButton(
-            toolTipLabel = it.title,
+            toolTipLabel = it.title.asString(),
             icon = it.icon,
             isEnabled = it.isEnabled,
             buttonClicked = it.onClick,
@@ -86,14 +60,14 @@ object AppBar {
     interface AppBarAction
 
     data class Action(
-        val title: String,
+        val title: UiText,
         val icon: ImageVector,
         val onClick: () -> Unit,
         val isEnabled: Boolean = true,
     ) : AppBarAction
 
     data class OverflowAction(
-        val title: String,
+        val title: UiText,
         val onClick: (() -> Unit?)? = null,
         val children: List<OverflowAction>? = null,
     ) : AppBarAction {

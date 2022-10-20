@@ -36,7 +36,8 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.message
-import org.nekomanga.presentation.components.ListGridActionButton
+import org.nekomanga.presentation.components.AppBarActions
+import org.nekomanga.presentation.components.ListGridAppBarAction
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
@@ -90,9 +91,14 @@ fun FollowsScreen(
             title = stringResource(id = R.string.follows),
             onNavigationIconClicked = onBackPress,
             actions = {
-                ListGridActionButton(
-                    isList = followsScreenState.value.isList,
-                    buttonClicked = switchDisplayClick,
+                AppBarActions(
+                    actions =
+                    listOf(
+                        ListGridAppBarAction(
+                            isList = followsScreenState.value.isList,
+                            onClick = switchDisplayClick,
+                        ),
+                    ),
                 )
             },
         ) { incomingPaddingValues ->
