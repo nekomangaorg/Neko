@@ -44,6 +44,7 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.SimpleDropDownItem
 import org.nekomanga.presentation.components.SimpleDropdownMenu
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -217,11 +218,11 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeCo
         onDismiss = onDismiss,
         dropDownItems = persistentListOf(
             SimpleDropDownItem.Action(
-                text = stringResource(R.string.remove_from_library),
+                text = UiText.StringResource(R.string.remove_from_library),
                 onClick = { toggleFavorite() },
             ),
             SimpleDropDownItem.Action(
-                text = stringResource(R.string.edit_categories),
+                text = UiText.StringResource(R.string.edit_categories),
                 onClick = { moveCategories() },
             ),
         ),

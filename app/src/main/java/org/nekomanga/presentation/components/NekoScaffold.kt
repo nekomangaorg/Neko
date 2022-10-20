@@ -35,13 +35,14 @@ import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 
 @Composable
 fun NekoScaffold(
     title: String,
     onNavigationIconClicked: () -> Unit,
     modifier: Modifier = Modifier,
-    themeColorState: ThemeColorState? = null,
+    themeColorState: ThemeColorState = defaultThemeColorState(),
     incognitoMode: Boolean = false,
     isRoot: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
@@ -59,12 +60,11 @@ fun NekoScaffold(
         systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
     }
     Scaffold(
-        modifier = modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
         topBar =
         {
-            CompositionLocalProvider(LocalRippleTheme provides (themeColorState?.rippleTheme ?: PrimaryColorRippleTheme)) {
+            CompositionLocalProvider(LocalRippleTheme provides (themeColorState.rippleTheme)) {
                 if (subtitle.isEmpty() && title.isNotEmpty()) {
                     TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, isRoot, scrollBehavior)
                 } else if (title.isEmpty()) {

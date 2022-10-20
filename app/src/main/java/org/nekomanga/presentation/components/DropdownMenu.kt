@@ -44,7 +44,7 @@ private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem,
                 modifier = modifier,
                 text = {
                     Text(
-                        text = item.text,
+                        text = item.text.asString(),
                         style = style,
                     )
                 },
@@ -58,7 +58,7 @@ private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem,
                         modifier = modifier,
                         text = {
                             Text(
-                                text = item.text,
+                                text = item.text.asString(),
                                 style = style,
                             )
                         },
@@ -67,7 +67,7 @@ private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem,
             )
         }
         is SimpleDropDownItem.Action -> {
-            Item(modifier = modifier, text = item.text, style = style, onClick = item.onClick, onDismiss = onDismiss)
+            Item(modifier = modifier, text = item.text.asString(), style = style, onClick = item.onClick, onDismiss = onDismiss)
         }
     }
 }
@@ -91,6 +91,6 @@ private fun Item(modifier: Modifier, text: String, style: TextStyle, onClick: ()
 
 @Immutable
 sealed class SimpleDropDownItem {
-    data class Action(val text: String, val onClick: () -> Unit) : SimpleDropDownItem()
-    data class Parent(val text: String, val children: List<SimpleDropDownItem>) : SimpleDropDownItem()
+    data class Action(val text: UiText, val onClick: () -> Unit) : SimpleDropDownItem()
+    data class Parent(val text: UiText, val children: List<SimpleDropDownItem>) : SimpleDropDownItem()
 }

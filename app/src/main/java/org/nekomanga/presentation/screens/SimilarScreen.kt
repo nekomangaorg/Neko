@@ -39,7 +39,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.presentation.components.ListGridActionButton
+import org.nekomanga.presentation.components.AppBarActions
+import org.nekomanga.presentation.components.ListGridAppBarAction
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
@@ -97,9 +98,14 @@ fun SimilarScreen(
             title = stringResource(id = R.string.similar),
             onNavigationIconClicked = onBackPress,
             actions = {
-                ListGridActionButton(
-                    isList = similarScreenState.value.isList,
-                    buttonClicked = switchDisplayClick,
+                AppBarActions(
+                    actions =
+                    listOf(
+                        ListGridAppBarAction(
+                            isList = similarScreenState.value.isList,
+                            onClick = switchDisplayClick,
+                        ),
+                    ),
                 )
             },
         ) { incomingPaddingValues ->

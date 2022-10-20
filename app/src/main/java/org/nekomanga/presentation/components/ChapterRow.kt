@@ -216,7 +216,7 @@ private fun ChapterInfo(
     val splitScanlator = remember {
         ChapterUtil.getScanlators(scanlator).map {
             SimpleDropDownItem.Action(
-                text = it,
+                text = UiText.String(it),
                 onClick = { blockScanlator(it) },
             )
         }.toImmutableList()
@@ -375,7 +375,7 @@ private fun ChapterInfo(
                     Download.State.DOWNLOADED -> {
                         persistentListOf(
                             SimpleDropDownItem.Action(
-                                text = stringResource(R.string.remove),
+                                text = UiText.StringResource(R.string.remove),
                                 onClick = {
                                     onDownload(DownloadAction.Remove)
                                 },
@@ -385,13 +385,13 @@ private fun ChapterInfo(
                     else -> {
                         persistentListOf(
                             SimpleDropDownItem.Action(
-                                text = stringResource(R.string.start_downloading_now),
+                                text = UiText.StringResource(R.string.start_downloading_now),
                                 onClick = {
                                     onDownload(DownloadAction.ImmediateDownload)
                                 },
                             ),
                             SimpleDropDownItem.Action(
-                                text = stringResource(R.string.cancel),
+                                text = UiText.StringResource(R.string.cancel),
                                 onClick = {
                                     onDownload(DownloadAction.Cancel)
                                 },
@@ -414,18 +414,18 @@ private fun getDropDownItems(
     return (
         listOf(
             SimpleDropDownItem.Action(
-                text = stringResource(R.string.open_in_webview),
+                text = UiText.StringResource(R.string.open_in_webview),
                 onClick = { onWebView() },
             ),
             SimpleDropDownItem.Parent(
-                text = stringResource(R.string.mark_previous_as),
+                text = UiText.StringResource(R.string.mark_previous_as),
                 children = listOf(
                     SimpleDropDownItem.Action(
-                        text = stringResource(R.string.read),
+                        text = UiText.StringResource(R.string.read),
                         onClick = { markPrevious(true) },
                     ),
                     SimpleDropDownItem.Action(
-                        text = stringResource(R.string.unread),
+                        text = UiText.StringResource(R.string.unread),
                         onClick = { markPrevious(false) },
                     ),
                 ),
@@ -434,7 +434,7 @@ private fun getDropDownItems(
             if (showScanlator) {
                 listOf(
                     SimpleDropDownItem.Parent(
-                        text = stringResource(R.string.block_scanlator),
+                        text = UiText.StringResource(R.string.block_scanlator),
                         children = scanlators,
                     ),
                 )

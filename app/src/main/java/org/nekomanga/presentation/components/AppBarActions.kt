@@ -17,43 +17,10 @@ import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.toPersistentList
 
-@Composable
-fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
-    when (isList) {
-        true -> ToolTipIconButton(
-            toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
-            icon = Icons.Filled.ViewModule,
-            buttonClicked = buttonClicked,
-        )
-        false -> ToolTipIconButton(
-            toolTipLabel = stringResource(id = R.string.display_as_, "list"),
-            icon = Icons.Filled.ViewList,
-            buttonClicked = buttonClicked,
-        )
-    }
-}
-
-@Composable
-fun listGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
+fun ListGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
     return when (isList) {
-        true -> AppBar.Action(title = stringResource(id = R.string.display_as_, "grid"), icon = Icons.Filled.ViewModule, onClick = onClick, isEnabled = isEnabled)
-        false -> AppBar.Action(title = stringResource(id = R.string.display_as_, "list"), icon = Icons.Filled.ViewList, onClick = onClick, isEnabled = isEnabled)
-    }
-}
-
-@Composable
-fun ShowLibraryEntriesActionButton(showEntries: Boolean, buttonClicked: () -> Unit) {
-    when (showEntries) {
-        true -> ToolTipIconButton(
-            toolTipLabel = stringResource(id = R.string.hide_library_manga),
-            icon = Icons.Filled.VisibilityOff,
-            buttonClicked = buttonClicked,
-        )
-        false -> ToolTipIconButton(
-            toolTipLabel = stringResource(id = R.string.show_library_manga),
-            icon = Icons.Filled.Visibility,
-            buttonClicked = buttonClicked,
-        )
+        true -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_grid), icon = Icons.Filled.ViewModule, onClick = onClick, isEnabled = isEnabled)
+        false -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_list), icon = Icons.Filled.ViewList, onClick = onClick, isEnabled = isEnabled)
     }
 }
 
@@ -73,7 +40,7 @@ fun AppBarActions(
 
     actions.filterIsInstance<AppBar.Action>().map {
         ToolTipIconButton(
-            toolTipLabel = it.title,
+            toolTipLabel = it.title.asString(),
             icon = it.icon,
             isEnabled = it.isEnabled,
             buttonClicked = it.onClick,
@@ -103,15 +70,14 @@ object AppBar {
     interface AppBarAction
 
     data class Action(
-        val title: String = "",
-        val titleRes: String? = null,
+        val title: UiText,
         val icon: ImageVector,
         val onClick: () -> Unit,
         val isEnabled: Boolean = true,
     ) : AppBarAction
 
     data class OverflowAction(
-        val title: String,
+        val title: UiText,
         val onClick: (() -> Unit?)? = null,
         val children: List<OverflowAction>? = null,
     ) : AppBarAction {
