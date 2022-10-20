@@ -52,7 +52,6 @@ class BrowseComposePresenter(
     private val _browseScreenState = MutableStateFlow(
         BrowseScreenState(
             isList = preferences.browseAsList().get(),
-            incognitoMode = preferences.incognitoMode().get(),
             showLibraryEntries = preferences.browseShowLibrary().get(),
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
@@ -154,6 +153,15 @@ class BrowseComposePresenter(
                 }
             }
         }
+
+        presenterScope.launch {
+            preferences.incognitoMode().asFlow().collectLatest {
+                _browseScreenState.update { state ->
+                    state.copy(incognitoMode = it)
+                }
+            }
+        }
+
         presenterScope.launch {
             preferences.browseShowLibrary().asFlow().collectLatest { bool ->
                 _browseScreenState.update {

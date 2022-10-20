@@ -43,6 +43,7 @@ fun NekoScaffold(
     modifier: Modifier = Modifier,
     themeColorState: ThemeColorState? = null,
     incognitoMode: Boolean = false,
+    isRoot: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
@@ -65,7 +66,7 @@ fun NekoScaffold(
         {
             CompositionLocalProvider(LocalRippleTheme provides (themeColorState?.rippleTheme ?: PrimaryColorRippleTheme)) {
                 if (subtitle.isEmpty() && title.isNotEmpty()) {
-                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, scrollBehavior)
+                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, isRoot, scrollBehavior)
                 } else if (title.isEmpty()) {
                     NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
                 } else {
@@ -164,6 +165,7 @@ private fun TitleOnlyTopAppBar(
     onNavigationIconClicked: () -> Unit,
     actions: @Composable (RowScope.() -> Unit),
     incognitoMode: Boolean,
+    isRoot: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     CenterAlignedTopAppBar(
@@ -189,7 +191,7 @@ private fun TitleOnlyTopAppBar(
                         .padding(start = 12.dp)
                         .size(32.dp),
                 )
-            } else {
+            } else if (!isRoot) {
                 ToolTipIconButton(
                     toolTipLabel = navigationIconLabel,
                     icon = navigationIcon,
