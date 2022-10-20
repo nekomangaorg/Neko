@@ -32,6 +32,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.text.NumberFormat
 import java.util.Locale
 import jp.wasabeef.gap.Gap
@@ -123,14 +124,7 @@ fun InformationBlock(
 
         ) {
             if (langFlagProvider() != null) {
-                val flag = when (langFlagProvider()!!.lowercase(Locale.US)) {
-                    "zh-hk" -> R.drawable.ic_flag_hk
-                    "zh" -> R.drawable.ic_flag_cn
-                    "ko" -> R.drawable.ic_flag_kr
-                    "ja" -> R.drawable.ic_flag_jp
-                    "en" -> R.drawable.ic_flag_us
-                    else -> null
-                }
+                val flag = MdLang.fromIsoCode(langFlagProvider()!!.lowercase(Locale.US))?.iconResId
                 if (flag != null) {
                     val drawable = AppCompatResources.getDrawable(LocalContext.current, flag)
                     Image(
