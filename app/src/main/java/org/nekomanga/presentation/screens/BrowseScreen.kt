@@ -57,12 +57,12 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.ListGridAppBarAction
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.ShowLibraryEntriesAction
+import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
+import org.nekomanga.presentation.components.showLibraryEntriesAction
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
@@ -158,11 +158,12 @@ fun BrowseScreen(
                 AppBarActions(
                     actions =
                     listOf(
-                        ListGridAppBarAction(
+                        listGridAppBarAction(
                             isList = browseScreenState.value.isList,
                             onClick = switchDisplayClick,
+                            isEnabled = browseScreenType != BrowseScreenType.Homepage && browseScreenType != BrowseScreenType.Other,
                         ),
-                        ShowLibraryEntriesAction(
+                        showLibraryEntriesAction(
                             showEntries = browseScreenState.value.showLibraryEntries,
                             onClick = switchLibraryVisibilityClick,
                         ),

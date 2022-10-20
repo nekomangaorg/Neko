@@ -42,13 +42,13 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.ListGridAppBarAction
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
+import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
+import org.nekomanga.presentation.components.showLibraryEntriesAction
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Shapes
 
@@ -107,14 +107,14 @@ fun DisplayScreen(
                 AppBarActions(
                     actions =
                     listOf(
-                        ListGridAppBarAction(
-                            isList = latestScreenState.value.isList,
+                        listGridAppBarAction(
+                            isList = displayScreenState.value.isList,
                             onClick = switchDisplayClick,
                         ),
-                        ShowLibraryEntriesActionButton(
+                        showLibraryEntriesAction(
                             showEntries = displayScreenState.value.showLibraryEntries,
-                            onCLick = switchLibraryVisibilityClick
-                            )
+                            onClick = switchLibraryVisibilityClick,
+                        ),
                     ),
                 )
             },

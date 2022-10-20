@@ -40,10 +40,10 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.ListGridAppBarAction
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Shapes
@@ -101,7 +101,7 @@ fun SimilarScreen(
                 AppBarActions(
                     actions =
                     listOf(
-                        ListGridAppBarAction(
+                        listGridAppBarAction(
                             isList = similarScreenState.value.isList,
                             onClick = switchDisplayClick,
                         ),

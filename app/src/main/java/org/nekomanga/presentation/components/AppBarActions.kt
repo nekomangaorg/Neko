@@ -17,18 +17,17 @@ import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.toPersistentList
 
-fun ListGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
+fun listGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
     return when (isList) {
         true -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_grid), icon = Icons.Filled.ViewModule, onClick = onClick, isEnabled = isEnabled)
         false -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_list), icon = Icons.Filled.ViewList, onClick = onClick, isEnabled = isEnabled)
     }
 }
 
-@Composable
-fun ShowLibraryEntriesAction(showEntries: Boolean, onClick: () -> Unit): AppBar.Action {
+fun showLibraryEntriesAction(showEntries: Boolean, onClick: () -> Unit): AppBar.Action {
     return when (showEntries) {
-        true -> AppBar.Action(title = stringResource(id = R.string.hide_library_manga), icon = Icons.Filled.VisibilityOff, onClick = onClick)
-        false -> AppBar.Action(title = stringResource(id = R.string.show_library_manga), icon = Icons.Filled.Visibility, onClick = onClick)
+        true -> AppBar.Action(title = UiText.StringResource(R.string.hide_library_manga), icon = Icons.Filled.VisibilityOff, onClick = onClick)
+        false -> AppBar.Action(title = UiText.StringResource(R.string.show_library_manga), icon = Icons.Filled.Visibility, onClick = onClick)
     }
 }
 

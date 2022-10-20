@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import org.nekomanga.presentation.components.NekoColors
 
 /**
  * This is a Tooltip Icon button, a wrapper around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip
@@ -50,6 +51,7 @@ fun ToolTipIconButton(
         modifier = modifier.iconButtonCombinedClickable(
             toolTipLabel = toolTipLabel,
             onClick = buttonClicked,
+            isEnabled = isEnabled,
             onLongClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showTooltip.value = true
@@ -105,7 +107,7 @@ fun CombinedClickableIconButton(
                 IconButtonTokens.UnselectedIconColor.toColor()
             } else {
                 IconButtonTokens.DisabledIconColor.toColor()
-                    .copy(alpha = IconButtonTokens.DisabledIconOpacity)
+                    .copy(alpha = NekoColors.disabledAlphaLowContrast)
             }
         CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
     }
@@ -117,20 +119,25 @@ fun CombinedClickableIconButton(
  */
 fun Modifier.iconButtonCombinedClickable(
     toolTipLabel: String,
+    isEnabled: Boolean,
     onLongClick: (() -> Unit)? = null,
     onDoubleClick: (() -> Unit)? = null,
     onClick: () -> Unit,
 ) = composed {
-    combinedClickable(
-        interactionSource = remember { MutableInteractionSource() },
-        indication = rememberRipple(
-            bounded = false,
-            radius = IconButtonTokens.StateLayerSize / 2,
-        ),
-        onClickLabel = toolTipLabel,
-        role = Role.Button,
-        onClick = onClick,
-        onLongClick = onLongClick,
-        onDoubleClick = onDoubleClick,
-    )
+    if (isEnabled) {
+        combinedClickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = rememberRipple(
+                bounded = false,
+                radius = IconButtonTokens.StateLayerSize / 2,
+            ),
+            onClickLabel = toolTipLabel,
+            role = Role.Button,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            onDoubleClick = onDoubleClick,
+        )
+    } else {
+        this
+    }
 }
