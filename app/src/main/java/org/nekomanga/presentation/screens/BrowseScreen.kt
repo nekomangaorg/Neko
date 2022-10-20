@@ -56,10 +56,11 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.presentation.components.ListGridActionButton
+import org.nekomanga.presentation.components.AppBarActions
+import org.nekomanga.presentation.components.ListGridAppBarAction
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.ShowLibraryEntriesActionButton
+import org.nekomanga.presentation.components.ShowLibraryEntriesAction
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
@@ -154,14 +155,20 @@ fun BrowseScreen(
             title = stringResource(id = R.string.browse),
             onNavigationIconClicked = onBackPress,
             actions = {
-                ListGridActionButton(
-                    isList = browseScreenState.value.isList,
-                    buttonClicked = switchDisplayClick,
-                )
-                ShowLibraryEntriesActionButton(
-                    showEntries = browseScreenState.value.showLibraryEntries,
-                    buttonClicked = switchLibraryVisibilityClick,
-                )
+                AppBarActions(
+                    actions =
+                    listOf(
+                        ListGridAppBarAction(
+                            isList = browseScreenState.value.isList,
+                            onClick = switchDisplayClick,
+                        ),
+                        ShowLibraryEntriesAction(
+                            showEntries = browseScreenState.value.showLibraryEntries,
+                            onClick = switchLibraryVisibilityClick,
+                        ),
+                    ),
+
+                    )
             },
         ) { incomingContentPadding ->
 

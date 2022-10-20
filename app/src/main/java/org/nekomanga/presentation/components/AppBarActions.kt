@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.components
 
 import ToolTipIconButton
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewList
@@ -15,10 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.toPersistentList
-import org.nekomanga.presentation.theme.NekoTheme
 
 @Composable
 fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
@@ -33,6 +30,14 @@ fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
             icon = Icons.Filled.ViewList,
             buttonClicked = buttonClicked,
         )
+    }
+}
+
+@Composable
+fun listGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
+    return when (isList) {
+        true -> AppBar.Action(title = stringResource(id = R.string.display_as_, "grid"), icon = Icons.Filled.ViewModule, onClick = onClick, isEnabled = isEnabled)
+        false -> AppBar.Action(title = stringResource(id = R.string.display_as_, "list"), icon = Icons.Filled.ViewList, onClick = onClick, isEnabled = isEnabled)
     }
 }
 
@@ -52,16 +57,11 @@ fun ShowLibraryEntriesActionButton(showEntries: Boolean, buttonClicked: () -> Un
     }
 }
 
-@Preview
 @Composable
-private fun ListGridActionButton() {
-    Row {
-        NekoTheme {
-            ListGridActionButton(isList = false) {}
-        }
-        NekoTheme {
-            ListGridActionButton(isList = true) {}
-        }
+fun ShowLibraryEntriesAction(showEntries: Boolean, onClick: () -> Unit): AppBar.Action {
+    return when (showEntries) {
+        true -> AppBar.Action(title = stringResource(id = R.string.hide_library_manga), icon = Icons.Filled.VisibilityOff, onClick = onClick)
+        false -> AppBar.Action(title = stringResource(id = R.string.show_library_manga), icon = Icons.Filled.Visibility, onClick = onClick)
     }
 }
 
@@ -103,7 +103,8 @@ object AppBar {
     interface AppBarAction
 
     data class Action(
-        val title: String,
+        val title: String = "",
+        val titleRes: String? = null,
         val icon: ImageVector,
         val onClick: () -> Unit,
         val isEnabled: Boolean = true,
