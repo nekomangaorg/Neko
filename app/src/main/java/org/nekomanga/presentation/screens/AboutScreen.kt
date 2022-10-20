@@ -251,7 +251,7 @@ private fun LinkIcon(
         iconModifier = Modifier.size(24.dp),
         icon = icon,
         painter = painter,
-        tint = MaterialTheme.colorScheme.primary.copy(alpha = .7f),
+        enabledTint = MaterialTheme.colorScheme.primary.copy(alpha = .7f),
         buttonClicked = { uriHandler.openUri(url) },
     )
 }

@@ -11,6 +11,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumTouchTargetSize
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.toColor
 import androidx.compose.material3.tokens.IconButtonTokens
 import androidx.compose.runtime.Composable
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 
 /**
  * This is a Tooltip Icon button, a wrapper around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip
@@ -38,7 +40,7 @@ fun ToolTipIconButton(
     icon: ImageVector? = null,
     painter: Painter? = null,
     isEnabled: Boolean = true,
-    tint: Color = LocalContentColor.current,
+    enabledTint: Color = MaterialTheme.colorScheme.onSurface,
     buttonClicked: () -> Unit = {},
 ) {
     require(icon != null || painter != null)
@@ -47,6 +49,7 @@ fun ToolTipIconButton(
     val haptic = LocalHapticFeedback.current
     CombinedClickableIconButton(
         enabled = isEnabled,
+        enabledTint = enabledTint,
         modifier = modifier.iconButtonCombinedClickable(
             toolTipLabel = toolTipLabel,
             onClick = buttonClicked,
@@ -60,14 +63,12 @@ fun ToolTipIconButton(
             Icon(
                 imageVector = icon,
                 modifier = iconModifier,
-                tint = tint,
                 contentDescription = toolTipLabel,
             )
         } else {
             Icon(
                 painter = painter!!,
                 modifier = iconModifier,
-                tint = tint,
                 contentDescription = toolTipLabel,
             )
         }
@@ -75,11 +76,11 @@ fun ToolTipIconButton(
 
     Tooltip(
         showTooltip,
-        modifier = Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = .75f)),
+        modifier = Modifier.background(MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)),
     ) {
         Text(
             text = toolTipLabel,
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -91,6 +92,7 @@ fun ToolTipIconButton(
 fun CombinedClickableIconButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    enabledTint: Color,
     content: @Composable () -> Unit,
 ) {
     Box(
@@ -102,7 +104,7 @@ fun CombinedClickableIconButton(
     ) {
         val contentColor =
             if (enabled) {
-                IconButtonTokens.UnselectedIconColor.toColor()
+                enabledTint
             } else {
                 IconButtonTokens.DisabledIconColor.toColor()
                     .copy(alpha = IconButtonTokens.DisabledIconOpacity)
