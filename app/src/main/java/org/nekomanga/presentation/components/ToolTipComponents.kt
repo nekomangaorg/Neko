@@ -27,9 +27,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
-import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.NekoColors
 import androidx.compose.ui.unit.dp
+import org.nekomanga.presentation.components.NekoColors
 
 /**
  * This is a Tooltip Icon button, a wrapper around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip

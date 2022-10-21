@@ -686,6 +686,8 @@
     <string name="help">Help</string>
     <string name="search_settings">Search settings</string>
 
+    <string name="turn_on_incognito_mode">Turn on incognito mode</string>
+    <string name="turn_off_incognito_mode">Turn off incognito mode</string>
     <string name="turn_on_">Turn on %s</string>
     <string name="turn_off_">Turn off %s</string>
     <string name="incognito_mode">Incognito mode</string>

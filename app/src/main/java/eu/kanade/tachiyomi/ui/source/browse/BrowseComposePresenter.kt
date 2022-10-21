@@ -298,6 +298,12 @@ class BrowseComposePresenter(
         }
     }
 
+    fun toggleIncognitoMode() {
+        presenterScope.launch {
+            preferences.incognitoMode().set(!preferences.incognitoMode().get())
+        }
+    }
+
     fun randomManga() {
         presenterScope.launch {
             _browseScreenState.update {

@@ -1,32 +1,35 @@
-package org.nekomanga.presentation.components
+package org.nekomanga.presentation.components.dropdown
 
+import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import kotlinx.collections.immutable.ImmutableList
 import me.saket.cascade.CascadeColumnScope
 import me.saket.cascade.CascadeDropdownMenu
 import me.saket.cascade.DropdownMenuHeader
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.screens.defaultThemeColorState
 
 @Composable
-fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: ImmutableList<SimpleDropDownItem>, themeColorState: ThemeColorState? = null) {
-    val customColor: Color = themeColorState?.buttonColor ?: MaterialTheme.colorScheme.surface
-    val background = Modifier.background(color = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(customColor, 8.dp))
+fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: ImmutableList<SimpleDropDownItem>, themeColorState: ThemeColorState = defaultThemeColorState()) {
+    val background = Modifier.background(color = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 8.dp))
     CascadeDropdownMenu(
         expanded = expanded,
         offset = DpOffset(8.dp, 0.dp),
         fixedWidth = 225.dp,
         modifier = background,
+        properties = PopupProperties(),
         onDismissRequest = onDismiss,
     ) {
         val style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
@@ -74,7 +77,7 @@ private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem,
 
 @Composable
 private fun Item(modifier: Modifier, text: String, style: TextStyle, onClick: () -> Unit, onDismiss: () -> Unit) {
-    androidx.compose.material3.DropdownMenuItem(
+    MaterialDropdownMenuItem(
         modifier = modifier,
         text = {
             Text(

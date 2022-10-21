@@ -5,10 +5,12 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.BrowseScreen
@@ -44,6 +46,11 @@ class BrowseComposeController(incomingQuery: String = "") : BaseComposeControlle
             otherClick = presenter::otherClick,
             changeScreenType = presenter::changeScreenType,
             randomClick = presenter::randomManga,
+            incognitoClick = presenter::toggleIncognitoMode,
+            settingsClick = { (this.activity as? MainActivity)?.showSettings() },
+            statsClick = { (this.activity as? MainActivity)?.showStats() },
+            aboutClick = { (this.activity as? MainActivity)?.showAbout() },
+            helpClick = { (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/help/") },
         )
     }
 

@@ -16,6 +16,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.presentation.components.dropdown.MainDropdownMenu
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 
 fun listGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
     return when (isList) {
@@ -63,10 +66,42 @@ fun AppBarActions(
             }.toPersistentList(),
         )
     }
+
+    val mainDropDown = actions.filterIsInstance<AppBar.MainDropdown>().firstOrNull()
+    if (mainDropDown != null) {
+        ToolTipIconButton(
+            toolTipLabel = stringResource(R.string.more),
+            icon = Icons.Filled.MoreVert,
+            buttonClicked = { showMenu = !showMenu },
+        )
+
+        mainDropDown.menuShowing(showMenu)
+
+        MainDropdownMenu(
+            expanded = showMenu,
+            incognitoModeEnabled = mainDropDown.incognitoMode,
+            incognitoModeClick = mainDropDown.incognitoModeClick,
+            settingsClick = mainDropDown.settingsClick,
+            statsClick = mainDropDown.statsClick,
+            aboutClick = mainDropDown.aboutClick,
+            helpClick = mainDropDown.helpClick,
+            onDismiss = { showMenu = false },
+        )
+    }
 }
 
 object AppBar {
     interface AppBarAction
+
+    data class MainDropdown(
+        val incognitoMode: Boolean,
+        val incognitoModeClick: () -> Unit,
+        val settingsClick: () -> Unit,
+        val statsClick: () -> Unit,
+        val aboutClick: () -> Unit,
+        val helpClick: () -> Unit,
+        val menuShowing: (Boolean) -> Unit,
+    ) : AppBarAction
 
     data class Action(
         val title: UiText,

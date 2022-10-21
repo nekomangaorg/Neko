@@ -42,9 +42,9 @@ import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.components.DynamicRippleTheme
-import org.nekomanga.presentation.components.SimpleDropDownItem
-import org.nekomanga.presentation.components.SimpleDropdownMenu
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -227,5 +227,5 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeCo
             ),
         ),
 
-    )
+        )
 }
