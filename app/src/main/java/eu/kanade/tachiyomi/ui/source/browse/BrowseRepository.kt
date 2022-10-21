@@ -38,7 +38,7 @@ class BrowseRepository(
     }
 
     suspend fun getSearchPage(page: Int, filters: DexFilters): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
-        return mangaDex.search2(page, filters)
+        return mangaDex.search(page, filters)
             .andThen { mangaListPage ->
                 val displayMangaList = mangaListPage.sourceManga.map { sourceManga ->
                     sourceManga.toDisplayManga(db, mangaDex.id)

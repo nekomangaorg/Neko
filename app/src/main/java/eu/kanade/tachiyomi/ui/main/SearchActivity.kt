@@ -21,8 +21,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
-import eu.kanade.tachiyomi.ui.source.browse.BrowseComposeController
-import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.Injekt
@@ -125,7 +124,7 @@ class SearchActivity : MainActivity() {
                 // Get the search query provided in extras, and if not null, perform a global search with it.
                 val query = intent.getStringExtra(SearchManager.QUERY) ?: intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (query != null && query.isNotEmpty()) {
-                    router.replaceTopController(BrowseSourceController(query).withFadeTransaction())
+                    router.replaceTopController(BrowseController(query).withFadeTransaction())
                 } else {
                     finish()
                 }
@@ -155,7 +154,7 @@ class SearchActivity : MainActivity() {
                             }
                         }
                         router.replaceTopController(
-                            BrowseComposeController(
+                            BrowseController(
                                 query,
                             ).withFadeTransaction(),
                         )
@@ -194,7 +193,7 @@ class SearchActivity : MainActivity() {
                 val extras = intent.extras ?: return false
                 SecureActivityDelegate.promptLockIfNeeded(this, true)
                 router.replaceTopController(
-                    RouterTransaction.with(BrowseSourceController(extras))
+                    RouterTransaction.with(BrowseController())
                         .pushChangeHandler(SimpleSwapChangeHandler())
                         .popChangeHandler(FadeChangeHandler()),
                 )

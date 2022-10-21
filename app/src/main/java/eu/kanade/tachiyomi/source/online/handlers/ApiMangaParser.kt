@@ -8,6 +8,7 @@ import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.source.model.MangaTag
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
@@ -28,7 +29,6 @@ import uy.kohesive.injekt.injectLazy
 
 class ApiMangaParser {
     val network: NetworkHelper by injectLazy()
-    val filterHandler: FilterHandler by injectLazy()
     val preferencesHelper: PreferencesHelper by injectLazy()
 
     /**
@@ -92,8 +92,6 @@ class ApiMangaParser {
                 manga.status = tempStatus
             }
 
-            val tags = filterHandler.getTags()
-
             val tempContentRating = mangaAttributesDto.contentRating?.capitalized()
 
             val contentRating = if (tempContentRating == null) {
@@ -105,8 +103,8 @@ class ApiMangaParser {
             val genres = (
                 listOf(mangaAttributesDto.publicationDemographic?.capitalized()) +
                     mangaAttributesDto.tags.map { it.id }
-                        .map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
-                        .map { tag -> tag?.name } +
+                        .map { dexTagId -> MangaTag.values().firstOrNull { tag -> tag.uuid == dexTagId } }
+                        .map { tag -> tag?.prettyPrint } +
                     listOf(contentRating)
                 )
                 .filterNotNull()
@@ -208,8 +206,6 @@ class ApiMangaParser {
                 manga.status = tempStatus
             }
 
-            val tags = filterHandler.getTags()
-
             val tempContentRating = mangaAttributesDto.contentRating?.capitalized()
 
             val contentRating = if (tempContentRating == null) {
@@ -221,8 +217,8 @@ class ApiMangaParser {
             val genres = (
                 listOf(mangaAttributesDto.publicationDemographic?.capitalized()) +
                     mangaAttributesDto.tags.map { it.id }
-                        .map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
-                        .map { tag -> tag?.name } +
+                        .map { dexTagId -> MangaTag.values().firstOrNull { tag -> tag.uuid == dexTagId } }
+                        .map { tag -> tag?.prettyPrint } +
                     listOf(contentRating)
                 )
                 .filterNotNull()

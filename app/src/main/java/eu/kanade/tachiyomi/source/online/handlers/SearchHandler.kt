@@ -6,26 +6,19 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.mapError
-import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexService
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
-import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.throws
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -39,8 +32,6 @@ import uy.kohesive.injekt.injectLazy
 
 class SearchHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
-    private val filterHandler: FilterHandler by injectLazy()
-    private val apiMangaParser: ApiMangaParser by injectLazy()
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
     suspend fun searchForManga(mangaUUID: String): Result<MangaListPage, ResultError> {
@@ -84,7 +75,7 @@ class SearchHandler {
             }
     }
 
-    suspend fun search2(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
+    suspend fun search(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
         return withContext(Dispatchers.IO) {
             val queryParameters = mutableMapOf<String, Any>()
 
@@ -147,7 +138,7 @@ class SearchHandler {
             service.search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Trying to search")
                 .andThen { response ->
-                    searchMangaParse2(response)
+                    searchMangaParse(response)
                 }
         }
     }
@@ -174,53 +165,7 @@ class SearchHandler {
         }
     }
 
-    suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
-        return withContext(Dispatchers.IO) {
-            if (query.startsWith("id:")) {
-                val realQuery = query.removePrefix("id:")
-                val response = service.viewManga(realQuery)
-                    .onFailure {
-                        val type = "trying to view manga $realQuery"
-                        this.log(type)
-                        this.throws(type)
-                    }.getOrThrow()
-
-                val details = apiMangaParser.mangaDetailsParse(response.data)
-                MangaListPage(listOf(details), false)
-            } else {
-                val queryParameters = mutableMapOf<String, Any>()
-
-                queryParameters["limit"] = MdConstants.Limits.manga
-                queryParameters["offset"] = (MdUtil.getMangaListOffset(page))
-                if (query.startsWith("grp:")) {
-                    val groupId = query.removePrefix("grp:")
-                    if (groupId.isUUID().not()) {
-                        throw Exception("Invalid Group ID must be UUID")
-                    }
-                    queryParameters["group"] = groupId
-                } else {
-                    val actualQuery = query.replace(WHITESPACE_REGEX, " ")
-                    if (actualQuery.isNotBlank()) {
-                        queryParameters["title"] = actualQuery
-                    }
-                }
-
-                val additionalQueries = filterHandler.getQueryMap(filters)
-                queryParameters.putAll(additionalQueries)
-
-                val response = service.search(ProxyRetrofitQueryMap(queryParameters))
-                    .onFailure {
-                        val type = "trying to search"
-                        this.log(type)
-                        this.throws(type)
-                    }.getOrThrow()
-
-                searchMangaParse(response)
-            }
-        }
-    }
-
-    private fun searchMangaParse2(mangaListDto: MangaListDto): Result<MangaListPage, ResultError> {
+    private fun searchMangaParse(mangaListDto: MangaListDto): Result<MangaListPage, ResultError> {
         return com.github.michaelbull.result.runCatching {
             val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
             val thumbQuality = preferencesHelper.thumbnailQuality()
@@ -230,18 +175,6 @@ class SearchHandler {
             XLog.e("error parsing search manga", it)
             "error parsing search manga".toResultError()
         }
-    }
-
-    private fun searchMangaParse(mangaListDto: MangaListDto): MangaListPage {
-        val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
-
-        val thumbQuality = preferencesHelper.thumbnailQuality()
-
-        val mangaList = mangaListDto.data.map {
-            it.toBasicManga(thumbQuality)
-        }
-
-        return MangaListPage(mangaList, hasMoreResults)
     }
 
     companion object {

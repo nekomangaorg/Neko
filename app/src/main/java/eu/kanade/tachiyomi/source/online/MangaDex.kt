@@ -11,14 +11,12 @@ import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
-import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
@@ -49,8 +47,6 @@ import uy.kohesive.injekt.injectLazy
 open class MangaDex : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
-
-    private val filterHandler: FilterHandler by injectLazy()
 
     private val followsHandler: FollowsHandler by injectLazy()
 
@@ -106,12 +102,8 @@ open class MangaDex : HttpSource() {
         }
     }
 
-    suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
-        return searchHandler.search(page, query, filters)
-    }
-
-    suspend fun search2(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
-        return searchHandler.search2(page, filters)
+    suspend fun search(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
+        return searchHandler.search(page, filters)
     }
 
     suspend fun searchForManga(uuid: String): Result<MangaListPage, ResultError> {
@@ -239,8 +231,4 @@ open class MangaDex : HttpSource() {
 
     override val headers: Headers
         get() = network.headers
-
-    override fun getFilterList(): FilterList {
-        return filterHandler.getMDFilterList()
-    }
 }

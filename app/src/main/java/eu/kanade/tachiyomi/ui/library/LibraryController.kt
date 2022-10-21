@@ -88,7 +88,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -822,7 +822,7 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                binding.libraryGridRecycler.recycler.translationY
+                    binding.libraryGridRecycler.recycler.translationY
         } else {
             binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
         }
@@ -863,8 +863,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                newOffset > -1
-            } else {
+                    newOffset > -1
+                } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -1538,7 +1538,7 @@ class LibraryController(
     }
 
     override fun globalSearch(query: String) {
-        router.pushController(BrowseSourceController(query).withFadeTransaction())
+        router.pushController(BrowseController(query).withFadeTransaction())
     }
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
@@ -1583,8 +1583,8 @@ class LibraryController(
         val fromItem = adapter.getItem(fromPosition)
         val toItem = adapter.getItem(toPosition)
         if (binding.libraryGridRecycler.recycler.layoutManager !is StaggeredGridLayoutManager && (
-            (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
-            )
+                (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
+                )
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
                 0,

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import androidx.compose.ui.state.ToggleableState
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -42,12 +43,12 @@ import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class BrowseComposePresenter(
+class BrowsePresenter(
     private val incomingQuery: String,
     private val browseRepository: BrowseRepository = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-) : BaseCoroutinePresenter<BrowseComposeController>() {
+) : BaseCoroutinePresenter<BrowseController>() {
 
     private val _browseScreenState = MutableStateFlow(
         BrowseScreenState(
@@ -510,6 +511,27 @@ class BrowseComposePresenter(
         presenterScope.launch {
             val resetFilters = createInitialDexFilter("")
             _browseScreenState.update { it.copy(filters = resetFilters) }
+        }
+    }
+
+    fun searchTag(tag: String) {
+        presenterScope.launch {
+            val blankFilter = createInitialDexFilter("")
+
+            val filters = if (tag.startsWith("Content rating: ")) {
+                val rating = MangaContentRating.getContentRating(tag.substringAfter("Content rating: "))
+                blankFilter.copy(
+                    contentRatings = blankFilter.contentRatings.map { if (it.rating == rating) it.copy(state = true) else it.copy(state = false) },
+                )
+            } else {
+                blankFilter.copy(
+                    tags = blankFilter.tags.map { if (it.tag.prettyPrint.equals(tag, true)) it.copy(state = ToggleableState.On) else it },
+                )
+            }
+            _browseScreenState.update {
+                it.copy(filters = filters)
+            }
+            paginator.loadNextItems()
         }
     }
 

@@ -1,19 +1,21 @@
-package eu.kanade.tachiyomi.ui.source.filter
+package eu.kanade.tachiyomi.ui.recents
 
 import android.view.View
-import android.widget.CheckBox
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.model.Filter
 
-open class CheckboxItem(val filter: Filter.CheckBox) : AbstractFlexibleItem<CheckboxItem.Holder>() {
+class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
+
+    private var loadMore = true
 
     override fun getLayoutRes(): Int {
-        return R.layout.navigation_view_checkbox
+        return R.layout.source_progress_item
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
@@ -21,27 +23,27 @@ open class CheckboxItem(val filter: Filter.CheckBox) : AbstractFlexibleItem<Chec
     }
 
     override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any>) {
-        val view = holder.check
-        view.text = filter.name
-        view.isChecked = filter.state
-        holder.itemView.setOnClickListener {
-            view.toggle()
-            filter.state = view.isChecked
+        holder.progressBar.visibility = View.GONE
+        holder.progressMessage.visibility = View.GONE
+
+        if (!adapter.isEndlessScrollEnabled) {
+            loadMore = false
+        }
+
+        if (loadMore) {
+            holder.progressBar.visibility = View.VISIBLE
+        } else {
+            holder.progressMessage.visibility = View.VISIBLE
         }
     }
 
     override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        return filter == (other as CheckboxItem).filter
-    }
-
-    override fun hashCode(): Int {
-        return filter.hashCode()
+        return this === other
     }
 
     class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : FlexibleViewHolder(view, adapter) {
 
-        val check: CheckBox = itemView.findViewById(R.id.nav_view_item)
+        val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
+        val progressMessage: TextView = view.findViewById(R.id.progress_message)
     }
 }

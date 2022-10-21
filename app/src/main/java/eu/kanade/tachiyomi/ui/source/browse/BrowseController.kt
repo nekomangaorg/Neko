@@ -15,8 +15,8 @@ import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.BrowseScreen
 
-class BrowseComposeController(incomingQuery: String = "") : BaseComposeController<BrowseComposePresenter>() {
-    override val presenter = BrowseComposePresenter(incomingQuery)
+class BrowseController(incomingQuery: String = "") : BaseComposeController<BrowsePresenter>() {
+    override val presenter = BrowsePresenter(incomingQuery)
 
     @Composable
     override fun ScreenContent() {
@@ -52,6 +52,10 @@ class BrowseComposeController(incomingQuery: String = "") : BaseComposeControlle
             aboutClick = { (this.activity as? MainActivity)?.showAbout() },
             helpClick = { (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/help/") },
         )
+    }
+
+    fun searchByTag(tag: String) {
+        presenter.searchTag(tag)
     }
 
     fun openDisplayScreen(displayScreenType: DisplayScreenType) {
