@@ -55,6 +55,13 @@ class BrowseRepository(
         }
     }
 
+    suspend fun getList(listUuid: String): Result<List<DisplayManga>, ResultError> {
+        return mangaDex.fetchList(listUuid).andThen { resultListPage ->
+            val displayManga = resultListPage.sourceManga.map { it.toDisplayManga(db, sourceId = mangaDex.id) }.toImmutableList()
+            Ok(displayManga)
+        }
+    }
+
     suspend fun getAuthors(authorQuery: String): Result<List<DisplayResult>, ResultError> {
         return mangaDex.searchForAuthor(authorQuery).andThen { resultListPage ->
             val displayManga = resultListPage.results.map { it.toDisplayResult() }
@@ -103,23 +110,29 @@ class BrowseRepository(
 }
 
 enum class DeepLinkType {
-    Manga,
+    Author,
     Group,
+    Manga,
+    List,
     None;
 
     companion object {
         fun getDeepLinkType(query: String): DeepLinkType {
             return when {
-                query.startsWith(MdConstants.DeepLinkPrefix.manga) -> Manga
+                query.startsWith(MdConstants.DeepLinkPrefix.author) -> Author
                 query.startsWith(MdConstants.DeepLinkPrefix.group) -> Group
+                query.startsWith(MdConstants.DeepLinkPrefix.manga) -> Manga
+                query.startsWith(MdConstants.DeepLinkPrefix.list) -> List
                 else -> None
             }
         }
 
         fun removePrefix(query: String, deepLinkType: DeepLinkType): String {
             return when (deepLinkType) {
-                Manga -> query.removePrefix(MdConstants.DeepLinkPrefix.manga)
+                Author -> query.removePrefix(MdConstants.DeepLinkPrefix.author)
                 Group -> query.removePrefix(MdConstants.DeepLinkPrefix.group)
+                Manga -> query.removePrefix(MdConstants.DeepLinkPrefix.manga)
+                List -> query.removePrefix(MdConstants.DeepLinkPrefix.list)
                 None -> query
             }
         }

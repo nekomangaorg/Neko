@@ -18,8 +18,7 @@ class MdUtil {
         const val chapterSuffix = "/chapter/"
 
         const val mangaUrl = "$apiUrl/manga"
-        const val PREFIX_ID_SEARCH = "id:"
-        const val PREFIX_GROUP_ID_SEARCH = "grp:"
+
         fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
 
         fun coverUrl(mangaId: String, coverId: String) =

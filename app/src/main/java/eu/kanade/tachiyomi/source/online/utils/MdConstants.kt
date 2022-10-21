@@ -64,8 +64,10 @@ object MdConstants {
     }
 
     object DeepLinkPrefix {
-        const val manga = "id:"
-        const val group = "grp:"
+        const val author = "author:"
+        const val group = "group:"
+        const val list = "list:"
+        const val manga = "manga:"
     }
 
     object SearchParameters {

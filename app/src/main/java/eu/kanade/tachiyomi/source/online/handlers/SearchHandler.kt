@@ -176,8 +176,8 @@ class SearchHandler {
 
     suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
         return withContext(Dispatchers.IO) {
-            if (query.startsWith(MdUtil.PREFIX_ID_SEARCH)) {
-                val realQuery = query.removePrefix(MdUtil.PREFIX_ID_SEARCH)
+            if (query.startsWith("id:")) {
+                val realQuery = query.removePrefix("id:")
                 val response = service.viewManga(realQuery)
                     .onFailure {
                         val type = "trying to view manga $realQuery"
@@ -192,8 +192,8 @@ class SearchHandler {
 
                 queryParameters["limit"] = MdConstants.Limits.manga
                 queryParameters["offset"] = (MdUtil.getMangaListOffset(page))
-                if (query.startsWith(MdUtil.PREFIX_GROUP_ID_SEARCH)) {
-                    val groupId = query.removePrefix(MdUtil.PREFIX_GROUP_ID_SEARCH)
+                if (query.startsWith("grp:")) {
+                    val groupId = query.removePrefix("grp:")
                     if (groupId.isUUID().not()) {
                         throw Exception("Invalid Group ID must be UUID")
                     }

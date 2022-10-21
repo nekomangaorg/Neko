@@ -18,17 +18,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
@@ -244,33 +249,49 @@ fun FilterBrowseSheet(
                     QueryType.Group -> {
                         R.string.scanlator_group
                     }
+                    QueryType.List -> {
+                        R.string.list_id
+                    }
                 }
+
+                val isError = remember(filters.query.text) {
+                    if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
+                        false
+                    } else {
+                        !filters.query.text.isUUID()
+                    }
+                }
+
                 SearchFooter(
                     themeColorState = themeColorState,
                     labelText = stringResource(id = titleRes),
                     showDivider = false,
                     title = filters.query.text,
+                    isError = isError,
                     textChanged = { text: String -> filterChanged(filters.query.copy(text = text)) },
                     search = { filterClick() },
                 )
 
-                Row(Modifier.fillMaxWidth(), Arrangement.Center) {
+                FlowRow(Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 8.dp) {
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Title,
                         { filterChanged(NewFilter.Query("", QueryType.Title)) },
                         stringResource(id = R.string.title),
                     )
-                    Gap(8.dp)
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Author,
                         { filterChanged(NewFilter.Query("", QueryType.Author)) },
                         stringResource(id = R.string.author),
                     )
-                    Gap(8.dp)
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Group,
                         { filterChanged(NewFilter.Query("", QueryType.Group)) },
                         stringResource(id = R.string.scanlator_group),
+                    )
+                    FilterChipWrapper(
+                        filters.queryMode == QueryType.List,
+                        { filterChanged(NewFilter.Query("", QueryType.List)) },
+                        stringResource(id = R.string.list_id),
                     )
                 }
             }
@@ -535,8 +556,6 @@ fun SavedFilters(
     AnimatedVisibility(visible = visible, enter = slideEnter(), exit = slideExit()) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
-            Text(text = stringResource(id = R.string.saved_filter), modifier = Modifier.padding(start = 16.dp), style = MaterialTheme.typography.labelMedium)
-
             LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 item { Gap(4.dp) }
                 items(savedFilters) { filter ->
@@ -548,7 +567,6 @@ fun SavedFilters(
 
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
@@ -559,16 +577,34 @@ fun SavedFilters(
                         false -> R.string.make_default to true
                     }
 
-                    TextButton(onClick = { deleteFilterClick(nameOfEnabledFilter) }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                        Text(text = stringResource(id = R.string.delete_filter), style = MaterialTheme.typography.titleSmall)
-                    }
 
-                    ElevatedButton(
+                    FilterChip(
+                        selected = false,
+                        onClick = { deleteFilterClick(nameOfEnabledFilter) },
+                        shape = RoundedCornerShape(100),
+                        label = { Text(text = stringResource(id = R.string.delete_filter), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
+                            labelColor = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                        ),
+                    )
+
+                    FilterChip(
+                        selected = false,
                         onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
-                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
-                    ) {
-                        Text(text = stringResource(id = textRes), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
-                    }
+                        shape = RoundedCornerShape(100),
+                        label = { Text(text = stringResource(id = textRes), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
+                            labelColor = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
+                        ),
+                    )
                 }
             }
         }

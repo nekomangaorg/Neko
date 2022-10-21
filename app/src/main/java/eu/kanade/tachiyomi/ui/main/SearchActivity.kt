@@ -12,7 +12,7 @@ import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseComposeController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -38,9 +39,9 @@ class SearchActivity : MainActivity() {
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
-                rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                ) && rootSearchController !is SmallToolbarInterface
+                    rootSearchController is RootSearchInterface ||
+                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                    ) && rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
             } else {
@@ -138,15 +139,24 @@ class SearchActivity : MainActivity() {
                         if (router.backstackSize > 1) {
                             router.popToRoot()
                         }
-                        val (query, mangaDeepLink) = if (path.equals("GROUP", true)) {
-                            Pair("${MdUtil.PREFIX_GROUP_ID_SEARCH}$id", false)
-                        } else {
-                            Pair("${MdUtil.PREFIX_ID_SEARCH}$id", true)
+
+                        val query = when {
+                            path.equals("GROUP", true) -> {
+                                MdConstants.DeepLinkPrefix.group + id
+                            }
+                            path.equals("AUTHOR", true) -> {
+                                MdConstants.DeepLinkPrefix.author + id
+                            }
+                            path.equals("LIST", true) -> {
+                                MdConstants.DeepLinkPrefix.list + id
+                            }
+                            else -> {
+                                MdConstants.DeepLinkPrefix.manga + id
+                            }
                         }
                         router.replaceTopController(
-                            BrowseSourceController(
+                            BrowseComposeController(
                                 query,
-                                mangaDeepLink,
                             ).withFadeTransaction(),
                         )
                     }

@@ -78,6 +78,7 @@ sealed class NewFilter {
 enum class QueryType {
     Title,
     Author,
-    Group
+    Group,
+    List
 }
 

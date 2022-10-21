@@ -256,6 +256,26 @@ class BrowseComposePresenter(
                                 it.copy(otherResults = dr.toImmutableList(), screenType = BrowseScreenType.Other, initialLoading = false)
                             }
                         }
+                    } else if (queryMode == QueryType.List) {
+                        browseRepository.getList(uuid).onFailure {
+                            _browseScreenState.update { state ->
+                                state.copy(error = it.message(), initialLoading = false)
+                            }
+                        }.onSuccess { allDisplayManga ->
+                            _browseScreenState.update { state ->
+                                state.copy(
+                                    screenType = BrowseScreenType.Filter,
+                                    displayMangaHolder = DisplayMangaHolder(
+                                        BrowseScreenType.Filter,
+                                        allDisplayManga.toImmutableList(),
+                                        allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                                    ),
+                                    initialLoading = false,
+                                    pageLoading = false,
+                                    endReached = true,
+                                )
+                            }
+                        }
                     } else {
                         paginator.loadNextItems()
                     }
@@ -272,7 +292,54 @@ class BrowseComposePresenter(
                         controller?.openManga(dm.mangaId)
                     }
                 }
-                else -> Unit
+                DeepLinkType.List -> {
+                    val searchFilters = createInitialDexFilter("").copy(queryMode = QueryType.List, query = NewFilter.Query(text = uuid, type = QueryType.List))
+                    _browseScreenState.update {
+                        it.copy(filters = searchFilters)
+                    }
+                    if (!_browseScreenState.value.handledIncomingQuery) {
+                        _browseScreenState.update { it.copy(handledIncomingQuery = true) }
+                    }
+                    browseRepository.getList(uuid).onFailure {
+                        _browseScreenState.update { state ->
+                            state.copy(error = it.message(), initialLoading = false)
+                        }
+                    }.onSuccess { allDisplayManga ->
+                        _browseScreenState.update { state ->
+                            state.copy(
+                                screenType = BrowseScreenType.Filter,
+                                displayMangaHolder = DisplayMangaHolder(
+                                    BrowseScreenType.Filter,
+                                    allDisplayManga.toImmutableList(),
+                                    allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                                ),
+                                initialLoading = false,
+                                pageLoading = false,
+                                endReached = true,
+                            )
+                        }
+                    }
+                }
+                DeepLinkType.Author -> {
+                    val searchFilters = createInitialDexFilter("").copy(authorId = NewFilter.AuthorId(uuid = uuid))
+                    _browseScreenState.update {
+                        it.copy(filters = searchFilters)
+                    }
+                    if (!_browseScreenState.value.handledIncomingQuery) {
+                        _browseScreenState.update { it.copy(handledIncomingQuery = true) }
+                    }
+                    paginator.loadNextItems()
+                }
+                DeepLinkType.Group -> {
+                    val searchFilters = createInitialDexFilter("").copy(groupId = NewFilter.GroupId(uuid = uuid))
+                    _browseScreenState.update {
+                        it.copy(filters = searchFilters)
+                    }
+                    if (!_browseScreenState.value.handledIncomingQuery) {
+                        _browseScreenState.update { it.copy(handledIncomingQuery = true) }
+                    }
+                    paginator.loadNextItems()
+                }
             }
         }
     }
@@ -501,6 +568,9 @@ class BrowseComposePresenter(
                         }
                         QueryType.Group -> {
                             browseScreenState.value.filters.copy(queryMode = QueryType.Group, query = newFilter)
+                        }
+                        QueryType.List -> {
+                            browseScreenState.value.filters.copy(queryMode = QueryType.List, query = newFilter)
                         }
                     }
                 }
