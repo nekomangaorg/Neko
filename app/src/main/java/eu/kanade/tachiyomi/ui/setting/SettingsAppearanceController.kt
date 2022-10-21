@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
@@ -85,12 +85,12 @@ class SettingsAppearanceController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.navigation
 
-            switchPreference {
+            /*switchPreference {
                 key = Keys.hideBottomNavOnScroll
                 titleRes = R.string.hide_bottom_nav
                 summaryRes = R.string.hides_on_scroll
                 defaultValue = true
-            }
+            }*/
 
             intListPreference(activity) {
                 key = Keys.sideNavIconAlignment

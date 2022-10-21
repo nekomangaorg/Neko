@@ -4,36 +4,42 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.coroutines.binding.binding
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
-import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
+import eu.kanade.tachiyomi.source.online.handlers.ListHandler
+import eu.kanade.tachiyomi.source.online.handlers.ListResults
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
+import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
@@ -42,13 +48,13 @@ open class MangaDex : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
 
-    private val filterHandler: FilterHandler by injectLazy()
-
     private val followsHandler: FollowsHandler by injectLazy()
 
     private val mangaHandler: MangaHandler by injectLazy()
 
     private val searchHandler: SearchHandler by injectLazy()
+
+    private val listHandler: ListHandler by injectLazy()
 
     private val pageHandler: PageHandler by injectLazy()
 
@@ -96,8 +102,52 @@ open class MangaDex : HttpSource() {
         }
     }
 
-    suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
-        return searchHandler.search(page, query, filters)
+    suspend fun search(page: Int, filters: DexFilters): Result<MangaListPage, ResultError> {
+        return searchHandler.search(page, filters)
+    }
+
+    suspend fun searchForManga(uuid: String): Result<MangaListPage, ResultError> {
+        return searchHandler.searchForManga(uuid)
+    }
+
+    suspend fun searchForAuthor(authorQuery: String): Result<ResultListPage, ResultError> {
+        return searchHandler.searchForAuthor(authorQuery)
+    }
+
+    suspend fun searchForGroup(groupQuery: String): Result<ResultListPage, ResultError> {
+        return searchHandler.searchForGroup(groupQuery)
+    }
+
+    suspend fun fetchList(listId: String): Result<ListResults, ResultError> {
+        return listHandler.retrieveList(listId)
+    }
+
+    suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>): Result<List<ListResults>, ResultError> {
+        return withIOContext {
+            binding {
+                val seasonal = async {
+                    fetchList(listId).bind()
+                }
+                val latestChapter = async {
+                    latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs, limit = MdConstants.Limits.latestSmaller)
+                        .andThen { mangaListPage ->
+                            Ok(ListResults(displayScreenType = DisplayScreenType.LatestChapters(), sourceManga = mangaListPage.sourceManga))
+                        }.bind()
+                }
+
+                val recentlyAdded = async {
+                    searchHandler.recentlyAdded(1).andThen { mangaListPage ->
+                        Ok(ListResults(displayScreenType = DisplayScreenType.RecentlyAdded(), sourceManga = mangaListPage.sourceManga))
+                    }.bind()
+                }
+
+                listOf(seasonal.await(), latestChapter.await(), recentlyAdded.await())
+            }
+        }
+    }
+
+    suspend fun recentlyAdded(page: Int): Result<MangaListPage, ResultError> {
+        return searchHandler.recentlyAdded(page)
     }
 
     suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
@@ -128,7 +178,7 @@ open class MangaDex : HttpSource() {
         return imageHandler.getImage(page, isLogged())
     }
 
-    suspend fun fetchAllFollows(): Result<Map<Int, List<SourceManga>>, ResultError> {
+    suspend fun fetchAllFollows(): Result<List<SourceManga>, ResultError> {
         return followsHandler.fetchAllFollows()
     }
 
@@ -181,8 +231,4 @@ open class MangaDex : HttpSource() {
 
     override val headers: Headers
         get() = network.headers
-
-    override fun getFilterList(): FilterList {
-        return filterHandler.getMDFilterList()
-    }
 }

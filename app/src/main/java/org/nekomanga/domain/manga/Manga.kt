@@ -13,6 +13,7 @@ data class DisplayManga(
     val url: String,
     val title: String,
     val displayText: String = "",
+    val isVisible: Boolean = true,
     @StringRes val displayTextRes: Int? = null,
 )
 

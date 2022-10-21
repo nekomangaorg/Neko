@@ -33,7 +33,8 @@ fun BaseSheet(
     themeColor: ThemeColorState,
     maxSheetHeightPercentage: Float = .7f,
     minSheetHeightPercentage: Float = 0f,
-    paddingAroundContent: Dp = 16.dp,
+    topPaddingAroundContent: Dp = 16.dp,
+    bottomPaddingAroundContent: Dp = 16.dp,
     showHandle: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -48,25 +49,26 @@ fun BaseSheet(
                 .requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
             shape = RoundedCornerShape(Shapes.sheetRadius),
         ) {
-            if (showHandle) {
-                Gap(16.dp)
-                Box(
-                    modifier = Modifier
-                        .width(50.dp)
-                        .height(4.dp)
-                        .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast), CircleShape)
-                        .align(Alignment.CenterHorizontally),
-                )
-            }
-
             Column(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .imePadding(),
             ) {
-                Gap(paddingAroundContent)
+                if (showHandle) {
+                    Gap(16.dp)
+                    Box(
+                        modifier = Modifier
+                            .width(50.dp)
+                            .height(4.dp)
+                            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast), CircleShape)
+                            .align(Alignment.CenterHorizontally),
+                    )
+                }
+
+
+                Gap(topPaddingAroundContent)
                 content()
-                Gap(paddingAroundContent)
+                Gap(bottomPaddingAroundContent)
             }
         }
     }

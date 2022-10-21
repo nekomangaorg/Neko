@@ -5,6 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,11 +16,21 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.presentation.components.dropdown.MainDropdownMenu
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 
-fun ListGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
+fun listGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
     return when (isList) {
         true -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_grid), icon = Icons.Filled.ViewModule, onClick = onClick, isEnabled = isEnabled)
         false -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_list), icon = Icons.Filled.ViewList, onClick = onClick, isEnabled = isEnabled)
+    }
+}
+
+fun showLibraryEntriesAction(showEntries: Boolean, onClick: () -> Unit): AppBar.Action {
+    return when (showEntries) {
+        true -> AppBar.Action(title = UiText.StringResource(R.string.hide_library_manga), icon = Icons.Filled.VisibilityOff, onClick = onClick)
+        false -> AppBar.Action(title = UiText.StringResource(R.string.show_library_manga), icon = Icons.Filled.Visibility, onClick = onClick)
     }
 }
 
@@ -54,10 +66,42 @@ fun AppBarActions(
             }.toPersistentList(),
         )
     }
+
+    val mainDropDown = actions.filterIsInstance<AppBar.MainDropdown>().firstOrNull()
+    if (mainDropDown != null) {
+        ToolTipIconButton(
+            toolTipLabel = stringResource(R.string.more),
+            icon = Icons.Filled.MoreVert,
+            buttonClicked = { showMenu = !showMenu },
+        )
+
+        mainDropDown.menuShowing(showMenu)
+
+        MainDropdownMenu(
+            expanded = showMenu,
+            incognitoModeEnabled = mainDropDown.incognitoMode,
+            incognitoModeClick = mainDropDown.incognitoModeClick,
+            settingsClick = mainDropDown.settingsClick,
+            statsClick = mainDropDown.statsClick,
+            aboutClick = mainDropDown.aboutClick,
+            helpClick = mainDropDown.helpClick,
+            onDismiss = { showMenu = false },
+        )
+    }
 }
 
 object AppBar {
     interface AppBarAction
+
+    data class MainDropdown(
+        val incognitoMode: Boolean,
+        val incognitoModeClick: () -> Unit,
+        val settingsClick: () -> Unit,
+        val statsClick: () -> Unit,
+        val aboutClick: () -> Unit,
+        val helpClick: () -> Unit,
+        val menuShowing: (Boolean) -> Unit,
+    ) : AppBarAction
 
     data class Action(
         val title: UiText,

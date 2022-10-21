@@ -14,29 +14,42 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
-import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, textChanged: (String) -> Unit, search: (String) -> Unit) {
+fun ColumnScope.SearchFooter(
+    themeColorState: ThemeColorState,
+    title: String,
+    labelText: String,
+    enabled: Boolean = true,
+    isError: Boolean = false,
+    showDivider: Boolean = true,
+    textChanged: (String) -> Unit,
+    search: (String) -> Unit,
+) {
     val focusManager = LocalFocusManager.current
 
-    Divider()
-    Gap(4.dp)
+    if (showDivider) {
+        Divider()
+        Gap(4.dp)
+    }
 
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         value = title,
+        enabled = enabled,
+        singleLine = true,
         label = {
-            Text(text = stringResource(id = R.string.title))
+            Text(text = labelText, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         trailingIcon = {
             if (title.isNotEmpty()) {
@@ -45,11 +58,13 @@ fun ColumnScope.SearchFooter(themeColorState: ThemeColorState, title: String, te
                 }
             }
         },
+        isError = isError,
         onValueChange = { textChanged(it) },
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedLabelColor = themeColorState.buttonColor,
             focusedBorderColor = themeColorState.buttonColor,
             cursorColor = themeColorState.buttonColor,
+            disabledBorderColor = Color.Cyan,
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Search,

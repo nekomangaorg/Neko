@@ -7,11 +7,11 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.nekomanga.presentation.extensions.surfaceColorAtElevation
 
 @Composable
 fun snackbarHost(snackbarHostState: SnackbarHostState, actionColor: Color? = null): @Composable () -> Unit {

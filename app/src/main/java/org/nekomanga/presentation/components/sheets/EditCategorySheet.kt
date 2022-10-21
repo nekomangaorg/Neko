@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
@@ -44,6 +45,7 @@ fun EditCategorySheet(
     categories: ImmutableList<CategoryItem>,
     mangaCategories: ImmutableList<CategoryItem> = persistentListOf(),
     themeColorState: ThemeColorState = defaultThemeColorState(),
+    bottomContentPadding: Dp = 16.dp,
     cancelClick: () -> Unit,
     addNewCategory: (String) -> Unit,
     confirmClicked: (List<CategoryItem>) -> Unit,
@@ -59,7 +61,7 @@ fun EditCategorySheet(
 
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .4
 
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f, bottomPaddingAroundContent = bottomContentPadding) {
             if (showAddCategoryDialog) {
                 AddCategoryDialog(themeColorState = themeColorState, currentCategories = categories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
             }

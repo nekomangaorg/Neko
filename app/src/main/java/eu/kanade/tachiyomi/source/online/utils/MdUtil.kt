@@ -18,8 +18,7 @@ class MdUtil {
         const val chapterSuffix = "/chapter/"
 
         const val mangaUrl = "$apiUrl/manga"
-        const val PREFIX_ID_SEARCH = "id:"
-        const val PREFIX_GROUP_ID_SEARCH = "grp:"
+
         fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
 
         fun coverUrl(mangaId: String, coverId: String) =
@@ -28,19 +27,15 @@ class MdUtil {
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
         const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
 
-        const val mangaLimit = 20
-        const val artworkLimit = 100
-        const val latestChapterLimit = 100
-
         /**
          * Get the manga offset pages are 1 based, so subtract 1
          */
-        fun getMangaListOffset(page: Int): String = (mangaLimit * (page - 1)).toString()
+        fun getMangaListOffset(page: Int): Int = (MdConstants.Limits.manga * (page - 1))
 
         /**
          * Get the latest chapter  offset pages are 1 based, so subtract 1
          */
-        fun getLatestChapterListOffset(page: Int): Int = (latestChapterLimit * (page - 1))
+        fun getLatestChapterListOffset(page: Int): Int = (MdConstants.Limits.latest * (page - 1))
 
         val jsonParser =
             Json {

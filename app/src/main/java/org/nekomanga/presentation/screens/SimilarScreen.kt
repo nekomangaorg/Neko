@@ -1,6 +1,8 @@
 package org.nekomanga.presentation.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -38,10 +40,10 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBarActions
-import org.nekomanga.presentation.components.ListGridAppBarAction
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Shapes
@@ -57,8 +59,12 @@ fun SimilarScreen(
     onRefresh: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
-
+    val sheetState =
+        rememberModalBottomSheetState(
+            initialValue = ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true,
+            animationSpec = tween(durationMillis = 150, easing = LinearEasing),
+        )
     var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
 
     /**
@@ -95,7 +101,7 @@ fun SimilarScreen(
                 AppBarActions(
                     actions =
                     listOf(
-                        ListGridAppBarAction(
+                        listGridAppBarAction(
                             isList = similarScreenState.value.isList,
                             onClick = switchDisplayClick,
                         ),
@@ -115,7 +121,7 @@ fun SimilarScreen(
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
 
-                    )
+                        )
                 },
             ) {
                 val haptic = LocalHapticFeedback.current

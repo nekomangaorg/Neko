@@ -77,17 +77,15 @@ data class IncludesAttributesDto(
 
 @Serializable
 data class AuthorListDto(
-    val results: List<AuthorDto>,
+    val result: String,
+    val data: List<AuthorDto>,
+    val limit: Int,
+    val offset: Int,
+    val total: Int,
 )
 
 @Serializable
 data class AuthorDto(
-    val result: String,
-    val data: AuthorDataDto,
-)
-
-@Serializable
-data class AuthorDataDto(
     val id: String,
     val attributes: AuthorAttributesDto,
 )
@@ -95,6 +93,7 @@ data class AuthorDataDto(
 @Serializable
 data class AuthorAttributesDto(
     val name: String,
+    val biography: JsonElement,
 )
 
 @Serializable

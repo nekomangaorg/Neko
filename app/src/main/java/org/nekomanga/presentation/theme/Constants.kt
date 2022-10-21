@@ -8,5 +8,7 @@ object Shapes {
 }
 
 object Padding {
-    val horizontalPadding = 16.dp
+    val smallHorizontalPadding = 8.dp
+    val mediumHorizontalPadding = 16.dp
+    val navBarSize = 68.dp
 }

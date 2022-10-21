@@ -36,6 +36,16 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 
 @Composable
+fun NoResultsEmptyScreen(contentPaddingValues: PaddingValues) {
+    EmptyScreen(
+        iconicImage = CommunityMaterial.Icon.cmd_compass_off,
+        iconSize = 176.dp,
+        message = stringResource(id = R.string.no_results_found),
+        contentPadding = contentPaddingValues,
+    )
+}
+
+@Composable
 fun EmptyScreen(
     icon: ImageVector? = null,
     iconicImage: IIcon? = null,

@@ -46,7 +46,7 @@ class FollowsHandler {
     /**
      * fetch all follows
      */
-    suspend fun fetchAllFollows(): Result<Map<Int, List<SourceManga>>, ResultError> {
+    suspend fun fetchAllFollows(): Result<List<SourceManga>, ResultError> {
         return withContext(Dispatchers.IO) {
             return@withContext runCatching {
                 val readingFuture = async {
@@ -87,14 +87,14 @@ class FollowsHandler {
         return authService.userFollowList(offset).getOrResultError("Failed to get follows")
     }
 
-    private fun allFollowsParser(mangaDataDtoList: List<MangaDataDto>, readingStatusMap: Map<String, String?>): Map<Int, List<SourceManga>> {
+    private fun allFollowsParser(mangaDataDtoList: List<MangaDataDto>, readingStatusMap: Map<String, String?>): List<SourceManga> {
         val coverQuality = preferences.thumbnailQuality()
         return mangaDataDtoList.asSequence().map {
             val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
-            followStatus to it.toSourceManga(coverQuality)
+            it.toSourceManga(coverQuality, displayTextRes = followStatus.stringRes)
         }
-            .sortedBy { it.second.title }
-            .groupBy({ it.first.int }, { it.second })
+            .sortedBy { it.title }
+            .toList()
     }
 
     /**

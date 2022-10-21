@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.domain.network.ResultError
@@ -29,10 +29,9 @@ class LatestChapterHandler {
 
     private val uniqueManga = mutableSetOf<String>()
 
-    suspend fun getPage(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
+    suspend fun getPage(page: Int = 1, blockedScanlatorUUIDs: List<String>, limit: Int = MdConstants.Limits.latest): Result<MangaListPage, ResultError> {
         if (page == 1) uniqueManga.clear()
         return withContext(Dispatchers.IO) {
-            val limit = MdUtil.latestChapterLimit
             val offset = MdUtil.getLatestChapterListOffset(page)
 
             val langs = MdUtil.getLangsToShow(preferencesHelper)
@@ -49,9 +48,13 @@ class LatestChapterHandler {
 
     private suspend fun latestChapterParse(chapterListDto: ChapterListDto): Result<MangaListPage, ResultError> {
         return runCatching {
-            val mangaIds = chapterListDto.data.asSequence().map { it.relationships }.flatten()
-                .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct()
-                .filter { !uniqueManga.contains(it) }.toList()
+            val result = chapterListDto.data
+                .groupBy { chapterListDto ->
+                    chapterListDto.relationships
+                        .first { relationshipDto -> relationshipDto.type == MdConstants.Types.manga }.id
+                }.filterNot { uniqueManga.contains(it.key) }
+
+            val mangaIds = result.keys.toList()
 
             uniqueManga.addAll(mangaIds)
 
@@ -77,11 +80,13 @@ class LatestChapterHandler {
 
                     val thumbQuality = preferencesHelper.thumbnailQuality()
                     val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }
+                        .sortedByDescending { result[it.id]!!.first().attributes.readableAt }
                         .map {
-                            it.toSourceManga(thumbQuality)
+                            val chapterName = result[it.id]?.firstOrNull()?.buildChapterName() ?: ""
+                            it.toSourceManga(coverQuality = thumbQuality, displayText = chapterName)
                         }
 
-                    Ok(MangaListPage(sourceManga = mangaList.toImmutableList(), hasNextPage = hasMoreResults))
+                    Ok(MangaListPage(sourceManga = mangaList.toPersistentList(), hasNextPage = hasMoreResults))
                 }
         }.getOrElse {
             XLog.e("Error parsing latest chapters", it)

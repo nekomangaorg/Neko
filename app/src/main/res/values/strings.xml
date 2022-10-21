@@ -34,6 +34,19 @@
     <string name="licensed">Licensed</string>
     <string name="completed">Completed</string>
 
+    <!-- Demographic -->
+    <string name="shounen">Shounen</string>
+    <string name="shoujo">Shoujo</string>
+    <string name="seinen">Seinen</string>
+    <string name="josei">Josei</string>
+
+    <!-- Content Rating -->
+    <string name="safe">Safe</string>
+    <string name="suggestive">Suggestive</string>
+    <string name="erotica">Erotica</string>
+    <string name="pornographic">Pornographic</string>
+
+
     <!-- Security -->
     <string name="unlock_library">Unlock to access Library</string>
     <string name="unlock">Unlock</string>
@@ -297,6 +310,7 @@
     <string name="affects_library_grid">Affects library grid covers</string>
 
     <!-- Browse -->
+    <string name="home_page">Home page</string>
     <string name="search_filters">Search filters</string>
     <string name="no_more_results">No more results</string>
     <string name="no_results_found">No results found</string>
@@ -304,9 +318,29 @@
     <string name="other">Other</string>
     <string name="global_search">Global search…</string>
     <string name="label_global_search">Global search</string>
-    <string name="latest">Latest</string>
+    <string name="latest">Latest uploads</string>
+    <string name="recently_added">Recently added</string>
     <string name="browse">Browse</string>
+    <string name="has_available_chapters">Has available chapters</string>
+    <string name="tag_inclusion_mode">Tag inclusion mode</string>
+    <string name="tag_exclusion_mode">Tag exclusion mode</string>
+    <string name="original_language">Original Language</string>
+    <string name="author_id">Author id</string>
+    <string name="list_id">List id</string>
+    <string name="scanlator_group_id">Group id</string>
+    <string name="scanlator_group">Group</string>
+    <string name="and">And</string>
+    <string name="or">Or</string>
+    <string name="publication_demographic">Publication Demographic</string>
+    <string name="tags">Tags</string>
     <string name="in_library">In Library</string>
+    <string name="make_default">Make default</string>
+    <string name="remove_default">Remove default</string>
+    <string name="save_filter">Save filter</string>
+    <string name="delete_filter">Delete filter</string>
+    <string name="saved_filter">Saved filter</string>
+    <string name="filter_with_name_exists">A filter with that name already exists</string>
+    <string name="filter_cannot_be_blank">Category name cannot be blank</string>
     <string name="search_extensions">Search extensions…</string>
     <string name="all_sources">All sources</string>
     <string name="sources">Sources</string>
@@ -653,6 +687,8 @@
     <string name="help">Help</string>
     <string name="search_settings">Search settings</string>
 
+    <string name="turn_on_incognito_mode">Turn on incognito mode</string>
+    <string name="turn_off_incognito_mode">Turn off incognito mode</string>
     <string name="turn_on_">Turn on %s</string>
     <string name="turn_off_">Turn off %s</string>
     <string name="incognito_mode">Incognito mode</string>
@@ -942,7 +978,7 @@
     <string name="mean_score">Avg user score</string>
     <string name="manga_tracked">Tracked manga</string>
     <string name="chapters_downloaded">Downloaded chapters</string>
-    <string name="tags">Total tags</string>
+    <string name="total_tags">Total tags</string>
     <string name="manga_local">Local manga</string>
     <string name="global_update_manga">Globally updated</string>
     <string name="unable_to_generate_stats">Library empty, unable to generate stats</string>
@@ -1232,7 +1268,7 @@
     <string name="sync_follows_failed">Syncing follows failed</string>
     <string name="follows">My follows</string>
     <string name="add_to_follows">Add to MangaDex follows</string>
-    <string name="follows_status">Follows Sstatus</string>
+    <string name="follows_status">Follows Status</string>
     <string name="follows_unfollowed">Unfollowed</string>
     <string name="follows_reading">Reading</string>
     <string name="follows_completed">Completed</string>

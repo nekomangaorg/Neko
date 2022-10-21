@@ -59,7 +59,7 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
             userScore to context.getString(R.string.mean_score),
             statsState.trackerCount.toString() to context.getString(R.string.trackers),
             numberFormat.format(statsState.trackedCount).toString() to context.getString(R.string.manga_tracked),
-            numberFormat.format(statsState.tagCount).toString() to context.getString(R.string.tags),
+            numberFormat.format(statsState.tagCount).toString() to context.getString(R.string.total_tags),
             numberFormat.format(statsState.mergeCount).toString() to context.getString(R.string.merged),
         ).toImmutableList()
     }

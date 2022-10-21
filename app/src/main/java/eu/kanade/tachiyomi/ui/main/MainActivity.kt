@@ -88,7 +88,7 @@ import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
-import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
@@ -306,7 +306,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             nav.selectedItemId =
                 when (router.backstack.firstOrNull()?.controller) {
                     is RecentsController -> R.id.nav_recents
-                    is BrowseSourceController -> R.id.nav_browse
+                    is BrowseController -> R.id.nav_browse
                     else -> R.id.nav_library
                 }
         }
@@ -316,9 +316,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                    continueSwitchingTabs = true
-                    this@MainActivity.nav.selectedItemId = id
-                }
+                        continueSwitchingTabs = true
+                        this@MainActivity.nav.selectedItemId = id
+                    }
                 ) {
                     return@setOnItemSelectedListener false
                 }
@@ -330,7 +330,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     when (id) {
                         R.id.nav_library -> LibraryController()
                         R.id.nav_recents -> RecentsController()
-                        else -> BrowseSourceController()
+                        else -> BrowseController()
                     },
                     id,
                 )
@@ -362,9 +362,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
-                rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                ) &&
+                    rootSearchController is RootSearchInterface ||
+                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                    ) &&
                 rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
@@ -508,7 +508,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
         backPressedCallback?.isEnabled =
             (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) ||
-            router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
+                router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
     }
 
     override fun onTitleChanged(title: CharSequence?, color: Int) {
@@ -804,7 +804,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             SHORTCUT_SOURCE -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
-                router.pushController(BrowseSourceController(extras).withFadeTransaction())
+                router.pushController(BrowseController().withFadeTransaction())
             }
             SHORTCUT_DOWNLOADS -> {
                 nav.selectedItemId = R.id.nav_recents
@@ -831,10 +831,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
                 outContent.webUri = Uri.parse(url)
             }
-            is BrowseSourceController -> {
-                val source = controller.presenter.source
-                outContent.webUri = Uri.parse(source.baseUrl)
-            }
+            /* is BrowseSourceController -> {
+                 val source = controller.presenter.source
+                 outContent.webUri = Uri.parse(source.baseUrl)
+             }*/
         }
     }
 
@@ -1159,6 +1159,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.sideNav?.let { sideNav ->
             val controllers = (router.backstack.map { it?.controller } + extraController)
                 .filterNotNull()
+                .filterNot { it is BrowseController }
                 .distinct()
             val navWidth = sideNav.width.takeIf { it != 0 } ?: 80.dpToPx
             controllers.forEach { controller ->

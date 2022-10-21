@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.model
 
 import android.os.Parcelable
-import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -90,9 +89,5 @@ enum class MangaTag(val uuid: String, val prettyPrint: String) : Parcelable {
 
         fun fromString(value: String): MangaTag =
             values().first { it.prettyPrint.equals(value, true) }
-
-        fun toTagList(): List<FilterHandler.Tag> {
-            return values().map { FilterHandler.Tag(it.uuid, it.prettyPrint) }
-        }
     }
 }

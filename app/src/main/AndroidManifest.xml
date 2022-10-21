@@ -125,6 +125,8 @@
                 <data android:pathPattern="/manga/..*" />
                 <data android:pathPattern="/title/..*" />
                 <data android:pathPattern="/group/..*" />
+                <data android:pathPattern="/list/..*" />
+                <data android:pathPattern="/author/..*" />
             </intent-filter>
 
 

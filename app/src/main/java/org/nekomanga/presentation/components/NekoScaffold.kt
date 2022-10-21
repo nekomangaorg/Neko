@@ -4,11 +4,14 @@ import ToolTipIconButton
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,12 +23,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.mikepenz.iconics.compose.Image
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
@@ -36,6 +43,8 @@ fun NekoScaffold(
     onNavigationIconClicked: () -> Unit,
     modifier: Modifier = Modifier,
     themeColorState: ThemeColorState = defaultThemeColorState(),
+    incognitoMode: Boolean = false,
+    isRoot: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
@@ -57,7 +66,7 @@ fun NekoScaffold(
         {
             CompositionLocalProvider(LocalRippleTheme provides (themeColorState.rippleTheme)) {
                 if (subtitle.isEmpty() && title.isNotEmpty()) {
-                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
+                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, isRoot, scrollBehavior)
                 } else if (title.isEmpty()) {
                     NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
                 } else {
@@ -154,7 +163,9 @@ private fun TitleOnlyTopAppBar(
     navigationIconLabel: String,
     navigationIcon: ImageVector,
     onNavigationIconClicked: () -> Unit,
-    actions: @Composable() (RowScope.() -> Unit),
+    actions: @Composable (RowScope.() -> Unit),
+    incognitoMode: Boolean,
+    isRoot: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     CenterAlignedTopAppBar(
@@ -172,11 +183,21 @@ private fun TitleOnlyTopAppBar(
             )
         },
         navigationIcon = {
-            ToolTipIconButton(
-                toolTipLabel = navigationIconLabel,
-                icon = navigationIcon,
-                buttonClicked = onNavigationIconClicked,
-            )
+            if (incognitoMode) {
+                Image(
+                    CommunityMaterial.Icon2.cmd_incognito_circle,
+                    colorFilter = ColorFilter.tint(LocalContentColor.current),
+                    modifier = Modifier
+                        .padding(start = 12.dp)
+                        .size(32.dp),
+                )
+            } else if (!isRoot) {
+                ToolTipIconButton(
+                    toolTipLabel = navigationIconLabel,
+                    icon = navigationIcon,
+                    buttonClicked = onNavigationIconClicked,
+                )
+            }
         },
         actions = actions,
         scrollBehavior = scrollBehavior,

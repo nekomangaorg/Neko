@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -96,7 +95,6 @@ abstract class HttpSource : Source {
     /**
      * Returns the list of filters for the source.
      */
-    override fun getFilterList() = FilterList()
 
     companion object {
         val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0"

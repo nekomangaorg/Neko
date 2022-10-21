@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import jp.wasabeef.gap.Gap
@@ -25,29 +26,39 @@ fun SortRow(
     sortChanged: (MangaConstants.SortState) -> Unit,
     rowText: String,
     modifier: Modifier = Modifier,
+    disabled: Boolean = false,
+    rowTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
+
+    val (tintColor, textColor) = when (disabled) {
+        true -> MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast) to MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast)
+        false -> themeColorState.buttonColor to MaterialTheme.colorScheme.onSurface
+    }
+
     Row(
         modifier = modifier
             .clickable {
-                changeSortState(sortState, sortChanged)
+                if (!disabled) {
+                    changeSortState(sortState, sortChanged)
+                }
             }
             .padding(horizontal = 12.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         when (sortState) {
             MangaConstants.SortState.Ascending -> {
-                Icon(imageVector = Icons.Filled.ArrowUpward, contentDescription = null, tint = themeColorState.buttonColor, modifier = Modifier.size(24.dp))
+                Icon(imageVector = Icons.Filled.ArrowUpward, contentDescription = null, tint = tintColor, modifier = Modifier.size(24.dp))
             }
             MangaConstants.SortState.Descending -> {
-                Icon(imageVector = Icons.Filled.ArrowDownward, contentDescription = null, tint = themeColorState.buttonColor, modifier = Modifier.size(24.dp))
+                Icon(imageVector = Icons.Filled.ArrowDownward, contentDescription = null, tint = tintColor, modifier = Modifier.size(24.dp))
             }
             MangaConstants.SortState.None -> {
                 Gap(24.dp)
             }
         }
         Gap(16.dp)
-        Text(text = rowText, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = rowText, style = rowTextStyle, color = textColor)
     }
 }
 

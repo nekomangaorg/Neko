@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.utils
 
+import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import org.nekomanga.domain.manga.SourceManga
@@ -23,7 +24,7 @@ fun MangaDataDto.toBasicManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = tr
     }
 }
 
-fun MangaDataDto.toSourceManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = true): SourceManga {
+fun MangaDataDto.toSourceManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = true, displayText: String = "", @StringRes displayTextRes: Int? = null): SourceManga {
     val thumbnail = this@toSourceManga.relationships
         .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.Types.coverArt }
         ?.attributes?.fileName
@@ -39,6 +40,8 @@ fun MangaDataDto.toSourceManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = t
                 this@toSourceManga.attributes.originalLanguage,
             ),
         ),
+        displayText = displayText,
+        displayTextRes = displayTextRes,
         currentThumbnail = thumbnail,
     )
 }

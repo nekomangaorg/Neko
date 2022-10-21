@@ -17,11 +17,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,6 +83,7 @@ fun MangaGrid(
     isComfortable: Boolean = true,
     onClick: (Long) -> Unit = {},
     onLongClick: (DisplayManga) -> Unit = {},
+    lastPage: Boolean = true,
     loadNextItems: () -> Unit = {},
 ) {
     val cells = GridCells.Fixed(columns)
@@ -101,10 +100,11 @@ fun MangaGrid(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
 
             LaunchedEffect(scrollState) {
-                if (index >= mangaList.size - 1) {
+                if (!lastPage && index >= mangaList.size - 1) {
                     loadNextItems()
                 }
             }
@@ -121,55 +121,58 @@ fun MangaGrid(
 }
 
 @Composable
-private fun MangaGridItem(
+fun MangaGridItem(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
     isComfortable: Boolean = true,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
+    modifier: Modifier = Modifier,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
-        Box {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(Shapes.coverRadius))
-                    .combinedClickable(
-                        onClick = onClick,
-                        onLongClick = onLongClick,
-                    )
-                    .padding(2.dp),
-            ) {
-                if (isComfortable) {
-                    Column {
-                        ComfortableGridItem(
-                            displayManga,
-                            displayManga.displayText,
-                            shouldOutlineCover,
-                        )
-                    }
-                } else {
-                    Box {
-                        CompactGridItem(
-                            displayManga,
-                            displayManga.displayText,
-                            shouldOutlineCover,
-                        )
-                    }
-                }
+    Box(modifier = modifier) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(Shapes.coverRadius))
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                )
+                .padding(2.dp),
+        ) {
+            val subtitleText = when (displayManga.displayTextRes) {
+                null -> displayManga.displayText
+                else -> stringResource(displayManga.displayTextRes)
             }
 
-            if (displayManga.inLibrary) {
-                val offset = (-2).dp
-                InLibraryBadge(offset, shouldOutlineCover)
+            if (isComfortable) {
+                Column {
+                    ComfortableGridItem(
+                        displayManga,
+                        subtitleText,
+                        shouldOutlineCover,
+                    )
+                }
+            } else {
+                Box {
+                    CompactGridItem(
+                        displayManga,
+                        subtitleText,
+                        shouldOutlineCover,
+                    )
+                }
             }
+        }
+
+        if (displayManga.inLibrary) {
+            InLibraryBadge(shouldOutlineCover)
         }
     }
 }
 
 @Composable
-private fun ColumnScope.ComfortableGridItem(
+fun ColumnScope.ComfortableGridItem(
     manga: DisplayManga,
-    displayText: String,
+    subtitleText: String,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -178,19 +181,19 @@ private fun ColumnScope.ComfortableGridItem(
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )
-    MangaTitle(
+    MangaGridTitle(
         title = manga.title,
-        hasSubtitle = displayText.isNotBlank(),
+        hasSubtitle = subtitleText.isNotBlank(),
 
-    )
+        )
 
-    DisplayText(displayText = displayText)
+    MangaGridSubtitle(subtitleText = subtitleText)
 }
 
 @Composable
-private fun BoxScope.CompactGridItem(
+fun BoxScope.CompactGridItem(
     manga: DisplayManga,
-    displayText: String,
+    subtitleText: String,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -218,13 +221,13 @@ private fun BoxScope.CompactGridItem(
                 .fillMaxWidth()
                 .align(Alignment.BottomStart),
         ) {
-            MangaTitle(
+            MangaGridTitle(
                 title = manga.title,
-                hasSubtitle = displayText.isNotBlank(),
+                hasSubtitle = subtitleText.isNotBlank(),
                 isComfortable = false,
             )
-            DisplayText(
-                displayText = displayText,
+            MangaGridSubtitle(
+                subtitleText = subtitleText,
                 isComfortable = false,
             )
         }
@@ -232,7 +235,7 @@ private fun BoxScope.CompactGridItem(
 }
 
 @Composable
-private fun MangaTitle(
+fun MangaGridTitle(
     title: String,
     maxLines: Int = 2,
     isComfortable: Boolean = true,
@@ -255,13 +258,14 @@ private fun MangaTitle(
 }
 
 @Composable
-private fun DisplayText(displayText: String, isComfortable: Boolean = true) {
-    if (displayText.isNotBlank()) {
+fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
+
+    if (subtitleText.isNotBlank()) {
         Text(
-            text = displayText,
+            text = subtitleText,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
-            color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White,
+            color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White.copy(alpha = NekoColors.mediumAlphaLowContrast),
             fontWeight = if (isComfortable) FontWeight.Normal else FontWeight.SemiBold,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier

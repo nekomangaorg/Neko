@@ -16,10 +16,10 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
 import eu.kanade.tachiyomi.source.online.handlers.ArtworkHandler
-import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
+import eu.kanade.tachiyomi.source.online.handlers.ListHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
@@ -30,11 +30,11 @@ import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
-import eu.kanade.tachiyomi.ui.follows.FollowsRepository
 import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
-import eu.kanade.tachiyomi.ui.source.latest.LatestRepository
+import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
+import eu.kanade.tachiyomi.ui.source.latest.DisplayRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
@@ -75,8 +75,6 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { MangaMappings(app.applicationContext) }
 
-        addSingleton(FilterHandler())
-
         addSingleton(FollowsHandler())
 
         addSingleton(ArtworkHandler())
@@ -86,6 +84,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(ApiMangaParser())
 
         addSingleton(SearchHandler())
+
+        addSingleton(ListHandler())
 
         addSingleton(PageHandler())
 
@@ -117,13 +117,13 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(SimilarRepository())
 
-        addSingleton(FollowsRepository())
-
         addSingleton(MangaUpdateCoordinator())
 
         addSingleton(TrackingCoordinator())
 
-        addSingleton(LatestRepository())
+        addSingleton(DisplayRepository())
+
+        addSingleton(BrowseRepository())
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 

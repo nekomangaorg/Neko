@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util
 
 import android.app.Activity
 import android.view.View
+import androidx.annotation.StringRes
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
@@ -9,14 +10,18 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
+import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import java.util.Date
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
@@ -229,16 +234,17 @@ fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga
         localManga.title = this.title
         db.insertManga(localManga).executeAsBlocking()
     }
-    return localManga.toDisplayManga(this.displayText)
+    return localManga.toDisplayManga(this.displayText, this.displayTextRes)
 }
 
-fun Manga.toDisplayManga(displayText: String = ""): DisplayManga {
+fun Manga.toDisplayManga(displayText: String = "", @StringRes displayTextRes: Int? = null): DisplayManga {
     return DisplayManga(
         mangaId = this.id!!,
         url = this.url,
-        title = this.title,
+        title = (this as? MangaImpl)?.title ?: this.title,
         inLibrary = this.favorite,
         displayText = displayText.replace("_", " ").capitalizeWords(),
+        displayTextRes = displayTextRes,
         currentArtwork = Artwork(mangaId = this.id!!, originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl),
     )
 }
@@ -258,4 +264,58 @@ fun SManga.getSlug(): String {
     }
 
     return slug.joinToString("-")
+}
+
+/**
+ * resync homepage manga with db manga
+ */
+fun List<HomePageManga>.resync(db: DatabaseHelper): ImmutableList<HomePageManga> {
+    return this.map { homePageManga ->
+        homePageManga.copy(
+            displayManga = homePageManga.displayManga.resync(db).toImmutableList(),
+        )
+    }.toImmutableList()
+}
+
+fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
+    return this.map {
+        val dbManga = db.getManga(it.mangaId).executeAsBlocking()!!
+        it.copy(inLibrary = dbManga.favorite, currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
+    }
+}
+
+/**
+ * Updates the visibility of HomePageManga display manga
+ */
+fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): ImmutableList<HomePageManga> {
+    return this.map { homePageManga ->
+        homePageManga.copy(
+            displayManga = homePageManga.displayManga.updateVisibility(prefs).toImmutableList(),
+        )
+    }.toImmutableList()
+}
+
+/**
+ * Marks display manga as visible when show library entries is enabled, otherwise hides library entries
+ */
+fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayManga> {
+    return this.map { displayManga ->
+        when (prefs.browseShowLibrary().get()) {
+            true -> {
+                displayManga.copy(isVisible = true)
+            }
+            false -> {
+                displayManga.copy(isVisible = !displayManga.inLibrary)
+            }
+        }
+    }
+}
+
+/**
+ * Filters out library manga if enabled
+ */
+fun List<DisplayManga>.filterVisibility(prefs: PreferencesHelper): List<DisplayManga> {
+    return this.filter { displayManga ->
+        prefs.browseShowLibrary().get() || !displayManga.inLibrary
+    }
 }

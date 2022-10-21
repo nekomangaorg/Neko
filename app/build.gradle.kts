@@ -221,6 +221,7 @@ dependencies {
 
     implementation(compose.bundles.charting)
 
+
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
     implementation(libs.fuzzysearch)
@@ -270,7 +271,7 @@ tasks {
     }
 
     preBuild {
-        dependsOn(formatKotlin)
+        //dependsOn(formatKotlin)
     }
 }
 

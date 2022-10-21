@@ -4,11 +4,13 @@ import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
+import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
+import eu.kanade.tachiyomi.source.online.models.dto.ListDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
@@ -31,6 +33,21 @@ interface MangaDexService {
 
     @GET("${MdApi.manga}?includes[]=${MdConstants.Types.coverArt}")
     suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
+
+    @GET(MdApi.author)
+    suspend fun searchAuthor(
+        @Query(value = "name") query: String,
+        @Query(value = "limit") limit: Int,
+    ): ApiResponse<AuthorListDto>
+
+    @GET(MdApi.group)
+    suspend fun searchGroup(
+        @Query(value = "name") query: String,
+        @Query(value = "limit") limit: Int,
+    ): ApiResponse<GroupListDto>
+
+    @GET("${MdApi.manga}?&order[createdAt]=desc&includes[]=${MdConstants.Types.coverArt}")
+    suspend fun getRecentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
     @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
     suspend fun viewManga(@Path("id") id: String): ApiResponse<MangaDto>
@@ -86,6 +103,9 @@ interface MangaDexService {
     @Headers("Cache-Control: no-cache")
     @GET(MdApi.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
+
+    @GET("${MdApi.list}/{id}")
+    suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>
 
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
