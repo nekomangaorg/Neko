@@ -34,7 +34,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.filter.DexFilters
-import org.nekomanga.domain.filter.NewFilter
+import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
@@ -67,10 +67,10 @@ class BrowsePresenter(
 
     private fun createInitialDexFilter(incomingQuery: String): DexFilters {
         val enabledContentRatings = preferences.contentRatingSelections()
-        val contentRatings = MangaContentRating.getOrdered().map { NewFilter.ContentRating(it, enabledContentRatings.contains(it.key)) }.toImmutableList()
+        val contentRatings = MangaContentRating.getOrdered().map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }.toImmutableList()
 
         return DexFilters(
-            query = NewFilter.Query(incomingQuery, QueryType.Title),
+            query = Filter.Query(incomingQuery, QueryType.Title),
             contentRatings = contentRatings,
             contentRatingVisible = preferences.showContentRatingFilter(),
         )
@@ -290,13 +290,13 @@ class BrowsePresenter(
                         }
                     }.onSuccess { dm ->
                         if (incomingQuery.isNotBlank() && !_browseScreenState.value.handledIncomingQuery) {
-                            _browseScreenState.update { it.copy(filters = it.filters.copy(query = NewFilter.Query("", QueryType.Title)), handledIncomingQuery = true) }
+                            _browseScreenState.update { it.copy(filters = it.filters.copy(query = Filter.Query("", QueryType.Title)), handledIncomingQuery = true) }
                         }
                         controller?.openManga(dm.mangaId)
                     }
                 }
                 DeepLinkType.List -> {
-                    val searchFilters = createInitialDexFilter("").copy(queryMode = QueryType.List, query = NewFilter.Query(text = uuid, type = QueryType.List))
+                    val searchFilters = createInitialDexFilter("").copy(queryMode = QueryType.List, query = Filter.Query(text = uuid, type = QueryType.List))
                     _browseScreenState.update {
                         it.copy(filters = searchFilters)
                     }
@@ -324,7 +324,7 @@ class BrowsePresenter(
                     }
                 }
                 DeepLinkType.Author -> {
-                    val searchFilters = createInitialDexFilter("").copy(authorId = NewFilter.AuthorId(uuid = uuid))
+                    val searchFilters = createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid = uuid))
                     _browseScreenState.update {
                         it.copy(filters = searchFilters)
                     }
@@ -334,7 +334,7 @@ class BrowsePresenter(
                     paginator.loadNextItems()
                 }
                 DeepLinkType.Group -> {
-                    val searchFilters = createInitialDexFilter("").copy(groupId = NewFilter.GroupId(uuid = uuid))
+                    val searchFilters = createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid = uuid))
                     _browseScreenState.update {
                         it.copy(filters = searchFilters)
                     }
@@ -352,14 +352,14 @@ class BrowsePresenter(
             if (browseScreenState.value.filters.queryMode == QueryType.Author) {
                 _browseScreenState.update {
                     it.copy(
-                        filters = createInitialDexFilter("").copy(authorId = NewFilter.AuthorId(uuid)),
+                        filters = createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid)),
                     )
                 }
                 getSearchPage()
             } else if (browseScreenState.value.filters.queryMode == QueryType.Group) {
                 _browseScreenState.update {
                     it.copy(
-                        filters = createInitialDexFilter("").copy(groupId = NewFilter.GroupId(uuid)),
+                        filters = createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid)),
                     )
                 }
                 getSearchPage()
@@ -537,52 +537,52 @@ class BrowsePresenter(
         }
     }
 
-    fun filterChanged(newFilter: NewFilter) {
+    fun filterChanged(newFilter: Filter) {
         presenterScope.launch {
             val updatedFilters = when (newFilter) {
-                is NewFilter.ContentRating -> {
+                is Filter.ContentRating -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.contentRatings, { it.rating == newFilter.rating }, newFilter)
                     if (list.none { it.state }) {
-                        val default = lookupAndReplaceEntry(list, { it.rating == MangaContentRating.Safe }, NewFilter.ContentRating(MangaContentRating.Safe, true))
+                        val default = lookupAndReplaceEntry(list, { it.rating == MangaContentRating.Safe }, Filter.ContentRating(MangaContentRating.Safe, true))
                         browseScreenState.value.filters.copy(contentRatings = default)
                     } else {
                         browseScreenState.value.filters.copy(contentRatings = list)
                     }
                 }
-                is NewFilter.OriginalLanguage -> {
+                is Filter.OriginalLanguage -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.originalLanguage, { it.language == newFilter.language }, newFilter)
                     browseScreenState.value.filters.copy(originalLanguage = list)
                 }
-                is NewFilter.PublicationDemographic -> {
+                is Filter.PublicationDemographic -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.publicationDemographics, { it.demographic == newFilter.demographic }, newFilter)
                     browseScreenState.value.filters.copy(publicationDemographics = list)
                 }
-                is NewFilter.Status -> {
+                is Filter.Status -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.statuses, { it.status == newFilter.status }, newFilter)
                     browseScreenState.value.filters.copy(statuses = list)
                 }
-                is NewFilter.Tag -> {
+                is Filter.Tag -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.tags, { it.tag == newFilter.tag }, newFilter)
                     browseScreenState.value.filters.copy(tags = list)
                 }
-                is NewFilter.Sort -> {
+                is Filter.Sort -> {
                     val filterMode = when (newFilter.state) {
                         true -> newFilter.sort
                         false -> MdSort.Best
                     }
 
-                    browseScreenState.value.filters.copy(sort = NewFilter.Sort.getSortList(filterMode))
+                    browseScreenState.value.filters.copy(sort = Filter.Sort.getSortList(filterMode))
                 }
-                is NewFilter.HasAvailableChapters -> {
+                is Filter.HasAvailableChapters -> {
                     browseScreenState.value.filters.copy(hasAvailableChapters = newFilter)
                 }
-                is NewFilter.TagInclusionMode -> {
+                is Filter.TagInclusionMode -> {
                     browseScreenState.value.filters.copy(tagInclusionMode = newFilter)
                 }
-                is NewFilter.TagExclusionMode -> {
+                is Filter.TagExclusionMode -> {
                     browseScreenState.value.filters.copy(tagExclusionMode = newFilter)
                 }
-                is NewFilter.Query -> {
+                is Filter.Query -> {
                     when (newFilter.type) {
                         QueryType.Title -> {
                             browseScreenState.value.filters.copy(queryMode = QueryType.Title, query = newFilter)
@@ -599,11 +599,11 @@ class BrowsePresenter(
                     }
                 }
 
-                is NewFilter.AuthorId -> {
+                is Filter.AuthorId -> {
                     browseScreenState.value.filters.copy(authorId = newFilter)
                 }
 
-                is NewFilter.GroupId -> {
+                is Filter.GroupId -> {
                     browseScreenState.value.filters.copy(groupId = newFilter)
                 }
 

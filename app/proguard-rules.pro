@@ -90,11 +90,19 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class eu.kanade.tachiyomi.**$$serializer { *; }
--keepclassmembers class eu.kanade.tachiyomi.** {
+-keep,includedescriptorclasses class org.nekomanga.**$$serializer { *; }
+-keepclassmembers class org.nekomanga.** {
     *** Companion;
 }
--keepclasseswithmembers class eu.kanade.tachiyomi.** {
+-keepclasseswithmembers class org.nekomanga.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+-keep,includedescriptorclasses class eu.kanade.**$$serializer { *; }
+-keepclassmembers class eu.kanade.** {
+    *** Companion;
+}
+-keepclasseswithmembers class eu.kanade.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
@@ -102,4 +110,6 @@
 -keepclassmembers class kotlinx.serialization.** {
     <methods>;
 }
+
+
 ##---------------End: proguard configuration for kotlinx.serialization  ----------

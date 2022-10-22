@@ -9,7 +9,7 @@ import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.filter.DexFilters
-import org.nekomanga.domain.filter.NewFilter
+import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.manga.DisplayManga
 
 data class BrowseScreenState(
@@ -61,7 +61,7 @@ data class FilterActions(
     val filterDefaultClick: (String, Boolean) -> Unit,
     val loadFilter: (BrowseFilterImpl) -> Unit,
     val resetClick: () -> Unit,
-    val filterChanged: (NewFilter) -> Unit,
+    val filterChanged: (Filter) -> Unit,
 )
 
 

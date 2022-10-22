@@ -61,7 +61,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.nekomanga.domain.filter.DexFilters
-import org.nekomanga.domain.filter.NewFilter
+import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.filter.TagMode
 import org.nekomanga.presentation.components.CheckboxRow
@@ -82,7 +82,7 @@ fun FilterBrowseSheet(
     deleteFilterClick: (String) -> Unit,
     filterDefaultClick: (String, Boolean) -> Unit,
     loadFilter: (BrowseFilterImpl) -> Unit,
-    filterChanged: (NewFilter) -> Unit,
+    filterChanged: (Filter) -> Unit,
     defaultContentRatings: ImmutableSet<String>,
     savedFilters: ImmutableList<BrowseFilterImpl>,
     bottomContentPadding: Dp = 16.dp,
@@ -219,9 +219,9 @@ fun FilterBrowseSheet(
                     themeColorState = themeColorState,
                     onHeaderClick = { otherExpanded = !otherExpanded },
                     filters = filters,
-                    anyEnabled = (filters.tagExclusionMode != NewFilter.TagExclusionMode() ||
-                        filters.tagInclusionMode != NewFilter.TagInclusionMode() ||
-                        filters.hasAvailableChapters != NewFilter.HasAvailableChapters() ||
+                    anyEnabled = (filters.tagExclusionMode != Filter.TagExclusionMode() ||
+                        filters.tagInclusionMode != Filter.TagInclusionMode() ||
+                        filters.hasAvailableChapters != Filter.HasAvailableChapters() ||
                         filters.authorId.uuid.isNotBlank() ||
                         filters.groupId.uuid.isNotBlank()),
 
@@ -275,22 +275,22 @@ fun FilterBrowseSheet(
                 FlowRow(Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 8.dp) {
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Title,
-                        { filterChanged(NewFilter.Query("", QueryType.Title)) },
+                        { filterChanged(Filter.Query("", QueryType.Title)) },
                         stringResource(id = R.string.title),
                     )
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Author,
-                        { filterChanged(NewFilter.Query("", QueryType.Author)) },
+                        { filterChanged(Filter.Query("", QueryType.Author)) },
                         stringResource(id = R.string.author),
                     )
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Group,
-                        { filterChanged(NewFilter.Query("", QueryType.Group)) },
+                        { filterChanged(Filter.Query("", QueryType.Group)) },
                         stringResource(id = R.string.scanlator_group),
                     )
                     FilterChipWrapper(
                         filters.queryMode == QueryType.List,
-                        { filterChanged(NewFilter.Query("", QueryType.List)) },
+                        { filterChanged(Filter.Query("", QueryType.List)) },
                         stringResource(id = R.string.list_id),
                     )
                 }
@@ -443,7 +443,7 @@ fun OtherRow(
     onHeaderClick: () -> Unit,
     anyEnabled: Boolean,
     filters: DexFilters,
-    filterChanged: (NewFilter) -> Unit,
+    filterChanged: (Filter) -> Unit,
     filterClick: () -> Unit,
 ) {
     Column(
@@ -516,7 +516,7 @@ fun OtherRow(
                     showDivider = false,
                     title = filters.groupId.uuid,
                     isError = groupIdError,
-                    textChanged = { text: String -> filterChanged(NewFilter.GroupId(text)) },
+                    textChanged = { text: String -> filterChanged(Filter.GroupId(text)) },
                     search = { filterClick() },
                 )
                 Gap(4.dp)
@@ -534,7 +534,7 @@ fun OtherRow(
                     showDivider = false,
                     title = filters.authorId.uuid,
                     isError = isError,
-                    textChanged = { text: String -> filterChanged(NewFilter.AuthorId(text)) },
+                    textChanged = { text: String -> filterChanged(Filter.AuthorId(text)) },
                     search = { filterClick() },
                 )
                 Gap(8.dp)

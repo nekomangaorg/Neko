@@ -93,6 +93,9 @@ android {
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
+            isShrinkResources = true
+            isMinifyEnabled = true
+            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
         getByName("release") {
             isShrinkResources = true
