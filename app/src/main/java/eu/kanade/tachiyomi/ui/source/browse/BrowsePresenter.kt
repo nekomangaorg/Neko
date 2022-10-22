@@ -224,7 +224,7 @@ class BrowsePresenter(
     fun getSearchPage() {
         presenterScope.launchIO {
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, page = 1)
+                state.copy(initialLoading = true, error = null, page = 1)
             }
 
             val currentQuery = browseScreenState.value.filters.query.text
@@ -242,43 +242,45 @@ class BrowsePresenter(
                         )
                     }
 
-                    val queryMode = browseScreenState.value.filters.queryMode
-
-                    if (queryMode == QueryType.Author || queryMode == QueryType.Group) {
-                        when (queryMode) {
-                            QueryType.Author -> browseRepository.getAuthors(currentQuery)
-                            else -> browseRepository.getGroups(currentQuery)
-                        }.onFailure {
-                            _browseScreenState.update { state ->
-                                state.copy(error = it.message(), initialLoading = false)
-                            }
-                        }.onSuccess { dr ->
-                            _browseScreenState.update {
-                                it.copy(otherResults = dr.toImmutableList(), screenType = BrowseScreenType.Other, initialLoading = false)
-                            }
-                        }
-                    } else if (queryMode == QueryType.List) {
-                        browseRepository.getList(uuid).onFailure {
-                            _browseScreenState.update { state ->
-                                state.copy(error = it.message(), initialLoading = false)
-                            }
-                        }.onSuccess { allDisplayManga ->
-                            _browseScreenState.update { state ->
-                                state.copy(
-                                    screenType = BrowseScreenType.Filter,
-                                    displayMangaHolder = DisplayMangaHolder(
-                                        BrowseScreenType.Filter,
-                                        allDisplayManga.toImmutableList(),
-                                        allDisplayManga.filterVisibility(preferences).toImmutableList(),
-                                    ),
-                                    initialLoading = false,
-                                    pageLoading = false,
-                                    endReached = true,
-                                )
+                    when (val queryMode = browseScreenState.value.filters.queryMode) {
+                        QueryType.Author, QueryType.Group -> {
+                            when (queryMode) {
+                                QueryType.Author -> browseRepository.getAuthors(currentQuery)
+                                else -> browseRepository.getGroups(currentQuery)
+                            }.onFailure {
+                                _browseScreenState.update { state ->
+                                    state.copy(error = it.message(), initialLoading = false)
+                                }
+                            }.onSuccess { dr ->
+                                _browseScreenState.update {
+                                    it.copy(otherResults = dr.toImmutableList(), screenType = BrowseScreenType.Other, initialLoading = false)
+                                }
                             }
                         }
-                    } else {
-                        paginator.loadNextItems()
+                        QueryType.List -> {
+                            browseRepository.getList(uuid).onFailure {
+                                _browseScreenState.update { state ->
+                                    state.copy(error = it.message(), initialLoading = false)
+                                }
+                            }.onSuccess { allDisplayManga ->
+                                _browseScreenState.update { state ->
+                                    state.copy(
+                                        screenType = BrowseScreenType.Filter,
+                                        displayMangaHolder = DisplayMangaHolder(
+                                            BrowseScreenType.Filter,
+                                            allDisplayManga.toImmutableList(),
+                                            allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                                        ),
+                                        initialLoading = false,
+                                        pageLoading = false,
+                                        endReached = true,
+                                    )
+                                }
+                            }
+                        }
+                        else -> {
+                            paginator.loadNextItems()
+                        }
                     }
                 }
                 DeepLinkType.Manga -> {
