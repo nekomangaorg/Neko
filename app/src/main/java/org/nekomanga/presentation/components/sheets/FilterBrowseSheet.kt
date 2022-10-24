@@ -21,7 +21,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
@@ -305,14 +307,20 @@ fun FilterBrowseSheet(
             ) {
                 TextButton(
                     onClick = resetClick,
+                    shape = RoundedCornerShape(35),
                     colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
+                    Icon(imageVector = Icons.Default.RestartAlt, contentDescription = null, tint = themeColorState.buttonColor)
+                    Gap(4.dp)
                     Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
                 }
 
                 AnimatedVisibility(nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
-                    TextButton(onClick = { showSaveFilterDialog = true }, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                        Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                    TextButton(
+                        onClick = { showSaveFilterDialog = true }, shape = RoundedCornerShape(35),
+                        colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                    ) {
+                        Icon(imageVector = Icons.Default.Save, contentDescription = null, tint = themeColorState.buttonColor)
                         Gap(4.dp)
                         Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
                     }
@@ -320,8 +328,11 @@ fun FilterBrowseSheet(
 
                 ElevatedButton(
                     onClick = filterClick,
+                    shape = RoundedCornerShape(35),
                     colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
                 ) {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.surface)
+                    Gap(4.dp)
                     Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                 }
             }
