@@ -215,7 +215,11 @@ fun BrowseScreen(
                 val recyclerContentPadding =
                     PaddingValues(
                         top = incomingContentPadding.calculateTopPadding(),
-                        bottom = Padding.navBarSize + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                        bottom = if (sideNav) {
+                            0.dp
+                        } else {
+                            Padding.navBarSize
+                        } + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                     )
 
                 val haptic = LocalHapticFeedback.current

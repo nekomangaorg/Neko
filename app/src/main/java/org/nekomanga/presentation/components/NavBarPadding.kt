@@ -20,6 +20,7 @@ fun rememberSideBarVisible(windowSizeClass: WindowSizeClass, sideNavMode: SideNa
             SideNavMode.DEFAULT -> {
                 when (windowSizeClass.widthSizeClass) {
                     WindowWidthSizeClass.Expanded -> true
+                    WindowWidthSizeClass.Medium -> true
                     else -> false
                 }
             }
