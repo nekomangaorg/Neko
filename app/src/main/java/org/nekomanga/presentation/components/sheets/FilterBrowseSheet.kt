@@ -140,6 +140,63 @@ fun FilterBrowseSheet(
                     .weight(weight = 1f, fill = false),
             ) {
 
+                val titleRes = when (filters.queryMode) {
+                    QueryType.Title -> {
+                        R.string.title
+                    }
+                    QueryType.Author -> {
+                        R.string.author
+                    }
+                    QueryType.Group -> {
+                        R.string.scanlator_group
+                    }
+                    QueryType.List -> {
+                        R.string.list_id
+                    }
+                }
+
+                FlowRow(Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 8.dp) {
+                    FilterChipWrapper(
+                        filters.queryMode == QueryType.Title,
+                        { filterChanged(Filter.Query("", QueryType.Title)) },
+                        stringResource(id = R.string.title),
+                    )
+                    FilterChipWrapper(
+                        filters.queryMode == QueryType.Author,
+                        { filterChanged(Filter.Query("", QueryType.Author)) },
+                        stringResource(id = R.string.author),
+                    )
+                    FilterChipWrapper(
+                        filters.queryMode == QueryType.Group,
+                        { filterChanged(Filter.Query("", QueryType.Group)) },
+                        stringResource(id = R.string.scanlator_group),
+                    )
+                    FilterChipWrapper(
+                        filters.queryMode == QueryType.List,
+                        { filterChanged(Filter.Query("", QueryType.List)) },
+                        stringResource(id = R.string.list_id),
+                    )
+                }
+
+                val isError = remember(filters.query.text) {
+                    if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
+                        false
+                    } else {
+                        !filters.query.text.isUUID()
+                    }
+                }
+
+                SearchFooter(
+                    themeColorState = themeColorState,
+                    labelText = stringResource(id = titleRes),
+                    showDivider = false,
+                    title = filters.query.text,
+                    isError = isError,
+                    textChanged = { text: String -> filterChanged(filters.query.copy(text = text)) },
+                    search = { filterClick() },
+                )
+
+
                 FilterRow(
                     items = filters.originalLanguage.toImmutableList(),
                     expanded = originalLanguageExpanded,
@@ -230,7 +287,6 @@ fun FilterBrowseSheet(
                     filterChanged = filterChanged,
                     filterClick = filterClick,
                 )
-
                 SavedFilters(
                     visible = savedFilters.isNotEmpty(),
                     savedFilters = savedFilters,
@@ -241,61 +297,6 @@ fun FilterBrowseSheet(
                     filterDefaultClick = filterDefaultClick,
                 )
 
-                val titleRes = when (filters.queryMode) {
-                    QueryType.Title -> {
-                        R.string.title
-                    }
-                    QueryType.Author -> {
-                        R.string.author
-                    }
-                    QueryType.Group -> {
-                        R.string.scanlator_group
-                    }
-                    QueryType.List -> {
-                        R.string.list_id
-                    }
-                }
-
-                val isError = remember(filters.query.text) {
-                    if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
-                        false
-                    } else {
-                        !filters.query.text.isUUID()
-                    }
-                }
-
-                SearchFooter(
-                    themeColorState = themeColorState,
-                    labelText = stringResource(id = titleRes),
-                    showDivider = false,
-                    title = filters.query.text,
-                    isError = isError,
-                    textChanged = { text: String -> filterChanged(filters.query.copy(text = text)) },
-                    search = { filterClick() },
-                )
-
-                FlowRow(Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 8.dp) {
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Title,
-                        { filterChanged(Filter.Query("", QueryType.Title)) },
-                        stringResource(id = R.string.title),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Author,
-                        { filterChanged(Filter.Query("", QueryType.Author)) },
-                        stringResource(id = R.string.author),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.Group,
-                        { filterChanged(Filter.Query("", QueryType.Group)) },
-                        stringResource(id = R.string.scanlator_group),
-                    )
-                    FilterChipWrapper(
-                        filters.queryMode == QueryType.List,
-                        { filterChanged(Filter.Query("", QueryType.List)) },
-                        stringResource(id = R.string.list_id),
-                    )
-                }
             }
 
             Gap(8.dp)
