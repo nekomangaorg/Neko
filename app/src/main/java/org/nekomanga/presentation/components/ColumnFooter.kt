@@ -3,6 +3,8 @@ package org.nekomanga.presentation.components
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
@@ -13,7 +15,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -21,6 +25,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
@@ -35,15 +41,27 @@ fun ColumnScope.SearchFooter(
     search: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val bringIntoViewRequester = BringIntoViewRequester()
+    val scope = rememberCoroutineScope()
 
     if (showDivider) {
         Divider()
         Gap(4.dp)
     }
 
+
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
+            .bringIntoViewRequester(bringIntoViewRequester)
+            .onFocusEvent {
+                if (it.isFocused || it.hasFocus) {
+                    scope.launch {
+                        delay(250)
+                        bringIntoViewRequester.bringIntoView()
+                    }
+                }
+            }
             .padding(horizontal = 8.dp),
         value = title,
         enabled = enabled,

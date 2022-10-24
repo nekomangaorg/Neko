@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -77,8 +79,10 @@ import org.nekomanga.presentation.components.FilterChipWrapper
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.TriStateFilterChip
 import org.nekomanga.presentation.components.dialog.SaveFilterDialog
+import org.nekomanga.presentation.components.sheetHandle
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun FilterBrowseSheet(
@@ -97,54 +101,58 @@ fun FilterBrowseSheet(
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
-        BaseSheet(themeColor = themeColorState, minSheetHeightPercentage = .75f, maxSheetHeightPercentage = 1f, bottomPaddingAroundContent = bottomContentPadding) {
+        val paddingModifier = Modifier.padding(horizontal = 8.dp)
 
-            val paddingModifier = Modifier.padding(horizontal = 8.dp)
+        var originalLanguageExpanded by remember { mutableStateOf(false) }
+        var contentRatingExpanded by remember { mutableStateOf(false) }
+        var publicationDemographicExpanded by remember { mutableStateOf(false) }
+        var statusExpanded by remember { mutableStateOf(false) }
+        var sortExpanded by remember { mutableStateOf(false) }
+        var tagExpanded by remember { mutableStateOf(false) }
+        var otherExpanded by remember { mutableStateOf(false) }
 
-            var originalLanguageExpanded by remember { mutableStateOf(false) }
-            var contentRatingExpanded by remember { mutableStateOf(false) }
-            var publicationDemographicExpanded by remember { mutableStateOf(false) }
-            var statusExpanded by remember { mutableStateOf(false) }
-            var sortExpanded by remember { mutableStateOf(false) }
-            var tagExpanded by remember { mutableStateOf(false) }
-            var otherExpanded by remember { mutableStateOf(false) }
+        var showSaveFilterDialog by remember { mutableStateOf(false) }
 
-            var showSaveFilterDialog by remember { mutableStateOf(false) }
+        var nameOfEnabledFilter by rememberSaveable(filters, savedFilters) {
+            mutableStateOf(
+                savedFilters.firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }?.name ?: "",
+            )
+        }
 
-            var nameOfEnabledFilter by rememberSaveable(filters, savedFilters) {
-                mutableStateOf(
-                    savedFilters.firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }?.name ?: "",
-                )
+        val disabled by remember(filters.queryMode) {
+            mutableStateOf(filters.queryMode != QueryType.Title)
+        }
+
+        LaunchedEffect(key1 = filters.queryMode) {
+            if (filters.queryMode != QueryType.Title) {
+                originalLanguageExpanded = false
+                contentRatingExpanded = false
+                publicationDemographicExpanded = false
+                statusExpanded = false
+                sortExpanded = false
+                tagExpanded = false
+                otherExpanded = false
             }
-
-            val disabled by remember(filters.queryMode) {
-                mutableStateOf(filters.queryMode != QueryType.Title)
-            }
-
-            LaunchedEffect(key1 = filters.queryMode) {
-                if (filters.queryMode != QueryType.Title) {
-                    originalLanguageExpanded = false
-                    contentRatingExpanded = false
-                    publicationDemographicExpanded = false
-                    statusExpanded = false
-                    sortExpanded = false
-                    tagExpanded = false
-                    otherExpanded = false
-                }
-            }
+        }
 
 
-            if (showSaveFilterDialog) {
-                SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
-            }
+        if (showSaveFilterDialog) {
+            SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
+        }
 
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding(),
+            shape = RoundedCornerShape(topEnd = Shapes.sheetRadius, topStart = Shapes.sheetRadius),
+        ) {
             Column(
                 modifier = paddingModifier
-                    .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .weight(weight = 1f, fill = false),
             ) {
-
+                sheetHandle()
+                Gap(16.dp)
                 val titleRes = when (filters.queryMode) {
                     QueryType.Title -> {
                         R.string.title
@@ -292,16 +300,19 @@ fun FilterBrowseSheet(
                     filterChanged = filterChanged,
                     filterClick = filterClick,
                 )
-                SavedFilters(
-                    visible = savedFilters.isNotEmpty(),
-                    savedFilters = savedFilters,
-                    nameOfEnabledFilter = nameOfEnabledFilter,
-                    loadFilter = loadFilter,
-                    deleteFilterClick = deleteFilterClick,
-                    filterDefaultClick = filterDefaultClick,
-                )
 
             }
+
+            Gap(4.dp)
+
+            SavedFilters(
+                visible = savedFilters.isNotEmpty(),
+                savedFilters = savedFilters,
+                nameOfEnabledFilter = nameOfEnabledFilter,
+                loadFilter = loadFilter,
+                deleteFilterClick = deleteFilterClick,
+                filterDefaultClick = filterDefaultClick,
+            )
 
             Gap(8.dp)
 
@@ -341,6 +352,8 @@ fun FilterBrowseSheet(
                     Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                 }
             }
+
+            Gap(bottomContentPadding + 8.dp)
         }
     }
 }
@@ -584,8 +597,7 @@ fun SavedFilters(
             val listState: LazyListState = rememberLazyListState()
             val scope = rememberCoroutineScope()
             LazyRow(verticalAlignment = Alignment.CenterVertically, state = listState) {
-                item { Gap(4.dp) }
-
+                item { Gap(8.dp) }
 
                 items(sortedFilters) { filter ->
                     val isEnabled = nameOfEnabledFilter.equals(filter.name, true)
@@ -609,9 +621,10 @@ fun SavedFilters(
                             ToolTipIconButton(toolTipLabel = stringResource(textRes), icon = icon, buttonClicked = { filterDefaultClick(nameOfEnabledFilter, makeDefault) })
                         }
                     }
-
                     Gap(4.dp)
                 }
+                item { Gap(4.dp) }
+
             }
         }
     }
