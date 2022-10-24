@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components.sheets
 
+import ToolTipIconButton
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -15,39 +16,41 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowRow
@@ -59,7 +62,9 @@ import eu.kanade.tachiyomi.util.lang.isUUID
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.nekomanga.domain.filter.DexFilters
@@ -291,7 +296,6 @@ fun FilterBrowseSheet(
                     visible = savedFilters.isNotEmpty(),
                     savedFilters = savedFilters,
                     nameOfEnabledFilter = nameOfEnabledFilter,
-                    themeColorState = themeColorState,
                     loadFilter = loadFilter,
                     deleteFilterClick = deleteFilterClick,
                     filterDefaultClick = filterDefaultClick,
@@ -560,7 +564,6 @@ fun SavedFilters(
     visible: Boolean,
     savedFilters: ImmutableList<BrowseFilterImpl>,
     nameOfEnabledFilter: String,
-    themeColorState: ThemeColorState,
     loadFilter: (BrowseFilterImpl) -> Unit,
     deleteFilterClick: (String) -> Unit,
     filterDefaultClick: (String, Boolean) -> Unit,
@@ -568,55 +571,46 @@ fun SavedFilters(
     AnimatedVisibility(visible = visible, enter = slideEnter(), exit = slideExit()) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
-            LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                item { Gap(4.dp) }
-                items(savedFilters) { filter ->
-                    FilterChipWrapper(nameOfEnabledFilter.equals(filter.name, true), { loadFilter(filter) }, filter.name)
+            val sortedFilters by remember(nameOfEnabledFilter) {
+                val enabledFilterIndex = savedFilters.indexOfFirst { nameOfEnabledFilter.equals(it.name, true) }
+                if (enabledFilterIndex == -1) {
+                    mutableStateOf(savedFilters)
+                } else {
+                    val mutableFilters = savedFilters.toMutableList()
+                    val enabledFilter = mutableFilters.removeAt(enabledFilterIndex)
+                    mutableStateOf(persistentListOf(enabledFilter) + mutableFilters.toImmutableList())
                 }
-                item { Gap(4.dp) }
             }
-            AnimatedVisibility(visible = nameOfEnabledFilter.isNotBlank()) {
+            val listState: LazyListState = rememberLazyListState()
+            val scope = rememberCoroutineScope()
+            LazyRow(verticalAlignment = Alignment.CenterVertically, state = listState) {
+                item { Gap(4.dp) }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
 
-                    val (textRes, makeDefault) = when (isDefault) {
-                        true -> R.string.remove_default to false
-                        false -> R.string.make_default to true
+                items(sortedFilters) { filter ->
+                    val isEnabled = nameOfEnabledFilter.equals(filter.name, true)
+                    FilterChipWrapper(
+                        modifier = Modifier.animateItemPlacement(), selected = isEnabled,
+                        onClick = {
+                            scope.launch { listState.animateScrollToItem(0) }
+                            loadFilter(filter)
+                        },
+                        name = filter.name,
+                    )
+                    // AnimatedVisibility(visible = isEnabled, enter = slideInHorizontally() + fadeIn(), exit = slideOutHorizontally() + fadeOut()) {
+                    if (isEnabled) {
+                        Row(modifier = Modifier.animateItemPlacement()) {
+                            ToolTipIconButton(toolTipLabel = stringResource(id = R.string.delete_filter), icon = Icons.Outlined.Delete, buttonClicked = { deleteFilterClick(nameOfEnabledFilter) })
+                            val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
+                            val (textRes, makeDefault, icon) = when (isDefault) {
+                                true -> Triple(R.string.remove_default, false, Icons.Default.HeartBroken)
+                                false -> Triple(R.string.make_default, true, Icons.Default.Favorite)
+                            }
+                            ToolTipIconButton(toolTipLabel = stringResource(textRes), icon = icon, buttonClicked = { filterDefaultClick(nameOfEnabledFilter, makeDefault) })
+                        }
                     }
 
-
-                    FilterChip(
-                        selected = false,
-                        onClick = { deleteFilterClick(nameOfEnabledFilter) },
-                        shape = RoundedCornerShape(100),
-                        label = { Text(text = stringResource(id = R.string.delete_filter), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-                            labelColor = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
-                        ),
-                    )
-
-                    FilterChip(
-                        selected = false,
-                        onClick = { filterDefaultClick(nameOfEnabledFilter, makeDefault) },
-                        shape = RoundedCornerShape(100),
-                        label = { Text(text = stringResource(id = textRes), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-                            labelColor = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = .5f),
-                        ),
-                    )
+                    Gap(4.dp)
                 }
             }
         }

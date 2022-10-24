@@ -60,11 +60,13 @@ fun TriStateFilterChip(
     state: ToggleableState,
     toggleState: (ToggleableState) -> Unit,
     name: String,
+    modifier: Modifier = Modifier,
     hideIcons: Boolean = false,
     labelTextStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
 ) {
 
     FilterChip(
+        modifier = modifier,
         selected = state == ToggleableState.On || state == ToggleableState.Indeterminate,
         onClick = { toggleStateIfAble(false, state, toggleState) },
         leadingIcon = {

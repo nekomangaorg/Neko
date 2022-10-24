@@ -58,10 +58,12 @@ fun FilterChipWrapper(
     selected: Boolean,
     onClick: () -> Unit,
     name: String,
+    modifier: Modifier = Modifier,
     hideIcons: Boolean = false,
     labelStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
 ) {
     TriStateFilterChip(
+        modifier = modifier,
         state = ToggleableState(selected),
         hideIcons = hideIcons,
         toggleState = { _ -> onClick() }, name = name, labelTextStyle = labelStyle,
