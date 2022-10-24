@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.filterVisibility
+import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -39,6 +40,7 @@ import org.nekomanga.domain.filter.QueryType
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -94,10 +96,12 @@ class BrowsePresenter(
                 it.copy(
                     initialLoading = false,
                     pageLoading = false,
-                    error = when (resultError) {
-                        is ResultError.Generic -> resultError.errorString
-                        else -> (resultError as ResultError.HttpError).message
-                    },
+                    error = UiText.String(
+                        when (resultError) {
+                            is ResultError.Generic -> resultError.errorString
+                            else -> (resultError as ResultError.HttpError).message
+                        },
+                    ),
                 )
             }
         },
@@ -192,7 +196,7 @@ class BrowsePresenter(
         presenterScope.launch {
             browseRepository.getHomePage().onFailure {
                 _browseScreenState.update { state ->
-                    state.copy(error = it.message(), initialLoading = false)
+                    state.copy(error = UiText.String(it.message()), initialLoading = false)
                 }
             }.onSuccess {
                 _browseScreenState.update { state ->
@@ -210,7 +214,7 @@ class BrowsePresenter(
                 }
                 browseRepository.getFollows().onFailure {
                     _browseScreenState.update { state ->
-                        state.copy(error = it.message(), initialLoading = false)
+                        state.copy(error = UiText.String(it.message()), initialLoading = false)
                     }
                 }.onSuccess {
                     _browseScreenState.update { state ->
@@ -249,7 +253,7 @@ class BrowsePresenter(
                                 else -> browseRepository.getGroups(currentQuery)
                             }.onFailure {
                                 _browseScreenState.update { state ->
-                                    state.copy(error = it.message(), initialLoading = false)
+                                    state.copy(error = UiText.String(it.message()), initialLoading = false)
                                 }
                             }.onSuccess { dr ->
                                 _browseScreenState.update {
@@ -258,35 +262,51 @@ class BrowsePresenter(
                             }
                         }
                         QueryType.List -> {
-                            browseRepository.getList(uuid).onFailure {
+                            if (!currentQuery.isUUID()) {
                                 _browseScreenState.update { state ->
-                                    state.copy(error = it.message(), initialLoading = false)
+                                    state.copy(error = UiText.String("Invalid List UUID"), initialLoading = false)
                                 }
-                            }.onSuccess { allDisplayManga ->
-                                _browseScreenState.update { state ->
-                                    state.copy(
-                                        screenType = BrowseScreenType.Filter,
-                                        displayMangaHolder = DisplayMangaHolder(
-                                            BrowseScreenType.Filter,
-                                            allDisplayManga.toImmutableList(),
-                                            allDisplayManga.filterVisibility(preferences).toImmutableList(),
-                                        ),
-                                        initialLoading = false,
-                                        pageLoading = false,
-                                        endReached = true,
-                                    )
+                            } else {
+                                browseRepository.getList(uuid).onFailure {
+                                    _browseScreenState.update { state ->
+                                        state.copy(error = UiText.String(it.message()), initialLoading = false)
+                                    }
+                                }.onSuccess { allDisplayManga ->
+                                    _browseScreenState.update { state ->
+                                        state.copy(
+                                            screenType = BrowseScreenType.Filter,
+                                            displayMangaHolder = DisplayMangaHolder(
+                                                BrowseScreenType.Filter,
+                                                allDisplayManga.toImmutableList(),
+                                                allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                                            ),
+                                            initialLoading = false,
+                                            pageLoading = false,
+                                            endReached = true,
+                                        )
+                                    }
                                 }
                             }
                         }
                         else -> {
-                            paginator.loadNextItems()
+                            if (_browseScreenState.value.filters.authorId.isNotBlankAndInvalidUUID()) {
+                                _browseScreenState.update { state ->
+                                    state.copy(error = UiText.String("Invalid Author UUID"), initialLoading = false)
+                                }
+                            } else if (_browseScreenState.value.filters.groupId.isNotBlankAndInvalidUUID()) {
+                                _browseScreenState.update { state ->
+                                    state.copy(error = UiText.String("Invalid Group UUID"), initialLoading = false)
+                                }
+                            } else {
+                                paginator.loadNextItems()
+                            }
                         }
                     }
                 }
                 DeepLinkType.Manga -> {
                     browseRepository.getDeepLinkManga(uuid).onFailure {
                         _browseScreenState.update { state ->
-                            state.copy(error = it.message(), initialLoading = false)
+                            state.copy(error = UiText.String(it.message()), initialLoading = false)
                         }
                     }.onSuccess { dm ->
                         if (incomingQuery.isNotBlank() && !_browseScreenState.value.handledIncomingQuery) {
@@ -305,7 +325,7 @@ class BrowsePresenter(
                     }
                     browseRepository.getList(uuid).onFailure {
                         _browseScreenState.update { state ->
-                            state.copy(error = it.message(), initialLoading = false)
+                            state.copy(error = UiText.String(it.message()), initialLoading = false)
                         }
                     }.onSuccess { allDisplayManga ->
                         _browseScreenState.update { state ->
@@ -383,7 +403,7 @@ class BrowsePresenter(
             }
             browseRepository.getRandomManga().onFailure { error ->
                 _browseScreenState.update {
-                    it.copy(initialLoading = false, error = error.message())
+                    it.copy(initialLoading = false, error = UiText.String(error.message()))
                 }
             }.onSuccess { displayManga ->
                 _browseScreenState.update {
@@ -650,10 +670,6 @@ class BrowsePresenter(
                 it.copy(screenType = browseScreenType, error = null)
             }
         }
-    }
-
-    fun retry() {
-        changeScreenType(browseScreenState.value.screenType, true)
     }
 
     fun switchLibraryVisibility() {

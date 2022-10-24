@@ -113,7 +113,7 @@ fun FilterBrowseSheet(
 
         var showSaveFilterDialog by remember { mutableStateOf(false) }
 
-        var nameOfEnabledFilter by rememberSaveable(filters, savedFilters) {
+        val nameOfEnabledFilter by rememberSaveable(filters, savedFilters) {
             mutableStateOf(
                 savedFilters.firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }?.name ?: "",
             )

@@ -263,7 +263,7 @@ fun BrowseScreen(
                         EmptyScreen(
                             icon = Icons.Default.ErrorOutline,
                             iconSize = 176.dp,
-                            message = browseScreenState.value.error,
+                            message = browseScreenState.value.error!!.asString(),
                             actions = persistentListOf(Action(R.string.retry, retryClick)),
                             contentPadding = recyclerContentPadding,
                         )

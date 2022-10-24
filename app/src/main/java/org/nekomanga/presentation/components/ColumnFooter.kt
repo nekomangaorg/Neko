@@ -10,7 +10,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -18,14 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.screens.ThemeColorState
 
@@ -57,7 +57,6 @@ fun ColumnScope.SearchFooter(
             .onFocusEvent {
                 if (it.isFocused || it.hasFocus) {
                     scope.launch {
-                        delay(250)
                         bringIntoViewRequester.bringIntoView()
                     }
                 }
@@ -70,7 +69,9 @@ fun ColumnScope.SearchFooter(
             Text(text = labelText, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         trailingIcon = {
-            if (title.isNotEmpty()) {
+            if (isError) {
+                Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+            } else if (title.isNotEmpty()) {
                 IconButton(onClick = { textChanged("") }) {
                     Icon(imageVector = Icons.Default.Cancel, contentDescription = null, tint = themeColorState.buttonColor)
                 }
@@ -82,15 +83,19 @@ fun ColumnScope.SearchFooter(
             focusedLabelColor = themeColorState.buttonColor,
             focusedBorderColor = themeColorState.buttonColor,
             cursorColor = themeColorState.buttonColor,
-            disabledBorderColor = Color.Cyan,
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            errorCursorColor = MaterialTheme.colorScheme.error,
+            errorLabelColor = MaterialTheme.colorScheme.error,
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Search,
         ),
         keyboardActions = KeyboardActions(
             onSearch = {
-                focusManager.clearFocus()
-                search(title)
+                if (!isError) {
+                    focusManager.clearFocus()
+                    search(title)
+                }
             },
         ),
     )

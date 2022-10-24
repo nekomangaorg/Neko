@@ -39,6 +39,8 @@
         <item name="background">@color/background</item>
         <item name="colorOnBackground">@color/colorOnBackground</item>
         <item name="colorBackgroundFloating">?colorSurface</item>
+        <item name="colorError">@color/primaryRed</item>
+
 
         <item name="colorTertiary">@color/md_black_1000</item>
         <item name="colorOnTertiary">@android:color/black</item>
@@ -114,6 +116,7 @@
         <item name="unreadBadgeColor">?attr/colorSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
+
     </style>
 
     <style name="Theme.Tachiyomi.Outrun" />
@@ -159,6 +162,7 @@
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorDownloadBadge">@color/md_black_1000</item>
         <item name="colorOnDownloadBadge">@color/md_white_1000</item>
+
     </style>
 
     <style name="Theme.Tachiyomi.Lavender">
@@ -183,6 +187,7 @@
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorDownloadBadge">@color/lavender_tertiary</item>
         <item name="colorOnDownloadBadge">@color/md_white_1000</item>
+
     </style>
 
     <style name="Theme.Tachiyomi.Strawberries">
@@ -195,10 +200,11 @@
         <item name="colorControlHighlight">@color/rippleColorStrawberry</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
         <item name="background">@color/backgroundStrawberries</item>
-        <item name="colorSurface">@color/backgroundStrawberries</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
+        <item name="colorError">@color/pale_green</item>
+
     </style>
 
     <!--== Tako Theme ==-->
@@ -223,7 +229,6 @@
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorDownloadBadge">@color/md_black_1000</item>
         <item name="colorOnDownloadBadge">@color/md_white_1000</item>
-
     </style>
 
 

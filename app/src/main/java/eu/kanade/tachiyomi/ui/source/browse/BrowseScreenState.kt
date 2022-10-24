@@ -11,6 +11,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.components.UiText
 
 data class BrowseScreenState(
     val initialLoading: Boolean = true,
@@ -21,7 +22,7 @@ data class BrowseScreenState(
     val displayMangaHolder: DisplayMangaHolder = DisplayMangaHolder(),
     val homePageManga: ImmutableList<HomePageManga> = persistentListOf(),
     val otherResults: ImmutableList<DisplayResult> = persistentListOf(),
-    val error: String? = null,
+    val error: UiText? = null,
     val endReached: Boolean = false,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val page: Int = 1,
