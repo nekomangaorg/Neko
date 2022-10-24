@@ -87,7 +87,7 @@ fun MainDropdownMenu(
                     onDismiss = onDismiss,
                 )
                 Row(
-                    title = UiText.StringResource(R.string.stat),
+                    title = UiText.StringResource(R.string.stats),
                     icon = UiIcon.Icon(Icons.Outlined.QueryStats),
                     onClick = statsClick,
                     onDismiss = onDismiss,
