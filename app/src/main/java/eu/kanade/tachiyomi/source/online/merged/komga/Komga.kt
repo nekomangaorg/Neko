@@ -1,17 +1,24 @@
 package eu.kanade.tachiyomi.source.online.merged.komga
 
+import com.elvishew.xlog.XLog
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
+import eu.kanade.tachiyomi.util.lang.toResultError
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Credentials
 import okhttp3.Dns
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
+import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
 
 class Komga : ReducedHttpSource() {
@@ -53,6 +60,32 @@ class Komga : ReducedHttpSource() {
         }
     }
 
+    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
+        return withContext(Dispatchers.IO) {
+            com.github.michaelbull.result.runCatching {
+                val response = client.newCall(GET("\"${mangaUrl}/books?unpaged=true&media_status=READY&deleted=false", headers)).await()
+                val responseBody = response.body
+                    ?: throw IllegalStateException("Komga: Response code ${response.code}")
+
+                val page = responseBody.use { json.decodeFromString<KomgaPageWrapperDto<KomgaBookDto>>(it.string()).content }
+                val r = page.map { book ->
+                    SChapter.create().apply {
+                        chapter_number = book.metadata.numberSort
+                        name = "${book.metadata.number} - ${book.metadata.title} (${book.size})"
+                        url = "$baseUrl/api/v1/books/${book.id}"
+                        scanlator = book.metadata.authors.groupBy({ it.role }, { it.name })["translator"]?.joinToString()
+                        date_upload = book.metadata.releaseDate?.let { parseDate(it) }
+                            ?: parseDateTime(book.fileLastModified)
+                    }
+                }
+                return@runCatching r.sortedByDescending { it.chapter_number }
+            }.mapError {
+                XLog.e(it)
+                (it.localizedMessage ?: "Komga Error").toResultError()
+            }
+        }
+    }
+
     override suspend fun fetchPageList(chapter: SChapter): List<Page> {
         val response = client.newCall(GET("$baseUrl${chapter.url}", headers)).await()
         val responseBody = response.body
@@ -72,6 +105,32 @@ class Komga : ReducedHttpSource() {
             )
         }
     }
+
+    private fun parseDate(date: String?): Long =
+        if (date == null)
+            Date().time
+        else {
+            try {
+                SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(date).time
+            } catch (ex: Exception) {
+                Date().time
+            }
+        }
+
+    private fun parseDateTime(date: String?): Long =
+        if (date == null)
+            Date().time
+        else {
+            try {
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(date).time
+            } catch (ex: Exception) {
+                try {
+                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S", Locale.US).parse(date).time
+                } catch (ex: Exception) {
+                    Date().time
+                }
+            }
+        }
 
     companion object {
         private val supportedImageTypes = listOf("image/jpeg", "image/png", "image/gif", "image/webp", "image/jxl")
