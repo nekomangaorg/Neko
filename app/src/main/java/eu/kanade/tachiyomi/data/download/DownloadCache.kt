@@ -203,7 +203,7 @@ class DownloadCache(
                                 mangaDir.key,
                                 sourceValue.key,
                             )
-                        val id = manga!!.id ?: return@async null
+                        val id = manga?.id ?: return@async null
 
                         val mangadexIds = mangaDir.value.files.map { it.takeLast(36) }
                             .filter {
