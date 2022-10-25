@@ -46,7 +46,7 @@ class MangaUpdateCoordinator {
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by lazy { Injekt.get() }
     private val mangaDex: MangaDex by lazy { sourceManager.getMangadex() }
-    private val mergedSource: MangaLife by lazy { sourceManager.getMergeSource() }
+    private val mangaLife: MangaLife by lazy { sourceManager.getMangaLife() }
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
@@ -143,7 +143,7 @@ class MangaUpdateCoordinator {
                 async {
                     when (manga.isMerged()) {
                         true -> {
-                            mergedSource.fetchChapters(manga.merge_manga_url!!)
+                            mangaLife.fetchChapters(manga.merge_manga_url!!)
                                 .onFailure {
                                     send(MangaResult.Error(text = "error with merged source: getting chapters "))
                                     this.cancel()

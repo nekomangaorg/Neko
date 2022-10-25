@@ -406,7 +406,7 @@ class LibraryUpdateService(
             val merged = when (manga.isMerged()) {
                 true -> {
                     withIOContext {
-                        sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!).getOrElse {
+                        sourceManager.getMangaLife().fetchChapters(manga.merge_manga_url!!).getOrElse {
                             errorFromMerged = true
                             emptyList()
                         }
@@ -431,7 +431,7 @@ class LibraryUpdateService(
                 withIOContext {
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                        .get()
+                            .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                         // load new covers in background

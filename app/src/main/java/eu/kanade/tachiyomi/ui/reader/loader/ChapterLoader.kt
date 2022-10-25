@@ -74,7 +74,7 @@ class ChapterLoader(
     private fun getPageLoader(chapter: ReaderChapter): PageLoader {
         val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
         val source =
-            if (chapter.chapter.isMergedChapter()) sourceManager.getMergeSource() else sourceManager.getMangadex()
+            if (chapter.chapter.isMergedChapter()) sourceManager.getMangaLife() else sourceManager.getMangadex()
         return when {
             isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager)
             else -> HttpPageLoader(chapter, source)

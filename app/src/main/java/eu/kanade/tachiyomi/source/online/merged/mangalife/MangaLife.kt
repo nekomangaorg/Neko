@@ -35,7 +35,7 @@ class MangaLife : ReducedHttpSource() {
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:SS Z", Locale.getDefault())
 
-    suspend fun searchManga(query: String): List<SManga> {
+    override suspend fun searchManga(query: String): List<SManga> {
         return withContext(Dispatchers.IO) {
             if (this@MangaLife::directory.isInitialized.not()) {
                 val response = client.newCall(GET("$baseUrl/search/", headers)).await()

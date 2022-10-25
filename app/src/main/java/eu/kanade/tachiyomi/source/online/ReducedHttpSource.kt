@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.SManga
 import java.util.concurrent.TimeUnit
 import okhttp3.Headers
 import okhttp3.OkHttpClient
@@ -26,6 +27,8 @@ abstract class ReducedHttpSource : HttpSource() {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36",
         )
         .build()
+
+    abstract suspend fun searchManga(query: String): List<SManga>
 
     override suspend fun fetchImage(page: Page): Response {
         val request = imageRequest(page).newBuilder()

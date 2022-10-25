@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.security.MessageDigest
@@ -17,7 +18,9 @@ open class SourceManager {
     // private val sourcesMap = mutableMapOf<Long, Source>()
     private val source: MangaDex = MangaDex()
 
-    private val mergeSource = MangaLife()
+    private val mangaLife = MangaLife()
+
+    private val komga = Komga()
 
     open fun get(sourceKey: Long): Source? {
         return source
@@ -29,7 +32,9 @@ open class SourceManager {
 
     fun getMangadex(): MangaDex = source
 
-    fun getMergeSource() = mergeSource
+    fun getMangaLife() = mangaLife
+
+    fun getKomga() = komga
 
     companion object {
 

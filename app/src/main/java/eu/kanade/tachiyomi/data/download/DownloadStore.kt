@@ -93,7 +93,7 @@ class DownloadStore(
                     db.getManga(mangaId).executeAsBlocking()
                 } ?: continue
                 val chapter = db.getChapter(chapterId).executeAsBlocking() ?: continue
-                val source = if (chapter.isMergedChapter()) sourceManager.getMergeSource() else sourceManager.getMangadex()
+                val source = if (chapter.isMergedChapter()) sourceManager.getMangaLife() else sourceManager.getMangadex()
                 downloads.add(Download(source, manga, chapter))
             }
         }

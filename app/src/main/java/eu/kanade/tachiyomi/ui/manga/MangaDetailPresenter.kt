@@ -592,7 +592,7 @@ class MangaDetailPresenter(
             }
 
             runCatching {
-                val mergedMangaResults = sourceManager.getMergeSource()
+                val mergedMangaResults = sourceManager.getMangaLife()
                     .searchManga(query)
                     .map { MergeManga(thumbnail = it.thumbnail_url ?: "", title = it.title, url = it.url) }
                 _trackMergeState.update {
@@ -1203,7 +1203,7 @@ class MangaDetailPresenter(
             initialized = m.initialized,
             inLibrary = m.favorite,
             isMerged = when (m.isMerged()) {
-                true -> Yes(sourceManager.getMergeSource().baseUrl + m.merge_manga_url!!, m.title)
+                true -> Yes(sourceManager.getMangaLife().baseUrl + m.merge_manga_url!!, m.title)
                 false -> No
             },
             isPornographic = m.getContentRating()?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true) ?: false,
@@ -1590,7 +1590,7 @@ class MangaDetailPresenter(
                         }
                     },
 
-                ),
+                    ),
             )
         }
     }
