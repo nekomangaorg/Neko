@@ -1538,7 +1538,10 @@ class LibraryController(
     }
 
     override fun globalSearch(query: String) {
-        router.pushController(BrowseController(query).withFadeTransaction())
+        (activity as? MainActivity)?.let {
+            (it.binding.bottomNav ?: it.binding.sideNav!!).selectedItemId = R.id.nav_browse
+            router.setRoot(BrowseController(query).withFadeTransaction().tag(R.id.nav_browse.toString()))
+        }
     }
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
