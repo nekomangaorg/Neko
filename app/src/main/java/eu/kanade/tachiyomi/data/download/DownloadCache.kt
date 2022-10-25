@@ -13,15 +13,12 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
-import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -57,7 +54,6 @@ class DownloadCache(
      * The last time the cache was refreshed.
      */
     private var lastRenew = 0L
-    private var renewalJob: Job? = null
 
     private var mangaFiles: MutableMap<Long, Pair<MutableSet<String>, MutableSet<String>>> =
         mutableMapOf()
@@ -153,70 +149,65 @@ class DownloadCache(
     /**
      * Checks if the cache needs a renewal and performs it if needed.
      */
+    @Synchronized
     private fun checkRenew() {
-        if (lastRenew + renewInterval >= System.currentTimeMillis() || renewalJob?.isActive == true) {
-            return
+        if (lastRenew + renewInterval < System.currentTimeMillis()) {
+            renew()
+            lastRenew = System.currentTimeMillis()
         }
-        renew()
     }
 
     fun forceRenewCache() {
-        renewalJob?.cancel()
         renew()
+        lastRenew = System.currentTimeMillis()
     }
 
     /**
      * Renews the downloads cache.
      */
     private fun renew() {
-        renewalJob = scope.launchIO {
+        val onlineSources = listOf(sourceManager.getMangadex())
 
-            val onlineSources = listOf(sourceManager.getMangadex())
-
-            val sourceDirs = getDirectoryFromPreference().listFiles().orEmpty()
-                .associate { it.name to SourceDirectory(it) }.mapNotNullKeys { entry ->
-                    onlineSources.find { provider.getSourceDirName() == entry.key }?.id
-                }
-
-            val db: DatabaseHelper by injectLazy()
-            val mangaGroupedBySource = db.getMangaList().executeAsBlocking().groupBy { it.source }
-
-            sourceDirs.forEach { sourceValue ->
-                val sourceMangaRaw =
-                    mangaGroupedBySource[sourceValue.key]?.toMutableSet() ?: return@forEach
-                val sourceMangaPair = sourceMangaRaw.partition { it.favorite }
-
-                val sourceDir = sourceValue.value
-
-                val mangaDirs = sourceDir.dir.listFiles().orEmpty().mapNotNull { mangaDir ->
-                    val name = mangaDir.name ?: return@mapNotNull null
-                    val chapterDirs = mangaDir.listFiles().orEmpty()
-                        .mapNotNull { chapterFile -> chapterFile.name?.replace(".cbz", "") }.toHashSet()
-                    name to MangaDirectory(mangaDir, chapterDirs)
-                }.toMap()
-
-                val trueMangaDirs = mangaDirs.map { mangaDir ->
-                    async {
-                        val manga =
-                            findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key) ?: findManga(
-                                sourceMangaPair.second,
-                                mangaDir.key,
-                                sourceValue.key,
-                            )
-                        val id = manga!!.id ?: return@async null
-
-                        val mangadexIds = mangaDir.value.files.map { it.takeLast(36) }
-                            .filter {
-                                it.isUUID()
-                            }.toMutableSet()
-
-                        id to Pair(mangaDir.value.files, mangadexIds)
-                    }
-                }.awaitAll().mapNotNull { it }.toMap()
-
-                mangaFiles.putAll(trueMangaDirs)
+        val sourceDirs = getDirectoryFromPreference().listFiles().orEmpty()
+            .associate { it.name to SourceDirectory(it) }.mapNotNullKeys { entry ->
+                onlineSources.find { provider.getSourceDirName() == entry.key }?.id
             }
-            lastRenew = System.currentTimeMillis()
+
+        val db: DatabaseHelper by injectLazy()
+        val mangaGroupedBySource = db.getMangaList().executeAsBlocking().groupBy { it.source }
+
+        sourceDirs.forEach { sourceValue ->
+            val sourceMangaRaw =
+                mangaGroupedBySource[sourceValue.key]?.toMutableSet() ?: return@forEach
+            val sourceMangaPair = sourceMangaRaw.partition { it.favorite }
+
+            val sourceDir = sourceValue.value
+
+            val mangaDirs = sourceDir.dir.listFiles().orEmpty().mapNotNull { mangaDir ->
+                val name = mangaDir.name ?: return@mapNotNull null
+                val chapterDirs = mangaDir.listFiles().orEmpty()
+                    .mapNotNull { chapterFile -> chapterFile.name?.replace(".cbz", "") }.toHashSet()
+                name to MangaDirectory(mangaDir, chapterDirs)
+            }.toMap()
+
+            val trueMangaDirs = mangaDirs.mapNotNull { mangaDir ->
+                val manga =
+                    findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key) ?: findManga(
+                        sourceMangaPair.second,
+                        mangaDir.key,
+                        sourceValue.key,
+                    )
+                val id = manga?.id ?: return@mapNotNull null
+
+                val mangadexIds = mangaDir.value.files.map { it.takeLast(36) }
+                    .filter {
+                        it.isUUID()
+                    }.toMutableSet()
+
+                id to Pair(mangaDir.value.files, mangadexIds)
+            }.toMap()
+
+            mangaFiles.putAll(trueMangaDirs)
         }
     }
 
