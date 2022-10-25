@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -325,22 +326,8 @@ class DownloadCache(
      * Returns a new map containing only the key entries of [transform] that are not null.
      */
     private inline fun <K, V, R> Map<out K, V>.mapNotNullKeys(transform: (Map.Entry<K?, V>) -> R?): Map<R, V> {
-        val destination = LinkedHashMap<R, V>()
-        forEach { element -> transform(element)?.let { destination.put(it, element.value) } }
-        return destination
-    }
-
-    /**
-     * Returns a map from a list containing only the key entries of [transform] that are not null.
-     */
-    private inline fun <T, K, V> Array<T>.associateNotNullKeys(transform: (T) -> Pair<K?, V>): Map<K, V> {
-        val destination = LinkedHashMap<K, V>()
-        for (element in this) {
-            val (key, value) = transform(element)
-            if (key != null) {
-                destination[key] = value
-            }
-        }
-        return destination
+        val mutableMap = ConcurrentHashMap<R, V>()
+        forEach { element -> transform(element)?.let { mutableMap[it] = element.value } }
+        return mutableMap
     }
 }
