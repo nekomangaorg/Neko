@@ -47,7 +47,7 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override suspend fun login(username: String, password: String, twoFactorCode: String): Boolean {
+    override suspend fun login(username: String, password: String): Boolean {
         TODO("Not yet implemented")
     }
 

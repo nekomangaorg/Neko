@@ -207,7 +207,6 @@ open class MangaDex : HttpSource() {
     override suspend fun login(
         username: String,
         password: String,
-        twoFactorCode: String,
     ): Boolean {
         return loginHelper.login(username, password)
     }

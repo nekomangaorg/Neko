@@ -33,7 +33,7 @@ interface Source {
 
     fun isLogged(): Boolean
 
-    suspend fun login(username: String, password: String, twoFactorCode: String = ""): Boolean
+    suspend fun login(username: String, password: String): Boolean
 
     suspend fun logout(): Logout
 }

@@ -238,10 +238,20 @@ class PreferencesHelper(val context: Context) {
 
     fun sourcePassword(source: Source) = prefs.getString(Keys.sourcePassword(source.id), "")
 
+    fun sourceUrl(source: Source) = prefs.getString(Keys.sourceUrl(source.id), "")
+
     fun setSourceCredentials(source: Source, username: String, password: String) {
         prefs.edit()
             .putString(Keys.sourceUsername(source.id), username)
             .putString(Keys.sourcePassword(source.id), password)
+            .apply()
+    }
+
+    fun setKomgaCredentials(source: Source, username: String, password: String, url: String) {
+        prefs.edit()
+            .putString(Keys.sourceUsername(source.id), username)
+            .putString(Keys.sourcePassword(source.id), password)
+            .putString(Keys.sourceUrl(source.id), url)
             .apply()
     }
 

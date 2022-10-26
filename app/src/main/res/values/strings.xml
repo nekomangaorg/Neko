@@ -1296,6 +1296,9 @@
     <!-- Reader Settings -->
     <string name="skip_hidden_chapters">Skip chapters hidden by filters</string>
 
+    <!-- Merge Settings -->
+    <string name="merge_source_settings">Merge source settings</string>
+
 
     <!-- Site Settings -->
     <string name="site_specific_settings">MangaDex settings</string>
@@ -1355,6 +1358,7 @@
 
     <!-- Login dialog -->
     <string name="two_factor">2FA Code</string>
+    <string name="url">Url</string>
     <string name="fields_cannot_be_blank">Fields cannot be blank</string>
     <string name="myanimelist_creds_missing">MAL login credentials not found</string>
 

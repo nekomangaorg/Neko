@@ -21,6 +21,7 @@ import uy.kohesive.injekt.injectLazy
 abstract class LoginDialogPreference(
     @StringRes private val usernameLabelRes: Int? = null,
     bundle: Bundle? = null,
+    val showUrl: Boolean = false,
 ) :
     DialogController(bundle) {
 
@@ -56,9 +57,10 @@ abstract class LoginDialogPreference(
                 checkLogin()
             }
 
-            binding.twoFactorCheck.setOnCheckedChangeListener { _, isChecked ->
-                binding.twoFactorCheck.isVisible = isChecked
+            if (showUrl) {
+                binding.urlHolder.isVisible = true
             }
+
 
             setCredentialsOnView(this)
         }

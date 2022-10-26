@@ -10,17 +10,18 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = bundle) {
+class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = bundle, showUrl = true) {
 
-    val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
+    val source: Komga by lazy { Injekt.get<SourceManager>().getKomga() }
 
-    constructor(source: Source) : this(
+    constructor(source: Komga) : this(
         Bundle().apply {
             putLong(
                 "key",
@@ -41,8 +42,11 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     override fun setCredentialsOnView(view: View) = with(view) {
         binding.dialogTitle.text = context.getString(R.string.log_in_to_, source.name)
-        binding.username.setText(preferences.sourceUsername(source))
-        binding.password.setText(preferences.sourcePassword(source))
+        binding.username.setText("demo@komga.org")
+        binding.password.setText("komga-demo")
+        binding.url.setText("https://demo.komga.org")
+        //binding.username.setText(preferences.sourceUsername(source))
+        // binding.password.setText(preferences.sourcePassword(source))
     }
 
     override fun checkLogin() {
@@ -52,7 +56,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                 startAnimation()
             }
 
-            if (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank()) {
+            if (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank() || binding.url.text.isNullOrBlank()) {
                 errorResult()
                 context.toast(R.string.fields_cannot_be_blank)
                 return
@@ -63,23 +67,22 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
             scope.launch {
                 try {
-                    val result = source.login(
-                        binding.username.text.toString(),
-                        binding.password.text.toString(),
-                    )
+                    val username = binding.username.text.toString()
+                    val password = binding.password.text.toString()
+                    val url = binding.url.text.toString()
+                    val result = source.loginWithUrl(username, password, url)
                     if (result) {
                         dialog?.dismiss()
-                        launch {
-                            preferences.setSourceCredentials(
-                                source,
-                                binding.username.text.toString(),
-                                binding.password.text.toString(),
-                            )
-                        }
+                        preferences.setKomgaCredentials(
+                            source,
+                            username,
+                            password,
+                            url,
+                        )
                         context.toast(R.string.successfully_logged_in)
                         (targetController as? Listener)?.siteLoginDialogClosed(
                             source,
-                            binding.username.text.toString(),
+                            binding.url.text.toString(),
                         )
                     } else {
                         errorResult()
@@ -104,6 +107,6 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
     }
 
     interface Listener {
-        fun siteLoginDialogClosed(source: Source, username: String)
+        fun siteLoginDialogClosed(source: Source, url: String)
     }
 }

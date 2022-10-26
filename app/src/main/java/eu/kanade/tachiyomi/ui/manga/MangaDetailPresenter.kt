@@ -592,7 +592,7 @@ class MangaDetailPresenter(
             }
 
             runCatching {
-                val mergedMangaResults = sourceManager.getMangaLife()
+                val mergedMangaResults = sourceManager.getKomga()
                     .searchManga(query)
                     .map { MergeManga(thumbnail = it.thumbnail_url ?: "", title = it.title, url = it.url) }
                 _trackMergeState.update {
@@ -602,6 +602,7 @@ class MangaDetailPresenter(
                     }
                 }
             }.getOrElse { error ->
+                XLog.e(error)
                 _trackMergeState.update {
                     it.copy(mergeSearchResult = MergeSearchResult.Error(error.message ?: "Error looking up information"))
                 }
