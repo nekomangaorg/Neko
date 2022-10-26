@@ -101,7 +101,7 @@ fun MangaGrid(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
 
-        itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
+        itemsIndexed(mangaList, key = { _, display -> display.hashCode() }) { index, displayManga ->
 
             LaunchedEffect(scrollState) {
                 if (!lastPage && index >= mangaList.size - 1) {
