@@ -319,31 +319,34 @@ fun BrowseScreen(
                             }
                         }
                     }
-                    ScreenTypeFooter(
-                        screenType = browseScreenType,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .conditional(sideNav) {
-                                this.navigationBarsPadding()
+                    //hide these on initial load
+                    if (!(browseScreenState.value.screenType == BrowseScreenType.Homepage && browseScreenState.value.initialLoading)) {
+                        ScreenTypeFooter(
+                            screenType = browseScreenType,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .conditional(sideNav) {
+                                    this.navigationBarsPadding()
+                                },
+                            isLoggedIn = browseScreenState.value.isLoggedIn,
+                            screenTypeClick = { newScreenType: BrowseScreenType ->
+                                scope.launch { sheetState.hide() }
+                                val sameScreen = browseScreenType == newScreenType
+                                val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
+
+                                if (sameScreen && !newIsFilterScreen) {
+                                    //do nothing
+                                } else if (newIsFilterScreen) {
+                                    openSheet(
+                                        BrowseBottomSheetScreen.FilterSheet(),
+                                    )
+                                } else {
+                                    changeScreenType(newScreenType)
+                                }
+
                             },
-                        isLoggedIn = browseScreenState.value.isLoggedIn,
-                        screenTypeClick = { newScreenType: BrowseScreenType ->
-                            scope.launch { sheetState.hide() }
-                            val sameScreen = browseScreenType == newScreenType
-                            val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
-
-                            if (sameScreen && !newIsFilterScreen) {
-                                //do nothing
-                            } else if (newIsFilterScreen) {
-                                openSheet(
-                                    BrowseBottomSheetScreen.FilterSheet(),
-                                )
-                            } else {
-                                changeScreenType(newScreenType)
-                            }
-
-                        },
-                    )
+                        )
+                    }
                 }
             }
         }
