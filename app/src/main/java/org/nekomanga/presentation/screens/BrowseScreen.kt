@@ -132,7 +132,7 @@ fun BrowseScreen(
     }
 
     val sideNav = rememberSideBarVisible(windowSizeClass, browseScreenState.value.sideNavMode)
-    val navBarPadding = rememberNavBarPadding(sideNav)
+    val navBarPadding = rememberNavBarPadding(sideNav, browseScreenState.value.isDeepLink)
 
     // set the current sheet to null when bottom sheet is closed
     if (!sheetState.isVisible) {
@@ -177,7 +177,7 @@ fun BrowseScreen(
             NekoScaffold(
                 incognitoMode = browseScreenState.value.incognitoMode,
                 isRoot = true,
-                title = stringResource(id = R.string.browse),
+                title = browseScreenState.value.title.asString(),
                 onNavigationIconClicked = onBackPress,
                 actions = {
                     AppBarActions(
@@ -197,18 +197,24 @@ fun BrowseScreen(
                                     showEntries = browseScreenState.value.showLibraryEntries,
                                     onClick = switchLibraryVisibilityClick,
                                 ),
-                                AppBar.MainDropdown(
-                                    incognitoMode = browseScreenState.value.incognitoMode,
-                                    incognitoModeClick = incognitoClick,
-                                    settingsClick = settingsClick,
-                                    statsClick = statsClick,
-                                    aboutClick = aboutClick,
-                                    helpClick = helpClick,
-                                    menuShowing = { visible -> mainDropdownShowing = visible },
-                                ),
-                            ),
-
-                        )
+                            )
+                            +
+                            if (browseScreenState.value.isDeepLink) {
+                                emptyList()
+                            } else {
+                                listOf(
+                                    AppBar.MainDropdown(
+                                        incognitoMode = browseScreenState.value.incognitoMode,
+                                        incognitoModeClick = incognitoClick,
+                                        settingsClick = settingsClick,
+                                        statsClick = statsClick,
+                                        aboutClick = aboutClick,
+                                        helpClick = helpClick,
+                                        menuShowing = { visible -> mainDropdownShowing = visible },
+                                    ),
+                                )
+                            },
+                    )
                 },
             ) { incomingContentPadding ->
 
@@ -216,7 +222,7 @@ fun BrowseScreen(
                     PaddingValues(
                         top = incomingContentPadding.calculateTopPadding(),
                         bottom = if (sideNav) {
-                            0.dp
+                            Padding.navBarSize
                         } else {
                             Padding.navBarSize
                         } + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
@@ -320,7 +326,7 @@ fun BrowseScreen(
                         }
                     }
                     //hide these on initial load
-                    if (!(browseScreenState.value.screenType == BrowseScreenType.Homepage && browseScreenState.value.initialLoading)) {
+                    if (!browseScreenState.value.hideFooterButton) {
                         ScreenTypeFooter(
                             screenType = browseScreenType,
                             modifier = Modifier

@@ -64,9 +64,13 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
         }
     }
 
-    fun openManga(mangaId: Long) {
+    fun openManga(mangaId: Long, wasDeepLink: Boolean = false) {
         viewScope.launchUI {
-            router.pushController(MangaDetailController(mangaId).withFadeTransaction())
+            if (wasDeepLink) {
+                router.replaceTopController(MangaDetailController(mangaId).withFadeTransaction())
+            } else {
+                router.pushController(MangaDetailController(mangaId).withFadeTransaction())
+            }
         }
     }
 

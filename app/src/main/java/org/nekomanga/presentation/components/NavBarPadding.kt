@@ -8,6 +8,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import org.nekomanga.presentation.theme.Padding
 
@@ -29,8 +30,13 @@ fun rememberSideBarVisible(windowSizeClass: WindowSizeClass, sideNavMode: SideNa
 }
 
 @Composable
-fun rememberNavBarPadding(isSideBarShowing: Boolean): PaddingValues {
-    val bottomNav = PaddingValues(bottom = Padding.navBarSize + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+fun rememberNavBarPadding(isSideBarShowing: Boolean, shouldIgnoreBottomNavPadding: Boolean = false): PaddingValues {
+    val bottomNav = PaddingValues(
+        bottom = when {
+            shouldIgnoreBottomNavPadding -> 0.dp
+            else -> Padding.navBarSize + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        },
+    )
     val sideNav = PaddingValues(start = Padding.navBarSize, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     return remember(isSideBarShowing, WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()) {
         when (isSideBarShowing) {
