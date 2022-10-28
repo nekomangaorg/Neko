@@ -121,7 +121,6 @@ fun EditCategorySheet(
                     Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                 }
             }
-            Gap(16.dp)
         }
     }
 }
