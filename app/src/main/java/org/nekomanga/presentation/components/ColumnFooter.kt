@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
@@ -29,6 +30,7 @@ import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.screens.ThemeColorState
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ColumnScope.SearchFooter(
     themeColorState: ThemeColorState,
@@ -44,11 +46,11 @@ fun ColumnScope.SearchFooter(
     val bringIntoViewRequester = BringIntoViewRequester()
     val scope = rememberCoroutineScope()
 
+
     if (showDivider) {
         Divider()
         Gap(4.dp)
     }
-
 
     OutlinedTextField(
         modifier = Modifier

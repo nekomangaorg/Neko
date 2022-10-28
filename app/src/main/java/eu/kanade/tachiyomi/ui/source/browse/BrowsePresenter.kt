@@ -109,7 +109,7 @@ class BrowsePresenter(
         },
         onSuccess = { hasNextPage, items, nextKey ->
             _browseScreenState.update { state ->
-                val allDisplayManga = state.displayMangaHolder.allDisplayManga + items
+                val allDisplayManga = (state.displayMangaHolder.allDisplayManga + items).distinct()
                 state.copy(
                     screenType = BrowseScreenType.Filter,
                     displayMangaHolder = DisplayMangaHolder(

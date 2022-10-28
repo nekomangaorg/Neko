@@ -138,6 +138,10 @@ class SearchHandler {
             service.search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Trying to search")
                 .andThen { response ->
+                    XLog.disableStackTrace().d("Page: $page")
+                    response.data.forEach {
+                        XLog.disableStackTrace().d("#mangaid: ${it.id}")
+                    }
                     searchMangaParse(response)
                 }
         }
