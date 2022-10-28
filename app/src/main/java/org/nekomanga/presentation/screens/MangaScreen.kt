@@ -185,7 +185,7 @@ fun MangaScreen(
     }
     ModalBottomSheetLayout(
         sheetState = sheetState,
-        sheetShape = RoundedCornerShape(Shapes.sheetRadius),
+        sheetShape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd = Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 currentBottomSheet?.let { currentSheet ->
