@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.SideNavMode
+import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
@@ -129,6 +130,7 @@ class BrowsePresenter(
     override fun onCreate() {
         super.onCreate()
 
+
         if (browseScreenState.value.filters.query.text.isNotBlank()) {
             getSearchPage()
         } else {
@@ -195,7 +197,8 @@ class BrowsePresenter(
     }
 
     private fun getHomepage() {
-        presenterScope.launch {
+        presenterScope.launchIO {
+            if (!isOnline()) return@launchIO
             browseRepository.getHomePage().onFailure {
                 _browseScreenState.update { state ->
                     state.copy(error = UiText.String(it.message()), initialLoading = false, hideFooterButton = false)
@@ -209,7 +212,8 @@ class BrowsePresenter(
     }
 
     private fun getFollows(forceUpdate: Boolean) {
-        presenterScope.launch {
+        presenterScope.launchIO {
+            if (!isOnline()) return@launchIO
             if (forceUpdate || _browseScreenState.value.displayMangaHolder.resultType != BrowseScreenType.Follows) {
                 _browseScreenState.update { state ->
                     state.copy(initialLoading = true)
@@ -241,6 +245,8 @@ class BrowsePresenter(
 
     fun getSearchPage() {
         presenterScope.launchIO {
+            if (!isOnline()) return@launchIO
+
             _browseScreenState.update { state ->
                 state.copy(initialLoading = true, error = null, page = 1)
             }
@@ -734,6 +740,22 @@ class BrowsePresenter(
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * Check if can access internet
+     */
+    private fun isOnline(): Boolean {
+        return if (controller?.activity?.isOnline() == true) {
+            true
+        } else {
+            presenterScope.launch {
+                _browseScreenState.update {
+                    it.copy(initialLoading = false, error = UiText.StringResource(R.string.no_network_connection))
+                }
+            }
+            false
         }
     }
 }
