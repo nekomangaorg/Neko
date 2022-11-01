@@ -103,8 +103,14 @@ class MangaDetailPresenter(
 
     private val _currentManga = MutableStateFlow<Manga?>(null)
     val manga: StateFlow<Manga?> = _currentManga.asStateFlow()
-    private val currentManga
-        get() = _currentManga.value!!
+
+    private fun currentManga(): Manga {
+        if (_currentManga.value == null) {
+            val dbManga = db.getManga(mangaId).executeAsBlocking()
+            _currentManga.value = dbManga
+        }
+        return _currentManga.value!!
+    }
 
     private val _generalState = MutableStateFlow(MangaConstants.MangaScreenGeneralState())
     val generalState: StateFlow<MangaConstants.MangaScreenGeneralState> = _generalState.asStateFlow()
@@ -139,7 +145,7 @@ class MangaDetailPresenter(
                 themeBasedOffCovers = preferences.themeMangaDetails(),
                 vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
             )
-            if (!currentManga.initialized) {
+            if (!currentManga().initialized) {
                 updateCategoryFlows()
                 updateMangaFlow()
                 updateArtworkFlow()
@@ -189,7 +195,7 @@ class MangaDetailPresenter(
 
             _isRefreshing.value = true
 
-            mangaUpdateCoordinator.update(currentManga, presenterScope).collect { result ->
+            mangaUpdateCoordinator.update(currentManga(), presenterScope).collect { result ->
                 when (result) {
                     is MangaResult.Error -> {
                         _snackbarState.emit(SnackbarState(message = result.text, messageRes = result.id))
@@ -238,8 +244,8 @@ class MangaDetailPresenter(
      */
     fun updateMangaCategories(enabledCategories: List<CategoryItem>) {
         presenterScope.launchIO {
-            val categories = enabledCategories.map { MangaCategory.create(currentManga, it.toDbCategory()) }
-            db.setMangaCategories(categories, listOf(currentManga))
+            val categories = enabledCategories.map { MangaCategory.create(currentManga(), it.toDbCategory()) }
+            db.setMangaCategories(categories, listOf(currentManga()))
             updateCategoryFlows()
         }
     }
@@ -376,7 +382,7 @@ class MangaDetailPresenter(
             if (!preferences.readingSync() || !sourceManager.getMangadex().isLogged() || !isOnline()) return@launchIO
 
             runCatching {
-                statusHandler.getReadChapterIds(currentManga.uuid()).collect { chapterIds ->
+                statusHandler.getReadChapterIds(currentManga().uuid()).collect { chapterIds ->
                     val chaptersToMarkRead = generalState.value.allChapters.asSequence().filter { !it.chapter.isMergedChapter() }
                         .filter { chapterIds.contains(it.chapter.mangaDexChapterId) }
                         .toList()
@@ -400,7 +406,7 @@ class MangaDetailPresenter(
     fun searchTracker(title: String, service: TrackServiceItem) {
         presenterScope.launchIO {
             val previouslyTracked = trackMergeState.value.tracks.firstOrNull { service.id == it.trackServiceId } != null
-            trackingCoordinator.searchTracker(title, service, currentManga, previouslyTracked).collect { result ->
+            trackingCoordinator.searchTracker(title, service, currentManga(), previouslyTracked).collect { result ->
                 _trackMergeState.update {
                     it.copy(trackSearchResult = result)
                 }
@@ -478,7 +484,7 @@ class MangaDetailPresenter(
      */
     private fun saveCover(directory: File, artwork: Artwork): File {
         val cover = if (artwork.url.isBlank()) {
-            coverCache.getCustomCoverFile(currentManga).takeIf { it.exists() } ?: coverCache.getCoverFile(currentManga.thumbnail_url, currentManga.favorite)
+            coverCache.getCustomCoverFile(currentManga()).takeIf { it.exists() } ?: coverCache.getCoverFile(currentManga().thumbnail_url, currentManga().favorite)
         } else {
             coverCache.getCoverFile(artwork.url)
         }
@@ -489,9 +495,9 @@ class MangaDetailPresenter(
 
         // Build destination file.
         val fileNameNoExtension = listOfNotNull(
-            currentManga.title,
+            currentManga().title,
             artwork.volume.ifEmpty { null },
-            currentManga.uuid(),
+            currentManga().uuid(),
         ).joinToString("-")
 
         val filename = DiskUtil.buildValidFilename("$fileNameNoExtension.${type.extension}")
@@ -510,9 +516,9 @@ class MangaDetailPresenter(
      */
     fun setCover(artwork: Artwork) {
         presenterScope.launchIO {
-            coverCache.setCustomCoverToCache(currentManga, artwork.url)
+            coverCache.setCustomCoverToCache(currentManga(), artwork.url)
             MangaCoverMetadata.remove(mangaId)
-            val manga = currentManga
+            val manga = currentManga()
             manga.user_cover = artwork.url
             db.insertManga(manga).executeOnIO()
             updateMangaFlow()
@@ -525,9 +531,9 @@ class MangaDetailPresenter(
      */
     fun resetCover() {
         presenterScope.launchIO {
-            coverCache.deleteCustomCover(currentManga)
+            coverCache.deleteCustomCover(currentManga())
             MangaCoverMetadata.remove(mangaId)
-            val manga = currentManga
+            val manga = currentManga()
             manga.user_cover = null
             db.insertManga(manga).executeOnIO()
             updateMangaFlow()
@@ -541,12 +547,12 @@ class MangaDetailPresenter(
     fun setAltTitle(title: String?) {
         presenterScope.launchIO {
             val previousTitle = mangaState.value.currentTitle
-            val newTitle = title ?: currentManga.originalTitle
+            val newTitle = title ?: currentManga().originalTitle
             _mangaState.update {
                 it.copy(currentTitle = newTitle)
             }
 
-            val manga = currentManga
+            val manga = currentManga()
             manga.user_title = title
             db.insertManga(manga).executeOnIO()
             updateMangaFlow()
@@ -569,7 +575,7 @@ class MangaDetailPresenter(
      */
     fun removeMergedManga() {
         presenterScope.launchIO {
-            val editManga = currentManga
+            val editManga = currentManga()
             editManga.apply {
                 merge_manga_url = null
             }
@@ -577,9 +583,9 @@ class MangaDetailPresenter(
             updateMangaFlow()
 
             val mergedChapters =
-                db.getChapters(currentManga).executeOnIO().filter { it.isMergedChapter() }
+                db.getChapters(currentManga()).executeOnIO().filter { it.isMergedChapter() }
 
-            downloadManager.deleteChapters(mergedChapters, currentManga, sourceManager.getMangadex())
+            downloadManager.deleteChapters(mergedChapters, currentManga(), sourceManager.getMangadex())
             db.deleteChapters(mergedChapters).executeOnIO()
             updateAllFlows()
         }
@@ -614,7 +620,7 @@ class MangaDetailPresenter(
      */
     fun addMergedManga(mergeManga: MergeManga) {
         presenterScope.launchIO {
-            val editManga = currentManga
+            val editManga = currentManga()
             editManga.apply {
                 merge_manga_url = mergeManga.url
                 merge_manga_image_url = merge_manga_image_url
@@ -633,7 +639,7 @@ class MangaDetailPresenter(
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             val currentArtwork = createCurrentArtwork(dbManga)
 
-            val altArtwork = createAltArtwork(currentManga, currentArtwork)
+            val altArtwork = createAltArtwork(currentManga(), currentArtwork)
             _mangaState.update {
                 it.copy(alternativeArtwork = altArtwork.toImmutableList(), currentArtwork = currentArtwork)
             }
@@ -677,7 +683,7 @@ class MangaDetailPresenter(
                 }
                 .map { chapter ->
                     val downloadState = when {
-                        downloadManager.isChapterDownloaded(chapter.toDbChapter(), currentManga) -> Download.State.DOWNLOADED
+                        downloadManager.isChapterDownloaded(chapter.toDbChapter(), currentManga()) -> Download.State.DOWNLOADED
                         downloadManager.hasQueue() -> downloadManager.queue.find { it.chapter.id == chapter.id }?.status ?: Download.State.default
                         else -> Download.State.default
                     }
@@ -696,7 +702,7 @@ class MangaDetailPresenter(
             }
 
             val allChapterScanlators = allChapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
-            if (allChapterScanlators.size == 1 && currentManga.filtered_scanlators.isNotNullOrEmpty()) {
+            if (allChapterScanlators.size == 1 && currentManga().filtered_scanlators.isNotNullOrEmpty()) {
                 updateMangaScanlator(emptySet())
             }
 
@@ -704,7 +710,7 @@ class MangaDetailPresenter(
 
             _generalState.update {
                 it.copy(
-                    activeChapters = chapterSort.getChaptersSorted(currentManga, allChapters).toImmutableList(),
+                    activeChapters = chapterSort.getChaptersSorted(currentManga(), allChapters).toImmutableList(),
                     allChapters = allChapters.toImmutableList(),
                     allScanlators = allChapterScanlators.toImmutableSet(),
                     allLanguages = allLanguages.toImmutableSet(),
@@ -723,7 +729,7 @@ class MangaDetailPresenter(
      */
     private fun updateMangaScanlator(filteredScanlators: Set<String>) {
         presenterScope.launchIO {
-            val manga = currentManga
+            val manga = currentManga()
             manga.filtered_scanlators = when (filteredScanlators.isEmpty()) {
                 true -> null
                 false -> ChapterUtil.getScanlatorString(filteredScanlators)
@@ -740,7 +746,7 @@ class MangaDetailPresenter(
      */
     private fun updateMangaFilteredLanguages(filteredLanguages: Set<String>) {
         presenterScope.launchIO {
-            val manga = currentManga
+            val manga = currentManga()
             manga.filtered_language = when (filteredLanguages.isEmpty()) {
                 true -> null
                 false -> ChapterUtil.getLanguageString(filteredLanguages)
@@ -791,34 +797,34 @@ class MangaDetailPresenter(
                     var track = trackMergeState.value.tracks.firstOrNull { mdList.matchingTrack(it) }?.toDbTrack()
 
                     if (track == null) {
-                        track = mdList.createInitialTracker(currentManga)
+                        track = mdList.createInitialTracker(currentManga())
                         db.insertTrack(track).executeOnIO()
                         if (isOnline()) {
                             mdList.bind(track)
                         }
                         db.insertTrack(track).executeOnIO()
                     }
-                    val shouldAddAsPlanToRead = currentManga.favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
+                    val shouldAddAsPlanToRead = currentManga().favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
                     if (shouldAddAsPlanToRead && isOnline()) {
                         track.status = FollowStatus.PLAN_TO_READ.int
                         trackingCoordinator.updateTrackingService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem())
                     }
                 }
 
-                if (autoAddTracker.size > 1 && currentManga.favorite) {
+                if (autoAddTracker.size > 1 && currentManga().favorite) {
                     val validContentRatings = preferences.autoTrackContentRatingSelections()
-                    val contentRating = currentManga.getContentRating()
+                    val contentRating = currentManga().getContentRating()
                     if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
                         autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->
                             async {
                                 trackMergeState.value.loggedInTrackService
                                     .firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
-                                        val id = trackManager.getIdFromManga(trackService, currentManga)
+                                        val id = trackManager.getIdFromManga(trackService, currentManga())
                                         if (id != null && !trackMergeState.value.tracks.any { trackService.id == it.trackServiceId }) {
                                             if (!isOnline()) {
                                                 launchUI { _snackbarState.emit(SnackbarState(message = "No network connection, cannot autolink tracker")) }
                                             } else {
-                                                val trackResult = trackingCoordinator.searchTrackerNonFlow("", trackManager.getService(trackService.id)!!.toTrackServiceItem(), currentManga, false)
+                                                val trackResult = trackingCoordinator.searchTrackerNonFlow("", trackManager.getService(trackService.id)!!.toTrackServiceItem(), currentManga(), false)
 
                                                 if (trackResult is TrackingConstants.TrackSearchResult.Success) {
                                                     val trackSearchItem = trackResult.trackSearchResult[0]
@@ -877,9 +883,9 @@ class MangaDetailPresenter(
      */
     private fun getDescription(): String {
         return when {
-            currentManga.uuid().isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
-            currentManga.description.isNotNullOrEmpty() -> currentManga.description!!
-            !currentManga.initialized -> ""
+            currentManga().uuid().isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
+            currentManga().description.isNotNullOrEmpty() -> currentManga().description!!
+            !currentManga().initialized -> ""
             else -> "No description"
         }
     }
@@ -888,8 +894,8 @@ class MangaDetailPresenter(
      * Get current sort filter
      */
     private fun getSortFilter(): MangaConstants.SortFilter {
-        val sortOrder = currentManga.chapterOrder(preferences)
-        val status = when (currentManga.sortDescending(preferences)) {
+        val sortOrder = currentManga().chapterOrder(preferences)
+        val status = when (currentManga().sortDescending(preferences)) {
             true -> MangaConstants.SortState.Descending
             false -> MangaConstants.SortState.Ascending
         }
@@ -907,18 +913,18 @@ class MangaDetailPresenter(
      * Get current sort filter
      */
     private fun getFilter(): MangaConstants.Filter {
-        val read = when (currentManga.readFilter(preferences)) {
+        val read = when (currentManga().readFilter(preferences)) {
             Manga.CHAPTER_SHOW_UNREAD -> ToggleableState.On
             Manga.CHAPTER_SHOW_READ -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
         }
-        val bookmark = when (currentManga.bookmarkedFilter(preferences)) {
+        val bookmark = when (currentManga().bookmarkedFilter(preferences)) {
             Manga.CHAPTER_SHOW_BOOKMARKED -> ToggleableState.On
             Manga.CHAPTER_SHOW_NOT_BOOKMARKED -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
         }
 
-        val downloaded = when (currentManga.downloadedFilter(preferences)) {
+        val downloaded = when (currentManga().downloadedFilter(preferences)) {
             Manga.CHAPTER_SHOW_DOWNLOADED -> ToggleableState.On
             Manga.CHAPTER_SHOW_NOT_DOWNLOADED -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
@@ -934,7 +940,7 @@ class MangaDetailPresenter(
      * Get scanlator filter
      */
     private fun getScanlatorFilter(): MangaConstants.ScanlatorFilter {
-        val filteredScanlators = ChapterUtil.getScanlators(currentManga.filtered_scanlators).toSet()
+        val filteredScanlators = ChapterUtil.getScanlators(currentManga().filtered_scanlators).toSet()
         val scanlatorOptions = generalState.value.allScanlators.sortedWith(
             compareBy(String.CASE_INSENSITIVE_ORDER) { it },
         )
@@ -948,7 +954,7 @@ class MangaDetailPresenter(
      * Get scanlator filter
      */
     private fun getLangaugeFilter(): MangaConstants.LanguageFilter {
-        val filteredLanguages = ChapterUtil.getLanguages(currentManga.filtered_language).toSet()
+        val filteredLanguages = ChapterUtil.getLanguages(currentManga().filtered_language).toSet()
         val languageOptions = generalState.value.allLanguages.sortedWith(
             compareBy(String.CASE_INSENSITIVE_ORDER) { it },
         )
@@ -962,7 +968,7 @@ class MangaDetailPresenter(
      * Get hide titles
      */
     private fun getHideTitlesFilter(): Boolean {
-        return currentManga.hideChapterTitle(preferences)
+        return currentManga().hideChapterTitle(preferences)
     }
 
     private fun getFilterText(filter: MangaConstants.Filter, chapterScanlatorFilter: MangaConstants.ScanlatorFilter): String {
@@ -983,7 +989,7 @@ class MangaDetailPresenter(
      */
     fun changeSortOption(sortOption: SortOption?) {
         presenterScope.launchIO {
-            val manga = currentManga
+            val manga = currentManga()
 
             if (sortOption == null) {
                 manga.setSortToGlobal()
@@ -1013,7 +1019,7 @@ class MangaDetailPresenter(
      */
     fun changeFilterOption(filterOption: MangaConstants.FilterOption?) {
         presenterScope.launchIO {
-            val manga = currentManga
+            val manga = currentManga()
 
             if (!manga.usesLocalFilter && manga.readFilter(preferences) == Manga.SHOW_ALL && manga.downloadedFilter(preferences) == Manga.SHOW_ALL && manga.bookmarkedFilter(preferences) == Manga.SHOW_ALL) {
                 manga.readFilter = Manga.SHOW_ALL
@@ -1071,7 +1077,7 @@ class MangaDetailPresenter(
     fun changeScanlatorOption(scanlatorOption: MangaConstants.ScanlatorOption?) {
         presenterScope.launchIO {
             val newFilteredScanlators = if (scanlatorOption != null) {
-                val filteredScanlators = ChapterUtil.getScanlators(currentManga.filtered_scanlators).toMutableSet()
+                val filteredScanlators = ChapterUtil.getScanlators(currentManga().filtered_scanlators).toMutableSet()
                 when (scanlatorOption.disabled) {
                     true -> filteredScanlators.add(scanlatorOption.name)
                     false -> filteredScanlators.remove(scanlatorOption.name)
@@ -1091,7 +1097,7 @@ class MangaDetailPresenter(
      */
     fun changeLanguageOption(languageOptions: MangaConstants.LanguageOption?) {
         presenterScope.launchIO {
-            val manga = currentManga
+            val manga = currentManga()
 
             val newFilteredLanguages = if (languageOptions != null) {
                 val filteredLanguages = ChapterUtil.getLanguages(manga.filtered_language).toMutableSet()
@@ -1114,7 +1120,7 @@ class MangaDetailPresenter(
      */
     fun hideTitlesOption(hide: Boolean) {
         presenterScope.launchIO {
-            val manga = currentManga
+            val manga = currentManga()
 
             manga.displayMode = if (hide) Manga.CHAPTER_DISPLAY_NUMBER else Manga.CHAPTER_DISPLAY_NAME
             manga.setFilterToLocal()
@@ -1133,7 +1139,7 @@ class MangaDetailPresenter(
      */
     fun setGlobalOption(option: MangaConstants.SetGlobal) {
         presenterScope.launchIO {
-            val manga = currentManga
+            val manga = currentManga()
             when (option) {
                 MangaConstants.SetGlobal.Sort -> {
                     preferences.sortChapterOrder().set(manga.sorting)
@@ -1156,18 +1162,18 @@ class MangaDetailPresenter(
 
     private fun mangaSortMatchesDefault(): Boolean {
         return (
-            currentManga.sortDescending == preferences.chaptersDescAsDefault().get() &&
-                currentManga.sorting == preferences.sortChapterOrder().get()
-            ) || !currentManga.usesLocalSort
+            currentManga().sortDescending == preferences.chaptersDescAsDefault().get() &&
+                currentManga().sorting == preferences.sortChapterOrder().get()
+            ) || !currentManga().usesLocalSort
     }
 
     private fun mangaFilterMatchesDefault(): Boolean {
         return (
-            currentManga.readFilter == preferences.filterChapterByRead().get() &&
-                currentManga.downloadedFilter == preferences.filterChapterByDownloaded().get() &&
-                currentManga.bookmarkedFilter == preferences.filterChapterByBookmarked().get() &&
-                currentManga.hideChapterTitles == preferences.hideChapterTitlesByDefault().get()
-            ) || !currentManga.usesLocalFilter
+            currentManga().readFilter == preferences.filterChapterByRead().get() &&
+                currentManga().downloadedFilter == preferences.filterChapterByDownloaded().get() &&
+                currentManga().bookmarkedFilter == preferences.filterChapterByBookmarked().get() &&
+                currentManga().hideChapterTitles == preferences.hideChapterTitlesByDefault().get()
+            ) || !currentManga().usesLocalFilter
     }
 
     /**
@@ -1243,7 +1249,7 @@ class MangaDetailPresenter(
      */
     fun toggleFavorite(shouldAddToDefaultCategory: Boolean) {
         presenterScope.launch {
-            val editManga = currentManga
+            val editManga = currentManga()
             editManga.apply {
                 favorite = !favorite
                 date_added = when (favorite) {
@@ -1282,9 +1288,9 @@ class MangaDetailPresenter(
             if (chapterItems.isNotEmpty()) {
                 val delete = {
                     if (isEverything) {
-                        downloadManager.deleteManga(currentManga, sourceManager.getMangadex())
+                        downloadManager.deleteManga(currentManga(), sourceManager.getMangadex())
                     } else {
-                        downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, currentManga, sourceManager.getMangadex())
+                        downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, currentManga(), sourceManager.getMangadex())
                     }
                 }
                 if (canUndo) {
@@ -1318,7 +1324,7 @@ class MangaDetailPresenter(
      * Checks if a manga is favorited, if not then snack action to add to library
      */
     private fun addToLibrarySnack() {
-        if (!currentManga.favorite) {
+        if (!currentManga().favorite) {
             presenterScope.launch {
                 _snackbarState.emit(
                     SnackbarState(
@@ -1346,23 +1352,23 @@ class MangaDetailPresenter(
                 }
                 is DownloadAction.DownloadAll -> {
                     addToLibrarySnack()
-                    downloadManager.downloadChapters(currentManga, generalState.value.activeChapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+                    downloadManager.downloadChapters(currentManga(), generalState.value.activeChapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
                 }
                 is DownloadAction.Download -> {
                     addToLibrarySnack()
-                    downloadManager.downloadChapters(currentManga, chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+                    downloadManager.downloadChapters(currentManga(), chapterItems.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
                 }
                 is DownloadAction.DownloadNextUnread -> {
                     val filteredChapters =
-                        generalState.value.activeChapters.filter { !it.chapter.read && !it.isDownloaded }.sortedWith(chapterSort.sortComparator(currentManga, true))
+                        generalState.value.activeChapters.filter { !it.chapter.read && !it.isDownloaded }.sortedWith(chapterSort.sortComparator(currentManga(), true))
                             .take(downloadAction.numberToDownload)
                             .map { it.chapter.toDbChapter() }
-                    downloadManager.downloadChapters(currentManga, filteredChapters)
+                    downloadManager.downloadChapters(currentManga(), filteredChapters)
                 }
                 is DownloadAction.DownloadUnread -> {
                     val filteredChapters =
-                        generalState.value.activeChapters.filter { !it.chapter.read && !it.isDownloaded }.sortedWith(chapterSort.sortComparator(currentManga, true)).map { it.chapter.toDbChapter() }
-                    downloadManager.downloadChapters(currentManga, filteredChapters)
+                        generalState.value.activeChapters.filter { !it.chapter.read && !it.isDownloaded }.sortedWith(chapterSort.sortComparator(currentManga(), true)).map { it.chapter.toDbChapter() }
+                    downloadManager.downloadChapters(currentManga(), filteredChapters)
                 }
                 is DownloadAction.Remove -> deleteChapters(chapterItems, chapterItems.size == allChapterSize)
                 is DownloadAction.RemoveAll -> deleteChapters(
@@ -1382,7 +1388,7 @@ class MangaDetailPresenter(
     fun markChapters(chapterItems: List<ChapterItem>, markAction: MangaConstants.MarkAction, skipSync: Boolean = false) {
         presenterScope.launchIO {
             val initialChapterItems = if (markAction is MangaConstants.MarkAction.PreviousRead || markAction is MangaConstants.MarkAction.PreviousUnread) {
-                when (currentManga.sortDescending(preferences)) {
+                when (currentManga().sortDescending(preferences)) {
                     true -> (markAction as? MangaConstants.MarkAction.PreviousRead)?.altChapters ?: (markAction as MangaConstants.MarkAction.PreviousUnread).altChapters
                     false -> chapterItems
                 }
@@ -1452,7 +1458,7 @@ class MangaDetailPresenter(
                     if (chapterIds.isNotEmpty()) {
                         GlobalScope.launchIO {
                             statusHandler.marksChaptersStatus(
-                                currentManga.uuid(),
+                                currentManga().uuid(),
                                 chapterIds,
                                 syncRead,
                             )
@@ -1500,7 +1506,7 @@ class MangaDetailPresenter(
      */
     private fun updateNextUnreadChapter() {
         presenterScope.launchIO {
-            val nextChapter = chapterSort.getNextUnreadChapter(currentManga, generalState.value.activeChapters)?.chapter
+            val nextChapter = chapterSort.getNextUnreadChapter(currentManga(), generalState.value.activeChapters)?.chapter
             _generalState.update {
                 it.copy(
                     nextUnreadChapter =
@@ -1533,9 +1539,9 @@ class MangaDetailPresenter(
      */
     private fun updateMissingChapters() {
         presenterScope.launchIO {
-            val currentMissingChapters = generalState.value.allChapters.getMissingCount(currentManga.status)
-            if (currentMissingChapters != currentManga.missing_chapters) {
-                val editManga = currentManga
+            val currentMissingChapters = generalState.value.allChapters.getMissingCount(currentManga().status)
+            if (currentMissingChapters != currentManga().missing_chapters) {
+                val editManga = currentManga()
                 editManga.apply {
                     this.missing_chapters = currentMissingChapters
                 }
@@ -1590,7 +1596,7 @@ class MangaDetailPresenter(
                         }
                     },
 
-                ),
+                    ),
             )
         }
     }
