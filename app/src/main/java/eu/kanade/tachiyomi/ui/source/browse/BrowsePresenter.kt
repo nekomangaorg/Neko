@@ -227,6 +227,18 @@ class BrowsePresenter(
         }
     }
 
+    fun retry() {
+        presenterScope.launchIO {
+            _browseScreenState.update { state ->
+                state.copy(initialLoading = true, error = null, page = 1)
+            }
+            when (browseScreenState.value.screenType) {
+                BrowseScreenType.Homepage -> getHomepage()
+                else -> getSearchPage()
+            }
+        }
+    }
+
     fun getSearchPage() {
         presenterScope.launchIO {
             _browseScreenState.update { state ->
