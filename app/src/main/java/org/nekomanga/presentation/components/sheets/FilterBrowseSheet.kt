@@ -142,8 +142,7 @@ fun FilterBrowseSheet(
 
         ElevatedCard(
             modifier = Modifier
-                .fillMaxWidth()
-                .imePadding(),
+                .fillMaxWidth(),
             shape = RoundedCornerShape(topEnd = Shapes.sheetRadius, topStart = Shapes.sheetRadius),
         ) {
             Column(
@@ -477,6 +476,7 @@ fun OtherRow(
 ) {
     Column(
         modifier = Modifier
+            .imePadding()
             .fillMaxWidth(),
     ) {
         ExpandableRow(

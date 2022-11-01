@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -132,11 +133,13 @@ fun BrowseScreen(
     }
 
     val sideNav = rememberSideBarVisible(windowSizeClass, browseScreenState.value.sideNavMode)
-    val navBarPadding = rememberNavBarPadding(sideNav)
+    val navBarPadding = rememberNavBarPadding(sideNav, browseScreenState.value.isDeepLink)
 
     // set the current sheet to null when bottom sheet is closed
-    if (!sheetState.isVisible) {
-        currentBottomSheet = null
+    LaunchedEffect(key1 = sheetState.isVisible) {
+        if (!sheetState.isVisible) {
+            currentBottomSheet = null
+        }
     }
 
     val openSheet: (BrowseBottomSheetScreen) -> Unit = {
@@ -177,7 +180,7 @@ fun BrowseScreen(
             NekoScaffold(
                 incognitoMode = browseScreenState.value.incognitoMode,
                 isRoot = true,
-                title = stringResource(id = R.string.browse),
+                title = browseScreenState.value.title.asString(),
                 onNavigationIconClicked = onBackPress,
                 actions = {
                     AppBarActions(
@@ -197,18 +200,24 @@ fun BrowseScreen(
                                     showEntries = browseScreenState.value.showLibraryEntries,
                                     onClick = switchLibraryVisibilityClick,
                                 ),
-                                AppBar.MainDropdown(
-                                    incognitoMode = browseScreenState.value.incognitoMode,
-                                    incognitoModeClick = incognitoClick,
-                                    settingsClick = settingsClick,
-                                    statsClick = statsClick,
-                                    aboutClick = aboutClick,
-                                    helpClick = helpClick,
-                                    menuShowing = { visible -> mainDropdownShowing = visible },
-                                ),
-                            ),
-
-                        )
+                            )
+                            +
+                            if (browseScreenState.value.isDeepLink) {
+                                emptyList()
+                            } else {
+                                listOf(
+                                    AppBar.MainDropdown(
+                                        incognitoMode = browseScreenState.value.incognitoMode,
+                                        incognitoModeClick = incognitoClick,
+                                        settingsClick = settingsClick,
+                                        statsClick = statsClick,
+                                        aboutClick = aboutClick,
+                                        helpClick = helpClick,
+                                        menuShowing = { visible -> mainDropdownShowing = visible },
+                                    ),
+                                )
+                            },
+                    )
                 },
             ) { incomingContentPadding ->
 
@@ -216,7 +225,7 @@ fun BrowseScreen(
                     PaddingValues(
                         top = incomingContentPadding.calculateTopPadding(),
                         bottom = if (sideNav) {
-                            0.dp
+                            Padding.navBarSize
                         } else {
                             Padding.navBarSize
                         } + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
@@ -319,31 +328,34 @@ fun BrowseScreen(
                             }
                         }
                     }
-                    ScreenTypeFooter(
-                        screenType = browseScreenType,
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .conditional(sideNav) {
-                                this.navigationBarsPadding()
+                    //hide these on initial load
+                    if (!browseScreenState.value.hideFooterButton) {
+                        ScreenTypeFooter(
+                            screenType = browseScreenType,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .conditional(sideNav) {
+                                    this.navigationBarsPadding()
+                                },
+                            isLoggedIn = browseScreenState.value.isLoggedIn,
+                            screenTypeClick = { newScreenType: BrowseScreenType ->
+                                scope.launch { sheetState.hide() }
+                                val sameScreen = browseScreenType == newScreenType
+                                val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
+
+                                if (sameScreen && !newIsFilterScreen) {
+                                    //do nothing
+                                } else if (newIsFilterScreen) {
+                                    openSheet(
+                                        BrowseBottomSheetScreen.FilterSheet(),
+                                    )
+                                } else {
+                                    changeScreenType(newScreenType)
+                                }
+
                             },
-                        isLoggedIn = browseScreenState.value.isLoggedIn,
-                        screenTypeClick = { newScreenType: BrowseScreenType ->
-                            scope.launch { sheetState.hide() }
-                            val sameScreen = browseScreenType == newScreenType
-                            val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
-
-                            if (sameScreen && !newIsFilterScreen) {
-                                //do nothing
-                            } else if (newIsFilterScreen) {
-                                openSheet(
-                                    BrowseBottomSheetScreen.FilterSheet(),
-                                )
-                            } else {
-                                changeScreenType(newScreenType)
-                            }
-
-                        },
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -388,7 +400,7 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
             FooterFilterChip(
                 selected = screenType == BrowseScreenType.Filter,
                 onClick = { screenTypeClick(BrowseScreenType.Filter) },
-                name = stringResource(R.string.filter),
+                name = stringResource(R.string.search),
             )
         }
     }

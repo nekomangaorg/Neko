@@ -1,8 +1,11 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.getAll
+import com.github.michaelbull.result.getAllErrors
 import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -77,28 +80,35 @@ class BrowseRepository(
     }
 
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
-        val blockedScanlatorUUIDs = preferenceHelper.blockedScanlators().get().mapNotNull {
+
+        val blockedScanlatorUUIDs = preferenceHelper.blockedScanlators().get().map {
             var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
             if (scanlatorImpl == null) {
-                mangaDex.getScanlator(scanlator = it).map { scanlator -> scanlatorImpl = scanlator.toScanlatorImpl() }
-                db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
+                mangaDex.getScanlator(scanlator = it).map { scanlator ->
+                    scanlatorImpl = scanlator.toScanlatorImpl()
+                    db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
+                    scanlatorImpl!!
+                }
+            } else {
+                Ok(scanlatorImpl!!)
             }
-            scanlatorImpl
-        }.map {
-            it.uuid
         }
-
-        return mangaDex.fetchHomePageInfo(MdConstants.currentSeasonalId, blockedScanlatorUUIDs)
-            .andThen { listResults ->
-                Ok(
-                    listResults.map { listResult ->
-                        HomePageManga(
-                            displayScreenType = listResult.displayScreenType,
-                            displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList(),
-                        )
-                    },
-                )
-            }
+        return if (blockedScanlatorUUIDs.getAllErrors().isNotEmpty()) {
+            Err(blockedScanlatorUUIDs.getAllErrors().first())
+        } else {
+            val uuids = blockedScanlatorUUIDs.getAll().map { it.uuid }
+            mangaDex.fetchHomePageInfo(MdConstants.currentSeasonalId, uuids)
+                .andThen { listResults ->
+                    Ok(
+                        listResults.map { listResult ->
+                            HomePageManga(
+                                displayScreenType = listResult.displayScreenType,
+                                displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList(),
+                            )
+                        },
+                    )
+                }
+        }
     }
 
     suspend fun getFollows(): Result<ImmutableList<DisplayManga>, ResultError> {

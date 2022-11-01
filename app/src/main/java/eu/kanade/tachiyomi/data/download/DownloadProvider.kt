@@ -185,7 +185,8 @@ class DownloadProvider(private val context: Context) {
     fun renameMangaFolder(from: String, to: String) {
         val sourceDir = findSourceDir()
         val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
-        mangaDir?.renameTo(to)
+        val toFileName = DiskUtil.buildValidFilename(to)
+        mangaDir?.renameTo(toFileName)
     }
 
     /**

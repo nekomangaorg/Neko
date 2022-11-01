@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.source.browse
 import androidx.compose.ui.state.ToggleableState
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -14,6 +15,7 @@ import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.SideNavMode
+import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
@@ -55,6 +57,7 @@ class BrowsePresenter(
     private val _browseScreenState = MutableStateFlow(
         BrowseScreenState(
             isList = preferences.browseAsList().get(),
+            hideFooterButton = true,
             showLibraryEntries = preferences.browseShowLibrary().get(),
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
@@ -107,7 +110,7 @@ class BrowsePresenter(
         },
         onSuccess = { hasNextPage, items, nextKey ->
             _browseScreenState.update { state ->
-                val allDisplayManga = state.displayMangaHolder.allDisplayManga + items
+                val allDisplayManga = (state.displayMangaHolder.allDisplayManga + items).distinct()
                 state.copy(
                     screenType = BrowseScreenType.Filter,
                     displayMangaHolder = DisplayMangaHolder(
@@ -126,6 +129,7 @@ class BrowsePresenter(
 
     override fun onCreate() {
         super.onCreate()
+
 
         if (browseScreenState.value.filters.query.text.isNotBlank()) {
             getSearchPage()
@@ -193,21 +197,23 @@ class BrowsePresenter(
     }
 
     private fun getHomepage() {
-        presenterScope.launch {
+        presenterScope.launchIO {
+            if (!isOnline()) return@launchIO
             browseRepository.getHomePage().onFailure {
                 _browseScreenState.update { state ->
-                    state.copy(error = UiText.String(it.message()), initialLoading = false)
+                    state.copy(error = UiText.String(it.message()), initialLoading = false, hideFooterButton = false)
                 }
             }.onSuccess {
                 _browseScreenState.update { state ->
-                    state.copy(homePageManga = it.updateVisibility(preferences), initialLoading = false)
+                    state.copy(homePageManga = it.updateVisibility(preferences), initialLoading = false, hideFooterButton = false)
                 }
             }
         }
     }
 
     private fun getFollows(forceUpdate: Boolean) {
-        presenterScope.launch {
+        presenterScope.launchIO {
+            if (!isOnline()) return@launchIO
             if (forceUpdate || _browseScreenState.value.displayMangaHolder.resultType != BrowseScreenType.Follows) {
                 _browseScreenState.update { state ->
                     state.copy(initialLoading = true)
@@ -225,8 +231,22 @@ class BrowsePresenter(
         }
     }
 
+    fun retry() {
+        presenterScope.launchIO {
+            _browseScreenState.update { state ->
+                state.copy(initialLoading = true, error = null, page = 1)
+            }
+            when (browseScreenState.value.screenType) {
+                BrowseScreenType.Homepage -> getHomepage()
+                else -> getSearchPage()
+            }
+        }
+    }
+
     fun getSearchPage() {
         presenterScope.launchIO {
+            if (!isOnline()) return@launchIO
+
             _browseScreenState.update { state ->
                 state.copy(initialLoading = true, error = null, page = 1)
             }
@@ -304,6 +324,9 @@ class BrowsePresenter(
                     }
                 }
                 DeepLinkType.Manga -> {
+                    _browseScreenState.update {
+                        it.copy(isDeepLink = true, title = UiText.String(""))
+                    }
                     browseRepository.getDeepLinkManga(uuid).onFailure {
                         _browseScreenState.update { state ->
                             state.copy(error = UiText.String(it.message()), initialLoading = false)
@@ -312,10 +335,13 @@ class BrowsePresenter(
                         if (incomingQuery.isNotBlank() && !_browseScreenState.value.handledIncomingQuery) {
                             _browseScreenState.update { it.copy(filters = it.filters.copy(query = Filter.Query("", QueryType.Title)), handledIncomingQuery = true) }
                         }
-                        controller?.openManga(dm.mangaId)
+                        controller?.openManga(dm.mangaId, true)
                     }
                 }
                 DeepLinkType.List -> {
+                    _browseScreenState.update {
+                        it.copy(isDeepLink = true, title = UiText.StringResource(R.string.list))
+                    }
                     val searchFilters = createInitialDexFilter("").copy(queryMode = QueryType.List, query = Filter.Query(text = uuid, type = QueryType.List))
                     _browseScreenState.update {
                         it.copy(filters = searchFilters)
@@ -344,6 +370,9 @@ class BrowsePresenter(
                     }
                 }
                 DeepLinkType.Author -> {
+                    _browseScreenState.update {
+                        it.copy(isDeepLink = true, title = UiText.StringResource(R.string.author))
+                    }
                     val searchFilters = createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid = uuid))
                     _browseScreenState.update {
                         it.copy(filters = searchFilters)
@@ -354,6 +383,9 @@ class BrowsePresenter(
                     paginator.loadNextItems()
                 }
                 DeepLinkType.Group -> {
+                    _browseScreenState.update {
+                        it.copy(isDeepLink = true, title = UiText.StringResource(R.string.scanlator_group))
+                    }
                     val searchFilters = createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid = uuid))
                     _browseScreenState.update {
                         it.copy(filters = searchFilters)
@@ -708,6 +740,22 @@ class BrowsePresenter(
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * Check if can access internet
+     */
+    private fun isOnline(): Boolean {
+        return if (controller?.activity?.isOnline() == true) {
+            true
+        } else {
+            presenterScope.launch {
+                _browseScreenState.update {
+                    it.copy(initialLoading = false, error = UiText.StringResource(R.string.no_network_connection))
+                }
+            }
+            false
         }
     }
 }

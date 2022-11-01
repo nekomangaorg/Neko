@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
@@ -15,6 +16,9 @@ import org.nekomanga.presentation.components.UiText
 
 data class BrowseScreenState(
     val initialLoading: Boolean = true,
+    val isDeepLink: Boolean = false,
+    val title: UiText = UiText.StringResource(R.string.browse),
+    val hideFooterButton: Boolean = false,
     val pageLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
     val incognitoMode: Boolean = false,

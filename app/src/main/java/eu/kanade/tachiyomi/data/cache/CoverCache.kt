@@ -195,10 +195,13 @@ class CoverCache(val context: Context) {
      */
     @Throws(IOException::class)
     fun setCustomCoverToCache(manga: Manga, url: String) {
-        getCoverFile(url).inputStream().use { inputStream ->
-            getCustomCoverFile(manga).outputStream().use {
-                inputStream.copyTo(it)
-                context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
+        val coverFile = getCoverFile(url)
+        if (coverFile.exists()) {
+            coverFile.inputStream().use { inputStream ->
+                getCustomCoverFile(manga).outputStream().use {
+                    inputStream.copyTo(it)
+                    context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
+                }
             }
         }
     }

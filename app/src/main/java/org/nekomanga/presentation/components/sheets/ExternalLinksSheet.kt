@@ -28,7 +28,7 @@ import org.nekomanga.presentation.screens.ThemeColorState
 @Composable
 fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<ExternalLink>, onLinkClick: (String, String) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
-        BaseSheet(themeColor = themeColorState) {
+        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()

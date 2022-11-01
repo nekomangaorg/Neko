@@ -39,7 +39,7 @@ fun BaseSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
-            shape = RoundedCornerShape(Shapes.sheetRadius),
+            shape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd = Shapes.sheetRadius),
         ) {
             Column(
                 modifier = Modifier

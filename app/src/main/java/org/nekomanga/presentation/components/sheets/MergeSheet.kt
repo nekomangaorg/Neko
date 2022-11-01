@@ -119,7 +119,7 @@ private fun SuccessResults(mergeMangaList: List<MergeManga>, mergeMangaClick: (M
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(mergeMangaList) { item ->
+        items(mergeMangaList, key = { item -> item.hashCode() }) { item ->
             Box(
                 modifier = Modifier
                     .aspectRatio(3f / 4f)

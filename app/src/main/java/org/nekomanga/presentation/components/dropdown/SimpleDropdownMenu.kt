@@ -86,8 +86,8 @@ private fun Item(modifier: Modifier, text: String, style: TextStyle, onClick: ()
             )
         },
         onClick = {
-            onClick()
             onDismiss()
+            onClick()
         },
     )
 }

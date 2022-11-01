@@ -803,7 +803,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
             SHORTCUT_SOURCE -> {
                 val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
+                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_browse
                 router.pushController(BrowseController().withFadeTransaction())
             }
             SHORTCUT_DOWNLOADS -> {
