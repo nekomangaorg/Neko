@@ -8,7 +8,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.webkit.CookieManager
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -49,6 +51,12 @@ open class App : Application(), DefaultLifecycleObserver {
     override fun onCreate() {
         super<Application>.onCreate()
         XLogSetup(this)
+
+        kotlin.runCatching {
+            CookieManager.getInstance()
+        }.onFailure {
+            Toast.makeText(applicationContext, "Error! App requires WebView to be installed", Toast.LENGTH_LONG).show()
+        }
 
         // TLS 1.3 support for Android < 10
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {

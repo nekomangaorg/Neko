@@ -400,7 +400,7 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
             FooterFilterChip(
                 selected = screenType == BrowseScreenType.Filter,
                 onClick = { screenTypeClick(BrowseScreenType.Filter) },
-                name = stringResource(R.string.filter),
+                name = stringResource(R.string.search),
             )
         }
     }
