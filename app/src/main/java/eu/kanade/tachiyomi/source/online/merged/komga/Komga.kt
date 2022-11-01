@@ -30,7 +30,7 @@ class Komga : ReducedHttpSource() {
 
     override val baseUrl: String = ""
 
-    override val name: String = "Komga"
+    override val name: String = Komga.name
 
     private val json: Json by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
@@ -166,6 +166,7 @@ class Komga : ReducedHttpSource() {
         }
 
     companion object {
+        val name = "Komga"
         private val supportedImageTypes = listOf("image/jpeg", "image/png", "image/gif", "image/webp", "image/jxl")
     }
 }
