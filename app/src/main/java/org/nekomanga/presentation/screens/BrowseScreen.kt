@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -135,8 +136,10 @@ fun BrowseScreen(
     val navBarPadding = rememberNavBarPadding(sideNav, browseScreenState.value.isDeepLink)
 
     // set the current sheet to null when bottom sheet is closed
-    if (!sheetState.isVisible) {
-        currentBottomSheet = null
+    LaunchedEffect(key1 = sheetState.isVisible) {
+        if (!sheetState.isVisible) {
+            currentBottomSheet = null
+        }
     }
 
     val openSheet: (BrowseBottomSheetScreen) -> Unit = {

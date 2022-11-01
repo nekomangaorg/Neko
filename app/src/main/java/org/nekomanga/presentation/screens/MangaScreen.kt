@@ -173,13 +173,16 @@ fun MangaScreen(
     }
 
     // set the current sheet to null when bottom sheet is closed
-    if (!sheetState.isVisible) {
-        currentBottomSheet = null
+    LaunchedEffect(key1 = sheetState.isVisible) {
+        if (!sheetState.isVisible) {
+            currentBottomSheet = null
+        }
     }
 
-    val openSheet: (DetailsBottomSheetScreen) -> Unit = {
+
+    fun openSheet(sheet: DetailsBottomSheetScreen) {
         scope.launch {
-            currentBottomSheet = it
+            currentBottomSheet = sheet
             sheetState.show()
         }
     }
@@ -197,13 +200,14 @@ fun MangaScreen(
                         trackMergeState = trackMergeState,
                         addNewCategory = categoryActions.addNew,
                         dateFormat = dateFormat,
-                        openSheet = openSheet,
+                        openSheet = ::openSheet,
                         trackActions = trackActions,
                         coverActions = coverActions,
                         mergeActions = mergeActions,
                         chapterFilterActions = chapterFilterActions,
                         openInWebView = { url, title -> context.asActivity().openInWebView(url, title) },
-                    ) { scope.launch { sheetState.hide() } }
+                        closeSheet = { scope.launch { sheetState.hide() } },
+                    )
                 }
             }
         },
