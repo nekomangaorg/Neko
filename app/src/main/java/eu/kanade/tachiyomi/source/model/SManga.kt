@@ -182,10 +182,6 @@ fun MangaInfo.toSManga(): SManga {
     }
 }
 
-fun SManga.isMerged(): Boolean {
-    return merge_manga_url.isNullOrEmpty().not()
-}
-
 fun SManga.uuid(): String {
     return MdUtil.getMangaUUID(this.url)
 }

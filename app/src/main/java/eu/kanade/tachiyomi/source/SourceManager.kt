@@ -13,14 +13,12 @@ import uy.kohesive.injekt.injectLazy
  */
 open class SourceManager {
 
-    private val preferences: PreferencesHelper by injectLazy()
-
     // private val sourcesMap = mutableMapOf<Long, Source>()
     private val source: MangaDex = MangaDex()
 
-    private val mangaLife = MangaLife()
+    private val mangaLife = lazy { MangaLife() }
 
-    private val komga = Komga()
+    private val komga = lazy {  Komga() }
 
     open fun get(sourceKey: Long): Source? {
         return source

@@ -2,8 +2,6 @@ package org.nekomanga.domain.manga
 
 import androidx.annotation.StringRes
 
-data class MergeManga(val thumbnail: String, val url: String, val title: String)
-
 data class SourceManga(val currentThumbnail: String, val url: String, val title: String, val displayText: String = "", @StringRes val displayTextRes: Int? = null)
 
 data class DisplayManga(

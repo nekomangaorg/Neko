@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.database.mappers.ChapterTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.HistoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MangaCategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MangaTypeMapping
+import eu.kanade.tachiyomi.data.database.mappers.MergeMangaTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.ScanlatorTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.SearchMetadataTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.SimilarTypeMapping
@@ -22,6 +23,7 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.ScanlatorImpl
 import eu.kanade.tachiyomi.data.database.models.SearchMetadata
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -32,6 +34,7 @@ import eu.kanade.tachiyomi.data.database.queries.ChapterQueries
 import eu.kanade.tachiyomi.data.database.queries.HistoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaCategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaQueries
+import eu.kanade.tachiyomi.data.database.queries.MergeMangaQueries
 import eu.kanade.tachiyomi.data.database.queries.ScanlatorQueries
 import eu.kanade.tachiyomi.data.database.queries.SearchMetadataQueries
 import eu.kanade.tachiyomi.data.database.queries.SimilarQueries
@@ -45,6 +48,7 @@ open class DatabaseHelper(context: Context) :
     ArtworkQueries,
     BrowseFilterQueries,
     MangaQueries,
+    MergeMangaQueries,
     ChapterQueries,
     TrackQueries,
     CategoryQueries,
@@ -73,6 +77,7 @@ open class DatabaseHelper(context: Context) :
         .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
         .addTypeMapping(ScanlatorImpl::class.java, ScanlatorTypeMapping())
         .addTypeMapping(BrowseFilterImpl::class.java, BrowseFilterTypeMapping())
+        .addTypeMapping(MergeMangaImpl::class.java, MergeMangaTypeMapping())
         .build()
 
     inline fun inTransaction(block: () -> Unit) = db.inTransaction(block)

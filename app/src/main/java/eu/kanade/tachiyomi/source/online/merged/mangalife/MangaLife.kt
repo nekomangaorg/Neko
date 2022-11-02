@@ -208,6 +208,7 @@ class MangaLife : ReducedHttpSource() {
     }
 
     companion object {
+        @Deprecated("deprecated")
         const val oldName = "Merged Chapter"
         const val name = "MangaLife"
     }

@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -26,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.channelFlow
@@ -45,8 +45,6 @@ class MangaUpdateCoordinator {
     private val preferences: PreferencesHelper by injectLazy()
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by lazy { Injekt.get() }
-    private val mangaDex: MangaDex by lazy { sourceManager.getMangadex() }
-    private val mangaLife: Komga by lazy { sourceManager.getKomga() }
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
@@ -56,7 +54,7 @@ class MangaUpdateCoordinator {
     suspend fun update(manga: Manga, scope: CoroutineScope) = channelFlow {
         val mangaWasInitialized = manga.initialized
 
-        if (!mangaDex.checkIfUp()) {
+        if (!sourceManager.getMangadex().checkIfUp()) {
             send(MangaResult.Error(R.string.site_down))
             return@channelFlow
         }
@@ -88,7 +86,7 @@ class MangaUpdateCoordinator {
      */
     private fun ProducerScope<MangaResult>.startMangaJob(scope: CoroutineScope, manga: Manga): Job {
         return scope.launchIO {
-            mangaDex.getMangaDetails(manga.uuid())
+            sourceManager.getMangadex().getMangaDetails(manga.uuid())
                 .onFailure {
                     send(MangaResult.Error(text = "Error getting manga from MangaDex"))
                     cancel()
@@ -132,28 +130,31 @@ class MangaUpdateCoordinator {
     private fun ProducerScope<MangaResult>.startChapterJob(scope: CoroutineScope, manga: Manga, mangaWasAlreadyInitialized: Boolean): Job {
         return scope.launchIO {
             val deferredChapters = async {
-                mangaDex.fetchChapterList(manga)
+                sourceManager.getMangadex().fetchChapterList(manga)
                     .onFailure {
                         send(MangaResult.Error(text = "error with MangaDex: getting chapters"))
                         cancel()
                     }.getOrElse { emptyList() }
             }
 
-            val deferredMergedChapters =
-                async {
-                    when (manga.isMerged()) {
-                        true -> {
-                            mangaLife.fetchChapters(manga.merge_manga_url!!)
-                                .onFailure {
-                                    send(MangaResult.Error(text = "error with merged source: getting chapters "))
-                                    this.cancel()
-                                }.getOrElse { emptyList() }
-                        }
-                        false -> emptyList()
+            val mergedMangaList = db.getMergeMangaList(manga).executeOnIO()
+
+            val deferredMergedChapters = if (mergedMangaList.isNotEmpty()) {
+                mergedMangaList.map { mergeManga ->
+                    async {
+                        //in the future check the merge type
+                        sourceManager.getMangaLife().fetchChapters(mergeManga.url)
+                            .onFailure {
+                                send(MangaResult.Error(text = "error with MangaLife: getting chapters "))
+                                this.cancel()
+                            }.getOrElse { emptyList() }
                     }
                 }
+            } else {
+                emptyList()
+            }
 
-            val allChapters = deferredChapters.await() + deferredMergedChapters.await()
+            val allChapters = deferredChapters.await() + deferredMergedChapters.awaitAll().flatten()
 
             val newChapters = syncChaptersWithSource(db, allChapters, manga)
             // chapters that were added
@@ -194,7 +195,7 @@ class MangaUpdateCoordinator {
     }
 
     suspend fun updateScanlator(scanlator: String) {
-        mangaDex.getScanlator(scanlator).onSuccess {
+        sourceManager.getMangadex().getScanlator(scanlator).onSuccess {
             db.insertScanlators(listOf(it.toScanlatorImpl())).executeAsBlocking()
         }
     }

@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
@@ -149,6 +151,20 @@ class BackupRestorer(val context: Context, val job: Job?) {
             val dbManga = backupManager.getMangaFromDatabase(manga)
             val dbMangaExists = dbManga != null
 
+            //needed for legacy merge manga
+            val mergeMangaList =
+                if (manga.merge_manga_url != null) {
+                    listOf(
+                        MergeMangaImpl(
+                            mangaId = 0L,
+                            url = manga.merge_manga_url!!,
+                            mergeType = MergeType.MangaLife,
+                        ),
+                    )
+                } else {
+                    backupManga.getMergeMangaImpl()
+                }
+
             if (dbMangaExists) {
                 backupManager.restoreMangaNoFetch(manga, dbManga!!)
             } else {
@@ -162,6 +178,7 @@ class BackupRestorer(val context: Context, val job: Job?) {
                 }
             }
             backupManager.restoreChaptersForMangaOffline(manga, chapters)
+            backupManager.restoreMergeMangaForManga(manga, mergeMangaList)
             backupManager.restoreCategoriesForManga(manga, categories, backupCategories)
             backupManager.restoreHistoryForManga(history)
             backupManager.restoreTrackForManga(manga, tracks)

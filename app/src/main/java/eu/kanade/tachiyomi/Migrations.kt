@@ -132,6 +132,14 @@ object Migrations {
                 LibraryUpdateJob.setupTask(context)
             }
 
+            if (oldVersion < 169) {
+                LibraryPresenter.updateMergeMangaDBAndFiles()
+            }
+
+
+
+
+
             return true
         }
         return false

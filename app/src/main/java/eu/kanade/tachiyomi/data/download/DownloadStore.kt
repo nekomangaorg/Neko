@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.model.getHttpSource
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -93,7 +93,7 @@ class DownloadStore(
                     db.getManga(mangaId).executeAsBlocking()
                 } ?: continue
                 val chapter = db.getChapter(chapterId).executeAsBlocking() ?: continue
-                val source = if (chapter.isMergedChapter()) sourceManager.getMangaLife() else sourceManager.getMangadex()
+                val source = chapter.getHttpSource(sourceManager)
                 downloads.add(Download(source, manga, chapter))
             }
         }

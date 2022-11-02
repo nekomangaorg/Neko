@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.source.model
 
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
+import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import java.io.Serializable
@@ -65,13 +68,24 @@ interface SChapter : Serializable {
     }
 }
 
-fun SChapter.isMergedChapter() =
-    when (this.scanlator) {
-        null -> false
-        MangaLife.name -> true
-        Komga.name -> true
+fun SChapter.isLegacyMergedChapter() = this.scanlator?.equals(MangaLife.oldName) == true
+
+fun SChapter.isMergedChapter(mergeType: MergeType = MergeType.MangaLife) =
+    when {
+        this.scanlator == null -> false
+        this.scanlator == MangaLife.name && mergeType == MergeType.MangaLife -> true
+        this.scanlator == Komga.name && mergeType == MergeType.Komga -> true
         else -> false
     }
+
+fun SChapter.getHttpSource(sourceManager: SourceManager): HttpSource {
+    return when (this.scanlator) {
+        null -> sourceManager.getMangaLife()
+        MangaLife.name -> sourceManager.getMangaLife()
+        Komga.name -> sourceManager.getKomga()
+        else -> sourceManager.getMangadex()
+    }
+}
 
 fun SChapter.toChapterInfo(): ChapterInfo {
     return ChapterInfo(

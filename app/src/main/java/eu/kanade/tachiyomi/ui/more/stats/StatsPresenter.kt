@@ -71,7 +71,7 @@ class StatsPresenter(
                     chapterCount = libraryList.sumOf { it.totalChapters },
                     readCount = libraryList.sumOf { it.read },
                     trackedCount = getMangaByTrackCount(libraryList, tracks),
-                    mergeCount = libraryList.mapNotNull { it.merge_manga_url }.count(),
+                    mergeCount = db.getAllMergeManga().executeAsBlocking().distinctBy { it.mangaId }.count(),
                     globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
                     downloadCount = libraryList.sumOf { getDownloadCount(it) },
                     tagCount = libraryList.mapNotNull { it.getGenres() }.flatten().distinct().count { !it.contains("content rating:", true) },
