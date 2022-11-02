@@ -33,9 +33,9 @@ fun syncChaptersWithSource(
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
     // no need to handle cache in dedupe because rawsource already has the correct chapters
-    val dedupedChapters = deduplicateChapters(rawSourceChapters, manga)
+    // val dedupedChapters = deduplicateChapters(rawSourceChapters, manga, db)
 
-    val sourceChapters = dedupedChapters.mapIndexed { i, sChapter ->
+    val sourceChapters = rawSourceChapters.mapIndexed { i, sChapter ->
         Chapter.create().apply {
             copyFrom(sChapter)
             manga_id = manga.id

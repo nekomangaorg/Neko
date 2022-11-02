@@ -24,7 +24,7 @@ import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
 
 class MangaLife : ReducedHttpSource() {
-    override val name = "Merged Chapter"
+    override val name = MangaLife.name
     override val baseUrl = "https://manga4life.com"
 
     lateinit var directory: Map<String, MangaLifeMangaDto>
@@ -208,6 +208,8 @@ class MangaLife : ReducedHttpSource() {
     }
 
     companion object {
-        const val name = "Merged Chapter"
+        @Deprecated("deprecated")
+        const val oldName = "Merged Chapter"
+        const val name = "MangaLife"
     }
 }

@@ -46,10 +46,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import jp.wasabeef.gap.Gap
-import org.nekomanga.domain.manga.MergeManga
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
@@ -64,7 +64,7 @@ fun MergeSheet(
     search: (String) -> Unit,
     openMergeSource: (String, String) -> Unit,
     removeMergeSource: () -> Unit,
-    mergeMangaClick: (MergeManga) -> Unit,
+    mergeMangaClick: (SourceMergeManga) -> Unit,
     cancelClick: () -> Unit,
 ) {
     if (isMergedManga is IsMergedManga.Yes) {
@@ -110,7 +110,7 @@ fun MergeSheet(
 }
 
 @Composable
-private fun SuccessResults(mergeMangaList: List<MergeManga>, mergeMangaClick: (MergeManga) -> Unit) {
+private fun SuccessResults(mergeMangaList: List<SourceMergeManga>, mergeMangaClick: (SourceMergeManga) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 100.dp),
         modifier = Modifier
@@ -128,7 +128,7 @@ private fun SuccessResults(mergeMangaList: List<MergeManga>, mergeMangaClick: (M
                     .clickable { mergeMangaClick(item) },
             ) {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current).data(item.thumbnail).crossfade(true).placeholder(Pastel.getColorLight()).build(),
+                    model = ImageRequest.Builder(LocalContext.current).data(item.coverUrl).crossfade(true).placeholder(Pastel.getColorLight()).build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

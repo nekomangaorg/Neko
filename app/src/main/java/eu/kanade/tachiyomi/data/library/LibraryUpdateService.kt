@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -402,14 +401,17 @@ class LibraryUpdateService(
                     source.fetchMangaAndChapterDetails(manga, true).getOrThrow { Exception(it.message()) }
                 }
             }
-
-            val merged = when (manga.isMerged()) {
+            val mergeMangaList = db.getMergeMangaList(manga).executeOnIO()
+            val merged = when (mergeMangaList.isNotEmpty()) {
                 true -> {
                     withIOContext {
-                        sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!).getOrElse {
-                            errorFromMerged = true
-                            emptyList()
-                        }
+                        //TODO eventually check which merge type
+                        mergeMangaList.map { mergeManga ->
+                            sourceManager.getMangaLife().fetchChapters(mergeManga.url).getOrElse {
+                                errorFromMerged = true
+                                emptyList()
+                            }
+                        }.flatten()
                     }
                 }
                 false -> emptyList()
@@ -431,7 +433,7 @@ class LibraryUpdateService(
                 withIOContext {
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                        .get()
+                            .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                         // load new covers in background

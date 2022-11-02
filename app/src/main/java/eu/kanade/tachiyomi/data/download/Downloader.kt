@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
@@ -254,8 +254,6 @@ class Downloader(
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) = launchIO {
-        val mangadexSource = sourceManager.getMangadex()
-        val mergedSource = sourceManager.getMergeSource()
 
         val wasEmpty = queue.isEmpty()
         // Called in background thread, the operation can be slow with SAF.
@@ -274,7 +272,7 @@ class Downloader(
             .filter { chapter -> queue.none { it.chapter.id == chapter.id } }
             // Create a download for each one.
             .map {
-                val source = if (it.isMergedChapter()) mergedSource else mangadexSource
+                val source = it.getHttpSource(sourceManager)
                 Download(source, manga, it)
             }
 
@@ -510,7 +508,7 @@ class Downloader(
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
         val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-            // Else guess from the uri.
+        // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.
             ?: ImageUtil.findImageType { file.openInputStream() }?.mime

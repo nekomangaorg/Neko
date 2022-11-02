@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.backup.models
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
@@ -41,12 +42,15 @@ data class BackupManga(
     @ProtoNumber(800) var customTitle: String? = null,
 
     // Neko Values
+    @Deprecated("Use mergeMangaList")
     @ProtoNumber(900) var mergedMangaUrl: String? = null,
     @ProtoNumber(901) var scanlatorFilter: String? = null,
+    @Deprecated("Use mergeMangaList")
     @ProtoNumber(902) var mergedMangaImageUrl: String? = null,
     @ProtoNumber(903) var alternativeArtwork: String? = null,
+    @ProtoNumber(904) var mergeMangaList: List<BackupMergeManga> = emptyList(),
 
-) {
+    ) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
             url = this@BackupManga.url.replace(
@@ -63,17 +67,22 @@ data class BackupManga(
             favorite = this@BackupManga.favorite
             source = this@BackupManga.source
             date_added = this@BackupManga.dateAdded
+            merge_manga_url = this@BackupManga.mergedMangaUrl
             viewer_flags = (
                 this@BackupManga.viewer_flags
                     ?: this@BackupManga.viewer
                 ).takeIf { it != 0 }
                 ?: -1
             chapter_flags = this@BackupManga.chapterFlags
-            merge_manga_url = this@BackupManga.mergedMangaUrl
-            merge_manga_image_url = this@BackupManga.mergedMangaImageUrl
             filtered_scanlators = this@BackupManga.scanlatorFilter
             user_title = this@BackupManga.customTitle
             user_cover = this@BackupManga.alternativeArtwork
+        }
+    }
+
+    fun getMergeMangaImpl(): List<MergeMangaImpl> {
+        return mergeMangaList.map {
+            it.toMergeMangaImpl()
         }
     }
 
@@ -106,8 +115,6 @@ data class BackupManga(
                 viewer = manga.readingModeType,
                 viewer_flags = manga.viewer_flags.takeIf { it != -1 } ?: 0,
                 chapterFlags = manga.chapter_flags,
-                mergedMangaUrl = manga.merge_manga_url,
-                mergedMangaImageUrl = manga.merge_manga_image_url,
                 scanlatorFilter = manga.filtered_scanlators,
                 customTitle = manga.user_title,
                 alternativeArtwork = manga.user_cover,

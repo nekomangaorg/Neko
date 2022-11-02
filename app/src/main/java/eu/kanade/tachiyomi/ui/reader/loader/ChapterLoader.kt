@@ -5,7 +5,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import rx.Completable
 import rx.Observable
@@ -73,8 +73,7 @@ class ChapterLoader(
      */
     private fun getPageLoader(chapter: ReaderChapter): PageLoader {
         val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
-        val source =
-            if (chapter.chapter.isMergedChapter()) sourceManager.getMergeSource() else sourceManager.getMangadex()
+        val source = chapter.chapter.getHttpSource(sourceManager)
         return when {
             isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager)
             else -> HttpPageLoader(chapter, source)

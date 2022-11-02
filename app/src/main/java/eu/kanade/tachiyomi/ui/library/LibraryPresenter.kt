@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.app.Application
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -9,8 +10,10 @@ import eu.kanade.tachiyomi.data.database.models.Chapter.Companion.copy
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
@@ -19,10 +22,10 @@ import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -379,8 +382,8 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
-            } else {
+                    (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
+                } else {
                     filterMangaType != item.manga.seriesType()
                 }
             ) {
@@ -392,8 +395,11 @@ class LibraryPresenter(
         if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED) return false
         if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED) return false
 
-        if (filterMerged == STATE_INCLUDE && item.manga.isMerged().not()) return false
-        if (filterMerged == STATE_EXCLUDE && item.manga.isMerged()) return false
+        if (filterMerged != STATE_IGNORE) {
+            val hasMerged = db.getMergeMangaList(item.manga).executeAsBlocking().isNotEmpty()
+            if (filterMerged == STATE_INCLUDE && !hasMerged) return false
+            if (filterMerged == STATE_EXCLUDE && hasMerged) return false
+        }
 
         if (filterMissingChapters == STATE_INCLUDE && item.manga.missing_chapters == null) return false
         if (filterMissingChapters == STATE_EXCLUDE && item.manga.missing_chapters != null) return false
@@ -405,9 +411,9 @@ class LibraryPresenter(
             val hasTrack = loggedServices.any { service ->
                 tracks.any {
                     if (service.isMdList() && (
-                        source.isLogged()
-                            .not() || it.status == FollowStatus.UNFOLLOWED.int
-                        )
+                            source.isLogged()
+                                .not() || it.status == FollowStatus.UNFOLLOWED.int
+                            )
                     ) {
                         false
                     } else {
@@ -728,8 +734,10 @@ class LibraryPresenter(
 
     private fun getCustomMangaItems(
         libraryManga: List<LibraryManga>,
-    ): Pair<List<LibraryItem>,
-        List<Category>,> {
+    ): Pair<
+        List<LibraryItem>,
+        List<Category>,
+        > {
         val tagItems: MutableMap<String, LibraryHeaderItem> = mutableMapOf()
 
         // internal function to make headers
@@ -1380,17 +1388,35 @@ class LibraryPresenter(
             preferences.lastLibrarySuggestion().set(Date().time)
         }
 
-        /** Give library manga to a date added based on min chapter fetch */
-        fun updateDB() {
+        /** Update the library manga with new merge manga info */
+        fun updateMergeMangaDBAndFiles() {
             val db: DatabaseHelper = Injekt.get()
+            val context by injectLazy<Application>()
+            val downloadProvider = DownloadProvider(context)
+            val libraryManga = db.getLibraryMangaList().executeAsBlocking()
+            val mergeManga = libraryManga.filter {
+                it.merge_manga_url != null
+            }
+
             db.inTransaction {
-                val libraryManga = db.getLibraryMangaList().executeAsBlocking()
-                libraryManga.forEach { manga ->
-                    if (manga.date_added == 0L) {
-                        val chapters = db.getChapters(manga).executeAsBlocking()
-                        manga.date_added = chapters.minByOrNull { it.date_fetch }?.date_fetch ?: 0L
-                        db.insertManga(manga).executeAsBlocking()
+                mergeManga.forEach { manga ->
+                    launchIO {
+                        downloadProvider.renameChapterFoldersForLegacyMerged(manga)
                     }
+                    db.insertMergeManga(
+                        MergeMangaImpl(
+                            mangaId = manga.id!!,
+                            url = manga.merge_manga_url!!,
+                        ),
+                    ).executeAsBlocking()
+                    manga.merge_manga_url = null
+                    db.insertManga(manga).executeAsBlocking()
+                    db.getChapters(manga).executeAsBlocking()
+                        .filter { it.scanlator?.equals(MangaLife.oldName) == true }
+                        .map { chp ->
+                            chp.scanlator = MangaLife.name
+                            db.insertChapter(chp).executeAsBlocking()
+                        }
                 }
             }
         }

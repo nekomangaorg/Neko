@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import org.nekomanga.domain.manga.MergeManga
+import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 
 object MergeConstants {
 
@@ -12,7 +12,7 @@ object MergeConstants {
     sealed class MergeSearchResult {
         object Loading : MergeSearchResult()
         object NoResult : MergeSearchResult()
-        class Success(val mergeMangaList: List<MergeManga>) : MergeSearchResult()
+        class Success(val mergeMangaList: List<SourceMergeManga>) : MergeSearchResult()
         class Error(val errorMessage: String) : MergeSearchResult()
     }
 }

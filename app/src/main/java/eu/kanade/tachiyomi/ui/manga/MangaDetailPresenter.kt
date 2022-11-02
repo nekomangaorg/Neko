@@ -12,6 +12,8 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.MergeType
+import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -22,7 +24,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -78,7 +79,6 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.domain.manga.MergeManga
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
@@ -573,17 +573,13 @@ class MangaDetailPresenter(
     /**
      * Remove merged manga entry
      */
-    fun removeMergedManga() {
+    fun removeMergedManga(mergeType: MergeType = MergeType.MangaLife) {
         presenterScope.launchIO {
-            val editManga = currentManga()
-            editManga.apply {
-                merge_manga_url = null
-            }
-            db.insertManga(editManga).executeOnIO()
+            db.deleteMergeMangaForType(mangaId, mergeType).executeAsBlocking()
             updateMangaFlow()
 
             val mergedChapters =
-                db.getChapters(currentManga()).executeOnIO().filter { it.isMergedChapter() }
+                db.getChapters(currentManga()).executeOnIO().filter { it.isMergedChapter(mergeType) }
 
             downloadManager.deleteChapters(mergedChapters, currentManga(), sourceManager.getMangadex())
             db.deleteChapters(mergedChapters).executeOnIO()
@@ -598,9 +594,9 @@ class MangaDetailPresenter(
             }
 
             runCatching {
-                val mergedMangaResults = sourceManager.getMergeSource()
+                val mergedMangaResults = sourceManager.getMangaLife()
                     .searchManga(query)
-                    .map { MergeManga(thumbnail = it.thumbnail_url ?: "", title = it.title, url = it.url) }
+                    .map { SourceMergeManga(coverUrl = it.thumbnail_url ?: "", title = it.title, url = it.url) }
                 _trackMergeState.update {
                     when (mergedMangaResults.isEmpty()) {
                         true -> trackMergeState.value.copy(mergeSearchResult = MergeSearchResult.NoResult)
@@ -618,14 +614,10 @@ class MangaDetailPresenter(
     /**
      * Attach the selected merge manga entry
      */
-    fun addMergedManga(mergeManga: MergeManga) {
+    fun addMergedManga(mergeManga: SourceMergeManga) {
         presenterScope.launchIO {
-            val editManga = currentManga()
-            editManga.apply {
-                merge_manga_url = mergeManga.url
-                merge_manga_image_url = merge_manga_image_url
-            }
-            db.insertManga(editManga).executeOnIO()
+            val newMergedManga = mergeManga.toMergeMangaImpl(mangaId)
+            db.insertMergeManga(newMergedManga).executeOnIO()
             updateMangaFlow()
             onRefresh()
         }
@@ -1208,8 +1200,10 @@ class MangaDetailPresenter(
             genres = (m.getGenres(true) ?: emptyList()).toImmutableList(),
             initialized = m.initialized,
             inLibrary = m.favorite,
-            isMerged = when (m.isMerged()) {
-                true -> Yes(sourceManager.getMergeSource().baseUrl + m.merge_manga_url!!, m.title)
+            isMerged = when (db.getMergeMangaList(m).executeAsBlocking().isNotEmpty()) {
+                true -> {
+                    Yes(sourceManager.getMangaLife().baseUrl + db.getMergeMangaList(m).executeAsBlocking().first().url, m.title)
+                }
                 false -> No
             },
             isPornographic = m.getContentRating()?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true) ?: false,

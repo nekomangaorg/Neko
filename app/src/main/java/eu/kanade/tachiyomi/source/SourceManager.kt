@@ -17,7 +17,7 @@ open class SourceManager {
     // private val sourcesMap = mutableMapOf<Long, Source>()
     private val source: MangaDex = MangaDex()
 
-    private val mergeSource = MangaLife()
+    private val mangaLife = MangaLife()
 
     open fun get(sourceKey: Long): Source? {
         return source
@@ -29,7 +29,7 @@ open class SourceManager {
 
     fun getMangadex(): MangaDex = source
 
-    fun getMergeSource() = mergeSource
+    fun getMangaLife() = mangaLife
 
     companion object {
 

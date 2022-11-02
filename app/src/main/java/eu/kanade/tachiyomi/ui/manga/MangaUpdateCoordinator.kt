@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -26,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.channelFlow
@@ -46,7 +46,7 @@ class MangaUpdateCoordinator {
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by lazy { Injekt.get() }
     private val mangaDex: MangaDex by lazy { sourceManager.getMangadex() }
-    private val mergedSource: MangaLife by lazy { sourceManager.getMergeSource() }
+    private val mergedSource: MangaLife by lazy { sourceManager.getMangaLife() }
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
@@ -139,21 +139,24 @@ class MangaUpdateCoordinator {
                     }.getOrElse { emptyList() }
             }
 
-            val deferredMergedChapters =
-                async {
-                    when (manga.isMerged()) {
-                        true -> {
-                            mergedSource.fetchChapters(manga.merge_manga_url!!)
-                                .onFailure {
-                                    send(MangaResult.Error(text = "error with merged source: getting chapters "))
-                                    this.cancel()
-                                }.getOrElse { emptyList() }
-                        }
-                        false -> emptyList()
+            val mergedMangaList = db.getMergeMangaList(manga).executeOnIO()
+
+            val deferredMergedChapters = if (mergedMangaList.isNotEmpty()) {
+                mergedMangaList.map { mergeManga ->
+                    async {
+                        //in the future check the merge type
+                        mergedSource.fetchChapters(mergeManga.url)
+                            .onFailure {
+                                send(MangaResult.Error(text = "error with MangaLife: getting chapters "))
+                                this.cancel()
+                            }.getOrElse { emptyList() }
                     }
                 }
+            } else {
+                emptyList()
+            }
 
-            val allChapters = deferredChapters.await() + deferredMergedChapters.await()
+            val allChapters = deferredChapters.await() + deferredMergedChapters.awaitAll().flatten()
 
             val newChapters = syncChaptersWithSource(db, allChapters, manga)
             // chapters that were added

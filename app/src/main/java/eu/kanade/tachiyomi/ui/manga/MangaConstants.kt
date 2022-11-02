@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
+import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import kotlinx.collections.immutable.ImmutableList
@@ -13,7 +14,6 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.domain.manga.MergeManga
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 
@@ -210,7 +210,7 @@ object MangaConstants {
     class MergeActions(
         val remove: () -> Unit,
         val search: (String) -> Unit,
-        val add: (MergeManga) -> Unit,
+        val add: (SourceMergeManga) -> Unit,
     )
 
     class ChapterActions(

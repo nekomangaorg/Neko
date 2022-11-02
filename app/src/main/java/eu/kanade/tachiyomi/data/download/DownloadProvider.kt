@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -189,6 +190,14 @@ class DownloadProvider(private val context: Context) {
         mangaDir?.renameTo(toFileName)
     }
 
+    fun renameChapterFoldersForLegacyMerged(manga: Manga) {
+        val mangaDir = findMangaDir(manga) ?: return
+        mangaDir.listFiles()?.filter { file -> file.name != null && file.name!!.startsWith(MangaLife.oldName) }?.forEach { file ->
+            val newFileName = file.name!!.replace(MangaLife.oldName, MangaLife.name)
+            file.renameTo(newFileName)
+        }
+    }
+
     /**
      * Returns a list of downloaded directories for the chapters that exist.
      *
@@ -254,7 +263,7 @@ class DownloadProvider(private val context: Context) {
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
         return listOf(
             getChapterDirName(chapter, true),
-            // chater names from j2k
+            // chapter names from j2k
             getJ2kChapterName(chapter),
             // legacy manga id
             getChapterDirName(chapter, false),

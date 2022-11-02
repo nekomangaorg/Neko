@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupChapter
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
+import eu.kanade.tachiyomi.data.backup.models.BackupMergeManga
 import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -27,11 +28,14 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isLegacyMergedChapter
+import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.FileOutputStream
 import kotlin.math.max
@@ -150,6 +154,11 @@ class BackupManager(val context: Context) {
     private fun backupMangaObject(manga: Manga, options: Int): BackupManga {
         // Entry for this manga
         val mangaObject = BackupManga.copyFrom(manga)
+
+        val mergeMangaList = databaseHelper.getMergeMangaList(manga.id!!).executeAsBlocking()
+        if (mergeMangaList.isNotEmpty()) {
+            mangaObject.mergeMangaList = mergeMangaList.map { BackupMergeManga.copyFrom(it) }
+        }
 
         // Check if user wants chapter information in backup
         if (options and BACKUP_CHAPTER_MASK == BACKUP_CHAPTER) {
@@ -351,13 +360,32 @@ class BackupManager(val context: Context) {
         }
     }
 
+    fun restoreMergeMangaForManga(manga: Manga, mergeMangaList: List<MergeMangaImpl>) {
+
+        val dbMergeMangaList = databaseHelper.getMergeMangaList(manga).executeAsBlocking()
+        mergeMangaList.forEach { mergeManga ->
+            val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
+            if (dbMergeManga == null) {
+                val newMergeManga = mergeManga.copy(
+                    mangaId = manga.id!!,
+                )
+                databaseHelper.insertMergeManga(newMergeManga).executeAsBlocking()
+            }
+        }
+    }
+
     internal fun restoreChaptersForMangaOffline(manga: Manga, chapters: List<Chapter>) {
         val dbChapters = databaseHelper.getChapters(manga).executeAsBlocking()
 
         chapters.forEach { chapter ->
             val dbChapter = dbChapters.find { it.url == chapter.url }
+
+            if (chapter.isLegacyMergedChapter()) {
+                chapter.scanlator = MangaLife.name
+            }
             if (dbChapter != null) {
                 chapter.id = dbChapter.id
+
                 chapter.copyFrom(dbChapter as SChapter)
                 if (dbChapter.read && !chapter.read) {
                     chapter.read = dbChapter.read
