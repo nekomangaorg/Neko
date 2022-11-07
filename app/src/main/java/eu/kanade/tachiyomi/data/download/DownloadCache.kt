@@ -166,7 +166,7 @@ class DownloadCache(
      * Renews the downloads cache.
      */
     private fun renew() {
-        val onlineSources = listOf(sourceManager.getMangadex())
+        val onlineSources = listOf(sourceManager.mangaDex)
 
         val sourceDirs = getDirectoryFromPreference().listFiles().orEmpty()
             .associate { it.name to SourceDirectory(it) }.mapNotNullKeys { entry ->

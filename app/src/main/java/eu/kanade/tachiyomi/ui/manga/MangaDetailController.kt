@@ -201,7 +201,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 val stream = cover?.getUriCompat(context)
                 try {
                     val manga = presenter.manga.value!!
-                    var url = presenter.sourceManager.getMangadex().mangaDetailsRequest(manga).url.toString()
+                    var url = presenter.sourceManager.mangaDex.mangaDetailsRequest(manga).url.toString()
                     url = "$url/" + manga.getSlug()
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/*"

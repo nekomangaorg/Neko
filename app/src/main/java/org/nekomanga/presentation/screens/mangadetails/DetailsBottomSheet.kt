@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
-import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import java.text.DateFormat
 import org.nekomanga.domain.category.CategoryItem
@@ -158,11 +157,6 @@ fun DetailsBottomSheet(
         }
 
         is DetailsBottomSheetScreen.MergeSheet -> {
-            if (mangaState.value.isMerged is MergeConstants.IsMergedManga.No) {
-                LaunchedEffect(key1 = 1) {
-                    mergeActions.search(mangaState.value.originalTitle)
-                }
-            }
             MergeSheet(
                 themeColorState = themeColorState,
                 isMergedManga = mangaState.value.isMerged,
@@ -185,6 +179,7 @@ fun DetailsBottomSheet(
                     closeSheet()
                     mergeActions.add(mergeManga)
                 },
+                validMergeTypes = generalState.value.validMergeTypes,
             )
         }
 

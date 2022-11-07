@@ -1,38 +1,29 @@
 package eu.kanade.tachiyomi.source
 
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.security.MessageDigest
-import uy.kohesive.injekt.injectLazy
 
 /**
  *Currently hardcoded to always return the same English [MangaDex] instance
  */
 open class SourceManager {
 
-    // private val sourcesMap = mutableMapOf<Long, Source>()
-    private val source: MangaDex = MangaDex()
+    val mangaDex: MangaDex = MangaDex()
 
-    private val mangaLife = lazy { MangaLife() }
+    val mangaLife: MangaLife by lazy { MangaLife() }
 
-    private val komga = lazy {  Komga() }
+    val komga: Komga by lazy { Komga() }
 
     open fun get(sourceKey: Long): Source? {
-        return source
+        return mangaDex
     }
 
     fun isMangadex(sourceKey: Long): Boolean {
         return possibleIds.contains(sourceKey)
     }
-
-    fun getMangadex(): MangaDex = source
-
-    fun getMangaLife() = mangaLife
-
-    fun getKomga() = komga
 
     companion object {
 

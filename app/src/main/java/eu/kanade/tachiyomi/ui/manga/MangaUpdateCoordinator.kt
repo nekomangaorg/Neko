@@ -54,7 +54,7 @@ class MangaUpdateCoordinator {
     suspend fun update(manga: Manga, scope: CoroutineScope) = channelFlow {
         val mangaWasInitialized = manga.initialized
 
-        if (!sourceManager.getMangadex().checkIfUp()) {
+        if (!sourceManager.mangaDex.checkIfUp()) {
             send(MangaResult.Error(R.string.site_down))
             return@channelFlow
         }
@@ -86,7 +86,7 @@ class MangaUpdateCoordinator {
      */
     private fun ProducerScope<MangaResult>.startMangaJob(scope: CoroutineScope, manga: Manga): Job {
         return scope.launchIO {
-            sourceManager.getMangadex().getMangaDetails(manga.uuid())
+            sourceManager.mangaDex.getMangaDetails(manga.uuid())
                 .onFailure {
                     send(MangaResult.Error(text = "Error getting manga from MangaDex"))
                     cancel()
@@ -130,7 +130,7 @@ class MangaUpdateCoordinator {
     private fun ProducerScope<MangaResult>.startChapterJob(scope: CoroutineScope, manga: Manga, mangaWasAlreadyInitialized: Boolean): Job {
         return scope.launchIO {
             val deferredChapters = async {
-                sourceManager.getMangadex().fetchChapterList(manga)
+                sourceManager.mangaDex.fetchChapterList(manga)
                     .onFailure {
                         send(MangaResult.Error(text = "error with MangaDex: getting chapters"))
                         cancel()
@@ -143,7 +143,7 @@ class MangaUpdateCoordinator {
                 mergedMangaList.map { mergeManga ->
                     async {
                         //in the future check the merge type
-                        sourceManager.getMangaLife().fetchChapters(mergeManga.url)
+                        sourceManager.mangaLife.fetchChapters(mergeManga.url)
                             .onFailure {
                                 send(MangaResult.Error(text = "error with MangaLife: getting chapters "))
                                 this.cancel()
@@ -195,7 +195,7 @@ class MangaUpdateCoordinator {
     }
 
     suspend fun updateScanlator(scanlator: String) {
-        sourceManager.getMangadex().getScanlator(scanlator).onSuccess {
+        sourceManager.mangaDex.getScanlator(scanlator).onSuccess {
             db.insertScanlators(listOf(it.toScanlatorImpl())).executeAsBlocking()
         }
     }

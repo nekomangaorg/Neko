@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.ui.state.ToggleableState
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -25,6 +26,7 @@ object MangaConstants {
         val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
+        val validMergeTypes: ImmutableList<MergeType> = persistentListOf(),
         val chapterFilter: Filter = Filter(),
         val chapterFilterText: String = "",
         val chapterSortFilter: SortFilter = SortFilter(),
@@ -209,7 +211,7 @@ object MangaConstants {
 
     class MergeActions(
         val remove: () -> Unit,
-        val search: (String) -> Unit,
+        val search: (String, MergeType) -> Unit,
         val add: (SourceMergeManga) -> Unit,
     )
 

@@ -27,7 +27,8 @@ data class SourceMergeManga(
 }
 
 enum class MergeType(val id: Int) {
-    MangaLife(0);
+    MangaLife(0),
+    Komga(1);
 
     companion object {
         fun getById(id: Int): MergeType {

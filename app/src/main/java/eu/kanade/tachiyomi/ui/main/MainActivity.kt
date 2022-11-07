@@ -131,7 +131,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     protected lateinit var router: Router
 
-    val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
+    val source: Source by lazy { Injekt.get<SourceManager>().mangaDex }
     val searchDrawable by lazy { contextCompatDrawable(R.drawable.ic_search_24dp) }
     protected val backDrawable by lazy { contextCompatDrawable(R.drawable.ic_arrow_back_24dp) }
     private var gestureDetector: GestureDetectorCompat? = null

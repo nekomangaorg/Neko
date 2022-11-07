@@ -1,6 +1,8 @@
 package org.nekomanga.presentation.components.sheets
 
 import Header
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +29,7 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,15 +42,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
+import eu.kanade.tachiyomi.source.online.merged.komga.Komga
+import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import jp.wasabeef.gap.Gap
@@ -59,54 +68,122 @@ fun MergeSheet(
     themeColorState: ThemeColorState,
     title: String,
     altTitles: List<String>,
+    validMergeTypes: List<MergeType>,
     isMergedManga: IsMergedManga,
     mergeSearchResults: MergeSearchResult,
-    search: (String) -> Unit,
+    search: (String, MergeType) -> Unit,
     openMergeSource: (String, String) -> Unit,
     removeMergeSource: () -> Unit,
     mergeMangaClick: (SourceMergeManga) -> Unit,
     cancelClick: () -> Unit,
 ) {
-    if (isMergedManga is IsMergedManga.Yes) {
-        BaseSheet(themeColor = themeColorState) {
-            TextButton(onClick = { openMergeSource(isMergedManga.url, isMergedManga.title) }, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(id = R.string.open_merged_in_webview), color = themeColorState.buttonColor)
-            }
-            Gap(8.dp)
-            TextButton(onClick = removeMergeSource, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(id = R.string.remove_merged_source), color = themeColorState.buttonColor)
-            }
-        }
-    } else {
-        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
-
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-            var searchTitle by remember { mutableStateOf(title) }
-
-            Header(stringResource(id = R.string.select_an_entry), cancelClick)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeightIn(0.dp, maxLazyHeight.dp),
-            ) {
-                if (mergeSearchResults is MergeSearchResult.Success) {
-                    SuccessResults(mergeMangaList = mergeSearchResults.mergeMangaList, mergeMangaClick = mergeMangaClick)
+    when (isMergedManga) {
+        is IsMergedManga.Yes -> {
+            BaseSheet(themeColor = themeColorState) {
+                val text = when (isMergedManga.mergeType) {
+                    MergeType.MangaLife -> MangaLife.name
+                    MergeType.Komga -> Komga.name
                 }
-                NonSuccessResultsAndChips(
-                    themeColorState = themeColorState,
-                    searchResults = mergeSearchResults,
-                    title = title,
-                    altTitles = altTitles,
-                    chipClick = { chipText ->
-                        searchTitle = chipText
-                        search(chipText)
-                    },
-                )
-            }
+                Gap(8.dp)
+                Text(text = stringResource(id = R.string.merge_source_, text), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
 
-            SearchFooter(themeColorState = themeColorState, labelText = stringResource(id = R.string.title), title = searchTitle, textChanged = { searchTitle = it }, search = search)
+                Gap(8.dp)
+
+                TextButton(onClick = { openMergeSource(isMergedManga.url, isMergedManga.title) }, modifier = Modifier.fillMaxWidth()) {
+                    Text(text = stringResource(id = R.string.open_merged_in_webview), color = themeColorState.buttonColor)
+                }
+                Gap(8.dp)
+                TextButton(onClick = removeMergeSource, modifier = Modifier.fillMaxWidth()) {
+
+                    Text(text = stringResource(id = R.string.remove_merged_source), color = themeColorState.buttonColor)
+                }
+                Gap(8.dp)
+            }
         }
+        is IsMergedManga.No -> {
+            var mergeType: MergeType? by remember { mutableStateOf(null) }
+            BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
+
+                when (mergeType == null) {
+                    true -> {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceAround,
+                        ) {
+                            validMergeTypes.forEach { validMergeType ->
+                                val id = when (validMergeType) {
+                                    MergeType.Komga -> R.drawable.ic_komga_logo
+                                    MergeType.MangaLife -> R.drawable.ic_mangalife_logo
+                                }
+                                Image(
+                                    painter = painterResource(id = id),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(86.dp)
+                                        .padding(top = 4.dp, bottom = 4.dp)
+                                        .clickable { mergeType = validMergeType },
+                                )
+                            }
+
+                        }
+                    }
+                    false -> {
+                        LaunchedEffect(key1 = mergeType) {
+                            search(title, mergeType!!)
+                        }
+                        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
+
+                        var searchTitle by remember { mutableStateOf(title) }
+
+                        Header(stringResource(id = R.string.select_an_entry), cancelClick)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .requiredHeightIn(0.dp, maxLazyHeight.dp),
+                        ) {
+                            if (mergeSearchResults is MergeSearchResult.Success) {
+                                SuccessResults(mergeMangaList = mergeSearchResults.mergeMangaList, mergeMangaClick = mergeMangaClick)
+                            }
+                            NonSuccessResultsAndChips(
+                                themeColorState = themeColorState,
+                                searchResults = mergeSearchResults,
+                                title = title,
+                                altTitles = altTitles,
+                                chipClick = { chipText ->
+                                    searchTitle = chipText
+                                    search(chipText, mergeType!!)
+                                },
+                            )
+                        }
+
+                        SearchFooter(
+                            themeColorState = themeColorState,
+                            labelText = stringResource(id = R.string.title),
+                            title = searchTitle,
+                            textChanged = { searchTitle = it },
+                            search = { search(it, mergeType!!) },
+                        )
+                    }
+                }
+            }
+        }
+
     }
+}
+
+@Composable
+private fun MergeLogo(mergeType: MergeType, @DrawableRes id: Int, onClick: () -> Unit) {
+    Image(
+        painter = painterResource(id = id),
+        contentDescription = null,
+        modifier = Modifier
+            .size(86.dp)
+            .padding(top = 4.dp, bottom = 4.dp)
+            .clickable(onClick = onClick),
+    )
 }
 
 @Composable

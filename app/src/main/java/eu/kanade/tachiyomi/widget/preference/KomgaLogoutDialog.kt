@@ -19,7 +19,7 @@ import uy.kohesive.injekt.injectLazy
 
 class KomgaLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
-    val source: Source by lazy { Injekt.get<SourceManager>().getKomga() }
+    val source: Source by lazy { Injekt.get<SourceManager>().komga }
 
     protected lateinit var binding: PrefAccountLoginBinding
     val preferences: PreferencesHelper by injectLazy()

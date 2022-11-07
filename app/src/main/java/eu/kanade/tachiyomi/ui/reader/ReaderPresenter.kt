@@ -88,7 +88,7 @@ class ReaderPresenter(
         private set
 
     val source: MangaDex?
-        get() = sourceManager.getMangadex()
+        get() = sourceManager.mangaDex
 
     /**
      * The chapter id of the currently loaded chapter. Used to restore from process kill.
@@ -340,7 +340,7 @@ class ReaderPresenter(
                 return
             }
         }
-        val mangaDex = sourceManager.getMangadex()
+        val mangaDex = sourceManager.mangaDex
         val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
         val url = "/title/$mangaId"
         val dbManga = db.getMangadexManga(url).executeAsBlocking()

@@ -137,12 +137,17 @@ class MangaDetailPresenter(
         presenterScope.launch {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
+            val validMergeTypes = when (sourceManager.komga.hasCredentials()) {
+                true -> persistentListOf(MergeType.MangaLife, MergeType.Komga)
+                false -> persistentListOf(MergeType.MangaLife)
+            }
             _generalState.value = MangaConstants.MangaScreenGeneralState(
                 hasDefaultCategory = preferences.defaultCategory() != -1,
                 hideButtonText = preferences.hideButtonText().get(),
                 extraLargeBackdrop = preferences.extraLargeBackdrop().get(),
                 hideChapterTitles = getHideTitlesFilter(),
                 themeBasedOffCovers = preferences.themeMangaDetails(),
+                validMergeTypes = validMergeTypes,
                 vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
             )
             if (!currentManga().initialized) {
@@ -379,7 +384,7 @@ class MangaDetailPresenter(
 
     private fun syncChaptersReadStatus() {
         presenterScope.launchIO {
-            if (!preferences.readingSync() || !sourceManager.getMangadex().isLogged() || !isOnline()) return@launchIO
+            if (!preferences.readingSync() || !sourceManager.mangaDex.isLogged() || !isOnline()) return@launchIO
 
             runCatching {
                 statusHandler.getReadChapterIds(currentManga().uuid()).collect { chapterIds ->
@@ -581,22 +586,25 @@ class MangaDetailPresenter(
             val mergedChapters =
                 db.getChapters(currentManga()).executeOnIO().filter { it.isMergedChapter(mergeType) }
 
-            downloadManager.deleteChapters(mergedChapters, currentManga(), sourceManager.getMangadex())
+            downloadManager.deleteChapters(mergedChapters, currentManga(), sourceManager.mangaDex)
             db.deleteChapters(mergedChapters).executeOnIO()
             updateAllFlows()
         }
     }
 
-    fun searchMergedManga(query: String) {
+    fun searchMergedManga(query: String, mergeType: MergeType) {
         presenterScope.launchIO {
             _trackMergeState.update {
                 it.copy(mergeSearchResult = MergeSearchResult.Loading)
             }
 
             runCatching {
-                val mergedMangaResults = sourceManager.getMangaLife()
-                    .searchManga(query)
+                val mergedMangaResults = when (mergeType) {
+                    MergeType.MangaLife -> sourceManager.mangaLife
+                    else -> sourceManager.komga
+                }.searchManga(query)
                     .map { SourceMergeManga(coverUrl = it.thumbnail_url ?: "", title = it.title, url = it.url) }
+
                 _trackMergeState.update {
                     when (mergedMangaResults.isEmpty()) {
                         true -> trackMergeState.value.copy(mergeSearchResult = MergeSearchResult.NoResult)
@@ -1201,12 +1209,7 @@ class MangaDetailPresenter(
             genres = (m.getGenres(true) ?: emptyList()).toImmutableList(),
             initialized = m.initialized,
             inLibrary = m.favorite,
-            isMerged = when (db.getMergeMangaList(m).executeAsBlocking().isNotEmpty()) {
-                true -> {
-                    Yes(sourceManager.getMangaLife().baseUrl + db.getMergeMangaList(m).executeAsBlocking().first().url, m.title)
-                }
-                false -> No
-            },
+            isMerged = isMerged(m),
             isPornographic = m.getContentRating()?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true) ?: false,
             langFlag = m.lang_flag,
             missingChapters = m.missing_chapters,
@@ -1215,6 +1218,25 @@ class MangaDetailPresenter(
             status = m.status,
             users = m.users,
         )
+    }
+
+    fun isMerged(manga: Manga): MergeConstants.IsMergedManga {
+        val mergeMangaList = db.getMergeMangaList(manga).executeAsBlocking()
+        return when (mergeMangaList.isNotEmpty()) {
+            true -> {
+                val mergeManga = mergeMangaList.first()
+                val baseUrl = when (mergeManga.mergeType) {
+                    MergeType.Komga -> sourceManager.komga.hostUrl()
+                    MergeType.MangaLife -> sourceManager.mangaLife.baseUrl
+                }
+                Yes(
+                    url = baseUrl + mergeManga.url,
+                    title = mergeManga.title,
+                    mergeType = mergeManga.mergeType,
+                )
+            }
+            false -> No
+        }
     }
 
     /**
@@ -1283,9 +1305,9 @@ class MangaDetailPresenter(
             if (chapterItems.isNotEmpty()) {
                 val delete = {
                     if (isEverything) {
-                        downloadManager.deleteManga(currentManga(), sourceManager.getMangadex())
+                        downloadManager.deleteManga(currentManga(), sourceManager.mangaDex)
                     } else {
-                        downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, currentManga(), sourceManager.getMangadex())
+                        downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, currentManga(), sourceManager.mangaDex)
                     }
                 }
                 if (canUndo) {

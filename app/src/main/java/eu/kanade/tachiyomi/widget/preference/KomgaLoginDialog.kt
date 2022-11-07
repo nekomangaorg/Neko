@@ -19,7 +19,7 @@ import uy.kohesive.injekt.api.get
 
 class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = bundle, showUrl = true) {
 
-    val source: Komga by lazy { Injekt.get<SourceManager>().getKomga() }
+    val source: Komga by lazy { Injekt.get<SourceManager>().komga }
 
     constructor(source: Komga) : this(
         Bundle().apply {

@@ -80,10 +80,10 @@ fun SChapter.isMergedChapter(mergeType: MergeType = MergeType.MangaLife) =
 
 fun SChapter.getHttpSource(sourceManager: SourceManager): HttpSource {
     return when (this.scanlator) {
-        null -> sourceManager.getMangaLife()
-        MangaLife.name -> sourceManager.getMangaLife()
-        Komga.name -> sourceManager.getKomga()
-        else -> sourceManager.getMangadex()
+        null -> sourceManager.mangaDex
+        MangaLife.name -> sourceManager.mangaLife
+        Komga.name -> sourceManager.komga
+        else -> sourceManager.mangaDex
     }
 }
 

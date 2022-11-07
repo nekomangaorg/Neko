@@ -22,7 +22,7 @@ class SimilarRepository {
 
     private val similarHandler: SimilarHandler by injectLazy()
     private val db: DatabaseHelper by injectLazy()
-    private val mangaDex: MangaDex by lazy { Injekt.get<SourceManager>().getMangadex() }
+    private val mangaDex: MangaDex by lazy { Injekt.get<SourceManager>().mangaDex }
 
     suspend fun fetchSimilar(
         dexId: String,

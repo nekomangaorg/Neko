@@ -14,7 +14,7 @@ class SettingsMergeController :
     SettingsController(),
     KomgaLoginDialog.Listener,
     KomgaLogoutDialog.Listener {
-    private val komga by lazy { Injekt.get<SourceManager>().getKomga() }
+    private val komga by lazy { Injekt.get<SourceManager>().komga }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.merge_source_settings

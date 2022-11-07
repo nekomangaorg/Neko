@@ -35,7 +35,7 @@ class Komga : ReducedHttpSource() {
     private val json: Json by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
-    private fun hostUrl() = preferences.sourceUrl(this) ?: ""
+    fun hostUrl() = preferences.sourceUrl(this) ?: ""
 
     suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
@@ -43,6 +43,13 @@ class Komga : ReducedHttpSource() {
             val response = createClient(username, password).newCall(GET(komgaUrl.toString(), headers)).await()
             response.isSuccessful
         }
+    }
+
+    fun hasCredentials(): Boolean {
+        val username = preferences.sourceUsername(this@Komga) ?: ""
+        val password = preferences.sourcePassword(this@Komga) ?: ""
+        val url = hostUrl()
+        return listOf(username, password, url).none { it.isBlank() }
     }
 
     suspend fun isLoggedIn(): Boolean {

@@ -1129,7 +1129,8 @@
     <string name="open_log">Open log</string>
     <string name="open_in_webview">Open in WebView</string>
     <string name="open_merged_in_webview">Open Merged source in WebView</string>
-    <string name="remove_merged_source">MergeMangaTabled source</string>
+    <string name="merge_source_">Merge Source: %1$s</string>
+    <string name="remove_merged_source">Remove merged source</string>
     <string name="options">Options</string>
     <string name="pause">Pause</string>
     <string name="picture_saved">Picture saved</string>

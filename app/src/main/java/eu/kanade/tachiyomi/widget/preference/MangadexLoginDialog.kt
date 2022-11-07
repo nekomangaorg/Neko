@@ -18,7 +18,7 @@ import uy.kohesive.injekt.api.get
 
 class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = bundle) {
 
-    val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
+    val source: Source by lazy { Injekt.get<SourceManager>().mangaDex }
 
     constructor(source: Source) : this(
         Bundle().apply {

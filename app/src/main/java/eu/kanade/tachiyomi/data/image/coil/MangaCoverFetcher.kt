@@ -330,7 +330,7 @@ class MangaCoverFetcher(
                     inLibrary = data.inLibrary,
                     mangaId = data.mangaId,
                     originalThumbnailUrl = data.originalArtwork,
-                    sourceLazy = lazy { sourceManager.getMangadex() },
+                    sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
                     coverCache = coverCache,
                     callFactoryLazy = callFactoryLazy,
@@ -339,7 +339,7 @@ class MangaCoverFetcher(
                 false -> AlternativeMangaCoverFetcher(
                     url = data.url,
                     mangaId = data.mangaId,
-                    sourceLazy = lazy { sourceManager.getMangadex() },
+                    sourceLazy = lazy { sourceManager.mangaDex },
                     options = options,
                     coverCache = coverCache,
                     callFactoryLazy = callFactoryLazy,

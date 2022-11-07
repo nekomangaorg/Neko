@@ -19,7 +19,7 @@ import uy.kohesive.injekt.injectLazy
 
 class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
-    val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
+    val source: Source by lazy { Injekt.get<SourceManager>().mangaDex }
 
     protected lateinit var binding: PrefAccountLoginBinding
     val preferences: PreferencesHelper by injectLazy()

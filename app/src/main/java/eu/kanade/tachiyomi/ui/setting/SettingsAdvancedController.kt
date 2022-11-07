@@ -281,8 +281,8 @@ class SettingsAdvancedController : SettingsController() {
                 context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
                 "${
-                it.name.lowercase(Locale.ENGLISH)
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+                    it.name.lowercase(Locale.ENGLISH)
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
                 } (${it.description})"
             }
             entryValues = XLogLevel.values().indices.toList()
@@ -396,7 +396,7 @@ class SettingsAdvancedController : SettingsController() {
             val downloadProvider = DownloadProvider(activity!!)
             var foldersCleared = 0
             val mangaList = db.getMangaList().executeAsBlocking()
-            val source = sourceManager.getMangadex()
+            val source = sourceManager.mangaDex
             val mangaFolders = downloadManager.getMangaFolders(source)
 
             for (mangaFolder in mangaFolders) {

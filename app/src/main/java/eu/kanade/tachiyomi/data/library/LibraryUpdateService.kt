@@ -307,7 +307,7 @@ class LibraryUpdateService(
 
         mangaToUpdateMap.putAll(mangaToAdd.groupBy { it.source })
 
-        val isDexUp = sourceManager.getMangadex().checkIfUp()
+        val isDexUp = sourceManager.mangaDex.checkIfUp()
 
         jobCount.andIncrement
         if (isDexUp) {
@@ -354,7 +354,7 @@ class LibraryUpdateService(
         if (mangaToUpdateMap[source] == null) return false
         var currentCount = 0
         var hasDownloads = false
-        if (sourceManager.getMangadex().isLogged()) {
+        if (sourceManager.mangaDex.isLogged()) {
             mangaDexLoginHelper.reAuthIfNeeded()
         }
 
@@ -392,7 +392,7 @@ class LibraryUpdateService(
 
             var errorFromMerged = false
 
-            val source = sourceManager.getMangadex()
+            val source = sourceManager.mangaDex
 
             val holder = withIOContext {
                 if (preferences.fasterLibraryUpdates().get()) {
@@ -407,7 +407,7 @@ class LibraryUpdateService(
                     withIOContext {
                         //TODO eventually check which merge type
                         mergeMangaList.map { mergeManga ->
-                            sourceManager.getMangaLife().fetchChapters(mergeManga.url).getOrElse {
+                            sourceManager.mangaLife.fetchChapters(mergeManga.url).getOrElse {
                                 errorFromMerged = true
                                 emptyList()
                             }
@@ -559,7 +559,7 @@ class LibraryUpdateService(
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) {
         XLog.d("Attempting to update reading statuses")
         if (mangaList.isNullOrEmpty()) return
-        if (sourceManager.getMangadex().isLogged() && job?.isCancelled == false) {
+        if (sourceManager.mangaDex.isLogged() && job?.isCancelled == false) {
             runCatching {
                 val readingStatus = statusHandler.fetchReadingStatusForAllManga()
                 if (readingStatus.isNotEmpty()) {

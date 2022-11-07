@@ -90,7 +90,7 @@ class LibraryPresenter(
     val isLoggedIntoTracking
         get() = loggedServices.isNotEmpty()
 
-    private val source by lazy { Injekt.get<SourceManager>().getMangadex() }
+    private val source by lazy { Injekt.get<SourceManager>().mangaDex }
 
     /** Current categories of the library. */
     var categories: List<Category> = emptyList()
