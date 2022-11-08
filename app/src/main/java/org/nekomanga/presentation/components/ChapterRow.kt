@@ -84,6 +84,7 @@ fun ChapterRow(
     pagesLeft: Int,
     read: Boolean,
     bookmark: Boolean,
+    isMerged: Boolean,
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Float,
     shouldHideChapterTitles: Boolean = false,
@@ -144,6 +145,7 @@ fun ChapterRow(
                     onWebView = onWebView,
                     onDownload = onDownload,
                     markPrevious = markPrevious,
+                    isMerged = isMerged,
                     blockScanlator = blockScanlator,
                 )
             },
@@ -210,6 +212,7 @@ private fun ChapterInfo(
     onWebView: () -> Unit,
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
+    isMerged: Boolean = false,
     blockScanlator: (String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
@@ -241,7 +244,7 @@ private fun ChapterInfo(
         expanded = dropdown,
         themeColorState = themeColorState,
         onDismiss = { dropdown = false },
-        dropDownItems = getDropDownItems(scanlator.isNotBlank(), splitScanlator, onWebView, markPrevious),
+        dropDownItems = getDropDownItems(scanlator.isNotBlank() && !isMerged, splitScanlator, onWebView, markPrevious),
     )
 
     Row(
