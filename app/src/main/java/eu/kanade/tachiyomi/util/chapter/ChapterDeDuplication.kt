@@ -4,7 +4,24 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import kotlin.math.floor
+
+/**This attempts to create a smart source order used when a manga is merged
+ */
+fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga, db: DatabaseHelper): List<SChapter> {
+
+    if (sourceChapters.all { !it.isMergedChapter() }) {
+        return sourceChapters
+    }
+
+    return if (manga.lang_flag != null && MdLang.fromIsoCode(manga.lang_flag!!) == MdLang.JAPANESE) {
+        sourceChapters.sortedByDescending { getChapterNum(it) }
+    } else {
+        val sorter = compareByDescending<SChapter> { getVolumeNum(it) == null }.thenByDescending { getVolumeNum(it) }.thenByDescending { getChapterNum(it) }
+        return sourceChapters.sortedWith(sorter)
+    }
+}
 
 /**This method dedupes merged manga chapters.  If the manga is not merged then it just returns the direct Dex chapter list
  * The follow fringe cases won't be deduped
@@ -73,6 +90,7 @@ fun deduplicateChapters(sourceChapters: List<SChapter>, manga: Manga, db: Databa
 }
 
 fun getChapterNum(chapter: SChapter): Float? {
+
     val float = if (chapter.isMergedChapter()) {
         chapter.chapter_txt.toFloatOrNull()
     } else {
@@ -82,7 +100,7 @@ fun getChapterNum(chapter: SChapter): Float? {
             chapter.chapter_txt.substringAfter("Ch.").toFloatOrNull()
         }
     }
-    return float ?: return null
+    return float
 }
 
 fun getChapterNumInt(chapter: SChapter): Int? {

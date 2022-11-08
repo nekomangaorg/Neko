@@ -115,7 +115,7 @@ class MangaLife : ReducedHttpSource() {
 
                         scanlator = this@MangaLife.name
                     }
-                }.asReversed()
+                }
             }.mapError {
                 XLog.e(it)
                 "Unknown Exception with merge".toResultError()
