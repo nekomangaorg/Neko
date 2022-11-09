@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader
 
+import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import android.app.Application
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -57,7 +58,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import rx.Completable
 import rx.Observable
@@ -1004,7 +1004,7 @@ class ReaderPresenter(
     private fun updateReadingStatus(readerChapter: ReaderChapter) {
         manga ?: return
 
-        if (preferences.readingSync().not() && readerChapter.chapter.isMergedChapter().not()) return
+        if (!preferences.readingSync() && !readerChapter.chapter.isMergedChapter()) return
         scope.launchIO {
             statusHandler.marksChaptersStatus(manga!!.uuid(), listOf(readerChapter.chapter.mangadex_chapter_id))
         }

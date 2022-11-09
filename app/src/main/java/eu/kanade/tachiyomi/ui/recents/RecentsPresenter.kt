@@ -491,7 +491,7 @@ class RecentsPresenter(
                     pages_left = pagesLeft ?: 0
                 }
             }
-            if (preferences.readingSync() && chapter.isMergedChapter().not()) {
+            if (preferences.readingSync() && !chapter.isMergedChapter()) {
                 statusHandler.marksChaptersStatus(manga.uuid(), listOf(chapter.mangadex_chapter_id), read)
             }
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()

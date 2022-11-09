@@ -107,11 +107,11 @@ class V5MigrationService(
             if (!mangaErroredOut) {
                 val chapters = db.getChapters(manga).executeAsBlocking()
 
-                val chapterMap = chapters.filter { it.isMergedChapter().not() }
+                val chapterMap = chapters.filter { !it.isMergedChapter() }
                     .filter { it.mangadex_chapter_id.isDigitsOnly() && it.mangadex_chapter_id.isNotBlank() }
                     .map { it.mangadex_chapter_id.toInt() to it }
                     .toMap()
-                val chapterChunks = chapters.filter { it.isMergedChapter().not() }
+                val chapterChunks = chapters.filter { !it.isMergedChapter() }
                     .filter { it.mangadex_chapter_id.isDigitsOnly() && it.mangadex_chapter_id.isNotBlank() }
                     .map { it.mangadex_chapter_id.toInt() }
                     .chunked(100)

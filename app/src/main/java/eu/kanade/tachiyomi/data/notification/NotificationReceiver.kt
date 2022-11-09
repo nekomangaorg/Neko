@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.notification
 
+import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ClipData
@@ -9,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import androidx.work.WorkManager
-import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -277,7 +277,7 @@ class NotificationReceiver : BroadcastReceiver() {
 
         if (preferences.readingSync()) {
             val nonMergedChapterIds =
-                dbChapters.filter { it.isMergedChapter().not() }.map { it.mangadex_chapter_id }
+                dbChapters.filter { !it.isMergedChapter() }.map { it.mangadex_chapter_id }
             if (nonMergedChapterIds.isNotEmpty()) {
                 val statusHandler: StatusHandler = Injekt.get()
                 launchIO {

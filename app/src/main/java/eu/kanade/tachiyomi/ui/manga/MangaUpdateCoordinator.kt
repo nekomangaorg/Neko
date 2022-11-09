@@ -9,12 +9,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -143,9 +142,12 @@ class MangaUpdateCoordinator {
                 mergedMangaList.map { mergeManga ->
                     async {
                         //in the future check the merge type
-                        sourceManager.mangaLife.fetchChapters(mergeManga.url)
+                        when (mergeManga.mergeType) {
+                            MergeType.MangaLife -> sourceManager.mangaLife
+                            MergeType.Komga -> sourceManager.komga
+                        }.fetchChapters(mergeManga.url)
                             .onFailure {
-                                send(MangaResult.Error(text = "error with MangaLife: getting chapters "))
+                                send(MangaResult.Error(text = "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: getting chapters "))
                                 this.cancel()
                             }.getOrElse { emptyList() }
                     }

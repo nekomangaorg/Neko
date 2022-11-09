@@ -54,8 +54,6 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import jp.wasabeef.gap.Gap
@@ -73,17 +71,15 @@ fun MergeSheet(
     mergeSearchResults: MergeSearchResult,
     search: (String, MergeType) -> Unit,
     openMergeSource: (String, String) -> Unit,
-    removeMergeSource: () -> Unit,
+    removeMergeSource: (MergeType) -> Unit,
     mergeMangaClick: (SourceMergeManga) -> Unit,
     cancelClick: () -> Unit,
 ) {
     when (isMergedManga) {
         is IsMergedManga.Yes -> {
             BaseSheet(themeColor = themeColorState) {
-                val text = when (isMergedManga.mergeType) {
-                    MergeType.MangaLife -> MangaLife.name
-                    MergeType.Komga -> Komga.name
-                }
+                val text = MergeType.getMergeTypeName(isMergedManga.mergeType)
+
                 Gap(8.dp)
                 Text(text = stringResource(id = R.string.merge_source_, text), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
 
@@ -93,7 +89,7 @@ fun MergeSheet(
                     Text(text = stringResource(id = R.string.open_merged_in_webview), color = themeColorState.buttonColor)
                 }
                 Gap(8.dp)
-                TextButton(onClick = removeMergeSource, modifier = Modifier.fillMaxWidth()) {
+                TextButton(onClick = { removeMergeSource(isMergedManga.mergeType) }, modifier = Modifier.fillMaxWidth()) {
 
                     Text(text = stringResource(id = R.string.remove_merged_source), color = themeColorState.buttonColor)
                 }

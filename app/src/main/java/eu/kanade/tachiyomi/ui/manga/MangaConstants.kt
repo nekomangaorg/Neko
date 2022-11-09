@@ -210,7 +210,7 @@ object MangaConstants {
     )
 
     class MergeActions(
-        val remove: () -> Unit,
+        val remove: (MergeType) -> Unit,
         val search: (String, MergeType) -> Unit,
         val add: (SourceMergeManga) -> Unit,
     )

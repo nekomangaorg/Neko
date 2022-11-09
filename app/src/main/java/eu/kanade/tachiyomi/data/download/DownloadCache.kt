@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
+import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import java.util.Locale
@@ -132,7 +132,7 @@ class DownloadCache(
             val ids = mangaFiles[manga.id]!!.second
             var count = files.size
             files.forEach {
-                if (!it.contains(MangaLife.name)) {
+                if (!it.containsMergeSourceName()) {
                     val mangadexId = it.substringAfterLast("- ")
                     if (mangadexId.isNotBlank() && mangadexId.isDigitsOnly() && !ids.contains(
                             mangadexId,
@@ -234,17 +234,16 @@ class DownloadCache(
         val files = mangaFiles[id]
         val mangadexId = chapterDirName.substringAfterLast("- ")
 
-        val set = if (chapterDirName.contains(MangaLife.name)) {
-            mutableSetOf()
-        } else {
-            mutableSetOf(mangadexId)
+        val set = when (chapterDirName.containsMergeSourceName()) {
+            true -> mutableSetOf()
+            false -> mutableSetOf(mangadexId)
         }
 
         if (files == null) {
             mangaFiles[id] = Pair(mutableSetOf(chapterDirName), set)
         } else {
             mangaFiles[id]?.first?.add(chapterDirName)
-            if (!chapterDirName.contains(MangaLife.name)) {
+            if (!chapterDirName.containsMergeSourceName()) {
                 mangaFiles[id]?.second?.add(mangadexId)
             }
         }
@@ -281,7 +280,7 @@ class DownloadCache(
             if (chapter in mangaFiles[id]!!.first) {
                 mangaFiles[id]!!.first.remove(chapter)
             }
-            if (!chapter.contains(MangaLife.name)) {
+            if (!chapter.containsMergeSourceName()) {
                 val mangadexId = chapter.substringAfterLast("- ")
                 mangaFiles[id]!!.second.remove(mangadexId)
             }

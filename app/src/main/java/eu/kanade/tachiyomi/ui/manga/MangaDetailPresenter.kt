@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -578,13 +578,13 @@ class MangaDetailPresenter(
     /**
      * Remove merged manga entry
      */
-    fun removeMergedManga(mergeType: MergeType = MergeType.MangaLife) {
+    fun removeMergedManga(mergeType: MergeType) {
         presenterScope.launchIO {
             db.deleteMergeMangaForType(mangaId, mergeType).executeAsBlocking()
             updateMangaFlow()
 
             val mergedChapters =
-                db.getChapters(currentManga()).executeOnIO().filter { it.isMergedChapter(mergeType) }
+                db.getChapters(currentManga()).executeOnIO().filter { it.isMergedChapterOfType(mergeType) }
 
             downloadManager.deleteChapters(mergedChapters, currentManga(), sourceManager.mangaDex)
             db.deleteChapters(mergedChapters).executeOnIO()
@@ -603,7 +603,7 @@ class MangaDetailPresenter(
                     MergeType.MangaLife -> sourceManager.mangaLife
                     else -> sourceManager.komga
                 }.searchManga(query)
-                    .map { SourceMergeManga(coverUrl = it.thumbnail_url ?: "", title = it.title, url = it.url) }
+                    .map { SourceMergeManga(coverUrl = it.thumbnail_url ?: "", title = it.title, url = it.url, mergeType = mergeType) }
 
                 _trackMergeState.update {
                     when (mergedMangaResults.isEmpty()) {

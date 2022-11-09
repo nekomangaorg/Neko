@@ -167,9 +167,9 @@ fun DetailsBottomSheet(
                     closeSheet()
                     openInWebView(url, title)
                 },
-                removeMergeSource = {
+                removeMergeSource = { mergeType ->
                     closeSheet()
-                    mergeActions.remove()
+                    mergeActions.remove(mergeType)
                 },
                 cancelClick = {
                     closeSheet()
