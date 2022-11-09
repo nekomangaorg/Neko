@@ -72,18 +72,24 @@ class MangaLife : ReducedHttpSource() {
                         .substringAfter("vm.Chapters = ").substringBefore(";")
 
                 val mangaLifeChapters = json.decodeFromString<List<MangaLifeChapterDto>>(vmChapters)
-
+                val uniqueTypes = arrayOf("Volume", "Special")
                 mangaLifeChapters.map { chp ->
                     SChapter.create().apply {
 
                         val chapterName = mutableListOf<String>()
                         // Build chapter name
-                        if (chp.type == "Volume") {
-                            this.vol = calculateChapterNumber(chp.chapter)
-                            chapterName.add("Vol.${this.vol}")
+                        if (chp.type in uniqueTypes) {
+                            this.vol = calculateChapterNumber(chp.chapter, true)
+                            val prefix = when (chp.type != "Volume") {
+                                true -> "${chp.type} "
+                                false -> "Vol."
+                            }
+                            chapterName.add("$prefix${this.vol}")
                         } else {
+                            //The old logic would apply the name from either the "ChapterName" or Type + chapterNumber
+                            //To match dex more this doesn't use name as it doesnt seem used often see Gantz (which doesnt make it here anyways cause its
+                            //a manga)) and the text the extension shows for that would be ex. Special Osaka 1 vs Neko Special 1 - Special Osaka 1
                             //get volume
-                            //TODO if you ever find a manga with chapter name filled that takes priority for some reason over using the chp.type for the chapter name
                             val vol1 = chp.type.substringAfter("Volume ", "")
                             val vol2 = chp.type.substringBefore(" -", "").substringAfter("S")
                             when {
@@ -99,13 +105,14 @@ class MangaLife : ReducedHttpSource() {
                             //get chapter
                             this.chapter_txt = chp.chapterString()
                             chapterName.add(this.chapter_txt)
-                            //get text
-                            if (chp.chapterName?.isNotEmpty() == true) {
-                                if (chapterName.isNotEmpty()) {
-                                    chapterName.add("-")
-                                }
-                                chapterName.add(chp.chapterName)
+                        }
+
+                        //get text
+                        if (chp.chapterName?.isNotEmpty() == true) {
+                            if (chapterName.isNotEmpty()) {
+                                chapterName.add("-")
                             }
+                            chapterName.add(chp.chapterName)
                         }
 
                         this.name = chapterName.joinToString(" ")

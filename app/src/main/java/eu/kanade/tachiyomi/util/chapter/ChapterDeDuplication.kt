@@ -16,12 +16,13 @@ fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga, db: DatabaseHe
     }
 
     //mangalife tends to not include a volume number for manga
-    return if (manga.lang_flag != null && MdLang.fromIsoCode(manga.lang_flag!!) == MdLang.JAPANESE) {
-        sourceChapters.sortedByDescending { getChapterNum(it) }
+    val sorter = if (manga.lang_flag != null && MdLang.fromIsoCode(manga.lang_flag!!) == MdLang.JAPANESE) {
+        compareByDescending<SChapter> { getChapterNum(it) == null }.thenByDescending { getChapterNum(it) }
     } else {
-        val sorter = compareByDescending<SChapter> { getVolumeNum(it) == null }.thenByDescending { getVolumeNum(it) }.thenByDescending { getChapterNum(it) }
-        return sourceChapters.sortedWith(sorter)
+        compareByDescending<SChapter> { getVolumeNum(it) == null }.thenByDescending { getVolumeNum(it) }.thenByDescending { getChapterNum(it) }
     }
+
+    return sourceChapters.sortedWith(sorter)
 }
 
 fun getChapterNum(chapter: SChapter): Float? {
