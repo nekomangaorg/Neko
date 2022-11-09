@@ -92,8 +92,8 @@ class Komga : ReducedHttpSource() {
                 content.map { series ->
                     SManga.create().apply {
                         this.title = series.metadata.title
-                        this.url = "${hostUrl()}/api/v1/series/${series.id}"
-                        this.thumbnail_url = "${this.url}/thumbnail"
+                        this.url = "/api/v1/series/${series.id}"
+                        this.thumbnail_url = "${hostUrl()}${this.url}/thumbnail"
                     }
                 }
             }
@@ -103,7 +103,7 @@ class Komga : ReducedHttpSource() {
     override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result.runCatching {
-                val response = customClient().newCall(GET("$mangaUrl/books?unpaged=true&media_status=READY&deleted=false", headers)).await()
+                val response = customClient().newCall(GET("${hostUrl()}$mangaUrl/books?unpaged=true&media_status=READY&deleted=false", headers)).await()
                 val responseBody = response.body
                     ?: throw IllegalStateException("Komga: Response code ${response.code}")
 
@@ -112,7 +112,7 @@ class Komga : ReducedHttpSource() {
                     SChapter.create().apply {
                         chapter_number = book.metadata.numberSort
                         name = "${book.metadata.number} - ${book.metadata.title}"
-                        url = "${hostUrl()}/api/v1/books/${book.id}"
+                        url = "/api/v1/books/${book.id}"
                         scanlator = this@Komga.name
                         date_upload = book.metadata.releaseDate?.let { parseDate(it) }
                             ?: parseDateTime(book.fileLastModified)
@@ -127,7 +127,8 @@ class Komga : ReducedHttpSource() {
     }
 
     override suspend fun fetchPageList(chapter: SChapter): List<Page> {
-        val response = customClient().newCall(GET("${hostUrl()}${chapter.url}", headers)).await()
+        val chapterUrl = "${hostUrl()}${chapter.url}/pages"
+        val response = customClient().newCall(GET(chapterUrl, headers)).await()
         val responseBody = response.body
             ?: throw IllegalStateException("Response code ${response.code}")
 
