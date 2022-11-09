@@ -137,13 +137,14 @@ class BrowsePresenter(
             getHomepage()
         }
 
+
+        updateBrowseFilters(_browseScreenState.value.firstLoad)
+
         presenterScope.launch {
             _browseScreenState.update {
-                it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()), isLoggedIn = browseRepository.isLoggedIn())
+                it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()), isLoggedIn = browseRepository.isLoggedIn(), firstLoad = false)
             }
         }
-
-        updateBrowseFilters(true)
 
         presenterScope.launch {
             if (browseScreenState.value.promptForCategories) {
