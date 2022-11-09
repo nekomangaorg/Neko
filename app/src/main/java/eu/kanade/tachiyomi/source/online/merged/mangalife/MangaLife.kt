@@ -37,7 +37,7 @@ class MangaLife : ReducedHttpSource() {
 
     override suspend fun searchManga(query: String): List<SManga> {
         return withContext(Dispatchers.IO) {
-            if (this@MangaLife::directory.isInitialized.not()) {
+            if (!this@MangaLife::directory.isInitialized) {
                 val response = client.newCall(GET("$baseUrl/search/", headers)).await()
                 val document = response.asJsoup()
                 directory = directoryFromDocument(document).associateBy { it.name }
@@ -72,34 +72,49 @@ class MangaLife : ReducedHttpSource() {
                         .substringAfter("vm.Chapters = ").substringBefore(";")
 
                 val mangaLifeChapters = json.decodeFromString<List<MangaLifeChapterDto>>(vmChapters)
-
+                val uniqueTypes = arrayOf("Volume", "Special")
                 mangaLifeChapters.map { chp ->
                     SChapter.create().apply {
-                        name = when (chp.chapterName == null || chp.chapterName.isEmpty()) {
-                            true -> "${chp.type} ${chapterImage(chp.chapter, true)}"
-                            false -> chp.chapterName
-                        }
 
-                        // get the seasons
-                        val season1 = name.substringAfter("Volume ", "")
-                        val season2 = name.substringBefore(" - Chapter", "").substringAfter("S")
-                        if (season1.isNotEmpty() && season2.isEmpty()) {
-                            vol = season1
-                        } else if (season2.isNotEmpty()) {
-                            vol = season2
-                        }
-
-                        // set the chapter text
-                        if (chp.type != "Volume") {
-                            val splitName = name.substringAfter(" - Chapter").split(" ")
-                            for (split in splitName) {
-                                val splitFloat = split.toFloatOrNull()
-                                if (splitFloat != null) {
-                                    chapter_txt = splitFloat.toString()
-                                    break
-                                }
+                        val chapterName = mutableListOf<String>()
+                        // Build chapter name
+                        if (chp.type in uniqueTypes) {
+                            this.vol = calculateChapterNumber(chp.chapter, true)
+                            val prefix = when (chp.type != "Volume") {
+                                true -> "${chp.type} "
+                                false -> "Vol."
                             }
+                            chapterName.add("$prefix${this.vol}")
+                        } else {
+                            //The old logic would apply the name from either the "ChapterName" or Type + chapterNumber
+                            //To match dex more this doesn't use name as it doesnt seem used often see Gantz (which doesnt make it here anyways cause its
+                            //a manga)) and the text the extension shows for that would be ex. Special Osaka 1 vs Neko Special 1 - Special Osaka 1
+                            //get volume
+                            var volResult = chp.type.substringBefore(" -", "")
+                            if (volResult.startsWith("S")) {
+                                volResult = volResult.substringAfter("S")
+                            } else {
+                                volResult = volResult.substringAfter(" ")
+                            }
+                            if (volResult.isNotEmpty()) {
+                                this.vol = volResult
+                                chapterName.add("Vol.$volResult")
+                            }
+
+                            //get chapter
+                            this.chapter_txt = chp.chapterString()
+                            chapterName.add(this.chapter_txt)
                         }
+
+                        //get text
+                        if (chp.chapterName?.isNotEmpty() == true) {
+                            if (chapterName.isNotEmpty()) {
+                                chapterName.add("-")
+                            }
+                            chapterName.add(chp.chapterName)
+                        }
+
+                        this.name = chapterName.joinToString(" ")
 
                         url = "/read-online/" + response.request.url.toString()
                             .substringAfter("/manga/") + chapterURLEncode(chp.chapter)
@@ -115,13 +130,15 @@ class MangaLife : ReducedHttpSource() {
 
                         scanlator = this@MangaLife.name
                     }
-                }.asReversed()
+                }
             }.mapError {
                 XLog.e(it)
                 "Unknown Exception with merge".toResultError()
             }
         }
     }
+
+    private fun MangaLifeChapterDto.chapterString(): String = "Ch.${calculateChapterNumber(this.chapter, true)}"
 
     /**
      * Returns an observable with the page list for a chapter.
@@ -151,7 +168,7 @@ class MangaLife : ReducedHttpSource() {
 
         val path = "$host/manga/$titleURI/$seasonURI"
 
-        val chNum = chapterImage(curChapter.chapter)
+        val chNum = calculateChapterNumber(curChapter.chapter)
 
         return IntRange(1, curChapter.totalPages!!).mapIndexed { i, _ ->
             val imageNum = (i + 1).toString().let { "000$it" }.let { it.substring(it.length - 3) }
@@ -172,7 +189,7 @@ class MangaLife : ReducedHttpSource() {
 
     private val chapterImageRegex = Regex("""^0+""")
 
-    private fun chapterImage(e: String, cleanString: Boolean = false): String {
+    private fun calculateChapterNumber(e: String, cleanString: Boolean = false): String {
         // cleanString will result in an empty string if chapter number is 0, hence the else if below
         val a = e.substring(1, e.length - 1).let { if (cleanString) it.replace(chapterImageRegex, "") else it }
         // If b is not zero, indicates chapter has decimal numbering

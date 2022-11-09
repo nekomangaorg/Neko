@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -29,13 +28,12 @@ fun syncChaptersWithSource(
     errorFromMerged: Boolean = false,
 ): Pair<List<Chapter>, List<Chapter>> {
     val downloadManager: DownloadManager = Injekt.get()
-    val preferences: PreferencesHelper = Injekt.get()
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
     // no need to handle cache in dedupe because rawsource already has the correct chapters
-    // val dedupedChapters = deduplicateChapters(rawSourceChapters, manga, db)
+    val sortedChapters = reorderChapters(rawSourceChapters, manga, db)
 
-    val sourceChapters = rawSourceChapters.mapIndexed { i, sChapter ->
+    val sourceChapters = sortedChapters.mapIndexed { i, sChapter ->
         Chapter.create().apply {
             copyFrom(sChapter)
             manga_id = manga.id

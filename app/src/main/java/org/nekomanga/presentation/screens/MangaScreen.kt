@@ -316,6 +316,7 @@ fun MangaScreen(
                         pagesLeft = chapterItem.chapter.pagesLeft,
                         read = chapterItem.chapter.read,
                         bookmark = chapterItem.chapter.bookmark,
+                        isMerged = chapterItem.chapter.isMergedChapter(),
                         downloadStateProvider = { chapterItem.downloadState },
                         downloadProgressProvider = { chapterItem.downloadProgress },
                         shouldHideChapterTitles = generalState.value.hideChapterTitles,

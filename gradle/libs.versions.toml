@@ -75,7 +75,7 @@ chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", ver
 
 
 conscrypt = "org.conscrypt:conscrypt-android:2.5.2"
-conductor = "com.bluelinelabs:conductor:3.1.7"
+conductor = "com.bluelinelabs:conductor:3.1.8"
 conductor-supportpref = "com.github.tachiyomiorg:conductor-support-preference:3.0.0"
 
 fast-adapter = { module = "com.mikepenz:fastadapter", version.ref = "fast_adapter_version" }
@@ -107,7 +107,7 @@ retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serializati
 #test libs
 junit = "junit:junit:4.13.2"
 mockk = "io.mockk:mockk:1.13.2"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.5.3"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.5.4"
 
 [plugins]
 kotlinter = { id = "org.jmailen.kotlinter", version = "3.12.0" }
