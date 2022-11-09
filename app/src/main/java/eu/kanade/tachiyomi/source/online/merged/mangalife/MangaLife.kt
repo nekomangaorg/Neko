@@ -90,18 +90,17 @@ class MangaLife : ReducedHttpSource() {
                             //To match dex more this doesn't use name as it doesnt seem used often see Gantz (which doesnt make it here anyways cause its
                             //a manga)) and the text the extension shows for that would be ex. Special Osaka 1 vs Neko Special 1 - Special Osaka 1
                             //get volume
-                            val vol1 = chp.type.substringAfter("Volume ", "")
-                            val vol2 = chp.type.substringBefore(" -", "").substringAfter("S")
-                            when {
-                                vol1.isNotEmpty() && vol2.isEmpty() -> {
-                                    this.vol = vol1
-                                    chapterName.add("Vol.$vol1")
-                                }
-                                vol2.isNotEmpty() -> {
-                                    this.vol = vol2
-                                    chapterName.add("Vol.$vol2")
-                                }
+                            var volResult = chp.type.substringBefore(" -", "")
+                            if (volResult.startsWith("S")) {
+                                volResult = volResult.substringAfter("S")
+                            } else {
+                                volResult = volResult.substringAfter(" ")
                             }
+                            if (volResult.isNotEmpty()) {
+                                this.vol = volResult
+                                chapterName.add("Vol.$volResult")
+                            }
+
                             //get chapter
                             this.chapter_txt = chp.chapterString()
                             chapterName.add(this.chapter_txt)
