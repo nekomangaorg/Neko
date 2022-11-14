@@ -27,7 +27,7 @@ data class KomgaSeriesMetadataDto(
 )
 
 @Serializable
-data class KomgaPageWrapperDto<T>(
+data class KomgaPaginatedResponseDto<T>(
     val content: List<T>,
     val empty: Boolean,
     val first: Boolean,
