@@ -83,7 +83,7 @@ class Komga : ReducedHttpSource() {
 
     override suspend fun searchManga(query: String): List<SManga> {
         if (hostUrl().isBlank()) {
-            throw Exception("No host for Komga")
+            throw Exception("Invalid host name")
         }
         val apiUrl = "${hostUrl()}/api/v1/series".toHttpUrl().newBuilder()
             .addQueryParameter("search", query)
@@ -112,7 +112,7 @@ class Komga : ReducedHttpSource() {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result.runCatching {
                 if (hostUrl().isBlank()) {
-                    throw Exception("No host for Komga")
+                    throw Exception("Invalid host name")
                 }
                 val apiUrl = "${hostUrl()}$mangaUrl/books".toHttpUrl().newBuilder()
                     .addQueryParameter("unpaged", "true")
@@ -143,7 +143,7 @@ class Komga : ReducedHttpSource() {
 
     override suspend fun fetchPageList(chapter: SChapter): List<Page> {
         if (hostUrl().isBlank()) {
-            throw Exception("No host for Komga")
+            throw Exception("Invalid host name")
         }
         val chapterUrl = "${hostUrl()}${chapter.url}/pages"
         val response = customClient().newCall(GET(chapterUrl, headers)).await()

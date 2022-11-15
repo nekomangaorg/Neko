@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -131,7 +132,7 @@ class MangaUpdateCoordinator {
             val deferredChapters = async {
                 sourceManager.mangaDex.fetchChapterList(manga)
                     .onFailure {
-                        send(MangaResult.Error(text = "error with MangaDex: getting chapters"))
+                        send(MangaResult.Error(text = "error with MangaDex: ${it.message()}"))
                         cancel()
                     }.getOrElse { emptyList() }
             }
@@ -147,8 +148,7 @@ class MangaUpdateCoordinator {
                             MergeType.Komga -> sourceManager.komga
                         }.fetchChapters(mergeManga.url)
                             .onFailure {
-                                XLog.e(it)
-                                send(MangaResult.Error(text = "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: getting chapters "))
+                                send(MangaResult.Error(text = "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: ${it.message()}"))
                                 this.cancel()
                             }.getOrElse { emptyList() }
                     }
