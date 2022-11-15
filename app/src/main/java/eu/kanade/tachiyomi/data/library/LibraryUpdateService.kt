@@ -415,6 +415,8 @@ class LibraryUpdateService(
                             }.fetchChapters(mergeManga.url)
                                 .onFailure {
                                     errorFromMerged = true
+                                    failedUpdates[manga] = "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
+
                                 }.getOrElse { emptyList() }
                         }.flatten()
                     }
