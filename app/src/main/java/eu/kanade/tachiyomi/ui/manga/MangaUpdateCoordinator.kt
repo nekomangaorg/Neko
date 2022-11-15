@@ -147,6 +147,7 @@ class MangaUpdateCoordinator {
                             MergeType.Komga -> sourceManager.komga
                         }.fetchChapters(mergeManga.url)
                             .onFailure {
+                                XLog.e(it)
                                 send(MangaResult.Error(text = "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: getting chapters "))
                                 this.cancel()
                             }.getOrElse { emptyList() }
