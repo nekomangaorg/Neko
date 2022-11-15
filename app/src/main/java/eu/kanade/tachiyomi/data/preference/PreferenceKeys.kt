@@ -296,6 +296,8 @@ object PreferenceKeys {
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
 
+    fun sourceUrl(sourceId: Long) = "pref_source_url_$sourceId"
+
     const val contentRating = "content_rating_options"
 
     const val autoTrackContentRating = "auto_track_content_rating_options"

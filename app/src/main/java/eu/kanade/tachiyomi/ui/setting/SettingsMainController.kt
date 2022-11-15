@@ -61,6 +61,16 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             titleRes = R.string.site_specific_settings
             onClick { navigateTo(SettingsSiteController()) }
         }
+
+        preference {
+            iconDrawable = CommunityMaterial.Icon3.cmd_source_merge.create(
+                context,
+                colorAttr = R.attr.colorOnSurface,
+            )
+            titleRes = R.string.merge_source_settings
+            onClick { navigateTo(SettingsMergeController()) }
+        }
+
         preference {
             iconDrawable =
                 OutlinedGoogleMaterial.Icon.gmo_chrome_reader_mode.create(

@@ -17,9 +17,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
+class KomgaLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
-    val source: Source by lazy { Injekt.get<SourceManager>().mangaDex }
+    val source: Source by lazy { Injekt.get<SourceManager>().komga }
 
     protected lateinit var binding: PrefAccountLoginBinding
     val preferences: PreferencesHelper by injectLazy()
@@ -37,11 +37,10 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
                         // if (loggedOut.loggedOut) {
                         launch {
-                            preferences.setSourceCredentials(source, "", "")
-                            preferences.setTokens("", "")
+                            preferences.setKomgaCredentials(source, "", "", "")
                         }
                         activity?.toast(R.string.successfully_logged_out)
-                        (targetController as? Listener)?.siteLogoutDialogClosed(source, "")
+                        (targetController as? Listener)?.siteLogoutDialogClosed(source)
                         /* } else {
                              activity?.toast(loggedOut.error)
                          }*/
@@ -55,6 +54,6 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
     }
 
     interface Listener {
-        fun siteLogoutDialogClosed(source: Source, username: String)
+        fun siteLogoutDialogClosed(source: Source)
     }
 }

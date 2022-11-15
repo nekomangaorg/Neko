@@ -31,7 +31,7 @@ class DownloadProvider(private val context: Context) {
      * Preferences helper.
      */
     private val preferences: PreferencesHelper by injectLazy()
-    private val source = Injekt.get<SourceManager>().getMangadex()
+    private val source = Injekt.get<SourceManager>().mangaDex
 
     fun downloadsDir(): UniFile = preferences.downloadsDirectory().get().let {
         val dir = UniFile.fromUri(context, it.toUri())

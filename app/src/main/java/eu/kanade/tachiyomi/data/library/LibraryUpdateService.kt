@@ -13,12 +13,14 @@ import coil.request.ImageRequest
 import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
+import com.github.michaelbull.result.onFailure
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
@@ -307,7 +309,7 @@ class LibraryUpdateService(
 
         mangaToUpdateMap.putAll(mangaToAdd.groupBy { it.source })
 
-        val isDexUp = sourceManager.getMangadex().checkIfUp()
+        val isDexUp = sourceManager.mangaDex.checkIfUp()
 
         jobCount.andIncrement
         if (isDexUp) {
@@ -354,7 +356,7 @@ class LibraryUpdateService(
         if (mangaToUpdateMap[source] == null) return false
         var currentCount = 0
         var hasDownloads = false
-        if (sourceManager.getMangadex().isLogged()) {
+        if (sourceManager.mangaDex.isLogged()) {
             mangaDexLoginHelper.reAuthIfNeeded()
         }
 
@@ -392,7 +394,7 @@ class LibraryUpdateService(
 
             var errorFromMerged = false
 
-            val source = sourceManager.getMangadex()
+            val source = sourceManager.mangaDex
 
             val holder = withIOContext {
                 if (preferences.fasterLibraryUpdates().get()) {
@@ -405,12 +407,17 @@ class LibraryUpdateService(
             val merged = when (mergeMangaList.isNotEmpty()) {
                 true -> {
                     withIOContext {
-                        //TODO eventually check which merge type
                         mergeMangaList.map { mergeManga ->
-                            sourceManager.getMangaLife().fetchChapters(mergeManga.url).getOrElse {
-                                errorFromMerged = true
-                                emptyList()
-                            }
+                            //in the future check the merge type
+                            when (mergeManga.mergeType) {
+                                MergeType.MangaLife -> sourceManager.mangaLife
+                                MergeType.Komga -> sourceManager.komga
+                            }.fetchChapters(mergeManga.url)
+                                .onFailure {
+                                    errorFromMerged = true
+                                    failedUpdates[manga] = "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
+
+                                }.getOrElse { emptyList() }
                         }.flatten()
                     }
                 }
@@ -517,7 +524,7 @@ class LibraryUpdateService(
                         statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.url))
                             .collect { chapterIds ->
                                 val markRead =
-                                    dbChapters.asSequence().filter { it.isMergedChapter().not() }
+                                    dbChapters.asSequence().filter { !it.isMergedChapter() }
                                         .filter { chapterIds.contains(it.mangadex_chapter_id) }
                                         .filter { it.read.not() }
                                         .map {
@@ -559,7 +566,7 @@ class LibraryUpdateService(
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) {
         XLog.d("Attempting to update reading statuses")
         if (mangaList.isNullOrEmpty()) return
-        if (sourceManager.getMangadex().isLogged() && job?.isCancelled == false) {
+        if (sourceManager.mangaDex.isLogged() && job?.isCancelled == false) {
             runCatching {
                 val readingStatus = statusHandler.fetchReadingStatusForAllManga()
                 if (readingStatus.isNotEmpty()) {

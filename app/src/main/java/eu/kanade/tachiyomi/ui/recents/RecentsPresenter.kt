@@ -428,7 +428,7 @@ class RecentsPresenter(
      * @param chapter the chapter to delete.
      */
     fun deleteChapter(chapter: Chapter, manga: Manga, update: Boolean = true) {
-        val source = Injekt.get<SourceManager>().getMangadex()
+        val source = Injekt.get<SourceManager>().mangaDex
         launchIO {
             downloadManager.deleteChapters(listOf(chapter), manga, source)
         }
@@ -491,7 +491,7 @@ class RecentsPresenter(
                     pages_left = pagesLeft ?: 0
                 }
             }
-            if (preferences.readingSync() && chapter.isMergedChapter().not()) {
+            if (preferences.readingSync() && !chapter.isMergedChapter()) {
                 statusHandler.marksChaptersStatus(manga.uuid(), listOf(chapter.mangadex_chapter_id), read)
             }
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()

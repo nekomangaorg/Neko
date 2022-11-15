@@ -26,7 +26,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class BrowseRepository(
-    private val mangaDex: MangaDex = Injekt.get<SourceManager>().getMangadex(),
+    private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
     private val db: DatabaseHelper = Injekt.get(),
     private val preferenceHelper: PreferencesHelper = Injekt.get(),
 ) {

@@ -24,7 +24,7 @@
         android:layout_marginTop="15dp"
         android:hint="@string/username"
         app:boxStrokeColor="@color/text_box_stroke_selector"
-        app:hintTextColor="?attr/colorSecondary" >
+        app:hintTextColor="?attr/colorSecondary">
 
         <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
             android:id="@+id/username"
@@ -50,30 +50,22 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/two_factor_holder"
-        style="@style/Neko.TextInputLayout.OutlineBox"
+        android:id="@+id/url_holder"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="@string/two_factor"
+        android:hint="@string/url"
         android:visibility="gone"
         tools:visibility="visible">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/two_factor_edit"
+            android:id="@+id/url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textNoSuggestions" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/two_factor_check"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:text="@string/two_factor" />
 
     <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
         android:id="@+id/login"

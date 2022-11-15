@@ -21,7 +21,7 @@ import uy.kohesive.injekt.api.get
 
 class MdList(private val context: Context, id: Int) : TrackService(id) {
 
-    private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() }
+    private val mdex by lazy { Injekt.get<SourceManager>().mangaDex }
 
     override fun nameRes() = R.string.mdlist
 

@@ -30,7 +30,7 @@ class SettingsSiteController :
     MangadexLoginDialog.Listener,
     MangadexLogoutDialog.Listener {
 
-    private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() }
+    private val mdex by lazy { Injekt.get<SourceManager>().mangaDex }
     private val db by lazy { Injekt.get<DatabaseHelper>() }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {

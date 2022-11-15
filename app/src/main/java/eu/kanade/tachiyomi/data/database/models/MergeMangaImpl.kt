@@ -6,14 +6,14 @@ data class MergeMangaImpl(
     val coverUrl: String = "",
     val url: String,
     val title: String = "",
-    val mergeType: MergeType = MergeType.MangaLife,
+    val mergeType: MergeType,
 )
 
 data class SourceMergeManga(
     val coverUrl: String,
     val url: String,
     val title: String,
-    val mergeType: MergeType = MergeType.MangaLife,
+    val mergeType: MergeType,
 ) {
     fun toMergeMangaImpl(mangaId: Long): MergeMangaImpl {
         return MergeMangaImpl(
@@ -27,11 +27,19 @@ data class SourceMergeManga(
 }
 
 enum class MergeType(val id: Int) {
-    MangaLife(0);
+    MangaLife(0),
+    Komga(1);
 
     companion object {
         fun getById(id: Int): MergeType {
             return values().firstOrNull { it.id == id } ?: MangaLife
+        }
+
+        fun getMergeTypeName(mergeType: MergeType): String {
+            return when (mergeType) {
+                MangaLife -> MangaLife.name
+                Komga -> Komga.name
+            }
         }
     }
 }

@@ -35,7 +35,7 @@ class MangaLife : ReducedHttpSource() {
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:SS Z", Locale.getDefault())
 
-    suspend fun searchManga(query: String): List<SManga> {
+    override suspend fun searchManga(query: String): List<SManga> {
         return withContext(Dispatchers.IO) {
             if (!this@MangaLife::directory.isInitialized) {
                 val response = client.newCall(GET("$baseUrl/search/", headers)).await()
@@ -63,10 +63,10 @@ class MangaLife : ReducedHttpSource() {
         }
     }
 
-    suspend fun fetchChapters(mergeMangaUrl: String): Result<List<SChapter>, ResultError> {
+    override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result.runCatching {
-                val response = client.newCall(GET("$baseUrl$mergeMangaUrl", headers)).await()
+                val response = client.newCall(GET("$baseUrl$mangaUrl", headers)).await()
                 val vmChapters =
                     response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
                         .substringAfter("vm.Chapters = ").substringBefore(";")

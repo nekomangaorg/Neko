@@ -54,7 +54,7 @@ class StatusSyncJob(
             val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
             setForeground(foregroundInfo)
         }
-        if (source.getMangadex().isLogged().not()) {
+        if (source.mangaDex.isLogged().not()) {
             context.notificationManager.cancel(Notifications.Id.Status.Complete)
             errorNotification()
             return@coroutineScope Result.failure()

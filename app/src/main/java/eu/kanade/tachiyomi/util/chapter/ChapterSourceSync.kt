@@ -51,7 +51,7 @@ fun syncChaptersWithSource(
         val dbChapter = dbChapters.find {
             if (sourceChapter.isMergedChapter() && it.isMergedChapter()) {
                 it.url == sourceChapter.url
-            } else if (sourceChapter.isMergedChapter().not() && it.isMergedChapter().not()) {
+            } else if (!sourceChapter.isMergedChapter() && !it.isMergedChapter()) {
                 (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
                     MdUtil.getChapterUUID(it.url) == sourceChapter.mangadex_chapter_id
             } else {

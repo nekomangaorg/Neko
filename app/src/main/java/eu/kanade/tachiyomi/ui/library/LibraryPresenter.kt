@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MergeMangaImpl
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
@@ -90,7 +91,7 @@ class LibraryPresenter(
     val isLoggedIntoTracking
         get() = loggedServices.isNotEmpty()
 
-    private val source by lazy { Injekt.get<SourceManager>().getMangadex() }
+    private val source by lazy { Injekt.get<SourceManager>().mangaDex }
 
     /** Current categories of the library. */
     var categories: List<Category> = emptyList()
@@ -1262,7 +1263,7 @@ class LibraryPresenter(
         if (preferences.readingSync()) {
             mangaList.forEach { entry ->
                 val nonMergedChapterIds =
-                    entry.value.filter { it.isMergedChapter().not() }.map { it.mangadex_chapter_id }
+                    entry.value.filter { !it.isMergedChapter() }.map { it.mangadex_chapter_id }
                 if (nonMergedChapterIds.isNotEmpty()) {
                     presenterScope.launch {
                         statusHandler.marksChaptersStatus(
@@ -1407,6 +1408,7 @@ class LibraryPresenter(
                         MergeMangaImpl(
                             mangaId = manga.id!!,
                             url = manga.merge_manga_url!!,
+                            mergeType = MergeType.MangaLife,
                         ),
                     ).executeAsBlocking()
                     manga.merge_manga_url = null

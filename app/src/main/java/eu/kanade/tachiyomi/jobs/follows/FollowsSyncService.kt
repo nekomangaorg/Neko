@@ -46,7 +46,7 @@ class FollowsSyncService {
             val syncFollowStatusInts =
                 preferences.mangadexSyncToLibraryIndexes().get().map { it.toInt() }
 
-            sourceManager.getMangadex().fetchAllFollows().onFailure {
+            sourceManager.mangaDex.fetchAllFollows().onFailure {
                 errorNotification((it as? ResultError.Generic)?.errorString ?: "Error fetching follows")
             }.onSuccess { unfilteredManga ->
 
@@ -61,13 +61,13 @@ class FollowsSyncService {
                 listManga.forEach { networkManga ->
                     updateNotification(networkManga.title, count.andIncrement, listManga.size)
 
-                    var dbManga = db.getManga(networkManga.url, sourceManager.getMangadex().id)
+                    var dbManga = db.getManga(networkManga.url, sourceManager.mangaDex.id)
                         .executeAsBlocking()
                     if (dbManga == null) {
                         dbManga = Manga.create(
                             networkManga.url,
                             networkManga.title,
-                            sourceManager.getMangadex().id,
+                            sourceManager.mangaDex.id,
                         )
                         dbManga.date_added = Date().time
                     }

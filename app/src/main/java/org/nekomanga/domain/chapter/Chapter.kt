@@ -2,11 +2,17 @@ package org.nekomanga.domain.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 data class SimpleChapter(
     val id: Long,
@@ -31,16 +37,24 @@ data class SimpleChapter(
 ) {
     val isRecognizedNumber = chapterNumber >= 0f
 
-    fun isMergedChapter() = this.scanlator == MangaLife.name
+    fun isMergedChapter() = this.scanlator.containsMergeSourceName()
+
+    fun isMergedChapterOfType(mergeType: MergeType) =
+        when {
+            this.scanlator == MangaLife.name && mergeType == MergeType.MangaLife -> true
+            this.scanlator == Komga.name && mergeType == MergeType.Komga -> true
+            else -> false
+        }
 
     fun scanlatorList(): List<String> {
         return ChapterUtil.getScanlators(this.scanlator)
     }
 
     fun fullUrl(): String {
-        return when (isMergedChapter()) {
-            true -> "https://manga4life.com$url"
-            false -> MdUtil.baseUrl + url
+        return when {
+            isMergedChapterOfType(MergeType.MangaLife) -> Injekt.get<SourceManager>().mangaLife.baseUrl + url
+            isMergedChapterOfType(MergeType.Komga) -> Injekt.get<SourceManager>().komga.hostUrl() + url
+            else -> MdUtil.baseUrl + url
         }
     }
 
@@ -93,7 +107,7 @@ data class SimpleChapter(
             oldMangaDexChapterId = null,
             language = "",
 
-        )
+            )
     }
 
     fun toDbChapter(): Chapter = ChapterImpl().also {

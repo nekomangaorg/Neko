@@ -9,12 +9,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -32,6 +31,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -45,8 +45,6 @@ class MangaUpdateCoordinator {
     private val preferences: PreferencesHelper by injectLazy()
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by lazy { Injekt.get() }
-    private val mangaDex: MangaDex by lazy { sourceManager.getMangadex() }
-    private val mergedSource: MangaLife by lazy { sourceManager.getMangaLife() }
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
@@ -56,7 +54,7 @@ class MangaUpdateCoordinator {
     suspend fun update(manga: Manga, scope: CoroutineScope) = channelFlow {
         val mangaWasInitialized = manga.initialized
 
-        if (!mangaDex.checkIfUp()) {
+        if (!sourceManager.mangaDex.checkIfUp()) {
             send(MangaResult.Error(R.string.site_down))
             return@channelFlow
         }
@@ -88,7 +86,7 @@ class MangaUpdateCoordinator {
      */
     private fun ProducerScope<MangaResult>.startMangaJob(scope: CoroutineScope, manga: Manga): Job {
         return scope.launchIO {
-            mangaDex.getMangaDetails(manga.uuid())
+            sourceManager.mangaDex.getMangaDetails(manga.uuid())
                 .onFailure {
                     send(MangaResult.Error(text = "Error getting manga from MangaDex"))
                     cancel()
@@ -132,9 +130,9 @@ class MangaUpdateCoordinator {
     private fun ProducerScope<MangaResult>.startChapterJob(scope: CoroutineScope, manga: Manga, mangaWasAlreadyInitialized: Boolean): Job {
         return scope.launchIO {
             val deferredChapters = async {
-                mangaDex.fetchChapterList(manga)
+                sourceManager.mangaDex.fetchChapterList(manga)
                     .onFailure {
-                        send(MangaResult.Error(text = "error with MangaDex: getting chapters"))
+                        send(MangaResult.Error(text = "error with MangaDex: ${it.message()}"))
                         cancel()
                     }.getOrElse { emptyList() }
             }
@@ -145,9 +143,12 @@ class MangaUpdateCoordinator {
                 mergedMangaList.map { mergeManga ->
                     async {
                         //in the future check the merge type
-                        mergedSource.fetchChapters(mergeManga.url)
+                        when (mergeManga.mergeType) {
+                            MergeType.MangaLife -> sourceManager.mangaLife
+                            MergeType.Komga -> sourceManager.komga
+                        }.fetchChapters(mergeManga.url)
                             .onFailure {
-                                send(MangaResult.Error(text = "error with MangaLife: getting chapters "))
+                                send(MangaResult.Error(text = "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: ${it.message()}"))
                                 this.cancel()
                             }.getOrElse { emptyList() }
                     }
@@ -197,7 +198,7 @@ class MangaUpdateCoordinator {
     }
 
     suspend fun updateScanlator(scanlator: String) {
-        mangaDex.getScanlator(scanlator).onSuccess {
+        sourceManager.mangaDex.getScanlator(scanlator).onSuccess {
             db.insertScanlators(listOf(it.toScanlatorImpl())).executeAsBlocking()
         }
     }
