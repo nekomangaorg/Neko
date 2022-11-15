@@ -4,6 +4,7 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.widget.preference.KomgaLoginDialog
 import eu.kanade.tachiyomi.widget.preference.KomgaLoginPreference
 import eu.kanade.tachiyomi.widget.preference.KomgaLogoutDialog
@@ -19,28 +20,31 @@ class SettingsMergeController :
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.merge_source_settings
 
-        val sourcePreference = KomgaLoginPreference(context, komga).apply {
-            title = "${komga.name} Login"
+        preferenceCategory {
+            title = Komga.name
+            val sourcePreference = KomgaLoginPreference(context, komga).apply {
+                title = "${komga.name} Login"
 
-            this.komgaUrl = preferences.sourceUrl(komga) ?: ""
+                this.komgaUrl = preferences.sourceUrl(komga) ?: ""
 
-            key = getSourceKey(source.id)
-            setOnLoginClickListener {
-                if (this.komgaUrl.isNotBlank()) {
-                    val dialog = KomgaLogoutDialog(komga)
-                    dialog.targetController = this@SettingsMergeController
-                    dialog.showDialog(router)
-                } else {
-                    val dialog = KomgaLoginDialog(komga)
-                    dialog.targetController = this@SettingsMergeController
-                    dialog.showDialog(router)
+                key = getSourceKey(source.id)
+                setOnLoginClickListener {
+                    if (this.komgaUrl.isNotBlank()) {
+                        val dialog = KomgaLogoutDialog(komga)
+                        dialog.targetController = this@SettingsMergeController
+                        dialog.showDialog(router)
+                    } else {
+                        val dialog = KomgaLoginDialog(komga)
+                        dialog.targetController = this@SettingsMergeController
+                        dialog.showDialog(router)
+                    }
                 }
+                this.isIconSpaceReserved = false
             }
-            this.isIconSpaceReserved = false
+
+            addPreference(sourcePreference)
+
         }
-
-        addPreference(sourcePreference)
-
     }
 
     override fun siteLoginDialogClosed(source: Source, username: String) {

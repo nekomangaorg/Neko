@@ -82,6 +82,9 @@ class Komga : ReducedHttpSource() {
     fun customClient() = createClient(preferences.sourceUsername(this)!!, preferences.sourcePassword(this)!!)
 
     override suspend fun searchManga(query: String): List<SManga> {
+        if (hostUrl().isBlank()) {
+            throw Exception("No host for Komga")
+        }
         val apiUrl = "${hostUrl()}/api/v1/series".toHttpUrl().newBuilder()
             .addQueryParameter("search", query)
             .addQueryParameter("unpaged", "true")
@@ -108,6 +111,9 @@ class Komga : ReducedHttpSource() {
     override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
             com.github.michaelbull.result.runCatching {
+                if (hostUrl().isBlank()) {
+                    throw Exception("No host for Komga")
+                }
                 val apiUrl = "${hostUrl()}$mangaUrl/books".toHttpUrl().newBuilder()
                     .addQueryParameter("unpaged", "true")
                     .addQueryParameter("media_status", "READY")
@@ -136,6 +142,9 @@ class Komga : ReducedHttpSource() {
     }
 
     override suspend fun fetchPageList(chapter: SChapter): List<Page> {
+        if (hostUrl().isBlank()) {
+            throw Exception("No host for Komga")
+        }
         val chapterUrl = "${hostUrl()}${chapter.url}/pages"
         val response = customClient().newCall(GET(chapterUrl, headers)).await()
         val responseBody = response.body
