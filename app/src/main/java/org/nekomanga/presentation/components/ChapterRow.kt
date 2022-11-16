@@ -59,6 +59,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.system.launchDelayed
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
@@ -371,6 +372,8 @@ private fun ChapterInfo(
                         onLongClick = {},
                     ),
             )
+
+            val scope = rememberCoroutineScope()
             SimpleDropdownMenu(
                 expanded = chapterDropdown,
                 themeColorState = themeColorState,
@@ -382,7 +385,9 @@ private fun ChapterInfo(
                             SimpleDropDownItem.Action(
                                 text = UiText.StringResource(R.string.remove),
                                 onClick = {
-                                    onDownload(DownloadAction.Remove)
+                                    scope.launchDelayed {
+                                        onDownload(DownloadAction.Remove)
+                                    }
                                 },
                             ),
                         )
@@ -392,13 +397,17 @@ private fun ChapterInfo(
                             SimpleDropDownItem.Action(
                                 text = UiText.StringResource(R.string.start_downloading_now),
                                 onClick = {
-                                    onDownload(DownloadAction.ImmediateDownload)
+                                    scope.launchDelayed {
+                                        onDownload(DownloadAction.ImmediateDownload)
+                                    }
                                 },
                             ),
                             SimpleDropDownItem.Action(
                                 text = UiText.StringResource(R.string.cancel),
                                 onClick = {
-                                    onDownload(DownloadAction.Cancel)
+                                    scope.launchDelayed {
+                                        onDownload(DownloadAction.Cancel)
+                                    }
                                 },
                             ),
                         )

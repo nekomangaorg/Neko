@@ -6,6 +6,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -47,6 +48,13 @@ fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
 
 fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.Main, block = block)
+
+fun CoroutineScope.launchDelayed(timeMillis: Long = 150L, block: () -> Unit) {
+    this.launch {
+        delay(timeMillis)
+        block()
+    }
+}
 
 suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.Main, block)
 
