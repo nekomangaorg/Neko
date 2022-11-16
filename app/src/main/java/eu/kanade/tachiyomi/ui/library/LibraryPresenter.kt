@@ -765,10 +765,11 @@ class LibraryPresenter(
                     val tags = if (manga.genre.isNullOrBlank()) {
                         listOf(unknown)
                     } else {
-                        manga.genre?.split(",")?.mapNotNull {
-                            val tag = it.trim().capitalizeWords()
-                            tag.ifBlank { null }
-                        } ?: listOf(unknown)
+                        manga.genre?.split(",")?.filter { !it.contains("content rating:", true) }
+                            ?.mapNotNull {
+                                val tag = it.trim().capitalizeWords()
+                                tag.ifBlank { null }
+                            } ?: listOf(unknown)
                     }
                     tags.map {
                         LibraryItem(manga, makeOrGetHeader(it))
