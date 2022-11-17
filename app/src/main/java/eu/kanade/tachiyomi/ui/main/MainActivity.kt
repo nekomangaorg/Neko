@@ -184,7 +184,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         get() = max(binding.toolbar.height, binding.cardFrame.height, binding.appBar.attrToolbarHeight)
 
     var backPressedCallback: OnBackPressedCallback? = null
-    private val backCallback = {
+    val backCallback = {
         pressingBack()
         reEnableBackPressedCallBack()
     }
@@ -872,12 +872,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     protected open fun backPress() {
         val controller = router.backstack.lastOrNull()?.controller
         if (if (router.backstackSize == 1) controller?.handleBack() != true else !router.handleBack()) {
-            if (preferences.backReturnsToStart().get() && this !is SearchActivity &&
-                startingTab() != nav.selectedItemId
-            ) {
+            if (shouldGoToStartingTab()) {
                 goToStartingTab()
             }
         }
+    }
+
+    fun shouldGoToStartingTab(): Boolean {
+        return preferences.backReturnsToStart().get() && this !is SearchActivity && startingTab() != nav.selectedItemId
     }
 
     protected val nav: NavigationBarView

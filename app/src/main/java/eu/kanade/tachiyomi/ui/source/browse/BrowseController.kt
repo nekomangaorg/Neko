@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,6 +22,10 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
+
+        BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
+            (this.activity as? MainActivity)?.backCallback?.invoke()
+        }
 
         BrowseScreen(
             browseScreenState = presenter.browseScreenState.collectAsState(),
