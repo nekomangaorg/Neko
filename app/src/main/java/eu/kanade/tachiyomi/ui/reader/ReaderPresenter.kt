@@ -136,7 +136,7 @@ class ReaderPresenter(
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
-        val chaptersForReader =
+        var chaptersForReader =
             chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
         val chapterSort = ChapterSort(manga, chapterFilter, preferences)
         chaptersForReader.sortedWith(chapterSort.sortComparator(true)).map(::ReaderChapter)

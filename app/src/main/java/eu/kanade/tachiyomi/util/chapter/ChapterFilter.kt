@@ -59,7 +59,7 @@ class ChapterFilter(
         }
 
         // if neither preference is enabled don't even filter
-        if (!preferences.skipRead() && !preferences.skipFiltered()) {
+        if (!preferences.skipRead() && !preferences.skipFiltered() && !preferences.skipDuplicates()) {
             return filteredChapters
         }
 
@@ -69,6 +69,11 @@ class ChapterFilter(
         if (preferences.skipFiltered()) {
             filteredChapters = filterChapters(filteredChapters, manga)
         }
+
+        if (preferences.skipDuplicates()) {
+            filteredChapters = filteredChapters.distinctBy { Pair(it.vol, it.chapter_txt) }
+        }
+
         // add the selected chapter to the list in case it was filtered out
         if (selectedChapter?.id != null) {
             val find = filteredChapters.find { it.id == selectedChapter.id }
@@ -78,6 +83,7 @@ class ChapterFilter(
                 filteredChapters = mutableList.toList()
             }
         }
+
 
         return filteredChapters
     }

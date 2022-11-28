@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
@@ -146,6 +146,17 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.skipFiltered
                 titleRes = R.string.skip_filtered_chapters
                 defaultValue = true
+            }
+
+            switchPreference {
+                key = Keys.skipDuplicates
+                titleRes = R.string.skip_duplicate_chapters
+                defaultValue = false
+            }
+            switchPreference {
+                key = Keys.skipDuplicates
+                titleRes = R.string.skip_read_chapters
+                defaultValue = false
             }
             switchPreference {
                 key = Keys.alwaysShowChapterTransition
@@ -295,7 +306,7 @@ class SettingsReaderController : SettingsController() {
                     R.string.double_page_gap_60,
                     R.string.double_page_gap_70,
 
-                )
+                    )
                 entryValues = listOf(0, 10, 20, 30, 40, 50, 60, 70)
                 defaultValue = "0"
             }
