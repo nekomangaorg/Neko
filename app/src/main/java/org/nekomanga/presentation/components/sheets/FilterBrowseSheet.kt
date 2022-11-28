@@ -167,25 +167,41 @@ fun FilterBrowseSheet(
                     }
                 }
 
+                var queryText by remember {
+                    mutableStateOf(filters.query.text)
+                }
+
                 FlowRow(Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 8.dp) {
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Title,
-                        { filterChanged(Filter.Query("", QueryType.Title)) },
+                        {
+                            queryText = ""
+                            filterChanged(Filter.Query("", QueryType.Title))
+                        },
                         stringResource(id = R.string.title),
                     )
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Author,
-                        { filterChanged(Filter.Query("", QueryType.Author)) },
+                        {
+                            queryText = ""
+                            filterChanged(Filter.Query("", QueryType.Author))
+                        },
                         stringResource(id = R.string.author),
                     )
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Group,
-                        { filterChanged(Filter.Query("", QueryType.Group)) },
+                        {
+                            queryText = ""
+                            filterChanged(Filter.Query("", QueryType.Group))
+                        },
                         stringResource(id = R.string.scanlator_group),
                     )
                     FilterChipWrapper(
                         filters.queryMode == QueryType.List,
-                        { filterChanged(Filter.Query("", QueryType.List)) },
+                        {
+                            queryText = ""
+                            filterChanged(Filter.Query("", QueryType.List))
+                        },
                         stringResource(id = R.string.list_id),
                     )
                 }
@@ -198,13 +214,17 @@ fun FilterBrowseSheet(
                     }
                 }
 
+
                 SearchFooter(
                     themeColorState = themeColorState,
                     labelText = stringResource(id = titleRes),
                     showDivider = false,
-                    title = filters.query.text,
+                    title = queryText,
                     isError = isError,
-                    textChanged = { text: String -> filterChanged(filters.query.copy(text = text)) },
+                    textChanged = { text: String ->
+                        queryText = text
+                        filterChanged(filters.query.copy(text = text))
+                    },
                     search = { filterClick() },
                 )
 
