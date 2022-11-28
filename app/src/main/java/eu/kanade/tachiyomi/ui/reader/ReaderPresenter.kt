@@ -87,7 +87,7 @@ class ReaderPresenter(
     var manga: Manga? = null
         private set
 
-    val source: MangaDex?
+    val source: MangaDex
         get() = sourceManager.mangaDex
 
     /**
@@ -346,6 +346,7 @@ class ReaderPresenter(
         val dbManga = db.getMangadexManga(url).executeAsBlocking()
         val tempManga = dbManga ?: (
             MangaImpl().apply {
+                this.source = mangaDex.id
                 this.url = url
                 title = ""
             }
