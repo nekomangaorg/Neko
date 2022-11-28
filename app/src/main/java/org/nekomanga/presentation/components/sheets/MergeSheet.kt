@@ -57,6 +57,7 @@ import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import jp.wasabeef.gap.Gap
+import org.nekomanga.domain.manga.MergeArtwork
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
@@ -114,16 +115,8 @@ fun MergeSheet(
                                     MergeType.Komga -> R.drawable.ic_komga_logo
                                     MergeType.MangaLife -> R.drawable.ic_mangalife_logo
                                 }
-                                Image(
-                                    painter = painterResource(id = id),
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(86.dp)
-                                        .padding(top = 4.dp, bottom = 4.dp)
-                                        .clickable { mergeType = validMergeType },
-                                )
+                                MergeLogo(id = id, onClick = { mergeType = validMergeType })
                             }
-
                         }
                     }
                     false -> {
@@ -141,7 +134,7 @@ fun MergeSheet(
                                 .requiredHeightIn(0.dp, maxLazyHeight.dp),
                         ) {
                             if (mergeSearchResults is MergeSearchResult.Success) {
-                                SuccessResults(mergeMangaList = mergeSearchResults.mergeMangaList, mergeMangaClick = mergeMangaClick)
+                                SuccessResults(mergeMangaList = mergeSearchResults.mergeMangaList, mergeType = mergeType!!, mergeMangaClick = mergeMangaClick)
                             }
                             NonSuccessResultsAndChips(
                                 themeColorState = themeColorState,
@@ -171,7 +164,7 @@ fun MergeSheet(
 }
 
 @Composable
-private fun MergeLogo(mergeType: MergeType, @DrawableRes id: Int, onClick: () -> Unit) {
+private fun MergeLogo(@DrawableRes id: Int, onClick: () -> Unit) {
     Image(
         painter = painterResource(id = id),
         contentDescription = null,
@@ -183,7 +176,7 @@ private fun MergeLogo(mergeType: MergeType, @DrawableRes id: Int, onClick: () ->
 }
 
 @Composable
-private fun SuccessResults(mergeMangaList: List<SourceMergeManga>, mergeMangaClick: (SourceMergeManga) -> Unit) {
+private fun SuccessResults(mergeMangaList: List<SourceMergeManga>, mergeType: MergeType, mergeMangaClick: (SourceMergeManga) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 100.dp),
         modifier = Modifier
@@ -201,7 +194,7 @@ private fun SuccessResults(mergeMangaList: List<SourceMergeManga>, mergeMangaCli
                     .clickable { mergeMangaClick(item) },
             ) {
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current).data(item.coverUrl).crossfade(true).placeholder(Pastel.getColorLight()).build(),
+                    model = ImageRequest.Builder(LocalContext.current).data(MergeArtwork(url = item.coverUrl, mergeType = mergeType)).crossfade(true).placeholder(Pastel.getColorLight()).build(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

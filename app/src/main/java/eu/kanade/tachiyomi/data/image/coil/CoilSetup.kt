@@ -30,6 +30,7 @@ class CoilSetup(context: Context) {
                 add(TachiyomiImageDecoder.Factory())
                 add(MangaCoverFetcher.Factory(lazy(callFactoryInit), lazy(diskCacheInit)))
                 add(MangaCoverFetcher.ArtworkFactory(lazy(callFactoryInit), lazy(diskCacheInit)))
+                add(MangaCoverFetcher.MergeArtworkFactory(lazy(callFactoryInit), lazy(diskCacheInit)))
                 add(ArtworkKeyer())
             }
             callFactory(callFactoryInit)

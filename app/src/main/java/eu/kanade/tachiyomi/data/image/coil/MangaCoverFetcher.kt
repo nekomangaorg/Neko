@@ -14,6 +14,7 @@ import coil.request.Parameters
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.SourceManager
@@ -36,6 +37,7 @@ import okio.Source
 import okio.buffer
 import okio.sink
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.domain.manga.MergeArtwork
 import uy.kohesive.injekt.injectLazy
 
 class MangaCoverFetcher(
@@ -307,6 +309,27 @@ class MangaCoverFetcher(
                 mangaId = data.id!!,
                 originalThumbnailUrl = data.thumbnail_url ?: """error("No cover specified")""",
                 sourceLazy = lazy { sourceManager.get(data.source) as? HttpSource },
+                options = options,
+                coverCache = coverCache,
+                callFactoryLazy = callFactoryLazy,
+                diskCacheLazy = diskCacheLazy,
+            )
+        }
+    }
+
+    class MergeArtworkFactory(
+        private val callFactoryLazy: Lazy<Call.Factory>,
+        private val diskCacheLazy: Lazy<DiskCache>,
+    ) : Fetcher.Factory<MergeArtwork> {
+
+        private val coverCache: CoverCache by injectLazy()
+        private val sourceManager: SourceManager by injectLazy()
+
+        override fun create(data: MergeArtwork, options: Options, imageLoader: ImageLoader): Fetcher {
+            return AlternativeMangaCoverFetcher(
+                url = data.url,
+                mangaId = 0L,
+                sourceLazy = lazy { MergeType.getSource(data.mergeType, sourceManager) },
                 options = options,
                 coverCache = coverCache,
                 callFactoryLazy = callFactoryLazy,

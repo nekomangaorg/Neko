@@ -1,5 +1,8 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.HttpSource
+
 data class MergeMangaImpl(
     val id: Long? = null,
     val mangaId: Long,
@@ -39,6 +42,13 @@ enum class MergeType(val id: Int) {
             return when (mergeType) {
                 MangaLife -> MangaLife.name
                 Komga -> Komga.name
+            }
+        }
+
+        fun getSource(mergeType: MergeType, sourceManager: SourceManager): HttpSource {
+            return when (mergeType) {
+                MangaLife -> sourceManager.mangaLife
+                Komga -> sourceManager.komga
             }
         }
     }
