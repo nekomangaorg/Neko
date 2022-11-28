@@ -28,11 +28,13 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_CONTENT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LANGUAGE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
@@ -815,6 +817,15 @@ class LibraryPresenter(
                         listOf(LibraryItem(manga, makeOrGetHeader(unknown)))
                     } else {
                         listOf(LibraryItem(manga, makeOrGetHeader(contentRating)))
+                    }
+                }
+
+                BY_LANGUAGE -> {
+                    val language = MdLang.fromIsoCode(manga.lang_flag ?: "###")?.prettyPrint
+                    if (language.isNullOrBlank()) {
+                        listOf(LibraryItem(manga, makeOrGetHeader(unknown)))
+                    } else {
+                        listOf(LibraryItem(manga, makeOrGetHeader(language)))
                     }
                 }
 
