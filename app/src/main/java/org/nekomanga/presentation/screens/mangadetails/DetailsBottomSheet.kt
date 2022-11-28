@@ -7,7 +7,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
-import eu.kanade.tachiyomi.util.system.launchDelayed
 import java.text.DateFormat
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.track.TrackItem
@@ -84,11 +83,9 @@ fun DetailsBottomSheet(
             onLogoClick = openInWebView,
             onSearchTrackClick = { service, track ->
                 closeSheet()
-                scope.launchDelayed {
-                    openSheet(
-                        DetailsBottomSheetScreen.TrackingSearchSheet(service, track),
-                    )
-                }
+                openSheet(
+                    DetailsBottomSheetScreen.TrackingSearchSheet(service, track),
+                )
             },
             trackStatusChanged = trackActions.statusChange,
             trackScoreChanged = trackActions.scoreChange,
@@ -96,19 +93,15 @@ fun DetailsBottomSheet(
             trackChapterChanged = trackActions.chapterChange,
             trackingStartDateClick = { trackAndService, trackingDate ->
                 closeSheet()
-                scope.launchDelayed {
-                    openSheet(
-                        DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, generalState.value.trackingSuggestedDates),
-                    )
-                }
+                openSheet(
+                    DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, generalState.value.trackingSuggestedDates),
+                )
             },
             trackingFinishDateClick = { trackAndService, trackingDate ->
                 closeSheet()
-                scope.launchDelayed {
-                    openSheet(
-                        DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, generalState.value.trackingSuggestedDates),
-                    )
-                }
+                openSheet(
+                    DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, generalState.value.trackingSuggestedDates),
+                )
             },
         )
         is DetailsBottomSheetScreen.TrackingSearchSheet -> {
@@ -125,19 +118,15 @@ fun DetailsBottomSheet(
                 service = currentScreen.trackingService,
                 cancelClick = {
                     closeSheet()
-                    scope.launchDelayed {
-                        openSheet(DetailsBottomSheetScreen.TrackingSheet)
-                    }
+                    openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
                 searchTracker = { query -> trackActions.search(query, currentScreen.trackingService) },
                 openInBrowser = openInWebView,
                 trackingRemoved = trackActions.remove,
                 trackSearchItemClick = { trackSearch ->
                     closeSheet()
-                    scope.launchDelayed {
-                        trackActions.searchItemClick(TrackingConstants.TrackAndService(trackSearch.trackItem, currentScreen.trackingService))
-                        openSheet(DetailsBottomSheetScreen.TrackingSheet)
-                    }
+                    trackActions.searchItemClick(TrackingConstants.TrackAndService(trackSearch.trackItem, currentScreen.trackingService))
+                    openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
             )
         }
@@ -149,16 +138,12 @@ fun DetailsBottomSheet(
                 trackSuggestedDates = currentScreen.trackSuggestedDates,
                 onDismiss = {
                     closeSheet()
-                    scope.launchDelayed {
-                        openSheet(DetailsBottomSheetScreen.TrackingSheet)
-                    }
+                    openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
                 trackDateChanged = { trackDateChanged ->
                     closeSheet()
-                    scope.launchDelayed {
-                        trackActions.dateChange(trackDateChanged)
-                        openSheet(DetailsBottomSheetScreen.TrackingSheet)
-                    }
+                    trackActions.dateChange(trackDateChanged)
+                    openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
             )
         }
@@ -186,9 +171,7 @@ fun DetailsBottomSheet(
                 },
                 removeMergeSource = { mergeType ->
                     closeSheet()
-                    scope.launchDelayed {
-                        mergeActions.remove(mergeType)
-                    }
+                    mergeActions.remove(mergeType)
                 },
                 cancelClick = {
                     closeSheet()
@@ -196,9 +179,7 @@ fun DetailsBottomSheet(
                 search = mergeActions.search,
                 mergeMangaClick = { mergeManga ->
                     closeSheet()
-                    scope.launchDelayed {
-                        mergeActions.add(mergeManga)
-                    }
+                    mergeActions.add(mergeManga)
                 },
                 validMergeTypes = generalState.value.validMergeTypes,
             )
@@ -213,15 +194,11 @@ fun DetailsBottomSheet(
                 shareClick = { url -> coverActions.share(context, url) },
                 setClick = { url ->
                     closeSheet()
-                    scope.launchDelayed {
-                        coverActions.set(url)
-                    }
+                    coverActions.set(url)
                 },
                 resetClick = {
                     closeSheet()
-                    scope.launchDelayed {
-                        coverActions.reset()
-                    }
+                    coverActions.reset()
                 },
             )
         }
