@@ -76,7 +76,7 @@ chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", ver
 
 conscrypt = "org.conscrypt:conscrypt-android:2.5.2"
 conductor = "com.bluelinelabs:conductor:3.1.8"
-conductor-supportpref = "com.github.tachiyomiorg:conductor-support-preference:3.1.8"
+conductor-supportpref = "com.github.tachiyomiorg:conductor-support-preference:27.0.2"
 
 fast-adapter = { module = "com.mikepenz:fastadapter", version.ref = "fast_adapter_version" }
 fast-adapter-binding = { module = "com.mikepenz:fastadapter-extensions-binding", version.ref = "fast_adapter_version" }
