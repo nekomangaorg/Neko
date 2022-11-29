@@ -10,12 +10,11 @@ accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiper
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist_version" }
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist_version" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist_version" }
-accompainist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
+accompanist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
+accompanist-themeadapter = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanist_version" }
 
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
-
-material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.21"
 
 activity = "androidx.activity:activity-compose:1.6.1"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
@@ -38,6 +37,6 @@ markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
 
 
 [bundles]
-accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompainist-webview"]
-compose = ["activity", "animations", "material3-core", "material3-windowsize", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
+accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
+compose = ["activity", "animations", "material3-core", "material3-windowsize", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
 charting = ["charty"]

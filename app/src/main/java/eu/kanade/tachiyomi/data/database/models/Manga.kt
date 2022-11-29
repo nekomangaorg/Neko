@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
-import com.crazylegend.string.equalsIgnoreCase
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.Amazon
@@ -126,7 +125,7 @@ interface Manga : SManga {
             ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
             ?.filter {
                 if (filterOutSafe) {
-                    !it.equalsIgnoreCase("Content rating: safe")
+                    !it.equals("Content rating: safe", true)
                 } else {
                     true
                 }

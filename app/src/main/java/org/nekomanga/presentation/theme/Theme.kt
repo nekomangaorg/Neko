@@ -4,7 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.LayoutDirection
-import com.google.android.material.composethemeadapter3.createMdc3Theme
+import com.google.accompanist.themeadapter.material3.createMdc3Theme
 import org.nekomanga.presentation.theme.Typefaces.appTypography
 
 @Composable
