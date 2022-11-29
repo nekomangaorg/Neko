@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.external
 
 import androidx.annotation.DrawableRes
+import androidx.core.text.isDigitsOnly
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -47,7 +48,10 @@ data class MangaUpdatesLink(override val id: String) : ExternalLink() {
     override val name = "MangaUpdates"
     override val logo = R.drawable.ic_tracker_manga_updates_logo
     override val logoColor: Long = 0xFF89a4c3
-    override fun getUrl() = "https://www.mangaupdates.com/series.html?id=$id"
+    override fun getUrl() = when (id.isDigitsOnly()) {
+        true -> "https://www.mangaupdates.com/series.html?id=$id"
+        false -> "https://www.mangaupdates.com/series/$id"
+    }
 }
 
 data class Dex(override val id: String) : ExternalLink() {
