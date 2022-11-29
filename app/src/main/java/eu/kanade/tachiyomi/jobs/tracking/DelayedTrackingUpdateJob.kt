@@ -41,8 +41,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         withContext(Dispatchers.IO) {
             trackings.forEach {
                 val mangaId = it.key
-                val manga = db.getManga(mangaId).executeAsBlocking() ?: return@withContext
-                val trackList = db.getTracks(manga).executeAsBlocking()
+                val trackList = db.getTracks(mangaId).executeAsBlocking()
                 it.value.map { tC ->
                     val trackChapter = tC.second
                     val service = trackManager.getService(trackChapter.first)
