@@ -12,6 +12,7 @@ import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import eu.kanade.tachiyomi.network.NetworkHelper
+import kotlinx.coroutines.Dispatchers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -39,6 +40,12 @@ class CoilSetup(context: Context) {
             crossfade(true)
             allowRgb565(context.getSystemService<ActivityManager>()!!.isLowRamDevice)
             allowHardware(true)
+            //TODO verbose logging
+
+            // Coil spawns a new thread for every image load by default
+            fetcherDispatcher(Dispatchers.IO.limitedParallelism(8))
+            decoderDispatcher(Dispatchers.IO.limitedParallelism(2))
+            transformationDispatcher(Dispatchers.IO.limitedParallelism(2))
         }.build()
         Coil.setImageLoader(imageLoader)
     }
