@@ -9,9 +9,8 @@ import android.webkit.WebView
 import com.elvishew.xlog.XLog
 
 object WebViewUtil {
-    const val REQUESTED_WITH = "com.android.browser"
 
-    const val MINIMUM_WEBVIEW_VERSION = 98
+    const val MINIMUM_WEBVIEW_VERSION = 102
 
     fun supportsWebView(context: Context): Boolean {
         try {
@@ -40,6 +39,11 @@ fun WebView.setDefaultSettings() {
         useWideViewPort = true
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT
+
+        // Allow zooming
+        setSupportZoom(true)
+        builtInZoomControls = true
+        displayZoomControls = false
     }
 }
 
