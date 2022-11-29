@@ -71,7 +71,7 @@ class ChapterFilter(
         }
 
         if (preferences.skipDuplicates()) {
-            filteredChapters = filteredChapters.distinctBy { Pair(it.vol, it.chapter_txt) }
+            filteredChapters = filteredChapters.sortedBy { it.chapter_number }.distinctBy { Pair(it.vol, it.chapter_txt) }
         }
 
         // add the selected chapter to the list in case it was filtered out
