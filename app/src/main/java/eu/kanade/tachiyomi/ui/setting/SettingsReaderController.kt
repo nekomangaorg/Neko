@@ -153,11 +153,7 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.skip_duplicate_chapters
                 defaultValue = false
             }
-            switchPreference {
-                key = Keys.skipDuplicates
-                titleRes = R.string.skip_read_chapters
-                defaultValue = false
-            }
+
             switchPreference {
                 key = Keys.alwaysShowChapterTransition
                 titleRes = R.string.always_show_chapter_transition
