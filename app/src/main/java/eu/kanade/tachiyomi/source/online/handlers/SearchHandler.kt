@@ -127,8 +127,7 @@ class SearchHandler {
             queryParameters[MdConstants.SearchParameters.excludedTagModeParam] = filters.tagExclusionMode.mode.key
 
             if (filters.authorId.uuid.isNotBlank()) {
-                queryParameters[MdConstants.SearchParameters.authors] = filters.authorId.uuid
-                queryParameters[MdConstants.SearchParameters.artists] = filters.authorId.uuid
+                queryParameters[MdConstants.SearchParameters.authorOrArtist] = filters.authorId.uuid
             }
 
             if (filters.groupId.uuid.isNotBlank()) {
