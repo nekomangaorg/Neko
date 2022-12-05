@@ -64,8 +64,11 @@ class Komga : ReducedHttpSource() {
         }
     }
 
+    override val client: OkHttpClient
+        get() = super.client.newBuilder().dns(Dns.SYSTEM).build()
+
     private fun createClient(username: String, password: String): OkHttpClient {
-        return network.client.newBuilder()
+        return client.newBuilder()
             .authenticator { _, response ->
                 if (response.request.header("Authorization") != null) {
                     null // Give up, we've already failed to authenticate.
@@ -75,7 +78,6 @@ class Komga : ReducedHttpSource() {
                         .build()
                 }
             }
-            .dns(Dns.SYSTEM) // don't use DNS over HTTPS as it breaks IP addressing
             .build()
     }
 
