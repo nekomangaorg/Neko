@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
+import java.util.Calendar
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -156,13 +157,43 @@ class SearchHandler {
                 queryParameters["contentRating[]"] = contentRatings
             }
             val thumbQuality = preferencesHelper.thumbnailQuality()
-            service.getRecentlyAdded(ProxyRetrofitQueryMap(queryParameters))
+            service.recentlyAdded(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error getting recently added")
                 .andThen { mangaListDto ->
                     val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 
                     Ok(
                         MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()),
+                    )
+                }
+        }
+    }
+
+    suspend fun popularNewTitles(page: Int): Result<MangaListPage, ResultError> {
+        return withContext(Dispatchers.IO) {
+            val queryParameters = mutableMapOf<String, Any>()
+            queryParameters["limit"] = MdConstants.Limits.manga
+            val offset = MdUtil.getMangaListOffset(page)
+            queryParameters["offset"] = offset
+            val calendar = Calendar.getInstance()
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+            calendar.add(Calendar.MONTH, -1)
+            queryParameters["createdAtSince"] = MdUtil.apiDateFormat.format(calendar.time)
+            val contentRatings = preferencesHelper.contentRatingSelections().toList()
+            if (contentRatings.isNotEmpty()) {
+                queryParameters["contentRating[]"] = contentRatings
+            }
+            val thumbQuality = preferencesHelper.thumbnailQuality()
+            service.popularNewReleases(ProxyRetrofitQueryMap(queryParameters))
+                .getOrResultError("Error getting recently added")
+                .andThen { mangaListDto ->
+                    val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
+
+                    Ok(
+                        MangaListPage(
+                            hasNextPage = hasMoreResults,
+                            sourceManga = mangaListDto.data.mapIndexed { index, dto -> dto.toSourceManga(thumbQuality, displayText = "No. ${offset + index + 1}") }.toImmutableList(),
+                        ),
                     )
                 }
         }

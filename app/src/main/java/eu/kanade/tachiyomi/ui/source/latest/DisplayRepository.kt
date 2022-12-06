@@ -28,6 +28,7 @@ class DisplayRepository(
             is DisplayScreenType.LatestChapters -> getLatestChapterPage(page)
             is DisplayScreenType.List -> getListPage(displayScreenType.listUUID)
             is DisplayScreenType.RecentlyAdded -> getRecentlyAddedPage(page)
+            is DisplayScreenType.PopularNewTitles -> getPopularNewTitles(page)
         }
     }
 
@@ -68,6 +69,19 @@ class DisplayRepository(
 
     private suspend fun getRecentlyAddedPage(page: Int): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.recentlyAdded(page).mapBoth(
+            success = { listResults ->
+                val displayMangaList = listResults.sourceManga.map { sourceManga ->
+                    sourceManga.toDisplayManga(db, mangaDex.id)
+                }
+                Ok(listResults.hasNextPage to displayMangaList.toImmutableList())
+
+            },
+            failure = { Err(it) },
+        )
+    }
+
+    private suspend fun getPopularNewTitles(page: Int): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        return mangaDex.popularNewTitles(page).mapBoth(
             success = { listResults ->
                 val displayMangaList = listResults.sourceManga.map { sourceManga ->
                     sourceManga.toDisplayManga(db, mangaDex.id)

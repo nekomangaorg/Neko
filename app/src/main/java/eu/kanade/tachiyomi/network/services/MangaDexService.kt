@@ -47,7 +47,10 @@ interface MangaDexService {
     ): ApiResponse<GroupListDto>
 
     @GET("${MdApi.manga}?&order[createdAt]=desc&includes[]=${MdConstants.Types.coverArt}")
-    suspend fun getRecentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
+    suspend fun recentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
+
+    @GET("${MdApi.manga}?&order[followedCount]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
+    suspend fun popularNewReleases(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
     @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
     suspend fun viewManga(@Path("id") id: String): ApiResponse<MangaDto>

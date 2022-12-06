@@ -320,6 +320,7 @@
     <string name="label_global_search">Global search</string>
     <string name="latest">Latest uploads</string>
     <string name="recently_added">Recently added</string>
+    <string name="popularNewTitles">Popular new titles</string>
     <string name="browse">Browse</string>
     <string name="has_available_chapters">Has available chapters</string>
     <string name="tag_inclusion_mode">Tag inclusion mode</string>

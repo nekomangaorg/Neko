@@ -128,6 +128,13 @@ open class MangaDex : HttpSource() {
                 val seasonal = async {
                     fetchList(listId).bind()
                 }
+
+                val popularNewTitles = async {
+                    searchHandler.popularNewTitles(1).andThen { mangaListPage ->
+                        Ok(ListResults(displayScreenType = DisplayScreenType.PopularNewTitles(), sourceManga = mangaListPage.sourceManga))
+                    }.bind()
+                }
+
                 val latestChapter = async {
                     latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs, limit = MdConstants.Limits.latestSmaller)
                         .andThen { mangaListPage ->
@@ -141,13 +148,17 @@ open class MangaDex : HttpSource() {
                     }.bind()
                 }
 
-                listOf(seasonal.await(), latestChapter.await(), recentlyAdded.await())
+                listOf(popularNewTitles.await(), latestChapter.await(), seasonal.await(), recentlyAdded.await())
             }
         }
     }
 
     suspend fun recentlyAdded(page: Int): Result<MangaListPage, ResultError> {
         return searchHandler.recentlyAdded(page)
+    }
+
+    suspend fun popularNewTitles(page: Int): Result<MangaListPage, ResultError> {
+        return searchHandler.popularNewTitles(page)
     }
 
     suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {

@@ -82,6 +82,9 @@ class MdUtil {
             return Parser.unescapeEntities(cleanedString, false)
         }
 
+        val apiDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+            .apply { timeZone = TimeZone.getTimeZone("UTC") }
+
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
             .apply { timeZone = TimeZone.getTimeZone("UTC") }
 

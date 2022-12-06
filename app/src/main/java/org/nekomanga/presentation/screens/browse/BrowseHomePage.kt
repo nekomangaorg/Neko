@@ -63,6 +63,7 @@ fun BrowseHomePage(
                 is DisplayScreenType.LatestChapters -> stringResource(homePageManga.displayScreenType.titleRes)
                 is DisplayScreenType.RecentlyAdded -> stringResource(homePageManga.displayScreenType.titleRes)
                 is DisplayScreenType.List -> homePageManga.displayScreenType.title
+                is DisplayScreenType.PopularNewTitles -> stringResource(id = homePageManga.displayScreenType.titleRes)
             }
             TextButton(
                 onClick = { titleClick(homePageManga.displayScreenType) },
