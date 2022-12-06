@@ -409,10 +409,8 @@ class LibraryUpdateService(
                     withIOContext {
                         mergeMangaList.map { mergeManga ->
                             //in the future check the merge type
-                            when (mergeManga.mergeType) {
-                                MergeType.MangaLife -> sourceManager.mangaLife
-                                MergeType.Komga -> sourceManager.komga
-                            }.fetchChapters(mergeManga.url)
+                            MergeType.getSource(mergeManga.mergeType, sourceManager)
+                                .fetchChapters(mergeManga.url)
                                 .onFailure {
                                     errorFromMerged = true
                                     failedUpdates[manga] = "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"

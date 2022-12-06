@@ -143,10 +143,8 @@ class MangaUpdateCoordinator {
                 mergedMangaList.map { mergeManga ->
                     async {
                         //in the future check the merge type
-                        when (mergeManga.mergeType) {
-                            MergeType.MangaLife -> sourceManager.mangaLife
-                            MergeType.Komga -> sourceManager.komga
-                        }.fetchChapters(mergeManga.url)
+                        MergeType.getSource(mergeManga.mergeType, sourceManager)
+                            .fetchChapters(mergeManga.url)
                             .onFailure {
                                 send(MangaResult.Error(text = "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: ${it.message()}"))
                                 this.cancel()

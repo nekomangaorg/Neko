@@ -6,8 +6,6 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
@@ -40,11 +38,7 @@ data class SimpleChapter(
     fun isMergedChapter() = this.scanlator.containsMergeSourceName()
 
     fun isMergedChapterOfType(mergeType: MergeType) =
-        when {
-            this.scanlator == MangaLife.name && mergeType == MergeType.MangaLife -> true
-            this.scanlator == Komga.name && mergeType == MergeType.Komga -> true
-            else -> false
-        }
+        MergeType.getMergeTypeName(mergeType) == this.scanlator
 
     fun scanlatorList(): List<String> {
         return ChapterUtil.getScanlators(this.scanlator)

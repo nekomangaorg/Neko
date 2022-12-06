@@ -15,8 +15,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.core.text.parseAsHtml
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import java.util.Locale
 import kotlin.math.floor
@@ -217,8 +216,5 @@ fun String.htmlDecode(): String {
 
 fun String.toResultError() = ResultError.Generic(errorString = this)
 
-fun String.containsMergeSourceName() = when {
-    this.contains(MangaLife.name) -> true
-    this.contains(Komga.name) -> true
-    else -> false
-}
+fun String.containsMergeSourceName() =
+    MergeType.values().any { this.contains(MergeType.getMergeTypeName(it)) }

@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -59,6 +60,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableSet
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -138,8 +140,8 @@ class MangaDetailPresenter(
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
             val validMergeTypes = when (sourceManager.komga.hasCredentials()) {
-                true -> persistentListOf(MergeType.MangaLife, MergeType.Komga)
-                false -> persistentListOf(MergeType.MangaLife)
+                true -> MergeType.values().toList().toPersistentList()
+                false -> MergeType.values().toList().filterNot { it == MergeType.Komga }.toPersistentList()
             }
             _generalState.value = MangaConstants.MangaScreenGeneralState(
                 hasDefaultCategory = preferences.defaultCategory() != -1,
@@ -599,10 +601,10 @@ class MangaDetailPresenter(
             }
 
             runCatching {
-                val mergedMangaResults = when (mergeType) {
-                    MergeType.MangaLife -> sourceManager.mangaLife
-                    else -> sourceManager.komga
-                }.searchManga(query)
+
+                MergeType.getSource(mergeType, sourceManager)
+                val mergedMangaResults = MergeType.getSource(mergeType, sourceManager)
+                    .searchManga(query)
                     .map { SourceMergeManga(coverUrl = it.thumbnail_url ?: "", title = it.title, url = it.url, mergeType = mergeType) }
 
                 _trackMergeState.update {
@@ -1225,9 +1227,9 @@ class MangaDetailPresenter(
         return when (mergeMangaList.isNotEmpty()) {
             true -> {
                 val mergeManga = mergeMangaList.first()
-                val baseUrl = when (mergeManga.mergeType) {
-                    MergeType.Komga -> sourceManager.komga.hostUrl()
-                    MergeType.MangaLife -> sourceManager.mangaLife.baseUrl
+                val baseUrl = when (val source = MergeType.getSource(mergeManga.mergeType, sourceManager)) {
+                    is Komga -> source.hostUrl()
+                    else -> source.baseUrl
                 }
                 Yes(
                     url = baseUrl + mergeManga.url,

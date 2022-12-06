@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
+import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.security.MessageDigest
 
@@ -16,6 +17,8 @@ open class SourceManager {
     val mangaLife: MangaLife by lazy { MangaLife() }
 
     val komga: Komga by lazy { Komga() }
+
+    val toonily: Toonily by lazy { Toonily() }
 
     open fun get(sourceKey: Long): Source? {
         return mangaDex
