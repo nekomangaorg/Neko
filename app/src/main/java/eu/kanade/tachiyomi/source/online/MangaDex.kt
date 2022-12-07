@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -126,12 +127,15 @@ open class MangaDex : HttpSource() {
         return withIOContext {
             binding {
                 val seasonal = async {
-                    fetchList(listId).bind()
+                    fetchList(listId).andThen { listResults ->
+                        Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
+                    }
+                        .bind()
                 }
 
                 val popularNewTitles = async {
                     searchHandler.popularNewTitles(1).andThen { mangaListPage ->
-                        Ok(ListResults(displayScreenType = DisplayScreenType.PopularNewTitles(), sourceManga = mangaListPage.sourceManga))
+                        Ok(ListResults(displayScreenType = DisplayScreenType.PopularNewTitles(), sourceManga = mangaListPage.sourceManga.shuffled().toImmutableList()))
                     }.bind()
                 }
 
@@ -144,6 +148,7 @@ open class MangaDex : HttpSource() {
 
                 val recentlyAdded = async {
                     searchHandler.recentlyAdded(1).andThen { mangaListPage ->
+
                         Ok(ListResults(displayScreenType = DisplayScreenType.RecentlyAdded(), sourceManga = mangaListPage.sourceManga))
                     }.bind()
                 }

@@ -10,7 +10,6 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -167,7 +166,6 @@ class SearchActivity : MainActivity() {
                             host.contains("mangaupdates", true) -> {
                                 val base = BigInteger(id, 36)
                                 val muID = base.toString(10)
-                                XLog.e("ESCO $muID")
                                 val dexId = mappings.getMangadexID(muID, "mu_new")
                                 when (dexId == null) {
                                     true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for MangaUpdates ID"
