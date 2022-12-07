@@ -10,6 +10,7 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -24,13 +25,18 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import java.math.BigInteger
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class SearchActivity : MainActivity() {
 
     var backToMain = false
+
+    private val mappings: MangaMappings by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,8 +139,9 @@ class SearchActivity : MainActivity() {
                 }
             }
             INTENT_SEARCH -> {
+                val host = intent.data?.host
                 val pathSegments = intent.data?.pathSegments
-                if (pathSegments != null && pathSegments.size > 1) {
+                if (host != null && pathSegments != null && pathSegments.size > 1) {
                     val path = pathSegments[0]
                     val id = pathSegments[1]
                     if (id != null && id.isNotEmpty()) {
@@ -143,6 +150,30 @@ class SearchActivity : MainActivity() {
                         }
 
                         val query = when {
+                            host.contains("anilist", true) -> {
+                                val dexId = mappings.getMangadexID(id, "al")
+                                when (dexId == null) {
+                                    true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for AniList ID"
+                                    false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                }
+                            }
+                            host.contains("myanimelist", true) -> {
+                                val dexId = mappings.getMangadexID(id, "mal")
+                                when (dexId == null) {
+                                    true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for MyAnimeList ID"
+                                    false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                }
+                            }
+                            host.contains("mangaupdates", true) -> {
+                                val base = BigInteger(id, 36)
+                                val muID = base.toString(10)
+                                XLog.e("ESCO $muID")
+                                val dexId = mappings.getMangadexID(muID, "mu_new")
+                                when (dexId == null) {
+                                    true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for MangaUpdates ID"
+                                    false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                }
+                            }
                             path.equals("GROUP", true) -> {
                                 MdConstants.DeepLinkPrefix.group + id
                             }

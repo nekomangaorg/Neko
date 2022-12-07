@@ -68,6 +68,7 @@ object MdConstants {
         const val group = "group:"
         const val list = "list:"
         const val manga = "manga:"
+        const val error = "error:"
     }
 
     object SearchParameters {

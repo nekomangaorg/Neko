@@ -122,6 +122,7 @@ class BrowseRepository(
 enum class DeepLinkType {
     Author,
     Group,
+    Error,
     Manga,
     List,
     None;
@@ -132,6 +133,7 @@ enum class DeepLinkType {
                 query.startsWith(MdConstants.DeepLinkPrefix.author) -> Author
                 query.startsWith(MdConstants.DeepLinkPrefix.group) -> Group
                 query.startsWith(MdConstants.DeepLinkPrefix.manga) -> Manga
+                query.startsWith(MdConstants.DeepLinkPrefix.error) -> Error
                 query.startsWith(MdConstants.DeepLinkPrefix.list) -> List
                 else -> None
             }
@@ -143,6 +145,7 @@ enum class DeepLinkType {
                 Group -> query.removePrefix(MdConstants.DeepLinkPrefix.group)
                 Manga -> query.removePrefix(MdConstants.DeepLinkPrefix.manga)
                 List -> query.removePrefix(MdConstants.DeepLinkPrefix.list)
+                Error -> query.removePrefix(MdConstants.DeepLinkPrefix.error)
                 None -> query
             }
         }

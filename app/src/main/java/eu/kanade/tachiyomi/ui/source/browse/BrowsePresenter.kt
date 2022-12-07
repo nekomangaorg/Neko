@@ -324,6 +324,12 @@ class BrowsePresenter(
                         }
                     }
                 }
+                DeepLinkType.Error -> {
+                    _browseScreenState.update {
+                        it.copy(isDeepLink = true, title = UiText.String(""), initialLoading = false, error = UiText.String(uuid))
+                    }
+                }
+
                 DeepLinkType.Manga -> {
                     _browseScreenState.update {
                         it.copy(isDeepLink = true, title = UiText.String(""))
