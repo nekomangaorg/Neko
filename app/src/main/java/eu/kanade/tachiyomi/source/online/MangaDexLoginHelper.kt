@@ -7,11 +7,15 @@ import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.services.MangaDexAuthService
+import eu.kanade.tachiyomi.network.POST
+import eu.kanade.tachiyomi.network.await
+import eu.kanade.tachiyomi.network.parseAs
+import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.online.models.dto.ErrorResponse
 import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
-import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
+import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.throws
 import java.util.concurrent.TimeUnit
@@ -19,12 +23,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okhttp3.FormBody
 import uy.kohesive.injekt.injectLazy
 
 class MangaDexLoginHelper {
 
     val networkHelper: NetworkHelper by injectLazy()
-    val authService: MangaDexAuthService by lazy { networkHelper.authService }
+    val authService: MangaDexAuthorizedUserService by lazy { networkHelper.authService }
     val service: MangaDexService by lazy { networkHelper.service }
     val preferences: PreferencesHelper by injectLazy()
     private val json: Json by injectLazy()
@@ -35,11 +40,12 @@ class MangaDexLoginHelper {
         val lastRefreshTime = preferences.lastRefreshTime()
         log.i("last refresh time $lastRefreshTime")
         log.i("current time ${System.currentTimeMillis()}")
-        if ((lastRefreshTime + TimeUnit.MINUTES.toMillis(15)) > System.currentTimeMillis()) {
+        if ((lastRefreshTime + TimeUnit.SECONDS.toMillis(10)) > System.currentTimeMillis()) {
             log.i("Token was refreshed recently dont hit dex to check")
             return true
         }
         log.i("token was not refreshed recently hit dex auth check")
+
         authService.checkToken()
         val checkTokenResponse = authService.checkToken()
             .onFailure {
@@ -60,21 +66,21 @@ class MangaDexLoginHelper {
         }
         log.i("refreshing token")
 
-        val refreshTokenResponse = service.refreshToken(RefreshTokenDto(refreshToken))
-            .onFailure {
-                this.log("trying to refresh token")
-            }
-        val refreshTokenDto = refreshTokenResponse.getOrNull()
-        val result = refreshTokenDto?.result == "ok"
-        if (result) {
-            preferences.setTokens(
-                refreshTokenDto!!.token.refresh,
-                refreshTokenDto.token.session,
-            )
-        } else {
-            log.e("error refreshing token")
-        }
-        return result
+        val formBody = FormBody.Builder()
+            .add("client_id", MdConstants.Login.clientId)
+            .add("grant_type", "refresh_token")
+            .add("refresh_token", refreshToken)
+            .add("code_verifier", preferences.codeVerifer())
+            .add("redirect_uri", MdConstants.Login.redirectUri)
+            .build()
+
+        val response = networkHelper.client.newCall(POST(MdConstants.Login.tokenUrl, body = formBody)).await().parseAs<LoginResponseDto>()
+
+        preferences.setTokens(
+            response.refresh_token,
+            response.access_token,
+        )
+        return true
     }
 
     suspend fun login(
@@ -109,20 +115,25 @@ class MangaDexLoginHelper {
         }
     }
 
-    suspend fun login(): Boolean {
-        val source = MangaDex()
-        val username = preferences.sourceUsername(source)
-        val password = preferences.sourcePassword(source)
-        if (username.isNullOrBlank() || password.isNullOrBlank()) {
-            XLog.e("No username or password stored, can't login")
-            return false
-        }
-        return login(username, password)
-    }
-
     suspend fun reAuthIfNeeded() {
         if (!isAuthenticated() && !refreshToken()) {
             login()
         }
+    }
+
+    suspend fun login(authorizationCode: String) {
+        val formBody = FormBody.Builder()
+            .add("client_id", MdConstants.Login.clientId)
+            .add("grant_type", "authorization_code")
+            .add("code", authorizationCode)
+            .add("code_verifier", preferences.codeVerifer())
+            .add("redirect_uri", MdConstants.Login.redirectUri)
+            .build()
+
+        val response = networkHelper.client.newCall(POST(MdConstants.Login.tokenUrl, body = formBody)).await().parseAs<LoginResponseDto>()
+        preferences.setTokens(
+            response.refresh_token,
+            response.access_token,
+        )
     }
 }

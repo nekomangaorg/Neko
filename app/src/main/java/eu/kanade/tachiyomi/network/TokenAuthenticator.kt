@@ -36,13 +36,13 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
                     log.i("Token is valid, other thread must have refreshed it")
                     validated = true
                 }
-                if (validated.not()) {
+                if (!validated) {
                     log.i("Token is invalid trying to refresh")
                     validated =
                         loginHelper.refreshToken()
                 }
 
-                if (validated.not()) {
+                if (!validated) {
                     log.i("Did not refresh token, trying to login")
                     validated = loginHelper.login()
                 }

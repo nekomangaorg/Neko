@@ -214,9 +214,7 @@ open class MangaDex : HttpSource() {
     }
 
     override fun isLogged(): Boolean {
-        return !preferences.sourceUsername(this).isNullOrBlank() &&
-            !preferences.sourcePassword(this).isNullOrBlank() &&
-            !preferences.sessionToken().isNullOrBlank() &&
+        return !preferences.sessionToken().isNullOrBlank() &&
             !preferences.refreshToken().isNullOrBlank()
     }
 
@@ -224,7 +222,6 @@ open class MangaDex : HttpSource() {
         username: String,
         password: String,
     ): Boolean {
-        return loginHelper.login(username, password)
     }
 
     suspend fun checkIfUp(): Boolean {

@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.services.MangaDexAuthService
+import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
@@ -41,7 +41,7 @@ class FollowsHandler {
 
     val preferences: PreferencesHelper by injectLazy()
     val statusHandler: StatusHandler by injectLazy()
-    private val authService: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }
+    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkHelper>().authService }
 
     /**
      * fetch all follows

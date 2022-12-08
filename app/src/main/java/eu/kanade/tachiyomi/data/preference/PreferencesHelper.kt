@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import com.fredporciuncula.flow.preferences.FlowSharedPreferences
@@ -28,6 +29,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
 import java.io.File
+import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -574,6 +576,7 @@ class PreferencesHelper(val context: Context) {
             .putString(Keys.sessionToken, session)
             .putString(Keys.refreshToken, refresh)
             .putLong(Keys.lastRefreshTokenTime, time)
+            .putLong(Keys.refreshTokenCreatedTime, time)
             .apply()
     }
 
@@ -581,8 +584,29 @@ class PreferencesHelper(val context: Context) {
         return prefs.getLong(Keys.lastRefreshTokenTime, 0)
     }
 
+    fun refreshTokenCreatedTime(): Long {
+        return prefs.getLong(Keys.refreshTokenCreatedTime, 0)
+    }
+
     fun readingSync(): Boolean = prefs.getBoolean(Keys.readingSync, false)
 
     fun mangadexSyncToLibraryIndexes() =
         flowPrefs.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
+
+    fun codeVerifer(): String {
+        val codeVerifier = prefs.getString("code_verifier", null)
+        return when (codeVerifier == null) {
+            false -> codeVerifier
+            true -> {
+                val secureRandom = SecureRandom()
+                val bytes = ByteArray(64)
+                secureRandom.nextBytes(bytes)
+                val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                val newCodeVerifier = Base64.encodeToString(bytes, encoding)
+                prefs.edit().putString("code_verifier", newCodeVerifier).apply()
+                newCodeVerifier
+            }
+
+        }
+    }
 }

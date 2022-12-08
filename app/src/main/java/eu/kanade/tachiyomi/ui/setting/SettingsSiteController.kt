@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
@@ -43,7 +44,10 @@ class SettingsSiteController :
 
             key = getSourceKey(source.id)
             setOnLoginClickListener {
-                if (mdex.isLogged()) {
+                //activity?.openInBrowser(MdConstants.Login.logoutUrl)
+                activity?.openInBrowser(MdConstants.Login.authUrl(preferences.codeVerifer()))
+
+                /*if (mdex.isLogged()) {
                     val dialog = MangadexLogoutDialog(source)
                     dialog.targetController = this@SettingsSiteController
                     dialog.showDialog(router)
@@ -51,7 +55,7 @@ class SettingsSiteController :
                     val dialog = MangadexLoginDialog(source)
                     dialog.targetController = this@SettingsSiteController
                     dialog.showDialog(router)
-                }
+                }*/
             }
             this.isIconSpaceReserved = false
         }
