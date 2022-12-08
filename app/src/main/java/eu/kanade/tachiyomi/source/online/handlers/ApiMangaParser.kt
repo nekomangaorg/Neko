@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -22,8 +21,10 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlin.math.floor
+import logcat.LogPriority
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
 
@@ -113,7 +114,7 @@ class ApiMangaParser {
 
             return Ok(manga)
         } catch (e: Exception) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             return Err("Unexpected Manga parsing error".toResultError())
         }
     }
@@ -227,7 +228,7 @@ class ApiMangaParser {
 
             return manga
         } catch (e: Exception) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             throw e
         }
     }
@@ -254,7 +255,7 @@ class ApiMangaParser {
             )
         }.getOrElse {
             val msg = "Exception parsing chapters"
-            XLog.e(msg, it)
+            loggycat(LogPriority.ERROR, it) { msg }
             Err(msg.toResultError())
         }
     }

@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
-import com.elvishew.xlog.XLog
+import logcat.LogPriority
 
 object WebViewUtil {
 
@@ -18,7 +18,7 @@ object WebViewUtil {
             // is not installed
             CookieManager.getInstance()
         } catch (e: Throwable) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             return false
         }
 

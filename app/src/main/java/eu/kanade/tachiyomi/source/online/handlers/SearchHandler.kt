@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import androidx.compose.ui.state.ToggleableState
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
@@ -19,11 +18,13 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.util.Calendar
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import org.nekomanga.domain.SourceResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.network.ResultError
@@ -138,9 +139,9 @@ class SearchHandler {
             service.search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Trying to search")
                 .andThen { response ->
-                    XLog.disableStackTrace().d("Page: $page")
+                    loggycat { "Page: $page" }
                     response.data.forEach {
-                        XLog.disableStackTrace().d("#mangaid: ${it.id}")
+                        loggycat { "#mangaid: ${it.id}" }
                     }
                     searchMangaParse(response)
                 }
@@ -206,7 +207,7 @@ class SearchHandler {
             val mangaList = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()
             MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)
         }.mapError {
-            XLog.e("error parsing search manga", it)
+            loggycat(LogPriority.ERROR, it) { "Error parsing search manga" }
             "error parsing search manga".toResultError()
         }
     }

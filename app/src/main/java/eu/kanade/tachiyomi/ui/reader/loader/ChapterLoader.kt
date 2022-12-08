@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.util.system.loggycat
 import rx.Completable
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -34,7 +34,7 @@ class ChapterLoader(
             .doOnNext { chapter.state = ReaderChapter.State.Loading }
             .observeOn(Schedulers.io())
             .flatMap { readerChapter ->
-                XLog.d("Loading pages for ${chapter.chapter.name}")
+                loggycat { "Loading pages for ${chapter.chapter.name}" }
 
                 val loader = getPageLoader(readerChapter)
                 chapter.pageLoader = loader

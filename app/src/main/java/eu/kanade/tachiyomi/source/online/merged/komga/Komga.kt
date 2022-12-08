@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.merged.komga
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -11,6 +10,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.util.lang.toResultError
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import logcat.LogPriority
 import okhttp3.Credentials
 import okhttp3.Dns
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -132,12 +133,11 @@ class Komga : ReducedHttpSource() {
                         url = "/api/v1/books/${book.id}"
                         scanlator = this@Komga.name
                         date_upload = book.metadata.releaseDate?.toDate() ?: book.fileLastModified.toDateTime()
-
                     }
                 }
                 return@runCatching r.sortedByDescending { it.chapter_number }
             }.mapError {
-                XLog.e(it)
+                loggycat(LogPriority.ERROR, it)
                 (it.localizedMessage ?: "Komga Error").toResultError()
             }
         }
@@ -191,5 +191,3 @@ class Komga : ReducedHttpSource() {
         private val supportedImageTypes = listOf("image/jpeg", "image/png", "image/gif", "image/webp")
     }
 }
-
-

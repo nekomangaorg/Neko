@@ -33,9 +33,7 @@ fun BrowseBottomSheet(
     filterActions: FilterActions,
     closeSheet: () -> Unit,
 ) {
-
     val keyboardController = LocalSoftwareKeyboardController.current
-
 
     when (currentScreen) {
         is BrowseBottomSheetScreen.CategoriesSheet -> EditCategorySheet(

@@ -1,15 +1,16 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import logcat.LogPriority
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
@@ -116,7 +117,7 @@ class TrackingCoordinator {
                     runCatching {
                         service.removeFromService(it)
                     }.onFailure {
-                        XLog.e("Unable to remove from service", it)
+                        loggycat(LogPriority.ERROR, it) { "Unable to remove from service" }
                     }
                 }
             }
@@ -150,7 +151,7 @@ class TrackingCoordinator {
             },
         )
     }.catch {
-        XLog.e("error searching tracker", it)
+        loggycat(LogPriority.ERROR, it) { "error searching tracker" }
         emit(TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker", service.nameRes))
     }
 
@@ -165,7 +166,7 @@ class TrackingCoordinator {
                 false -> TrackingConstants.TrackSearchResult.Success(results.map { it.toTrackSearchItem() }.toImmutableList())
             }
         }.getOrElse {
-            XLog.e("error searching tracker", it)
+            loggycat(LogPriority.ERROR, it) { "error searching tracker" }
             TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker", service.nameRes)
         }
     }

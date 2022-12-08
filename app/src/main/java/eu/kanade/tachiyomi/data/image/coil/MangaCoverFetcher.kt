@@ -11,7 +11,6 @@ import coil.fetch.SourceResult
 import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
@@ -19,6 +18,7 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import java.util.Date
@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
@@ -149,7 +150,7 @@ class MangaCoverFetcher(
         } catch (e: Exception) {
             snapshot?.close()
             if (e !is CancellationException) {
-                XLog.e("error loading image", e)
+                loggycat(LogPriority.ERROR, e) { "error loading image" }
             }
             throw e
         }
@@ -197,7 +198,7 @@ class MangaCoverFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            XLog.e("Failed to write snapshot data to cover cache ${cacheFile.name}", e)
+            loggycat(LogPriority.ERROR, e) { "Failed to write snapshot data to cover cache ${cacheFile.name}" }
             null
         }
     }
@@ -210,7 +211,7 @@ class MangaCoverFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            XLog.e("Failed to write response data to cover cache ${cacheFile.name}", e)
+            loggycat(LogPriority.ERROR, e) { "Failed to write response data to cover cache ${cacheFile.name}" }
             null
         }
     }

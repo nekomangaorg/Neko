@@ -7,14 +7,15 @@ import android.net.Uri
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.content.ContextCompat
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 
 /**
  * Restores backup.
@@ -77,7 +78,7 @@ class BackupRestoreService : Service() {
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
         val handler = CoroutineExceptionHandler { _, exception ->
-            XLog.e(exception)
+            loggycat(LogPriority.ERROR, exception)
             restoreHelper.showErrorNotification(exception.message!!)
             stopSelf(startId)
         }

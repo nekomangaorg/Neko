@@ -198,7 +198,7 @@ dependencies {
     implementation(libs.bundles.coil)
 
     // Logging
-    implementation("com.elvishew:xlog:1.11.0")
+    implementation(libs.logcat)
 
     // UI
     implementation(libs.bundles.fastadapter)
@@ -271,7 +271,7 @@ tasks {
     }
 
     preBuild {
-        //dependsOn(formatKotlin)
+        dependsOn(formatKotlin)
     }
 }
 

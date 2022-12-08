@@ -1,12 +1,10 @@
 package eu.kanade.tachiyomi.ui.reader
 
-import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import android.app.Application
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
 import androidx.annotation.ColorInt
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.onSuccess
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
@@ -49,6 +47,7 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.io.File
 import java.util.Date
@@ -58,6 +57,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
+import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import rx.Completable
 import rx.Observable
@@ -361,8 +362,8 @@ class ReaderPresenter(
             db.insertManga(tempManga).executeAsBlocking()
             val manga = db.getMangadexManga(tempManga.url).executeAsBlocking()!!
 
-            XLog.d("tempManga id ${tempManga.id}")
-            XLog.d("Manga id ${manga.id}")
+            loggycat { "tempManga id ${tempManga.id}" }
+            loggycat { "Manga id ${manga.id}" }
 
             if (chapters.isNotEmpty()) {
                 val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
@@ -385,7 +386,7 @@ class ReaderPresenter(
     private fun loadNewChapter(chapter: ReaderChapter) {
         val loader = loader ?: return
 
-        XLog.d("loadNewChapter Loading %s - %s", chapter.chapter.url, chapter.chapter.name)
+        loggycat { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
 
         activeChapterSubscription?.unsubscribe()
         activeChapterSubscription = getLoadObservable(loader, chapter)
@@ -400,7 +401,7 @@ class ReaderPresenter(
 
         viewerChaptersRelay.value?.currChapter?.let(::saveReadingProgress)
 
-        XLog.d("Loading ${chapter.url}")
+        loggycat { "Loading ${chapter.url}" }
 
         activeChapterSubscription?.unsubscribe()
         val lastPage = if (chapter.pages_left <= 1) 0 else chapter.last_page_read
@@ -442,7 +443,7 @@ class ReaderPresenter(
             return
         }
 
-        XLog.d("Preloading %s - %s", chapter.chapter.url, chapter.chapter.name)
+        loggycat { "Preloading ${chapter.chapter.url} - ${chapter.chapter.name}" }
 
         val loader = loader ?: return
 
@@ -507,7 +508,7 @@ class ReaderPresenter(
         }
 
         if (selectedChapter != currentChapters.currChapter) {
-            XLog.d("Setting ${selectedChapter.chapter.url} as active")
+            loggycat { "Setting ${selectedChapter.chapter.url} as active" }
             saveReadingProgress(currentChapters.currChapter)
             setReadStartTime()
             loadNewChapter(selectedChapter)
@@ -719,7 +720,7 @@ class ReaderPresenter(
         manga.orientationType = rotationType
         db.updateViewerFlags(manga).executeAsBlocking()
 
-        XLog.i("Manga orientation is ${manga.orientationType}")
+        loggycat(LogPriority.INFO) { "Manga orientation is ${manga.orientationType}" }
 
         Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
             .subscribeFirst(

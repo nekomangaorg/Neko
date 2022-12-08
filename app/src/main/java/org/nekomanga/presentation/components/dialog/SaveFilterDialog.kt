@@ -66,7 +66,7 @@ fun SaveFilterDialog(themeColorState: ThemeColorState, currentSavedFilters: List
                             focusedLabelColor = themeColorState.buttonColor,
                             focusedBorderColor = themeColorState.buttonColor,
 
-                            ),
+                        ),
                     )
                     Gap(2.dp)
                     Text(text = errorMessage, style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.error))

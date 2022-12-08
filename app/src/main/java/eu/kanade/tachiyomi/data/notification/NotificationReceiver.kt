@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.notification
 
-import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ClipData
@@ -10,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import androidx.work.WorkManager
+import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -272,7 +272,7 @@ class NotificationReceiver : BroadcastReceiver() {
         if (preferences.removeAfterMarkedAsRead()) {
             val manga = db.getManga(mangaId).executeAsBlocking() ?: return
             val source = sourceManager.get(manga.source) ?: return
-            downloadManager.deleteChapters(dbChapters, manga, source)
+            downloadManager.deleteChapters(dbChapters, manga)
         }
 
         if (preferences.readingSync()) {

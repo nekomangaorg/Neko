@@ -61,7 +61,6 @@ abstract class LoginDialogPreference(
                 binding.urlHolder.isVisible = true
             }
 
-
             setCredentialsOnView(this)
         }
     }

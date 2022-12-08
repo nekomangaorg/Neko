@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
@@ -110,7 +110,7 @@ fun SimilarScreen(
             },
         ) { incomingPaddingValues ->
             SwipeRefresh(
-                state = rememberSwipeRefreshState(similarScreenState.value.isRefreshing),
+                state = rememberPullRefreshState(similarScreenState.value.isRefreshing, onRefresh =),
                 onRefresh = onRefresh,
                 modifier = Modifier.fillMaxSize(),
                 indicator = { state, trigger ->
@@ -121,7 +121,7 @@ fun SimilarScreen(
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
 
-                        )
+                    )
                 },
             ) {
                 val haptic = LocalHapticFeedback.current

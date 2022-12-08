@@ -88,6 +88,5 @@ enum class QueryType {
     Title,
     Author,
     Group,
-    List
+    List,
 }
-

@@ -138,7 +138,8 @@ object MangaConstants {
     enum class SortState(val key: String) {
         Ascending(MdConstants.Sort.ascending),
         Descending(MdConstants.Sort.descending),
-        None("");
+        None(""),
+        ;
     }
 
     enum class SetGlobal {

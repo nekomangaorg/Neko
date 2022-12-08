@@ -100,7 +100,6 @@ fun MangaGrid(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-
         itemsIndexed(mangaList, key = { _, display -> display.hashCode() }) { index, displayManga ->
 
             LaunchedEffect(scrollState) {
@@ -185,7 +184,7 @@ fun ColumnScope.ComfortableGridItem(
         title = manga.title,
         hasSubtitle = subtitleText.isNotBlank(),
 
-        )
+    )
 
     MangaGridSubtitle(subtitleText = subtitleText)
 }
@@ -259,7 +258,6 @@ fun MangaGridTitle(
 
 @Composable
 fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
-
     if (subtitleText.isNotBlank()) {
         Text(
             text = subtitleText,

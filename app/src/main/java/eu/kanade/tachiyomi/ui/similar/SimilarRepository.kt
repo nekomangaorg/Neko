@@ -1,17 +1,18 @@
 package eu.kanade.tachiyomi.ui.similar
 
 import androidx.annotation.StringRes
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.system.logTimeTaken
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
 import uy.kohesive.injekt.Injekt
@@ -43,7 +44,7 @@ class SimilarRepository {
                             similarHandler.fetchRelated(dexId, actualRefresh),
                         )
                     }
-                }.onFailure { XLog.e("Failed to get related", it) }
+                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get related" } }
                     .getOrNull()
             }
 
@@ -55,7 +56,7 @@ class SimilarRepository {
                             similarHandler.fetchSimilar(dexId, actualRefresh),
                         )
                     }
-                }.onFailure { XLog.e("Failed to get similar", it) }
+                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get similar" } }
                     .getOrNull()
             }
 
@@ -70,7 +71,7 @@ class SimilarRepository {
                             ),
                         )
                     }
-                }.onFailure { XLog.e("Failed to get MU recs", it) }
+                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get MU recs" } }
                     .getOrNull()
             }
 
@@ -85,7 +86,7 @@ class SimilarRepository {
                             ),
                         )
                     }
-                }.onFailure { XLog.e("Failed to get anilist recs", it) }
+                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get anilist recs" } }
                     .getOrNull()
             }
 
@@ -100,7 +101,7 @@ class SimilarRepository {
                             ),
                         )
                     }
-                }.onFailure { XLog.e("Failed to get mal recs", it) }
+                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get mal recs" } }
                     .getOrNull()
             }
 

@@ -9,15 +9,16 @@ import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.lang.chop
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.coroutineScope
+import logcat.LogPriority
 import uy.kohesive.injekt.injectLazy
 
 class V5MigrationJob(private val context: Context, workerParams: WorkerParameters) :
@@ -57,7 +58,7 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
             )
             return@coroutineScope Result.success()
         } catch (e: Exception) {
-            XLog.e("error with v5 migration follows", e)
+            loggycat(LogPriority.ERROR, e) { "error with v5 migration follows" }
             return@coroutineScope Result.failure()
         }
     }

@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
@@ -16,8 +15,10 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.Job
+import logcat.LogPriority
 import okio.buffer
 import okio.gzip
 import okio.source
@@ -151,7 +152,7 @@ class BackupRestorer(val context: Context, val job: Job?) {
             val dbManga = backupManager.getMangaFromDatabase(manga)
             val dbMangaExists = dbManga != null
 
-            //needed for legacy merge manga
+            // needed for legacy merge manga
             val mergeMangaList =
                 if (manga.merge_manga_url != null) {
                     listOf(
@@ -183,7 +184,7 @@ class BackupRestorer(val context: Context, val job: Job?) {
             backupManager.restoreHistoryForManga(history)
             backupManager.restoreTrackForManga(manga, tracks)
         } catch (e: Exception) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             errors.add("$title - ${e.message}")
         }
     }

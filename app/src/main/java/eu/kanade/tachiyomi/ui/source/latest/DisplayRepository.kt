@@ -61,7 +61,6 @@ class DisplayRepository(
                     sourceManga.toDisplayManga(db, mangaDex.id)
                 }
                 Ok(false to displayMangaList.toImmutableList())
-
             },
             failure = { Err(it) },
         )
@@ -74,7 +73,6 @@ class DisplayRepository(
                     sourceManga.toDisplayManga(db, mangaDex.id)
                 }
                 Ok(listResults.hasNextPage to displayMangaList.toImmutableList())
-
             },
             failure = { Err(it) },
         )
@@ -87,10 +85,8 @@ class DisplayRepository(
                     sourceManga.toDisplayManga(db, mangaDex.id)
                 }
                 Ok(listResults.hasNextPage to displayMangaList.toImmutableList())
-
             },
             failure = { Err(it) },
         )
     }
 }
-

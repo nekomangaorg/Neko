@@ -11,11 +11,12 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.coroutineScope
+import logcat.LogPriority
 
 class AppUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -25,7 +26,7 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
             AppUpdateChecker().checkForUpdate(context)
             Result.success()
         } catch (e: Exception) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             Result.failure()
         }
     }

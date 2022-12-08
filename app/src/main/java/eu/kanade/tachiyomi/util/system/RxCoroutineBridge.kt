@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.util.system
 
-import com.elvishew.xlog.XLog
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CancellableContinuation
@@ -10,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import logcat.LogPriority
 import rx.Emitter
 import rx.Observable
 import rx.Subscriber
@@ -74,10 +74,10 @@ fun <T> runAsObservable(
                 } catch (e: Throwable) {
                     // Ignore `CancellationException` as error, since it indicates "normal cancellation"
                     if (e !is CancellationException) {
-                        XLog.d("coroutine is cancelled")
+                        loggycat { "coroutine is cancelled" }
                         emitter.onError(e)
                     } else {
-                        XLog.e("error in coroutine bridge", e)
+                        loggycat(LogPriority.ERROR, e) { "Error in coroutine bridge" }
                         emitter.onCompleted()
                     }
                 }

@@ -5,15 +5,16 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -86,7 +87,7 @@ class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = 
                         errorResult()
                     }
                 } catch (error: Exception) {
-                    XLog.e("error logging in ", error)
+                    loggycat(LogPriority.ERROR, error) { "error logging in" }
                     errorResult()
                     error.message?.let { context.toast(it, Toast.LENGTH_LONG) }
                 }

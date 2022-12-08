@@ -54,7 +54,6 @@ class BrowseRepository(
         return mangaDex.searchForManga(uuid).andThen { mangaListPage ->
             val displayManga = mangaListPage.sourceManga.first().toDisplayManga(db, mangaDex.id)
             Ok(displayManga)
-
         }
     }
 
@@ -80,7 +79,6 @@ class BrowseRepository(
     }
 
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
-
         val blockedScanlatorUUIDs = preferenceHelper.blockedScanlators().get().map {
             var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
             if (scanlatorImpl == null) {
@@ -125,7 +123,8 @@ enum class DeepLinkType {
     Error,
     Manga,
     List,
-    None;
+    None,
+    ;
 
     companion object {
         fun getDeepLinkType(query: String): DeepLinkType {

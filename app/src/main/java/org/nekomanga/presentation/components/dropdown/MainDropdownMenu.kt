@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components.dropdown
 
-import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +9,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,7 +59,6 @@ fun MainDropdownMenu(
         shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp)),
     ) {
         CompositionLocalProvider(LocalRippleTheme provides (defaultThemeColorState().rippleTheme)) {
-
             CascadeDropdownMenu(
                 expanded = expanded,
                 offset = DpOffset(12.dp, 0.dp),
@@ -135,4 +134,3 @@ private fun Row(title: UiText, subTitle: UiText? = null, icon: UiIcon, onClick: 
         },
     )
 }
-

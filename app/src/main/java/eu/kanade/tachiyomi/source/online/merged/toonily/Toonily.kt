@@ -74,9 +74,11 @@ open class Toonily : ReducedHttpSource() {
         if (!response.isSuccessful) {
             response.close()
             // Error message for exceeding last page
-            if (response.code == 404)
+            if (response.code == 404) {
                 error("Already on the Last Page!")
-            else throw Exception("HTTP error ${response.code}")
+            } else {
+                throw Exception("HTTP error ${response.code}")
+            }
         }
 
         return parseSearchManga(response)
@@ -94,11 +96,9 @@ open class Toonily : ReducedHttpSource() {
         add("vars[manga_archives_item_layout]", "big_thumbnail")
         add("vars[posts_per_page]", "30")
         add("vars[s]", query)
-
     }
 
     override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
-
         val response = client.newCall(POST("${baseUrl}${mangaUrl}ajax/chapters", searchHeaders)).await()
         return parseChapterList(response)
     }
@@ -120,7 +120,7 @@ open class Toonily : ReducedHttpSource() {
                     toonilyChapterName = urlElement.text()
                 }
 
-                //edge case where there is a Season finale then an epilogue after it in the same season
+                // edge case where there is a Season finale then an epilogue after it in the same season
                 if (toonilyChapterName.endsWith("Season ${currentVolume - 1} Epilogue")) {
                     val previousVolume = currentVolume - 1
                     chapterName.add("Vol.$previousVolume")
@@ -151,7 +151,7 @@ open class Toonily : ReducedHttpSource() {
 
                 chapter.date_upload = element.select("img:not(.thumb)").firstOrNull()?.attr("alt")?.let { parseChapterDate(it) }
                     ?: element.select("span a").firstOrNull()?.attr("title")?.let { parseChapterDate(it) }
-                        ?: parseChapterDate(element.select("span.chapter-release-date").firstOrNull()?.text())
+                    ?: parseChapterDate(element.select("span.chapter-release-date").firstOrNull()?.text())
 
                 chapter
             },
@@ -206,4 +206,3 @@ open class Toonily : ReducedHttpSource() {
         const val name = "Toonily"
     }
 }
-

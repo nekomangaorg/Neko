@@ -66,6 +66,8 @@ fun FilterChipWrapper(
         modifier = modifier,
         state = ToggleableState(selected),
         hideIcons = hideIcons,
-        toggleState = { _ -> onClick() }, name = name, labelTextStyle = labelStyle,
+        toggleState = { _ -> onClick() },
+        name = name,
+        labelTextStyle = labelStyle,
     )
 }

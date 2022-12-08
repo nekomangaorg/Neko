@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
@@ -53,7 +54,6 @@ import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.presentation.components.VerticalDivider
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
@@ -179,7 +179,6 @@ fun MangaScreen(
         }
     }
 
-
     fun openSheet(sheet: DetailsBottomSheetScreen) {
         scope.launch {
             currentBottomSheet = sheet
@@ -222,7 +221,7 @@ fun MangaScreen(
             },
         ) { incomingPaddingValues ->
             SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing = isRefreshing.value),
+                state = rememberPullRefreshState(refreshing = isRefreshing.value, onRefresh =),
                 modifier = Modifier.fillMaxSize(),
                 onRefresh = onRefresh,
                 indicator = { state, trigger ->
@@ -233,7 +232,7 @@ fun MangaScreen(
                         backgroundColor = themeColorState.buttonColor,
                         contentColor = MaterialTheme.colorScheme.surface,
 
-                        )
+                    )
                 },
             ) {
                 val mangaDetailContentPadding =

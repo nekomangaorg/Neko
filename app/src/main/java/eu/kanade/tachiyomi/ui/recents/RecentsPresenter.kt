@@ -430,7 +430,7 @@ class RecentsPresenter(
     fun deleteChapter(chapter: Chapter, manga: Manga, update: Boolean = true) {
         val source = Injekt.get<SourceManager>().mangaDex
         launchIO {
-            downloadManager.deleteChapters(listOf(chapter), manga, source)
+            downloadManager.deleteChapters(listOf(chapter), manga)
         }
         if (update) {
             val item = recentItems.find { it.chapter.id == chapter.id } ?: return

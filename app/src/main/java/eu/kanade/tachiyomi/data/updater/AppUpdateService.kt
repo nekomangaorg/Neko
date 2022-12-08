@@ -11,7 +11,6 @@ import android.os.PowerManager
 import androidx.annotation.RequiresApi
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -23,6 +22,7 @@ import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
 import kotlinx.coroutines.CancellationException
@@ -30,6 +30,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
 import okhttp3.internal.http2.StreamResetException
@@ -73,7 +74,7 @@ class AppUpdateService : Service() {
         instance = this
 
         val handler = CoroutineExceptionHandler { _, exception ->
-            XLog.e(exception)
+            loggycat(LogPriority.ERROR, exception)
             stopSelf(startId)
         }
 
@@ -158,7 +159,7 @@ class AppUpdateService : Service() {
                 notifier.onDownloadFinished(apkFile.getUriCompat(this))
             }
         } catch (error: Exception) {
-            XLog.e(error)
+            loggycat(LogPriority.ERROR, error)
             if (error is CancellationException ||
                 (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
             ) {

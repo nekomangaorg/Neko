@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -15,9 +14,11 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -89,7 +90,7 @@ class LatestChapterHandler {
                     Ok(MangaListPage(sourceManga = mangaList.toPersistentList(), hasNextPage = hasMoreResults))
                 }
         }.getOrElse {
-            XLog.e("Error parsing latest chapters", it)
+            loggycat(LogPriority.ERROR, it) { "Error parsing latest chapters" }
             Err(ResultError.Generic(errorString = "Error parsing latest chapters response"))
         }
     }

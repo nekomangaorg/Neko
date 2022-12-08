@@ -227,5 +227,5 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeCo
             ),
         ),
 
-        )
+    )
 }

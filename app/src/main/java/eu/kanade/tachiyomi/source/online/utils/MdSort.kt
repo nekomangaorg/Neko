@@ -16,5 +16,5 @@ enum class MdSort(val displayName: String, val key: String, val state: MangaCons
     OldestAdded("Oldest added", MdConstants.Sort.createdAt, MangaConstants.SortState.Descending),
     YearAscending("Year asc", MdConstants.Sort.year, MangaConstants.SortState.Ascending),
     YearDescending("Year desc", MdConstants.Sort.year, MangaConstants.SortState.Descending),
-    //updatedAt("Information updated", MdConstants.Sort.updatedAt),
+    // updatedAt("Information updated", MdConstants.Sort.updatedAt),
 }

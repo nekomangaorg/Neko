@@ -4,14 +4,15 @@ import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
+import logcat.LogPriority
 
 class RestoreHelper(val context: Context) {
 
@@ -209,7 +210,7 @@ class RestoreHelper(val context: Context) {
                 return destFile
             }
         } catch (e: Exception) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
         }
         return null
     }

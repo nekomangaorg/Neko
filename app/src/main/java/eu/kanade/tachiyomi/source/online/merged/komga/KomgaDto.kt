@@ -75,5 +75,3 @@ data class KomgaAuthorDto(
     val name: String,
     val role: String,
 )
-
-

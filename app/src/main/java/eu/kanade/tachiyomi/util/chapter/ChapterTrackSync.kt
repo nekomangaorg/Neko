@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.util.chapter
 
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -10,8 +9,10 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.jobs.tracking.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -41,7 +42,7 @@ fun syncChaptersWithTrackServiceTwoWay(db: DatabaseHelper, chapters: List<Chapte
             service.update(remoteTrack)
             db.insertTrack(remoteTrack).executeAsBlocking()
         } catch (e: Throwable) {
-            XLog.w(e)
+            loggycat(LogPriority.WARN, e)
         }
     }
 }
@@ -104,7 +105,7 @@ suspend fun updateTrackChapterRead(
                     service.update(track, true)
                     db.insertTrack(track).executeAsBlocking()
                 } catch (e: Exception) {
-                    XLog.e(e)
+                    loggycat("updateTrackChapterRead", LogPriority.ERROR, e)
                 }
             }
         }

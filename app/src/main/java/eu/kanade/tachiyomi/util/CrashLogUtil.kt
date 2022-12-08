@@ -7,14 +7,18 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.IOException
+import uy.kohesive.injekt.injectLazy
 
 class CrashLogUtil(private val context: Context) {
+
+    val preferences: PreferencesHelper by injectLazy()
 
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_CRASH_LOGS) {
         setSmallIcon(R.drawable.ic_neko_notification)
@@ -24,13 +28,20 @@ class CrashLogUtil(private val context: Context) {
         try {
             val file = context.createFileInCacheDir("neko_crash_logs.txt")
             file.appendText(getDebugInfo() + "\n")
-            Runtime.getRuntime().exec("logcat *:E -d -f ${file.absolutePath}")
+
+            val logLevel = when (preferences.verboseLogging()) {
+                true -> "*:*"
+                false -> "*:E"
+            }
+
+            Runtime.getRuntime().exec("logcat $logLevel -d -f ${file.absolutePath}")
 
             showNotification(file.getUriCompat(context))
         } catch (e: IOException) {
             context.toast("Failed to get logs")
         }
     }
+
     fun getDebugInfo(): String {
         return """
             App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR}, ${BuildConfig.COMMIT_SHA}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.BUILD_TIME})
@@ -43,6 +54,7 @@ class CrashLogUtil(private val context: Context) {
             Device product name: ${Build.PRODUCT}
         """.trimIndent()
     }
+
     private fun showNotification(uri: Uri) {
         context.notificationManager.cancel(Notifications.ID_CRASH_LOGS)
 

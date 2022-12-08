@@ -28,13 +28,15 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.log.XLogSetup
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.notification
 import java.security.Security
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import logcat.AndroidLogcatLogger
+import logcat.LogPriority
+import logcat.LogcatLogger
 import org.conscrypt.Conscrypt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
@@ -50,7 +52,6 @@ open class App : Application(), DefaultLifecycleObserver {
     @SuppressLint("LaunchActivityFromNotification")
     override fun onCreate() {
         super<Application>.onCreate()
-        XLogSetup(this)
 
         kotlin.runCatching {
             CookieManager.getInstance()
@@ -71,6 +72,10 @@ open class App : Application(), DefaultLifecycleObserver {
 
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.importModule(AppModule(this))
+
+        if (!LogcatLogger.isInstalled && (preferences.verboseLogging())) {
+            LogcatLogger.install(AndroidLogcatLogger(LogPriority.VERBOSE))
+        }
 
         CoilSetup(this)
         setupNotificationChannels()

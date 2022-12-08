@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.merged.mangalife
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.network.GET
@@ -11,12 +10,14 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.lang.toResultError
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import logcat.LogPriority
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import okhttp3.Response
 import org.jsoup.nodes.Document
@@ -75,7 +76,6 @@ class MangaLife : ReducedHttpSource() {
                 val uniqueTypes = arrayOf("Volume", "Special")
                 mangaLifeChapters.map { chp ->
                     SChapter.create().apply {
-
                         val chapterName = mutableListOf<String>()
                         // Build chapter name
                         if (chp.type in uniqueTypes) {
@@ -86,10 +86,10 @@ class MangaLife : ReducedHttpSource() {
                             }
                             chapterName.add("$prefix${this.vol}")
                         } else {
-                            //The old logic would apply the name from either the "ChapterName" or Type + chapterNumber
-                            //To match dex more this doesn't use name as it doesnt seem used often see Gantz (which doesnt make it here anyways cause its
-                            //a manga)) and the text the extension shows for that would be ex. Special Osaka 1 vs Neko Special 1 - Special Osaka 1
-                            //get volume
+                            // The old logic would apply the name from either the "ChapterName" or Type + chapterNumber
+                            // To match dex more this doesn't use name as it doesnt seem used often see Gantz (which doesnt make it here anyways cause its
+                            // a manga)) and the text the extension shows for that would be ex. Special Osaka 1 vs Neko Special 1 - Special Osaka 1
+                            // get volume
                             var volResult = chp.type.substringBefore(" -", "")
                             if (volResult.startsWith("S")) {
                                 volResult = volResult.substringAfter("S")
@@ -101,12 +101,12 @@ class MangaLife : ReducedHttpSource() {
                                 chapterName.add("Vol.$volResult")
                             }
 
-                            //get chapter
+                            // get chapter
                             this.chapter_txt = chp.chapterString()
                             chapterName.add(this.chapter_txt)
                         }
 
-                        //get text
+                        // get text
                         if (chp.chapterName?.isNotEmpty() == true) {
                             if (chapterName.isNotEmpty()) {
                                 chapterName.add("-")
@@ -125,14 +125,14 @@ class MangaLife : ReducedHttpSource() {
                                 false -> dateFormat.parse("${chp.date} +0600")?.time!!
                             }
                         }.onFailure {
-                            XLog.e(it)
+                            loggycat(LogPriority.ERROR, it)
                         }.getOrElse { 0L }
 
                         scanlator = this@MangaLife.name
                     }
                 }
             }.mapError {
-                XLog.e(it)
+                loggycat(LogPriority.ERROR, it)
                 "Unknown Exception with merge".toResultError()
             }
         }
