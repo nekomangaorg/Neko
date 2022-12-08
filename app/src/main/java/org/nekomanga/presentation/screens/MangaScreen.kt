@@ -232,7 +232,7 @@ fun MangaScreen(
                         backgroundColor = themeColorState.buttonColor,
                         contentColor = MaterialTheme.colorScheme.surface,
 
-                    )
+                        )
                 },
             ) {
                 val mangaDetailContentPadding =

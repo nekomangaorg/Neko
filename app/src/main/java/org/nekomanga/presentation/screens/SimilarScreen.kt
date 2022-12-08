@@ -121,7 +121,7 @@ fun SimilarScreen(
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
 
-                    )
+                        )
                 },
             ) {
                 val haptic = LocalHapticFeedback.current
