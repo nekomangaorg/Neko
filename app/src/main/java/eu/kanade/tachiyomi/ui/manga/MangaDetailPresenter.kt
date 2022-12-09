@@ -33,7 +33,6 @@ import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
-import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator.*
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.No
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga.Yes
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
@@ -212,12 +211,10 @@ class MangaDetailPresenter(
                     }
                     is MangaResult.Success -> {
                         updateAllFlows()
+                        syncChaptersReadStatus()
                         _isRefreshing.value = false
                     }
-                    is MangaResult.UpdatedChapters -> {
-                        updateChapterFlows()
-                        syncChaptersReadStatus()
-                    }
+                    is MangaResult.UpdatedChapters -> Unit
                     is MangaResult.UpdatedManga -> {
                         updateMangaFlow()
                     }
@@ -1616,7 +1613,7 @@ class MangaDetailPresenter(
                         }
                     },
 
-                ),
+                    ),
             )
         }
     }

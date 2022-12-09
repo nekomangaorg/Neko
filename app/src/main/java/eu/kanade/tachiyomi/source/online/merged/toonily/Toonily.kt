@@ -107,55 +107,78 @@ open class Toonily : ReducedHttpSource() {
         val document = response.asJsoup()
         response.closeQuietly()
         var currentVolume = 1
-        return Ok(
-            document.select("li.wp-manga-chapter").reversed().map { element ->
-                val chapter = SChapter.create()
-                val chapterName = mutableListOf<String>()
+        var previousChapterNumber = "1"
+        var currentExtraNumber = 0
 
-                var toonilyChapterName = ""
-                element.select("a").first()?.let { urlElement ->
-                    chapter.url = urlElement.attr("abs:href").let {
-                        it.substringBefore("?style=paged") + if (!it.endsWith("?style=list")) "?style=list" else ""
-                    }
-                    toonilyChapterName = urlElement.text()
+        val elements = document.select("li.wp-manga-chapter").reversed()
+
+        val chapters = elements.map { element ->
+            val chapter = SChapter.create()
+            val chapterName = mutableListOf<String>()
+
+            var toonilyChapterName = ""
+            element.select("a").first()?.let { urlElement ->
+                chapter.url = urlElement.attr("abs:href").let {
+                    it.substringBefore("?style=paged") + if (!it.endsWith("?style=list")) "?style=list" else ""
                 }
+                toonilyChapterName = urlElement.text()
+            }
 
-                // edge case where there is a Season finale then an epilogue after it in the same season
-                if (toonilyChapterName.endsWith("Season ${currentVolume - 1} Epilogue")) {
-                    val previousVolume = currentVolume - 1
-                    chapterName.add("Vol.$previousVolume")
-                    chapter.vol = previousVolume.toString()
-                } else {
-                    chapterName.add("Vol.$currentVolume")
-                    chapter.vol = currentVolume.toString()
+            if (toonilyChapterName.startsWith("S${currentVolume + 1}")) {
+                currentVolume++
+            }
+
+            //edge case where there is a Season finale then an epilogue after it in the same season
+            if (toonilyChapterName.endsWith("Season ${currentVolume - 1} Epilogue")) {
+                val previousVolume = currentVolume - 1
+                chapterName.add("Vol.$previousVolume")
+                chapter.vol = previousVolume.toString()
+            } else {
+                chapterName.add("Vol.$currentVolume")
+                chapter.vol = currentVolume.toString()
+            }
+
+            val endingList = listOf("Season $currentVolume END", "Season $currentVolume Finale")
+
+            if (endingList.any { toonilyChapterName.endsWith(it, true) }) {
+                currentVolume++
+            }
+
+            val chapterNumber = toonilyChapterName.substringAfter("Chapter ", "").substringBefore("-")
+
+            val actualChapterNumberToUse = when (chapterNumber.isBlank()) {
+                true -> {
+                    currentExtraNumber++
+                    "$previousChapterNumber.$currentExtraNumber"
                 }
-
-                if (toonilyChapterName.endsWith("Season $currentVolume END", true) || toonilyChapterName.endsWith("Season $currentVolume Finale", true)) {
-                    currentVolume++
+                false -> {
+                    previousChapterNumber = chapterNumber.trim()
+                    currentExtraNumber = 0
+                    previousChapterNumber
                 }
+            }
+            val chpText = "Ch.$actualChapterNumberToUse"
+            chapterName.add(chpText)
+            chapter.chapter_txt = chpText
 
-                val chpText = "Ch." + toonilyChapterName.substringAfter("Chapter ").substringBefore("-")
-                chapterName.add(chpText)
-                chapter.chapter_txt = chpText
+            val chpName = toonilyChapterName.substringAfter("Chapter $chapterNumber").substringAfterLast("-")
 
-                val chpName = toonilyChapterName.substringAfter("-", "")
+            if (chpName.isNotBlank()) {
+                chapterName.add("-")
+                chapterName.add(chpName)
+            }
 
-                if (chpName.isNotBlank()) {
-                    chapterName.add("-")
-                    chapterName.add(chpName)
-                }
+            chapter.name = chapterName.joinToString(" ")
 
-                chapter.name = chapterName.joinToString(" ")
+            chapter.scanlator = Toonily.name
 
-                chapter.scanlator = Toonily.name
-
-                chapter.date_upload = element.select("img:not(.thumb)").firstOrNull()?.attr("alt")?.let { parseChapterDate(it) }
-                    ?: element.select("span a").firstOrNull()?.attr("title")?.let { parseChapterDate(it) }
+            chapter.date_upload = element.select("img:not(.thumb)").firstOrNull()?.attr("alt")?.let { parseChapterDate(it) }
+                ?: element.select("span a").firstOrNull()?.attr("title")?.let { parseChapterDate(it) }
                     ?: parseChapterDate(element.select("span.chapter-release-date").firstOrNull()?.text())
 
-                chapter
-            },
-        )
+            chapter
+        }
+        return Ok(chapters)
     }
 
     override suspend fun fetchPageList(chapter: SChapter): List<Page> {

@@ -66,7 +66,7 @@ class MangaUpdateCoordinator {
             return@channelFlow
         }
 
-        loggycat { "Begin processing manga/chapter update for manga $mangaUUID" }
+        this@MangaUpdateCoordinator.loggycat { "Begin processing manga/chapter update for manga $mangaUUID" }
 
         val mangaJob = startMangaJob(scope, manga)
 
