@@ -51,9 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.presentation.components.VerticalDivider
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
@@ -76,6 +73,7 @@ import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
+import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.snackbar.snackbarHost
@@ -221,21 +219,24 @@ fun MangaScreen(
                 OverflowOptions(chapterActions = chapterActions, chaptersProvider = { generalState.value.activeChapters })
             },
         ) { incomingPaddingValues ->
-            SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing = isRefreshing.value),
-                modifier = Modifier.fillMaxSize(),
+            PullRefresh(
+                refreshing = isRefreshing.value,
                 onRefresh = onRefresh,
-                indicator = { state, trigger ->
-                    SwipeRefreshIndicator(
-                        state = state,
-                        refreshingOffset = incomingPaddingValues.calculateTopPadding(),
-                        refreshTriggerDistance = trigger,
-                        backgroundColor = themeColorState.buttonColor,
-                        contentColor = MaterialTheme.colorScheme.surface,
-
-                        )
-                },
+                indicatorOffset = incomingPaddingValues.calculateTopPadding(),
+                backgroundColor = themeColorState.buttonColor,
+                contentColor = MaterialTheme.colorScheme.surface,
             ) {
+
+                /*
+                             state = state,
+                             refreshingOffset = incomingPaddingValues.calculateTopPadding(),
+                             refreshTriggerDistance = trigger,
+                             backgroundColor = themeColorState.buttonColor,
+                             contentColor = MaterialTheme.colorScheme.surface,
+
+                             )
+                     },
+                 ) */
                 val mangaDetailContentPadding =
                     PaddingValues(
                         bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
