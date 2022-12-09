@@ -82,7 +82,7 @@ class SimilarPresenter(
 
                 val list = repo.fetchSimilar(mangaUUID, forceRefresh)
                 _similarScreenState.update {
-                    it.copy(isRefreshing = false, displayManga = list.associate { it.type to it.manga.toImmutableList() }.toImmutableMap())
+                    it.copy(isRefreshing = false, displayManga = list.associate { group -> group.type to group.manga.toImmutableList() }.toImmutableMap())
                 }
             }
         }
