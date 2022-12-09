@@ -813,7 +813,7 @@
     <string name="data_management">Data Management</string>
     <string name="crash_logs">Crash logs</string>
     <string name="dump_crash_logs">Dump crash logs</string>
-    <string name="saves_error_logs">Saves error logs to a file for sharing with the developers.  If verbose logging enabled extra debug logs will be included.</string>
+    <string name="saves_error_logs">Saves error logs to a file for sharing with the developers.  If verbose logging is enabled, extra debug logs will be included.</string>
     <string name="about_dont_kill_my_app">Some manufacturers have additional app restrictions that kill background services. This website has more info on how to fix it.</string>
     <string name="crash_log_saved">Crash logs saved</string>
     <string name="network">Network</string>
