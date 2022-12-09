@@ -9,7 +9,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
 import coil.Coil
 import coil.request.ImageRequest
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -18,6 +17,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlin.math.min
 import kotlinx.coroutines.GlobalScope
 import uy.kohesive.injekt.Injekt
@@ -89,7 +89,7 @@ class MangaShortcutManager(
                         .build()
                 }
 
-                XLog.d("Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}")
+                loggycat { "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}" }
                 shortcutManager.dynamicShortcuts = shortcuts
             }
         }

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
@@ -24,10 +23,12 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.manga.MangaMappings
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import logcat.LogPriority
 import org.nekomanga.domain.manga.SourceManga
 import uy.kohesive.injekt.injectLazy
 
@@ -46,7 +47,7 @@ class SimilarHandler {
             val related = withIOContext {
                 network.service.relatedManga(dexId)
                     .onFailure {
-                        XLog.e("trying to get related manga, $this")
+                        loggycat(LogPriority.ERROR) { "trying to get related manga, $this" }
                     }
                     .getOrNull()
             }
@@ -131,7 +132,7 @@ class SimilarHandler {
         if (forceRefresh) {
             val response = network.similarService.getSimilarManga(dexId)
                 .onFailure {
-                    XLog.e("trying to get similar manga, $this")
+                    loggycat(LogPriority.ERROR) { "trying to get similar manga, $this" }
                 }.getOrNull()
 
             similarMangaParse(dexId, response)
@@ -406,7 +407,7 @@ class SimilarHandler {
         }.getOrThrow()
 
         if (strictMatch && responseBody.data.size != mangaIds.size) {
-            XLog.e("manga returned doesn't match number of manga expected")
+            loggycat { "manga returned doesn't match number of manga expected" }
             throw Exception("Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned")
         }
         return responseBody

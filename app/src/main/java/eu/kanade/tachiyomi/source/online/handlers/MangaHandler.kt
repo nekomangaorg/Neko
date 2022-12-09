@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
@@ -25,6 +24,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,7 +43,7 @@ class MangaHandler {
     private val apiMangaParser: ApiMangaParser by injectLazy()
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga, fetchArtwork: Boolean): Result<MangaDetailChapterInformation, ResultError> {
-        XLog.d("fetch manga and chapter details")
+        loggycat { "fetch manga and chapter details" }
 
         return withContext(Dispatchers.IO) {
             val detailsManga = withContext(Dispatchers.Default) { fetchMangaDetails(manga.uuid(), fetchArtwork) }

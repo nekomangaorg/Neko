@@ -10,12 +10,11 @@ import kotlin.math.floor
 /**This attempts to create a smart source order used when a manga is merged
  */
 fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga, db: DatabaseHelper): List<SChapter> {
-
     if (sourceChapters.all { !it.isMergedChapter() }) {
         return sourceChapters
     }
 
-    //mangalife tends to not include a volume number for manga
+    // mangalife tends to not include a volume number for manga
     val sorter = if (manga.lang_flag != null && MdLang.fromIsoCode(manga.lang_flag!!) == MdLang.JAPANESE) {
         compareByDescending<SChapter> { getChapterNum(it) == null }.thenByDescending { getChapterNum(it) }
     } else {
@@ -50,4 +49,3 @@ fun getChapterNumInt(chapter: SChapter): Int? {
 fun getVolumeNum(chapter: SChapter): Int? {
     return chapter.vol.toIntOrNull()
 }
-

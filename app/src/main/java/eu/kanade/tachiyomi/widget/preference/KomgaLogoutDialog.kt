@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.widget.preference
 
 import android.app.Dialog
 import android.os.Bundle
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
@@ -10,9 +9,11 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.launchNow
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -45,7 +46,7 @@ class KomgaLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                              activity?.toast(loggedOut.error)
                          }*/
                     }.onFailure { e ->
-                        XLog.e("error logging out", e)
+                        loggycat(LogPriority.ERROR, e) { "error logging out" }
                         activity?.toast(R.string.could_not_log_in)
                     }
                 }

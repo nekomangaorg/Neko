@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import androidx.core.text.isDigitsOnly
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
@@ -20,6 +19,7 @@ import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -66,7 +66,7 @@ class MangaUpdateCoordinator {
             return@channelFlow
         }
 
-        XLog.d("Begin processing manga/chapter update for manga $mangaUUID")
+        loggycat { "Begin processing manga/chapter update for manga $mangaUUID" }
 
         val mangaJob = startMangaJob(scope, manga)
 
@@ -142,7 +142,7 @@ class MangaUpdateCoordinator {
             val deferredMergedChapters = if (mergedMangaList.isNotEmpty()) {
                 mergedMangaList.map { mergeManga ->
                     async {
-                        //in the future check the merge type
+                        // in the future check the merge type
                         MergeType.getSource(mergeManga.mergeType, sourceManager)
                             .fetchChapters(mergeManga.url)
                             .onFailure {

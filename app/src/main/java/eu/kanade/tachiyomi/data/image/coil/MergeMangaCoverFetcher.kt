@@ -8,15 +8,16 @@ import coil.fetch.SourceResult
 import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Request
 import okhttp3.Response
@@ -34,7 +35,6 @@ class MergeMangaCoverFetcher(
     }
 
     private suspend fun httpLoader(): FetchResult {
-
         try {
             // Fetch from network
             val response = executeNetworkRequest()
@@ -52,7 +52,7 @@ class MergeMangaCoverFetcher(
             }
         } catch (e: Exception) {
             if (e !is CancellationException) {
-                XLog.e("error loading image", e)
+                loggycat(LogPriority.ERROR, e) { "error loading image" }
             }
             throw e
         }

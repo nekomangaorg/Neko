@@ -136,10 +136,6 @@ object Migrations {
                 LibraryPresenter.updateMergeMangaDBAndFiles()
             }
 
-
-
-
-
             return true
         }
         return false

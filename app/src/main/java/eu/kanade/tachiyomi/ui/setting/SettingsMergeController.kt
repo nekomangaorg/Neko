@@ -43,7 +43,6 @@ class SettingsMergeController :
             }
 
             addPreference(sourcePreference)
-
         }
     }
 

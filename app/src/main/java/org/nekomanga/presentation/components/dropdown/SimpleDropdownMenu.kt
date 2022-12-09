@@ -1,7 +1,7 @@
 package org.nekomanga.presentation.components.dropdown
 
-import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.foundation.background
+import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

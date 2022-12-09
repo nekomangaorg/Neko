@@ -69,8 +69,3 @@ data class FilterActions(
     val resetClick: () -> Unit,
     val filterChanged: (Filter) -> Unit,
 )
-
-
-
-
-

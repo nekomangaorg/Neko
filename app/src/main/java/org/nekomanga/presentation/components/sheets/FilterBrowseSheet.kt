@@ -100,7 +100,6 @@ fun FilterBrowseSheet(
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
-
         val paddingModifier = Modifier.padding(horizontal = 8.dp)
 
         var originalLanguageExpanded by remember { mutableStateOf(false) }
@@ -134,7 +133,6 @@ fun FilterBrowseSheet(
                 otherExpanded = false
             }
         }
-
 
         if (showSaveFilterDialog) {
             SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
@@ -214,7 +212,6 @@ fun FilterBrowseSheet(
                     }
                 }
 
-
                 SearchFooter(
                     themeColorState = themeColorState,
                     labelText = stringResource(id = titleRes),
@@ -227,7 +224,6 @@ fun FilterBrowseSheet(
                     },
                     search = { filterClick() },
                 )
-
 
                 FilterRow(
                     items = filters.originalLanguage.toImmutableList(),
@@ -279,7 +275,6 @@ fun FilterBrowseSheet(
                     nameRes = { status -> status.status.statusRes },
                 )
 
-
                 FilterRow(
                     items = filters.sort.toImmutableList(),
                     expanded = sortExpanded,
@@ -310,16 +305,17 @@ fun FilterBrowseSheet(
                     themeColorState = themeColorState,
                     onHeaderClick = { otherExpanded = !otherExpanded },
                     filters = filters,
-                    anyEnabled = (filters.tagExclusionMode != Filter.TagExclusionMode() ||
-                        filters.tagInclusionMode != Filter.TagInclusionMode() ||
-                        filters.hasAvailableChapters != Filter.HasAvailableChapters() ||
-                        filters.authorId.uuid.isNotBlank() ||
-                        filters.groupId.uuid.isNotBlank()),
+                    anyEnabled = (
+                        filters.tagExclusionMode != Filter.TagExclusionMode() ||
+                            filters.tagInclusionMode != Filter.TagInclusionMode() ||
+                            filters.hasAvailableChapters != Filter.HasAvailableChapters() ||
+                            filters.authorId.uuid.isNotBlank() ||
+                            filters.groupId.uuid.isNotBlank()
+                        ),
 
                     filterChanged = filterChanged,
                     filterClick = filterClick,
                 )
-
             }
 
             Gap(4.dp)
@@ -352,7 +348,8 @@ fun FilterBrowseSheet(
 
                 AnimatedVisibility(nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
                     TextButton(
-                        onClick = { showSaveFilterDialog = true }, shape = RoundedCornerShape(35),
+                        onClick = { showSaveFilterDialog = true },
+                        shape = RoundedCornerShape(35),
                         colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                     ) {
                         Icon(imageVector = Icons.Default.Save, contentDescription = null, tint = themeColorState.buttonColor)
@@ -415,7 +412,6 @@ private fun <T> FilterRow(
                 mainAxisSpacing = 8.dp,
                 mainAxisAlignment = MainAxisAlignment.Start,
             ) {
-
                 items.forEach { item ->
                     val itemName = when {
                         nameRes != null -> stringResource(id = nameRes(item))
@@ -430,7 +426,6 @@ private fun <T> FilterRow(
 }
 
 @Composable
-
 private fun <T> FilterTriStateRow(
     items: ImmutableList<T>,
     expanded: Boolean,
@@ -444,7 +439,6 @@ private fun <T> FilterTriStateRow(
     nameRes: ((T) -> Int)? = null,
     name: ((T) -> String)? = null,
 ) {
-
     Column(
         modifier = modifier
             .fillMaxWidth(),
@@ -469,7 +463,6 @@ private fun <T> FilterTriStateRow(
                 mainAxisSpacing = 8.dp,
                 mainAxisAlignment = MainAxisAlignment.Start,
             ) {
-
                 items.forEach { item ->
                     val itemName = when {
                         nameRes != null -> stringResource(id = nameRes(item))
@@ -534,7 +527,6 @@ fun OtherRow(
                         Text(text = stringResource(id = R.string.or), color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
-
 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(text = stringResource(id = R.string.tag_exclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
@@ -603,7 +595,6 @@ fun SavedFilters(
 ) {
     AnimatedVisibility(visible = visible, enter = slideEnter(), exit = slideExit()) {
         Column(modifier = Modifier.fillMaxWidth()) {
-
             val sortedFilters by remember(nameOfEnabledFilter) {
                 val enabledFilterIndex = savedFilters.indexOfFirst { nameOfEnabledFilter.equals(it.name, true) }
                 if (enabledFilterIndex == -1) {
@@ -622,7 +613,8 @@ fun SavedFilters(
                 items(sortedFilters) { filter ->
                     val isEnabled = nameOfEnabledFilter.equals(filter.name, true)
                     FilterChipWrapper(
-                        modifier = Modifier.animateItemPlacement(), selected = isEnabled,
+                        modifier = Modifier.animateItemPlacement(),
+                        selected = isEnabled,
                         onClick = {
                             scope.launch { listState.animateScrollToItem(0) }
                             loadFilter(filter)
@@ -644,7 +636,6 @@ fun SavedFilters(
                     Gap(4.dp)
                 }
                 item { Gap(4.dp) }
-
             }
         }
     }
@@ -661,6 +652,3 @@ private fun slideEnter(): EnterTransition {
 private fun slideExit(): ExitTransition {
     return slideOutVertically { it / 3 } + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
 }
-
-
-

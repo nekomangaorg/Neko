@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import androidx.core.text.isDigitsOnly
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -14,8 +13,10 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -96,7 +97,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                     track.last_chapter_read = 0f
                 }
             } catch (e: Exception) {
-                XLog.e("error updating MDList", e)
+                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
             }
             db.insertTrack(track).executeAsBlocking()
             track
@@ -112,7 +113,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override suspend fun bind(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
-            XLog.i("v3 tracking ${track.tracking_url} skipping bind")
+            loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
@@ -122,7 +123,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override suspend fun refresh(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
-            XLog.i("v3 tracking ${track.tracking_url} skipping bind")
+            loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)

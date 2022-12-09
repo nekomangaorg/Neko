@@ -7,7 +7,6 @@ import android.os.Environment
 import android.provider.Settings
 import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
-import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
@@ -31,6 +30,7 @@ import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNow
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.runAsObservable
 import java.io.BufferedOutputStream
 import java.io.File
@@ -38,6 +38,7 @@ import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.async
+import logcat.LogPriority
 import okhttp3.Response
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -229,7 +230,7 @@ class Downloader(
                 },
                 { error ->
                     DownloadService.stop(context)
-                    XLog.e(error)
+                    loggycat(LogPriority.ERROR, error)
                     notifier.onError(error.message)
                 },
             )
@@ -254,7 +255,6 @@ class Downloader(
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) = launchIO {
-
         val wasEmpty = queue.isEmpty()
         // Called in background thread, the operation can be slow with SAF.
         val chaptersWithoutDir = async {
@@ -368,7 +368,7 @@ class Downloader(
             .doOnNext { ensureSuccessfulDownload(download, mangaDir, tmpDir, chapterDirname) }
             // If the page list threw, it will resume here
             .onErrorReturn { error ->
-                XLog.e(error)
+                loggycat(LogPriority.ERROR, error)
                 download.status = Download.State.ERROR
                 notifier.onError(error.message, download.chapter.name, download.manga.title)
                 download
@@ -508,7 +508,7 @@ class Downloader(
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
         val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-        // Else guess from the uri.
+            // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.
             ?: ImageUtil.findImageType { file.openInputStream() }?.mime
@@ -531,7 +531,7 @@ class Downloader(
         return try {
             ImageUtil.splitTallImage(imageFile, imageFilePath)
         } catch (e: Exception) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             false
         }
     }

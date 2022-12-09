@@ -40,5 +40,3 @@ sealed interface DisplayScreenType : Parcelable {
     @Parcelize
     data class List(val title: String, val listUUID: String) : DisplayScreenType
 }
-
-

@@ -30,7 +30,6 @@ fun SortRow(
     rowTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
-
     val (tintColor, textColor) = when (disabled) {
         true -> MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast) to MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast)
         false -> themeColorState.buttonColor to MaterialTheme.colorScheme.onSurface

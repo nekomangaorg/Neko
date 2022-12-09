@@ -140,7 +140,6 @@ private fun MangaListTitle(title: String, maxLines: Int) {
 
 @Composable
 private fun MangaListSubtitle(text: String, @StringRes textRes: Int?) {
-
     val displayText = when (textRes) {
         null -> text
         else -> stringResource(textRes)

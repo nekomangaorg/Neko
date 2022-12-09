@@ -43,14 +43,16 @@ data class BackupManga(
 
     // Neko Values
     @Deprecated("Use mergeMangaList")
-    @ProtoNumber(900) var mergedMangaUrl: String? = null,
+    @ProtoNumber(900)
+    var mergedMangaUrl: String? = null,
     @ProtoNumber(901) var scanlatorFilter: String? = null,
     @Deprecated("Use mergeMangaList")
-    @ProtoNumber(902) var mergedMangaImageUrl: String? = null,
+    @ProtoNumber(902)
+    var mergedMangaImageUrl: String? = null,
     @ProtoNumber(903) var alternativeArtwork: String? = null,
     @ProtoNumber(904) var mergeMangaList: List<BackupMergeManga> = emptyList(),
 
-    ) {
+) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
             url = this@BackupManga.url.replace(

@@ -130,13 +130,11 @@ class BrowsePresenter(
     override fun onCreate() {
         super.onCreate()
 
-
         if (browseScreenState.value.filters.query.text.isNotBlank()) {
             getSearchPage()
         } else {
             getHomepage()
         }
-
 
         updateBrowseFilters(_browseScreenState.value.firstLoad)
 
@@ -423,7 +421,6 @@ class BrowsePresenter(
                 }
                 getSearchPage()
             }
-
         }
     }
 
@@ -450,7 +447,6 @@ class BrowsePresenter(
                 }
                 controller?.openManga(displayManga.mangaId)
             }
-
         }
     }
 
@@ -665,7 +661,6 @@ class BrowsePresenter(
                 is Filter.GroupId -> {
                     browseScreenState.value.filters.copy(groupId = newFilter)
                 }
-
             }
 
             _browseScreenState.update {
@@ -766,5 +761,3 @@ class BrowsePresenter(
         }
     }
 }
-
-

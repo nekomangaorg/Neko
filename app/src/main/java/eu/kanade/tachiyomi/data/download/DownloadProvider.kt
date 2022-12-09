@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.download
 import android.content.Context
 import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
-import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -15,6 +14,8 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import eu.kanade.tachiyomi.util.system.loggycat
+import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -50,11 +51,11 @@ class DownloadProvider(private val context: Context) {
         try {
             val mangaDirName = getMangaDirName(manga)
             val sourceDirName = getSourceDirName()
-            XLog.d("creating directory for $sourceDirName : $mangaDirName")
+            loggycat { "creating directory for $sourceDirName : $mangaDirName" }
             return downloadsDir().createDirectory(sourceDirName)
                 .createDirectory(mangaDirName)
         } catch (e: Exception) {
-            XLog.e("error getting download folder for ${manga.title}", e)
+            loggycat(LogPriority.ERROR, e) { "error getting download folder for ${manga.title}" }
             throw Exception(context.getString(R.string.invalid_download_location))
         }
     }

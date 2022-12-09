@@ -158,7 +158,6 @@ fun BrowseScreen(
                     .clickable(enabled = false) { }
             },
     ) {
-
         ModalBottomSheetLayout(
             sheetState = sheetState,
             sheetShape = RoundedCornerShape(Shapes.sheetRadius),
@@ -193,15 +192,13 @@ fun BrowseScreen(
                                 ),
                             )
                             false -> emptyList()
-                        }
-                            +
+                        } +
                             listOf(
                                 showLibraryEntriesAction(
                                     showEntries = browseScreenState.value.showLibraryEntries,
                                     onClick = switchLibraryVisibilityClick,
                                 ),
-                            )
-                            +
+                            ) +
                             if (browseScreenState.value.isDeepLink) {
                                 emptyList()
                             } else {
@@ -253,13 +250,11 @@ fun BrowseScreen(
                     }
                 }
 
-
                 Box(
                     modifier = Modifier
                         .padding(bottom = navBarPadding.calculateBottomPadding())
                         .fillMaxSize(),
                 ) {
-
                     if (browseScreenState.value.initialLoading) {
                         Loading(
                             Modifier
@@ -328,7 +323,7 @@ fun BrowseScreen(
                             }
                         }
                     }
-                    //hide these on initial load
+                    // hide these on initial load
                     if (!browseScreenState.value.hideFooterButton) {
                         ScreenTypeFooter(
                             screenType = browseScreenType,
@@ -344,7 +339,7 @@ fun BrowseScreen(
                                 val newIsFilterScreen = newScreenType == BrowseScreenType.Filter
 
                                 if (sameScreen && !newIsFilterScreen) {
-                                    //do nothing
+                                    // do nothing
                                 } else if (newIsFilterScreen) {
                                     openSheet(
                                         BrowseBottomSheetScreen.FilterSheet(),
@@ -352,14 +347,13 @@ fun BrowseScreen(
                                 } else {
                                     changeScreenType(newScreenType)
                                 }
-
                             },
                         )
                     }
                 }
             }
         }
-        //this is needed for Android SDK where blur isn't available
+        // this is needed for Android SDK where blur isn't available
         if (mainDropdownShowing && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
             Box(
                 modifier = Modifier
@@ -375,7 +369,8 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
     LazyRow(
         modifier = modifier
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         item {
             Gap(8.dp)
@@ -412,7 +407,6 @@ private fun FooterFilterChip(
     onClick: () -> Unit,
     name: String,
 ) {
-
     FilterChip(
         selected = selected,
         onClick = onClick,
@@ -437,4 +431,3 @@ private fun FooterFilterChip(
         ),
     )
 }
-

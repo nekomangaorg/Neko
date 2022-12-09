@@ -21,7 +21,6 @@ import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
-import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import java.io.BufferedInputStream
@@ -34,6 +33,7 @@ import java.net.URLConnection
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import logcat.LogPriority
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder
 
@@ -541,13 +541,13 @@ object ImageUtil {
         }
 
         if (bitmapRegionDecoder == null) {
-            XLog.d("Failed to create new instance of BitmapRegionDecoder")
+            loggycat { "Failed to create new instance of BitmapRegionDecoder" }
             return false
         }
 
-        XLog.d(
-            "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split",
-        )
+        loggycat {
+            "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split"
+        }
 
         return try {
             splitDataList.forEach { splitData ->
@@ -560,9 +560,9 @@ object ImageUtil {
                     splitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                     splitBitmap.recycle()
                 }
-                XLog.d(
-                    "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} height=${splitData.outputImageHeight} bottomOffset=${splitData.bottomOffset}",
-                )
+                loggycat {
+                    "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} height=${splitData.outputImageHeight} bottomOffset=${splitData.bottomOffset}"
+                }
             }
             imageFile.delete()
             true
@@ -571,7 +571,7 @@ object ImageUtil {
             splitDataList
                 .map { splitImagePath(imageFilePath, it.index) }
                 .forEach { File(it).delete() }
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             return false
         } finally {
             bitmapRegionDecoder.recycle()

@@ -46,7 +46,6 @@ fun ColumnScope.SearchFooter(
     val bringIntoViewRequester = BringIntoViewRequester()
     val scope = rememberCoroutineScope()
 
-
     if (showDivider) {
         Divider()
         Gap(4.dp)

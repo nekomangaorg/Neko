@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
-import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY
@@ -37,9 +36,11 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLegacyMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.FileOutputStream
 import kotlin.math.max
 import kotlinx.serialization.protobuf.ProtoBuf
+import logcat.LogPriority
 import okio.buffer
 import okio.gzip
 import okio.sink
@@ -121,7 +122,7 @@ class BackupManager(val context: Context) {
 
             return fileUri.toString()
         } catch (e: Exception) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             file?.delete()
             throw e
         }
@@ -361,7 +362,6 @@ class BackupManager(val context: Context) {
     }
 
     fun restoreMergeMangaForManga(manga: Manga, mergeMangaList: List<MergeMangaImpl>) {
-
         val dbMergeMangaList = databaseHelper.getMergeMangaList(manga).executeAsBlocking()
         mergeMangaList.forEach { mergeManga ->
             val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }

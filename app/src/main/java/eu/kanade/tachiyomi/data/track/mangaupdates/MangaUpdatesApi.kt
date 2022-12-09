@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.track.mangaupdates
 
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Context
@@ -13,6 +12,7 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.PUT
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
@@ -24,6 +24,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
+import logcat.LogPriority
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -182,7 +183,7 @@ class MangaUpdatesApi(
                 try {
                     json.decodeFromJsonElement<Context>(obj["context"]!!)
                 } catch (e: Exception) {
-                    XLog.e(e)
+                    loggycat(LogPriority.ERROR, e)
                     null
                 }
             }

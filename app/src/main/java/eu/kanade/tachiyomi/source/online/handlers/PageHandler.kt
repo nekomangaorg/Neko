@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.getOrThrow
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
@@ -17,9 +16,11 @@ import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.injectLazy
 
@@ -36,7 +37,7 @@ class PageHandler {
 
     suspend fun fetchPageList(chapter: SChapter): List<Page> {
         return withContext(Dispatchers.IO) {
-            XLog.d("fetching page list")
+            loggycat { "fetching page list" }
 
             try {
                 val chapterAttributesDto = network.service.viewChapter(chapter.mangadex_chapter_id)
@@ -87,7 +88,7 @@ class PageHandler {
                     preferences.dataSaver(),
                 )
             } catch (e: Exception) {
-                XLog.e("error processing page list ", e)
+                loggycat(LogPriority.ERROR, e) { "error processing page list" }
                 throw (e)
             }
         }

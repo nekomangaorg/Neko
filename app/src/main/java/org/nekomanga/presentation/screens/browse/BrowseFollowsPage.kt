@@ -14,8 +14,14 @@ import org.nekomanga.presentation.screens.NoResultsEmptyScreen
 
 @Composable
 fun BrowseFollowsPage(
-    displayMangaHolder: DisplayMangaHolder, isList: Boolean, isComfortableGrid: Boolean, outlineCovers: Boolean, rawColumnCount: Float, contentPadding: PaddingValues = PaddingValues(),
-    onClick: (Long) -> Unit, onLongClick: (DisplayManga) -> Unit,
+    displayMangaHolder: DisplayMangaHolder,
+    isList: Boolean,
+    isComfortableGrid: Boolean,
+    outlineCovers: Boolean,
+    rawColumnCount: Float,
+    contentPadding: PaddingValues = PaddingValues(),
+    onClick: (Long) -> Unit,
+    onLongClick: (DisplayManga) -> Unit,
 ) {
     if (displayMangaHolder.allDisplayManga.isEmpty()) {
         NoResultsEmptyScreen(contentPadding)

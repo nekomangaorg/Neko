@@ -1,10 +1,11 @@
 package eu.kanade.tachiyomi.network
 
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import logcat.LogPriority
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
@@ -14,10 +15,10 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
     Authenticator {
 
     private val mutext = Mutex()
-    val log = XLog.tag("||Neko-TokenAuthenticator")
+    private val tag = "||Neko-TokenAuthenticator"
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        log.i("Detected Auth error ${response.code} on ${response.request.url}")
+        loggycat(LogPriority.INFO, tag = tag) { "Detected Auth error ${response.code} on ${response.request.url}" }
         val token = refreshToken(loginHelper)
         return if (token.isEmpty()) {
             null
@@ -33,17 +34,17 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
                 val checkToken =
                     loginHelper.isAuthenticated()
                 if (checkToken) {
-                    log.i("Token is valid, other thread must have refreshed it")
+                    loggycat(LogPriority.INFO, tag = tag) { "Token is valid, other thread must have refreshed it" }
                     validated = true
                 }
                 if (validated.not()) {
-                    log.i("Token is invalid trying to refresh")
+                    loggycat(LogPriority.INFO, tag = tag) { "Token is invalid trying to refresh" }
                     validated =
                         loginHelper.refreshToken()
                 }
 
                 if (validated.not()) {
-                    log.i("Did not refresh token, trying to login")
+                    loggycat(LogPriority.INFO, tag = tag) { "Did not refresh token, trying to login" }
                     validated = loginHelper.login()
                 }
                 return@runBlocking when {

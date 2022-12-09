@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.util.system.loggycat
 
 data class ViewerChapters(
     val currChapter: ReaderChapter,
@@ -9,14 +9,14 @@ data class ViewerChapters(
 ) {
 
     fun ref() {
-        XLog.d("ref viewer chapters")
+        loggycat { "ref viewer chapters" }
         currChapter.ref()
         prevChapter?.ref()
         nextChapter?.ref()
     }
 
     fun unref() {
-        XLog.d("unref viewer chapters")
+        loggycat { "unref viewer chapters" }
         currChapter.unref()
         prevChapter?.unref()
         nextChapter?.unref()

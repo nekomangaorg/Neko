@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
-import com.elvishew.xlog.XLog
+import logcat.LogPriority
 
 object MiuiUtil {
 
@@ -31,7 +31,7 @@ object MiuiUtil {
                 .getDeclaredMethod("get", String::class.java)
                 .invoke(null, key) as String
         } catch (e: Exception) {
-            XLog.w("Unable to use SystemProperties.get", e)
+            loggycat(LogPriority.WARN, e) { "Unable to use SystemProperties.get" }
             null
         }
     }

@@ -16,9 +16,9 @@ import androidx.viewbinding.ViewBinding
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.removeQueryListener
@@ -44,20 +44,20 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
                 override fun preCreateView(controller: Controller) {
                     viewScope = MainScope()
-                    XLog.d("Create view for ${controller.instance()}")
+                    loggycat { "Create view for ${controller.instance()}" }
                 }
 
                 override fun preAttach(controller: Controller, view: View) {
-                    XLog.d("Attach view for ${controller.instance()}")
+                    loggycat { "Attach view for ${controller.instance()}" }
                 }
 
                 override fun preDetach(controller: Controller, view: View) {
-                    XLog.d("Detach view for ${controller.instance()}")
+                    loggycat { "Detach view for ${controller.instance()}" }
                 }
 
                 override fun preDestroyView(controller: Controller, view: View) {
                     viewScope.cancel()
-                    XLog.d("Destroy view for ${controller.instance()}")
+                    loggycat { "Destroy view for ${controller.instance()}" }
                 }
             },
         )
@@ -101,7 +101,9 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         return null
     }
 
-    open fun canStillGoBack(): Boolean { return false }
+    open fun canStillGoBack(): Boolean {
+        return false
+    }
 
     open val mainRecycler: RecyclerView?
         get() = null

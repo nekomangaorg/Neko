@@ -84,7 +84,6 @@ class ChapterFilter(
             }
         }
 
-
         return filteredChapters
     }
 

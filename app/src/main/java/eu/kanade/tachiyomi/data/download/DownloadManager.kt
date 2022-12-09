@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -11,9 +10,11 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
@@ -245,7 +246,7 @@ class DownloadManager(val context: Context) {
         downloadsByManga.map { entry ->
             val manga = entry.value.first().manga
             val source = entry.value.first().source
-            deleteChapters(entry.value.map { it.chapter }, manga, source)
+            deleteChapters(entry.value.map { it.chapter }, manga)
         }
     }
 
@@ -256,7 +257,7 @@ class DownloadManager(val context: Context) {
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
      */
-    fun deleteChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
+    fun deleteChapters(chapters: List<Chapter>, manga: Manga) {
         GlobalScope.launch(Dispatchers.IO) {
             try {
                 val wasPaused = isPaused()
@@ -292,7 +293,7 @@ class DownloadManager(val context: Context) {
                 }
                 queue.updateListeners()
             } catch (e: Exception) {
-                XLog.e("error deleting chapters", e)
+                loggycat(LogPriority.ERROR, e) { "error deleting chapters" }
             }
         }
     }
@@ -300,7 +301,7 @@ class DownloadManager(val context: Context) {
     /**
      * return the list of all manga folders
      */
-    fun getMangaFolders(source: Source): List<UniFile> {
+    fun getMangaFolders(): List<UniFile> {
         return provider.findSourceDir()?.listFiles()?.toList() ?: emptyList()
     }
 
@@ -314,7 +315,6 @@ class DownloadManager(val context: Context) {
     fun cleanupChapters(
         allChapters: List<Chapter>,
         manga: Manga,
-        source: Source,
         removeRead: Boolean,
         removeNonFavorite: Boolean,
     ): Int {
@@ -348,7 +348,7 @@ class DownloadManager(val context: Context) {
                 mangaFolder.delete()
                 cache.removeManga(manga)
             } else {
-                XLog.e("Cache and download folder doesn't match for %s", manga.title)
+                loggycat(LogPriority.ERROR) { "Cache and download folder doesn't match for ${manga.title}" }
             }
         }
         return cleaned
@@ -360,7 +360,7 @@ class DownloadManager(val context: Context) {
      * @param manga the manga to delete.
      * @param source the source of the manga.
      */
-    fun deleteManga(manga: Manga, source: Source) {
+    fun deleteManga(manga: Manga) {
         downloader.clearQueue(manga, true)
         queue.remove(manga)
         provider.findMangaDir(manga)?.delete()
@@ -385,7 +385,7 @@ class DownloadManager(val context: Context) {
         val pendingChapters = pendingDeleter.getPendingChapters()
         for ((manga, chapters) in pendingChapters) {
             val source = sourceManager.get(manga.source) ?: continue
-            deleteChapters(chapters, manga, source)
+            deleteChapters(chapters, manga)
         }
     }
 
@@ -406,7 +406,7 @@ class DownloadManager(val context: Context) {
             cache.removeChapters(listOf(oldChapter), manga)
             cache.addChapter(newName, manga)
         } else {
-            XLog.e("Could not rename downloaded chapter: %s.", oldName)
+            loggycat(LogPriority.ERROR) { "Could not rename downloaded chapter: $oldName" }
         }
     }
 

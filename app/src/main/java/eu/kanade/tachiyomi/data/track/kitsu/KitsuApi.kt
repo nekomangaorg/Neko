@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
-import com.elvishew.xlog.XLog
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -8,6 +7,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -18,6 +18,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
+import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -144,7 +145,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             rest.deleteLibManga(track.media_id)
             return true
         } catch (e: Exception) {
-            XLog.w(e)
+            loggycat(LogPriority.WARN, e)
         }
         return false
     }

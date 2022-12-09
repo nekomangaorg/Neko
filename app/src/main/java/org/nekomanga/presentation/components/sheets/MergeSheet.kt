@@ -91,7 +91,6 @@ fun MergeSheet(
                 }
                 Gap(8.dp)
                 TextButton(onClick = { removeMergeSource(isMergedManga.mergeType) }, modifier = Modifier.fillMaxWidth()) {
-
                     Text(text = stringResource(id = R.string.remove_merged_source), color = themeColorState.buttonColor)
                 }
                 Gap(8.dp)
@@ -100,10 +99,8 @@ fun MergeSheet(
         is IsMergedManga.No -> {
             var mergeType: MergeType? by remember { mutableStateOf(null) }
             BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-
                 when (mergeType == null) {
                     true -> {
-
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -160,7 +157,6 @@ fun MergeSheet(
                 }
             }
         }
-
     }
 }
 

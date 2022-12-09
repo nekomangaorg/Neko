@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.view.View
 import android.view.ViewGroup
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -10,6 +9,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlin.math.max
 import kotlinx.coroutines.delay
@@ -154,7 +154,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             if (position != -1) {
                 return position
             } else {
-                XLog.d("Position for ${view.item} not found")
+                loggycat { "Position for ${view.item} not found" }
             }
         }
         return POSITION_NONE
@@ -180,9 +180,9 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         // This case usually happens when we load a new chapter and the first 2 pages need to split og
         viewer.scope.launchUI {
             delay(100)
-            XLog.d("about to on page change from splitDoublePages")
+            loggycat { "about to on page change from splitDoublePages" }
             viewer.onPageChange(viewer.pager.currentItem)
-            XLog.d("finished on page change from splitDoublePages")
+            loggycat { "finished on page change from splitDoublePages" }
         }
     }
 

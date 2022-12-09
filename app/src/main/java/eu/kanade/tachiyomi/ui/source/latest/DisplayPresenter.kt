@@ -36,7 +36,7 @@ class DisplayPresenter(
             isList = preferences.browseAsList().get(),
             title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
             titleRes = (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
-            ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
+                ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),

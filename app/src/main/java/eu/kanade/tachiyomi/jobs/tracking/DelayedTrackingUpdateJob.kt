@@ -9,13 +9,14 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -23,11 +24,11 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
     CoroutineWorker(context, workerParams) {
 
     private data class DelayedTracking(val mangaId: Long, val syncId: Int, val lastReadChapter: Float) {
-        fun print() = "${mangaId}:${syncId}:${lastReadChapter}"
+        fun print() = "$mangaId:$syncId:$lastReadChapter"
     }
 
     override suspend fun doWork(): Result {
-        XLog.d("Starting Delayed Tracking Update Job")
+        loggycat { "Starting Delayed Tracking Update Job" }
         val preferences = Injekt.get<PreferencesHelper>()
         val db = Injekt.get<DatabaseHelper>()
         val trackManager = Injekt.get<TrackManager>()
@@ -57,7 +58,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                             db.insertTrack(track).executeAsBlocking()
                         } catch (e: Exception) {
                             trackingsToAdd.add(delayedTracking.print())
-                            XLog.e(e)
+                            loggycat(LogPriority.ERROR, e)
                         }
                     }
                 }

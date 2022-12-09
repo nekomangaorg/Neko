@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
@@ -177,7 +178,6 @@ fun MangaScreen(
         }
     }
 
-
     fun openSheet(sheet: DetailsBottomSheetScreen) {
         scope.launch {
             currentBottomSheet = sheet
@@ -226,17 +226,6 @@ fun MangaScreen(
                 backgroundColor = themeColorState.buttonColor,
                 contentColor = MaterialTheme.colorScheme.surface,
             ) {
-
-                /*
-                             state = state,
-                             refreshingOffset = incomingPaddingValues.calculateTopPadding(),
-                             refreshTriggerDistance = trigger,
-                             backgroundColor = themeColorState.buttonColor,
-                             contentColor = MaterialTheme.colorScheme.surface,
-
-                             )
-                     },
-                 ) */
                 val mangaDetailContentPadding =
                     PaddingValues(
                         bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)

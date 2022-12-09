@@ -58,7 +58,6 @@ private fun ResultRow(
                 .fillMaxWidth()
                 .padding(12.dp),
         ) {
-
             Text(
                 text = displayResult.title,
                 style = MaterialTheme.typography.titleMedium,
