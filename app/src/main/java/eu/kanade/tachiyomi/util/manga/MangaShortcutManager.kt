@@ -89,7 +89,7 @@ class MangaShortcutManager(
                         .build()
                 }
 
-                loggycat { "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}" }
+                this@MangaShortcutManager.loggycat { "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}" }
                 shortcutManager.dynamicShortcuts = shortcuts
             }
         }
