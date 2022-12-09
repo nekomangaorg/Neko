@@ -110,7 +110,7 @@ fun SimilarScreen(
             },
         ) { incomingPaddingValues ->
             SwipeRefresh(
-                state = rememberPullRefreshState(similarScreenState.value.isRefreshing, onRefresh =),
+                state = rememberPullRefreshState(refreshing = similarScreenState.value.isRefreshing, onRefresh =),
                 onRefresh = onRefresh,
                 modifier = Modifier.fillMaxSize(),
                 indicator = { state, trigger ->
