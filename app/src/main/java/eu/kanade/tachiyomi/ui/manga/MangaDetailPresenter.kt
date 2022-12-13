@@ -135,7 +135,6 @@ class MangaDetailPresenter(
     override fun onCreate() {
         super.onCreate()
         downloadManager.addListener(this)
-        throw Exception("Not Good test")
 
         LibraryUpdateService.setListener(this)
         presenterScope.launch {
