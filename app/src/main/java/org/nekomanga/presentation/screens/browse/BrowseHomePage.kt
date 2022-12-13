@@ -88,7 +88,7 @@ fun BrowseHomePage(
                     .requiredHeight(coverSize + 60.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                item { Gap(Padding.smallHorizontalPadding) }
+                item { Gap(Padding.small) }
 
                 items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
                     if (displayManga.isVisible) {
@@ -118,7 +118,7 @@ fun BrowseHomePage(
                         }
                     }
                 }
-                item { Gap(Padding.smallHorizontalPadding) }
+                item { Gap(Padding.small) }
             }
         }
         item {

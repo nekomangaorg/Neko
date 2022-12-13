@@ -1261,6 +1261,12 @@
     <string name="try_similar_after_click">icon on the manga info screen</string>
 
 
+    <!-- Crash screen -->
+    <string name="crash_screen_title">An Unexpected Error Occurred</string>
+    <string name="crash_screen_description">%s ran into an unexpected error. We suggest you screenshot this message, dump the crash logs, and then share it the Neko channel on Discord.</string>
+    <string name="crash_screen_restart_application">Restart the application</string>
+
+
     <!-- Follows -->
     <string name="status_channel">Manga status sync</string>
     <string name="syncing_follows">Begin syncing follows</string>

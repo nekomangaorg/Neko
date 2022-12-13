@@ -21,6 +21,8 @@ import androidx.multidex.MultiDex
 import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import eu.kanade.tachiyomi.crash.CrashActivity
+import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -53,6 +55,8 @@ open class App : Application(), DefaultLifecycleObserver {
     override fun onCreate() {
         super<Application>.onCreate()
 
+        GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
+
         kotlin.runCatching {
             CookieManager.getInstance()
         }.onFailure {
@@ -67,7 +71,7 @@ open class App : Application(), DefaultLifecycleObserver {
         // Avoid potential crashes
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val process = getProcessName()
-            if (packageName != process) WebView.setDataDirectorySuffix(process)
+            if (packageName != process) kotlin.runCatching { WebView.setDataDirectorySuffix(process) }
         }
 
         Injekt = InjektScope(DefaultRegistrar())

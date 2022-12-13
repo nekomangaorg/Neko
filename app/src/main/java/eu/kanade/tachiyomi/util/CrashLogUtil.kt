@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withNonCancellableContext
+import eu.kanade.tachiyomi.util.system.withUIContext
 import java.io.IOException
 import uy.kohesive.injekt.injectLazy
 
@@ -24,7 +26,7 @@ class CrashLogUtil(private val context: Context) {
         setSmallIcon(R.drawable.ic_neko_notification)
     }
 
-    fun dumpLogs() {
+    suspend fun dumpLogs() = withNonCancellableContext {
         try {
             val file = context.createFileInCacheDir("neko_crash_logs.txt")
             file.appendText(getDebugInfo() + "\n")
@@ -38,7 +40,7 @@ class CrashLogUtil(private val context: Context) {
 
             showNotification(file.getUriCompat(context))
         } catch (e: IOException) {
-            context.toast("Failed to get logs")
+            withUIContext { context.toast("Failed to get logs") }
         }
     }
 

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import eu.kanade.tachiyomi.BuildConfig
 import logcat.AndroidLogcatLogger
 import logcat.LogPriority
 import logcat.asLog
@@ -18,8 +19,12 @@ inline fun Any.loggycat(
         msg += throwable.asLog()
     }
 
-    if (priority == LogPriority.ERROR) {
-        FirebaseCrashlytics.getInstance().log(msg)
+    if (priority == LogPriority.ERROR && !BuildConfig.DEBUG) {
+        try {
+            FirebaseCrashlytics.getInstance().log(msg)
+        } catch (e: Exception) {
+            logcat(LogPriority.ERROR) { e.asLog() }
+        }
     }
     msg
 }

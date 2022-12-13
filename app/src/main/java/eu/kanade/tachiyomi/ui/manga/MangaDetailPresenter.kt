@@ -135,6 +135,7 @@ class MangaDetailPresenter(
     override fun onCreate() {
         super.onCreate()
         downloadManager.addListener(this)
+        throw Exception("Not Good test")
 
         LibraryUpdateService.setListener(this)
         presenterScope.launch {
@@ -185,7 +186,7 @@ class MangaDetailPresenter(
                 updateChapterFlows()
                 updateFilterFlow()
             }.onFailure {
-                loggycat(LogPriority.ERROR, it) { "Error trying to update manga in all flows" }
+                this@MangaDetailPresenter.loggycat(LogPriority.ERROR, it) { "Error trying to update manga in all flows" }
             }
         }
         updateTrackingFlows(true)

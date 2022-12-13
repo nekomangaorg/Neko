@@ -98,7 +98,9 @@ class SettingsAdvancedController : SettingsController() {
             summaryRes = R.string.saves_error_logs
 
             onClick {
-                CrashLogUtil(context).dumpLogs()
+                (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                    CrashLogUtil(context).dumpLogs()
+                }
             }
         }
 
