@@ -79,6 +79,10 @@ class ChapterFilter(
             val find = filteredChapters.find { it.id == selectedChapter.id }
             if (find == null) {
                 val mutableList = filteredChapters.toMutableList()
+
+                if (preferences.skipDuplicates()) {
+                    mutableList.removeIf { chapter -> chapter.vol == selectedChapter.vol && chapter.chapter_txt == selectedChapter.chapter_txt }
+                }
                 mutableList.add(selectedChapter)
                 filteredChapters = mutableList.toList()
             }
