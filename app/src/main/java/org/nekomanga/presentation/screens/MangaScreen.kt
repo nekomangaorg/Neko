@@ -22,10 +22,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
@@ -52,8 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import eu.kanade.presentation.components.VerticalDivider
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
@@ -76,6 +72,7 @@ import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
+import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.snackbar.snackbarHost
@@ -86,7 +83,6 @@ import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.screens.mangadetails.OverflowOptions
 import org.nekomanga.presentation.theme.Shapes
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MangaScreen(
     generalState: State<MangaScreenGeneralState>,
@@ -220,21 +216,14 @@ fun MangaScreen(
                 OverflowOptions(chapterActions = chapterActions, chaptersProvider = { generalState.value.activeChapters })
             },
         ) { incomingPaddingValues ->
-            SwipeRefresh(
-                state = rememberPullRefreshState(refreshing = isRefreshing.value, onRefresh =),
-                modifier = Modifier.fillMaxSize(),
+            PullRefresh(
+                refreshing = isRefreshing.value,
                 onRefresh = onRefresh,
-                indicator = { state, trigger ->
-                    SwipeRefreshIndicator(
-                        state = state,
-                        refreshingOffset = incomingPaddingValues.calculateTopPadding(),
-                        refreshTriggerDistance = trigger,
-                        backgroundColor = themeColorState.buttonColor,
-                        contentColor = MaterialTheme.colorScheme.surface,
-
-                        )
-                },
+                indicatorOffset = incomingPaddingValues.calculateTopPadding(),
+                backgroundColor = themeColorState.buttonColor,
+                contentColor = MaterialTheme.colorScheme.surface,
             ) {
+
                 val mangaDetailContentPadding =
                     PaddingValues(
                         bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
