@@ -17,6 +17,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -29,6 +30,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
@@ -40,7 +43,6 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
-import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.functions.numberOfColumns
@@ -107,13 +109,21 @@ fun SimilarScreen(
                 )
             },
         ) { incomingPaddingValues ->
-
-            PullRefresh(
-                refreshing = similarScreenState.value.isRefreshing,
+            SwipeRefresh(
+                state = rememberPullRefreshState(similarScreenState.value.isRefreshing, onRefresh =),
                 onRefresh = onRefresh,
-                indicatorOffset = (incomingPaddingValues.calculateTopPadding() + 48.dp),
-            )
-            {
+                modifier = Modifier.fillMaxSize(),
+                indicator = { state, trigger ->
+                    SwipeRefreshIndicator(
+                        state = state,
+                        refreshTriggerDistance = trigger,
+                        refreshingOffset = (incomingPaddingValues.calculateTopPadding() * 2),
+                        backgroundColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+
+                        )
+                },
+            ) {
                 val haptic = LocalHapticFeedback.current
 
                 SimilarContent(
