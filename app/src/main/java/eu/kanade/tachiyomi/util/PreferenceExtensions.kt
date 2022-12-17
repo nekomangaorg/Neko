@@ -26,6 +26,7 @@ inline fun <reified T> SharedPreferences.getItem(key: String, default: T): T {
  * Binds a checkbox or switch view with a boolean preference.
  */
 fun CompoundButton.bindToPreference(pref: Preference<Boolean>, block: ((Boolean) -> Unit)? = null) {
+    setOnCheckedChangeListener { _, _ -> }
     isChecked = pref.get()
     setOnCheckedChangeListener { _, isChecked ->
         pref.set(isChecked)
