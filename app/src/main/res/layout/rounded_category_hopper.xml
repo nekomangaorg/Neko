@@ -4,12 +4,13 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="20dp"
+    android:clipToPadding="false"
     android:layout_marginTop="6dp"
     app:strokeWidth="0dp"
     android:layout_marginEnd="20dp"
     android:layout_marginBottom="6dp"
     app:cardCornerRadius="18dp"
-    app:cardElevation="12dp">
+    app:cardElevation="6dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/category_hopper_layout"
