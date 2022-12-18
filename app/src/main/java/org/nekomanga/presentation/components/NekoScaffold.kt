@@ -65,7 +65,7 @@ fun NekoScaffold(
         topBar =
         {
             CompositionLocalProvider(LocalRippleTheme provides (themeColorState.rippleTheme)) {
-                if (subtitle.isEmpty() && title.isNotEmpty()) {
+                if (subtitle.isEmpty() && (title.isNotEmpty()) || isRoot) {
                     TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, isRoot, scrollBehavior)
                 } else if (title.isEmpty()) {
                     NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)

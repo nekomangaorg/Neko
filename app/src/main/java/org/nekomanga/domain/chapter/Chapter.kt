@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
+import org.nekomanga.domain.manga.Artwork
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -101,7 +102,7 @@ data class SimpleChapter(
             oldMangaDexChapterId = null,
             language = "",
 
-        )
+            )
     }
 
     fun toDbChapter(): Chapter = ChapterImpl().also {
@@ -167,3 +168,9 @@ data class ChapterItem(
 
     val isNotDefaultDownload = downloadState != Download.State.default
 }
+
+data class FeedChapter(
+    val mangaTitle: String,
+    val artwork: Artwork,
+    val simpleChapter: SimpleChapter,
+)

@@ -176,7 +176,7 @@ fun ColumnScope.ComfortableGridItem(
     modifier: Modifier = Modifier,
 ) {
     MangaCover.Book.invoke(
-        manga = manga,
+        artwork = manga.currentArtwork,
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )
@@ -184,7 +184,7 @@ fun ColumnScope.ComfortableGridItem(
         title = manga.title,
         hasSubtitle = subtitleText.isNotBlank(),
 
-    )
+        )
 
     MangaGridSubtitle(subtitleText = subtitleText)
 }
@@ -197,7 +197,7 @@ fun BoxScope.CompactGridItem(
     modifier: Modifier = Modifier,
 ) {
     MangaCover.Book.invoke(
-        manga = manga,
+        artwork = manga.currentArtwork,
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )

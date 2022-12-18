@@ -23,15 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,7 +41,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import eu.kanade.tachiyomi.R
@@ -63,6 +55,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
+import org.nekomanga.presentation.components.FooterFilterChip
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
@@ -359,7 +352,7 @@ fun BrowseScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast)),
-            ) {}
+            )
         }
     }
 }
@@ -401,33 +394,3 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
     }
 }
 
-@Composable
-private fun FooterFilterChip(
-    selected: Boolean,
-    onClick: () -> Unit,
-    name: String,
-) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        leadingIcon = {
-            if (selected) {
-                Icon(imageVector = Icons.Default.Check, contentDescription = null)
-            }
-        },
-        shape = RoundedCornerShape(100),
-        label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            labelColor = MaterialTheme.colorScheme.secondary,
-            selectedContainerColor = MaterialTheme.colorScheme.secondary,
-            selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
-            selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondary,
-        ),
-        border = FilterChipDefaults.filterChipBorder(
-            borderColor = MaterialTheme.colorScheme.secondary,
-            selectedBorderColor = Color.Transparent,
-            borderWidth = 2.dp,
-        ),
-    )
-}

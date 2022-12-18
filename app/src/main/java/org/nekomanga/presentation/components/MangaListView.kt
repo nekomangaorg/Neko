@@ -159,7 +159,7 @@ private fun MangaListSubtitle(text: String, @StringRes textRes: Int?) {
 private fun RowScope.MangaListCover(displayManga: DisplayManga, shouldOutlineCover: Boolean) {
     Box(modifier = Modifier.Companion.align(alignment = Alignment.CenterVertically)) {
         MangaCover.Square.invoke(
-            manga = displayManga,
+            artwork = displayManga.currentArtwork,
             shouldOutlineCover = shouldOutlineCover,
             modifier = Modifier
                 .size(48.dp)

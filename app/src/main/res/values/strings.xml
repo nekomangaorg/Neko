@@ -262,8 +262,9 @@
     <string name="search_suggestions">Search suggestions</string>
     <string name="search_tips_show_periodically">Search tips will show up periodically. Long press the suggestion to search it.</string>
 
-    <!-- Recents -->
+    <!-- Feed -->
     <string name="recents">Recents</string>
+    <string name="feed">Feed</string>
     <string name="updates_and_history">Updates &amp; history</string>
     <string name="updates">Updates</string>
     <string name="newly_added">Newly added</string>
