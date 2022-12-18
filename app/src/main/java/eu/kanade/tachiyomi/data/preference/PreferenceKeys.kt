@@ -312,13 +312,13 @@ object PreferenceKeys {
 
     const val readingSync = "reading_sync_bool"
 
-    const val logLevel = "log_level"
-
     const val showContentRatingFilter = "show_R18_filter"
 
     const val autoAddTracker = "auto_add_tracker"
 
     const val enablePort443Only = "use_port_443_only_for_image_server"
+
+    const val verboseLogging = "verbose_logging"
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
 

@@ -132,6 +132,7 @@ fun WebViewScreen(
             }
             WebView(
                 state = state,
+                modifier = Modifier.fillMaxSize(),
                 navigator = navigator,
                 onCreated = { webView ->
                     webView.setDefaultSettings()

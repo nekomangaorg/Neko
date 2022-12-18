@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.util
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -8,8 +7,10 @@ import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import eu.kanade.tachiyomi.source.online.models.dto.ErrorResponse
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import logcat.LogPriority
 import org.jsoup.Jsoup
 import org.nekomanga.domain.network.ResultError
 
@@ -18,8 +19,14 @@ import org.nekomanga.domain.network.ResultError
  */
 fun ApiResponse.Failure.Error<*>.toResultError(errorType: String): ResultError {
     val errorBody = this.errorBody?.string() ?: ""
-    XLog.e("error $errorType, \n error response code ${this.statusCode.code}\n $errorBody")
 
+    loggycat(LogPriority.ERROR) {
+        """
+            error $errorType
+            error response code ${this.statusCode.code}
+            $errorBody
+        """.trimIndent()
+    }
     val parsedJsoup = Jsoup.parse(this.toString())
     val textOfHtmlString: String = parsedJsoup.text()
 
@@ -58,7 +65,7 @@ fun <T> ApiResponse<T>.getOrResultError(errorType: String): Result<T, ResultErro
  * Maps the ApiResponse Exception to a Result Error
  */
 fun ApiResponse.Failure.Exception<*>.toResultError(errorType: String): ResultError {
-    XLog.enableStackTrace(10).e("Exception $errorType ${this.message}", this.exception)
+    loggycat(LogPriority.ERROR, this.exception) { "Exception $errorType ${this.message}" }
 
     return ResultError.Generic(errorString = "Unknown Error: '${this.message}'")
 }
@@ -66,13 +73,19 @@ fun ApiResponse.Failure.Exception<*>.toResultError(errorType: String): ResultErr
 fun ApiResponse<*>.log(type: String) {
     return when (this) {
         is ApiResponse.Failure.Exception -> {
-            XLog.enableStackTrace(10).e("Exception $type ${this.message}", this.exception)
+            loggycat(LogPriority.ERROR, this.exception) { "Exception $type ${this.message}" }
         }
         is ApiResponse.Failure.Error -> {
-            XLog.e("error $type, \n error response code ${this.statusCode.code}\n ${this.errorBody?.string()}")
+            loggycat(LogPriority.ERROR) {
+                """
+                    error $type
+                    error response code ${this.statusCode.code}
+                    ${this.errorBody?.string()}
+                """.trimIndent()
+            }
         }
         else -> {
-            XLog.e("error $type")
+            loggycat(LogPriority.ERROR) { "error $type" }
         }
     }
 }

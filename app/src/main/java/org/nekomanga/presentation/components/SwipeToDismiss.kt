@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissState
 import androidx.compose.material.DismissValue
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.ResistanceConfig
 import androidx.compose.material.SwipeableDefaults
@@ -23,7 +22,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import kotlin.math.roundToInt
 
 @Composable
-@ExperimentalMaterialApi
 fun NekoSwipeToDismiss(
     state: DismissState,
     modifier: Modifier = Modifier,

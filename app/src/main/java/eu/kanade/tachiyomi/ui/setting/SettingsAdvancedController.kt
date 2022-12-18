@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import android.webkit.WebStorage
@@ -16,7 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
-import com.elvishew.xlog.XLog
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.BuildConfig
@@ -44,23 +42,23 @@ import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
-import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import java.io.File
-import java.util.Locale
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -100,7 +98,22 @@ class SettingsAdvancedController : SettingsController() {
             summaryRes = R.string.saves_error_logs
 
             onClick {
-                CrashLogUtil(context).dumpLogs()
+                (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                    CrashLogUtil(context).dumpLogs()
+                }
+            }
+        }
+
+        if (!BuildConfig.DEBUG) {
+            switchPreference {
+                key = PreferenceKeys.verboseLogging
+                titleRes = R.string.verbose_logging
+                summaryRes = R.string.verbose_logging_summary
+                defaultValue = BuildConfig.DEBUG
+                onChange {
+                    activity?.toast(R.string.requires_app_restart)
+                    true
+                }
             }
         }
 
@@ -274,29 +287,6 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
         }
-        intListPreference(activity) {
-            key = PreferenceKeys.logLevel
-            titleRes = R.string.log_level
-            summary =
-                context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
-            entries = XLogLevel.values().map {
-                "${
-                    it.name.lowercase(Locale.ENGLISH)
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
-                } (${it.description})"
-            }
-            entryValues = XLogLevel.values().indices.toList()
-            defaultValue = if (BuildConfig.DEBUG) 2 else 0
-
-            onChange {
-                val logFolder = File(
-                    Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                        context.getString(R.string.app_name),
-                    "logs",
-                )
-                logFolder.deleteRecursively()
-            }
-        }
 
         preference {
             key = "send_firebase_event"
@@ -397,7 +387,7 @@ class SettingsAdvancedController : SettingsController() {
             var foldersCleared = 0
             val mangaList = db.getMangaList().executeAsBlocking()
             val source = sourceManager.mangaDex
-            val mangaFolders = downloadManager.getMangaFolders(source)
+            val mangaFolders = downloadManager.getMangaFolders()
 
             for (mangaFolder in mangaFolders) {
                 val manga =
@@ -414,7 +404,6 @@ class SettingsAdvancedController : SettingsController() {
                 foldersCleared += downloadManager.cleanupChapters(
                     chapterList,
                     manga,
-                    source,
                     removeRead,
                     removeNonFavorite,
                 )
@@ -510,7 +499,7 @@ class SettingsAdvancedController : SettingsController() {
             activity?.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
             activity?.toast(R.string.webview_data_deleted)
         } catch (e: Throwable) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             activity?.toast(R.string.cache_delete_error)
         }
     }

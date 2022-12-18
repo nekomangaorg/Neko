@@ -30,7 +30,6 @@ fun BrowseFilterPage(
     onLongClick: (DisplayManga) -> Unit,
     loadNextPage: () -> Unit,
 ) {
-
     if (displayMangaHolder.allDisplayManga.isEmpty()) {
         NoResultsEmptyScreen(contentPadding)
     } else {

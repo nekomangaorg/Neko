@@ -101,7 +101,7 @@ data class SimpleChapter(
             oldMangaDexChapterId = null,
             language = "",
 
-            )
+        )
     }
 
     fun toDbChapter(): Chapter = ChapterImpl().also {

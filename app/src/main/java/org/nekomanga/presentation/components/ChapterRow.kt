@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
-import com.elvishew.xlog.XLog
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -60,6 +59,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.launchDelayed
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
@@ -68,6 +68,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
@@ -319,7 +320,7 @@ private fun ChapterInfo(
 
                     when (iconRes == null) {
                         true -> {
-                            XLog.e("Missing flag for $language")
+                            loggycat(LogPriority.ERROR) { "Missing flag for $language" }
                             Text(
                                 text = "$language • ",
                                 style = MaterialTheme.typography.bodyMedium.copy(

@@ -7,13 +7,13 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.isOutdated
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.IOException
@@ -41,11 +41,14 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
     private val initWebView by lazy {
         // Checked added due to crash https://bugs.chromium.org/p/chromium/issues/detail?id=1279562
         if (!(
-            Build.VERSION.SDK_INT == Build.VERSION_CODES.S &&
-                Build.MANUFACTURER.lowercase(Locale.ENGLISH) == "samsung"
-            )
+                Build.VERSION.SDK_INT == Build.VERSION_CODES.S &&
+                    Build.MANUFACTURER.lowercase(Locale.ENGLISH) == "samsung"
+                )
         ) {
-            WebSettings.getDefaultUserAgent(context)
+            // Avoid some crashes like when Chrome/WebView is being updated.
+            kotlin.runCatching {
+                WebSettings.getDefaultUserAgent(context)
+            }
         }
     }
 
@@ -91,7 +94,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
     private fun resolveWithWebView(request: Request, oldCookie: Cookie?) {
         // We need to lock this thread until the WebView finds the challenge solution url, because
         // OkHttp doesn't support asynchronous interceptors.
-        XLog.d("Resolve with webview")
+        loggycat { "Resolve with webview" }
         val latch = CountDownLatch(1)
 
         var webView: WebView? = null

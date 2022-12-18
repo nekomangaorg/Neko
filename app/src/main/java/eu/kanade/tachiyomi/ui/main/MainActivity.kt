@@ -48,7 +48,6 @@ import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
-import com.elvishew.xlog.XLog
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
@@ -100,6 +99,7 @@ import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
@@ -120,6 +120,7 @@ import kotlin.math.roundToLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import me.saket.cascade.CascadePopupMenu
 import me.saket.cascade.overrideAllPopupMenus
 import uy.kohesive.injekt.Injekt
@@ -316,9 +317,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                        continueSwitchingTabs = true
-                        this@MainActivity.nav.selectedItemId = id
-                    }
+                    continueSwitchingTabs = true
+                    this@MainActivity.nav.selectedItemId = id
+                }
                 ) {
                     return@setOnItemSelectedListener false
                 }
@@ -362,9 +363,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
-                    rootSearchController is RootSearchInterface ||
-                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                    ) &&
+                rootSearchController is RootSearchInterface ||
+                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                ) &&
                 rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
@@ -508,7 +509,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
         backPressedCallback?.isEnabled =
             (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) ||
-                router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
+            router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
     }
 
     override fun onTitleChanged(title: CharSequence?, color: Int) {
@@ -748,7 +749,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         }
                     }
                 } catch (error: Exception) {
-                    XLog.e(error)
+                    loggycat(LogPriority.ERROR, error)
                 }
             }
         }

@@ -22,7 +22,8 @@ import org.nekomanga.presentation.screens.ThemeColorState
 */
 /**
  * Simple Dialog to save a filter
- *//*
+ */
+/*
 
 @Composable
 fun RemoveFilterDialog(themeColorState: ThemeColorState, currentFilter: String, onDismiss: () -> Unit, onRemove: (String) -> Unit, onDefault: (String) -> Unit) {

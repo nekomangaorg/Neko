@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -20,10 +19,12 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
 import kotlin.collections.set
 import kotlin.time.Duration.Companion.seconds
+import logcat.LogPriority
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -40,7 +41,7 @@ class ImageHandler {
     private val bilibiliHandler: BilibiliHandler by injectLazy()
     private val comikeyHandler: ComikeyHandler by injectLazy()
 
-    val log = XLog.tag("||ImageHandler").disableStackTrace().build()
+    val tag = "||ImageHandler"
 
     // chapter id and last request time
     private val tokenTracker = hashMapOf<String, Long>()
@@ -60,7 +61,7 @@ class ImageHandler {
                         network.nonRateLimitedClient.newCallWithProgress(request, page)
                             .await()
                     } catch (e: Exception) {
-                        log.e("error getting images", e)
+                        loggycat(LogPriority.ERROR, e, tag) { "error getting images" }
                         reportFailedImage(request.url.toString())
                         throw (e)
                     }
@@ -69,7 +70,7 @@ class ImageHandler {
 
                     if (!response.isSuccessful) {
                         response.close()
-                        log.e("response for image was not successful http status code ${response.code}")
+                        loggycat(LogPriority.ERROR, tag = tag) { "response for image was not successful http status code ${response.code}" }
                         throw Exception("HTTP error ${response.code}")
                     }
                     response
@@ -98,16 +99,16 @@ class ImageHandler {
             cache,
             duration,
         )
-        log.d(atHomeImageReportDto)
+        loggycat(tag = tag) { atHomeImageReportDto.toString() }
         sendReport(atHomeImageReportDto)
     }
 
     private fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
         launchIO {
-            log.d("Image to report $atHomeImageReportDto")
+            loggycat(tag = tag) { "Image to report $atHomeImageReportDto" }
 
             if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
-                log.d("image is at CDN don't report to md@home node")
+                loggycat(tag = tag) { "image is at CDN don't report to md@home node" }
                 return@launchIO
             }
             network.service.atHomeImageReport(atHomeImageReportDto).onFailure {
@@ -123,7 +124,7 @@ class ImageHandler {
             when (currentTime - tokenTracker[page.mangaDexChapterId]!! < MdConstants.mdAtHomeTokenLifespan) {
                 true -> data[0]
                 false -> {
-                    log.d("Time has expired get new at home url isLogged $isLogged")
+                    loggycat(tag = tag) { "Time has expired get new at home url isLogged $isLogged" }
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
 
                     network.cdnService.getAtHomeServer(
@@ -135,8 +136,12 @@ class ImageHandler {
                         .baseUrl
                 }
             }
-        log.d("Image server is $mdAtHomeServerUrl")
-        log.d("page url is ${page.imageUrl}")
+        loggycat(tag = tag) {
+            """
+            Image server is $mdAtHomeServerUrl
+            page url is ${page.imageUrl}
+            """
+        }
         return buildRequest(mdAtHomeServerUrl + page.imageUrl, network.headers)
     }
 

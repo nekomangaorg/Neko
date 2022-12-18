@@ -71,7 +71,8 @@ fun BrowseHomePage(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = headerText,
@@ -87,7 +88,7 @@ fun BrowseHomePage(
                     .requiredHeight(coverSize + 60.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                item { Gap(Padding.smallHorizontalPadding) }
+                item { Gap(Padding.small) }
 
                 items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
                     if (displayManga.isVisible) {
@@ -117,7 +118,7 @@ fun BrowseHomePage(
                         }
                     }
                 }
-                item { Gap(Padding.smallHorizontalPadding) }
+                item { Gap(Padding.small) }
             }
         }
         item {
@@ -127,7 +128,8 @@ fun BrowseHomePage(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = stringResource(id = R.string.random_manga),

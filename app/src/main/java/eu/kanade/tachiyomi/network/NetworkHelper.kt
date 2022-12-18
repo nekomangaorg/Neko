@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.network
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
-import com.elvishew.xlog.XLog
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.skydoves.sandwich.adapters.ApiResponseCallAdapterFactory
 import eu.kanade.tachiyomi.BuildConfig
@@ -19,9 +18,10 @@ import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.log.XLogLevel
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.util.concurrent.TimeUnit
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.Cache
 import okhttp3.Headers
@@ -48,6 +48,12 @@ class NetworkHelper(val context: Context) {
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
+    }
+
+    private val prettyPrintJson = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        prettyPrint = true
     }
 
     private fun authInterceptor() = Interceptor { chain ->
@@ -89,29 +95,24 @@ class NetworkHelper(val context: Context) {
                     PREF_DOH_ADGUARD -> dohAdGuard()
                     PREF_DOH_QUAD9 -> dohQuad9()
                 }
-                if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
-                    val logger: HttpLoggingInterceptor.Logger =
-                        HttpLoggingInterceptor.Logger { message ->
-                            try {
-                                if (message.contains("username") && message.contains("password")) {
-                                    XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
-                                        .d("Not logging request because it contained username and password")
-                                } else {
-                                    json.parseToJsonElement(message)
-                                    XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
-                                        .json(message)
-                                }
-                            } catch (ex: Exception) {
-                                XLog.tag("||NEKO-NETWORK").disableBorder().disableStackTrace()
-                                    .d(message)
+                val logger: HttpLoggingInterceptor.Logger =
+                    HttpLoggingInterceptor.Logger { message ->
+                        try {
+                            if (message.contains("username") && message.contains("password")) {
+                                loggycat(tag = "||NEKO-NETWORK-JSON") { "Not logging request because it contained username and password" }
+                            } else {
+                                val element = prettyPrintJson.parseToJsonElement(message)
+                                loggycat(tag = "||NEKO-NETWORK-JSON") { prettyPrintJson.encodeToString(element) }
                             }
+                        } catch (ex: Exception) {
+                            loggycat(tag = "||NEKO-NETWORK-JSON") { message }
                         }
-                    addInterceptor(
-                        HttpLoggingInterceptor(logger).apply {
+                    }
+                addInterceptor(
+                    HttpLoggingInterceptor(logger).apply {
                             level = HttpLoggingInterceptor.Level.BODY
-                        },
-                    )
-                }
+                    },
+                )
             }.build()
     }
 

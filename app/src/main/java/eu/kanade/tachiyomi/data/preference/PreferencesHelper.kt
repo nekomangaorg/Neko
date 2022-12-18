@@ -1,7 +1,5 @@
 package eu.kanade.tachiyomi.data.preference
 
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
@@ -14,6 +12,8 @@ import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
@@ -482,7 +482,7 @@ class PreferencesHelper(val context: Context) {
 
     fun shownDownloadSwipeTutorial() = flowPrefs.getBoolean("shown_download_tutorial", false)
 
-    fun hideBottomNavOnScroll() = flowPrefs.getBoolean("false_key") //flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, false)
+    fun hideBottomNavOnScroll() = flowPrefs.getBoolean("false_key") // flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, false)
 
     fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
 
@@ -539,7 +539,7 @@ class PreferencesHelper(val context: Context) {
 
     fun usePort443Only() = prefs.getBoolean(Keys.enablePort443Only, false)
 
-    fun logLevel() = prefs.getInt(Keys.logLevel, 0)
+    fun verboseLogging() = prefs.getBoolean(Keys.verboseLogging, BuildConfig.DEBUG)
 
     fun showContentRatingFilter(): Boolean = prefs.getBoolean(Keys.showContentRatingFilter, true)
 

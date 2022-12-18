@@ -10,7 +10,6 @@ import androidx.core.text.isDigitsOnly
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
@@ -45,6 +44,7 @@ import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
 import java.util.Date
@@ -58,6 +58,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import logcat.LogPriority
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -130,8 +131,7 @@ class LibraryUpdateService(
                 mangaToUpdateMap[it.key] = it.value
                 jobCount.andIncrement
                 val handler = CoroutineExceptionHandler { _, exception ->
-                    XLog.e("Exception handler is handling exception")
-                    XLog.e(exception)
+                    loggycat(LogPriority.ERROR, exception) { "Exception handler is handling exception" }
                 }
                 GlobalScope.launch(handler) {
                     val hasDLs = try {
@@ -284,7 +284,7 @@ class LibraryUpdateService(
 
     private fun launchTarget(target: Target, mangaToAdd: List<LibraryManga>, startId: Int) {
         val handler = CoroutineExceptionHandler { _, exception ->
-            XLog.e(exception)
+            loggycat(LogPriority.ERROR, exception)
             stopSelf(startId)
         }
         if (target == Target.CHAPTERS) {
@@ -317,7 +317,7 @@ class LibraryUpdateService(
                 try {
                     updateMangaInSource(source)
                 } catch (e: Exception) {
-                    XLog.e(e)
+                    loggycat(LogPriority.ERROR, e)
                     false
                 }
             }
@@ -365,7 +365,7 @@ class LibraryUpdateService(
             val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
             logTimeTaken("library manga ${manga.title}") {
                 if (MdUtil.getMangaUUID(manga.url).isDigitsOnly()) {
-                    XLog.i("Manga : ${manga.title} is not migrated to v5 skipping")
+                    loggycat(LogPriority.INFO) { "Manga : ${manga.title} is not migrated to v5 skipping" }
                 } else if (updateMangaChapters(manga, this.count.andIncrement, shouldDownload)) {
                     hasDownloads = true
                 }
@@ -408,13 +408,12 @@ class LibraryUpdateService(
                 true -> {
                     withIOContext {
                         mergeMangaList.map { mergeManga ->
-                            //in the future check the merge type
+                            // in the future check the merge type
                             MergeType.getSource(mergeManga.mergeType, sourceManager)
                                 .fetchChapters(mergeManga.url)
                                 .onFailure {
                                     errorFromMerged = true
                                     failedUpdates[manga] = "Merged Chapter --${mergeManga.mergeType}-- ${it.message()}"
-
                                 }.getOrElse { emptyList() }
                         }.flatten()
                     }
@@ -438,7 +437,7 @@ class LibraryUpdateService(
                 withIOContext {
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                            .get()
+                        .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                         // load new covers in background
@@ -501,7 +500,7 @@ class LibraryUpdateService(
                             }
                     }
                     if (removedChapters.isNotEmpty()) {
-                        downloadManager.deleteChapters(removedChapters, manga, source)
+                        downloadManager.deleteChapters(removedChapters, manga)
                     }
                 }
                 if (newChapters.first.size + newChapters.second.size > 0) {
@@ -545,7 +544,7 @@ class LibraryUpdateService(
         }.getOrElse { e ->
             if (e !is CancellationException) {
                 failedUpdates[manga] = e.message ?: "unknown error"
-                XLog.e("Failed updating: ${manga.title}", e)
+                loggycat(LogPriority.ERROR, e) { "Failed updating: ${manga.title}" }
             }
             false
         }
@@ -562,13 +561,13 @@ class LibraryUpdateService(
     }
 
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) {
-        XLog.d("Attempting to update reading statuses")
+        loggycat { "Attempting to update reading statuses" }
         if (mangaList.isNullOrEmpty()) return
         if (sourceManager.mangaDex.isLogged() && job?.isCancelled == false) {
             runCatching {
                 val readingStatus = statusHandler.fetchReadingStatusForAllManga()
                 if (readingStatus.isNotEmpty()) {
-                    XLog.d("Updating follow statuses")
+                    loggycat { "Updating follow statuses" }
                     mangaList.map { libraryManga ->
                         runCatching {
                             db.getTracks(libraryManga).executeOnIO()
@@ -583,12 +582,12 @@ class LibraryUpdateService(
                                     }
                                 }
                         }.onFailure {
-                            XLog.e("Error refreshing tracking", it)
+                            loggycat(LogPriority.ERROR, it) { "Error refreshing tracking" }
                         }
                     }
                 }
             }.onFailure {
-                XLog.e("error getting reading status", it)
+                loggycat(LogPriority.ERROR, it) { "error getting reading status" }
             }
         }
     }

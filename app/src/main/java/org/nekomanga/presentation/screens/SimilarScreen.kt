@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -29,9 +28,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
@@ -43,6 +39,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.functions.numberOfColumns
@@ -109,21 +106,13 @@ fun SimilarScreen(
                 )
             },
         ) { incomingPaddingValues ->
-            SwipeRefresh(
-                state = rememberSwipeRefreshState(similarScreenState.value.isRefreshing),
-                onRefresh = onRefresh,
-                modifier = Modifier.fillMaxSize(),
-                indicator = { state, trigger ->
-                    SwipeRefreshIndicator(
-                        state = state,
-                        refreshTriggerDistance = trigger,
-                        refreshingOffset = (incomingPaddingValues.calculateTopPadding() * 2),
-                        backgroundColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
 
-                        )
-                },
-            ) {
+            PullRefresh(
+                refreshing = similarScreenState.value.isRefreshing,
+                onRefresh = onRefresh,
+                indicatorOffset = (incomingPaddingValues.calculateTopPadding() + 48.dp),
+            )
+            {
                 val haptic = LocalHapticFeedback.current
 
                 SimilarContent(
@@ -156,40 +145,42 @@ private fun SimilarContent(
     mangaClick: (Long) -> Unit,
     mangaLongClick: (DisplayManga) -> Unit,
 ) {
-    if (!similarScreenState.value.isRefreshing) {
-        if (similarScreenState.value.displayManga.isEmpty()) {
+    if (similarScreenState.value.displayManga.isEmpty()) {
+        if (similarScreenState.value.isRefreshing) {
+            Box(modifier = Modifier.fillMaxSize())
+        } else {
             EmptyScreen(
                 iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                 iconSize = 176.dp,
                 message = stringResource(id = R.string.no_results_found),
                 actions = persistentListOf(Action(R.string.retry, refreshing)),
             )
-        } else {
-            val contentPadding = PaddingValues(
-                bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                    .asPaddingValues().calculateBottomPadding(),
-                top = paddingValues.calculateTopPadding(),
-            )
+        }
+    } else {
+        val contentPadding = PaddingValues(
+            bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                .asPaddingValues().calculateBottomPadding(),
+            top = paddingValues.calculateTopPadding(),
+        )
 
-            if (similarScreenState.value.isList) {
-                MangaListWithHeader(
-                    groupedManga = similarScreenState.value.displayManga,
-                    shouldOutlineCover = similarScreenState.value.outlineCovers,
-                    contentPadding = contentPadding,
-                    onClick = mangaClick,
-                    onLongClick = mangaLongClick,
-                )
-            } else {
-                MangaGridWithHeader(
-                    groupedManga = similarScreenState.value.displayManga,
-                    shouldOutlineCover = similarScreenState.value.outlineCovers,
-                    columns = numberOfColumns(rawValue = similarScreenState.value.rawColumnCount),
-                    isComfortable = similarScreenState.value.isComfortableGrid,
-                    contentPadding = contentPadding,
-                    onClick = mangaClick,
-                    onLongClick = mangaLongClick,
-                )
-            }
+        if (similarScreenState.value.isList) {
+            MangaListWithHeader(
+                groupedManga = similarScreenState.value.displayManga,
+                shouldOutlineCover = similarScreenState.value.outlineCovers,
+                contentPadding = contentPadding,
+                onClick = mangaClick,
+                onLongClick = mangaLongClick,
+            )
+        } else {
+            MangaGridWithHeader(
+                groupedManga = similarScreenState.value.displayManga,
+                shouldOutlineCover = similarScreenState.value.outlineCovers,
+                columns = numberOfColumns(rawValue = similarScreenState.value.rawColumnCount),
+                isComfortable = similarScreenState.value.isComfortableGrid,
+                contentPadding = contentPadding,
+                onClick = mangaClick,
+                onLongClick = mangaLongClick,
+            )
         }
     }
 }

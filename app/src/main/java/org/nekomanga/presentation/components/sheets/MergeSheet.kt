@@ -91,7 +91,6 @@ fun MergeSheet(
                 }
                 Gap(8.dp)
                 TextButton(onClick = { removeMergeSource(isMergedManga.mergeType) }, modifier = Modifier.fillMaxWidth()) {
-
                     Text(text = stringResource(id = R.string.remove_merged_source), color = themeColorState.buttonColor)
                 }
                 Gap(8.dp)
@@ -100,15 +99,13 @@ fun MergeSheet(
         is IsMergedManga.No -> {
             var mergeType: MergeType? by remember { mutableStateOf(null) }
             BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-
                 when (mergeType == null) {
                     true -> {
-
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceAround,
+                            horizontalArrangement = Arrangement.Center,
                         ) {
                             validMergeTypes.forEach { validMergeType ->
                                 val id = when (validMergeType) {
@@ -160,20 +157,25 @@ fun MergeSheet(
                 }
             }
         }
-
     }
 }
 
 @Composable
 private fun MergeLogo(@DrawableRes id: Int, onClick: () -> Unit) {
-    Image(
-        painter = painterResource(id = id),
-        contentDescription = null,
+    Box(
         modifier = Modifier
-            .size(86.dp)
-            .padding(top = 4.dp, bottom = 4.dp)
-            .clickable(onClick = onClick),
-    )
+            .clip(RoundedCornerShape(Shapes.coverRadius))
+            .clickable(onClick = onClick)
+            .padding(8.dp)
+            .clip(RoundedCornerShape(Shapes.coverRadius)),
+    ) {
+        Image(
+            painter = painterResource(id = id),
+            contentDescription = null,
+            modifier = Modifier
+                .size(86.dp),
+        )
+    }
 }
 
 @Composable

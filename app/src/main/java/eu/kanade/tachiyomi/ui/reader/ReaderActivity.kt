@@ -49,7 +49,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
@@ -106,6 +105,7 @@ import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -138,6 +138,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import nucleus.factory.RequiresPresenter
 import uy.kohesive.injekt.injectLazy
 
@@ -514,9 +515,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             config.shiftDoublePage = !config.shiftDoublePage
             presenter.viewerChapters?.let {
                 (viewer as? PagerViewer)?.updateShifting()
-                XLog.d("about to shiftDoublePages")
+                loggycat { "about to shiftDoublePages" }
                 (viewer as? PagerViewer)?.setChaptersDoubleShift(it)
-                XLog.d("finished shiftDoublePages")
+                loggycat { "finished shiftDoublePages" }
                 invalidateOptionsMenu()
             }
         }
@@ -1193,9 +1194,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 ) % 2 != 0
         }
         presenter.viewerChapters?.let {
-            XLog.d("about to reloadChapter call set chaptersDoubleShift")
+            loggycat { "about to reloadChapter call set chaptersDoubleShift" }
             pViewer.setChaptersDoubleShift(it)
-            XLog.d("finished reloadChapter call set chaptersDoubleShift")
+            loggycat { "finished reloadChapter call set chaptersDoubleShift" }
         }
         invalidateOptionsMenu()
     }
@@ -1259,7 +1260,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * this case the activity is closed and a toast is shown to the user.
      */
     fun setInitialChapterError(error: Throwable) {
-        XLog.e(error)
+        loggycat(LogPriority.ERROR, error)
         finish()
         toast(error.message)
     }
@@ -1533,7 +1534,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
         val manga = presenter.manga ?: return
-        val source = presenter.source ?: return
+        val source = presenter.source
         val url = try {
             source.mangaDetailsRequest(manga).url.toString()
         } catch (e: Exception) {
@@ -1560,7 +1561,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 toast(R.string.picture_saved)
             }
             is ReaderPresenter.SaveImageResult.Error -> {
-                XLog.e(result.error)
+                loggycat(LogPriority.ERROR, result.error)
             }
         }
     }
@@ -1685,7 +1686,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     private fun handleIntentAction(intent: Intent): Boolean {
         val pathSegments = intent.data?.pathSegments
         if (pathSegments != null && pathSegments.size > 1) {
-            XLog.e(pathSegments[0])
+            loggycat(LogPriority.ERROR) { pathSegments[0] }
             val id = pathSegments[1]
             val secondary = pathSegments.getOrNull(2)
             if (secondary == "comments") {

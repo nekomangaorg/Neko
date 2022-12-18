@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -8,6 +7,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.runAsObservable
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.concurrent.PriorityBlockingQueue
@@ -19,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import logcat.LogPriority
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -67,7 +68,7 @@ class HttpPageLoader(
                 },
                 { error ->
                     if (error !is InterruptedException) {
-                        XLog.e(error)
+                        loggycat(LogPriority.ERROR, error)
                     }
                 },
             )
@@ -103,12 +104,12 @@ class HttpPageLoader(
      */
     override fun getPages(): Observable<List<ReaderPage>> {
         return runAsObservable(scope) {
-            XLog.d("get pages")
+            loggycat { "get pages" }
             runCatching {
-                XLog.d("try to get page from cache")
+                loggycat { "try to get page from cache" }
                 chapterCache.getPageListFromCache(chapter.chapter)
             }.getOrElse {
-                XLog.d("try to get page from network")
+                loggycat { "try to get page from network" }
                 source.fetchPageList(chapter.chapter)
             }.mapIndexed { index, page ->
                 ReaderPage(index, page.url, page.imageUrl, page.mangaDexChapterId)
@@ -250,7 +251,7 @@ class HttpPageLoader(
                 page.status = Page.READY
                 page
             }.getOrElse {
-                XLog.e("error getting page", it)
+                loggycat(LogPriority.ERROR, it) { "error getting page" }
                 initialPage.apply { status = Page.ERROR }
             }
         }

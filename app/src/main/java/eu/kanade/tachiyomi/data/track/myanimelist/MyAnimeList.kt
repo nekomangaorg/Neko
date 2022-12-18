@@ -3,16 +3,17 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import logcat.LogPriority
 import uy.kohesive.injekt.injectLazy
 
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
@@ -135,7 +136,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
             saveCredentials(username, oauth.access_token)
             true
         } catch (e: Exception) {
-            XLog.e(e)
+            loggycat(LogPriority.ERROR, e)
             logout()
             false
         }
@@ -167,14 +168,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         const val PLAN_TO_READ = 6
         const val REREADING = 7
 
-        const val DEFAULT_STATUS = READING
-        const val DEFAULT_SCORE = 0
-
         private const val SEARCH_ID_PREFIX = "id:"
         private const val SEARCH_LIST_PREFIX = "my:"
-
-        const val BASE_URL = "https://myanimelist.net"
-        const val USER_SESSION_COOKIE = "MALSESSIONID"
-        const val LOGGED_IN_COOKIE = "is_logged_in"
     }
 }

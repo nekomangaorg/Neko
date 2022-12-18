@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.jobs.follows
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -13,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
@@ -39,7 +39,7 @@ class FollowsSyncService {
         completeNotification: () -> Unit,
     ): Int {
         return withContext(Dispatchers.IO) {
-            XLog.d("Starting from MangaDex sync")
+            loggycat { "Starting from MangaDex sync" }
             val count = AtomicInteger(0)
             val countOfAdded = AtomicInteger(0)
 
@@ -52,7 +52,7 @@ class FollowsSyncService {
 
                 val listManga = unfilteredManga.groupBy { FollowStatus.fromStringRes(it.displayTextRes).int }.filter { it.key in syncFollowStatusInts }.values.flatten()
 
-                XLog.d("total number from mangadex is ${listManga.size}")
+                loggycat { "total number from mangadex is ${listManga.size}" }
 
                 val categories = db.getCategories().executeAsBlocking()
                 val defaultCategoryId = preferences.defaultCategory()
@@ -100,7 +100,7 @@ class FollowsSyncService {
         ids: String? = null,
     ) {
         withContext(Dispatchers.IO) {
-            XLog.d("Starting to MangaDex sync")
+            loggycat { "Starting to MangaDex sync" }
             val count = AtomicInteger(0)
             val countNew = AtomicInteger(0)
 

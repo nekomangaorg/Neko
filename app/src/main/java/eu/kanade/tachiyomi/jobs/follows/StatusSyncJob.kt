@@ -9,13 +9,13 @@ import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import logcat.LogPriority
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -96,7 +97,7 @@ class StatusSyncJob(
 
             return@coroutineScope Result.success()
         } catch (e: Exception) {
-            XLog.e("error syncing follows", e)
+            loggycat(LogPriority.ERROR, e) { "error syncing follows" }
             return@coroutineScope Result.failure()
         } finally {
             launchIO {

@@ -5,7 +5,6 @@ import android.os.Environment
 import androidx.compose.ui.state.ToggleableState
 import androidx.core.text.isDigitsOnly
 import com.crazylegend.string.isNotNullOrEmpty
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -52,6 +51,7 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
@@ -75,6 +75,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import logcat.LogPriority
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -184,7 +185,7 @@ class MangaDetailPresenter(
                 updateChapterFlows()
                 updateFilterFlow()
             }.onFailure {
-                XLog.e("Error trying to update manga in all flows", it)
+                this@MangaDetailPresenter.loggycat(LogPriority.ERROR, it) { "Error trying to update manga in all flows" }
             }
         }
         updateTrackingFlows(true)
@@ -210,12 +211,10 @@ class MangaDetailPresenter(
                     }
                     is MangaResult.Success -> {
                         updateAllFlows()
+                        syncChaptersReadStatus()
                         _isRefreshing.value = false
                     }
-                    is MangaResult.UpdatedChapters -> {
-                        updateChapterFlows()
-                        syncChaptersReadStatus()
-                    }
+                    is MangaResult.UpdatedChapters -> Unit
                     is MangaResult.UpdatedManga -> {
                         updateMangaFlow()
                     }
@@ -304,7 +303,7 @@ class MangaDetailPresenter(
     private suspend fun handleTrackingUpdate(trackingUpdate: TrackingUpdate, updateTrackFlows: Boolean = true) {
         when (trackingUpdate) {
             is TrackingUpdate.Error -> {
-                XLog.e("Error", trackingUpdate.exception)
+                loggycat(LogPriority.ERROR, trackingUpdate.exception)
                 _snackbarState.emit(SnackbarState(message = trackingUpdate.message))
             }
             is TrackingUpdate.Success -> {
@@ -369,7 +368,7 @@ class MangaDetailPresenter(
                     async(Dispatchers.IO) {
                         kotlin.runCatching { service.refresh(trackItem.toDbTrack()) }.onFailure {
                             if (it !is CancellationException) {
-                                XLog.e("error refreshing tracker", it)
+                                loggycat(LogPriority.ERROR, it) { "error refreshing tracker" }
                                 delay(3000)
                                 _snackbarState.emit(SnackbarState(message = it.message, fieldRes = service.nameRes(), messageRes = R.string.error_refreshing_))
                             }
@@ -398,7 +397,7 @@ class MangaDetailPresenter(
                     }
                 }
             }.onFailure {
-                XLog.e("Error trying to mark chapters read from MangaDex", it)
+                loggycat(LogPriority.ERROR, it) { "Error trying to mark chapters read from MangaDex" }
                 presenterScope.launch {
                     delay(3000)
                     _snackbarState.emit(SnackbarState("Error trying to mark chapters read from MangaDex $it"))
@@ -452,7 +451,7 @@ class MangaDetailPresenter(
                 try {
                     saveCover(destDir, artwork)
                 } catch (e: java.lang.Exception) {
-                    XLog.e("warn", e)
+                    loggycat(LogPriority.ERROR, e) { "warn" }
                     null
                 }
             } else {
@@ -478,7 +477,7 @@ class MangaDetailPresenter(
                     controller?.applicationContext?.toast(R.string.cover_saved)
                 }
             } catch (e: Exception) {
-                XLog.e("error saving cover", e)
+                loggycat(LogPriority.ERROR, e) { "error saving cover" }
                 launchUI {
                     controller?.applicationContext?.toast("Error saving cover")
                 }
@@ -588,7 +587,7 @@ class MangaDetailPresenter(
             val mergedChapters =
                 db.getChapters(currentManga()).executeOnIO().filter { it.isMergedChapterOfType(mergeType) }
 
-            downloadManager.deleteChapters(mergedChapters, currentManga(), sourceManager.mangaDex)
+            downloadManager.deleteChapters(mergedChapters, currentManga())
             db.deleteChapters(mergedChapters).executeOnIO()
             updateAllFlows()
         }
@@ -601,7 +600,6 @@ class MangaDetailPresenter(
             }
 
             runCatching {
-
                 MergeType.getSource(mergeType, sourceManager)
                 val mergedMangaResults = MergeType.getSource(mergeType, sourceManager)
                     .searchManga(query)
@@ -614,7 +612,7 @@ class MangaDetailPresenter(
                     }
                 }
             }.getOrElse { error ->
-                XLog.e(error)
+                loggycat(LogPriority.ERROR, error)
                 _trackMergeState.update {
                     it.copy(mergeSearchResult = MergeSearchResult.Error(error.message ?: "Error looking up information"))
                 }
@@ -1307,9 +1305,9 @@ class MangaDetailPresenter(
             if (chapterItems.isNotEmpty()) {
                 val delete = {
                     if (isEverything) {
-                        downloadManager.deleteManga(currentManga(), sourceManager.mangaDex)
+                        downloadManager.deleteManga(currentManga())
                     } else {
-                        downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, currentManga(), sourceManager.mangaDex)
+                        downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, currentManga())
                     }
                 }
                 if (canUndo) {
@@ -1457,7 +1455,7 @@ class MangaDetailPresenter(
                                 updateTrackingFlows()
                             }
                         }.onFailure {
-                            XLog.e("Failed to update track chapter marked as read", it)
+                            loggycat(LogPriority.ERROR, it) { "Failed to update track chapter marked as read" }
                             presenterScope.launch {
                                 _snackbarState.emit(SnackbarState("Error trying to update tracked chapter marked as read ${it.message}"))
                             }

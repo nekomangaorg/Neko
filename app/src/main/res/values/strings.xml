@@ -813,7 +813,7 @@
     <string name="data_management">Data Management</string>
     <string name="crash_logs">Crash logs</string>
     <string name="dump_crash_logs">Dump crash logs</string>
-    <string name="saves_error_logs">Saves error logs to a file for sharing with the developers</string>
+    <string name="saves_error_logs">Saves error logs to a file for sharing with the developers.  If verbose logging is enabled, extra debug logs will be included.</string>
     <string name="about_dont_kill_my_app">Some manufacturers have additional app restrictions that kill background services. This website has more info on how to fix it.</string>
     <string name="crash_log_saved">Crash logs saved</string>
     <string name="network">Network</string>
@@ -1261,6 +1261,12 @@
     <string name="try_similar_after_click">icon on the manga info screen</string>
 
 
+    <!-- Crash screen -->
+    <string name="crash_screen_title">An Unexpected Error Occurred</string>
+    <string name="crash_screen_description">%s ran into an unexpected error. We suggest you screenshot this message, dump the crash logs, and then share it the Neko channel on Discord.</string>
+    <string name="crash_screen_restart_application">Restart the application</string>
+
+
     <!-- Follows -->
     <string name="status_channel">Manga status sync</string>
     <string name="syncing_follows">Begin syncing follows</string>
@@ -1352,8 +1358,8 @@
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>
-    <string name="log_level">"Log level"</string>
-    <string name="log_level_summary">Changing this can impact app performance. Force-restart app after changing. Log file is stored at /Neko/logs.</string>
+    <string name="verbose_logging">Verbose Logging</string>
+    <string name="verbose_logging_summary">Print verbose logs to system log (reduces app performance)</string>
 
     <string name="force_download_cache_refresh">Refresh the download cache</string>
     <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use after you migrated to v5 or if you copied downloads outside of this app</string>

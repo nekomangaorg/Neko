@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.system.loggycat
 import java.util.Date
 import java.util.TreeSet
 import uy.kohesive.injekt.Injekt
@@ -31,11 +32,12 @@ fun syncChaptersWithSource(
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
     // no need to handle cache in dedupe because rawsource already has the correct chapters
-    val sortedChapters = reorderChapters(rawSourceChapters, manga, db)
+    val sortedChapters = reorderChapters(rawSourceChapters, manga)
 
     val sourceChapters = sortedChapters.mapIndexed { i, sChapter ->
         Chapter.create().apply {
             copyFrom(sChapter)
+            loggycat(tag = "ChapterSourceSync") { "${this.scanlator} ${this.chapter_txt} sourceOrder=${i}" }
             manga_id = manga.id
             source_order = i
         }
@@ -113,9 +115,6 @@ fun syncChaptersWithSource(
         dupes.addAll(toDelete)
         toDelete = dupes.toList()
     }
-
-    // Fix order in source.
-    db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
 
     // Return if there's nothing to add, delete or change, avoiding unnecessary db transactions.
     if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {

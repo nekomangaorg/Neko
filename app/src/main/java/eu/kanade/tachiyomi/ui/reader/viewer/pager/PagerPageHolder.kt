@@ -19,7 +19,6 @@ import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -34,6 +33,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
@@ -48,6 +48,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -513,7 +514,7 @@ class PagerPageHolder(
                                 try {
                                     pageView?.background = setBG(bytesArray)
                                 } catch (e: Exception) {
-                                    XLog.e(e.localizedMessage)
+                                    loggycat(LogPriority.ERROR, e)
                                     pageView?.background = ColorDrawable(Color.WHITE)
                                 } finally {
                                     page.bg = pageView?.background
@@ -727,7 +728,7 @@ class PagerPageHolder(
                 BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             } catch (e: Exception) {
                 imageStream.close()
-                XLog.e("Cannot split page ${e.message}")
+                loggycat(LogPriority.ERROR, e) { "Cannot split page" }
                 return imageBytes.inputStream()
             }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
@@ -750,7 +751,7 @@ class PagerPageHolder(
                     imageStream.close()
                     page.longPage = true
                     splitDoublePages()
-                    XLog.e("Cannot split page ${e.message}")
+                    loggycat(LogPriority.ERROR, e) { "Cannot split page" }
                     return imageBytes.inputStream()
                 }
                 val height = imageBitmap.height
@@ -795,7 +796,7 @@ class PagerPageHolder(
             imageStream.close()
             page.fullPage = true
             splitDoublePages()
-            XLog.e("Cannot combine pages ${e.message}")
+            loggycat(LogPriority.ERROR, e) { "Cannot combine pages" }
             return imageBytes.inputStream()
         }
         scope?.launchUI { progressBar.setProgress(96) }
@@ -819,7 +820,7 @@ class PagerPageHolder(
             extraPage?.fullPage = true
             page.isolatedPage = true
             splitDoublePages()
-            XLog.e("Cannot combine pages ${e.message}")
+            loggycat(LogPriority.ERROR, e) { "Cannot combine pages" }
             return imageBytes.inputStream()
         }
         scope?.launchUI { progressBar.setProgress(97) }

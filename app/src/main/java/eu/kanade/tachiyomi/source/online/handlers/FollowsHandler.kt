@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
@@ -26,11 +25,13 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
@@ -65,7 +66,7 @@ class FollowsHandler {
                         Ok(allFollowsParser(allResults, readingFuture.await()))
                     }
             }.getOrElse {
-                XLog.e("Error fetching all follows", it)
+                loggycat(LogPriority.ERROR, it) { "Error fetching all follows" }
                 Err(ResultError.Generic("Unknown error fetching all follows"))
             }
         }

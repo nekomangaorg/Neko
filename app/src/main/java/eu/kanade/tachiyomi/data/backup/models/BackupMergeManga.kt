@@ -12,7 +12,7 @@ data class BackupMergeManga(
     @ProtoNumber(3) var coverUrl: String = "",
     @ProtoNumber(4) var mergeType: Int,
 
-    ) {
+) {
     fun toMergeMangaImpl(): MergeMangaImpl {
         return MergeMangaImpl(
             mangaId = 0L,

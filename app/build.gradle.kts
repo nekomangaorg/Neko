@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 174
-    const val versionName = "2.12.0"
+    const val versionCode = 176
+    const val versionName = "2.12.2"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -198,7 +198,7 @@ dependencies {
     implementation(libs.bundles.coil)
 
     // Logging
-    implementation("com.elvishew:xlog:1.11.0")
+    implementation(libs.logcat)
 
     // UI
     implementation(libs.bundles.fastadapter)
@@ -271,7 +271,7 @@ tasks {
     }
 
     preBuild {
-        //dependsOn(formatKotlin)
+        // dependsOn(formatKotlin)
     }
 }
 
