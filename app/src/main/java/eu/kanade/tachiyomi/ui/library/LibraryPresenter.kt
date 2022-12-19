@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -94,6 +95,7 @@ class LibraryPresenter(
         get() = loggedServices.isNotEmpty()
 
     private val source by lazy { Injekt.get<SourceManager>().mangaDex }
+    private val loginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
     /** Current categories of the library. */
     var categories: List<Category> = emptyList()
@@ -385,8 +387,8 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
-            } else {
+                    (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
+                } else {
                     filterMangaType != item.manga.seriesType()
                 }
             ) {
@@ -414,9 +416,9 @@ class LibraryPresenter(
             val hasTrack = loggedServices.any { service ->
                 tracks.any {
                     if (service.isMdList() && (
-                        source.isLogged()
-                            .not() || it.status == FollowStatus.UNFOLLOWED.int
-                        )
+                            loginHelper.isLoggedIn()
+                                .not() || it.status == FollowStatus.UNFOLLOWED.int
+                            )
                     ) {
                         false
                     } else {
@@ -737,8 +739,10 @@ class LibraryPresenter(
 
     private fun getCustomMangaItems(
         libraryManga: List<LibraryManga>,
-    ): Pair<List<LibraryItem>,
-        List<Category>,> {
+    ): Pair<
+        List<LibraryItem>,
+        List<Category>,
+        > {
         val tagItems: MutableMap<String, LibraryHeaderItem> = mutableMapOf()
 
         // internal function to make headers

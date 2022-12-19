@@ -136,6 +136,11 @@ object Migrations {
                 LibraryPresenter.updateMergeMangaDBAndFiles()
             }
 
+            if (oldVersion < 177) {
+                preferences.removeTokens()
+                //preferences.setSourceCredentials(source = )
+            }
+
             return true
         }
         return false

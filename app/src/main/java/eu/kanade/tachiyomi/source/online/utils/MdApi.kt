@@ -2,10 +2,6 @@ package eu.kanade.tachiyomi.source.online.utils
 
 object MdApi {
     const val baseUrl = "https://api.mangadex.org"
-    const val login = "/auth/login"
-    const val checkToken = "/auth/check"
-    const val refreshToken = "/auth/refresh"
-    const val logout = "/auth/logout"
     const val manga = "/manga"
     const val list = "/list"
     const val statistics = "/statistics/manga"
@@ -17,6 +13,12 @@ object MdApi {
     const val readingStatusForAllManga = "/manga/status"
     const val rating = "/rating"
     const val atHomeServer = "/at-home/server"
-
     const val legacyMapping = "/legacy/mapping"
+
+    const val baseAuthUrl = "https://auth.mangadex.org"
+    private const val auth = "/realms/mangadex/protocol/openid-connect"
+    const val login = "$auth/auth"
+    const val logout = "$auth/logout"
+    const val token = "$auth/token"
 }
+

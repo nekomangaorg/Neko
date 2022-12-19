@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -98,6 +99,7 @@ class MangaDetailPresenter(
     val downloadManager: DownloadManager = Injekt.get(),
     chapterItemFilter: ChapterItemFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
+    val loginHelper: MangaDexLoginHelper = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
@@ -385,7 +387,7 @@ class MangaDetailPresenter(
 
     private fun syncChaptersReadStatus() {
         presenterScope.launchIO {
-            if (!preferences.readingSync() || !sourceManager.mangaDex.isLogged() || !isOnline()) return@launchIO
+            if (!preferences.readingSync() || !loginHelper.isLoggedIn() || !isOnline()) return@launchIO
 
             runCatching {
                 statusHandler.getReadChapterIds(currentManga().uuid()).collect { chapterIds ->

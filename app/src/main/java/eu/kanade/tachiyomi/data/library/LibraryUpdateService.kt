@@ -356,9 +356,6 @@ class LibraryUpdateService(
         if (mangaToUpdateMap[source] == null) return false
         var currentCount = 0
         var hasDownloads = false
-        if (sourceManager.mangaDex.isLogged()) {
-            mangaDexLoginHelper.reAuthIfNeeded()
-        }
 
         while (currentCount < mangaToUpdateMap[source]!!.size) {
             val manga = mangaToUpdateMap[source]!![currentCount]
@@ -437,7 +434,7 @@ class LibraryUpdateService(
                 withIOContext {
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                        .get()
+                            .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                         // load new covers in background
@@ -516,7 +513,7 @@ class LibraryUpdateService(
 
             coroutineScope {
                 launch {
-                    if (preferences.readingSync() && source.isLogged()) {
+                    if (preferences.readingSync() && mangaDexLoginHelper.isLoggedIn()) {
                         val dbChapters = db.getChapters(manga).executeAsBlocking()
                         statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.url))
                             .collect { chapterIds ->
@@ -563,7 +560,7 @@ class LibraryUpdateService(
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) {
         loggycat { "Attempting to update reading statuses" }
         if (mangaList.isNullOrEmpty()) return
-        if (sourceManager.mangaDex.isLogged() && job?.isCancelled == false) {
+        if (mangaDexLoginHelper.isLoggedIn() && job?.isCancelled == false) {
             runCatching {
                 val readingStatus = statusHandler.fetchReadingStatusForAllManga()
                 if (readingStatus.isNotEmpty()) {

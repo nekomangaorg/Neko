@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexCdnService
+import eu.kanade.tachiyomi.network.services.MangaDexOAuthService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.SimilarService
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -98,19 +99,21 @@ class NetworkHelper(val context: Context) {
                 val logger: HttpLoggingInterceptor.Logger =
                     HttpLoggingInterceptor.Logger { message ->
                         try {
-                            if (message.contains("username") && message.contains("password")) {
-                                loggycat(tag = "||NEKO-NETWORK-JSON") { "Not logging request because it contained username and password" }
+                            if (message.contains("grant_type=")) {
+                                loggycat(tag = "|") { "Not logging request because it contained sessionToken || refreshToken" }
                             } else {
                                 val element = prettyPrintJson.parseToJsonElement(message)
-                                loggycat(tag = "||NEKO-NETWORK-JSON") { prettyPrintJson.encodeToString(element) }
+                                loggycat(tag = "|") { prettyPrintJson.encodeToString(element) }
                             }
                         } catch (ex: Exception) {
-                            loggycat(tag = "||NEKO-NETWORK-JSON") { message }
+                            loggycat(tag = "|") { message }
                         }
                     }
                 addInterceptor(
                     HttpLoggingInterceptor(logger).apply {
-                            level = HttpLoggingInterceptor.Level.BODY
+                        level = HttpLoggingInterceptor.Level.BASIC
+                        redactHeader("Authorization")
+
                     },
                 )
             }.build()
@@ -127,7 +130,7 @@ class NetworkHelper(val context: Context) {
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
         return buildRateLimitedClient().newBuilder()
             .addNetworkInterceptor(authInterceptor())
-            .authenticator(TokenAuthenticator(mangaDexLoginHelper)).build()
+            .authenticator(MangaDexTokenAuthenticator(mangaDexLoginHelper)).build()
     }
 
     private fun buildCloudFlareClient(): OkHttpClient {
@@ -173,6 +176,10 @@ class NetworkHelper(val context: Context) {
     val authService: MangaDexAuthorizedUserService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
         .client(authClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
         .create(MangaDexAuthorizedUserService::class.java)
+
+    val oauthService: MangaDexOAuthService = jsonRetrofitClient.baseUrl(MdApi.baseAuthUrl)
+        .client(authClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
+        .create(MangaDexOAuthService::class.java)
 
     val similarService: SimilarService =
         jsonRetrofitClient.client(

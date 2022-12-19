@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
@@ -27,11 +28,12 @@ import uy.kohesive.injekt.api.get
 
 class BrowseRepository(
     private val mangaDex: MangaDex = Injekt.get<SourceManager>().mangaDex,
+    private val loginHelper: MangaDexLoginHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val preferenceHelper: PreferencesHelper = Injekt.get(),
 ) {
 
-    fun isLoggedIn() = mangaDex.isLogged()
+    fun isLoggedIn() = loginHelper.isLoggedIn()
 
     suspend fun getRandomManga(): Result<DisplayManga, ResultError> {
         return mangaDex.getRandomManga().andThen {

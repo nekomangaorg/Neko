@@ -5,7 +5,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.binding.binding
-import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -31,7 +30,6 @@ import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.collections.immutable.toImmutableList
@@ -191,7 +189,7 @@ open class MangaDex : HttpSource() {
     }
 
     override suspend fun fetchImage(page: Page): Response {
-        return imageHandler.getImage(page, isLogged())
+        return imageHandler.getImage(page, loginHelper.isLoggedIn())
     }
 
     suspend fun fetchAllFollows(): Result<List<SourceManga>, ResultError> {
@@ -207,21 +205,10 @@ open class MangaDex : HttpSource() {
     }
 
     suspend fun fetchTrackingInfo(url: String): Track {
-        if (!isLogged()) {
+        if (!loginHelper.isLoggedIn()) {
             throw Exception("Not Logged in to MangaDex")
         }
         return followsHandler.fetchTrackingInfo(url)
-    }
-
-    override fun isLogged(): Boolean {
-        return !preferences.sessionToken().isNullOrBlank() &&
-            !preferences.refreshToken().isNullOrBlank()
-    }
-
-    override suspend fun login(
-        username: String,
-        password: String,
-    ): Boolean {
     }
 
     suspend fun checkIfUp(): Boolean {
@@ -229,15 +216,6 @@ open class MangaDex : HttpSource() {
             true
             // val response = network.client.newCall(GET(MdUtil.apiUrl + MdUtil.apiManga + 1)).await()
             // response.isSuccessful
-        }
-    }
-
-    override suspend fun logout(): Logout {
-        return withContext(Dispatchers.IO) {
-            network.authService.logout().onFailure {
-                this.log("trying to logout")
-            }
-            return@withContext Logout(true)
         }
     }
 

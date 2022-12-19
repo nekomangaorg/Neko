@@ -11,10 +11,8 @@ import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ListDto
-import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
-import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
@@ -115,8 +113,4 @@ interface MangaDexService {
 
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): ApiResponse<ResultDto>
-
-    @Headers("Cache-Control: no-cache")
-    @POST(MdApi.refreshToken)
-    suspend fun refreshToken(@Body request: RefreshTokenDto): ApiResponse<LoginResponseDto>
 }

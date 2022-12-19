@@ -12,11 +12,11 @@ object MdConstants {
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
 
     object Login {
-        const val baseAuthUrl = "https://auth.mangadex.dev/realms/mangadex/protocol/openid-connect"
-        const val tokenUrl = "$baseAuthUrl/token"
-        const val tokenInspectionUrl = "$tokenUrl/introspect"
         const val redirectUri = "neko://mangadex-auth"
-        const val clientId = "thirdparty-oauth-client"
+        const val clientId = "neko"
+        const val authorizationCode = "authorization_code"
+        const val refreshToken = "refresh_token"
+
         fun authUrl(codeVerifier: String): String {
             val bytes = codeVerifier.toByteArray()
             val messageDigest = MessageDigest.getInstance("SHA-256")
@@ -25,7 +25,7 @@ object MdConstants {
             val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
             val codeChallenge = Base64.encodeToString(digest, encoding)
 
-            return "$baseAuthUrl/auth".toUri().buildUpon()
+            return MdApi.baseAuthUrl + MdApi.login.toUri().buildUpon()
                 .appendQueryParameter("client_id", clientId)
                 .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("redirect_uri", redirectUri)
@@ -33,8 +33,6 @@ object MdConstants {
                 .appendQueryParameter("code_challenge_method", "S256")
                 .build().toString()
         }
-
-        const val logoutUrl = "https://auth.mangadex.dev/realms/mangadex/protocol/openid-connect/logout"
     }
 
     const val currentSeasonalId = "4be9338a-3402-4f98-b467-43fb56663927"
