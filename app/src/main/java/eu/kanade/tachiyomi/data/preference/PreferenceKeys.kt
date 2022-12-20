@@ -294,7 +294,7 @@ object PreferenceKeys {
 
     const val lastRefreshTokenTime = "mangadex_refresh_token_time"
 
-    const val refreshTokenCreatedTime = "mangadex_refresh_token_created_time"
+    const val mangadexCodeVerifier = "mangadex_code_verifier"
 
     const val mangadexUserName = "mangadex_username"
 

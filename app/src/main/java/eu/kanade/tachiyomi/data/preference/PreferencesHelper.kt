@@ -575,6 +575,7 @@ class PreferencesHelper(val context: Context) {
             .remove(Keys.sessionToken)
             .remove(Keys.refreshToken)
             .remove(Keys.lastRefreshTokenTime)
+            .remove(Keys.mangadexCodeVerifier)
             .apply()
     }
 
@@ -588,16 +589,11 @@ class PreferencesHelper(val context: Context) {
             .putString(Keys.sessionToken, session)
             .putString(Keys.refreshToken, refresh)
             .putLong(Keys.lastRefreshTokenTime, time)
-            .putLong(Keys.refreshTokenCreatedTime, time)
             .apply()
     }
 
     fun lastRefreshTime(): Long {
         return prefs.getLong(Keys.lastRefreshTokenTime, 0)
-    }
-
-    fun refreshTokenCreatedTime(): Long {
-        return prefs.getLong(Keys.refreshTokenCreatedTime, 0)
     }
 
     fun readingSync(): Boolean = prefs.getBoolean(Keys.readingSync, false)
@@ -606,7 +602,7 @@ class PreferencesHelper(val context: Context) {
         flowPrefs.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
 
     fun codeVerifer(): String {
-        val codeVerifier = prefs.getString("code_verifier", null)
+        val codeVerifier = prefs.getString(Keys.mangadexCodeVerifier, null)
         return when (codeVerifier == null) {
             false -> codeVerifier
             true -> {
@@ -615,7 +611,7 @@ class PreferencesHelper(val context: Context) {
                 secureRandom.nextBytes(bytes)
                 val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
                 val newCodeVerifier = Base64.encodeToString(bytes, encoding)
-                prefs.edit().putString("code_verifier", newCodeVerifier).apply()
+                prefs.edit().putString(Keys.mangadexCodeVerifier, newCodeVerifier).apply()
                 newCodeVerifier
             }
 
