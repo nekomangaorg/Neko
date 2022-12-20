@@ -113,6 +113,10 @@ jobs:
           sha=`sha256sum neko-x86.apk | awk '{ print $1 }'`
           echo "APK_X86_SHA=$sha" >> $GITHUB_ENV
 
+          cp app/build/outputs/apk/standard/release/Neko-standard-x86_64-release-unsigned-signed.apk neko-x86_64.apk
+          sha=`sha256sum neko-x86_64.apk | awk '{ print $1 }'`
+          echo "APK_X86_64_SHA=$sha" >> $GITHUB_ENV
+
       - name: Delete any draft releases and last latest tag
         uses: dev-drprasad/delete-tag-and-release@v0.2.0
         with:
@@ -138,7 +142,9 @@ jobs:
             | Universal | ${{ env.APK_UNIVERSAL_SHA }}
             | arm64-v8a | ${{ env.APK_ARM64_V8A_SHA }}
             | armeabi-v7a | ${{ env.APK_ARMEABI_V7A_SHA }}
-            | x86 | ${{ env.APK_X86_SHA }} |
+            | x86 | ${{ env.APK_X86_SHA }}
+            | x86_64 | ${{ env.APK_X86_64_SHA }}
+
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
           replacesArtifacts: true
