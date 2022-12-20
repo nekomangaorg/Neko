@@ -823,7 +823,7 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                binding.libraryGridRecycler.recycler.translationY
+                    binding.libraryGridRecycler.recycler.translationY
         } else {
             binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
         }
@@ -864,8 +864,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                newOffset > -1
-            } else {
+                    newOffset > -1
+                } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -1411,10 +1411,11 @@ class LibraryController(
                 if (adapter.mode != SelectableAdapter.Mode.MULTI) {
                     adapter.mode = SelectableAdapter.Mode.MULTI
                 }
-                launchUI {
+                viewScope.launchUI {
                     delay(100)
                     adapter.isLongPressDragEnabled = false
                 }
+
                 positions.forEach { position ->
                     adapter.addSelection(position)
                     (binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
@@ -1587,8 +1588,8 @@ class LibraryController(
         val fromItem = adapter.getItem(fromPosition)
         val toItem = adapter.getItem(toPosition)
         if (binding.libraryGridRecycler.recycler.layoutManager !is StaggeredGridLayoutManager && (
-            (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
-            )
+                (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
+                )
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
                 0,

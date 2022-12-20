@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader
 
+import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import android.app.Application
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -46,6 +47,7 @@ import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -58,7 +60,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
-import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import rx.Completable
 import rx.Observable
@@ -1018,8 +1019,7 @@ class ReaderPresenter(
      */
     private fun updateTrackChapterAfterReading(readerChapter: ReaderChapter) {
         if (!preferences.autoUpdateTrack()) return
-
-        launchIO {
+        presenterScope.launchNonCancellable {
             val newChapterRead = readerChapter.chapter.chapter_number
             updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
         }

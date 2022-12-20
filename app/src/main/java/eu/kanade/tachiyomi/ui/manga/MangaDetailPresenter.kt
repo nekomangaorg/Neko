@@ -51,6 +51,7 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.toast
@@ -64,7 +65,6 @@ import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -1301,9 +1301,7 @@ class MangaDetailPresenter(
      * Delete the list of chapters
      */
     fun deleteChapters(chapterItems: List<ChapterItem>, isEverything: Boolean = false, canUndo: Boolean = false) {
-        // do on global scope cause we don't want exiting the manga to prevent the deleting
-
-        launchIO {
+        presenterScope.launchNonCancellable {
             if (chapterItems.isNotEmpty()) {
                 val delete = {
                     if (isEverything) {
@@ -1475,7 +1473,7 @@ class MangaDetailPresenter(
                 if (syncRead != null && !skipSync && preferences.readingSync()) {
                     val chapterIds = newChapterItems.filter { !it.isMergedChapter() }.map { it.mangaDexChapterId }
                     if (chapterIds.isNotEmpty()) {
-                        GlobalScope.launchIO {
+                        presenterScope.launchNonCancellable {
                             statusHandler.marksChaptersStatus(
                                 currentManga().uuid(),
                                 chapterIds,

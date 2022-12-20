@@ -167,7 +167,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
         canDismissSnackBar = false
-        launchUI {
+        lifecycleScope.launchUI {
             delay(1000)
             if (this@MainActivity.snackBar == snackBar) {
                 canDismissSnackBar = true
@@ -317,9 +317,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                    continueSwitchingTabs = true
-                    this@MainActivity.nav.selectedItemId = id
-                }
+                        continueSwitchingTabs = true
+                        this@MainActivity.nav.selectedItemId = id
+                    }
                 ) {
                     return@setOnItemSelectedListener false
                 }
@@ -363,9 +363,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
-                rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                ) &&
+                    rootSearchController is RootSearchInterface ||
+                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                    ) &&
                 rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
@@ -509,7 +509,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
         backPressedCallback?.isEnabled =
             (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) ||
-            router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
+                router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
     }
 
     override fun onTitleChanged(title: CharSequence?, color: Int) {
@@ -653,7 +653,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
-        launchUI {
+        lifecycleScope.launchUI {
             val scale = Settings.Global.getFloat(
                 contentResolver,
                 Settings.Global.ANIMATOR_DURATION_SCALE,
@@ -1210,7 +1210,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     override fun downloadStatusChanged(downloading: Boolean) {
         val hasQueue = downloading || downloadManager.hasQueue()
-        launchUI {
+        lifecycleScope.launchUI {
             if (hasQueue) {
                 nav.getOrCreateBadge(R.id.nav_recents)
                 showDLQueueTutorial()

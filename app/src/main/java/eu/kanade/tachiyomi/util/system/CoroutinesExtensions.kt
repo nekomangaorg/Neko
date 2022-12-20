@@ -50,6 +50,9 @@ fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
 fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.Main, block = block)
 
+fun CoroutineScope.launchNonCancellable(block: suspend CoroutineScope.() -> Unit): Job =
+    launchIO { withContext(NonCancellable, block) }
+
 fun CoroutineScope.launchDelayed(timeMillis: Long = 150L, block: () -> Unit) {
     this.launch {
         delay(timeMillis)

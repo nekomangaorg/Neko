@@ -54,6 +54,7 @@ import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.util.Calendar
 import java.util.Date
@@ -62,6 +63,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -1011,7 +1013,7 @@ class LibraryPresenter(
 
     /** Remove manga from the library and delete the downloads */
     fun confirmDeletion(mangaList: List<Manga>) {
-        launchIO {
+        presenterScope.launchNonCancellable {
             val mangaToDelete = mangaList.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
                 coverCache.deleteFromCache(manga)
@@ -1259,7 +1261,7 @@ class LibraryPresenter(
     fun undoMarkReadStatus(
         mangaList: HashMap<Manga, List<Chapter>>,
     ) {
-        launchIO {
+        presenterScope.launchNonCancellable {
             mangaList.forEach { (_, chapters) ->
                 db.updateChaptersProgress(chapters).executeAsBlocking()
             }
@@ -1410,7 +1412,7 @@ class LibraryPresenter(
 
             db.inTransaction {
                 mergeManga.forEach { manga ->
-                    launchIO {
+                    GlobalScope.launchIO {
                         downloadProvider.renameChapterFoldersForLegacyMerged(manga)
                     }
                     db.insertMergeManga(

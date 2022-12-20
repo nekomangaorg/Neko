@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -24,6 +23,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -428,8 +428,7 @@ class RecentsPresenter(
      * @param chapter the chapter to delete.
      */
     fun deleteChapter(chapter: Chapter, manga: Manga, update: Boolean = true) {
-        val source = Injekt.get<SourceManager>().mangaDex
-        launchIO {
+        presenterScope.launchNonCancellable {
             downloadManager.deleteChapters(listOf(chapter), manga)
         }
         if (update) {
