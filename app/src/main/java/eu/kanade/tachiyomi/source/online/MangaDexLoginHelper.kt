@@ -128,7 +128,7 @@ class MangaDexLoginHelper {
                     body = formBody,
                 ),
             ).await()
-            // invalidate()
+            invalidate()
         }.exceptionOrNull()
 
         return when (error == null) {
