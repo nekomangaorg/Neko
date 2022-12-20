@@ -140,7 +140,6 @@ object Migrations {
             if (oldVersion < 177) {
                 preferences.removeTokens()
                 preferences.removeOldCredentials(MangaDex())
-                //preferences.setSourceCredentials(source = )
             }
 
             return true
