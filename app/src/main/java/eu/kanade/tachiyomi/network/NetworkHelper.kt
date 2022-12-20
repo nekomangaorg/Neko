@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexCdnService
-import eu.kanade.tachiyomi.network.services.MangaDexOAuthService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.SimilarService
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -178,10 +177,6 @@ class NetworkHelper(val context: Context) {
     val authService: MangaDexAuthorizedUserService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
         .client(authClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
         .create(MangaDexAuthorizedUserService::class.java)
-
-    val oauthService: MangaDexOAuthService = jsonRetrofitClient.baseUrl(MdApi.baseAuthUrl)
-        .client(authClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
-        .create(MangaDexOAuthService::class.java)
 
     val similarService: SimilarService =
         jsonRetrofitClient.client(

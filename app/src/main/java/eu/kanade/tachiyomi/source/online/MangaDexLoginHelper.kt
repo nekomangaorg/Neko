@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
-import eu.kanade.tachiyomi.network.services.MangaDexOAuthService
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -21,7 +20,6 @@ import uy.kohesive.injekt.injectLazy
 class MangaDexLoginHelper {
 
     private val networkHelper: NetworkHelper by lazy { Injekt.get() }
-    private val oauthService: MangaDexOAuthService by lazy { Injekt.get<NetworkHelper>().oauthService }
     private val preferences: PreferencesHelper by injectLazy()
 
     val tag = "||LoginHelper"
@@ -68,57 +66,11 @@ class MangaDexLoginHelper {
                 false
             }
         }
-
-        /* loggycat(LogPriority.INFO, tag = tag) { "attempting to extend session" }
-
-         val fields = baseFields + mapOf(
-             "grant_type" to "refresh_token",
-             "refresh_token" to refreshToken,
-             "code_verifier" to preferences.codeVerifer(),
-         )
-
-         val response = oauthService.retrieveTokens(fields)
-         response.onSuccess {
-             preferences.setTokens(
-                 this.data.refreshToken,
-                 this.data.accessToken,
-             )
-         }.onFailure {
-             this.log("Error extending session")
-         }
-
-         return response.isSuccess*/
     }
 
     /** Login given the generated authorization code
      */
     suspend fun login(authorizationCode: String): Boolean {
-
-        /*  val fields = baseFields + mapOf(
-              "grant_type" to MdConstants.Login.authorizationCode,
-              "code" to authorizationCode,
-              "code_verifier" to preferences.codeVerifer(),
-          )
-          val response = oauthService.retrieveTokens(fields)
-  */
-        /*val authRequestDto = AuthRequestDto(
-            grantType = MdConstants.Login.authorizationCode,
-            clientId = MdConstants.Login.clientId,
-            code = authorizationCode,
-            redirectUri = MdConstants.Login.redirectUri,
-            codeVerifier = preferences.codeVerifer(),
-        )
-        response.onSuccess {
-            preferences.setTokens(
-                this.data.refresh_token,
-                this.data.access_token,
-            )
-        }.onFailure {
-            this.log("Error logging in")
-        }
-
-        return response.isSuccess
-        */
 
         val loginFormBody = FormBody.Builder()
             .add("client_id", MdConstants.Login.clientId)
@@ -152,9 +104,6 @@ class MangaDexLoginHelper {
                 false
             }
         }
-    }
-
-    suspend fun lookupUserName() {
     }
 
     suspend fun logout(): Boolean {
@@ -206,6 +155,4 @@ class MangaDexLoginHelper {
     fun sessionToken(): String {
         return preferences.sessionToken() ?: ""
     }
-
-    private val baseFields = mapOf("client_id" to MdConstants.Login.clientId, "redirect_uri" to MdConstants.Login.redirectUri)
 }
