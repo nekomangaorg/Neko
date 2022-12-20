@@ -99,11 +99,11 @@ class NetworkHelper(val context: Context) {
                 val logger: HttpLoggingInterceptor.Logger =
                     HttpLoggingInterceptor.Logger { message ->
                         try {
-                            if (message.contains("grant_type=")) {
+                            if (message.contains("grant_type=") || message.contains("access_token\":")) {
                                 loggycat(tag = "|") { "Not logging request because it contained sessionToken || refreshToken" }
                             } else {
                                 val element = prettyPrintJson.parseToJsonElement(message)
-                                loggycat(tag = "|") { prettyPrintJson.encodeToString(element) }
+                                element.loggycat(tag = "|") { prettyPrintJson.encodeToString(element) }
                             }
                         } catch (ex: Exception) {
                             loggycat(tag = "|") { message }
@@ -111,7 +111,9 @@ class NetworkHelper(val context: Context) {
                     }
                 addInterceptor(
                     HttpLoggingInterceptor(logger).apply {
-                        level = HttpLoggingInterceptor.Level.BASIC
+                        if (preferences.verboseLogging()) {
+                            level = HttpLoggingInterceptor.Level.BASIC
+                        }
                         redactHeader("Authorization")
 
                     },

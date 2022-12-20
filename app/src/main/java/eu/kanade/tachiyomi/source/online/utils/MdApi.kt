@@ -20,5 +20,6 @@ object MdApi {
     const val login = "$auth/auth"
     const val logout = "$auth/logout"
     const val token = "$auth/token"
+    const val userInfo = "$auth/userinfo"
 }
 

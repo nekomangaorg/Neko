@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.AppUpdateJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
+import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -138,6 +139,7 @@ object Migrations {
 
             if (oldVersion < 177) {
                 preferences.removeTokens()
+                preferences.removeOldCredentials(MangaDex())
                 //preferences.setSourceCredentials(source = )
             }
 

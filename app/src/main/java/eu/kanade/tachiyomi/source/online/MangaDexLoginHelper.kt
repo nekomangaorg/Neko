@@ -120,19 +120,28 @@ class MangaDexLoginHelper {
         return response.isSuccess
         */
 
-        val formBody = FormBody.Builder()
+        val loginFormBody = FormBody.Builder()
             .add("client_id", MdConstants.Login.clientId)
             .add("grant_type", MdConstants.Login.authorizationCode)
             .add("code", authorizationCode)
             .add("code_verifier", preferences.codeVerifer())
             .add("redirect_uri", MdConstants.Login.redirectUri)
             .build()
+
         val error = kotlin.runCatching {
-            val data = networkHelper.client.newCall(POST(MdApi.baseAuthUrl + MdApi.token, body = formBody)).await().parseAs<LoginResponseDto>()
+            val data = networkHelper.client.newCall(POST(MdApi.baseAuthUrl + MdApi.token, body = loginFormBody)).await().parseAs<LoginResponseDto>()
             preferences.setTokens(
                 data.refreshToken,
                 data.accessToken,
             )
+            /*val introspect = networkHelper.client.newCall(
+                GET(
+                    url = MdApi.baseAuthUrl + MdApi.userInfo,
+                    headers = Headers.Builder().add("Authorization", "Bearer $data.accessToken").build(),
+                    //  body = introspectFormBody,
+                ),
+            ).await()*/
+
         }.exceptionOrNull()
 
         return when (error == null) {
@@ -143,6 +152,9 @@ class MangaDexLoginHelper {
                 false
             }
         }
+    }
+
+    suspend fun lookupUserName() {
     }
 
     suspend fun logout(): Boolean {
@@ -183,6 +195,7 @@ class MangaDexLoginHelper {
      * Clears the session and refresh tokens
      */
     fun invalidate() {
+        preferences.removeMangaDexUserName()
         preferences.removeTokens()
     }
 

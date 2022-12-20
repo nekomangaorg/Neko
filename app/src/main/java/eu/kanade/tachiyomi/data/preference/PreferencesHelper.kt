@@ -242,10 +242,14 @@ class PreferencesHelper(val context: Context) {
 
     fun sourceUrl(source: Source) = prefs.getString(Keys.sourceUrl(source.id), "")
 
-    fun setSourceCredentials(source: Source, username: String, password: String) {
+    fun mangaDexUserName() = prefs.getString(Keys.mangadexUserName, "")
+
+    fun removeMangaDexUserName() = prefs.edit().remove(Keys.mangadexUserName).apply()
+
+    fun removeOldCredentials(source: Source) {
         prefs.edit()
-            .putString(Keys.sourceUsername(source.id), username)
-            .putString(Keys.sourcePassword(source.id), password)
+            .remove(Keys.sourceUsername(source.id))
+            .remove(Keys.sourcePassword(source.id))
             .apply()
     }
 
