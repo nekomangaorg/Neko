@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.loggycat
@@ -36,6 +37,7 @@ class StatusSyncJob(
 
     val followsSyncService: FollowsSyncService by injectLazy()
     val source: SourceManager by injectLazy()
+    val loginHelper: MangaDexLoginHelper by injectLazy()
 
     private val progressNotification =
         applicationContext.notificationBuilder(Notifications.Channel.Status).apply {
@@ -55,7 +57,7 @@ class StatusSyncJob(
             val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
             setForeground(foregroundInfo)
         }
-        if (source.mangaDex.isLogged().not()) {
+        if (!loginHelper.isLoggedIn()) {
             context.notificationManager.cancel(Notifications.Id.Status.Complete)
             errorNotification()
             return@coroutineScope Result.failure()

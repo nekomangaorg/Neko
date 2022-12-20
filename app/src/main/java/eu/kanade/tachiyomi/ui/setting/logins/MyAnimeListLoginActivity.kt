@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.setting.track
+package eu.kanade.tachiyomi.ui.setting.logins
 
 import android.net.Uri
 import androidx.lifecycle.lifecycleScope

@@ -26,12 +26,12 @@ import okhttp3.internal.closeQuietly
 import org.jsoup.nodes.Element
 import org.nekomanga.domain.network.ResultError
 
-open class Toonily : ReducedHttpSource() {
+class Toonily : ReducedHttpSource() {
     override val name = Toonily.name
     override val baseUrl = "https://toonily.com"
     val dateFormat = SimpleDateFormat("MMM d, yy", Locale.US)
 
-    fun parseChapterDate(date: String?): Long {
+    private fun parseChapterDate(date: String?): Long {
         date ?: return 0
 
         return when (date.contains("UP")) {

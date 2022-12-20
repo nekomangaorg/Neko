@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
-import eu.kanade.tachiyomi.network.services.MangaDexAuthService
+import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexCdnService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.SimilarService
@@ -98,19 +98,23 @@ class NetworkHelper(val context: Context) {
                 val logger: HttpLoggingInterceptor.Logger =
                     HttpLoggingInterceptor.Logger { message ->
                         try {
-                            if (message.contains("username") && message.contains("password")) {
-                                loggycat(tag = "||NEKO-NETWORK-JSON") { "Not logging request because it contained username and password" }
+                            if (message.contains("grant_type=") || message.contains("access_token\":")) {
+                                loggycat(tag = "|") { "Not logging request because it contained sessionToken || refreshToken" }
                             } else {
                                 val element = prettyPrintJson.parseToJsonElement(message)
-                                loggycat(tag = "||NEKO-NETWORK-JSON") { prettyPrintJson.encodeToString(element) }
+                                element.loggycat(tag = "|") { prettyPrintJson.encodeToString(element) }
                             }
                         } catch (ex: Exception) {
-                            loggycat(tag = "||NEKO-NETWORK-JSON") { message }
+                            loggycat(tag = "|") { message }
                         }
                     }
                 addInterceptor(
                     HttpLoggingInterceptor(logger).apply {
-                        level = HttpLoggingInterceptor.Level.BASIC
+                        if (preferences.verboseLogging()) {
+                            level = HttpLoggingInterceptor.Level.BASIC
+                        }
+                        redactHeader("Authorization")
+
                     },
                 )
             }.build()
@@ -127,7 +131,7 @@ class NetworkHelper(val context: Context) {
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
         return buildRateLimitedClient().newBuilder()
             .addNetworkInterceptor(authInterceptor())
-            .authenticator(TokenAuthenticator(mangaDexLoginHelper)).build()
+            .authenticator(MangaDexTokenAuthenticator(mangaDexLoginHelper)).build()
     }
 
     private fun buildCloudFlareClient(): OkHttpClient {
@@ -170,9 +174,9 @@ class NetworkHelper(val context: Context) {
             .client(cdnClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
             .create(MangaDexCdnService::class.java)
 
-    val authService: MangaDexAuthService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
+    val authService: MangaDexAuthorizedUserService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
         .client(authClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
-        .create(MangaDexAuthService::class.java)
+        .create(MangaDexAuthorizedUserService::class.java)
 
     val similarService: SimilarService =
         jsonRetrofitClient.client(

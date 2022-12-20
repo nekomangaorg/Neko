@@ -9,13 +9,13 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.system.createWithColorRes
 
 class SiteLoginPreference @JvmOverloads constructor(
     context: Context,
-    val source: HttpSource,
+    val mangaDexLoginHelper: MangaDexLoginHelper,
     attrs: AttributeSet? = null,
 ) : Preference(context, attrs) {
 
@@ -34,7 +34,7 @@ class SiteLoginPreference @JvmOverloads constructor(
         }
 
         (holder.findViewById(R.id.image_view) as? ImageView)?.setImageDrawable(
-            when (source.isLogged()) {
+            when (mangaDexLoginHelper.isLoggedIn()) {
                 true -> CommunityMaterial.Icon.cmd_account_circle.create(context, 24f)
                 false -> CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(
                     context,

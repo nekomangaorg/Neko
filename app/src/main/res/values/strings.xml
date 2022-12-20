@@ -902,6 +902,8 @@
     <string name="username_must_not_be_blank">Username or password cannot be blank</string>
 
     <string name="successfully_logged_out">You are now logged out</string>
+    <string name="unsuccessful_logged_out">Error logging out</string>
+
     <string name="could_not_log_in">Error could not log in</string>
 
     <!-- Downloads -->

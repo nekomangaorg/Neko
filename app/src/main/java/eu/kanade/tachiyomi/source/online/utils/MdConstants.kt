@@ -1,5 +1,8 @@
 package eu.kanade.tachiyomi.source.online.utils
 
+import android.util.Base64
+import androidx.core.net.toUri
+import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 object MdConstants {
@@ -7,6 +10,30 @@ object MdConstants {
     const val cdnUrl = "https://uploads.mangadex.org"
     const val atHomeReportUrl = "https://api.mangadex.network/report"
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
+
+    object Login {
+        const val redirectUri = "neko://mangadex-auth"
+        const val clientId = "neko"
+        const val authorizationCode = "authorization_code"
+        const val refreshToken = "refresh_token"
+
+        fun authUrl(codeVerifier: String): String {
+            val bytes = codeVerifier.toByteArray()
+            val messageDigest = MessageDigest.getInstance("SHA-256")
+            messageDigest.update(bytes)
+            val digest = messageDigest.digest()
+            val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+            val codeChallenge = Base64.encodeToString(digest, encoding)
+
+            return MdApi.baseAuthUrl + MdApi.login.toUri().buildUpon()
+                .appendQueryParameter("client_id", clientId)
+                .appendQueryParameter("response_type", "code")
+                .appendQueryParameter("redirect_uri", redirectUri)
+                .appendQueryParameter("code_challenge", codeChallenge)
+                .appendQueryParameter("code_challenge_method", "S256")
+                .build().toString()
+        }
+    }
 
     const val currentSeasonalId = "4be9338a-3402-4f98-b467-43fb56663927"
 

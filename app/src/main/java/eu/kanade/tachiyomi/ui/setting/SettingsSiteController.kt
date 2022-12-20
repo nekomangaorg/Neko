@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
@@ -11,14 +12,13 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
-import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
-import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import kotlinx.coroutines.launch
@@ -26,32 +26,30 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SettingsSiteController :
-    SettingsController(),
-    MangadexLoginDialog.Listener,
-    MangadexLogoutDialog.Listener {
+    SettingsController(), MangadexLogoutDialog.Listener {
 
-    private val mdex by lazy { Injekt.get<SourceManager>().mangaDex }
+    private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
     private val db by lazy { Injekt.get<DatabaseHelper>() }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.site_specific_settings
 
-        val sourcePreference = SiteLoginPreference(context, mdex).apply {
-            title = mdex.name + " Login"
+        val sourcePreference = SiteLoginPreference(context, mangaDexLoginHelper).apply {
+            title = "MangaDex Login"
+            key = PreferenceKeys.refreshToken
 
-            this.username = preferences.sourceUsername(mdex) ?: ""
+            /*this.username = preferences.sourceUsername(mdex) ?: ""*/
 
-            key = getSourceKey(source.id)
             setOnLoginClickListener {
-                if (mdex.isLogged()) {
-                    val dialog = MangadexLogoutDialog(source)
-                    dialog.targetController = this@SettingsSiteController
-                    dialog.showDialog(router)
-                } else {
-                    val dialog = MangadexLoginDialog(source)
-                    dialog.targetController = this@SettingsSiteController
-                    dialog.showDialog(router)
+                when (mangaDexLoginHelper.isLoggedIn()) {
+                    true -> {
+                        val dialog = MangadexLogoutDialog()
+                        dialog.targetController = this@SettingsSiteController
+                        dialog.showDialog(router)
+                    }
+                    false -> activity?.openInBrowser(MdConstants.Login.authUrl(preferences.codeVerifer()))
                 }
+
             }
             this.isIconSpaceReserved = false
         }
@@ -232,22 +230,6 @@ class SettingsSiteController :
         }
     }
 
-    override fun siteLoginDialogClosed(source: Source, username: String) {
-        val pref = findPreference(getSourceKey(source.id)) as? SiteLoginPreference
-        pref?.username = username
-        pref?.notifyChanged()
-    }
-
-    override fun siteLogoutDialogClosed(source: Source, username: String) {
-        val pref = findPreference(getSourceKey(source.id)) as? SiteLoginPreference
-        pref?.username = username
-        pref?.notifyChanged()
-    }
-
-    private fun getSourceKey(sourceId: Long): String {
-        return "source_$sourceId"
-    }
-
     class ChooseLanguagesDialog() : DialogController() {
 
         constructor(preferences: PreferencesHelper) : this() {
@@ -288,5 +270,16 @@ class SettingsSiteController :
                 }
                 .create()
         }
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        val pref = findPreference(PreferenceKeys.refreshToken) as? SiteLoginPreference
+        pref?.notifyChanged()
+    }
+
+    override fun siteLogoutDialogClosed() {
+        val pref = findPreference(PreferenceKeys.refreshToken) as? SiteLoginPreference
+        pref?.notifyChanged()
     }
 }

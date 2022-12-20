@@ -1,10 +1,6 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
-import eu.kanade.tachiyomi.source.online.models.dto.CheckTokenDto
-import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
-import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
-import eu.kanade.tachiyomi.source.online.models.dto.LogoutDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
@@ -24,19 +20,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface MangaDexAuthService {
-
-    @Headers("Cache-Control: no-cache")
-    @POST(MdApi.login)
-    suspend fun login(@Body request: LoginRequestDto): ApiResponse<LoginResponseDto>
-
-    @Headers("Cache-Control: no-cache")
-    @POST(MdApi.logout)
-    suspend fun logout(): ApiResponse<LogoutDto>
-
-    @Headers("Cache-Control: no-cache")
-    @GET(MdApi.checkToken)
-    suspend fun checkToken(): ApiResponse<CheckTokenDto>
+interface MangaDexAuthorizedUserService {
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.userFollows}?limit=100&includes[]=${MdConstants.Types.coverArt}")

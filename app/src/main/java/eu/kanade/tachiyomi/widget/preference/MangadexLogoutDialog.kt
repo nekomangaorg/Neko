@@ -5,41 +5,37 @@ import android.os.Bundle
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
-import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.launch
 import logcat.LogPriority
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
-    val source: Source by lazy { Injekt.get<SourceManager>().mangaDex }
+    val loginHelper: MangaDexLoginHelper by injectLazy()
 
-    protected lateinit var binding: PrefAccountLoginBinding
+    private lateinit var binding: PrefAccountLoginBinding
     val preferences: PreferencesHelper by injectLazy()
-
-    constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return activity!!.materialAlertDialog().apply {
             setTitle(R.string.log_out)
             setNegativeButton(android.R.string.cancel, null)
             setPositiveButton(R.string.log_out) { _, _ ->
+
                 launchNow {
                     runCatching {
-                        launch {
-                            preferences.setSourceCredentials(source, "", "")
-                            preferences.setTokens("", "")
+                        when (loginHelper.logout()) {
+                            true -> activity?.toast(R.string.successfully_logged_out)
+                            false -> activity?.toast(R.string.successfully_logged_out)
+
                         }
                         activity?.toast(R.string.successfully_logged_out)
-                        (targetController as? Listener)?.siteLogoutDialogClosed(source, "")
+                        (targetController as? Listener)?.siteLogoutDialogClosed()
                     }.onFailure { e ->
                         loggycat(LogPriority.ERROR, e) { "Error logging out" }
                         activity?.toast(R.string.could_not_log_in)
@@ -50,6 +46,6 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
     }
 
     interface Listener {
-        fun siteLogoutDialogClosed(source: Source, username: String)
+        fun siteLogoutDialogClosed()
     }
 }

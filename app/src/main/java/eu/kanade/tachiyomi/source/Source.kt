@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.Logout
 import okhttp3.Response
 
 /**
@@ -30,12 +29,6 @@ interface Source {
     suspend fun fetchPageList(chapter: SChapter): List<Page>
 
     suspend fun fetchImage(page: Page): Response
-
-    fun isLogged(): Boolean
-
-    suspend fun login(username: String, password: String): Boolean
-
-    suspend fun logout(): Logout
 }
 
 data class MangaDetailChapterInformation(
