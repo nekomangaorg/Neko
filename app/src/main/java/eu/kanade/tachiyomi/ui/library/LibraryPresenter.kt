@@ -101,7 +101,7 @@ class LibraryPresenter(
     var categories: List<Category> = emptyList()
         private set
 
-    var removeArticles: Boolean = preferences.removeArticles().get()
+    private var removeArticles: Boolean = preferences.removeArticles().get()
 
     /** All categories of the library, in case they are hidden because of hide categories is on */
     var allCategories: List<Category> = emptyList()
@@ -515,7 +515,7 @@ class LibraryPresenter(
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             if (i1.header.category.id == i2.header.category.id) {
                 val category = i1.header.category
-                if (category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
+                if (category.mangaOrder.isEmpty() && category.mangaSort == null) {
                     category.changeSortTo(preferences.librarySortingMode().get())
                     if (category.id == 0) {
                         preferences.defaultMangaOrder()
@@ -659,21 +659,15 @@ class LibraryPresenter(
             val headerItems = (
                 categories.mapNotNull { category ->
                     val id = category.id
-                    if (id == null) {
-                        null
-                    } else {
-                        id to LibraryHeaderItem({ getCategory(id) }, id)
-                    }
+                    if (id == null) null
+                    else id to LibraryHeaderItem({ getCategory(id) }, id)
                 } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0))
                 ).toMap()
 
             val items = libraryManga.mapNotNull {
                 val headerItem = (
-                    if (!libraryIsGrouped) {
-                        catItemAll
-                    } else {
-                        headerItems[it.category]
-                    }
+                    if (!libraryIsGrouped) catItemAll
+                    else headerItems[it.category]
                     ) ?: return@mapNotNull null
                 categorySet.add(it.category)
                 LibraryItem(it, headerItem)
@@ -693,11 +687,9 @@ class LibraryPresenter(
                         (catId !in categoriesHidden || !showAll)
                     ) {
                         val headerItem = headerItems[catId]
-                        if (headerItem != null) {
-                            items.add(
-                                LibraryItem(LibraryManga.createBlank(catId), headerItem),
-                            )
-                        }
+                        if (headerItem != null) items.add(
+                            LibraryItem(LibraryManga.createBlank(catId), headerItem),
+                        )
                     } else if (catId in categoriesHidden && showAll && categories.size > 1) {
                         val mangaToRemove = items.filter { it.manga.category == catId }
                         val mergedTitle = mangaToRemove.joinToString("-") {
@@ -707,11 +699,16 @@ class LibraryPresenter(
                         hiddenItems.addAll(mangaToRemove)
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
-                        if (headerItem != null) {
-                            items.add(
-                                LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
-                            )
-                        }
+                        if (headerItem != null) items.add(
+                            LibraryItem(
+                                LibraryManga.createHide(
+                                    catId,
+                                    mergedTitle,
+                                    mangaToRemove.size,
+                                ),
+                                headerItem,
+                            ),
+                        )
                     }
                 }
             }
@@ -1311,9 +1308,7 @@ class LibraryPresenter(
     }
 
     private fun deleteChapters(manga: Manga, chapters: List<Chapter>) {
-        sourceManager.get(manga.source)?.let { source ->
-            downloadManager.deleteChapters(chapters, manga)
-        }
+        downloadManager.deleteChapters(chapters, manga)
     }
 
     companion object {
