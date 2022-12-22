@@ -26,19 +26,22 @@ class CrashLogUtil(private val context: Context) {
         setSmallIcon(R.drawable.ic_neko_notification)
     }
 
-    suspend fun dumpLogs() = withNonCancellableContext {
+    suspend fun dumpLogs(exception: Throwable? = null) = withNonCancellableContext {
         try {
             val file = context.createFileInCacheDir("neko_crash_logs.txt")
             file.appendText(getDebugInfo() + "\n")
 
-            val logLevel = when (preferences.verboseLogging()) {
-                true -> "*:*"
-                false -> "*:E"
+            if (exception != null) {
+                file.appendText(getExceptionBlock(exception))
             }
 
-            Runtime.getRuntime().exec("logcat $logLevel -d -f ${file.absolutePath}")
-
+            val logLevel = when (preferences.verboseLogging()) {
+                true -> " *:D"
+                false -> " *:E"
+            }
+            Runtime.getRuntime().exec("logcat $logLevel -d -f ${file.absolutePath}").waitFor()
             showNotification(file.getUriCompat(context))
+            Runtime.getRuntime().exec("logcat -c")
         } catch (e: IOException) {
             withUIContext { context.toast("Failed to get logs") }
         }
@@ -54,6 +57,17 @@ class CrashLogUtil(private val context: Context) {
             Device name: ${Build.DEVICE}
             Device model: ${Build.MODEL}
             Device product name: ${Build.PRODUCT}
+        """.trimIndent()
+    }
+
+    private fun getExceptionBlock(exception: Throwable): String {
+        return """
+            ******************************************************************************************************************************************************************************************************************************
+            Exception that caused crash
+            ******************************************************************************************************************************************************************************************************************************
+            $exception
+            ******************************************************************************************************************************************************************************************************************************
+            ******************************************************************************************************************************************************************************************************************************
         """.trimIndent()
     }
 

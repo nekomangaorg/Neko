@@ -104,16 +104,14 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
 
-        if (!BuildConfig.DEBUG) {
-            switchPreference {
-                key = PreferenceKeys.verboseLogging
-                titleRes = R.string.verbose_logging
-                summaryRes = R.string.verbose_logging_summary
-                defaultValue = BuildConfig.DEBUG
-                onChange {
-                    activity?.toast(R.string.requires_app_restart)
-                    true
-                }
+        switchPreference {
+            key = PreferenceKeys.verboseLogging
+            titleRes = R.string.verbose_logging
+            summaryRes = R.string.verbose_logging_summary
+            defaultValue = BuildConfig.DEBUG
+            onChange {
+                activity?.toast(R.string.requires_app_restart)
+                true
             }
         }
 
