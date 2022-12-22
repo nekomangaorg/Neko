@@ -78,7 +78,7 @@ fun ArtworkSheet(
                 )
             }
         } else {
-            var currentImage by remember { mutableStateOf(alternativeArtwork.first { it.active }) }
+            var currentImage by remember { mutableStateOf(alternativeArtwork.firstOrNull { it.active } ?: alternativeArtwork.first()) }
 
             val screenHeight = LocalConfiguration.current.screenHeightDp
             val thumbnailSize = (screenHeight * .12f).dp
