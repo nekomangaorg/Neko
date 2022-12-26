@@ -99,7 +99,7 @@ class MangaDetailPresenter(
     val downloadManager: DownloadManager = Injekt.get(),
     chapterItemFilter: ChapterItemFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
-    val loginHelper: MangaDexLoginHelper = Injekt.get(),
+    private val loginHelper: MangaDexLoginHelper = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
@@ -1556,7 +1556,11 @@ class MangaDetailPresenter(
      */
     private fun updateMissingChapters() {
         presenterScope.launchIO {
-            val currentMissingChapters = generalState.value.allChapters.getMissingChapters().count
+            val missingChapterHolder = generalState.value.allChapters.getMissingChapters()
+            _mangaState.update {
+                it.copy(estimatedMissingChapters = missingChapterHolder.estimatedChapters?.toImmutableList())
+            }
+            val currentMissingChapters = missingChapterHolder.count
             if (currentMissingChapters != currentManga().missing_chapters) {
                 val editManga = currentManga()
                 editManga.apply {
