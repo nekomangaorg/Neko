@@ -36,7 +36,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.getMissingChapterCount
+import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
@@ -59,6 +59,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import logcat.LogPriority
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -549,7 +550,7 @@ class LibraryUpdateService(
 
     private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
         val allChaps = db.getChapters(manga).executeAsBlocking()
-        val missingChapters = allChaps.getMissingChapterCount(manga.status)
+        val missingChapters = allChaps.map { it.toSimpleChapter()!!.toChapterItem() }.getMissingChapters().count
         if (missingChapters != manga.missing_chapters) {
             manga.missing_chapters = missingChapters
             db.insertManga(manga).executeOnIO()

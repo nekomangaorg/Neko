@@ -44,7 +44,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
-import eu.kanade.tachiyomi.util.getMissingCount
+import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -1556,7 +1556,7 @@ class MangaDetailPresenter(
      */
     private fun updateMissingChapters() {
         presenterScope.launchIO {
-            val currentMissingChapters = generalState.value.allChapters.getMissingCount(currentManga().status)
+            val currentMissingChapters = generalState.value.allChapters.getMissingChapters().count
             if (currentMissingChapters != currentManga().missing_chapters) {
                 val editManga = currentManga()
                 editManga.apply {
