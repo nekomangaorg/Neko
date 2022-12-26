@@ -100,7 +100,7 @@ class TrackingCoordinator {
             db.insertTrack(track).executeOnIO()
             TrackingUpdate.Success
         }.getOrElse { exception ->
-            TrackingUpdate.Error("Error registering tacker", exception)
+            TrackingUpdate.Error("Error registering tracker", exception)
         }
     }
 
