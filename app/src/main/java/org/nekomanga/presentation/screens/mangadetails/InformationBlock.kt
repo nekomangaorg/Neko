@@ -206,7 +206,7 @@ fun InformationBlock(
                 Column {
                     Gap(4.dp)
                     NoRippleText(
-                        text = estimates.joinToString(" \uD83D\uDF84 "),
+                        text = estimates.joinToString(" ⬤ "),
                         maxLines = 4,
                         style = MaterialTheme.typography.bodySmall,
                         color = mediumAlpha,
