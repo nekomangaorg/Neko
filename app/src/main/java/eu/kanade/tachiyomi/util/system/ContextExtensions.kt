@@ -364,6 +364,21 @@ fun Context.openInWebView(url: String, title: String = "") {
     startActivity(intent)
 }
 
+fun Context.openInFirefox(url: String) {
+    val uri = url.toUri()
+    try {
+        val intent = Intent().apply {
+            setPackage("org.mozilla.firefox")
+            action = Intent.ACTION_VIEW
+            data = uri
+        }
+        startActivity(intent)
+    } catch (e: Exception) {
+        toast(e.message)
+        openInBrowser(uri)
+    }
+}
+
 fun Context.openInBrowser(url: String, forceDefaultBrowser: Boolean = false) {
     if (url.contains(MdConstants.baseUrl)) {
         this.openInBrowser(url.toUri(), true)

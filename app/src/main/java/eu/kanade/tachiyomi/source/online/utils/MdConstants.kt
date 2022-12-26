@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.utils
 
 import android.util.Base64
 import androidx.core.net.toUri
+import eu.kanade.tachiyomi.BuildConfig
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
@@ -12,7 +13,7 @@ object MdConstants {
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
 
     object Login {
-        const val redirectUri = "neko://mangadex-auth"
+        val redirectUri = if (BuildConfig.DEBUG) "neko://mangadex-auth-debug" else "neko://mangadex-auth"
         const val clientId = "neko"
         const val authorizationCode = "authorization_code"
         const val refreshToken = "refresh_token"

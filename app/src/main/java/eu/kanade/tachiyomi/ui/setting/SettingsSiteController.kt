@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
@@ -19,6 +20,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import kotlinx.coroutines.launch
@@ -47,7 +49,13 @@ class SettingsSiteController :
                         dialog.targetController = this@SettingsSiteController
                         dialog.showDialog(router)
                     }
-                    false -> activity?.openInBrowser(MdConstants.Login.authUrl(preferences.codeVerifer()))
+                    false -> {
+                        val url = MdConstants.Login.authUrl(preferences.codeVerifer())
+                        when (BuildConfig.DEBUG) {
+                            true -> activity?.openInFirefox(url)
+                            false -> activity?.openInBrowser(url)
+                        }
+                    }
                 }
 
             }

@@ -124,7 +124,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="mangadex-auth"
+                    android:host="${mangadexAuthRedirectUri}"
                     android:scheme="neko" />
             </intent-filter>
         </activity>
