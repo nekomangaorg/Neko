@@ -23,8 +23,9 @@ class CoilSetup(context: Context) {
         val imageLoader = ImageLoader.Builder(context).apply {
             val callFactoryInit = { Injekt.get<NetworkHelper>().nonRateLimitedClient }
             val diskCacheInit = { CoilDiskCache.get(context) }
+            val isCurrSDKPieOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
             components {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                if (isCurrSDKPieOrGreater) {
                     add(ImageDecoderDecoder.Factory())
                 } else {
                     add(GifDecoder.Factory())
@@ -41,7 +42,7 @@ class CoilSetup(context: Context) {
             memoryCache { MemoryCache.Builder(context).maxSizePercent(0.40).build() }
             crossfade(true)
             allowRgb565(context.getSystemService<ActivityManager>()!!.isLowRamDevice)
-            allowHardware(true)
+            allowHardware(isCurrSDKPieOrGreater)
             if (Injekt.get<PreferencesHelper>().verboseLogging()) {
                 logger(DebugLogger())
             }
