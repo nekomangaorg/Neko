@@ -21,6 +21,7 @@ import kotlinx.serialization.json.Json
 import logcat.LogPriority
 import okhttp3.Credentials
 import okhttp3.Dns
+import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -64,6 +65,11 @@ class Komga : ReducedHttpSource() {
             return@withIOContext loginWithUrl(username, password, url)
         }
     }
+
+    override val headers = Headers.Builder()
+        .add("Referer", hostUrl())
+        .add("User-Agent", userAgent)
+        .build()
 
     override val client: OkHttpClient
         get() = super.client.newBuilder().dns(Dns.SYSTEM).build()

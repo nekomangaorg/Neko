@@ -18,9 +18,9 @@ import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.Date
 import kotlin.collections.set
 import kotlin.time.Duration.Companion.seconds
@@ -65,8 +65,9 @@ class ImageHandler {
                         reportFailedImage(request.url.toString())
                         throw (e)
                     }
-
-                    reportImageWithResponse(response)
+                    withNonCancellableContext {
+                        reportImageWithResponse(response)
+                    }
 
                     if (!response.isSuccessful) {
                         response.close()
@@ -79,7 +80,7 @@ class ImageHandler {
         }
     }
 
-    private fun reportFailedImage(url: String) {
+    private suspend fun reportFailedImage(url: String) {
         val atHomeImageReportDto = AtHomeImageReportDto(
             url,
             false,
@@ -88,7 +89,7 @@ class ImageHandler {
         sendReport(atHomeImageReportDto)
     }
 
-    private fun reportImageWithResponse(response: Response) {
+    private suspend fun reportImageWithResponse(response: Response) {
         val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
         val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
         val cache = response.header("X-Cache", "") == "HIT"
@@ -103,17 +104,15 @@ class ImageHandler {
         sendReport(atHomeImageReportDto)
     }
 
-    private fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
-        launchIO {
-            loggycat(tag = tag) { "Image to report $atHomeImageReportDto" }
+    private suspend fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
+        loggycat(tag = tag) { "Image to report $atHomeImageReportDto" }
 
-            if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
-                loggycat(tag = tag) { "image is at CDN don't report to md@home node" }
-                return@launchIO
-            }
-            network.service.atHomeImageReport(atHomeImageReportDto).onFailure {
-                this.log("trying to post to dex@home")
-            }
+        if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
+            loggycat(tag = tag) { "image is at CDN don't report to md@home node" }
+            return
+        }
+        network.service.atHomeImageReport(atHomeImageReportDto).onFailure {
+            this.log("trying to post to dex@home")
         }
     }
 

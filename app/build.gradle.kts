@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 176
-    const val versionName = "2.12.2"
+    const val versionCode = 178
+    const val versionName = "2.12.4"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -41,7 +41,7 @@ if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
     apply(mapOf("plugin" to "com.google.firebase.crashlytics"))
 }
 
-val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86")
+val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 
 
@@ -93,10 +93,12 @@ android {
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
+            manifestPlaceholders["mangadexAuthRedirectUri"] = "mangadex-auth-debug"
         }
         getByName("release") {
             isShrinkResources = true
             isMinifyEnabled = true
+            manifestPlaceholders["mangadexAuthRedirectUri"] = "mangadex-auth"
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
 

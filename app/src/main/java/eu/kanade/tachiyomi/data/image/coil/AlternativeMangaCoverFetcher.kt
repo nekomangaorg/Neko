@@ -12,11 +12,12 @@ import coil.request.Parameters
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import java.util.Date
+import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,7 @@ import org.nekomanga.domain.manga.Artwork
 class AlternativeMangaCoverFetcher(
     private val url: String,
     private val mangaId: Long,
-    private val sourceLazy: Lazy<HttpSource?>,
+    private val sourceLazy: Lazy<MangaDex>,
     private val options: Options,
     private val coverCache: CoverCache,
     private val callFactoryLazy: Lazy<Call.Factory>,
@@ -126,7 +127,7 @@ class AlternativeMangaCoverFetcher(
     }
 
     private suspend fun executeNetworkRequest(): Response {
-        val client = sourceLazy.value?.client ?: callFactoryLazy.value
+        val client = sourceLazy.value.client
         val response = client.newCall(newRequest()).await()
         if (!response.isSuccessful && response.code != HTTP_NOT_MODIFIED) {
             response.close()
@@ -136,9 +137,10 @@ class AlternativeMangaCoverFetcher(
     }
 
     private fun newRequest(): Request {
+
         val request = Request.Builder()
             .url(url)
-            .headers(sourceLazy.value?.headers ?: options.headers)
+            .headers(sourceLazy.value.headers.newBuilder().add("x-request-id", "Neko-" + UUID.randomUUID()).build())
             // Support attaching custom data to the network request.
             .tag(Parameters::class.java, options.parameters)
 

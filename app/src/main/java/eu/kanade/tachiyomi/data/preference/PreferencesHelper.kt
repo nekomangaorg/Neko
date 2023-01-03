@@ -1,8 +1,11 @@
 package eu.kanade.tachiyomi.data.preference
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
+import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import com.fredporciuncula.flow.preferences.FlowSharedPreferences
@@ -11,8 +14,6 @@ import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
@@ -28,6 +29,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
 import java.io.File
+import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -240,10 +242,14 @@ class PreferencesHelper(val context: Context) {
 
     fun sourceUrl(source: Source) = prefs.getString(Keys.sourceUrl(source.id), "")
 
-    fun setSourceCredentials(source: Source, username: String, password: String) {
+    fun mangaDexUserName() = prefs.getString(Keys.mangadexUserName, "")
+
+    fun removeMangaDexUserName() = prefs.edit().remove(Keys.mangadexUserName).apply()
+
+    fun removeOldCredentials(source: Source) {
         prefs.edit()
-            .putString(Keys.sourceUsername(source.id), username)
-            .putString(Keys.sourcePassword(source.id), password)
+            .remove(Keys.sourceUsername(source.id))
+            .remove(Keys.sourcePassword(source.id))
             .apply()
     }
 
@@ -564,6 +570,15 @@ class PreferencesHelper(val context: Context) {
 
     fun refreshToken() = prefs.getString(Keys.refreshToken, "")
 
+    fun removeTokens() {
+        prefs.edit()
+            .remove(Keys.sessionToken)
+            .remove(Keys.refreshToken)
+            .remove(Keys.lastRefreshTokenTime)
+            .remove(Keys.mangadexCodeVerifier)
+            .apply()
+    }
+
     fun setTokens(refresh: String, session: String) {
         val time = if (refresh.isBlank() && session.isBlank()) {
             0
@@ -585,4 +600,21 @@ class PreferencesHelper(val context: Context) {
 
     fun mangadexSyncToLibraryIndexes() =
         flowPrefs.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
+
+    fun codeVerifer(): String {
+        val codeVerifier = prefs.getString(Keys.mangadexCodeVerifier, null)
+        return when (codeVerifier == null) {
+            false -> codeVerifier
+            true -> {
+                val secureRandom = SecureRandom()
+                val bytes = ByteArray(64)
+                secureRandom.nextBytes(bytes)
+                val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                val newCodeVerifier = Base64.encodeToString(bytes, encoding)
+                prefs.edit().putString(Keys.mangadexCodeVerifier, newCodeVerifier).apply()
+                newCodeVerifier
+            }
+
+        }
+    }
 }

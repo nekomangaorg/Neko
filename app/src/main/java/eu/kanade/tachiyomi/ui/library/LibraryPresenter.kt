@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -53,6 +54,7 @@ import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.util.Calendar
 import java.util.Date
@@ -61,6 +63,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -94,12 +97,13 @@ class LibraryPresenter(
         get() = loggedServices.isNotEmpty()
 
     private val source by lazy { Injekt.get<SourceManager>().mangaDex }
+    private val loginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
     /** Current categories of the library. */
     var categories: List<Category> = emptyList()
         private set
 
-    var removeArticles: Boolean = preferences.removeArticles().get()
+    private var removeArticles: Boolean = preferences.removeArticles().get()
 
     /** All categories of the library, in case they are hidden because of hide categories is on */
     var allCategories: List<Category> = emptyList()
@@ -385,8 +389,8 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
-            } else {
+                    (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
+                } else {
                     filterMangaType != item.manga.seriesType()
                 }
             ) {
@@ -414,9 +418,9 @@ class LibraryPresenter(
             val hasTrack = loggedServices.any { service ->
                 tracks.any {
                     if (service.isMdList() && (
-                        source.isLogged()
-                            .not() || it.status == FollowStatus.UNFOLLOWED.int
-                        )
+                            loginHelper.isLoggedIn()
+                                .not() || it.status == FollowStatus.UNFOLLOWED.int
+                            )
                     ) {
                         false
                     } else {
@@ -513,7 +517,7 @@ class LibraryPresenter(
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             if (i1.header.category.id == i2.header.category.id) {
                 val category = i1.header.category
-                if (category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
+                if (category.mangaOrder.isEmpty() && category.mangaSort == null) {
                     category.changeSortTo(preferences.librarySortingMode().get())
                     if (category.id == 0) {
                         preferences.defaultMangaOrder()
@@ -657,21 +661,15 @@ class LibraryPresenter(
             val headerItems = (
                 categories.mapNotNull { category ->
                     val id = category.id
-                    if (id == null) {
-                        null
-                    } else {
-                        id to LibraryHeaderItem({ getCategory(id) }, id)
-                    }
+                    if (id == null) null
+                    else id to LibraryHeaderItem({ getCategory(id) }, id)
                 } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0))
                 ).toMap()
 
             val items = libraryManga.mapNotNull {
                 val headerItem = (
-                    if (!libraryIsGrouped) {
-                        catItemAll
-                    } else {
-                        headerItems[it.category]
-                    }
+                    if (!libraryIsGrouped) catItemAll
+                    else headerItems[it.category]
                     ) ?: return@mapNotNull null
                 categorySet.add(it.category)
                 LibraryItem(it, headerItem)
@@ -691,11 +689,9 @@ class LibraryPresenter(
                         (catId !in categoriesHidden || !showAll)
                     ) {
                         val headerItem = headerItems[catId]
-                        if (headerItem != null) {
-                            items.add(
-                                LibraryItem(LibraryManga.createBlank(catId), headerItem),
-                            )
-                        }
+                        if (headerItem != null) items.add(
+                            LibraryItem(LibraryManga.createBlank(catId), headerItem),
+                        )
                     } else if (catId in categoriesHidden && showAll && categories.size > 1) {
                         val mangaToRemove = items.filter { it.manga.category == catId }
                         val mergedTitle = mangaToRemove.joinToString("-") {
@@ -705,11 +701,16 @@ class LibraryPresenter(
                         hiddenItems.addAll(mangaToRemove)
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
-                        if (headerItem != null) {
-                            items.add(
-                                LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
-                            )
-                        }
+                        if (headerItem != null) items.add(
+                            LibraryItem(
+                                LibraryManga.createHide(
+                                    catId,
+                                    mergedTitle,
+                                    mangaToRemove.size,
+                                ),
+                                headerItem,
+                            ),
+                        )
                     }
                 }
             }
@@ -737,8 +738,10 @@ class LibraryPresenter(
 
     private fun getCustomMangaItems(
         libraryManga: List<LibraryManga>,
-    ): Pair<List<LibraryItem>,
-        List<Category>,> {
+    ): Pair<
+        List<LibraryItem>,
+        List<Category>,
+        > {
         val tagItems: MutableMap<String, LibraryHeaderItem> = mutableMapOf()
 
         // internal function to make headers
@@ -1010,7 +1013,7 @@ class LibraryPresenter(
 
     /** Remove manga from the library and delete the downloads */
     fun confirmDeletion(mangaList: List<Manga>) {
-        launchIO {
+        presenterScope.launchNonCancellable {
             val mangaToDelete = mangaList.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
                 coverCache.deleteFromCache(manga)
@@ -1258,7 +1261,7 @@ class LibraryPresenter(
     fun undoMarkReadStatus(
         mangaList: HashMap<Manga, List<Chapter>>,
     ) {
-        launchIO {
+        presenterScope.launchNonCancellable {
             mangaList.forEach { (_, chapters) ->
                 db.updateChaptersProgress(chapters).executeAsBlocking()
             }
@@ -1307,9 +1310,7 @@ class LibraryPresenter(
     }
 
     private fun deleteChapters(manga: Manga, chapters: List<Chapter>) {
-        sourceManager.get(manga.source)?.let { source ->
-            downloadManager.deleteChapters(chapters, manga)
-        }
+        downloadManager.deleteChapters(chapters, manga)
     }
 
     companion object {
@@ -1411,7 +1412,7 @@ class LibraryPresenter(
 
             db.inTransaction {
                 mergeManga.forEach { manga ->
-                    launchIO {
+                    GlobalScope.launchIO {
                         downloadProvider.renameChapterFoldersForLegacyMerged(manga)
                     }
                     db.insertMergeManga(

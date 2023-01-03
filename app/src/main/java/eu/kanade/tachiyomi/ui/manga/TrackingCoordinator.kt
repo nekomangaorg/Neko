@@ -5,8 +5,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.loggycat
+import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -100,7 +100,7 @@ class TrackingCoordinator {
             db.insertTrack(track).executeOnIO()
             TrackingUpdate.Success
         }.getOrElse { exception ->
-            TrackingUpdate.Error("Error registering tacker", exception)
+            TrackingUpdate.Error("Error registering tracker", exception)
         }
     }
 
@@ -112,7 +112,7 @@ class TrackingCoordinator {
         val tracks = db.getTracks(mangaId).executeOnIO().filter { it.sync_id == service.id }
         db.deleteTrackForManga(mangaId, service).executeOnIO()
         if (alsoRemoveFromTracker && service.canRemoveFromService()) {
-            launchIO {
+            withNonCancellableContext {
                 tracks.forEach {
                     runCatching {
                         service.removeFromService(it)

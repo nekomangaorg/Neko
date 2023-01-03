@@ -294,6 +294,10 @@ object PreferenceKeys {
 
     const val lastRefreshTokenTime = "mangadex_refresh_token_time"
 
+    const val mangadexCodeVerifier = "mangadex_code_verifier"
+
+    const val mangadexUserName = "mangadex_username"
+
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"

@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,10 @@ import androidx.compose.material.icons.filled.HotelClass
 import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -51,6 +56,7 @@ fun InformationBlock(
     statusProvider: () -> Int,
     isPornographicProvider: () -> Boolean,
     missingChaptersProvider: () -> String?,
+    estimatedMissingChapterProvider: () -> List<String>?,
     modifier: Modifier = Modifier,
     isExpandedProvider: () -> Boolean,
     showMergedIconProvider: () -> Boolean,
@@ -122,7 +128,7 @@ fun InformationBlock(
             mainAxisAlignment = FlowMainAxisAlignment.Start,
             crossAxisAlignment = FlowCrossAxisAlignment.Center,
 
-        ) {
+            ) {
             if (langFlagProvider() != null) {
                 val flag = MdLang.fromIsoCode(langFlagProvider()!!.lowercase(Locale.US))?.iconResId
                 if (flag != null) {
@@ -183,13 +189,32 @@ fun InformationBlock(
             }
         }
 
+        var showEstimatedMissingChapters by remember { mutableStateOf(false) }
+
         missingChaptersProvider()?.let { numberOfMissingChapters ->
             Gap(4.dp)
             NoRippleText(
                 text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters),
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
+                onClick = { showEstimatedMissingChapters = !showEstimatedMissingChapters },
             )
         }
+
+        AnimatedVisibility(visible = showEstimatedMissingChapters) {
+            estimatedMissingChapterProvider()?.let { estimates ->
+                Column {
+                    Gap(4.dp)
+                    NoRippleText(
+                        text = estimates.joinToString(" ● "),
+                        maxLines = 4,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = mediumAlpha,
+                    )
+                }
+
+            }
+        }
+
     }
 }

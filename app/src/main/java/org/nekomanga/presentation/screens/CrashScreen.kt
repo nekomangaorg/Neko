@@ -60,7 +60,7 @@ fun CrashScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            CrashLogUtil(context).dumpLogs()
+                            CrashLogUtil(context).dumpLogs(exception)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),

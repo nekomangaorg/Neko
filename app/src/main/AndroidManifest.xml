@@ -84,7 +84,7 @@
 
         <activity android:name=".ui.security.BiometricActivity" />
         <activity
-            android:name=".ui.setting.track.MyAnimeListLoginActivity"
+            android:name=".ui.setting.logins.MyAnimeListLoginActivity"
             android:label="MyAnimeList"
             android:exported="true">
             <intent-filter>
@@ -99,7 +99,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.setting.track.AnilistLoginActivity"
+            android:name=".ui.setting.logins.AnilistLoginActivity"
             android:label="Anilist"
             android:exported="true">
             <intent-filter>
@@ -110,6 +110,21 @@
 
                 <data
                     android:host="anilist-auth"
+                    android:scheme="neko" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.setting.logins.MangaDexLoginActivity"
+            android:label="MangaDexLogin"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="${mangadexAuthRedirectUri}"
                     android:scheme="neko" />
             </intent-filter>
         </activity>

@@ -117,6 +117,7 @@ fun MangaDetailsHeader(
                         statusProvider = { mangaState.value.status },
                         isPornographicProvider = { mangaState.value.isPornographic },
                         missingChaptersProvider = { mangaState.value.missingChapters },
+                        estimatedMissingChapterProvider = { mangaState.value.estimatedMissingChapters },
                         modifier = Modifier
                             .statusBarsPadding()
                             .padding(top = 70.dp),
@@ -227,5 +228,5 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeCo
             ),
         ),
 
-    )
+        )
 }

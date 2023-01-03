@@ -471,7 +471,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         with(binding.chaptersSheet) {
             readingMode.isVisible =
                 presenter?.manga?.isLongStrip() != true &&
-                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                    ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
                 ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&
@@ -913,15 +913,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
                 peek + if (fullscreen) {
-                insets.getBottomGestureInsets()
-            } else {
-                val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
-                max(
-                    0,
-                    (rootInsets.getBottomGestureInsets()) -
-                        rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom,
-                )
-            }
+                    insets.getBottomGestureInsets()
+                } else {
+                    val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
+                    max(
+                        0,
+                        (rootInsets.getBottomGestureInsets()) -
+                            rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom,
+                    )
+                }
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = systemInsets.bottom)
             binding.viewerContainer.requestLayout()
         }
@@ -1514,10 +1514,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         val text = "${manga.title}: ${
-        getString(
-            R.string.chapter_,
-            decimalFormat.format(chapter.chapter_number),
-        )
+            getString(
+                R.string.chapter_,
+                decimalFormat.format(chapter.chapter_number),
+            )
         }, $pageNumber, <${MdUtil.baseUrl + manga.url}>"
 
         val stream = file.getUriCompat(this)
@@ -1619,7 +1619,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         if (visible && !menuStickyVisible && !menuVisible && !binding.appBar.isVisible) {
             menuStickyVisible = visible
             if (visible) {
-                coroutine = launchUI {
+                coroutine = lifecycleScope.launchUI {
                     delay(2000)
                     if (window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) == true) {
                         menuStickyVisible = false

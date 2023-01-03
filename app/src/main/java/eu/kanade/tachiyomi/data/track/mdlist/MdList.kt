@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.loggycat
@@ -23,6 +24,8 @@ import uy.kohesive.injekt.api.get
 class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     private val mdex by lazy { Injekt.get<SourceManager>().mangaDex }
+
+    private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
     override fun nameRes() = R.string.mdlist
 
@@ -162,7 +165,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     @SuppressLint("MissingSuperCall")
     override fun logout() = throw Exception("not used")
 
-    override fun isLogged() = mdex.isLogged()
+    override fun isLogged() = mangaDexLoginHelper.isLoggedIn()
 
     override fun isMdList() = true
 

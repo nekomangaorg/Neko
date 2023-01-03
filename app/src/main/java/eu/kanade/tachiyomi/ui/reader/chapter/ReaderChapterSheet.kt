@@ -216,7 +216,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun refreshList() {
-        launchUI {
+        presenter.presenterScope.launchUI {
             val chapters = presenter.getChapters()
 
             selectedChapterId = chapters.find { it.isCurrent }?.chapter?.id ?: -1L

@@ -168,7 +168,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
         canDismissSnackBar = false
-        launchUI {
+        lifecycleScope.launchUI {
             delay(1000)
             if (this@MainActivity.snackBar == snackBar) {
                 canDismissSnackBar = true
@@ -655,7 +655,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
-        launchUI {
+        lifecycleScope.launchUI {
             val scale = Settings.Global.getFloat(
                 contentResolver,
                 Settings.Global.ANIMATOR_DURATION_SCALE,
@@ -1212,7 +1212,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     override fun downloadStatusChanged(downloading: Boolean) {
         val hasQueue = downloading || downloadManager.hasQueue()
-        launchUI {
+        lifecycleScope.launchUI {
             if (hasQueue) {
                 nav.getOrCreateBadge(R.id.nav_recents)
                 showDLQueueTutorial()

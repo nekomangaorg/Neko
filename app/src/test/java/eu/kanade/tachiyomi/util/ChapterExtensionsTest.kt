@@ -1,22 +1,41 @@
 package eu.kanade.tachiyomi.util
 
-import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
 import io.kotest.matchers.shouldBe
 import org.junit.Test
+import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.SimpleChapter
 
 class ChapterExtensionsTest {
     @Test
     fun `Missing chapter Test`() {
-        val list = listOf(createSChapter(1f, "test"), createSChapter(2f, "test2"), createSChapter(5f, "test5"))
-        val count = list.getMissingChapterCount(SManga.ONGOING)
+        val list = listOf(createChp(1f, "test"), createChp(2f, "test2"), createChp(5f, "test5"))
+        val count = list.getMissingChapters().count
         count shouldBe "2"
     }
 
-    private fun createSChapter(chapNum: Float, chapName: String): SChapter {
-        return SChapter.create().apply {
-            chapter_number = chapNum
-            name = chapName
-        }
+    private fun createChp(chapNum: Float, chapName: String): ChapterItem {
+        return ChapterItem(
+            chapter = SimpleChapter(
+                id = 0,
+                mangaId = 0,
+                read = false,
+                bookmark = false,
+                lastPageRead = 0,
+                dateFetch = 0,
+                sourceOrder = 1,
+                url = "",
+                name = chapName,
+                dateUpload = 0,
+                chapterNumber = chapNum,
+                pagesLeft = 0,
+                volume = "",
+                chapterText = "",
+                chapterTitle = "",
+                language = "",
+                mangaDexChapterId = "",
+                oldMangaDexChapterId = null,
+                scanlator = "",
+            ),
+        )
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -21,7 +22,9 @@ fun rememberSideBarVisible(windowSizeClass: WindowSizeClass, sideNavMode: SideNa
             SideNavMode.DEFAULT -> {
                 when (windowSizeClass.widthSizeClass) {
                     WindowWidthSizeClass.Expanded -> true
-                    WindowWidthSizeClass.Medium -> true
+                    WindowWidthSizeClass.Medium -> {
+                        windowSizeClass.heightSizeClass != WindowHeightSizeClass.Medium
+                    }
                     else -> false
                 }
             }

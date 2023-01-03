@@ -11,7 +11,10 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 
-class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
+/**
+ * Authenticator that intercepts 401 requests and tries to reauth the user
+ */
+class MangaDexTokenAuthenticator(private val loginHelper: MangaDexLoginHelper) :
     Authenticator {
 
     private val mutext = Mutex()
@@ -19,7 +22,7 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
 
     override fun authenticate(route: Route?, response: Response): Request? {
         loggycat(LogPriority.INFO, tag = tag) { "Detected Auth error ${response.code} on ${response.request.url}" }
-        val token = refreshToken(loginHelper)
+        val token = refreshSessionToken(loginHelper)
         return if (token.isEmpty()) {
             null
         } else {
@@ -27,29 +30,29 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
         }
     }
 
-    fun refreshToken(loginHelper: MangaDexLoginHelper): String {
-        var validated = false
+    private fun refreshSessionToken(loginHelper: MangaDexLoginHelper): String {
         return runBlocking {
             mutext.withLock {
-                val checkToken =
-                    loginHelper.isAuthenticated()
-                if (checkToken) {
+
+                var validated = loginHelper.wasTokenRefreshedRecently()
+                if (validated) {
                     loggycat(LogPriority.INFO, tag = tag) { "Token is valid, other thread must have refreshed it" }
-                    validated = true
                 }
-                if (validated.not()) {
+                if (!validated) {
                     loggycat(LogPriority.INFO, tag = tag) { "Token is invalid trying to refresh" }
-                    validated =
-                        loginHelper.refreshToken()
+                    validated = loginHelper.refreshSessionToken()
                 }
 
-                if (validated.not()) {
-                    loggycat(LogPriority.INFO, tag = tag) { "Did not refresh token, trying to login" }
-                    validated = loginHelper.login()
+                if (!validated) {
+                    loggycat(LogPriority.INFO, tag = tag) { "Unable to refresh token user will need to relogin" }
+                    loginHelper.invalidate()
                 }
-                return@runBlocking when {
-                    validated -> "Bearer ${loginHelper.preferences.sessionToken()!!}"
-                    else -> ""
+
+                loginHelper.sessionToken()
+
+                return@runBlocking when (validated) {
+                    true -> "Bearer ${loginHelper.sessionToken()}"
+                    false -> ""
                 }
             }
         }

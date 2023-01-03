@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -43,13 +44,14 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
-import eu.kanade.tachiyomi.util.getMissingCount
+import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.toast
@@ -63,7 +65,6 @@ import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -98,6 +99,7 @@ class MangaDetailPresenter(
     val downloadManager: DownloadManager = Injekt.get(),
     chapterItemFilter: ChapterItemFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
+    private val loginHelper: MangaDexLoginHelper = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
@@ -385,7 +387,7 @@ class MangaDetailPresenter(
 
     private fun syncChaptersReadStatus() {
         presenterScope.launchIO {
-            if (!preferences.readingSync() || !sourceManager.mangaDex.isLogged() || !isOnline()) return@launchIO
+            if (!preferences.readingSync() || !loginHelper.isLoggedIn() || !isOnline()) return@launchIO
 
             runCatching {
                 statusHandler.getReadChapterIds(currentManga().uuid()).collect { chapterIds ->
@@ -1299,9 +1301,7 @@ class MangaDetailPresenter(
      * Delete the list of chapters
      */
     fun deleteChapters(chapterItems: List<ChapterItem>, isEverything: Boolean = false, canUndo: Boolean = false) {
-        // do on global scope cause we don't want exiting the manga to prevent the deleting
-
-        launchIO {
+        presenterScope.launchNonCancellable {
             if (chapterItems.isNotEmpty()) {
                 val delete = {
                     if (isEverything) {
@@ -1473,7 +1473,7 @@ class MangaDetailPresenter(
                 if (syncRead != null && !skipSync && preferences.readingSync()) {
                     val chapterIds = newChapterItems.filter { !it.isMergedChapter() }.map { it.mangaDexChapterId }
                     if (chapterIds.isNotEmpty()) {
-                        GlobalScope.launchIO {
+                        presenterScope.launchNonCancellable {
                             statusHandler.marksChaptersStatus(
                                 currentManga().uuid(),
                                 chapterIds,
@@ -1556,7 +1556,11 @@ class MangaDetailPresenter(
      */
     private fun updateMissingChapters() {
         presenterScope.launchIO {
-            val currentMissingChapters = generalState.value.allChapters.getMissingCount(currentManga().status)
+            val missingChapterHolder = generalState.value.allChapters.getMissingChapters()
+            _mangaState.update {
+                it.copy(estimatedMissingChapters = missingChapterHolder.estimatedChapters?.toImmutableList())
+            }
+            val currentMissingChapters = missingChapterHolder.count
             if (currentMissingChapters != currentManga().missing_chapters) {
                 val editManga = currentManga()
                 editManga.apply {

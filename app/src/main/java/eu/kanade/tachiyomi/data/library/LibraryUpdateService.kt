@@ -36,7 +36,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.getMissingChapterCount
+import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
@@ -59,6 +59,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import logcat.LogPriority
+import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -356,9 +357,6 @@ class LibraryUpdateService(
         if (mangaToUpdateMap[source] == null) return false
         var currentCount = 0
         var hasDownloads = false
-        if (sourceManager.mangaDex.isLogged()) {
-            mangaDexLoginHelper.reAuthIfNeeded()
-        }
 
         while (currentCount < mangaToUpdateMap[source]!!.size) {
             val manga = mangaToUpdateMap[source]!![currentCount]
@@ -437,7 +435,7 @@ class LibraryUpdateService(
                 withIOContext {
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                        .get()
+                            .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                         // load new covers in background
@@ -516,7 +514,7 @@ class LibraryUpdateService(
 
             coroutineScope {
                 launch {
-                    if (preferences.readingSync() && source.isLogged()) {
+                    if (preferences.readingSync() && mangaDexLoginHelper.isLoggedIn()) {
                         val dbChapters = db.getChapters(manga).executeAsBlocking()
                         statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.url))
                             .collect { chapterIds ->
@@ -552,7 +550,7 @@ class LibraryUpdateService(
 
     private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
         val allChaps = db.getChapters(manga).executeAsBlocking()
-        val missingChapters = allChaps.getMissingChapterCount(manga.status)
+        val missingChapters = allChaps.map { it.toSimpleChapter()!!.toChapterItem() }.getMissingChapters().count
         if (missingChapters != manga.missing_chapters) {
             manga.missing_chapters = missingChapters
             db.insertManga(manga).executeOnIO()
@@ -563,7 +561,7 @@ class LibraryUpdateService(
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) {
         loggycat { "Attempting to update reading statuses" }
         if (mangaList.isNullOrEmpty()) return
-        if (sourceManager.mangaDex.isLogged() && job?.isCancelled == false) {
+        if (mangaDexLoginHelper.isLoggedIn() && job?.isCancelled == false) {
             runCatching {
                 val readingStatus = statusHandler.fetchReadingStatusForAllManga()
                 if (readingStatus.isNotEmpty()) {
