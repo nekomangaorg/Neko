@@ -150,7 +150,6 @@ class StatusSyncJob(
     private fun errorNotification(errorTxt: String? = null) {
         val notification = progressNotification
             .setContentTitle(errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync))
-            .setOngoing(true)
             .setAutoCancel(true)
             .build()
         context.applicationContext.notificationManager.notify(
