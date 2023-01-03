@@ -11,14 +11,13 @@ data class FeedScreenState(
     val outlineCovers: Boolean,
     val offset: Int = 0,
     val hasMoreResults: Boolean = true,
+    val groupChaptersUpdates: Boolean = false,
     val incognitoMode: Boolean = false,
     val allFeedChapters: ImmutableList<FeedChapter> = persistentListOf(),
 
     )
 
 enum class FeedScreenType {
-    Grouped,
-    All,
     History,
     Updates
 }

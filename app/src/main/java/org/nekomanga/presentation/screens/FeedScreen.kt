@@ -60,6 +60,7 @@ fun FeedScreen(
     feedScreenState: State<FeedScreenState>,
     windowSizeClass: WindowSizeClass,
     loadNextPage: () -> Unit,
+    toggleGroupChaptersUpdates: () -> Unit,
     onBackPress: () -> Unit,
     incognitoClick: () -> Unit,
     settingsClick: () -> Unit,
@@ -180,6 +181,9 @@ fun FeedScreen(
                         contentPadding = recyclerContentPadding,
                         feedChapters = feedScreenState.value.allFeedChapters,
                         hasMoreResults = feedScreenState.value.hasMoreResults,
+                        groupChaptersUpdates = feedScreenState.value.groupChaptersUpdates,
+                        toggleGroupChaptersUpdates = toggleGroupChaptersUpdates,
+                        outlineCovers = feedScreenState.value.outlineCovers,
                         loadNextPage = loadNextPage,
                     )
 
@@ -225,20 +229,7 @@ private fun ScreenTypeFooter(screenType: FeedScreenType, modifier: Modifier = Mo
         item {
             Gap(8.dp)
         }
-        item {
-            FooterFilterChip(
-                selected = screenType == FeedScreenType.Grouped,
-                onClick = { screenTypeClick(FeedScreenType.Grouped) },
-                name = stringResource(id = R.string.grouped),
-            )
-        }
-        item {
-            FooterFilterChip(
-                selected = screenType == FeedScreenType.All,
-                onClick = { screenTypeClick(FeedScreenType.All) },
-                name = stringResource(R.string.all),
-            )
-        }
+
         item {
             FooterFilterChip(
                 selected = screenType == FeedScreenType.History,

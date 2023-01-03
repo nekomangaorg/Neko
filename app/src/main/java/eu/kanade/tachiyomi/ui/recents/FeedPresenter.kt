@@ -24,6 +24,8 @@ class FeedPresenter(
     private val _feedScreenState = MutableStateFlow(
         FeedScreenState(
             outlineCovers = preferences.outlineOnCovers().get(),
+            incognitoMode = preferences.incognitoMode().get(),
+            groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
         ),
     )
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
@@ -65,11 +67,17 @@ class FeedPresenter(
             }
         }
 
-
         presenterScope.launch {
             preferences.incognitoMode().asFlow().collectLatest {
                 _feedScreenState.update { state ->
                     state.copy(incognitoMode = it)
+                }
+            }
+        }
+        presenterScope.launch {
+            preferences.groupChaptersUpdates().asFlow().collectLatest {
+                _feedScreenState.update { state ->
+                    state.copy(groupChaptersUpdates = it)
                 }
             }
         }
@@ -78,6 +86,12 @@ class FeedPresenter(
     fun loadNextPage() {
         presenterScope.launchIO {
             paginator.loadNextItems()
+        }
+    }
+
+    fun toggleGroupChaptersUpdates() {
+        presenterScope.launch {
+            preferences.groupChaptersUpdates().set(!preferences.groupChaptersUpdates().get())
         }
     }
 

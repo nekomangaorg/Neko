@@ -16,15 +16,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Calendar
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.chapter.FeedChapter
+import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.HeaderCard
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors
@@ -34,13 +37,27 @@ import org.nekomanga.presentation.theme.Padding
 fun FeedUpdatePage(
     contentPadding: PaddingValues,
     feedChapters: ImmutableList<FeedChapter>,
+    outlineCovers: Boolean,
     hasMoreResults: Boolean,
+    groupChaptersUpdates: Boolean,
+    toggleGroupChaptersUpdates: () -> Unit,
     loadNextPage: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
 
-    val grouped = remember(feedChapters) {
-        feedChapters.groupBy {
+    val grouped = remember(feedChapters, groupChaptersUpdates) {
+        val chapters = when (groupChaptersUpdates) {
+            true -> {
+                feedChapters.groupBy { it.mangaTitle }.map { entry ->
+                    entry.value.first().copy(
+                        totalChapter = entry.value.size,
+                    )
+                }
+            }
+            false -> feedChapters
+        }
+
+        chapters.groupBy {
             val cal = Calendar.getInstance()
             cal.time = Date(it.simpleChapter.dateFetch)
             cal[Calendar.HOUR_OF_DAY] = 0
@@ -48,6 +65,7 @@ fun FeedUpdatePage(
             cal[Calendar.SECOND] = 0
             cal[Calendar.MILLISECOND] = 0
             cal.time.time
+
         }.toList()
     }
 
@@ -58,6 +76,9 @@ fun FeedUpdatePage(
         contentPadding = contentPadding,
     ) {
 
+        item {
+            CheckboxRow(checkedState = groupChaptersUpdates, checkedChange = { toggleGroupChaptersUpdates() }, rowText = stringResource(id = R.string.group_chapters_together))
+        }
         items(grouped) { group ->
             HeaderCard {
                 Text(
@@ -75,7 +96,7 @@ fun FeedUpdatePage(
                 Row(Modifier.fillMaxWidth()) {
                     MangaCover.Square.invoke(
                         artwork = feedChapter.artwork,
-                        shouldOutlineCover = true,
+                        shouldOutlineCover = outlineCovers,
                         modifier = Modifier
                             .size(56.dp)
                             .align(Alignment.CenterVertically)
@@ -86,6 +107,7 @@ fun FeedUpdatePage(
                             .fillMaxWidth()
                             .padding(horizontal = Padding.extraSmall),
                     ) {
+
                         Text(text = feedChapter.simpleChapter.chapterText, style = MaterialTheme.typography.bodyLarge, overflow = TextOverflow.Ellipsis)
                         Text(text = feedChapter.mangaTitle, style = MaterialTheme.typography.bodyMedium, overflow = TextOverflow.Ellipsis)
                         Text(
@@ -94,6 +116,15 @@ fun FeedUpdatePage(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
                             overflow = TextOverflow.Ellipsis,
                         )
+                        if (feedChapter.totalChapter > 1) {
+                            Text(
+                                text = "${feedChapter.totalChapter} other recently added chapters",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+
                     }
 
                 }
