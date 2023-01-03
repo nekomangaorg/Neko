@@ -21,6 +21,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set Swap Space
+        if: runner.os == 'Linux'
+        # v1.0 -> 49819abfb41bd9b44fb781159c033dba90353a7c
+        uses: pierotofy/set-swap-space@49819abfb41bd9b44fb781159c033dba90353a7c
+        with:
+          swap-size-gb: 7
+
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
         with:
