@@ -7,7 +7,6 @@ import coil.request.Options
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
 import okhttp3.Call
 import uy.kohesive.injekt.injectLazy
 
@@ -25,7 +24,7 @@ class MangaCoverFactory(
             inLibrary = data.favorite,
             mangaId = data.id!!,
             originalThumbnailUrl = data.thumbnail_url ?: """error("No cover specified")""",
-            sourceLazy = lazy { sourceManager.get(data.source) as? HttpSource },
+            sourceLazy = lazy { sourceManager.mangaDex },
             options = options,
             coverCache = coverCache,
             callFactoryLazy = callFactoryLazy,

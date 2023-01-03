@@ -51,7 +51,12 @@ class MangaDexLoginHelper {
             .add("redirect_uri", MdConstants.Login.redirectUri)
             .build()
         val error = kotlin.runCatching {
-            val data = networkHelper.client.newCall(POST(MdApi.baseAuthUrl + MdApi.token, body = formBody)).await().parseAs<LoginResponseDto>()
+            val data = networkHelper.client.newCall(
+                POST(
+                    url = MdApi.baseAuthUrl + MdApi.token,
+                    body = formBody,
+                ),
+            ).await().parseAs<LoginResponseDto>()
             preferences.setTokens(
                 data.refreshToken,
                 data.accessToken,
@@ -81,18 +86,16 @@ class MangaDexLoginHelper {
             .build()
 
         val error = kotlin.runCatching {
-            val data = networkHelper.client.newCall(POST(MdApi.baseAuthUrl + MdApi.token, body = loginFormBody)).await().parseAs<LoginResponseDto>()
+            val data = networkHelper.mangadexClient.newCall(
+                POST(
+                    url = MdApi.baseAuthUrl + MdApi.token,
+                    body = loginFormBody,
+                ),
+            ).await().parseAs<LoginResponseDto>()
             preferences.setTokens(
                 data.refreshToken,
                 data.accessToken,
             )
-            /*val introspect = networkHelper.client.newCall(
-                GET(
-                    url = MdApi.baseAuthUrl + MdApi.userInfo,
-                    headers = Headers.Builder().add("Authorization", "Bearer $data.accessToken").build(),
-                    //  body = introspectFormBody,
-                ),
-            ).await()*/
 
         }.exceptionOrNull()
 
@@ -121,7 +124,7 @@ class MangaDexLoginHelper {
             .build()
 
         val error = kotlin.runCatching {
-            networkHelper.client.newCall(
+            networkHelper.mangadexClient.newCall(
                 POST(
                     url = MdApi.baseAuthUrl + MdApi.logout,
                     headers = Headers.Builder().add("Authorization", "Bearer $sessionToken").build(),

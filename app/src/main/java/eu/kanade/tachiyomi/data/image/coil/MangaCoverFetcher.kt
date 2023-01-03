@@ -16,12 +16,13 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import java.util.Date
+import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +45,7 @@ class MangaCoverFetcher(
     private val inLibrary: Boolean,
     private val mangaId: Long,
     private val originalThumbnailUrl: String,
-    private val sourceLazy: Lazy<HttpSource?>,
+    private val sourceLazy: Lazy<MangaDex>,
     private val options: Options,
     private val coverCache: CoverCache,
     private val callFactoryLazy: Lazy<Call.Factory>,
@@ -157,7 +158,7 @@ class MangaCoverFetcher(
     }
 
     private suspend fun executeNetworkRequest(): Response {
-        val client = sourceLazy.value?.client ?: callFactoryLazy.value
+        val client = sourceLazy.value.client
         val response = client.newCall(newRequest()).await()
         if (!response.isSuccessful && response.code != HTTP_NOT_MODIFIED) {
             response.close()
@@ -169,7 +170,7 @@ class MangaCoverFetcher(
     private fun newRequest(): Request {
         val request = Request.Builder()
             .url(url)
-            .headers(sourceLazy.value?.headers ?: options.headers)
+            .headers(sourceLazy.value.headers.newBuilder().add("x-request-id", "Neko-" + UUID.randomUUID()).build())
             // Support attaching custom data to the network request.
             .tag(Parameters::class.java, options.parameters)
 
@@ -307,7 +308,7 @@ class MangaCoverFetcher(
                 inLibrary = data.favorite,
                 mangaId = data.id!!,
                 originalThumbnailUrl = data.thumbnail_url ?: """error("No cover specified")""",
-                sourceLazy = lazy { sourceManager.get(data.source) as? HttpSource },
+                sourceLazy = lazy { sourceManager.mangaDex },
                 options = options,
                 coverCache = coverCache,
                 callFactoryLazy = callFactoryLazy,
