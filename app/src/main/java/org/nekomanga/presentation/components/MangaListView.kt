@@ -83,7 +83,9 @@ fun MangaListWithHeader(
     ) {
         groupedManga.forEach { (stringRes, mangaList) ->
             stickyHeader {
-                HeaderCard(stringResource(id = stringRes))
+                HeaderCard {
+                    DefaultHeaderText(text = stringResource(id = stringRes))
+                }
             }
             itemsIndexed(mangaList, key = { _, displayManga -> Objects.hash(displayManga.title, displayManga.mangaId, stringRes) }) { _, displayManga ->
                 MangaRow(

@@ -14,34 +14,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun HeaderCard(text: String) {
+fun HeaderCard(headerText: @Composable () -> Unit) {
     ElevatedCard(
         shape = RoundedCornerShape(Shapes.coverRadius),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(Padding.small),
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondary),
 
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSecondary,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-        )
+        ) {
+        headerText()
+
     }
+}
+
+@Composable
+fun DefaultHeaderText(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSecondary,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+    )
 }
 
 @Preview
 @Composable
 private fun HeaderCardPreview() {
     Box(modifier = Modifier.statusBarsPadding()) {
-        HeaderCard(text = "My Test header")
+        HeaderCard {
+            DefaultHeaderText(text = "My Test Header")
+        }
     }
 }

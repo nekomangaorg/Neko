@@ -53,7 +53,9 @@ fun MangaGridWithHeader(
     ) {
         groupedManga.forEach { (stringRes, allGrids) ->
             stickyHeader {
-                HeaderCard(stringResource(id = stringRes))
+                HeaderCard {
+                    DefaultHeaderText(text = stringResource(id = stringRes))
+                }
             }
             gridItems(
                 items = allGrids,

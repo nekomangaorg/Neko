@@ -9,13 +9,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Calendar
@@ -23,7 +25,9 @@ import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.chapter.FeedChapter
+import org.nekomanga.presentation.components.HeaderCard
 import org.nekomanga.presentation.components.MangaCover
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Padding
 
 @Composable
@@ -55,35 +59,52 @@ fun FeedUpdatePage(
     ) {
 
         items(grouped) { group ->
+            HeaderCard {
+                Text(
+                    text = "Fetched ${group.first.timeSpanFromNow}",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier
+                        .padding(Padding.small)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                )
+            }
 
-            Text(text = "Fetched: ${group.first.timeSpanFromNow}", style = MaterialTheme.typography.labelLarge)
-
+            Gap(Padding.small)
             group.second.forEach { feedChapter ->
-                ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                    Row(Modifier.fillMaxWidth()) {
-                        MangaCover.Square.invoke(
-                            artwork = feedChapter.artwork,
-                            shouldOutlineCover = true,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .padding(Padding.extraSmall),
+                Row(Modifier.fillMaxWidth()) {
+                    MangaCover.Square.invoke(
+                        artwork = feedChapter.artwork,
+                        shouldOutlineCover = true,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .align(Alignment.CenterVertically)
+                            .padding(Padding.extraSmall),
+                    )
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Padding.extraSmall),
+                    ) {
+                        Text(text = feedChapter.simpleChapter.chapterText, style = MaterialTheme.typography.bodyLarge, overflow = TextOverflow.Ellipsis)
+                        Text(text = feedChapter.mangaTitle, style = MaterialTheme.typography.bodyMedium, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            text = "Updated ${feedChapter.simpleChapter.dateUpload.timeSpanFromNow}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+                            overflow = TextOverflow.Ellipsis,
                         )
-                        Column(Modifier.fillMaxWidth()) {
-                            Text(text = feedChapter.simpleChapter.chapterTitle)
-                            Text(text = feedChapter.mangaTitle)
-                            Text(text = feedChapter.simpleChapter.dateUpload.timeSpanFromNow)
-                        }
-
                     }
+
                 }
-                Gap(Padding.extraSmall)
+                Gap(Padding.small)
+
                 LaunchedEffect(scrollState) {
                     if (hasMoreResults && feedChapters.indexOf(feedChapter) >= feedChapters.size - 4) {
                         loadNextPage()
                     }
                 }
             }
-
         }
     }
 }
