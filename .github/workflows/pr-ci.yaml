@@ -17,6 +17,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Set Swap Space
+        if: runner.os == 'Linux'
+        # v1.0 -> 49819abfb41bd9b44fb781159c033dba90353a7c
+        uses: pierotofy/set-swap-space@49819abfb41bd9b44fb781159c033dba90353a7c
+        with:
+          swap-size-gb: 7
+
       - name: clone repo
         uses: actions/checkout@v3
 
@@ -25,6 +32,11 @@ jobs:
         with:
           distribution: "zulu"
           java-version: 11
+
+      - name: Copy ci gradle.properties
+        run: |
+          mkdir -p ~/.gradle
+          cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
 
       - name: Build app
         uses: eskatos/gradle-command-action@v2.3.3
