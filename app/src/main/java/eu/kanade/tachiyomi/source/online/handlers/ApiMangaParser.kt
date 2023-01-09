@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlin.math.floor
 import logcat.LogPriority
+import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
 
@@ -35,13 +36,15 @@ class ApiMangaParser {
     /**
      * Parse the manga details json into manga object
      */
-    fun mangaDetailsParse(mangaDto: MangaDataDto, stats: Pair<String?, String?>, simpleChapters: List<String>): Result<SManga, ResultError> {
+    fun mangaDetailsParse(mangaDto: MangaDataDto, stats: Stats, simpleChapters: List<String>): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
             val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality())
 
-            manga.rating = stats.first
-            manga.users = stats.second
+            manga.rating = stats.rating
+            manga.users = stats.follows
+            manga.replies_count = stats.repliesCount
+            manga.thread_id = stats.threadId
 
             manga.description = mangaAttributesDto.description.asMdMap<String>()["en"]
 

@@ -80,7 +80,7 @@ open class MangaDex : HttpSource() {
         }
     }
 
-    suspend fun getChapterCommentId(chapterUUID: String): Result<Int?, ResultError> {
+    suspend fun getChapterCommentId(chapterUUID: String): Result<String?, ResultError> {
         return withIOContext {
             return@withIOContext mangaHandler.fetchChapterCommentId(chapterUUID)
         }

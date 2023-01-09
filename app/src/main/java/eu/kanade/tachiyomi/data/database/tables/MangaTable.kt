@@ -82,6 +82,10 @@ object MangaTable {
 
     const val COL_USER_TITLE = "user_title"
 
+    const val COL_THREAD_ID = "thread_id"
+
+    const val COL_REPLIES_COUNT = "replies_count"
+
     val createTableQuery: String
         get() =
             """CREATE TABLE $TABLE(
@@ -120,7 +124,9 @@ object MangaTable {
             $COL_FOLLOW_STATUS INTEGER,
             $COL_ALT_TITLE TEXT,
             $COL_USER_COVER TEXT,
-            $COL_USER_TITLE TEXT
+            $COL_USER_TITLE TEXT,
+            $COL_THREAD_ID TEXT,
+            $COL_REPLIES_COUNT TEXT,
             )
             """
 
@@ -132,68 +138,74 @@ object MangaTable {
             "WHERE $COL_FAVORITE = 1"
 
     val addDateAddedCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_DATE_ADDED} LONG DEFAULT 0"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_DATE_ADDED LONG DEFAULT 0"
 
     val addNextUpdateCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_NEXT_UPDATE} LONG DEFAULT 0"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_NEXT_UPDATE LONG DEFAULT 0"
 
     val addLangFlagCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_LANG_FLAG} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LANG_FLAG TEXT DEFAULT NULL"
 
     val addFollowStatusCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_FOLLOW_STATUS} INT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_FOLLOW_STATUS INT DEFAULT NULL"
 
     val addAnilistIdCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ANILIST_ID} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_ANILIST_ID TEXT DEFAULT NULL"
 
     val addKitsuIdCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_KITSU_ID} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_KITSU_ID TEXT DEFAULT NULL"
 
     val addMyAnimeListIdCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MY_ANIME_LIST_ID} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_MY_ANIME_LIST_ID TEXT DEFAULT NULL"
 
     val addMangaUpdatesIdCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MANGA_UPDATES_ID} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_MANGA_UPDATES_ID TEXT DEFAULT NULL"
 
     val addAnimePlanetIdCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ANIME_PLANET_ID} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_ANIME_PLANET_ID TEXT DEFAULT NULL"
 
     val addScanlatorFilterFlagCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_SCANLATOR_FILTER_FLAG} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_SCANLATOR_FILTER_FLAG TEXT DEFAULT NULL"
 
     val addMissingChaptersCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MISSING_CHAPTERS} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_MISSING_CHAPTERS TEXT DEFAULT NULL"
 
     val addRatingCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_RATING} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_RATING TEXT DEFAULT NULL"
 
     val addUsersCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_USERS} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_USERS TEXT DEFAULT NULL"
 
     val addMergeMangaCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MERGE_MANGA_URL} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_MERGE_MANGA_URL TEXT DEFAULT NULL"
 
     val addMangaLastChapter: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MANGA_LAST_CHAPTER} INTEGER DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_MANGA_LAST_CHAPTER INTEGER DEFAULT NULL"
 
     val addMergeMangaImageCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MERGE_MANGA_IMAGE_URL} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_MERGE_MANGA_IMAGE_URL TEXT DEFAULT NULL"
 
     val addOtherUrlsCol: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_OTHER_URLS} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_OTHER_URLS TEXT DEFAULT NULL"
 
     val addAltTitles: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ALT_TITLE} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_ALT_TITLE TEXT DEFAULT NULL"
 
     val addUserTitle: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_USER_TITLE} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_USER_TITLE TEXT DEFAULT NULL"
 
     val addUserCover: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_USER_COVER} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_USER_COVER TEXT DEFAULT NULL"
+
+    val addThreadId: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_THREAD_ID TEXT DEFAULT NULL"
+
+    val addRepliesCount: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_REPLIES_COUNT TEXT DEFAULT NULL"
 
     val clearScanlators: String
-        get() = "UPDATE ${MangaTable.TABLE} SET ${MangaTable.COL_SCANLATOR_FILTER_FLAG} = NULL where _id in (select _id from ${MangaTable.TABLE} where ${MangaTable.COL_SCANLATOR_FILTER_FLAG} IS NOT NULL)"
+        get() = "UPDATE $TABLE SET $COL_SCANLATOR_FILTER_FLAG = NULL where _id in (select _id from $TABLE where $COL_SCANLATOR_FILTER_FLAG IS NOT NULL)"
 
     val addLanguageFilterFlag: String
-        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_LANGUAGE_FILTER_FLAG} TEXT DEFAULT NULL"
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LANGUAGE_FILTER_FLAG TEXT DEFAULT NULL"
 }

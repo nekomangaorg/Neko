@@ -85,6 +85,7 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.track.TrackServiceItem
@@ -1219,9 +1220,8 @@ class MangaDetailPresenter(
             langFlag = m.lang_flag,
             missingChapters = m.missing_chapters,
             originalTitle = m.originalTitle,
-            rating = m.rating,
+            stats = Stats(rating = m.rating, follows = m.users, threadId = m.thread_id, repliesCount = m.replies_count),
             status = m.status,
-            users = m.users,
         )
     }
 
@@ -1593,7 +1593,7 @@ class MangaDetailPresenter(
         }
     }
 
-    suspend fun lookupComment(chapterId: String): Int? {
+    suspend fun lookupComment(chapterId: String): String? {
         return sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
             loggycat(LogPriority.ERROR) { it.message() }
             _snackbarState.emit(

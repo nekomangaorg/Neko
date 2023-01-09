@@ -15,6 +15,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 
@@ -63,9 +64,8 @@ object MangaConstants {
         val missingChapters: String? = null,
         val estimatedMissingChapters: ImmutableList<String>? = null,
         val originalTitle: String = "",
-        val rating: String? = null,
+        val stats: Stats? = null,
         val status: Int = 0,
-        val users: String? = null,
     )
 
     data class MangaScreenTrackMergeState(
@@ -225,6 +225,6 @@ object MangaConstants {
         val open: (Context, ChapterItem) -> Unit,
         val blockScanlator: (String) -> Unit,
         val openNext: (Context) -> Unit,
-        val openComment: suspend (String) -> Int?,
+        val openComment: suspend (String) -> String?,
     )
 }

@@ -38,9 +38,11 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_NEXT_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_OTHER_URLS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_RATING
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_REPLIES_COUNT
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SCANLATOR_FILTER_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STATUS
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_THREAD_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_THUMBNAIL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_URL
@@ -99,6 +101,8 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_MISSING_CHAPTERS, obj.missing_chapters)
         put(COL_RATING, obj.rating)
         put(COL_USERS, obj.users)
+        put(COL_THREAD_ID, obj.thread_id)
+        put(COL_REPLIES_COUNT, obj.replies_count)
         put(COL_MERGE_MANGA_URL, obj.merge_manga_url)
         put(COL_MANGA_LAST_CHAPTER, obj.last_chapter_number)
         put(COL_MERGE_MANGA_IMAGE_URL, obj.merge_manga_image_url)
@@ -148,6 +152,8 @@ interface BaseMangaGetResolver {
         user_cover = cursor.getString(cursor.getColumnIndex(COL_USER_COVER))
         user_title = cursor.getString(cursor.getColumnIndex(COL_USER_TITLE))
         filtered_language = cursor.getString(cursor.getColumnIndex(COL_LANGUAGE_FILTER_FLAG))
+        thread_id = cursor.getString(cursor.getColumnIndex(COL_THREAD_ID))
+        replies_count = cursor.getString(cursor.getColumnIndex(COL_REPLIES_COUNT))
     }
 }
 

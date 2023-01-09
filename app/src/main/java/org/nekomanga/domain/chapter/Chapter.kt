@@ -52,7 +52,7 @@ data class SimpleChapter(
         }
     }
 
-    fun commentUrl(threadId: Int): String {
+    fun commentUrl(threadId: String): String {
         return MdUtil.forumUrl + threadId
     }
 

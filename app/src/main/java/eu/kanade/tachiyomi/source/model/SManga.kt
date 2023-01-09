@@ -48,6 +48,10 @@ interface SManga : Serializable {
 
     var users: String?
 
+    var replies_count: String?
+
+    var thread_id: String?
+
     var merge_manga_url: String?
 
     var merge_manga_image_url: String?
@@ -115,13 +119,6 @@ interface SManga : Serializable {
             other_urls = other.other_urls
         }
 
-        if (other.rating != null) {
-            rating = other.rating
-        }
-
-        if (other.users != null) {
-            users = other.users
-        }
 
         if (other.last_chapter_number != null) {
             last_chapter_number = other.last_chapter_number
@@ -135,6 +132,11 @@ interface SManga : Serializable {
 
         status = other.status
 
+        rating = other.rating
+        users = other.users
+        thread_id = other.thread_id
+        replies_count = other.replies_count
+        
         if (!initialized) {
             initialized = other.initialized
         }

@@ -140,7 +140,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 blockScanlator = presenter::blockScanlator,
                 openComment = presenter::lookupComment,
             ),
-        ) { activity?.onBackPressed() }
+        ) { activity?.finish() }
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {

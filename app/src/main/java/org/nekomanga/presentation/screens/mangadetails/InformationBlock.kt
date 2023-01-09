@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.HotelClass
 import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
+import org.nekomanga.domain.manga.Stats
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
 
@@ -50,8 +52,7 @@ fun InformationBlock(
     titleProvider: () -> String,
     authorProvider: () -> String,
     artistProvider: () -> String,
-    ratingProvider: () -> String?,
-    usersProvider: () -> String?,
+    statsProvider: () -> Stats?,
     langFlagProvider: () -> String?,
     statusProvider: () -> Int,
     isPornographicProvider: () -> Boolean,
@@ -119,7 +120,7 @@ fun InformationBlock(
                 color = mediumAlpha,
             )
         }
-        if (ratingProvider() != null || usersProvider() != null || langFlagProvider() != null) {
+        if (statsProvider() != null || langFlagProvider() != null) {
             Gap(8.dp)
         }
         FlowRow(
@@ -149,37 +150,60 @@ fun InformationBlock(
                 }
             }
 
-            ratingProvider()?.let { rating ->
-                val formattedRating = ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
+            statsProvider()?.let { stats ->
+                stats.rating?.let { rating ->
+                    val formattedRating = ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
 
-                Row {
-                    Gap(8.dp)
-                    Image(imageVector = Icons.Filled.HotelClass, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
-                    Gap(4.dp)
-                    NoRippleText(
-                        text = formattedRating,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = mediumAlpha,
-                    )
+                    Row {
+                        Gap(8.dp)
+                        Image(imageVector = Icons.Filled.HotelClass, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                        Gap(4.dp)
+                        NoRippleText(
+                            text = formattedRating,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = mediumAlpha,
+                        )
+                    }
                 }
+
+                stats.follows?.let { unformattedNumberOfUsers ->
+                    val numberOfUsers = runCatching {
+                        NumberFormat.getNumberInstance(Locale.US).format(unformattedNumberOfUsers.toInt())
+                    }.getOrDefault(0).toString()
+
+                    Row {
+                        Gap(8.dp)
+                        Image(imageVector = Icons.Filled.Bookmarks, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                        Gap(4.dp)
+                        NoRippleText(
+                            text = numberOfUsers,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = mediumAlpha,
+                        )
+                    }
+                }
+
+                if (stats.threadId != null) {
+
+                    val numberOfComments = runCatching {
+                        NumberFormat.getNumberInstance(Locale.US).format(stats.repliesCount?.toInt())
+                    }.getOrDefault(0).toString()
+
+                    Row {
+                        Gap(8.dp)
+                        Image(imageVector = Icons.Filled.Comment, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                        Gap(4.dp)
+                        NoRippleText(
+                            text = numberOfComments,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = mediumAlpha,
+                        )
+                    }
+                }
+
             }
 
-            usersProvider()?.let { unformattedNumberOfUsers ->
-                val numberOfUsers = runCatching {
-                    NumberFormat.getNumberInstance(Locale.US).format(unformattedNumberOfUsers.toInt())
-                }.getOrDefault(0).toString()
 
-                Row {
-                    Gap(8.dp)
-                    Image(imageVector = Icons.Filled.Bookmarks, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
-                    Gap(4.dp)
-                    NoRippleText(
-                        text = numberOfUsers,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = mediumAlpha,
-                    )
-                }
-            }
 
             if (showMergedIconProvider()) {
                 Row {
