@@ -55,11 +55,16 @@ fun StatsScreen(
     val isSimple = rememberSaveable(statsState.value.screenState) { statsState.value.screenState is StatsConstants.ScreenState.Simple }
     val hideAction = rememberSaveable(statsState.value.screenState) { statsState.value.screenState is StatsConstants.ScreenState.NoResults || statsState.value.screenState is Loading }
 
-    val (actionIcon, actionText, titleText) = rememberSaveable(isSimple) {
+    val (actionText, titleText) = rememberSaveable(isSimple) {
         when (isSimple) {
-            true -> Triple(Icons.Default.ZoomInMap, R.string.view_detailed_statistics, R.string.simple_stats)
-            false -> Triple(Icons.Default.ZoomOutMap, R.string.view_simple_statistics, R.string.detailed_stats)
+            true -> Pair(R.string.view_detailed_statistics, R.string.simple_stats)
+            false -> Pair(R.string.view_simple_statistics, R.string.detailed_stats)
         }
+    }
+
+    val actionIcon = when (titleText == R.string.simple_stats) {
+        true -> Icons.Default.ZoomInMap
+        false -> Icons.Default.ZoomOutMap
     }
 
     NekoScaffold(
