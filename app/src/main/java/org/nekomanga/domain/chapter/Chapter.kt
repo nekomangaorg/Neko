@@ -171,6 +171,7 @@ data class ChapterItem(
 
 data class FeedChapter(
     val mangaTitle: String,
+    val mangaId: Long,
     val artwork: Artwork,
     val simpleChapter: SimpleChapter,
     val totalChapter: Int = 1,

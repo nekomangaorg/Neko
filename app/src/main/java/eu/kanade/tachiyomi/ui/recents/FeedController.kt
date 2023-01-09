@@ -29,6 +29,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
             onBackPress = { activity?.finish() },
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,
+            mangaClick = ::openManga,
             toggleGroupChaptersUpdates = presenter::toggleGroupChaptersUpdates,
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },

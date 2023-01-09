@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -36,6 +37,7 @@ enum class MangaCover(private val ratio: Float) {
         contentDescription: String = "",
         shape: Shape = RoundedCornerShape(Shapes.coverRadius),
         shouldOutlineCover: Boolean = true,
+        onClick: () -> Unit = { },
     ) {
         val color by remember { mutableStateOf(Pastel.getColorLight()) }
         AsyncImage(
@@ -50,7 +52,8 @@ enum class MangaCover(private val ratio: Float) {
                 .clip(shape)
                 .conditional(shouldOutlineCover) {
                     this.border(width = Outline.thickness, color = Outline.color, shape = RoundedCornerShape(Shapes.coverRadius))
-                },
+                }
+                .clickable { onClick() },
         )
     }
 }

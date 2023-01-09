@@ -61,6 +61,7 @@ fun FeedScreen(
     windowSizeClass: WindowSizeClass,
     loadNextPage: () -> Unit,
     toggleGroupChaptersUpdates: () -> Unit,
+    mangaClick: (Long) -> Unit,
     onBackPress: () -> Unit,
     incognitoClick: () -> Unit,
     settingsClick: () -> Unit,
@@ -183,6 +184,7 @@ fun FeedScreen(
                         hasMoreResults = feedScreenState.value.hasMoreResults,
                         groupChaptersUpdates = feedScreenState.value.groupChaptersUpdates,
                         toggleGroupChaptersUpdates = toggleGroupChaptersUpdates,
+                        mangaClick = mangaClick,
                         outlineCovers = feedScreenState.value.outlineCovers,
                         loadNextPage = loadNextPage,
                     )

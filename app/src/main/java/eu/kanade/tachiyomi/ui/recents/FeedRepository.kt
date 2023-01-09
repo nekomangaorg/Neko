@@ -24,7 +24,11 @@ class FeedRepository(
                 FeedScreenType.Updates -> {
                     val chapters = db.getRecentChapters(offset = offset, isResuming = false).executeAsBlocking()
                         .mapNotNull {
+                            it.manga.id ?: return@mapNotNull null
+                            it.chapter.id ?: return@mapNotNull null
+
                             FeedChapter(
+                                mangaId = it.manga.id!!,
                                 mangaTitle = it.manga.title,
                                 artwork = it.manga.toDisplayManga().currentArtwork,
                                 simpleChapter = it.chapter.toSimpleChapter()!!,
