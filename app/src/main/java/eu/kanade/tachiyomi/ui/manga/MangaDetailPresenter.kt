@@ -5,6 +5,8 @@ import android.os.Environment
 import androidx.compose.ui.state.ToggleableState
 import androidx.core.text.isDigitsOnly
 import com.crazylegend.string.isNotNullOrEmpty
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.onFailure
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -83,6 +85,7 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.domain.network.message
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
@@ -1588,6 +1591,17 @@ class MangaDetailPresenter(
                 }
             }
         }
+    }
+
+    suspend fun lookupComment(chapterId: String): Int? {
+        return sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
+            loggycat(LogPriority.ERROR) { it.message() }
+            _snackbarState.emit(
+                SnackbarState(
+                    messageRes = R.string.comments_unavailable,
+                ),
+            )
+        }.getOrElse { null }
     }
 
     fun blockScanlator(scanlator: String) {

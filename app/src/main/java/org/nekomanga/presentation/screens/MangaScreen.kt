@@ -60,6 +60,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenGeneralState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
+import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInWebView
 import java.text.DateFormat
@@ -325,6 +327,16 @@ fun MangaScreen(
                             )
                         },
                         onWebView = { context.asActivity().openInBrowser(chapterItem.chapter.fullUrl()) },
+                        onComment = {
+                            scope.launchIO {
+                                val result = chapterActions.openComment(chapterItem.chapter.mangaDexChapterId)
+                                if (result != null) {
+                                    scope.launchUI {
+                                        context.asActivity().openInBrowser(chapterItem.chapter.commentUrl(result))
+                                    }
+                                }
+                            }
+                        },
                         onDownload = { downloadAction ->
                             chapterActions.download(listOf(chapterItem), downloadAction)
                         },

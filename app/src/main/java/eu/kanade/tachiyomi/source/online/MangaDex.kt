@@ -80,6 +80,12 @@ open class MangaDex : HttpSource() {
         }
     }
 
+    suspend fun getChapterCommentId(chapterUUID: String): Result<Int?, ResultError> {
+        return withIOContext {
+            return@withIOContext mangaHandler.fetchChapterCommentId(chapterUUID)
+        }
+    }
+
     suspend fun getScanlator(scanlator: String): Result<Scanlator, ResultError> {
         return withIOContext {
             network.service.scanlatorGroup(scanlator).getOrResultError("Trying to get scanlator")

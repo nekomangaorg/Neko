@@ -93,6 +93,7 @@ fun ChapterRow(
     onClick: () -> Unit,
     onBookmark: () -> Unit,
     onWebView: () -> Unit,
+    onComment: () -> Unit,
     onRead: () -> Unit,
     blockScanlator: (String) -> Unit,
     markPrevious: (Boolean) -> Unit,
@@ -145,6 +146,7 @@ fun ChapterRow(
                     downloadProgressProvider = downloadProgressProvider,
                     onClick = onClick,
                     onWebView = onWebView,
+                    onComment = onComment,
                     onDownload = onDownload,
                     markPrevious = markPrevious,
                     isMerged = isMerged,
@@ -212,6 +214,7 @@ private fun ChapterInfo(
     downloadProgressProvider: () -> Float,
     onClick: () -> Unit,
     onWebView: () -> Unit,
+    onComment: () -> Unit,
     onDownload: (DownloadAction) -> Unit,
     markPrevious: (Boolean) -> Unit,
     isMerged: Boolean = false,
@@ -246,7 +249,14 @@ private fun ChapterInfo(
         expanded = dropdown,
         themeColorState = themeColorState,
         onDismiss = { dropdown = false },
-        dropDownItems = getDropDownItems(scanlator.isNotBlank() && !isMerged, splitScanlator, onWebView, markPrevious),
+        dropDownItems = getDropDownItems(
+            showScanlator = scanlator.isNotBlank() && !isMerged,
+            showComments = !isMerged,
+            scanlators = splitScanlator,
+            onWebView = onWebView,
+            onComment = onComment,
+            markPrevious = markPrevious,
+        ),
     )
 
     Row(
@@ -422,8 +432,10 @@ private fun ChapterInfo(
 @Composable
 private fun getDropDownItems(
     showScanlator: Boolean,
+    showComments: Boolean,
     scanlators: ImmutableList<SimpleDropDownItem>,
     onWebView: () -> Unit,
+    onComment: () -> Unit,
     markPrevious: (Boolean) -> Unit,
 ): ImmutableList<SimpleDropDownItem> {
     return (
@@ -456,6 +468,16 @@ private fun getDropDownItems(
             } else {
                 emptyList()
             }
+            + if (showComments) {
+            listOf(
+                SimpleDropDownItem.Action(
+                    text = UiText.StringResource(R.string.comments),
+                    onClick = onComment,
+                ),
+            )
+        } else {
+            emptyList()
+        }
         ).toPersistentList()
 }
 

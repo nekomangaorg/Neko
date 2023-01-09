@@ -148,7 +148,7 @@ class ApiMangaParser {
                         this.log("trying to get rating for ${mangaDto.id}")
                     }.getOrNull()
                 statResult?.statistics?.get(mangaDto.id)?.let { stats ->
-                    val rating = stats.rating.bayesian ?: 0.0
+                    val rating = stats.rating?.bayesian ?: 0.0
                     if (rating > 0) {
                         manga.rating = rating.toString()
                     }

@@ -138,6 +138,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 },
                 open = { context, chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
                 blockScanlator = presenter::blockScanlator,
+                openComment = presenter::lookupComment,
             ),
         ) { activity?.onBackPressed() }
     }

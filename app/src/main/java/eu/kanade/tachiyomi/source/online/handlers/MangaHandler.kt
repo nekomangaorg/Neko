@@ -127,7 +127,7 @@ class MangaHandler {
                     when (stats == null) {
                         true -> null to null
                         false -> {
-                            val rating = stats.rating.bayesian ?: 0.0
+                            val rating = stats.rating?.bayesian ?: 0.0
                             val strRating = when (rating > 0) {
                                 true -> rating.toString()
                                 false -> null
@@ -167,6 +167,12 @@ class MangaHandler {
                     fetchOffset(mangaUUID, langs, pos * limit)
                 }
             }.awaitAll().mapNotNull { it.getOrElse { null }?.data }.flatten()
+        }
+    }
+
+    suspend fun fetchChapterCommentId(chapterUUID: String): Result<Int?, ResultError> {
+        return service.chapterStatistics(chapterUUID).getOrResultError("Trying to get chapter comments").andThen {
+            Ok(it.statistics[chapterUUID]?.comments?.threadId)
         }
     }
 

@@ -59,9 +59,14 @@ interface MangaDexService {
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
     ): ApiResponse<AggregateDto>
 
-    @GET(MdApi.statistics)
+    @GET("${MdApi.statistics}${MdApi.manga}/{id}")
     suspend fun mangaStatistics(
-        @Query(value = "manga[]") mangaId: String,
+        @Path("id") mangaId: String,
+    ): ApiResponse<StatisticResponseDto>
+
+    @GET("${MdApi.statistics}${MdApi.chapter}/{id}")
+    suspend fun chapterStatistics(
+        @Path("id") chapterId: String,
     ): ApiResponse<StatisticResponseDto>
 
     @GET("${MdApi.manga}/{id}/relation")

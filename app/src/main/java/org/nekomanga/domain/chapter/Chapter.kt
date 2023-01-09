@@ -52,6 +52,10 @@ data class SimpleChapter(
         }
     }
 
+    fun commentUrl(threadId: Int): String {
+        return MdUtil.forumUrl + threadId
+    }
+
     fun toSChapter(): SChapter {
         return SChapter.create().also {
             it.url = url
@@ -101,7 +105,7 @@ data class SimpleChapter(
             oldMangaDexChapterId = null,
             language = "",
 
-        )
+            )
     }
 
     fun toDbChapter(): Chapter = ChapterImpl().also {
@@ -167,3 +171,4 @@ data class ChapterItem(
 
     val isNotDefaultDownload = downloadState != Download.State.default
 }
+
