@@ -32,7 +32,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
             browseScreenState = presenter.browseScreenState.collectAsState(),
             switchDisplayClick = presenter::switchDisplayMode,
             switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
-            onBackPress = { activity?.onBackPressed() },
+            onBackPress = { activity?.finish() },
             windowSizeClass = windowSizeClass,
             legacySideNav = isSideNav,
             homeScreenTitleClick = ::openDisplayScreen,
@@ -65,7 +65,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
         presenter.searchTag(tag)
     }
 
-    fun openDisplayScreen(displayScreenType: DisplayScreenType) {
+    private fun openDisplayScreen(displayScreenType: DisplayScreenType) {
         viewScope.launchUI {
             router.pushController(DisplayController(displayScreenType).withFadeTransaction())
         }
