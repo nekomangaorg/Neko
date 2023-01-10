@@ -36,9 +36,10 @@ class CrashLogUtil(private val context: Context) {
             }
 
             val logLevel = when (preferences.verboseLogging()) {
-                true -> " *:D"
-                false -> " *:E"
+                true -> "D:*"
+                false -> "E*"
             }
+
             Runtime.getRuntime().exec("logcat $logLevel -d -f ${file.absolutePath}").waitFor()
             showNotification(file.getUriCompat(context))
             Runtime.getRuntime().exec("logcat -c")
