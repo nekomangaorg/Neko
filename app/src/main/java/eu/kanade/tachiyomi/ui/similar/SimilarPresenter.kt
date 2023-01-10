@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import java.util.Date
@@ -40,7 +41,6 @@ class SimilarPresenter(
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
-            promptForCategories = preferences.defaultCategory() == -1,
         ),
     )
 
@@ -51,13 +51,12 @@ class SimilarPresenter(
         getSimilarManga()
 
         presenterScope.launch {
-            if (similarScreenState.value.promptForCategories) {
-                val categories = db.getCategories().executeAsBlocking()
-                _similarScreenState.update {
-                    it.copy(
-                        categories = categories.map { category -> category.toCategoryItem() }.toImmutableList(),
-                    )
-                }
+            val categories = db.getCategories().executeAsBlocking().map { category -> category.toCategoryItem() }.toImmutableList()
+            _similarScreenState.update {
+                it.copy(
+                    categories = categories,
+                    promptForCategories = CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                )
             }
         }
         presenterScope.launch {

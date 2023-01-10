@@ -15,6 +15,6 @@ data class SimilarScreenState(
     val outlineCovers: Boolean,
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
-    val promptForCategories: Boolean,
+    val promptForCategories: Boolean = false,
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )

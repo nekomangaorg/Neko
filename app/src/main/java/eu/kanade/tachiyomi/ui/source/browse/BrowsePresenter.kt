@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.resync
@@ -62,7 +63,6 @@ class BrowsePresenter(
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
-            promptForCategories = preferences.defaultCategory() == -1,
             filters = createInitialDexFilter(incomingQuery),
             defaultContentRatings = preferences.contentRatingSelections().toImmutableSet(),
             screenType = BrowseScreenType.Homepage,
@@ -145,13 +145,13 @@ class BrowsePresenter(
         }
 
         presenterScope.launch {
-            if (browseScreenState.value.promptForCategories) {
-                val categories = db.getCategories().executeAsBlocking()
-                _browseScreenState.update {
-                    it.copy(
-                        categories = categories.map { category -> category.toCategoryItem() }.toPersistentList(),
-                    )
-                }
+            val categories = db.getCategories().executeAsBlocking().map { category -> category.toCategoryItem() }.toPersistentList()
+
+            _browseScreenState.update {
+                it.copy(
+                    categories = categories,
+                    promptForCategories = CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                )
             }
         }
         presenterScope.launch {

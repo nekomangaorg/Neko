@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -36,11 +37,10 @@ class DisplayPresenter(
             isList = preferences.browseAsList().get(),
             title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
             titleRes = (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
-                ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
+            ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
-            promptForCategories = preferences.defaultCategory() == -1,
             showLibraryEntries = preferences.browseShowLibrary().get(),
         ),
     )
@@ -90,15 +90,15 @@ class DisplayPresenter(
         loadNextItems()
 
         presenterScope.launch {
-            if (displayScreenState.value.promptForCategories) {
-                val categories = db.getCategories().executeAsBlocking()
-                _displayScreenState.update {
-                    it.copy(
-                        categories = categories.map { category -> category.toCategoryItem() }.toImmutableList(),
-                    )
-                }
+            val categories = db.getCategories().executeAsBlocking().map { category -> category.toCategoryItem() }.toImmutableList()
+            _displayScreenState.update {
+                it.copy(
+                    categories = categories,
+                    promptForCategories = CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                )
             }
         }
+
         presenterScope.launch {
             preferences.browseAsList().asFlow().collectLatest {
                 _displayScreenState.update { state ->

@@ -21,7 +21,7 @@ data class DisplayScreenState(
     val outlineCovers: Boolean,
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
-    val promptForCategories: Boolean,
+    val promptForCategories: Boolean = false,
     val showLibraryEntries: Boolean,
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
