@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 178
-    const val versionName = "2.12.4"
+    const val versionCode = 179
+    const val versionName = "2.12.5"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -153,6 +153,7 @@ dependencies {
         exclude(module = "image-decoder")
     }
 
+
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)
     implementation(libs.bundles.google)
@@ -222,6 +223,7 @@ dependencies {
     implementation(compose.number.picker)
 
     implementation(compose.bundles.charting)
+    implementation(compose.balloon)
 
 
     implementation(libs.pastelplaceholders)

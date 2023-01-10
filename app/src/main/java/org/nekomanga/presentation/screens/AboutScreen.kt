@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.screens
 
-import ToolTipIconButton
+import ToolTipButton
 import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -246,7 +246,7 @@ private fun LinkIcon(
 ) {
     val uriHandler = LocalUriHandler.current
 
-    ToolTipIconButton(
+    ToolTipButton(
         label,
         iconModifier = Modifier.size(24.dp),
         icon = icon,

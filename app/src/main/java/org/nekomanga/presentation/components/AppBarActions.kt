@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.components
 
-import ToolTipIconButton
+import ToolTipButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewList
@@ -41,7 +41,7 @@ fun AppBarActions(
     var showMenu by remember { mutableStateOf(false) }
 
     actions.filterIsInstance<AppBar.Action>().map {
-        ToolTipIconButton(
+        ToolTipButton(
             toolTipLabel = it.title.asString(),
             icon = it.icon,
             isEnabled = it.isEnabled,
@@ -51,7 +51,7 @@ fun AppBarActions(
 
     val overflowActions = actions.filterIsInstance<AppBar.OverflowAction>()
     if (overflowActions.isNotEmpty()) {
-        ToolTipIconButton(
+        ToolTipButton(
             toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
             buttonClicked = { showMenu = !showMenu },
@@ -69,7 +69,7 @@ fun AppBarActions(
 
     val mainDropDown = actions.filterIsInstance<AppBar.MainDropdown>().firstOrNull()
     if (mainDropDown != null) {
-        ToolTipIconButton(
+        ToolTipButton(
             toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
             buttonClicked = { showMenu = !showMenu },

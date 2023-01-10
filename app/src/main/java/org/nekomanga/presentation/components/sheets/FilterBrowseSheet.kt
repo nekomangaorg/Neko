@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.components.sheets
 
-import ToolTipIconButton
+import ToolTipButton
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -624,13 +624,13 @@ fun SavedFilters(
                     // AnimatedVisibility(visible = isEnabled, enter = slideInHorizontally() + fadeIn(), exit = slideOutHorizontally() + fadeOut()) {
                     if (isEnabled) {
                         Row(modifier = Modifier.animateItemPlacement()) {
-                            ToolTipIconButton(toolTipLabel = stringResource(id = R.string.delete_filter), icon = Icons.Outlined.Delete, buttonClicked = { deleteFilterClick(nameOfEnabledFilter) })
+                            ToolTipButton(toolTipLabel = stringResource(id = R.string.delete_filter), icon = Icons.Outlined.Delete, buttonClicked = { deleteFilterClick(nameOfEnabledFilter) })
                             val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
                             val (textRes, makeDefault, icon) = when (isDefault) {
                                 true -> Triple(R.string.remove_default, false, Icons.Default.HeartBroken)
                                 false -> Triple(R.string.make_default, true, Icons.Default.Favorite)
                             }
-                            ToolTipIconButton(toolTipLabel = stringResource(textRes), icon = icon, buttonClicked = { filterDefaultClick(nameOfEnabledFilter, makeDefault) })
+                            ToolTipButton(toolTipLabel = stringResource(textRes), icon = icon, buttonClicked = { filterDefaultClick(nameOfEnabledFilter, makeDefault) })
                         }
                     }
                     Gap(4.dp)

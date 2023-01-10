@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.components
 
-import ToolTipIconButton
+import ToolTipButton
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -113,7 +113,7 @@ private fun TitleAndSubtitleTopAppBar(
         },
         modifier = Modifier.statusBarsPadding(),
         navigationIcon = {
-            ToolTipIconButton(
+            ToolTipButton(
                 toolTipLabel = navigationIconLabel,
                 icon = navigationIcon,
                 buttonClicked = onNavigationIconClicked,
@@ -141,7 +141,7 @@ private fun NoTitleTopAppBar(
         title = {},
         modifier = Modifier.statusBarsPadding(),
         navigationIcon = {
-            ToolTipIconButton(
+            ToolTipButton(
                 toolTipLabel = navigationIconLabel,
                 icon = navigationIcon,
                 buttonClicked = onNavigationIconClicked,
@@ -192,7 +192,7 @@ private fun TitleOnlyTopAppBar(
                         .size(32.dp),
                 )
             } else if (!isRoot) {
-                ToolTipIconButton(
+                ToolTipButton(
                     toolTipLabel = navigationIconLabel,
                     icon = navigationIcon,
                     buttonClicked = onNavigationIconClicked,

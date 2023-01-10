@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.screens
 
-import ToolTipIconButton
+import ToolTipButton
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -72,7 +72,7 @@ fun StatsScreen(
         onNavigationIconClicked = onBackPressed,
         actions = {
             if (!hideAction) {
-                ToolTipIconButton(
+                ToolTipButton(
                     toolTipLabel = stringResource(id = actionText),
                     icon = actionIcon,
                     buttonClicked = onSwitchClick,
