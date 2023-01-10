@@ -89,7 +89,7 @@ fun InformationBlock(
                     true -> authorProvider().trim()
                     false -> {
                         listOfNotNull(authorProvider().trim(), artistProvider().trim())
-                            .joinToString(", ")
+                            .joinToString(" • ")
                     }
                 }
 
