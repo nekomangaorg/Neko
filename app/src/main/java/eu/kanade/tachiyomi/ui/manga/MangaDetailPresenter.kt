@@ -7,6 +7,7 @@ import androidx.core.text.isDigitsOnly
 import com.crazylegend.string.isNotNullOrEmpty
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.runCatching
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -787,8 +788,8 @@ class MangaDetailPresenter(
      */
     private fun updateTrackingFlows(checkForMissingTrackers: Boolean = false) {
         presenterScope.launchIO {
-            _trackMergeState.update {
-                it.copy(
+            _trackMergeState.update { mergeState ->
+                mergeState.copy(
                     loggedInTrackService = trackManager.services.filter { it.value.isLogged() }.map { it.value.toTrackServiceItem() }.toImmutableList(),
                     tracks = db.getTracks(mangaId).executeAsBlocking().map { it.toTrackItem() }.toImmutableList(),
                 )
@@ -807,7 +808,9 @@ class MangaDetailPresenter(
                         track = mdList.createInitialTracker(currentManga())
                         db.insertTrack(track).executeOnIO()
                         if (isOnline()) {
-                            mdList.bind(track)
+                            runCatching { mdList.bind(track) }.onFailure { exception ->
+                                loggycat(LogPriority.ERROR, exception) { "Error trying to bind tracking info for mangadex" }
+                            }
                         }
                         db.insertTrack(track).executeOnIO()
                     }
@@ -855,8 +858,8 @@ class MangaDetailPresenter(
                     }
                 }
                 // update the tracks incase they were updated above
-                _trackMergeState.update {
-                    it.copy(
+                _trackMergeState.update { mergeState ->
+                    mergeState.copy(
                         tracks = db.getTracks(mangaId).executeAsBlocking().map { it.toTrackItem() }.toImmutableList(),
                     )
                 }
