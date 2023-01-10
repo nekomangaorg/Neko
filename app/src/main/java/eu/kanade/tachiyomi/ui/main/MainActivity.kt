@@ -1208,6 +1208,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
     }
 
+    fun isSideNavigation(): Boolean {
+        return binding.bottomNav == null
+    }
+
     override fun downloadStatusChanged(downloading: Boolean) {
         val hasQueue = downloading || downloadManager.hasQueue()
         lifecycleScope.launchUI {

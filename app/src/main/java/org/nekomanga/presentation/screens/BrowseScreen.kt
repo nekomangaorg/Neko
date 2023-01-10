@@ -86,6 +86,7 @@ fun BrowseScreen(
     switchDisplayClick: () -> Unit,
     switchLibraryVisibilityClick: () -> Unit,
     windowSizeClass: WindowSizeClass,
+    legacySideNav: Boolean,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
@@ -133,7 +134,7 @@ fun BrowseScreen(
     }
 
     val sideNav = rememberSideBarVisible(windowSizeClass, browseScreenState.value.sideNavMode)
-    val navBarPadding = rememberNavBarPadding(sideNav, browseScreenState.value.isDeepLink)
+    val navBarPadding = rememberNavBarPadding(sideNav || legacySideNav, browseScreenState.value.isDeepLink)
 
     // set the current sheet to null when bottom sheet is closed
     LaunchedEffect(key1 = sheetState.isVisible) {
