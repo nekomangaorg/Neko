@@ -149,6 +149,13 @@ class MangaUpdatesApi(
     suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<Record> {
         val body = buildJsonObject {
             put("search", query)
+            put(
+                "filter_types",
+                buildJsonArray {
+                    add("drama cd")
+                    add("novel")
+                },
+            )
         }
         return client.newCall(
             POST(
