@@ -57,7 +57,7 @@ fun InformationBlock(
     statusProvider: () -> Int,
     isPornographicProvider: () -> Boolean,
     missingChaptersProvider: () -> String?,
-    estimatedMissingChapterProvider: () -> List<String>?,
+    estimatedMissingChapterProvider: () -> String?,
     modifier: Modifier = Modifier,
     isExpandedProvider: () -> Boolean,
     showMergedIconProvider: () -> Boolean,
@@ -230,7 +230,7 @@ fun InformationBlock(
                 Column {
                     Gap(4.dp)
                     NoRippleText(
-                        text = estimates.joinToString(" ● "),
+                        text = estimates,
                         maxLines = 4,
                         style = MaterialTheme.typography.bodySmall,
                         color = mediumAlpha,

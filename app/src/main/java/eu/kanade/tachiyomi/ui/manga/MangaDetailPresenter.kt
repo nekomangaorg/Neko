@@ -1564,7 +1564,7 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val missingChapterHolder = generalState.value.allChapters.getMissingChapters()
             _mangaState.update {
-                it.copy(estimatedMissingChapters = missingChapterHolder.estimatedChapters?.toImmutableList())
+                it.copy(estimatedMissingChapters = missingChapterHolder.estimatedChapters)
             }
             val currentMissingChapters = missingChapterHolder.count
             if (currentMissingChapters != currentManga().missing_chapters) {
@@ -1597,14 +1597,31 @@ class MangaDetailPresenter(
     }
 
     suspend fun lookupComment(chapterId: String): String? {
-        return sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
-            loggycat(LogPriority.ERROR) { it.message() }
-            _snackbarState.emit(
-                SnackbarState(
-                    messageRes = R.string.comments_unavailable,
-                ),
-            )
-        }.getOrElse { null }
+        if (!isOnline()) {
+            presenterScope.launch { _snackbarState.emit(SnackbarState(message = "No network connection, cannot open comments")) }
+            return null
+        } else {
+            presenterScope.launch {
+                _isRefreshing.value = true
+            }
+
+            val threadId = sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
+                loggycat(LogPriority.ERROR) { it.message() }
+
+            }.getOrElse {
+                null
+            }
+            presenterScope.launch {
+                _isRefreshing.value = false
+                if (threadId == null)
+                    _snackbarState.emit(
+                        SnackbarState(
+                            messageRes = R.string.comments_unavailable,
+                        ),
+                    )
+            }
+            return threadId
+        }
     }
 
     fun blockScanlator(scanlator: String) {

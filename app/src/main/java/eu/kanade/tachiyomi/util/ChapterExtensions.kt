@@ -5,7 +5,7 @@ import org.nekomanga.domain.chapter.ChapterItem
 
 data class MissingChapterHolder(
     val count: String? = null,
-    val estimatedChapters: List<String>? = null,
+    val estimatedChapters: String? = null,
 )
 
 fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
@@ -55,9 +55,14 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
         count.toString()
     }
 
+    val estimateChapterString = when (estimateChapters.isEmpty()) {
+        true -> null
+        false -> estimateChapters.joinToString(" • ")
+    }
+
 
     return MissingChapterHolder(
         count = actualCount,
-        estimatedChapters = estimateChapters,
+        estimatedChapters = estimateChapterString,
     )
 }

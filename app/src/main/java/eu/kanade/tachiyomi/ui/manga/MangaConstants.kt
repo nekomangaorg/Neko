@@ -62,7 +62,7 @@ object MangaConstants {
         val isPornographic: Boolean = false,
         val langFlag: String? = null,
         val missingChapters: String? = null,
-        val estimatedMissingChapters: ImmutableList<String>? = null,
+        val estimatedMissingChapters: String? = null,
         val originalTitle: String = "",
         val stats: Stats? = null,
         val status: Int = 0,
