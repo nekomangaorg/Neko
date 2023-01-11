@@ -126,7 +126,7 @@ object MangaTable {
             $COL_USER_COVER TEXT,
             $COL_USER_TITLE TEXT,
             $COL_THREAD_ID TEXT,
-            $COL_REPLIES_COUNT TEXT,
+            $COL_REPLIES_COUNT TEXT
             )
             """
 
