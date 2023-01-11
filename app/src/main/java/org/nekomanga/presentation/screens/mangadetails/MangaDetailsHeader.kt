@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
@@ -55,8 +56,6 @@ fun MangaDetailsHeader(
     isLoggedIntoTrackersProvider: () -> Boolean,
     themeColorState: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
-    titleLongClick: (String) -> Unit = {},
-    creatorLongClick: (String) -> Unit = {},
     toggleFavorite: () -> Unit = {},
     moveCategories: () -> Unit = {},
     trackingClick: () -> Unit = {},
@@ -66,6 +65,7 @@ fun MangaDetailsHeader(
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
     descriptionActions: DescriptionActions,
+    informationActions: InformationActions,
     quickReadClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
@@ -122,8 +122,8 @@ fun MangaDetailsHeader(
                             .padding(top = 70.dp),
                         isExpandedProvider = { isExpanded.value },
                         showMergedIconProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes && !generalState.value.hideButtonText },
-                        titleLongClick = titleLongClick,
-                        creatorLongClicked = creatorLongClick,
+                        titleLongClick = informationActions.titleLongClick,
+                        creatorLongClicked = informationActions.creatorLongClick,
                     )
                     Gap(height = 16.dp)
                     ButtonBlock(

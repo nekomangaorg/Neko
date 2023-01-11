@@ -57,6 +57,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MangaScreenGeneralState
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
@@ -95,8 +96,6 @@ fun MangaScreen(
     isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
     generatePalette: (Drawable) -> Unit = {},
-    titleLongClick: (Context, String) -> Unit,
-    creatorLongClick: (Context, String) -> Unit,
     toggleFavorite: (Boolean) -> Unit,
     categoryActions: CategoryActions,
     dateFormat: DateFormat,
@@ -105,6 +104,7 @@ fun MangaScreen(
     coverActions: CoverActions,
     mergeActions: MergeActions,
     shareClick: (Context) -> Unit,
+    informationActions: InformationActions,
     descriptionActions: DescriptionActions,
     chapterFilterActions: ChapterFilterActions,
     chapterActions: ChapterActions,
@@ -244,8 +244,7 @@ fun MangaScreen(
                         mangaState = mangaState,
                         generalState = generalState,
                         windowSizeClass = windowSizeClass,
-                        titleLongClick = { title: String -> titleLongClick(context, title) },
-                        creatorLongClick = { creator: String -> creatorLongClick(context, creator) },
+                        informationActions = informationActions,
                         themeColorState = themeColorState,
                         generatePalette = generatePalette,
                         isLoggedIntoTrackersProvider = { trackMergeState.value.loggedInTrackService.isNotEmpty() },

@@ -194,6 +194,11 @@ object MangaConstants {
         val altTitleResetClick: () -> Unit,
     )
 
+    class InformationActions(
+        val titleLongClick: (String) -> Unit,
+        val creatorLongClick: (String) -> Unit,
+    )
+
     class TrackActions(
         val statusChange: (Int, TrackingConstants.TrackAndService) -> Unit,
         val scoreChange: (Int, TrackingConstants.TrackAndService) -> Unit,

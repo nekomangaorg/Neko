@@ -12,6 +12,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.R
@@ -27,6 +28,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -67,6 +69,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
+        val context = LocalContext.current
         MangaScreen(
             generalState = presenter.generalState.collectAsState(),
             mangaState = presenter.mangaState.collectAsState(),
@@ -79,6 +82,17 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 set = { enabledCategories -> presenter.updateMangaCategories(enabledCategories) },
                 addNew = { newCategory -> presenter.addNewCategory(newCategory) },
             ),
+            informationActions = InformationActions(
+                titleLongClick = {
+                    presenter.copiedToClipboard(it)
+                    copyToClipboard(context, it, R.string.title)
+                },
+                creatorLongClick = {
+                    presenter.copiedToClipboard(it)
+                    copyToClipboard(context, it, R.string.creator)
+                },
+
+                ),
             descriptionActions = DescriptionActions(
                 genreClick = this::tagClicked,
                 genreLongClick = this::tagLongClicked,
@@ -86,14 +100,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 altTitleResetClick = { presenter.setAltTitle(null) },
             ),
             generatePalette = this::setPalette,
-            titleLongClick = { context, content ->
-                presenter.copiedToClipboard(context.getString(R.string.title))
-                copyToClipboard(context, content, R.string.title)
-            },
-            creatorLongClick = { context, content ->
-                presenter.copiedToClipboard(context.getString(R.string.creator))
-                copyToClipboard(context, content, R.string.creator)
-            },
+
             toggleFavorite = presenter::toggleFavorite,
             dateFormat = preferences.dateFormat(),
             trackActions = TrackActions(
