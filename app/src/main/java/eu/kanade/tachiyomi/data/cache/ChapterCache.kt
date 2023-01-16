@@ -193,7 +193,7 @@ class ChapterCache(private val context: Context) {
     fun isImageInCache(imageUrl: String): Boolean {
         return try {
             loggycat { "is image in cache $imageUrl" }
-            diskCache.get(DiskUtil.hashKeyForDisk(imageUrl)) != null
+            diskCache.get(DiskUtil.hashKeyForDisk(imageUrl)).use { it != null }
         } catch (e: IOException) {
             loggycat(LogPriority.ERROR, e)
             false
