@@ -61,6 +61,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.toggle
@@ -90,7 +91,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -1566,7 +1566,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
     }
 
-    fun openWebView(isComments: Boolean) {
+    private fun openWebView(isComments: Boolean) {
         val currentChapter = presenter.getCurrentChapter()
         currentChapter ?: return
 
@@ -1574,22 +1574,24 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             if (currentChapter.chapter.isMergedChapter()) {
                 toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
             } else {
-                toast(R.string.comments_unavailable_dex, duration = Toast.LENGTH_SHORT)
+                binding.pleaseWait.isVisible = true
+                scope.launchIO {
+                    val threadId = presenter.lookupComment(currentChapter.chapter.uuid())
+
+                    scope.launchUI {
+                        binding.pleaseWait.isVisible = false
+
+                        if (threadId == null) {
+                            toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
+                        } else {
+                            this@ReaderActivity.openInBrowser(MdUtil.forumUrl + threadId)
+                        }
+                    }
+                }
             }
         } else {
-            var url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterUUID(currentChapter.chapter.url)
-            if (isComments) {
-                url += "/comments"
-            }
-
-            val intent =
-                WebViewActivity.newIntent(
-                    this,
-                    presenter.manga!!.source,
-                    url,
-                    currentChapter.chapter.name,
-                )
-            startActivity(intent)
+            var url = MdUtil.baseUrl + "/chapter/" + currentChapter.chapter.uuid()
+            this@ReaderActivity.openInBrowser(url)
         }
     }
 

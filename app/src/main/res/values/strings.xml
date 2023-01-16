@@ -1232,7 +1232,6 @@
     <string name="open_external">Open external links</string>
     <string name="comments">Comments</string>
     <string name="comments_unavailable">"Comments not available"</string>
-    <string name="comments_unavailable_dex">"Comments not available on MangaDex at this time"</string>
     <string name="remove_bookmark">Remove bookmark</string>
     <string name="add_bookmark">Add bookmark</string>
     <string name="merge_other">Merge another source to fill potential missing chapters</string>

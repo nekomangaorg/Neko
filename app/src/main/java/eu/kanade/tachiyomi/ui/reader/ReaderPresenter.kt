@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
 import androidx.annotation.ColorInt
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
@@ -61,6 +63,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.network.message
 import rx.Completable
 import rx.Observable
 import rx.Subscription
@@ -1053,10 +1056,14 @@ class ReaderPresenter(
             .subscribe()
     }
 
-    companion object {
-        /**
-         * To check if any chapter of the current reading session was downloaded
-         */
-        private var isAnyPrevChapterDownloaded = false
+    suspend fun lookupComment(chapterId: String): String? {
+        val threadId = sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
+            loggycat(LogPriority.ERROR) { it.message() }
+
+        }.getOrElse {
+            null
+        }
+
+        return threadId
     }
 }
