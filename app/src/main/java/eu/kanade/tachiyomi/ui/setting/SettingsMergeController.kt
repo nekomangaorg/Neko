@@ -22,6 +22,8 @@ class SettingsMergeController :
 
         preferenceCategory {
             title = Komga.name
+            this.summaryRes = R.string.minimum_komga_version
+
             val sourcePreference = KomgaLoginPreference(context, komga).apply {
                 title = "${komga.name} Login"
 
