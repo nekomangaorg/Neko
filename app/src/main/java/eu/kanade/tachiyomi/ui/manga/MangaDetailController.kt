@@ -87,12 +87,12 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                     presenter.copiedToClipboard(it)
                     copyToClipboard(context, it, R.string.title)
                 },
-                creatorLongClick = {
+                creatorCopy = {
                     presenter.copiedToClipboard(it)
                     copyToClipboard(context, it, R.string.creator)
                 },
-
-                ),
+                creatorSearch = this::creatorClicked,
+            ),
             descriptionActions = DescriptionActions(
                 genreClick = this::tagClicked,
                 genreLongClick = this::tagLongClicked,
@@ -229,29 +229,40 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
     }
 
     /**
-     * Navigate to browse screen when a tag is clicked and search there
+     * Search by author on browse screen
+     */
+    private fun creatorClicked(text: String) {
+        getBrowseController()?.searchByCreator(text)
+    }
+
+    /**
+     * Search by tag on browse screen
      */
     private fun tagClicked(text: String) {
-        if (router.backstackSize < 2) {
-            return
-        }
+        getBrowseController()?.searchByTag(text)
+    }
 
-        val controller =
-            when (val previousController = router.backstack[router.backstackSize - 2].controller) {
-                is LibraryController, is RecentsController -> {
-                    // Manually navigate to LibraryController
-                    router.handleBack()
-                    (activity as? MainActivity)?.goToTab(R.id.nav_browse)
-                    router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
-                }
-                is BrowseController -> {
-                    router.handleBack()
-                    previousController
-                }
-                else -> null
+    private fun getBrowseController(backstackNumber: Int = 2): BrowseController? {
+        val position = router.backstackSize - backstackNumber
+        if (position < 0) return null
+        return when (val previousController = router.backstack[position].controller) {
+            is LibraryController, is RecentsController -> {
+                // Manually navigate to LibraryController
+                router.handleBack()
+                (activity as? MainActivity)?.goToTab(R.id.nav_browse)
+                router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
             }
-        controller?.let {
-            controller.searchByTag(text)
+            is BrowseController -> {
+                router.handleBack()
+                previousController
+            }
+            else -> {
+                if (backstackNumber == 1) {
+                    null
+                } else {
+                    getBrowseController(backstackNumber - 1)
+                }
+            }
         }
     }
 

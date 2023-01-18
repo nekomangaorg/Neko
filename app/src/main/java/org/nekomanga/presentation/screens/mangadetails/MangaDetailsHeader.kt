@@ -108,6 +108,7 @@ fun MangaDetailsHeader(
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
+                        themeColorState = themeColorState,
                         titleProvider = { mangaState.value.currentTitle },
                         authorProvider = { mangaState.value.author },
                         artistProvider = { mangaState.value.artist },
@@ -123,7 +124,8 @@ fun MangaDetailsHeader(
                         isExpandedProvider = { isExpanded.value },
                         showMergedIconProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes && !generalState.value.hideButtonText },
                         titleLongClick = informationActions.titleLongClick,
-                        creatorLongClicked = informationActions.creatorLongClick,
+                        creatorCopyClick = informationActions.creatorCopy,
+                        creatorSearchClick = informationActions.creatorSearch,
                     )
                     Gap(height = 16.dp)
                     ButtonBlock(

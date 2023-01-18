@@ -588,7 +588,18 @@ class BrowsePresenter(
             _browseScreenState.update {
                 it.copy(filters = filters)
             }
-            paginator.loadNextItems()
+            getSearchPage()
+        }
+    }
+
+    fun searchCreator(creator: String) {
+        presenterScope.launch {
+            val blankFilter = createInitialDexFilter("")
+            _browseScreenState.update {
+                it.copy(filters = blankFilter.copy(queryMode = QueryType.Author, query = Filter.Query(creator, QueryType.Author)))
+            }
+
+            getSearchPage()
         }
     }
 

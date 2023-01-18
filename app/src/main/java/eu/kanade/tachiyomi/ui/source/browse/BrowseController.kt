@@ -65,6 +65,10 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
         presenter.searchTag(tag)
     }
 
+    fun searchByCreator(creator: String) {
+        presenter.searchCreator(creator)
+    }
+
     private fun openDisplayScreen(displayScreenType: DisplayScreenType) {
         viewScope.launchUI {
             router.pushController(DisplayController(displayScreenType).withFadeTransaction())

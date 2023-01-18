@@ -196,7 +196,8 @@ object MangaConstants {
 
     class InformationActions(
         val titleLongClick: (String) -> Unit,
-        val creatorLongClick: (String) -> Unit,
+        val creatorCopy: (String) -> Unit,
+        val creatorSearch: (String) -> Unit,
     )
 
     class TrackActions(

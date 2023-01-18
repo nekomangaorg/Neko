@@ -3,6 +3,7 @@ package org.nekomanga.presentation.screens.mangadetails
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,11 +17,15 @@ import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.HotelClass
 import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -36,6 +41,8 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.skydoves.balloon.compose.Balloon
+import com.skydoves.balloon.compose.BalloonWindow
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -46,9 +53,13 @@ import kotlin.math.roundToInt
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
+import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
+import org.nekomanga.presentation.screens.ThemeColorState
+import toolTipBuilder
 
 @Composable
 fun InformationBlock(
+    themeColorState: ThemeColorState,
     titleProvider: () -> String,
     authorProvider: () -> String,
     artistProvider: () -> String,
@@ -62,7 +73,8 @@ fun InformationBlock(
     isExpandedProvider: () -> Boolean,
     showMergedIconProvider: () -> Boolean,
     titleLongClick: (String) -> Unit = {},
-    creatorLongClicked: (String) -> Unit = {},
+    creatorCopyClick: (String) -> Unit = {},
+    creatorSearchClick: (String) -> Unit = {},
 ) {
     val highAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast)
     val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
@@ -94,14 +106,62 @@ fun InformationBlock(
                 }
 
             Gap(4.dp)
-            NoRippleText(
-                text = creator,
-                onLongClick = creatorLongClicked,
-                maxLines = if (isExpandedProvider()) 5 else 2,
-                style = MaterialTheme.typography.bodyLarge,
-                color = mediumAlpha,
-            )
+
+            var balloonWindow: BalloonWindow? by remember { mutableStateOf(null) }
+
+            Balloon(
+                builder = toolTipBuilder(backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 16.dp), dismissable = false, wrapHeight = true),
+                balloonContent = {
+                    val creators = creator.split(" • ").map { it.trim() }
+                    val result = when (creators.size > 5) {
+                        true -> listOf(creator)
+                        false -> creators
+                    }
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        result.forEach {
+                            Text(text = it, style = MaterialTheme.typography.labelLarge)
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceAround) {
+                                TextButton(
+                                    onClick = {
+                                        balloonWindow?.dismiss()
+                                        creatorCopyClick(it)
+                                    },
+                                ) {
+                                    Text(text = "Copy", color = themeColorState.buttonColor)
+                                }
+                                TextButton(
+                                    onClick = {
+                                        balloonWindow?.dismiss()
+                                        creatorSearchClick(it)
+                                    },
+                                ) {
+                                    Text(text = "Search", color = themeColorState.buttonColor)
+                                }
+                            }
+                            Gap(4.dp)
+                        }
+                    }
+                },
+
+                ) { window ->
+
+                LaunchedEffect(Unit) {
+                    balloonWindow = window
+                }
+
+                NoRippleText(
+                    text = creator,
+                    onClick = {
+                        window.showAsDropDown()
+                    },
+                    maxLines = if (isExpandedProvider()) 5 else 2,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = mediumAlpha,
+                )
+            }
         }
+
         if (statusProvider() != 0) {
             Gap(4.dp)
             val statusRes = when (statusProvider()) {
