@@ -188,8 +188,8 @@ object MangaConstants {
     )
 
     class DescriptionActions(
-        val genreClick: (String) -> Unit,
-        val genreLongClick: (String) -> Unit,
+        val genreSearch: (String) -> Unit,
+        val genreSearchLibrary: (String) -> Unit,
         val altTitleClick: (String) -> Unit,
         val altTitleResetClick: () -> Unit,
     )

@@ -94,8 +94,8 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 creatorSearch = this::creatorClicked,
             ),
             descriptionActions = DescriptionActions(
-                genreClick = this::tagClicked,
-                genreLongClick = this::tagLongClicked,
+                genreSearch = this::genreSearch,
+                genreSearchLibrary = this::genreSearchLibrary,
                 altTitleClick = presenter::setAltTitle,
                 altTitleResetClick = { presenter.setAltTitle(null) },
             ),
@@ -238,7 +238,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
     /**
      * Search by tag on browse screen
      */
-    private fun tagClicked(text: String) {
+    private fun genreSearch(text: String) {
         getBrowseController()?.searchByTag(text)
     }
 
@@ -269,7 +269,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
     /**
      * Navigate back to library when a tag is long clicked and search there
      */
-    private fun tagLongClicked(text: String) {
+    private fun genreSearchLibrary(text: String) {
         if (router.backstackSize < 2) {
             return
         }

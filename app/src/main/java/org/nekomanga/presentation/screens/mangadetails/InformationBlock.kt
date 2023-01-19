@@ -128,7 +128,7 @@ fun InformationBlock(
                                         creatorCopyClick(it)
                                     },
                                 ) {
-                                    Text(text = "Copy", color = themeColorState.buttonColor)
+                                    Text(text = stringResource(id = R.string.copy), color = themeColorState.buttonColor)
                                 }
                                 TextButton(
                                     onClick = {
@@ -136,7 +136,7 @@ fun InformationBlock(
                                         creatorSearchClick(it)
                                     },
                                 ) {
-                                    Text(text = "Search", color = themeColorState.buttonColor)
+                                    Text(text = stringResource(id = R.string.search), color = themeColorState.buttonColor)
                                 }
                             }
                             Gap(4.dp)

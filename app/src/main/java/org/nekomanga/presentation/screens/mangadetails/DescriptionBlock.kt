@@ -4,7 +4,6 @@ import android.animation.TimeInterpolator
 import androidx.compose.animation.core.Easing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,12 +31,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -49,6 +51,8 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.markdown.Markdown
 import com.mikepenz.markdown.MarkdownColors
 import com.mikepenz.markdown.MarkdownDefaults
+import com.skydoves.balloon.compose.Balloon
+import com.skydoves.balloon.compose.BalloonWindow
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
@@ -58,6 +62,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
+import toolTipBuilder
 
 /**
  * Genre, alt titles, description
@@ -73,8 +78,8 @@ fun DescriptionBlock(
     themeColorState: ThemeColorState,
     isExpanded: Boolean,
     expandCollapseClick: () -> Unit = {},
-    genreClick: (String) -> Unit = {},
-    genreLongClick: (String) -> Unit = {},
+    genreSearch: (String) -> Unit = {},
+    genreSearchLibrary: (String) -> Unit = {},
     altTitleClick: (String) -> Unit = {},
     altTitleResetClick: () -> Unit = {},
 ) {
@@ -148,7 +153,7 @@ fun DescriptionBlock(
                     resetClick = altTitleResetClick,
                 )
                 Gap(8.dp)
-                Genres(genresProvider(), tagColor, genreClick, genreLongClick)
+                Genres(genresProvider(), tagColor, themeColorState.buttonColor, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
             }
             val text = descriptionProvider().trim()
@@ -174,7 +179,7 @@ fun DescriptionBlock(
                     resetClick = altTitleResetClick,
                 )
                 Gap(16.dp)
-                Genres(genresProvider(), tagColor, genreClick, genreLongClick)
+                Genres(genresProvider(), tagColor, themeColorState.buttonColor, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
                 MoreLessButton(
                     buttonColor = themeColorState.buttonColor,
@@ -282,7 +287,7 @@ private fun AltTitles(altTitles: ImmutableList<String>, currentTitle: String, ta
 }
 
 @Composable
-private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, genreClick: (String) -> Unit, genreLongClick: (String) -> Unit) {
+private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, buttonColor: Color, genreSearch: (String) -> Unit, genreLibrarySearch: (String) -> Unit) {
     if (genres.isEmpty()) return
 
     val haptic = LocalHapticFeedback.current
@@ -309,17 +314,55 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, g
         crossAxisSpacing = 12.dp,
     ) {
         genres.forEach { genre ->
-            Chip(
-                label = genre,
-                containerColor = tagColor,
-                modifier = Modifier.combinedClickable(
-                    onClick = { genreClick(genre) },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        genreLongClick(genre)
+            var balloonWindow: BalloonWindow? by remember { mutableStateOf(null) }
+
+            Balloon(
+                builder = toolTipBuilder(backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(tagColor, 16.dp), dismissable = false),
+                balloonContent = {
+                    genreBalloon(balloonWindow, genreSearch, genre, buttonColor, genreLibrarySearch)
+                },
+            ) { window ->
+
+                LaunchedEffect(Unit) {
+                    balloonWindow = window
+                }
+                Chip(
+                    label = genre,
+                    containerColor = tagColor,
+                    modifier = Modifier.clickable {
+                        window.showAsDropDown()
                     },
-                ),
-            )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun genreBalloon(
+    balloonWindow: BalloonWindow?,
+    genreSearch: (String) -> Unit,
+    genre: String,
+    buttonColor: Color,
+    genreLibrarySearch: (String) -> Unit,
+) {
+    Row {
+        TextButton(
+            onClick = {
+                balloonWindow?.dismiss()
+                genreSearch(genre)
+            },
+        ) {
+            Text(text = stringResource(id = R.string.search), color = buttonColor)
+        }
+        Gap(4.dp)
+        TextButton(
+            onClick = {
+                balloonWindow?.dismiss()
+                genreLibrarySearch(genre)
+            },
+        ) {
+            Text(text = stringResource(id = R.string.search_library), color = buttonColor)
         }
     }
 }

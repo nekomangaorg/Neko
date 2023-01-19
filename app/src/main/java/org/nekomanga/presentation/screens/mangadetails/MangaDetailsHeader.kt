@@ -176,8 +176,8 @@ fun MangaDetailsHeader(
                 expandCollapseClick = {
                     isExpanded.value = !isExpanded.value
                 },
-                genreClick = descriptionActions.genreClick,
-                genreLongClick = descriptionActions.genreLongClick,
+                genreSearch = descriptionActions.genreSearch,
+                genreSearchLibrary = descriptionActions.genreSearchLibrary,
                 altTitleClick = descriptionActions.altTitleClick,
                 altTitleResetClick = descriptionActions.altTitleResetClick,
             )
