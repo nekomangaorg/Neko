@@ -42,7 +42,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -290,7 +289,6 @@ private fun AltTitles(altTitles: ImmutableList<String>, currentTitle: String, ta
 private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, buttonColor: Color, genreSearch: (String) -> Unit, genreLibrarySearch: (String) -> Unit) {
     if (genres.isEmpty()) return
 
-    val haptic = LocalHapticFeedback.current
     Text(
         text = "Tags:",
         style = MaterialTheme.typography.labelMedium,
