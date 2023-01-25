@@ -74,6 +74,7 @@ import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
@@ -210,7 +211,7 @@ fun MangaScreen(
         },
     ) {
         NekoScaffold(
-            title = "",
+            type = NekoScaffoldType.NoTitle,
             themeColorState = themeColorState,
             onNavigationIconClicked = onBackPressed,
             snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),

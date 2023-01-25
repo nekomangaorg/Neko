@@ -39,6 +39,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
@@ -93,6 +94,7 @@ fun SimilarScreen(
     ) {
         NekoScaffold(
             title = stringResource(id = R.string.similar),
+            type = NekoScaffoldType.Title,
             onNavigationIconClicked = onBackPress,
             actions = {
                 AppBarActions(

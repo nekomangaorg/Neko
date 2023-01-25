@@ -66,6 +66,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
@@ -181,6 +182,7 @@ fun BrowseScreen(
                 incognitoMode = browseScreenState.value.incognitoMode,
                 isRoot = true,
                 title = browseScreenState.value.title.asString(),
+                type = NekoScaffoldType.Title,
                 onNavigationIconClicked = onBackPress,
                 actions = {
                     AppBarActions(

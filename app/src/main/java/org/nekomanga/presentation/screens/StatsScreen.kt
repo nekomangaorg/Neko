@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.screens.stats.DetailedStats
 import org.nekomanga.presentation.screens.stats.SimpleStats
 
@@ -69,6 +70,7 @@ fun StatsScreen(
 
     NekoScaffold(
         title = stringResource(id = titleText),
+        type = NekoScaffoldType.Title,
         onNavigationIconClicked = onBackPressed,
         actions = {
             if (!hideAction) {

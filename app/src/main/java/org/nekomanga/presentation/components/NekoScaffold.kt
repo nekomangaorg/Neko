@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -39,16 +40,18 @@ import org.nekomanga.presentation.screens.defaultThemeColorState
 
 @Composable
 fun NekoScaffold(
-    title: String,
+
+    type: NekoScaffoldType,
     onNavigationIconClicked: () -> Unit,
     modifier: Modifier = Modifier,
     themeColorState: ThemeColorState = defaultThemeColorState(),
+    title: String = "",
+    subtitle: String = "",
     incognitoMode: Boolean = false,
     isRoot: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
-    subtitle: String = "",
     snackBarHost: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
@@ -65,13 +68,13 @@ fun NekoScaffold(
         topBar =
         {
             CompositionLocalProvider(LocalRippleTheme provides (themeColorState.rippleTheme)) {
-                if (subtitle.isEmpty() && title.isNotEmpty()) {
-                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, isRoot, scrollBehavior)
-                } else if (title.isEmpty()) {
-                    NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
-                } else {
-                    TitleAndSubtitleTopAppBar(color, title, subtitle, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
+                when (type) {
+                    NekoScaffoldType.Title -> TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, isRoot, scrollBehavior)
+                    NekoScaffoldType.NoTitle -> NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
+                    NekoScaffoldType.TitleAndSubtitle -> TitleAndSubtitleTopAppBar(color, title, subtitle, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
+                    else -> Unit
                 }
+
             }
         },
     ) { paddingValues ->
@@ -120,7 +123,7 @@ private fun TitleAndSubtitleTopAppBar(
             )
         },
         actions = actions,
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = topAppBarColors(
             containerColor = color,
             scrolledContainerColor = color,
         ),
@@ -148,7 +151,7 @@ private fun NoTitleTopAppBar(
             )
         },
         actions = actions,
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = topAppBarColors(
             containerColor = color,
             scrolledContainerColor = color,
         ),
@@ -169,7 +172,7 @@ private fun TitleOnlyTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = topAppBarColors(
             containerColor = color,
             scrolledContainerColor = color,
         ),
@@ -210,4 +213,11 @@ fun getTopAppBarColor(title: String): Color {
         true -> Color.Transparent
         false -> MaterialTheme.colorScheme.surface.copy(alpha = .7f)
     }
+}
+
+enum class NekoScaffoldType {
+    TitleAndSubtitle,
+    Title,
+    NoTitle,
+    Search
 }

@@ -46,6 +46,7 @@ import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.MangaGrid
 import org.nekomanga.presentation.components.MangaList
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.showLibraryEntriesAction
@@ -102,6 +103,7 @@ fun DisplayScreen(
     ) {
         NekoScaffold(
             title = if (displayScreenState.value.titleRes != null) stringResource(id = displayScreenState.value.titleRes!!) else displayScreenState.value.title,
+            type = NekoScaffoldType.Title,
             onNavigationIconClicked = onBackPress,
             actions = {
                 AppBarActions(
