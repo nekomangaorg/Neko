@@ -36,7 +36,8 @@ gap = "jp.wasabeef:gap:1.1.0"
 
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
-date-fieled = "com.github.LanarsInc:compose-date-text-field:1.0.2"
+date-fieled = "com.github.CarlosEsco:compose-date-text-field:1691474d1c"
+#date-fieled = "com.github.LanarsInc:compose-date-text-field:1.0.2"
 markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
 
 

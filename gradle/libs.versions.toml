@@ -18,12 +18,14 @@ google-services-gradle = "com.google.gms:google-services:4.3.15"
 firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.2"
 
 material = "com.google.android.material:material:1.7.0"
+desugaring = "com.android.tools:desugar_jdk_libs:2.0.0"
 firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.2.0"
 firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.3.3"
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"
 flex-box = "com.google.android.flexbox:flexbox:3.0.0"
 #needed for token bucket to work
 guava-fix = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
+
 
 coil = { module = "io.coil-kt:coil", version.ref = "coil_version" }
 coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coil_version" }

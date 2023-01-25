@@ -137,6 +137,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
@@ -147,6 +148,8 @@ android {
 dependencies {
 
     implementation(kotlinx.bundles.kotlin)
+
+    coreLibraryDesugaring(libs.desugaring)
 
     // Modified dependencies
     implementation(libs.j2k.subsample) {

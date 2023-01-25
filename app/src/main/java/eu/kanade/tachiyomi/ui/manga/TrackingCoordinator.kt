@@ -3,10 +3,10 @@ package eu.kanade.tachiyomi.ui.manga
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
+import java.time.ZoneId
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -15,7 +15,6 @@ import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackSearchItem
-import org.threeten.bp.ZoneId
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -26,7 +25,6 @@ import uy.kohesive.injekt.injectLazy
 class TrackingCoordinator {
     private val db: DatabaseHelper by injectLazy()
     private val trackManager: TrackManager = Injekt.get()
-    private val sourceManager: SourceManager by lazy { Injekt.get() }
 
     /**
      * Update tracker with new status
