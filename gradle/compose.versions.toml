@@ -1,5 +1,5 @@
 [versions]
-accompanist_version = "0.28.0"
+accompanist_version = "0.29.0-alpha"
 #sorta of stuck here until 1.4.0 hopefully, that or swipeable snackbar needs rewritten
 compose_version = "1.4.0-alpha05"
 compose_material3_version = "1.1.0-alpha04"
@@ -13,13 +13,13 @@ accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-
 accompanist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
 accompanist-themeadapter = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanist_version" }
 
+
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
 activity = "androidx.activity:activity-compose:1.6.1"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
 #Fix material swipe refresh bug
@@ -37,11 +37,10 @@ gap = "jp.wasabeef:gap:1.1.0"
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
 date-fieled = "com.github.CarlosEsco:compose-date-text-field:1691474d1c"
-#date-fieled = "com.github.LanarsInc:compose-date-text-field:1.0.2"
 markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
 
 
 [bundles]
 accompanist = ["accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
-compose = ["activity", "animations", "material3-core", "material3-windowsize", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
+compose = ["activity", "animations", "material3-core", "material3-windowsize", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
 charting = ["charty"]
