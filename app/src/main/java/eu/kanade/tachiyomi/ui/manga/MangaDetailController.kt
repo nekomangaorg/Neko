@@ -77,7 +77,9 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
             isRefreshing = presenter.isRefreshing.collectAsState(),
+            isSearching = presenter.isSearching.collectAsState(),
             onRefresh = presenter::onRefresh,
+            onSearch = presenter::onSearch,
             categoryActions = CategoryActions(
                 set = { enabledCategories -> presenter.updateMangaCategories(enabledCategories) },
                 addNew = { newCategory -> presenter.addNewCategory(newCategory) },

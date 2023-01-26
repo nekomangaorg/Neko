@@ -23,6 +23,7 @@ object MangaConstants {
 
     data class MangaScreenGeneralState(
         val activeChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val searchChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),

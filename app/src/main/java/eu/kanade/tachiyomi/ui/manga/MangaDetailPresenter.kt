@@ -134,6 +134,9 @@ class MangaDetailPresenter(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
     private val _snackbarState = MutableSharedFlow<SnackbarState>()
     val snackBarState: SharedFlow<SnackbarState> = _snackbarState.asSharedFlow()
 
@@ -253,6 +256,35 @@ class MangaDetailPresenter(
     }
 
     /**
+     * Search filtered chapters
+     */
+    fun onSearch(search: String?) {
+        presenterScope.launchIO {
+
+            val searchActive = search != null
+
+            _isSearching.value = searchActive
+
+            val filteredChapters = when (searchActive) {
+                true -> {
+                    _generalState.value.activeChapters.filter {
+                        it.chapter.chapterTitle.contains(search!!, true) || it.chapter.scanlator.contains(search, true) || it.chapter.name.contains(search, true)
+                    }
+                }
+                false -> emptyList()
+
+            }
+
+            _generalState.update {
+                it.copy(
+                    searchChapters = filteredChapters.toPersistentList(),
+
+                    )
+            }
+        }
+    }
+
+    /**
      * Updates the database with categories for the manga
      */
     fun updateMangaCategories(enabledCategories: List<CategoryItem>) {
@@ -327,8 +359,8 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val chapters = db.getHistoryByMangaId(mangaId).executeOnIO()
 
-            _generalState.update {
-                it.copy(
+            _generalState.update { state ->
+                state.copy(
                     trackingSuggestedDates = TrackingSuggestedDates(
                         startDate = chapters.minOfOrNull { it.last_read } ?: 0L,
                         finishedDate = chapters.maxOfOrNull { it.last_read } ?: 0L,

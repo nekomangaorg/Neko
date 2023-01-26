@@ -47,10 +47,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
 import eu.kanade.presentation.components.VerticalDivider
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -95,7 +97,9 @@ fun MangaScreen(
     windowSizeClass: WindowSizeClass,
     snackbar: SharedFlow<SnackbarState>,
     isRefreshing: State<Boolean>,
+    isSearching: State<Boolean>,
     onRefresh: () -> Unit,
+    onSearch: (String?) -> Unit,
     generatePalette: (Drawable) -> Unit = {},
     toggleFavorite: (Boolean) -> Unit,
     categoryActions: CategoryActions,
@@ -211,10 +215,15 @@ fun MangaScreen(
         },
     ) {
         NekoScaffold(
-            type = NekoScaffoldType.NoTitle,
+            type = NekoScaffoldType.Search,
             themeColorState = themeColorState,
             onNavigationIconClicked = onBackPressed,
-            snackBarHost = snackbarHost(snackbarHostState, themeColorState.buttonColor),
+            onSearch = onSearch,
+            searchPlaceHolder = stringResource(id = R.string.search_chapters),
+            snackBarHost = snackbarHost(
+                snackbarHostState,
+                themeColorState.buttonColor,
+            ),
             actions = {
                 OverflowOptions(chapterActions = chapterActions, chaptersProvider = { generalState.value.activeChapters })
             },
@@ -244,6 +253,7 @@ fun MangaScreen(
                     MangaDetailsHeader(
                         mangaState = mangaState,
                         generalState = generalState,
+                        isSearching = isSearching.value,
                         windowSizeClass = windowSizeClass,
                         informationActions = informationActions,
                         themeColorState = themeColorState,
@@ -288,7 +298,12 @@ fun MangaScreen(
                 fun chapterHeader() = @Composable {
                     ChapterHeader(
                         themeColor = themeColorState,
-                        numberOfChaptersProvider = { generalState.value.activeChapters.size },
+                        numberOfChaptersProvider = {
+                            when (isSearching.value) {
+                                true -> generalState.value.searchChapters.size
+                                false -> generalState.value.activeChapters.size
+                            }
+                        },
                         filterTextProvider = { generalState.value.chapterFilterText },
                         onClick = { openSheet(DetailsBottomSheetScreen.FilterChapterSheet) },
                     )
@@ -366,7 +381,12 @@ fun MangaScreen(
                             chapterContentPadding = chapterContentPadding,
                             details = details(),
                             chapterHeader = chapterHeader(),
-                            chaptersProvider = { generalState.value.activeChapters },
+                            chaptersProvider = {
+                                when (isSearching.value) {
+                                    true -> generalState.value.searchChapters
+                                    false -> generalState.value.activeChapters
+                                }
+                            },
                             chapterRow = chapterRow(),
                         )
                     } else {
@@ -374,7 +394,12 @@ fun MangaScreen(
                             contentPadding = mangaDetailContentPadding,
                             details = details(),
                             chapterHeader = chapterHeader(),
-                            chaptersProvider = { generalState.value.activeChapters },
+                            chaptersProvider = {
+                                when (isSearching.value) {
+                                    true -> generalState.value.searchChapters
+                                    false -> generalState.value.activeChapters
+                                }
+                            },
                             chapterRow = chapterRow(),
                         )
                     }
