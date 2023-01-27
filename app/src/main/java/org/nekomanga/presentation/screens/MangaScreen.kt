@@ -430,11 +430,11 @@ private fun NormalLayout(
     chapterRow: @Composable (Int, ChapterItem) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
-        item {
+        item(key = 1) {
             details()
         }
 
-        item {
+        item(key = 2) {
             chapterHeader()
         }
 
