@@ -16,6 +16,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
@@ -35,18 +36,14 @@ class ListHandler {
                     when (mangaIds.isEmpty()) {
                         true -> Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
                         false -> {
-                            val allContentRating = listOf(
-                                MdConstants.ContentRating.safe,
-                                MdConstants.ContentRating.suggestive,
-                                MdConstants.ContentRating.erotica,
-                                MdConstants.ContentRating.pornographic,
-                            )
+                            val enabledContentRatings = preferencesHelper.contentRatingSelections()
+                            val contentRatings = MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
 
                             val queryParameters =
                                 mutableMapOf(
                                     "ids[]" to mangaIds,
                                     "limit" to mangaIds.size,
-                                    "contentRating[]" to allContentRating,
+                                    "contentRating[]" to contentRatings,
                                 )
                             val coverQuality = preferencesHelper.thumbnailQuality()
                             service.search(ProxyRetrofitQueryMap(queryParameters))
