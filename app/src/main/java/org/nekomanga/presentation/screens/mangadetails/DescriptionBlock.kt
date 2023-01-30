@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandLess
@@ -157,16 +158,15 @@ fun DescriptionBlock(
             }
             val text = descriptionProvider().trim()
 
-            // SelectionContainer {
-
-            Markdown(
-                content = text,
-                colors = markdownColors(),
-                typography = markdownTypography(),
-                flavour = CommonMarkFlavourDescriptor(),
-                modifier = clickable,
-            )
-            //}
+            SelectionContainer {
+                Markdown(
+                    content = text,
+                    colors = markdownColors(),
+                    typography = markdownTypography(),
+                    flavour = CommonMarkFlavourDescriptor(),
+                    modifier = clickable,
+                )
+            }
 
             if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
                 Gap(8.dp)
