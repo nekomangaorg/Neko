@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.data.track.kitsu.Kitsu
 import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates
+import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdatesHelper.getMangaUpdatesApiId
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -46,7 +47,7 @@ class TrackManager(context: Context) {
             MYANIMELIST -> manga.my_anime_list_id
             ANILIST -> manga.anilist_id
             KITSU -> manga.kitsu_id
-            // MANGA_UPDATES -> manga.manga_updates_id
+            MANGA_UPDATES -> getMangaUpdatesApiId(manga)
             else -> null
         }
     }

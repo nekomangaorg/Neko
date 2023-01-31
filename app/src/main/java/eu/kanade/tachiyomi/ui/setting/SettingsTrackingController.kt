@@ -166,6 +166,26 @@ class SettingsTrackingController :
                 dialog.targetController = this@SettingsTrackingController
                 dialog.showDialog(router)
             }
+
+            switchPreference {
+                key = "auto_add_mangaupdates"
+                isPersistent = true
+                isIconSpaceReserved = true
+                title = context.getString(
+                    R.string.auto_track,
+                )
+
+                preferences.getStringPref(Keys.trackUsername(trackManager.mangaUpdates.id))
+                    .asImmediateFlowIn(viewScope) {
+                        isVisible = it.isNotEmpty()
+                    }
+
+                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.MANGA_UPDATES.toString())
+
+                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+                    updateAutoAddTracker(newValue as Boolean, TrackManager.MANGA_UPDATES)
+                }
+            }
         }
     }
 
