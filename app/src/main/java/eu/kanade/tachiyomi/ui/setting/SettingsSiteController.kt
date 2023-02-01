@@ -256,7 +256,7 @@ class SettingsSiteController :
 
             val allLangs = (options.map { it.second }).toTypedArray()
             val enabledLangs =
-                (options.mapIndexed { index, _ -> initialLangs.contains(index) }).toBooleanArray()
+                (List(options.size) { index -> initialLangs.contains(index) }).toBooleanArray()
 
             return activity.materialAlertDialog()
                 .setTitle(R.string.show_languages)

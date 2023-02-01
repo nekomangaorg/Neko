@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableList
@@ -724,6 +725,9 @@ class BrowsePresenter(
     private fun updateBrowseFilters(initialLoad: Boolean = false) {
         presenterScope.launch {
             val filters = db.getBrowseFilters().executeAsBlocking().toImmutableList()
+            filters.forEach {
+                loggycat(tag = "CESCO") { it.dexFilters }
+            }
             _browseScreenState.update { it.copy(savedFilters = filters) }
             if (initialLoad) {
                 filters.firstOrNull { it.default }?.let { filter ->

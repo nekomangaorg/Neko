@@ -1434,6 +1434,16 @@ class LibraryPresenter(
             }
         }
 
+        /** Remove any saved filters that had OTHER language
+         */
+        fun updateSavedFilters() {
+            val db: DatabaseHelper = Injekt.get()
+            val updatedFilters = db.getBrowseFilters().executeAsBlocking().map { filter ->
+                filter.copy(dexFilters = filter.dexFilters.replace(""",{"language":"OTHER","state":true}""", "").replace(""",{"language":"OTHER","state":false}""", ""))
+            }
+            db.insertBrowseFilters(updatedFilters).executeAsBlocking()
+        }
+
         suspend fun updateRatiosAndColors() {
             val db: DatabaseHelper = Injekt.get()
             val libraryManga = db.getFavoriteMangaList().executeOnIO()
