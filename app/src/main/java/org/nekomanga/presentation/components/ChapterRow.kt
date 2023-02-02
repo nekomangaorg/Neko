@@ -223,6 +223,9 @@ private fun ChapterInfo(
     var dropdown by remember { mutableStateOf(false) }
     var chapterDropdown by remember { mutableStateOf(false) }
 
+    val downloadState = remember(downloadStateProvider()) { downloadStateProvider() }
+    val downloadProgress = remember(downloadProgressProvider()) { downloadProgressProvider() }
+
     val splitScanlator = remember {
         ChapterUtil.getScanlators(scanlator).map {
             SimpleDropDownItem.Action(
@@ -370,12 +373,12 @@ private fun ChapterInfo(
         Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
             DownloadButton(
                 themeColorState.buttonColor,
-                downloadStateProvider,
-                downloadProgressProvider,
+                downloadState,
+                downloadProgress,
                 Modifier
                     .combinedClickable(
                         onClick = {
-                            when (downloadStateProvider()) {
+                            when (downloadState) {
                                 Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
                                 else -> chapterDropdown = true
                             }
@@ -390,7 +393,7 @@ private fun ChapterInfo(
                 themeColorState = themeColorState,
                 onDismiss = { chapterDropdown = false },
                 dropDownItems =
-                when (downloadStateProvider()) {
+                when (downloadState) {
                     Download.State.DOWNLOADED -> {
                         persistentListOf(
                             SimpleDropDownItem.Action(
