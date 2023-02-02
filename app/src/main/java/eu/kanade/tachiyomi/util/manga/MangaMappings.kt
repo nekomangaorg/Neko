@@ -68,4 +68,18 @@ class MangaMappings(context: Context) {
         cursor.close()
         return null
     }
+
+    fun getMuNewForMuID(id: String): String? {
+        if (!dbMappings.isOpen) {
+            return null
+        }
+        val queryString = "SELECT mu_new FROM mappings WHERE mu = ? LIMIT 1"
+        val whereArgs = arrayOf(id)
+        val cursor = dbMappings.rawQuery(queryString, whereArgs) ?: return ""
+        if (cursor.moveToFirst()) {
+            return cursor.getString(0)
+        }
+        cursor.close()
+        return null
+    }
 }
