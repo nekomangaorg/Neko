@@ -5,6 +5,7 @@ import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
@@ -112,7 +113,7 @@ class FollowsSyncService {
 
             // only add if the current tracker is not set to reading
 
-            listManga.forEach { manga ->
+            listManga.distinctBy { it.uuid() }.forEach { manga ->
                 updateNotification(manga.title, count.andIncrement, listManga.size)
 
                 // Get this manga's trackers from the database
