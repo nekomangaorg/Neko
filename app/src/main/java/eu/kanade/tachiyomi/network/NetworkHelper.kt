@@ -155,7 +155,7 @@ class NetworkHelper(val context: Context) {
     private val authClient = buildRateLimitedAuthenticatedClient()
 
     val headers = Headers.Builder().apply {
-        add("User-Agent", "Neko " + System.getProperty("http.agent"))
+        add("User-Agent", "Neko ${BuildConfig.VERSION_NAME}" + System.getProperty("http.agent"))
         add("Referer", MdUtil.baseUrl)
         add("Content-Type", "application/json")
     }.build()
