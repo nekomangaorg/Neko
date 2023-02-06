@@ -98,6 +98,7 @@ class TrackingCoordinator {
             db.insertTrack(track).executeOnIO()
             TrackingUpdate.Success
         }.getOrElse { exception ->
+            loggycat(LogPriority.ERROR, exception)
             TrackingUpdate.Error("Error registering tracker", exception)
         }
     }
