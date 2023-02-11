@@ -40,6 +40,8 @@ object MangaTable {
 
     const val COL_HAS_READ = "has_read"
 
+    const val COL_BOOKMARK_COUNT = "bookmark_count"
+
     const val COL_CATEGORY = "category"
 
     const val COL_DATE_ADDED = "date_added"

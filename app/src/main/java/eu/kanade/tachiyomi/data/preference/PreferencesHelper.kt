@@ -334,6 +334,8 @@ class PreferencesHelper(val context: Context) {
 
     fun filterCompleted() = flowPrefs.getInt(Keys.filterCompleted, 0)
 
+    fun filterBookmarked() = flowPrefs.getInt("pref_filter_bookmarked_key", 0)
+
     fun filterTracked() = flowPrefs.getInt(Keys.filterTracked, 0)
 
     fun filterMangaType() = flowPrefs.getInt(Keys.filterMangaType, 0)

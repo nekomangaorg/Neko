@@ -72,6 +72,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private lateinit var missingChapters: FilterTagGroup
 
+    private lateinit var bookmarked: FilterTagGroup
+
     private var tracked: FilterTagGroup? = null
 
     private var trackers: FilterTagGroup? = null
@@ -90,6 +92,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         list.add(unread)
         list.add(downloaded)
         list.add(completed)
+        list.add(bookmarked)
         if (hasTracking) {
             tracked?.let { list.add(it) }
         }
@@ -267,6 +270,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             preferences.filterMangaType().get() > 0 ||
             preferences.filterMerged().get() > 0 ||
             preferences.filterMissingChapters().get() > 0 ||
+            preferences.filterBookmarked().get() > 0 ||
             FILTER_TRACKER.isNotEmpty()
     }
 
@@ -288,6 +292,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         merged = inflate(R.layout.filter_tag_group) as FilterTagGroup
         merged.setup(this, R.string.merged, R.string.not_merged)
+
+        bookmarked = inflate(R.layout.filter_tag_group) as FilterTagGroup
+        bookmarked.setup(this, R.string.bookmarked, R.string.not_bookmarked)
 
         if (hasTracking) {
             tracked = inflate(R.layout.filter_tag_group) as FilterTagGroup
@@ -373,10 +380,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         withContext(Dispatchers.Main) {
             downloaded.setState(preferences.filterDownloaded())
             completed.setState(preferences.filterCompleted())
+            bookmarked.setState(preferences.filterBookmarked())
             val unreadP = preferences.filterUnread().get()
             if (unreadP <= 2) {
                 unread.state = unreadP - 1
-            } else if (unreadP >= 3) {
+            } else {
                 unreadProgress.state = unreadP - 3
             }
             tracked?.setState(preferences.filterTracked())
@@ -399,6 +407,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             downloaded,
             completed,
             mangaType,
+            bookmarked,
             tracked,
             missingChapters,
             merged,
@@ -421,6 +430,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             Filters.Downloaded -> downloaded
             Filters.Completed -> completed
             Filters.SeriesType -> mangaType
+            Filters.Bookmarked -> bookmarked
             Filters.MissingChapters -> missingChapters
             Filters.Merged -> merged
             Filters.Tracked -> if (hasTracking) tracked else null
@@ -451,6 +461,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 }
                 downloaded -> preferences.filterDownloaded()
                 completed -> preferences.filterCompleted()
+                bookmarked -> preferences.filterBookmarked()
                 tracked -> preferences.filterTracked()
                 merged -> preferences.filterMerged()
                 missingChapters -> preferences.filterMissingChapters()
@@ -490,10 +501,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         binding.groupBy.setIconResource(LibraryGroup.groupTypeDrawableRes(groupType))
     }
 
-    fun clearFilters() {
+    private fun clearFilters() {
         preferences.filterDownloaded().set(0)
         preferences.filterUnread().set(0)
         preferences.filterCompleted().set(0)
+        preferences.filterBookmarked().set(0)
         preferences.filterTracked().set(0)
         preferences.filterMerged().set(0)
         preferences.filterMissingChapters().set(0)
@@ -550,6 +562,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         Downloaded('d', R.string.downloaded),
         Completed('c', R.string.status),
         SeriesType('m', R.string.series_type),
+        Bookmarked('b', R.string.bookmarked),
         MissingChapters('o', R.string.missing_chapters),
         Merged('n', R.string.merged),
         Tracked('t', R.string.tracked),
@@ -562,6 +575,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 Downloaded,
                 Completed,
                 SeriesType,
+                Bookmarked,
                 MissingChapters,
                 Merged,
                 Tracked,
