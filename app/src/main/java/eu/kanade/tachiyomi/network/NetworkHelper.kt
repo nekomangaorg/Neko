@@ -111,7 +111,7 @@ class NetworkHelper(val context: Context) {
     private fun loggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor(logger).apply {
             level = when (preferences.verboseLogging()) {
-                true -> HttpLoggingInterceptor.Level.HEADERS
+                true -> HttpLoggingInterceptor.Level.BODY
                 false -> HttpLoggingInterceptor.Level.HEADERS
             }
             redactHeader("Authorization")
@@ -120,7 +120,7 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildRateLimitedClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).build()
+        return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).addInterceptor(loggingInterceptor()).build()
     }
 
     private fun buildCdnRateLimitedClient(): OkHttpClient {
@@ -139,6 +139,7 @@ class NetworkHelper(val context: Context) {
         return nonRateLimitedClient.newBuilder()
             .addInterceptor(UserAgentInterceptor())
             .addInterceptor(CloudflareInterceptor(context))
+            .addInterceptor(loggingInterceptor())
             .build()
     }
 
