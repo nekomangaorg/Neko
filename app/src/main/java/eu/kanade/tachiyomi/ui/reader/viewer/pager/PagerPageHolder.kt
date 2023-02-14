@@ -334,15 +334,16 @@ class PagerPageHolder(
                         ZoomType.Center -> center.also { it?.y = 0F }
                     }
 
+                    val rootInsets = viewer.activity.window.decorView.rootWindowInsets
                     val topInsets = if (viewer.activity.isSplitScreen) {
                         0f
                     } else {
-                        viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
+                        rootInsets?.topCutoutInset()?.toFloat() ?: 0f
                     }
                     val bottomInsets = if (viewer.activity.isSplitScreen) {
                         0f
                     } else {
-                        viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
+                        rootInsets?.bottomCutoutInset()?.toFloat() ?: 0f
                     }
                     val targetScale = (height.toFloat() - topInsets - bottomInsets) / sHeight.toFloat()
                     animateScaleAndCenter(min(targetScale, minScale * 2), point)!!
@@ -566,8 +567,8 @@ class PagerPageHolder(
             landscapeZoom = viewer.config.landscapeZoom,
             insetInfo = InsetInfo(
                 cutoutBehavior = viewer.config.cutoutBehavior,
-                topCutoutInset = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat(),
-                bottomCutoutInset = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat(),
+                topCutoutInset = viewer.activity.window.decorView.rootWindowInsets?.topCutoutInset()?.toFloat() ?: 0f,
+                bottomCutoutInset = viewer.activity.window.decorView.rootWindowInsets?.bottomCutoutInset()?.toFloat() ?: 0f,
                 scaleTypeIsFullFit = viewer.config.scaleTypeIsFullFit(),
                 isFullscreen = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
                     viewer.config.isFullscreen && !viewer.activity.isInMultiWindowMode,
