@@ -84,6 +84,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
@@ -1732,5 +1733,9 @@ class MangaDetailPresenter(
         super.onDestroy()
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
+    }
+
+    fun getChapterUrl(chapter: SimpleChapter): String {
+        return chapter.getHttpSource(sourceManager).getChapterUrl(chapter)
     }
 }

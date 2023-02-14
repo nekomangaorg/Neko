@@ -35,9 +35,9 @@ fun Call.asObservable(): Observable<Response> {
                         subscriber.onNext(response)
                         subscriber.onCompleted()
                     }
-                } catch (error: Exception) {
+                } catch (e: Exception) {
                     if (!subscriber.isUnsubscribed) {
-                        subscriber.onError(error)
+                        subscriber.onError(e)
                     }
                 }
             }
@@ -57,26 +57,29 @@ fun Call.asObservable(): Observable<Response> {
 }
 
 // Based on https://github.com/gildor/kotlin-coroutines-okhttp
-suspend fun Call.await(): Response {
+private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
     return suspendCancellableCoroutine { continuation ->
-        enqueue(
+        val callback =
             object : Callback {
                 override fun onResponse(call: Call, response: Response) {
                     if (!response.isSuccessful) {
-                        continuation.resumeWithException(Exception("HTTP error ${response.code}"))
-                        return
+                        val exception = Exception("HTTP error ${response.code}").apply { stackTrace = callStack }
+                        continuation.resumeWithException(exception)
+                        response.body.close()
+                    } else {
+                        continuation.resume(response)
                     }
-
-                    continuation.resume(response)
                 }
 
                 override fun onFailure(call: Call, e: IOException) {
                     // Don't bother with resuming the continuation if it is already cancelled.
                     if (continuation.isCancelled) return
-                    continuation.resumeWithException(e)
+                    val exception = IOException(e.message, e).apply { stackTrace = callStack }
+                    continuation.resumeWithException(exception)
                 }
-            },
-        )
+            }
+
+        enqueue(callback)
 
         continuation.invokeOnCancellation {
             try {
@@ -88,29 +91,33 @@ suspend fun Call.await(): Response {
     }
 }
 
-fun Call.asObservableSuccess(): Observable<Response> {
-    return asObservable().doOnNext { response ->
-
-        if (!response.isSuccessful) {
-            response.close()
-            if (response.code == 502) {
-                throw Exception("MangaDex appears to be down, or under heavy load")
-            } else if (response.code == 404) {
-                throw Exception("Http error 404.  It is possible that MangaDex is down, or under heavy load")
-            } else {
-                throw Exception("HTTP error ${response.code}")
-            }
-        }
-    }
+suspend fun Call.await(): Response {
+    val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
+    return await(callStack)
 }
 
-fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListener): Call {
+suspend fun Call.awaitSuccess(): Response {
+    val callStack = Exception().stackTrace.run { copyOfRange(1, size) }
+    val response = await(callStack)
+    if (!response.isSuccessful) {
+        response.close()
+        val exception = when (response.code) {
+            502 -> Exception("MangaDex appears to be down, or under heavy load")
+            404 -> Exception("Http error 404.  It is possible that MangaDex is down, or under heavy load")
+            else -> Exception("HTTP error ${response.code}")
+        }
+        throw exception.apply { stackTrace = callStack }
+    }
+    return response
+}
+
+fun OkHttpClient.newCachelessCallWithProgress(request: Request, listener: ProgressListener): Call {
     val progressClient = newBuilder()
         .cache(null)
         .addNetworkInterceptor { chain ->
             val originalResponse = chain.proceed(chain.request())
             originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body!!, listener))
+                .body(ProgressResponseBody(originalResponse.body, listener))
                 .build()
         }
         .build()
@@ -120,7 +127,7 @@ fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListene
 
 inline fun <reified T> Response.parseAs(): T {
     this.use {
-        val responseBody = it.body?.string().orEmpty()
+        val responseBody = it.body.string().orEmpty()
         return MdUtil.jsonParser.decodeFromString(responseBody)
     }
 }

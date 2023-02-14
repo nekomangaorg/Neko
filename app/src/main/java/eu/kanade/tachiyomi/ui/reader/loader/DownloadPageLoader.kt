@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.loader
 
 import android.app.Application
 import android.net.Uri
+import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
@@ -9,11 +10,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
-import eu.kanade.tachiyomi.util.system.ImageUtil
 import java.io.File
-import java.util.zip.ZipFile
-import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -24,69 +21,52 @@ class DownloadPageLoader(
     private val manga: Manga,
     private val source: Source,
     private val downloadManager: DownloadManager,
+    private val downloadProvider: DownloadProvider,
 ) : PageLoader() {
 
-    /**
-     * The application context. Needed to open input streams.
-     */
-    private val context by injectLazy<Application>()
-    private val downloadProvider by lazy { DownloadProvider(context) }
+    // Needed to open input streams
+    private val context: Application by injectLazy()
+
+    private var zipPageLoader: ZipPageLoader? = null
+
+    override fun recycle() {
+        super.recycle()
+        zipPageLoader?.recycle()
+    }
 
     /**
-     * Returns an observable containing the pages found on this downloaded chapter.
+     * Returns the pages found on this downloaded chapter.
      */
-    override fun getPages(): Observable<List<ReaderPage>> {
-        val chapterPath = downloadProvider.findChapterDir(chapter.chapter, manga)
-        if (chapterPath?.isFile == true) {
-            val zip = if (!File(chapterPath.filePath!!).canRead()) {
-                val tmpFile = File.createTempFile(chapterPath.name!!.replace(".cbz", ""), ".cbz")
-                val buffer = ByteArray(1024)
-                chapterPath.openInputStream().use { input ->
-                    tmpFile.outputStream().use { fileOut ->
-                        while (true) {
-                            val length = input.read(buffer)
-                            if (length <= 0) break
-                            fileOut.write(buffer, 0, length)
-                        }
-                        fileOut.flush()
-                    }
-                }
-                ZipFile(tmpFile.absolutePath)
-            } else {
-                ZipFile(chapterPath.filePath)
-            }
-            return zip.entries().toList()
-                .filter { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
-                .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
-                .mapIndexed { i, entry ->
-                    val streamFn = { zip.getInputStream(entry) }
-                    ReaderPage(i).apply {
-                        stream = streamFn
-                        status = Page.READY
-                    }
-                }
-                .let { Observable.just(it) }
+    override suspend fun getPages(): List<ReaderPage> {
+        val dbChapter = chapter.chapter
+        val chapterPath = downloadProvider.findChapterDir(dbChapter, manga)
+        return if (chapterPath?.isFile == true) {
+            getPagesFromArchive(chapterPath)
         } else {
-            return downloadManager.buildPageList(source, manga, chapter.chapter)
-                .map { pages ->
-                    pages.map { page ->
-                        ReaderPage(
-                            page.index,
-                            page.url,
-                            page.imageUrl,
-                            page.mangaDexChapterId,
-                            {
-                                context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!!
-                            },
-                        ).apply {
-                            status = Page.READY
-                        }
-                    }
-                }
+            getPagesFromDirectory()
         }
     }
 
-    override fun getPage(page: ReaderPage): Observable<Int> {
-        return Observable.just(Page.READY) // TODO maybe check if file still exists?
+    private suspend fun getPagesFromArchive(chapterPath: UniFile): List<ReaderPage> {
+        val loader = ZipPageLoader(File(chapterPath.filePath!!)).also { zipPageLoader = it }
+        return loader.getPages()
+    }
+
+    private fun getPagesFromDirectory(): List<ReaderPage> {
+        val pages = downloadManager.buildPageList(source, manga, chapter.chapter)
+        return pages.map { page ->
+            ReaderPage(
+                page.index, page.url, page.imageUrl, page.mangaDexChapterId,
+                stream = {
+                    context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!!
+                },
+            ).apply {
+                status = Page.State.READY
+            }
+        }
+    }
+
+    override suspend fun loadPage(page: ReaderPage) {
+        zipPageLoader?.loadPage(page)
     }
 }

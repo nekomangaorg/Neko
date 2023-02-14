@@ -14,27 +14,23 @@ import rx.Observable
 class DirectoryPageLoader(val file: File) : PageLoader() {
 
     /**
-     * Returns an observable containing the pages found on this directory ordered with a natural
-     * comparator.
+     * Returns the pages found on this directory ordered with a natural comparator.
      */
-    override fun getPages(): Observable<List<ReaderPage>> {
+    override suspend fun getPages(): List<ReaderPage> {
         return file.listFiles()
-            .filter { !it.isDirectory && ImageUtil.isImage(it.name) { FileInputStream(it) } }
-            .sortedWith(Comparator<File> { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) })
-            .mapIndexed { i, file ->
+            ?.filter { !it.isDirectory && ImageUtil.isImage(it.name) { FileInputStream(it) } }
+            ?.sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
+            ?.mapIndexed { i, file ->
                 val streamFn = { FileInputStream(file) }
                 ReaderPage(i).apply {
                     stream = streamFn
-                    status = Page.READY
+                    status = Page.State.READY
                 }
-            }
-            .let { Observable.just(it) }
+            } ?: emptyList()
     }
 
     /**
-     * Returns an observable that emits a ready state.
+     * No additional action required to load the page
      */
-    override fun getPage(page: ReaderPage): Observable<Int> {
-        return Observable.just(Page.READY)
-    }
+    override suspend fun loadPage(page: ReaderPage) {}
 }

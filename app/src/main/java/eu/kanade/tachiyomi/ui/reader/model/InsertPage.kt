@@ -12,6 +12,6 @@ class InsertPage(parent: ReaderPage) : ReaderPage(
         fullPage = true
         firstHalf = false
         stream = parent.stream
-        status = READY
+        status = State.READY
     }
 }

@@ -18,17 +18,20 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProgressListener
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.newCallWithProgress
+import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
+import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.loggycat
+import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import logcat.LogPriority
 import okhttp3.Call
@@ -60,7 +63,7 @@ class AppUpdateService : Service() {
             notifier.onDownloadStarted(getString(R.string.app_name)).build(),
         )
 
-        wakeLock = acquireWakeLock()
+        wakeLock = acquireWakeLock(javaClass.name)
     }
 
     /**
@@ -141,14 +144,15 @@ class AppUpdateService : Service() {
 
         try {
             // Download the new update.
-            val call = network.client.newCallWithProgress(GET(url), progressListener)
+            val call = network.client.newCachelessCallWithProgress(GET(url), progressListener)
+            runningCall = call
             val response = call.await()
 
             // File where the apk will be saved.
             val apkFile = File(externalCacheDir, "update.apk")
 
             if (response.isSuccessful) {
-                response.body!!.source().saveTo(apkFile)
+                response.body.source().saveTo(apkFile)
             } else {
                 response.close()
                 throw Exception("Unsuccessful response")
@@ -186,8 +190,7 @@ class AppUpdateService : Service() {
                 data.copyTo(packageInSession)
             }
             if (notifyOnInstall) {
-                val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-                prefs.edit {
+                PreferenceManager.getDefaultSharedPreferences(this).edit {
                     putBoolean(NOTIFY_ON_INSTALL_KEY, true)
                 }
             }
@@ -197,19 +200,33 @@ class AppUpdateService : Service() {
                 .putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
                 .putExtra(EXTRA_FILE_URI, file.getUriCompat(this).toString())
 
-            val pendingIntent = PendingIntent.getBroadcast(
-                this,
-                -10053,
-                newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
-            )
+            val pendingIntent = PendingIntent.getBroadcast(this, -10053, newIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             data.close()
+
+            val hasNotification by lazy {
+                notificationManager.activeNotifications.any { it.id == Notifications.ID_UPDATER }
+            }
+            launchNow {
+                delay(5000)
+                // If the package manager crashes for whatever reason (china phone) set a timeout
+                // and let the user manually install
+                if (packageInstaller.getSessionInfo(sessionId) == null && !hasNotification) {
+                    notifier.onDownloadFinished(file.getUriCompat(this@AppUpdateService))
+                    PreferenceManager.getDefaultSharedPreferences(this@AppUpdateService).edit {
+                        remove(NOTIFY_ON_INSTALL_KEY)
+                    }
+                }
+            }
         } catch (error: Exception) {
             // Either install package can't be found (probably bots) or there's a security exception
             // with the download manager. Nothing we can workaround.
             toast(error.message)
+            notifier.onDownloadFinished(file.getUriCompat(this))
+            PreferenceManager.getDefaultSharedPreferences(this).edit {
+                remove(NOTIFY_ON_INSTALL_KEY)
+            }
         }
     }
 
@@ -217,13 +234,10 @@ class AppUpdateService : Service() {
 
         const val PACKAGE_INSTALLED_ACTION =
             "${BuildConfig.APPLICATION_ID}.SESSION_SELF_API_PACKAGE_INSTALLED"
-        internal const val EXTRA_NOTIFY_ON_INSTALL =
-            "${BuildConfig.APPLICATION_ID}.UpdaterService.ACTION_ON_INSTALL"
-        internal const val EXTRA_DOWNLOAD_URL =
-            "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
+        internal const val EXTRA_NOTIFY_ON_INSTALL = "${BuildConfig.APPLICATION_ID}.UpdaterService.ACTION_ON_INSTALL"
+        internal const val EXTRA_DOWNLOAD_URL = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
         internal const val EXTRA_FILE_URI = "${BuildConfig.APPLICATION_ID}.UpdaterService.FILE_URI"
-        internal const val EXTRA_DOWNLOAD_TITLE =
-            "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
+        internal const val EXTRA_DOWNLOAD_TITLE = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
 
         internal const val NOTIFY_ON_INSTALL_KEY = "notify_on_install_complete"
 
@@ -232,7 +246,6 @@ class AppUpdateService : Service() {
         /**
          * Returns the status of the service.
          *
-         * @param context the application context.
          * @return true if the service is running, false otherwise.
          */
         fun isRunning(): Boolean = instance != null
@@ -273,21 +286,12 @@ class AppUpdateService : Service() {
          * @param url the url to the new update.
          * @return [PendingIntent]
          */
-        internal fun downloadApkPendingService(
-            context: Context,
-            url: String,
-            notifyOnInstall: Boolean = false,
-        ): PendingIntent {
+        internal fun downloadApkPendingService(context: Context, url: String, notifyOnInstall: Boolean = false): PendingIntent {
             val intent = Intent(context, AppUpdateService::class.java).apply {
                 putExtra(EXTRA_DOWNLOAD_URL, url)
                 putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
             }
-            return PendingIntent.getService(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
+            return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
     }
 }

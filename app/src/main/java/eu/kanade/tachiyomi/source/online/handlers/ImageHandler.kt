@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.newCallWithProgress
+import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
@@ -58,7 +58,7 @@ class ImageHandler {
                 else -> {
                     val request = imageRequest(page, isLogged)
                     val response = try {
-                        network.nonRateLimitedClient.newCallWithProgress(request, page)
+                        network.nonRateLimitedClient.newCachelessCallWithProgress(request, page)
                             .await()
                     } catch (e: Exception) {
                         loggycat(LogPriority.ERROR, e, tag) { "error getting images" }
@@ -153,7 +153,7 @@ class ImageHandler {
     }
 
     private suspend fun getImageResponse(client: OkHttpClient, headers: Headers, page: Page): Response {
-        return client.newCallWithProgress(buildRequest(page.imageUrl!!, headers), page).await()
+        return client.newCachelessCallWithProgress(buildRequest(page.imageUrl!!, headers), page).await()
     }
 
     private fun isExternal(page: Page, scanlatorName: String): Boolean {

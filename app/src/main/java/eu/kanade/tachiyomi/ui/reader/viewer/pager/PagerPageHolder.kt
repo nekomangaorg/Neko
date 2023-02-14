@@ -39,14 +39,14 @@ import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import java.io.InputStream
-import java.util.concurrent.TimeUnit
 import kotlin.math.min
 import kotlin.math.roundToInt
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import rx.Observable
@@ -87,42 +87,51 @@ class PagerPageHolder(
     private var decodeErrorLayout: ViewGroup? = null
 
     /**
-     * Subscription for status changes of the page.
+     * Job for loading the page.
      */
-    private var statusSubscription: Subscription? = null
+    private var loadJob: Job? = null
 
     /**
-     * Subscription for progress changes of the page.
+     * Job for status changes of the page.
      */
-    private var progressSubscription: Subscription? = null
+    private var statusJob: Job? = null
 
     /**
-     * Subscription for status changes of the page.
+     * Job for progress changes of the page.
      */
-    private var extraStatusSubscription: Subscription? = null
+    private var progressJob: Job? = null
 
     /**
-     * Subscription for progress changes of the page.
+     * Job for loading the page.
      */
-    private var extraProgressSubscription: Subscription? = null
+    private var extraLoadJob: Job? = null
+
+    /**
+     * Job for status changes of the page.
+     */
+    private var extraStatusJob: Job? = null
+
+    /**
+     * Job for progress changes of the page.
+     */
+    private var extraProgressJob: Job? = null
 
     /**
      * Subscription used to read the header of the image. This is needed in order to instantiate
-     * the appropriate image view depending if the image is animated (GIF).
+     * the appropiate image view depending if the image is animated (GIF).
      */
     private var readImageHeaderSubscription: Subscription? = null
 
-    private var status: Int = 0
-    private var extraStatus: Int = 0
+    private var status = Page.State.READY
+    private var extraStatus = Page.State.READY
     private var progress: Int = 0
     private var extraProgress: Int = 0
 
-    private var scope: CoroutineScope? = null
+    private var scope = MainScope()
 
     init {
         addView(progressBar)
-        scope = CoroutineScope(Job() + Default)
-        observeStatus()
+        launchLoadJob()
         setBackgroundColor(
             when (val theme = viewer.config.readerTheme) {
                 3 -> Color.TRANSPARENT
@@ -180,14 +189,62 @@ class PagerPageHolder(
     @SuppressLint("ClickableViewAccessibility")
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        unsubscribeProgress(1)
-        unsubscribeStatus(1)
-        unsubscribeProgress(2)
-        unsubscribeStatus(2)
+        cancelProgressJob(1)
+        cancelLoadJob(1)
+        cancelProgressJob(2)
+        cancelLoadJob(2)
         unsubscribeReadImageHeader()
-        scope?.cancel()
-        scope = null
         (pageView as? SubsamplingScaleImageView)?.setOnImageEventListener(null)
+    }
+
+    /**
+     * Starts loading the page and processing changes to the page's status.
+     *
+     * @see processStatus
+     */
+    private fun launchLoadJob() {
+        loadJob?.cancel()
+        statusJob?.cancel()
+
+        val loader = page.chapter.pageLoader ?: return
+        loadJob = scope.launch {
+            loader.loadPage(page)
+        }
+        statusJob = scope.launch {
+            page.statusFlow.collectLatest { processStatus(it) }
+        }
+        val extraPage = extraPage ?: return
+        extraLoadJob = scope.launch {
+            loader.loadPage(extraPage)
+        }
+        extraStatusJob = scope.launch {
+            extraPage.statusFlow.collectLatest { processStatus2(it) }
+        }
+    }
+
+    private fun launchProgressJob() {
+        progressJob?.cancel()
+        progressJob = scope.launch {
+            page.progressFlow.collectLatest { value ->
+                progress = value
+                if (extraPage == null) {
+                    progressBar.setProgress(progress)
+                } else {
+                    progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
+                }
+            }
+        }
+    }
+
+    private fun launchProgressJob2() {
+        val extraPage = extraPage ?: return
+        extraProgressJob?.cancel()
+        extraProgressJob = scope.launch {
+            extraPage.progressFlow.collectLatest { value ->
+                extraProgress = value
+                progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
+            }
+        }
     }
 
     fun onPageSelected(forward: Boolean?) {
@@ -300,87 +357,27 @@ class PagerPageHolder(
     }
 
     /**
-     * Observes the status of the page and notify the changes.
-     *
-     * @see processStatus
-     */
-    private fun observeStatus() {
-        statusSubscription?.unsubscribe()
-
-        val loader = page.chapter.pageLoader ?: return
-        statusSubscription = loader.getPage(page)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                status = it
-                processStatus(it)
-            }
-        val extraPage = extraPage ?: return
-        val loader2 = extraPage.chapter.pageLoader ?: return
-        extraStatusSubscription = loader2.getPage(extraPage)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                extraStatus = it
-                processStatus2(it)
-            }
-    }
-
-    /**
-     * Observes the progress of the page and updates view.
-     */
-    private fun observeProgress() {
-        progressSubscription?.unsubscribe()
-
-        progressSubscription = Observable.interval(100, TimeUnit.MILLISECONDS)
-            .map { page.progress }
-            .distinctUntilChanged()
-            .onBackpressureLatest()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { value ->
-                progress = value
-                if (extraPage == null) {
-                    progressBar.setProgress(progress)
-                } else {
-                    progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
-                }
-            }
-    }
-
-    private fun observeProgress2() {
-        extraProgressSubscription?.unsubscribe()
-        val extraPage = extraPage ?: return
-        extraProgressSubscription = Observable.interval(100, TimeUnit.MILLISECONDS)
-            .map { extraPage.progress }
-            .distinctUntilChanged()
-            .onBackpressureLatest()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { value ->
-                extraProgress = value
-                progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
-            }
-    }
-
-    /**
      * Called when the status of the page changes.
      *
      * @param status the new status of the page.
      */
-    private fun processStatus(status: Int) {
+    private fun processStatus(status: Page.State) {
         when (status) {
-            Page.QUEUE -> setQueued()
-            Page.LOAD_PAGE -> setLoading()
-            Page.DOWNLOAD_IMAGE -> {
-                observeProgress()
+            Page.State.QUEUE -> setQueued()
+            Page.State.LOAD_PAGE -> setLoading()
+            Page.State.DOWNLOAD_IMAGE -> {
+                launchProgressJob()
                 setDownloading()
             }
-            Page.READY -> {
-                if (extraStatus == Page.READY || extraPage == null) {
+            Page.State.READY -> {
+                if (extraStatus == Page.State.READY || extraPage == null) {
                     setImage()
                 }
-                unsubscribeProgress(1)
+                cancelProgressJob(1)
             }
-            Page.ERROR -> {
+            Page.State.ERROR -> {
                 setError()
-                unsubscribeProgress(1)
+                cancelProgressJob(1)
             }
         }
     }
@@ -390,43 +387,51 @@ class PagerPageHolder(
      *
      * @param status the new status of the page.
      */
-    private fun processStatus2(status: Int) {
+    private fun processStatus2(status: Page.State) {
         when (status) {
-            Page.QUEUE -> setQueued()
-            Page.LOAD_PAGE -> setLoading()
-            Page.DOWNLOAD_IMAGE -> {
-                observeProgress2()
+            Page.State.QUEUE -> setQueued()
+            Page.State.LOAD_PAGE -> setLoading()
+            Page.State.DOWNLOAD_IMAGE -> {
+                launchProgressJob2()
                 setDownloading()
             }
-            Page.READY -> {
-                if (this.status == Page.READY) {
+            Page.State.READY -> {
+                if (this.status == Page.State.READY) {
                     setImage()
                 }
-                unsubscribeProgress(2)
+                cancelProgressJob(2)
             }
-            Page.ERROR -> {
+            Page.State.ERROR -> {
                 setError()
-                unsubscribeProgress(2)
+                cancelProgressJob(2)
             }
         }
     }
 
     /**
-     * Unsubscribes from the status subscription.
+     * Cancels loading the page and processing changes to the page's status.
      */
-    private fun unsubscribeStatus(page: Int) {
-        val subscription = if (page == 1) statusSubscription else extraStatusSubscription
-        subscription?.unsubscribe()
-        if (page == 1) statusSubscription = null else extraStatusSubscription = null
+    private fun cancelLoadJob(page: Int) {
+        if (page == 1) {
+            loadJob?.cancel()
+            loadJob = null
+            statusJob?.cancel()
+            statusJob = null
+        } else {
+            extraLoadJob?.cancel()
+            extraLoadJob = null
+            extraStatusJob?.cancel()
+            extraStatusJob = null
+        }
     }
 
-    /**
-     * Unsubscribes from the progress subscription.
-     */
-    private fun unsubscribeProgress(page: Int) {
-        val subscription = if (page == 1) progressSubscription else extraProgressSubscription
-        subscription?.unsubscribe()
-        if (page == 1) progressSubscription = null else extraProgressSubscription = null
+    private fun cancelProgressJob(page: Int) {
+        (if (page == 1) progressJob else extraProgressJob)?.cancel()
+        if (page == 1) {
+            progressJob = null
+        } else {
+            extraProgressJob = null
+        }
     }
 
     /**
@@ -487,7 +492,7 @@ class PagerPageHolder(
             .fromCallable {
                 val stream = streamFn().buffered(16)
 
-                val stream2 = if (extraPage != null) streamFn2?.invoke()?.buffered(16) else null
+                val stream2 = streamFn2?.invoke()?.buffered(16)
                 openStream = this@PagerPageHolder.mergeOrSplitPages(stream, stream2)
                 ImageUtil.isAnimatedAndSupported(stream) ||
                     if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2) else false
@@ -510,7 +515,7 @@ class PagerPageHolder(
                             setImage(bytesStream, false, imageConfig)
                             bytesStream.close()
 
-                            scope?.launchUI {
+                            scope.launchUI {
                                 try {
                                     pageView?.background = setBG(bytesArray)
                                 } catch (e: Exception) {
@@ -717,7 +722,7 @@ class PagerPageHolder(
                     splitDoublePages()
                 }
             }
-            scope?.launchUI {
+            scope.launchUI {
                 progressBar.completeAndFadeOut()
             }
             return imageStream
@@ -733,7 +738,7 @@ class PagerPageHolder(
             }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
             return ImageUtil.splitBitmap(imageBitmap, (page.firstHalf == false).xor(!isLTR)) {
-                scope?.launchUI {
+                scope.launchUI {
                     if (it == 100) {
                         progressBar.completeAndFadeOut()
                     } else {
@@ -762,7 +767,7 @@ class PagerPageHolder(
                     splitDoublePages()
                     val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
                     return ImageUtil.splitBitmap(imageBitmap, !isLTR) {
-                        scope?.launchUI {
+                        scope.launchUI {
                             if (it == 100) {
                                 progressBar.completeAndFadeOut()
                             } else {
@@ -799,7 +804,7 @@ class PagerPageHolder(
             loggycat(LogPriority.ERROR, e) { "Cannot combine pages" }
             return imageBytes.inputStream()
         }
-        scope?.launchUI { progressBar.setProgress(96) }
+        scope.launchUI { progressBar.setProgress(96) }
         val height = imageBitmap.height
         val width = imageBitmap.width
 
@@ -823,7 +828,7 @@ class PagerPageHolder(
             loggycat(LogPriority.ERROR, e) { "Cannot combine pages" }
             return imageBytes.inputStream()
         }
-        scope?.launchUI { progressBar.setProgress(97) }
+        scope.launchUI { progressBar.setProgress(97) }
         val height2 = imageBitmap2.height
         val width2 = imageBitmap2.width
 
@@ -845,7 +850,7 @@ class PagerPageHolder(
         imageStream.close()
         imageStream2.close()
         return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg, viewer.config.doublePageGap) {
-            scope?.launchUI {
+            scope.launchUI {
                 if (it == 100) {
                     progressBar.completeAndFadeOut()
                 } else {
@@ -857,7 +862,7 @@ class PagerPageHolder(
 
     private fun splitDoublePages() {
         // extraPage ?: return
-        scope?.launchUI {
+        scope.launchUI {
             delay(100)
             viewer.splitDoublePages(page)
             if (extraPage?.fullPage == true || page.fullPage == true) {

@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.awaitSuccess
+import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -14,6 +16,8 @@ import java.util.Locale
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
+import org.nekomanga.domain.chapter.SimpleChapter
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
@@ -91,6 +95,27 @@ abstract class HttpSource : Source {
         return Observable.just("")
     }
 
+    /**
+     * Returns an observable with the response of the source image.
+     *
+     * @param page the page whose source image has to be downloaded.
+     */
+    override suspend fun fetchImage(page: Page): Response {
+        return client.newCachelessCallWithProgress(imageRequest(page), page)
+            .awaitSuccess()
+    }
+
+    /**
+     * Returns the response of the source image.
+     *
+     * @param page the page whose source image has to be downloaded.
+     */
+    suspend fun getImage(page: Page): Response {
+        // images will be cached or saved manually, so don't take up network cache
+        return client.newCachelessCallWithProgress(imageRequest(page), page)
+            .awaitSuccess()
+    }
+
     protected open fun imageRequest(page: Page): Request {
         return GET(page.imageUrl!!, headers)
     }
@@ -135,6 +160,8 @@ abstract class HttpSource : Source {
             orig
         }
     }
+
+    abstract fun getChapterUrl(simpleChapter: SimpleChapter): String
 
     companion object {
         const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0"
