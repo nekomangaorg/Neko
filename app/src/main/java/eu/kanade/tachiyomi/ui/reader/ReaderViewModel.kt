@@ -592,6 +592,7 @@ class ReaderViewModel(
      * If incognito mode isn't on or has at least 1 tracker
      */
     private fun saveChapterProgress(readerChapter: ReaderChapter) {
+        onSave()
         db.getChapter(readerChapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
             readerChapter.chapter.bookmark = dbChapter.bookmark
         }
