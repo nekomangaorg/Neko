@@ -36,7 +36,6 @@ open class Pager(
         super.onRestoreInstanceState(state)
         setCurrentItem(currentItem, false)
         isRestoring = false
-//        super.onRestoreInstanceState(state)
     }
 
     /**

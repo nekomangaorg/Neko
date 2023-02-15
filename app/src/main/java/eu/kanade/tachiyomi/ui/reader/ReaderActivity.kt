@@ -354,15 +354,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             .onEach(::setManga)
             .launchIn(lifecycleScope)
 
-        val viewerChapters = viewModel.state.value.viewerChapters
         viewModel.state
             .map { it.viewerChapters }
             .distinctUntilChanged()
-//            .drop(if (viewerChapters != null) 1 else 0)
             .filterNotNull()
             .onEach(::setChapters)
             .launchIn(lifecycleScope)
-        viewerChapters?.currChapter?.let { currChapter ->
+        viewModel.state.value.viewerChapters?.currChapter?.let { currChapter ->
             currChapter.requestedPage = currChapter.chapter.last_page_read
         }
 
@@ -840,7 +838,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                             }
                         }
                         if (readerNavGestureDetector.lockVertical) {
-                            // event.action = MotionEvent.ACTION_CANCEL
                             return@setOnTouchListener true
                         }
                     } else if ((event?.action != MotionEvent.ACTION_UP || event.action != MotionEvent.ACTION_DOWN) && result) {

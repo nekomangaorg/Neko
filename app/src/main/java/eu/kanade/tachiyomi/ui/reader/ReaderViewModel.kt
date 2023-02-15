@@ -351,12 +351,6 @@ class ReaderViewModel(
 
         loggycat { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
 
-//        activeChapterSubscription?.unsubscribe()
-//        activeChapterSubscription = getLoadObservable(loader, chapter)
-//            .toCompletable()
-//            .onErrorComplete()
-//            .subscribe()
-//            .also(::add)
         withIOContext {
             try {
                 loadChapter(loader, chapter)
@@ -382,7 +376,6 @@ class ReaderViewModel(
         loader.loadChapter(chapter)
 
         val chapterPos = chapterList.indexOf(chapter)
-//        chapter.requestedPage = chapter.chapter.last_page_read
         val newChapters = ViewerChapters(
             chapter,
             chapterList.getOrNull(chapterPos - 1),
@@ -726,7 +719,6 @@ class ReaderViewModel(
         loggycat(LogPriority.INFO) { "Manga orientation is ${manga.orientationType}" }
 
         viewModelScope.launchIO {
-//            delay(250)
             db.updateViewerFlags(manga).executeAsBlocking()
             val currChapters = state.value.viewerChapters
             if (currChapters != null) {
