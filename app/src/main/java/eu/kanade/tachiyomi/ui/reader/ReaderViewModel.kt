@@ -187,17 +187,6 @@ class ReaderViewModel(
     }
 
     /**
-     * Called when the presenter instance is being saved. It saves the currently active chapter
-     * id and the last page read.
-     */
-    fun onSave() {
-        val currentChapter = getCurrentChapter()
-        if (currentChapter != null) {
-            currentChapter.requestedPage = currentChapter.chapter.last_page_read
-        }
-    }
-
-    /**
      * Called when the user pressed the back button and is going to leave the reader. Used to
      * trigger deletion of the downloaded chapters.
      */
@@ -219,7 +208,7 @@ class ReaderViewModel(
      * Called when the activity is saved and not changing configurations. It updates the database
      * to persist the current progress of the active chapter.
      */
-    fun onSaveInstanceStateNonConfigurationChange() {
+    fun onSaveInstanceState() {
         val currentChapter = getCurrentChapter() ?: return
         saveChapterProgress(currentChapter)
     }
@@ -588,11 +577,11 @@ class ReaderViewModel(
     fun saveCurrentChapterReadingProgress() = getCurrentChapter()?.let { saveReadingProgress(it) }
 
     /**
-     * Saves this [readerChapter] progress (last read page and whether it's read).
+     * Saves this [readerChapter]'s progress (last read page and whether it's read).
      * If incognito mode isn't on or has at least 1 tracker
      */
     private fun saveChapterProgress(readerChapter: ReaderChapter) {
-        onSave()
+        readerChapter.requestedPage = readerChapter.chapter.last_page_read
         db.getChapter(readerChapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
             readerChapter.chapter.bookmark = dbChapter.bookmark
         }

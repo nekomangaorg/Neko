@@ -360,9 +360,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             .filterNotNull()
             .onEach(::setChapters)
             .launchIn(lifecycleScope)
-        viewModel.state.value.viewerChapters?.currChapter?.let { currChapter ->
-            currChapter.requestedPage = currChapter.chapter.last_page_read
-        }
 
         viewModel.eventFlow
             .onEach { event ->
@@ -423,11 +420,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 }
             }
         }
-        if (!isChangingConfigurations) {
-            viewModel.onSaveInstanceStateNonConfigurationChange()
-        } else {
-            viewModel.onSave()
-        }
+        viewModel.onSaveInstanceState()
         super.onSaveInstanceState(outState)
     }
 
