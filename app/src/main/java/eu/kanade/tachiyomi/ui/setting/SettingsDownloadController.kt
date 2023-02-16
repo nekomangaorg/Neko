@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -13,7 +14,6 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.util.system.toast
@@ -50,7 +50,7 @@ class SettingsDownloadController : SettingsController() {
         switchPreference {
             key = Keys.saveChaptersAsCBZ
             titleRes = R.string.save_chapters_as_cbz
-            defaultValue = false
+            defaultValue = true
         }
         switchPreference {
             bindTo(preferences.splitTallImages())
