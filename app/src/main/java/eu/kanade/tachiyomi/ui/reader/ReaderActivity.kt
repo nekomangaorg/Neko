@@ -1065,7 +1065,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     fun hideMenu() {
-        if (menuVisible) {
+        if (menuVisible && !isScrollingThroughPagesOrChapters) {
             setMenuVisibility(false)
         }
     }
