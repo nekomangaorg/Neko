@@ -210,7 +210,6 @@ class HttpPageLoader(
             val imageUrl = page.imageUrl!!
 
             if (!chapterCache.isImageInCache(imageUrl)) {
-
                 page.status = Page.State.DOWNLOAD_IMAGE
                 val imageResponse = source.getImage(page)
                 chapterCache.putImageToCache(imageUrl, imageResponse)

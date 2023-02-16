@@ -17,6 +17,9 @@ import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.style.DynamicDrawableSpan
+import android.text.style.ImageSpan
+import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.Menu
@@ -34,6 +37,8 @@ import androidx.activity.viewModels
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.text.buildSpannedString
+import androidx.core.text.inSpans
 import androidx.core.transition.addListener
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
@@ -65,6 +70,7 @@ import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.toggle
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -93,6 +99,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.contextCompatColor
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -382,6 +389,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     }
                     is ReaderViewModel.Event.SetCoverResult -> {
                         onSetAsCoverResult(event.result)
+                    }
+                    is ReaderViewModel.Event.ShareTrackingError -> {
+                        showTrackingError(event.errors)
                     }
                 }
             }
@@ -1664,39 +1674,64 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         )
     }
 
+    private fun showTrackingError(errors: List<Pair<TrackService, String?>>) {
+        if (errors.isEmpty()) return
+        snackbar?.dismiss()
+        val errorText = if (errors.size > 1) {
+            getString(R.string.failed_to_update_, errors.joinToString(", ") { getString(it.first.nameRes()) })
+        } else {
+            val (service, errorMessage) = errors.first()
+            buildSpannedString {
+                if (errorMessage != null) {
+                    val icon = contextCompatDrawable(service.getLogo())
+                        ?.mutate()
+                        ?.apply {
+                            val size =
+                                resources.getDimension(com.google.android.material.R.dimen.design_snackbar_text_size)
+                            val dRatio = intrinsicWidth / intrinsicHeight.toFloat()
+                            setBounds(0, 0, (size * dRatio).roundToInt(), size.roundToInt())
+                        } ?: return
+                    val alignment =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) DynamicDrawableSpan.ALIGN_CENTER else DynamicDrawableSpan.ALIGN_BASELINE
+                    inSpans(ImageSpan(icon, alignment)) { append("image") }
+                    append(" - $errorMessage")
+                }
+            }
+        }
+        snackbar = binding.readerLayout.snack(errorText, 5000)
+    }
+
     private fun onVisibilityChange(visible: Boolean) {
         if (visible && !menuStickyVisible && !menuVisible && !binding.appBar.isVisible) {
-            menuStickyVisible = visible
-            if (visible) {
-                coroutine = lifecycleScope.launchUI {
-                    delay(2000)
-                    if (window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) == true) {
-                        menuStickyVisible = false
-                        setMenuVisibility(false)
-                    }
+            menuStickyVisible = true
+            coroutine = launchUI {
+                delay(2000)
+                if (window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) == true) {
+                    menuStickyVisible = false
+                    setMenuVisibility(false)
                 }
-                if (sheetManageNavColor) {
-                    window.navigationBarColor =
-                        ColorUtils.setAlphaComponent(
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || isInNightMode()) {
-                                getResourceColor(R.attr.colorSurface)
-                            } else {
-                                Color.BLACK
-                            },
-                            if (binding.root.rootWindowInsetsCompat?.hasSideNavBar() == true) {
-                                255
-                            } else {
-                                179
-                            },
-                        )
-                }
-                binding.appBar.isVisible = true
-                val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
-                toolbarAnimation.doOnStart {
-                    window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                }
-                binding.appBar.startAnimation(toolbarAnimation)
             }
+            if (sheetManageNavColor) {
+                window.navigationBarColor =
+                    ColorUtils.setAlphaComponent(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || isInNightMode()) {
+                            getResourceColor(R.attr.colorSurface)
+                        } else {
+                            Color.BLACK
+                        },
+                        if (binding.root.rootWindowInsetsCompat?.hasSideNavBar() == true) {
+                            255
+                        } else {
+                            179
+                        },
+                    )
+            }
+            binding.appBar.isVisible = true
+            val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
+            toolbarAnimation.doOnStart {
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            }
+            binding.appBar.startAnimation(toolbarAnimation)
         } else if (!visible && (menuStickyVisible || menuVisible)) {
             if (menuStickyVisible && !menuVisible) {
                 setMenuVisibility(false)

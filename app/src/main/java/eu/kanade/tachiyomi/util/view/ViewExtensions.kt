@@ -97,7 +97,7 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
  * @param f a function to execute in the snack, allowing for example to define a custom action.
  */
 fun View.snack(
-    message: String,
+    message: CharSequence,
     length: Int = Snackbar.LENGTH_SHORT,
     f: (Snackbar.() -> Unit)? = null,
 ): Snackbar {

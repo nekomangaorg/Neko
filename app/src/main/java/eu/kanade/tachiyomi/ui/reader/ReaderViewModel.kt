@@ -26,6 +26,8 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource
@@ -993,7 +995,10 @@ class ReaderViewModel(
         if (!preferences.autoUpdateTrack()) return
         viewModelScope.launchNonCancellable {
             val newChapterRead = readerChapter.chapter.chapter_number
-            updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
+            val errors = updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
+            if (errors.isNotEmpty()) {
+                eventChannel.send(Event.ShareTrackingError(errors))
+            }
         }
     }
 
@@ -1051,5 +1056,6 @@ class ReaderViewModel(
 
         data class SavedImage(val result: SaveImageResult) : Event()
         data class ShareImage(val file: File, val page: ReaderPage, val extraPage: ReaderPage? = null) : Event()
+        data class ShareTrackingError(val errors: List<Pair<TrackService, String?>>) : Event()
     }
 }
