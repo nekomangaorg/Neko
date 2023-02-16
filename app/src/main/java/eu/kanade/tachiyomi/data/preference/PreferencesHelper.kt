@@ -383,7 +383,7 @@ class PreferencesHelper(val context: Context) {
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, true)
 
-    fun skipDuplicates() = prefs.getBoolean(Keys.skipDuplicates, false)
+    fun skipDuplicates() = flowPrefs.getBoolean(Keys.skipDuplicates, false)
 
     fun useBiometrics() = flowPrefs.getBoolean(Keys.useBiometrics, false)
 
