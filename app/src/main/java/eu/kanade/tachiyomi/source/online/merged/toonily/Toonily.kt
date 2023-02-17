@@ -227,7 +227,7 @@ class Toonily : ReducedHttpSource() {
     }
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
-        return baseUrl + simpleChapter.url
+        return simpleChapter.url
     }
 
     companion object {
