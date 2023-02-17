@@ -17,9 +17,9 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
     override fun initGeneralPreferences() {
         binding.viewerSeries.onItemSelectedListener = { position ->
             val readingModeType = ReadingModeType.fromSpinner(position)
-            (context as ReaderActivity).presenter.setMangaReadingMode(readingModeType.flagValue)
+            (context as ReaderActivity).viewModel.setMangaReadingMode(readingModeType.flagValue)
 
-            val mangaViewer = activity.presenter.getMangaReadingMode()
+            val mangaViewer = activity.viewModel.getMangaReadingMode()
             if (mangaViewer == ReadingModeType.WEBTOON.flagValue || mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue) {
                 initWebtoonPreferences()
             } else {
@@ -27,16 +27,16 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             }
         }
         binding.viewerSeries.setSelection(
-            (context as? ReaderActivity)?.presenter?.manga?.readingModeType?.let {
+            (context as? ReaderActivity)?.viewModel?.state?.value?.manga?.readingModeType?.let {
                 ReadingModeType.fromPreference(it).prefValue
             } ?: 0,
         )
         binding.rotationMode.onItemSelectedListener = { position ->
             val rotationType = OrientationType.fromSpinner(position)
-            (context as ReaderActivity).presenter.setMangaOrientationType(rotationType.flagValue)
+            (context as ReaderActivity).viewModel.setMangaOrientationType(rotationType.flagValue)
         }
         binding.rotationMode.setSelection(
-            (context as ReaderActivity).presenter.manga?.orientationType?.let {
+            (context as ReaderActivity).viewModel.manga?.orientationType?.let {
                 OrientationType.fromPreference(it).prefValue
             } ?: 0,
         )
@@ -49,7 +49,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun checkIfShouldDisableReadingMode() {
-        if (activity.presenter.manga?.isLongStrip() == true) {
+        if (activity.viewModel.manga?.isLongStrip() == true) {
             binding.viewerSeries.setDisabledState(R.string.webtoon_cannot_change)
         }
     }

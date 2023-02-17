@@ -38,7 +38,7 @@ class TabbedReaderSettingsSheet(
     ) as ReaderFilterView
 
     var showWebtoonView: Boolean = run {
-        val mangaViewer = readerActivity.presenter.getMangaReadingMode()
+        val mangaViewer = readerActivity.viewModel.getMangaReadingMode()
         ReadingModeType.isWebtoonType(mangaViewer)
     }
 

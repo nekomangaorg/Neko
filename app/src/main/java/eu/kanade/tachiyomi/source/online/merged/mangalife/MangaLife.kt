@@ -25,6 +25,7 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.jsoup.nodes.Document
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
 
@@ -238,6 +239,10 @@ class MangaLife : ReducedHttpSource() {
             suffix = ".$path"
         }
         return "-chapter-$n$suffix$index.html"
+    }
+
+    override fun getChapterUrl(simpleChapter: SimpleChapter): String {
+        return baseUrl + simpleChapter.url
     }
 
     companion object {

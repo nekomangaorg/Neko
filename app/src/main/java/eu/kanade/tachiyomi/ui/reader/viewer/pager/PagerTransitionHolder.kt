@@ -43,7 +43,7 @@ class PagerTransitionHolder(
      * dynamically.
      */
     private var pagesContainer = LinearLayout(context).apply {
-        layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         orientation = VERTICAL
         gravity = Gravity.CENTER
     }
@@ -57,7 +57,7 @@ class PagerTransitionHolder(
         addView(transitionView)
         addView(pagesContainer)
 
-        transitionView.bind(transition, viewer.downloadManager, viewer.activity.presenter.manga)
+        transitionView.bind(transition, viewer.downloadManager, viewer.activity.viewModel.state.value.manga)
         transition.to?.let { observeStatus(it) }
     }
 

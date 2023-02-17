@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -148,6 +149,10 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 open = { context, chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
                 blockScanlator = presenter::blockScanlator,
                 openComment = presenter::lookupComment,
+                openInBrowser = { context, chapterItem ->
+                    val url = presenter.getChapterUrl(chapterItem.chapter)
+                    context.openInBrowser(url)
+                },
             ),
         ) { activity?.onBackPressed() }
     }

@@ -58,8 +58,8 @@ class ChapterFilter(
             filteredChapters = filteredChapters.filter { chp -> chp.scanlatorList().none { it in blockedScanlator } }
         }
 
-        // if neither preference is enabled don't even filter
-        if (!preferences.skipRead() && !preferences.skipFiltered() && !preferences.skipDuplicates()) {
+        // if filter preferences are not enabled don't even filter
+        if (!preferences.skipRead() && !preferences.skipFiltered() && !preferences.skipDuplicates().get()) {
             return filteredChapters
         }
 
@@ -70,8 +70,22 @@ class ChapterFilter(
             filteredChapters = filterChapters(filteredChapters, manga)
         }
 
-        if (preferences.skipDuplicates()) {
-            filteredChapters = filteredChapters.sortedBy { it.chapter_number }.distinctBy { Pair(it.vol, it.chapter_txt) }
+        if (preferences.skipDuplicates().get()) {
+            filteredChapters = filteredChapters.groupBy { it.chapter_number }
+                .map { (_, chapters) ->
+                    chapters.find { it.id == selectedChapter?.id }
+                        ?: chapters.find { it.scanlator == selectedChapter?.scanlator }
+                        ?: chapters.find {
+                            val mainScans = ChapterUtil.getScanlators(it.scanlator)
+                            val currScans = ChapterUtil.getScanlators(selectedChapter?.scanlator)
+                            if (currScans.isEmpty() || mainScans.isEmpty()) {
+                                return@find false
+                            }
+
+                            mainScans.any { scanlator -> currScans.contains(scanlator) }
+                        }
+                        ?: chapters.first()
+                }
         }
 
         // add the selected chapter to the list in case it was filtered out
@@ -80,9 +94,6 @@ class ChapterFilter(
             if (find == null) {
                 val mutableList = filteredChapters.toMutableList()
 
-                if (preferences.skipDuplicates()) {
-                    mutableList.removeIf { chapter -> chapter.vol == selectedChapter.vol && chapter.chapter_txt == selectedChapter.chapter_txt }
-                }
                 mutableList.add(selectedChapter)
                 filteredChapters = mutableList.toList()
             }

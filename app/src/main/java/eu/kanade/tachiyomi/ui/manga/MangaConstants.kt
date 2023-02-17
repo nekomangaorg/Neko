@@ -233,5 +233,6 @@ object MangaConstants {
         val blockScanlator: (String) -> Unit,
         val openNext: (Context) -> Unit,
         val openComment: suspend (String) -> String?,
+        val openInBrowser: (Context, ChapterItem) -> Unit,
     )
 }

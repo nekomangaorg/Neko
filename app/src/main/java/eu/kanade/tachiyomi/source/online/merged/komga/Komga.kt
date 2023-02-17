@@ -25,6 +25,7 @@ import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
 
@@ -74,6 +75,10 @@ class Komga : ReducedHttpSource() {
     override val client: OkHttpClient
         get() = super.client.newBuilder().dns(Dns.SYSTEM).build()
 
+    override fun getChapterUrl(simpleChapter: SimpleChapter): String {
+        return hostUrl() + simpleChapter.url
+    }
+
     private fun createClient(username: String, password: String): OkHttpClient {
         return client.newBuilder()
             .authenticator { _, response ->
@@ -102,7 +107,6 @@ class Komga : ReducedHttpSource() {
 
         val response = customClient().newCall(GET(apiUrl, headers)).await()
         val responseBody = response.body
-            ?: throw IllegalStateException("Response code ${response.code}")
 
         return responseBody.use { body ->
             with(json.decodeFromString<KomgaPaginatedResponseDto<KomgaSeriesDto>>(body.string())) {
@@ -129,7 +133,6 @@ class Komga : ReducedHttpSource() {
                     .addQueryParameter("deleted", "false").toString()
                 val response = customClient().newCall(GET(apiUrl, headers)).await()
                 val responseBody = response.body
-                    ?: throw IllegalStateException("Komga: Response code ${response.code}")
 
                 val page = responseBody.use { json.decodeFromString<KomgaPaginatedResponseDto<KomgaBookDto>>(it.string()).content }
                 val r = page.map { book ->
@@ -156,7 +159,6 @@ class Komga : ReducedHttpSource() {
         val chapterUrl = "${hostUrl()}${chapter.url}/pages"
         val response = customClient().newCall(GET(chapterUrl, headers)).await()
         val responseBody = response.body
-            ?: throw IllegalStateException("Response code ${response.code}")
 
         val pages = responseBody.use { body -> json.decodeFromString<List<KomgaPageDto>>(body.string()) }
         return pages.map { page ->

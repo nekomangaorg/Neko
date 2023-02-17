@@ -341,7 +341,7 @@ fun MangaScreen(
                                 },
                             )
                         },
-                        onWebView = { context.asActivity().openInBrowser(chapterItem.chapter.fullUrl()) },
+                        onWebView = { chapterActions.openInBrowser(context, chapterItem) },
                         onComment = {
                             scope.launchIO {
                                 val result = chapterActions.openComment(chapterItem.chapter.mangaDexChapterId)

@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
-import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
@@ -22,7 +21,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
+import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -304,10 +303,7 @@ class Downloader(
         val availSpace = DiskUtil.getAvailableStorageSpace(mangaDir)
         if (availSpace != -1L && availSpace < MIN_DISK_SPACE) {
             download.status = Download.State.ERROR
-            notifier.onError(
-                context.getString(R.string.couldnt_download_low_space),
-                download.chapter.name,
-            )
+            notifier.onError(context.getString(R.string.couldnt_download_low_space), download.chapter.name)
             return@defer Observable.just(download)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
@@ -328,18 +324,22 @@ class Downloader(
         }
         val chapterDirname = provider.getChapterDirName(download.chapter)
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
-        val pagesToDownload = if (download.source is MangaLife) 3 else 6
+        val pagesToDownload = if (download.source is MangaDex) 6 else 3
 
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
-            runAsObservable {
+            runAsObservable(tag = "Downloader.downloadChapter") {
                 download.source.fetchPageList(download.chapter)
-            }.doOnNext { pages ->
-                if (pages.isEmpty()) {
-                    throw Exception(context.getString(R.string.no_pages_found))
-                }
-                download.pages = pages
             }
+                .map { pages ->
+                    if (pages.isEmpty()) {
+                        throw Exception(context.getString(R.string.no_pages_found))
+                    }
+                    // Don't trust index from source
+                    val reIndexedPages = pages.mapIndexed { index, page -> Page(index, page.url, page.imageUrl, uri = page.uri) }
+                    download.pages = reIndexedPages
+                    reIndexedPages
+                }
         } else {
             // Or if the page list already exists, start from the file
             Observable.just(download.pages!!)
@@ -358,7 +358,6 @@ class Downloader(
             // Get all the URLs to the source images, fetch pages if necessary
             .flatMap { Observable.from(it) }
             // Start downloading images, consider we can have downloaded images already
-            // Concurrently do 5 pages at a time
             .flatMap({ page -> getOrDownloadImage(page, download, tmpDir).subscribeOn(Schedulers.io()) }, pagesToDownload)
             // Do when page is downloaded.
             .doOnNext { notifier.onProgressChange(download) }
@@ -393,7 +392,9 @@ class Downloader(
             return Observable.just(page)
         }
 
-        val filename = String.format("%03d", page.number)
+        val digitCount = (download.pages?.size ?: 0).toString().length.coerceAtLeast(3)
+        val filename = String.format("%0${digitCount}d", page.number)
+
         val tmpFile = tmpDir.findFile("$filename.tmp")
 
         // Delete temp file if it exists.
@@ -405,13 +406,7 @@ class Downloader(
         // If the image is already downloaded, do nothing. Otherwise download from network
         val pageObservable = when {
             imageFile != null -> Observable.just(imageFile)
-            chapterCache.isImageInCache(page.imageUrl!!) -> moveImageFromCache(
-                chapterCache.getImageFile(
-                    page.imageUrl!!,
-                ),
-                tmpDir,
-                filename,
-            )
+            chapterCache.isImageInCache(page.imageUrl!!) -> moveImageFromCache(chapterCache.getImageFile(page.imageUrl!!), tmpDir, filename)
             else -> downloadImage(page, download.source, tmpDir, filename)
         }
 
@@ -425,13 +420,13 @@ class Downloader(
                 page.uri = file.uri
                 page.progress = 100
                 download.downloadedImages++
-                page.status = Page.READY
+                page.status = Page.State.READY
             }
             .map { page }
             // Mark this page as error and allow to download the remaining
             .onErrorReturn {
                 page.progress = 0
-                page.status = Page.ERROR
+                page.status = Page.State.ERROR
                 notifier.onError(it.message, download.chapter.name, download.manga.title)
                 page
             }
@@ -451,14 +446,15 @@ class Downloader(
         tmpDir: UniFile,
         filename: String,
     ): Observable<UniFile> {
-        page.status = Page.DOWNLOAD_IMAGE
+        page.status = Page.State.DOWNLOAD_IMAGE
         page.progress = 0
-        return runAsObservable {
+        return runAsObservable(tag = "Downloader.downloadImage") {
+            loggycat { "fetch image" }
             source.fetchImage(page)
         }.map { response ->
             val file = tmpDir.createFile("$filename.tmp")
             try {
-                response.body!!.source().saveTo(file.openOutputStream())
+                response.body.source().saveTo(file.openOutputStream())
                 val extension = getImageExtension(response, file)
                 file.renameTo("$filename.$extension")
             } catch (e: Exception) {
@@ -507,13 +503,13 @@ class Downloader(
      */
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
-        val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-            // Else guess from the uri.
+        val mime = response.body.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
+        // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.
             ?: ImageUtil.findImageType { file.openInputStream() }?.mime
 
-        return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: "jpg"
+        return ImageUtil.getExtensionFromMimeType(mime)
     }
 
     private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile): Boolean {
