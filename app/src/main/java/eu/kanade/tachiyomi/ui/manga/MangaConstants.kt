@@ -229,10 +229,10 @@ object MangaConstants {
         val clearRemoved: () -> Unit,
         val download: (List<ChapterItem>, DownloadAction) -> Unit,
         val delete: (List<ChapterItem>) -> Unit,
-        val open: (Context, ChapterItem) -> Unit,
+        val open: (ChapterItem) -> Unit,
         val blockScanlator: (String) -> Unit,
-        val openNext: (Context) -> Unit,
-        val openComment: suspend (String) -> String?,
-        val openInBrowser: (Context, ChapterItem) -> Unit,
+        val openNext: () -> Unit,
+        val openComment: (String) -> Unit,
+        val openInBrowser: (ChapterItem) -> Unit,
     )
 }

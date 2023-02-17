@@ -121,7 +121,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 add = presenter::addMergedManga,
             ),
             similarClick = { router.pushController(SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction()) },
-            shareClick = this::shareManga,
+            shareClick = { shareManga(context) },
             coverActions = CoverActions(
                 share = this::shareCover,
                 set = presenter::setCover,
@@ -141,15 +141,15 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 download = presenter::downloadChapters,
                 delete = presenter::deleteChapters,
                 clearRemoved = presenter::clearRemovedChapters,
-                openNext = { context ->
+                openNext = {
                     presenter.generalState.value.nextUnreadChapter.simpleChapter?.let {
                         openChapter(context, it.toDbChapter())
                     }
                 },
-                open = { context, chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
+                open = { chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
                 blockScanlator = presenter::blockScanlator,
-                openComment = presenter::lookupComment,
-                openInBrowser = { context, chapterItem ->
+                openComment = { chapterId -> presenter.openComment(context, chapterId) },
+                openInBrowser = { chapterItem ->
                     val url = presenter.getChapterUrl(chapterItem.chapter)
                     context.openInBrowser(url)
                 },

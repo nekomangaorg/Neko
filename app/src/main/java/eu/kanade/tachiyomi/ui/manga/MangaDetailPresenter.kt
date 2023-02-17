@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.content.Context
 import android.os.Build
 import android.os.Environment
 import androidx.compose.ui.state.ToggleableState
@@ -57,6 +58,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.loggycat
+import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
@@ -1629,31 +1631,30 @@ class MangaDetailPresenter(
         }
     }
 
-    suspend fun lookupComment(chapterId: String): String? {
-        if (!isOnline()) {
-            presenterScope.launch { _snackbarState.emit(SnackbarState(message = "No network connection, cannot open comments")) }
-            return null
-        } else {
-            presenterScope.launch {
-                _isRefreshing.value = true
-            }
+    fun openComment(context: Context, chapterId: String) {
+        presenterScope.launch {
+            when (!isOnline()) {
+                true -> _snackbarState.emit(SnackbarState(message = "No network connection, cannot open comments"))
+                false -> {
+                    _isRefreshing.value = true
+                    val threadId = sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
+                        loggycat(LogPriority.ERROR) { it.message() }
 
-            val threadId = sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
-                loggycat(LogPriority.ERROR) { it.message() }
-
-            }.getOrElse {
-                null
+                    }.getOrElse {
+                        null
+                    }
+                    _isRefreshing.value = false
+                    if (threadId == null) {
+                        _snackbarState.emit(
+                            SnackbarState(
+                                messageRes = R.string.comments_unavailable,
+                            ),
+                        )
+                    } else {
+                        context.openInWebView(MdUtil.forumUrl + threadId)
+                    }
+                }
             }
-            presenterScope.launch {
-                _isRefreshing.value = false
-                if (threadId == null)
-                    _snackbarState.emit(
-                        SnackbarState(
-                            messageRes = R.string.comments_unavailable,
-                        ),
-                    )
-            }
-            return threadId
         }
     }
 

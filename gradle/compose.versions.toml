@@ -13,7 +13,6 @@ accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-
 accompanist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
 accompanist-themeadapter = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanist_version" }
 
-
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
