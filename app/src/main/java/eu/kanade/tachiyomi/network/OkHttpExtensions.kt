@@ -65,7 +65,7 @@ private suspend fun Call.await(callStack: Array<StackTraceElement>): Response {
                     if (!response.isSuccessful) {
                         val exception = Exception("HTTP error ${response.code}").apply { stackTrace = callStack }
                         continuation.resumeWithException(exception)
-                        response.body.close()
+                        return
                     } else {
                         continuation.resume(response)
                     }
@@ -127,7 +127,7 @@ fun OkHttpClient.newCachelessCallWithProgress(request: Request, listener: Progre
 
 inline fun <reified T> Response.parseAs(): T {
     this.use {
-        val responseBody = it.body.string().orEmpty()
+        val responseBody = it.body.string()
         return MdUtil.jsonParser.decodeFromString(responseBody)
     }
 }

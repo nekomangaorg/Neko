@@ -328,17 +328,18 @@ class Downloader(
 
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
-            runAsObservable {
+            runAsObservable(tag = "Downloader.downloadChapter") {
                 download.source.fetchPageList(download.chapter)
-            }.map { pages ->
-                if (pages.isEmpty()) {
-                    throw Exception(context.getString(R.string.no_pages_found))
-                }
-                // Don't trust index from source
-                val reIndexedPages = pages.mapIndexed { index, page -> Page(index, page.url, page.imageUrl, uri = page.uri) }
-                download.pages = reIndexedPages
-                reIndexedPages
             }
+                .map { pages ->
+                    if (pages.isEmpty()) {
+                        throw Exception(context.getString(R.string.no_pages_found))
+                    }
+                    // Don't trust index from source
+                    val reIndexedPages = pages.mapIndexed { index, page -> Page(index, page.url, page.imageUrl, uri = page.uri) }
+                    download.pages = reIndexedPages
+                    reIndexedPages
+                }
         } else {
             // Or if the page list already exists, start from the file
             Observable.just(download.pages!!)
@@ -357,9 +358,7 @@ class Downloader(
             // Get all the URLs to the source images, fetch pages if necessary
             .flatMap { Observable.from(it) }
             // Start downloading images, consider we can have downloaded images already
-            // Concurrently do 5 pages at a time
             .flatMap({ page -> getOrDownloadImage(page, download, tmpDir).subscribeOn(Schedulers.io()) }, pagesToDownload)
-            .onBackpressureLatest()
             // Do when page is downloaded.
             .doOnNext { notifier.onProgressChange(download) }
             .toList()
@@ -449,7 +448,8 @@ class Downloader(
     ): Observable<UniFile> {
         page.status = Page.State.DOWNLOAD_IMAGE
         page.progress = 0
-        return runAsObservable {
+        return runAsObservable(tag = "Downloader.downloadImage") {
+            loggycat { "fetch image" }
             source.fetchImage(page)
         }.map { response ->
             val file = tmpDir.createFile("$filename.tmp")

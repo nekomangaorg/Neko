@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.system.loggycat
@@ -176,7 +175,7 @@ class DownloadManager(val context: Context) {
      * @param chapter the downloaded chapter.
      * @return the list of pages from the chapter.
      */
-    fun buildPageList(source: Source, manga: Manga, chapter: Chapter): List<Page> {
+    fun buildPageList(manga: Manga, chapter: Chapter): List<Page> {
         val chapterDir = provider.findChapterDir(chapter, manga)
         val files = chapterDir?.listFiles().orEmpty()
             .filter { "image" in it.type.orEmpty() }
@@ -299,7 +298,6 @@ class DownloadManager(val context: Context) {
      *
      * @param chapters the list of chapters to delete.
      * @param manga the manga of the chapters.
-     * @param source the source of the chapters.
      */
     fun cleanupChapters(
         allChapters: List<Chapter>,

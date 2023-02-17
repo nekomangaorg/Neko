@@ -6,8 +6,8 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.util.system.awaitSingle
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
+import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -62,7 +63,7 @@ class HttpPageLoader(
             }
                 .filter { it.status == Page.State.QUEUE }
                 .collect {
-                    _loadPage(it)
+                    collectPage(it)
                 }
         }
     }
@@ -201,17 +202,12 @@ class HttpPageLoader(
      *
      * @param page the page whose source image has to be downloaded.
      */
-    private suspend fun _loadPage(page: ReaderPage) {
+    private suspend fun collectPage(page: ReaderPage) {
         try {
-            if (page.imageUrl.isNullOrEmpty()) {
-                page.status = Page.State.LOAD_PAGE
-                page.imageUrl = source.fetchImageUrl(page).awaitSingle()
-            }
             val imageUrl = page.imageUrl!!
-
             if (!chapterCache.isImageInCache(imageUrl)) {
                 page.status = Page.State.DOWNLOAD_IMAGE
-                val imageResponse = source.getImage(page)
+                val imageResponse = source.fetchImage(page)
                 chapterCache.putImageToCache(imageUrl, imageResponse)
             }
 
@@ -219,6 +215,7 @@ class HttpPageLoader(
             page.status = Page.State.READY
         } catch (e: Throwable) {
             page.status = Page.State.ERROR
+            loggycat(LogPriority.ERROR, e) { "Error loading page" }
             if (e is CancellationException) {
                 throw e
             }

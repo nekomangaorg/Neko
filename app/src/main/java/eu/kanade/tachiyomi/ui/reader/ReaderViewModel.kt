@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.getHttpSource
@@ -153,7 +152,7 @@ class ReaderViewModel(
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
-        var chaptersForReader =
+        val chaptersForReader =
             chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
         val chapterSort = ChapterSort(manga, chapterFilter, preferences)
         chaptersForReader.sortedWith(chapterSort.sortComparator(true)).map(::ReaderChapter)
@@ -465,7 +464,7 @@ class ReaderViewModel(
         val selectedChapter = page.chapter
 
         // Save last page read and mark as read if needed
-        if (preferences.incognitoMode().get().not()) {
+        if (!preferences.incognitoMode().get()) {
             selectedChapter.chapter.last_page_read = page.index
             selectedChapter.chapter.pages_left =
                 (selectedChapter.pages?.size ?: page.index) - page.index

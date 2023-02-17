@@ -4,11 +4,11 @@ import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadStore
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import rx.subjects.PublishSubject
-import java.util.concurrent.CopyOnWriteArrayList
 
 class DownloadQueue(
     private val store: DownloadStore,
@@ -58,7 +58,9 @@ class DownloadQueue(
     }
 
     fun remove(chapters: List<Chapter>) {
-        for (chapter in chapters) { remove(chapter) }
+        for (chapter in chapters) {
+            remove(chapter)
+        }
     }
 
     fun remove(manga: Manga) {
@@ -91,7 +93,6 @@ class DownloadQueue(
             }
             callListeners(download)
         } else if (download.status == Download.State.DOWNLOADED || download.status == Download.State.ERROR) {
-//            setPagesSubject(download.pages, null)
             if (download.status == Download.State.ERROR) {
                 callListeners(download)
             }
@@ -103,14 +104,6 @@ class DownloadQueue(
     private fun callListeners(download: Download) {
         downloadListeners.forEach { it.updateDownload(download) }
     }
-
-//    private fun setPagesSubject(pages: List<Page>?, subject: PublishSubject<Int>?) {
-//        if (pages != null) {
-//            for (page in pages) {
-//                page.setStatusSubject(subject)
-//            }
-//        }
-//    }
 
     fun addListener(listener: DownloadListener) {
         downloadListeners.add(listener)

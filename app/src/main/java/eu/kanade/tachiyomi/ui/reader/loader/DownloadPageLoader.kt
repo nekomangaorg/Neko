@@ -53,7 +53,7 @@ class DownloadPageLoader(
     }
 
     private fun getPagesFromDirectory(): List<ReaderPage> {
-        val pages = downloadManager.buildPageList(source, manga, chapter.chapter)
+        val pages = downloadManager.buildPageList(manga, chapter.chapter)
         return pages.map { page ->
             ReaderPage(
                 page.index, page.url, page.imageUrl, page.mangaDexChapterId,

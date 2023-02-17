@@ -19,7 +19,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.style.DynamicDrawableSpan
 import android.text.style.ImageSpan
-import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.Menu
@@ -404,7 +403,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     override fun onDestroy() {
         super.onDestroy()
         viewer?.destroy()
-        binding.viewerContainer.removeAllViews()
         binding.chaptersSheet.chaptersBottomSheet.adapter = null
         viewer = null
         config = null
@@ -817,8 +815,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         val gestureDetector = GestureDetectorCompat(this, readerNavGestureDetector)
         with(binding.readerNav) {
             binding.readerNav.pageSeekbar.addOnSliderTouchListener(
-                object :
-                    Slider.OnSliderTouchListener {
+                object : Slider.OnSliderTouchListener {
                     override fun onStartTrackingTouch(slider: Slider) {
                         readerNavGestureDetector.lockVertical = false
                         readerNavGestureDetector.hasScrollHorizontal = true
@@ -1110,8 +1107,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
                 toolbarAnimation.doOnEnd { binding.appBar.isVisible = false }
                 binding.appBar.startAnimation(toolbarAnimation)
-                BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable =
-                    true
+                BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable = true
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
             } else if (!animate) {
                 binding.appBar.isVisible = false
@@ -1207,6 +1203,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         supportActionBar?.title = manga.title
 
         binding.readerNav.pageSeekbar.isRTL = newViewer is R2LPagerViewer
+
         binding.pleaseWait.isVisible = true
         binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
         invalidateOptionsMenu()
@@ -1235,8 +1232,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         } else {
             pViewer.config.doublePages = doublePages
             if (pViewer.config.autoDoublePages) {
-                pViewer.config.splitPages =
-                    preferences.automaticSplitsPage().get() && !pViewer.config.doublePages
+                pViewer.config.splitPages = preferences.automaticSplitsPage().get() && !pViewer.config.doublePages
             }
         }
         val currentChapter = viewModel.getCurrentChapter()
@@ -1266,10 +1262,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         binding.pleaseWait.clearAnimation()
         binding.pleaseWait.isVisible = false
         if (indexChapterToShift != null && indexPageToShift != null) {
-            viewerChapters.currChapter.pages?.find { it.index == indexPageToShift && it.chapter.chapter.id == indexChapterToShift }
-                ?.let {
-                    (viewer as? PagerViewer)?.updateShifting(it)
-                }
+            viewerChapters.currChapter.pages?.find { it.index == indexPageToShift && it.chapter.chapter.id == indexChapterToShift }?.let {
+                (viewer as? PagerViewer)?.updateShifting(it)
+            }
             indexChapterToShift = null
             indexPageToShift = null
         } else if (lastShiftDoubleState != null) {
@@ -1302,15 +1297,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.readerNav.leftChapter.isVisible = false
             binding.readerNav.rightChapter.isVisible = false
         } else if (viewer is R2LPagerViewer) {
-            binding.readerNav.leftChapter.alpha =
-                if (viewerChapters.nextChapter != null) 1f else 0.5f
-            binding.readerNav.rightChapter.alpha =
-                if (viewerChapters.prevChapter != null) 1f else 0.5f
+            binding.readerNav.leftChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
+            binding.readerNav.rightChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
         } else {
-            binding.readerNav.rightChapter.alpha =
-                if (viewerChapters.nextChapter != null) 1f else 0.5f
-            binding.readerNav.leftChapter.alpha =
-                if (viewerChapters.prevChapter != null) 1f else 0.5f
+            binding.readerNav.rightChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
+            binding.readerNav.leftChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
         }
         if (didTransistionFromChapter) {
             MainActivity.chapterIdToExitTo = viewerChapters.currChapter.chapter.id ?: 0L
