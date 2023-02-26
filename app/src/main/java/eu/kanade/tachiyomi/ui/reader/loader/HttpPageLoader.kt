@@ -35,6 +35,7 @@ class HttpPageLoader(
     private val chapter: ReaderChapter,
     private val source: HttpSource,
     private val chapterCache: ChapterCache = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get(),
 ) : PageLoader() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -44,8 +45,7 @@ class HttpPageLoader(
      */
     private val queue = PriorityBlockingQueue<PriorityPage>()
 
-    private val preferences by injectLazy<PreferencesHelper>()
-    private var preloadSize = preferences.preloadSize().get()
+    private val preloadSize = preferences.preloadSize().get()
 
     init {
         // Adding flow since we can reach reader settings after this is created
