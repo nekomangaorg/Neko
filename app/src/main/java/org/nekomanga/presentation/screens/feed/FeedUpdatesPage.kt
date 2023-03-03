@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.feed
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -116,6 +117,9 @@ fun FeedUpdatePage(
                         .fillMaxWidth()
                         .background(color = Color.Magenta),
                 ) {
+                    Box(modifier = Modifier.clickable { mangaClick(feedChapter.mangaId) }) {
+
+                    }
                     MangaCover.Square.invoke(
                         artwork = feedChapter.artwork,
                         shouldOutlineCover = outlineCovers,
@@ -123,7 +127,6 @@ fun FeedUpdatePage(
                             .size(56.dp)
                             .align(Alignment.CenterVertically)
                             .padding(Padding.extraSmall),
-                        onClick = { mangaClick(feedChapter.mangaId) },
                     )
                     Column(
                         Modifier
