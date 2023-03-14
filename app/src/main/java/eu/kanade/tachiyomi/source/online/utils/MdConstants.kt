@@ -36,7 +36,7 @@ object MdConstants {
         }
     }
 
-    const val currentSeasonalId = "4be9338a-3402-4f98-b467-43fb56663927"
+    const val currentSeasonalId = "44224004-1fad-425e-b416-45b46b74d3d1"
 
     object Limits {
         const val manga = 20
