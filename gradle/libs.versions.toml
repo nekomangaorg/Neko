@@ -1,5 +1,5 @@
 [versions]
-aboutlib_version = "10.5.2"
+aboutlib_version = "10.6.1"
 chucker_version = "3.5.2"
 coil_version = "2.2.2"
 fast_adapter_version = "5.7.0"
@@ -41,7 +41,7 @@ iconics-material = "com.mikepenz:community-material-typeface:7.0.96.0-kotlin"
 iconics-dx = "com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin"
 iconics-outlined = "com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin"
 
-jsoup = "org.jsoup:jsoup:1.15.3"
+jsoup = "org.jsoup:jsoup:1.15.4"
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlin_result" }
 kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlin_result" }

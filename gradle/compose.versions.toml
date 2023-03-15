@@ -1,7 +1,7 @@
 [versions]
 accompanist_version = "0.29.0-alpha"
 #sorta of stuck here until 1.4.0 hopefully, that or swipeable snackbar needs rewritten
-compose_version = "1.4.0-beta01"
+compose_version = "1.4.0-rc01"
 compose_material3_version = "1.1.0-alpha06"
 compose_compiler_version = "1.4.0"
 
@@ -22,7 +22,7 @@ ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
 #Fix material swipe refresh bug
-material = { module = "androidx.compose.material:material", version = "1.4.0-beta01" }
+material = { module = "androidx.compose.material:material", version = "1.4.0-rc01" }
 material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose_version" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose_version" }
 
