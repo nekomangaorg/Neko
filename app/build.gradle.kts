@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 182
-    const val versionName = "2.12.8"
+    const val versionCode = 183
+    const val versionName = "2.12.9"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -218,7 +218,7 @@ dependencies {
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
     implementation("me.saket.cascade:cascade-compose:2.0.0-rc02")
     implementation("me.saket.cascade:cascade:2.0.0-rc02")
-    
+
     //Compose
     implementation(compose.bundles.compose)
     implementation(compose.gap)
