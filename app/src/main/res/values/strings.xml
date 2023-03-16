@@ -979,6 +979,7 @@
     <string name="statistics_details">Statistics details</string>
     <string name="total_manga">Total manga</string>
     <string name="chapters_read">Read chapters</string>
+    <string name="chapters_bookmarked">Bookmarked chapters</string>
     <string name="most_entries">Most entries</string>
     <string name="read_chapter_count">Read chapters count</string>
     <string name="average_score">Avg manga score</string>

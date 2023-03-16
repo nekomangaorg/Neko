@@ -52,6 +52,7 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
             numberFormat.format(statsState.mangaCount).toString() to context.getString(R.string.total_manga),
             numberFormat.format(statsState.chapterCount).toString() to context.getString(R.string.total_chapters),
             numberFormat.format(statsState.readCount).toString() to context.getString(R.string.chapters_read),
+            numberFormat.format(statsState.bookmarkCount).toString() to context.getString(R.string.chapters_bookmarked),
             statsState.readDuration to context.getString(R.string.read_duration),
             libUpdates to context.getString(R.string.last_library_update),
             numberFormat.format(statsState.globalUpdateCount).toString() to context.getString(R.string.global_update_manga),
