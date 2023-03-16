@@ -15,6 +15,12 @@ import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.loggycat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -34,10 +40,21 @@ class DownloadProvider(private val context: Context) {
     private val preferences: PreferencesHelper by injectLazy()
     private val source = Injekt.get<SourceManager>().mangaDex
 
-    fun downloadsDir(): UniFile = preferences.downloadsDirectory().get().let {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * The root directory for downloads.
+     */
+    private var downloadsDir = preferences.downloadsDirectory().get().let {
         val dir = UniFile.fromUri(context, it.toUri())
         DiskUtil.createNoMediaFile(dir, context)
         dir
+    }
+
+    init {
+        preferences.downloadsDirectory().asFlow().drop(1).onEach {
+            downloadsDir = UniFile.fromUri(context, it.toUri())
+        }.launchIn(scope)
     }
 
     /**
@@ -52,7 +69,7 @@ class DownloadProvider(private val context: Context) {
             val mangaDirName = getMangaDirName(manga)
             val sourceDirName = getSourceDirName()
             loggycat { "creating directory for $sourceDirName : $mangaDirName" }
-            return downloadsDir().createDirectory(sourceDirName)
+            return downloadsDir.createDirectory(sourceDirName)
                 .createDirectory(mangaDirName)
         } catch (e: Exception) {
             loggycat(LogPriority.ERROR, e) { "error getting download folder for ${manga.title}" }
@@ -66,7 +83,7 @@ class DownloadProvider(private val context: Context) {
      * @param source the source to query.
      */
     fun findSourceDir(): UniFile? {
-        return downloadsDir().findFile(getSourceDirName(), true)
+        return downloadsDir.findFile(getSourceDirName(), true)
     }
 
     /**
