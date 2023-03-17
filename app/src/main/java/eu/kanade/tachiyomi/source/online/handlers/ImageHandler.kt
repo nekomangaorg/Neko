@@ -119,8 +119,9 @@ class ImageHandler {
     suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
         val data = page.url.split(",")
         val currentTime = Date().time
+
         val mdAtHomeServerUrl =
-            when (currentTime - tokenTracker[page.mangaDexChapterId]!! < MdConstants.mdAtHomeTokenLifespan) {
+            when (tokenTracker[page.mangaDexChapterId] != null && (currentTime - tokenTracker[page.mangaDexChapterId]!!) < MdConstants.mdAtHomeTokenLifespan) {
                 true -> data[0]
                 false -> {
                     loggycat(tag = tag) { "Time has expired get new at home url isLogged $isLogged" }

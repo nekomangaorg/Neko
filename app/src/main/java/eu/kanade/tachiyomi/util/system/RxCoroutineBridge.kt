@@ -73,10 +73,10 @@ fun <T> runAsObservable(
                 } catch (e: Throwable) {
                     // Ignore `CancellationException` as error, since it indicates "normal cancellation"
                     if (e !is CancellationException) {
-                        loggycat(tag = tag) { "coroutine is cancelled" }
+                        loggycat(LogPriority.ERROR, e, tag) { "Error in coroutine bridge" }
                         emitter.onError(e)
                     } else {
-                        loggycat(LogPriority.ERROR, e, tag) { "Error in coroutine bridge" }
+                        loggycat(LogPriority.DEBUG) { "Coroutine cancelled" }
                         emitter.onCompleted()
                     }
                 }
