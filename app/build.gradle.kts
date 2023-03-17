@@ -192,7 +192,7 @@ dependencies {
     implementation("androidx.sqlite:sqlite:2.3.0")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.github.requery:sqlite-android:3.39.2")
+    implementation("com.github.requery:sqlite-android:3.41.1")
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)
