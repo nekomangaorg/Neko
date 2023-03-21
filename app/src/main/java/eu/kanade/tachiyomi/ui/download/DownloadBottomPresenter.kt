@@ -54,7 +54,7 @@ class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
             }
             this@DownloadBottomPresenter.items = items
             if (hasChanged) {
-                withContext(Dispatchers.Main) { controller?.onNextDownloads(items) }
+                withContext(Dispatchers.Main) { view?.onNextDownloads(items) }
             }
         }
     }

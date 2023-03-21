@@ -4,12 +4,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import java.lang.ref.WeakReference
 
 open class BaseCoroutinePresenter<T> {
     lateinit var presenterScope: CoroutineScope
     val isScopeInitialized get() = this::presenterScope.isInitialized
-
-    protected var controller: T? = null
+    private var weakView: WeakReference<T>? = null
+    protected val view: T?
+        get() = weakView?.get()
 
     /**
      * Attaches a view to the presenter.
@@ -17,7 +19,7 @@ open class BaseCoroutinePresenter<T> {
      * @param view a view to attach.
      */
     open fun attachView(view: T?) {
-        controller = view
+        weakView = WeakReference(view)
     }
 
     open fun onCreate() {
@@ -28,6 +30,6 @@ open class BaseCoroutinePresenter<T> {
 
     open fun onDestroy() {
         presenterScope.cancel()
-        controller = null
+        weakView = null
     }
 }
