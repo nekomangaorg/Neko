@@ -50,7 +50,7 @@
     <!-- Security -->
     <string name="unlock_library">Unlock to access Library</string>
     <string name="unlock">Unlock</string>
-    <string name="lock_with_biometrics">Lock with biometrics</string>
+    <string name="lock_with_biometrics">Require unlock</string>
     <string name="lock_when_idle">Lock when idle</string>
 
     <!-- Chapters -->
@@ -518,7 +518,7 @@
         <item quantity="other">%1$d pages</item>
     </plurals>
     <plurals name="missing_chapters_warning">
-        <item quantity="one">Skipping 1 chapter, either the source is missing it or it has been filtered out</item>
+        <item quantity="one">Skipping %d chapter, either the source is missing it or it has been filtered out</item>
         <item quantity="other">Skipping %d chapters, either the source is missing them or they have been filtered out</item>
     </plurals>
 

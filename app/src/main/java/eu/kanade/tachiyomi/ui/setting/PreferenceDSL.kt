@@ -207,7 +207,7 @@ fun SwitchPreferenceCompat.requireAuthentication(
 ) {
     onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
         newValue as Boolean
-        if (newValue && activity != null && context.isAuthenticationSupported()) {
+        if (activity != null && context.isAuthenticationSupported()) {
             activity.startAuthentication(
                 title,
                 subtitle,
