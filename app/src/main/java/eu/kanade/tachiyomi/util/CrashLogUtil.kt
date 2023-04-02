@@ -35,12 +35,8 @@ class CrashLogUtil(private val context: Context) {
                 file.appendText(getExceptionBlock(exception))
             }
 
-            val logLevel = when (preferences.verboseLogging()) {
-                true -> "*:D"
-                false -> "*:E"
-            }
 
-            Runtime.getRuntime().exec("logcat $logLevel -d -f ${file.absolutePath}").waitFor()
+            Runtime.getRuntime().exec("logcat *:V -d -f ${file.absolutePath}").waitFor()
             showNotification(file.getUriCompat(context))
             Runtime.getRuntime().exec("logcat -c")
         } catch (e: IOException) {
