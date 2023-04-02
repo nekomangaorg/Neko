@@ -96,7 +96,6 @@ class LibraryPresenter(
     val isLoggedIntoTracking
         get() = loggedServices.isNotEmpty()
 
-    private val source by lazy { Injekt.get<SourceManager>().mangaDex }
     private val loginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
     /** Current categories of the library. */
@@ -788,20 +787,22 @@ class LibraryPresenter(
                 }
                 BY_TRACK_STATUS -> {
                     val tracks = db.getTracks(manga).executeAsBlocking()
-                    val track = tracks.find { track ->
-                        loggedServices.any { it.id == track?.sync_id }
-                    }
-                    val service = loggedServices.find { it.id == track?.sync_id }
-                    val status: String = if (track != null && service != null) {
-                        if (loggedServices.size > 1) {
-                            service.getGlobalStatus(track.status)
-                        } else {
-                            service.getStatus(track.status)
+                    val results = tracks.mapNotNull { track ->
+                        val service = Injekt.get<TrackManager>().getService(track.sync_id)
+                        return@mapNotNull when (service?.isLogged()) {
+                            true -> Pair(track, service)
+                            else -> null
                         }
-                    } else {
-                        context.getString(R.string.not_tracked)
+                    }.map { trackAndService ->
+                        trackAndService.second.getGlobalStatus(trackAndService.first.status)
+                    }.map { status ->
+                        LibraryItem(manga, makeOrGetHeader(status))
                     }
-                    listOf(LibraryItem(manga, makeOrGetHeader(status)))
+
+                    when (results.isEmpty()) {
+                        true -> listOf(LibraryItem(manga, makeOrGetHeader(context.getString(R.string.not_tracked))))
+                        false -> results
+                    }
                 }
                 BY_AUTHOR -> {
                     if (manga.artist.isNullOrBlank() && manga.author.isNullOrBlank()) {
