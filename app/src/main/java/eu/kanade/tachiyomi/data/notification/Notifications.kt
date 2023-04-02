@@ -5,6 +5,7 @@ import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import androidx.core.app.NotificationManagerCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.notificationManager
 
@@ -80,6 +81,8 @@ object Notifications {
     const val ID_LIBRARY_PROGRESS = -101
     const val CHANNEL_LIBRARY_ERROR = "library_errors_channel"
     const val ID_LIBRARY_ERROR = -102
+    const val CHANNEL_LIBRARY_SKIPPED = "library_skipped_channel"
+    const val ID_LIBRARY_SKIPPED = -103
 
     /**
      * Notification channel and ids used for backup and restore.
@@ -147,6 +150,14 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_LIBRARY_ERROR,
                 context.getString(R.string.channel_errors),
+                NotificationManager.IMPORTANCE_LOW,
+            ).apply {
+                group = GROUP_LIBRARY
+                setShowBadge(false)
+            },
+            NotificationChannel(
+                CHANNEL_LIBRARY_SKIPPED,
+                context.getString(R.string.channel_skipped),
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 group = GROUP_LIBRARY
@@ -255,5 +266,19 @@ object Notifications {
                 NotificationManager.IMPORTANCE_LOW,
             ),
         ).forEach(context.notificationManager::createNotificationChannel)
+    }
+
+    fun isNotificationChannelEnabled(context: Context, channelId: String?): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!channelId.isNullOrBlank()) {
+                val manager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val channel = manager.getNotificationChannel(channelId)
+                return channel.importance != NotificationManager.IMPORTANCE_NONE
+            }
+            false
+        } else {
+            NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
     }
 }

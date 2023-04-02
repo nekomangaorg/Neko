@@ -129,6 +129,43 @@ class LibraryUpdateNotifier(private val context: Context) {
     }
 
     /**
+     * Shows notification containing update entries that were skipped with actions to open full log and learn more.
+     *
+     * @param skips List of entry titles that were skipped.
+     * @param uri Uri for error log file containing all titles that were skipped.
+     */
+    fun showUpdateSkippedNotification(skips: List<String>, uri: Uri) {
+        if (skips.isEmpty()) {
+            return
+        }
+
+        val pendingIntent = NotificationReceiver.openErrorLogPendingActivity(context, uri)
+
+        context.notificationManager.notify(
+            Notifications.ID_LIBRARY_ERROR,
+            context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
+                setContentTitle(context.getString(R.string.notification_update_skipped, skips.size))
+                setContentText(context.getString(R.string.tap_to_see_details))
+                setStyle(
+                    NotificationCompat.BigTextStyle().bigText(
+                        skips.joinToString("\n") {
+                            it.chop(TITLE_MAX_LEN)
+                        },
+                    ),
+                )
+                setContentIntent(pendingIntent)
+                setSmallIcon(R.drawable.ic_neko_notification)
+                addAction(
+                    R.drawable.ic_help_24dp,
+                    context.getString(R.string.open_log),
+                    pendingIntent,
+                )
+            }
+                .build(),
+        )
+    }
+
+    /**
      * Shows the notification containing the result of the update done by the service.
      *
      * @param updates a list of manga with new updates.

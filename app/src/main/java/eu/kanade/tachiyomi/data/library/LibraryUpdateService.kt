@@ -13,6 +13,7 @@ import coil.request.ImageRequest
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onFailure
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -29,6 +30,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -103,6 +105,9 @@ class LibraryUpdateService(
 
     // List containing failed updates
     private val failedUpdates = mutableMapOf<Manga, String?>()
+
+    // List containing skipped updates
+    private val skippedUpdates = mutableMapOf<Manga, String?>()
 
     private val statusHandler: StatusHandler by injectLazy()
 
@@ -301,10 +306,34 @@ class LibraryUpdateService(
         job?.invokeOnCompletion { stopSelf(startId) }
     }
 
-    private suspend fun updateChaptersJob(mangaToAdd: List<LibraryManga>) {
+    private suspend fun updateChaptersJob(tempMangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
 
         preferences.libraryUpdateLastTimestamp().set(Date().time)
+
+        val skipCompleted = preferences.updateOnlyNonCompleted()
+        val skipBasedOnTracking = preferences.updateOnlyWhenTrackingIsNotFinished()
+
+        val mangaToAdd = tempMangaToAdd.filter { libraryManga ->
+
+            if (skipCompleted && libraryManga.status == SManga.COMPLETED) {
+                skippedUpdates[libraryManga] = getString(R.string.skipped_reason_completed)
+                return@filter false
+            }
+            if (skipBasedOnTracking) {
+                val tracks = db.getTracks(libraryManga).executeAsBlocking()
+                val foundNonReadingEntry = tracks.any { track ->
+                    val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
+                    return@any status != null && status != getString(R.string.follows_re_reading) && status != getString(R.string.follows_re_reading) && status != getString(R.string.follows_unfollowed)
+                }
+                if (foundNonReadingEntry) {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_track_status)
+                    return@filter false
+                }
+            }
+            return@filter true
+        }
+
 
         mangaToUpdate.addAll(mangaToAdd)
 
@@ -347,7 +376,16 @@ class LibraryUpdateService(
             )
         }
 
+        if (skippedUpdates.isNotEmpty() && Notifications.isNotificationChannelEnabled(this, Notifications.CHANNEL_LIBRARY_SKIPPED)) {
+            val skippedFile = writeErrorFile(
+                skippedUpdates,
+                "skipped",
+            ).getUriCompat(this)
+            notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
+        }
+
         failedUpdates.clear()
+        skippedUpdates.clear()
         notifier.cancelProgressNotification()
     }
 
@@ -599,10 +637,10 @@ class LibraryUpdateService(
     /**
      * Writes basic file of update errors to cache dir.
      */
-    private fun writeErrorFile(errors: Map<Manga, String?>): File {
+    private fun writeErrorFile(errors: Map<Manga, String?>, fileName: String = "errors"): File {
         try {
             if (errors.isNotEmpty()) {
-                val file = createFileInCacheDir("neko_update_errors.txt")
+                val file = createFileInCacheDir("neko_update_$fileName.txt")
                 file.bufferedWriter().use { out ->
                     // Error file format:
                     // ! Error

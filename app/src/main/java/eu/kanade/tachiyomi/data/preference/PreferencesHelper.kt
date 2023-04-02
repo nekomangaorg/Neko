@@ -213,6 +213,8 @@ class PreferencesHelper(val context: Context) {
 
     fun updateOnlyNonCompleted() = prefs.getBoolean(Keys.updateOnlyNonCompleted, false)
 
+    fun updateOnlyWhenTrackingIsNotFinished() = prefs.getBoolean(Keys.updateOnlyWhenTrackingIsNotFinished, false)
+
     fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)
 
     fun trackMarkedAsRead() = prefs.getBoolean(Keys.trackMarkedAsRead, false)

@@ -233,12 +233,16 @@
         <item quantity="other">and %1$d more chapters</item>
     </plurals>
     <string name="notification_update_error">%1$d update(s) failed</string>
+    <string name="notification_update_skipped">%1$d update(s) skipped</string>
+    <string name="skipped_reason_completed">Skipped because series is complete</string>
+    <string name="skipped_reason_track_status">Skipped because at least one tracker was not in a reading status</string>
 
     <plurals name="notification_update_failed">
         <item quantity="one">1 update failed</item>
         <item quantity="other">%1$d updates failed</item>
     </plurals>
     <string name="channel_errors">Errors</string>
+    <string name="channel_skipped">Skipped</string>
 
     <string name="number_of_migrated">only %d manga needed to be migrated</string>
 
@@ -249,6 +253,7 @@
     <string name="library_update_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
     <string name="only_update_ongoing">Only update ongoing manga</string>
+    <string name="only_update_based_on_tracking">Only update manga with tracking status\'s of Reading, Re Reading, Unfollowed</string>
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
