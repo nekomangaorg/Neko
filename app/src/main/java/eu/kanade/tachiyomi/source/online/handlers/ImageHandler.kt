@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.Date
 import kotlin.collections.set
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import logcat.LogPriority
 import okhttp3.Headers
@@ -61,8 +62,10 @@ class ImageHandler {
                         network.nonRateLimitedClient.newCachelessCallWithProgress(request, page)
                             .await()
                     } catch (e: Exception) {
-                        loggycat(LogPriority.ERROR, e, tag) { "error getting images" }
-                        reportFailedImage(request.url.toString())
+                        if (e !is CancellationException) {
+                            loggycat(LogPriority.ERROR, e, tag) { "error getting images" }
+                            reportFailedImage(request.url.toString())
+                        }
                         throw (e)
                     }
                     withNonCancellableContext {
