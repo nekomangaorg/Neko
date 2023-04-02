@@ -220,9 +220,9 @@ class Downloader(
         subscriptions.clear()
 
         subscriptions += downloadsRelay.concatMapIterable { it }
-            .onBackpressureBuffer()
             .flatMap({ downloadChapter(it).subscribeOn(Schedulers.io()) }, 2)
             .observeOn(AndroidSchedulers.mainThread())
+            .onBackpressureLatest()
             .subscribe(
                 {
                     completeDownload(it)
