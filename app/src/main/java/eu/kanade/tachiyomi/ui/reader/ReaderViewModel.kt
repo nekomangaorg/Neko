@@ -78,8 +78,6 @@ import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
-import rx.Completable
-import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -1008,14 +1006,9 @@ class ReaderViewModel(
     private fun enqueueDeleteReadChapters(chapter: ReaderChapter) {
         if (!chapter.chapter.read) return
         val manga = manga ?: return
-
-        Completable
-            .fromCallable {
-                downloadManager.enqueueDeleteChapters(listOf(chapter.chapter), manga)
-            }
-            .onErrorComplete()
-            .subscribeOn(Schedulers.io())
-            .subscribe()
+        scope.launchNonCancellable {
+            downloadManager.enqueueDeleteChapters(listOf(chapter.chapter), manga)
+        }
     }
 
     /**
@@ -1023,10 +1016,9 @@ class ReaderViewModel(
      * are ignored.
      */
     private fun deletePendingChapters() {
-        Completable.fromCallable { downloadManager.deletePendingChapters() }
-            .onErrorComplete()
-            .subscribeOn(Schedulers.io())
-            .subscribe()
+        scope.launchNonCancellable {
+            downloadManager.deletePendingChapters()
+        }
     }
 
     suspend fun lookupComment(chapterId: String): String? {
