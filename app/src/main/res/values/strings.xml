@@ -369,7 +369,7 @@
     <string name="page_">Page %1$d</string>
     <string name="pages_">Pages %1$s</string>
     <string name="next_chapter_not_found">Next chapter not found</string>
-    <string name="decode_image_error">The image could not be decoded</string>
+    <string name="decode_image_error">The image couldn\'t be loaded</string>
     <string name="use_image_as_cover">Use this image as cover art?</string>
     <string name="reading_mode">Reading mode</string>
     <string name="changing_will_reset_reading_mode">Changing this will reset the reading mode for this series</string>
