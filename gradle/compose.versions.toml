@@ -28,7 +28,7 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 
 charty = "com.himanshoe:charty:1.1.3-alpha05"
 
-balloon = "com.github.skydoves:balloon-compose:1.5.2"
+balloon = "com.github.skydoves:balloon-compose:1.5.3"
 
 
 gap = "jp.wasabeef:gap:1.1.0"
