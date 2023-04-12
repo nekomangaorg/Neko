@@ -17,7 +17,7 @@ data class ReaderChapter(val chapter: Chapter) {
 
     private val stateRelay by lazy { BehaviorRelay.create(state) }
 
-    val stateObserver by lazy { stateRelay.asObservable() }
+    val stateObserver by lazy { stateRelay.asObservable().onBackpressureBuffer() }
 
     val pages: List<ReaderPage>?
         get() = (state as? State.Loaded)?.pages
