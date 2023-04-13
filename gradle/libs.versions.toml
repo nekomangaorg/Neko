@@ -15,11 +15,11 @@ kotlin_result = "1.1.17"
 
 [libraries]
 google-services-gradle = "com.google.gms:google-services:4.3.15"
-firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.4"
+firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.5"
 
 material = "com.google.android.material:material:1.8.0"
 desugaring = "com.android.tools:desugar_jdk_libs:2.0.3"
-firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.2.1"
+firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.2.2"
 firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.3.6"
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"
 flex-box = "com.google.android.flexbox:flexbox:3.0.0"
