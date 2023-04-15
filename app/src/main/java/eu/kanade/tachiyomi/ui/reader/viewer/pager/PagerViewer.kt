@@ -81,6 +81,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             }
         }
 
+    var hasMoved = false
+
     /**
      * Variable used to hold the forward pos for reader activity shared transitions
      * Without this var landscapezoom wont work with activity transitions
@@ -102,6 +104,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         override fun onPageScrollStateChanged(state: Int) {
             loggycat { "about to page scroll sctate change 'state == ViewPager.SCROLL_STATE_IDLE' = ${state == ViewPager.SCROLL_STATE_IDLE}" }
             isIdle = state == ViewPager.SCROLL_STATE_IDLE
+            if (!hasMoved) {
+                hasMoved = !isIdle
+            }
             loggycat { "finished on pageScrollStateChanged" }
         }
     }
@@ -200,10 +205,13 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                     } else {
                         pageF.number > (currentPage as ReaderPage).number
                     }
+
                     currentPage is ChapterTransition.Prev && pageF is ReaderPage ->
                         (currentPage as ChapterTransition).from == pageF.chapter
+
                     currentPage is ChapterTransition.Next && pageF is ReaderPage ->
                         (currentPage as ChapterTransition).to == pageF.chapter
+
                     else -> true
                 }
             currentPage = pageF
@@ -211,6 +219,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 is ReaderPage -> {
                     onReaderPageSelected(pageF, allowPreload, page.second is ReaderPage, forward)
                 }
+
                 is ChapterTransition -> onTransitionSelected(pageF)
             }
         }
@@ -305,6 +314,13 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         // If we don't the size change could put us on a new chapter
         pager.removeOnPageChangeListener(pagerListener)
         setChaptersInternal(chapters)
+        if (!hasMoved) {
+            activity.isScrollingThroughPagesOrChapters = true
+            chapters.currChapter.pages?.let { pages ->
+                moveToPage(pages[chapters.currChapter.requestedPage], false)
+            }
+            activity.isScrollingThroughPagesOrChapters = false
+        }
         pager.addOnPageChangeListener(pagerListener)
         // Since we removed the listener while shifting, call page change to update the ui
         loggycat { "about to on page change from setChapterDoubleShift" }
@@ -468,6 +484,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                     if (!config.volumeKeysInverted) moveDown() else moveUp()
                 }
             }
+
             KeyEvent.KEYCODE_VOLUME_UP -> {
                 if (!config.volumeKeysEnabled || activity.menuVisible) {
                     return false
@@ -475,16 +492,19 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                     if (!config.volumeKeysInverted) moveUp() else moveDown()
                 }
             }
+
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (isUp) {
                     if (ctrlPressed) moveToNext() else moveRight()
                 }
             }
+
             KeyEvent.KEYCODE_DPAD_LEFT -> {
                 if (isUp) {
                     if (ctrlPressed) moveToPrevious() else moveLeft()
                 }
             }
+
             KeyEvent.KEYCODE_DPAD_DOWN -> if (isUp) moveDown()
             KeyEvent.KEYCODE_DPAD_UP -> if (isUp) moveUp()
             KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) moveDown()

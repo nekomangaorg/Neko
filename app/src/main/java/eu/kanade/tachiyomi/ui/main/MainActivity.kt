@@ -26,6 +26,7 @@ import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.annotation.IdRes
+import androidx.appcompat.view.ActionMode
 import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.appcompat.view.menu.MenuItemImpl
 import androidx.appcompat.widget.ActionMenuView
@@ -38,6 +39,7 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
@@ -184,6 +186,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     val toolbarHeight: Int
         get() = max(binding.toolbar.height, binding.cardFrame.height, binding.appBar.attrToolbarHeight)
 
+    private var actionMode: ActionMode? = null
     var backPressedCallback: OnBackPressedCallback? = null
     val backCallback = {
         pressingBack()
@@ -507,9 +510,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     fun reEnableBackPressedCallBack() {
         val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
-        backPressedCallback?.isEnabled =
+        backPressedCallback?.isEnabled = actionMode != null ||
             (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) ||
-                router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
+            router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
     }
 
     override fun onTitleChanged(title: CharSequence?, color: Int) {
@@ -625,6 +628,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         getResourceColor(R.attr.colorPrimaryVariant),
                         179,
                     )
+
                     else -> Color.argb(179, 0, 0, 0)
                 }
             }
@@ -647,12 +651,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
     }
 
-    override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
+    override fun startSupportActionMode(callback: ActionMode.Callback): ActionMode? {
         window?.statusBarColor = getResourceColor(R.attr.colorPrimaryVariant)
-        return super.startSupportActionMode(callback)
+        actionMode = super.startSupportActionMode(callback)
+        reEnableBackPressedCallBack()
+        return actionMode
     }
 
-    override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
+    override fun onSupportActionModeFinished(mode: ActionMode) {
         lifecycleScope.launchUI {
             val scale = Settings.Global.getFloat(
                 contentResolver,
@@ -789,12 +795,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     )
                 }
             }
+
             SHORTCUT_BROWSE -> nav.selectedItemId = R.id.nav_browse
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
                 router.pushController(MangaDetailController(extras).withFadeTransaction())
             }
+
             SHORTCUT_UPDATE_NOTES -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
@@ -802,11 +810,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     NewUpdateDialogController(extras).showDialog(router)
                 }
             }
+
             SHORTCUT_SOURCE -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_browse
                 router.pushController(BrowseController().withFadeTransaction())
             }
+
             SHORTCUT_DOWNLOADS -> {
                 nav.selectedItemId = R.id.nav_recents
                 router.popToRoot()
@@ -816,6 +826,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     controller?.showSheet()
                 }
             }
+
             else -> return false
         }
         return true
@@ -852,11 +863,18 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun pressingBack() {
-        if (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ViewCompat.getRootWindowInsets(window.decorView)
+                ?.isVisible(WindowInsetsCompat.Type.ime()) == true
+        ) {
+            WindowInsetsControllerCompat(window, binding.root).hide(WindowInsetsCompat.Type.ime())
+        } else if (actionMode != null) {
+            actionMode?.finish()
+        } else if (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) {
             binding.searchToolbar.collapseActionView()
-            return
+        } else {
+            backPress()
         }
-        backPress()
     }
 
     override fun finish() {
@@ -1035,10 +1053,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     isCheckable = oldSubMenuItem.isCheckable
                 }
             }
-            menuItem.subMenu!!.setGroupCheckable(oldSubMenu.children.first().groupId, isCheckable, isExclusiveCheckable)
-            menuItem.subMenu!!.children.toList().forEach {
+            menuItem.subMenu?.setGroupCheckable(oldSubMenu.children.first().groupId, isCheckable, isExclusiveCheckable)
+            menuItem.subMenu?.children?.toList()?.forEach {
                 if (!newMenuIds.contains(it.itemId)) {
-                    menuItem.subMenu!!.removeItem(it.itemId)
+                    menuItem.subMenu?.removeItem(it.itemId)
                 }
             }
         }
@@ -1059,6 +1077,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 )
                 overflowDialog.show()
             }
+
             else -> return super.onOptionsItemSelected(item)
         }
         return super.onOptionsItemSelected(item)
