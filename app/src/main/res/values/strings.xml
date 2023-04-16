@@ -739,7 +739,7 @@
     <string name="date_format">Date format</string>
     <string name="manage_notifications">Manage notifications</string>
     <string name="check_for_updates">Check for updates</string>
-
+    <string name="app_updates">App updates</string>
     <string name="updated_to_">Updated to v%1$s</string>
     <string name="secure_screen">Secure screen</string>
     <string name="secure_screen_summary">Secure screen hides app contents when switching apps and block screenshots</string>
@@ -1102,6 +1102,7 @@
     <string name="ignore">Ignore</string>
     <string name="include_">Include: %s</string>
     <string name="install">Install</string>
+    <string name="installing">Installing</string>
     <string name="keep">Keep</string>
     <string name="keep_in_">Keep in %1$s</string>
     <string name="left">Left</string>
@@ -1136,8 +1137,9 @@
     <string name="no_animation">No animation</string>
     <string name="normal">Normal</string>
     <string name="oldest">Oldest</string>
-    <string name="open_in_browser">Open in browser</string>
+    <string name="open">Open</string>
     <string name="open_in_app">Open in app</string>
+    <string name="open_in_browser">Open in browser</string>
 
     <string name="open_log">Open log</string>
     <string name="open_in_webview">Open in WebView</string>
