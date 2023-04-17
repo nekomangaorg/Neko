@@ -806,7 +806,7 @@ class LibraryPresenter(
                         }
                     }.map { trackAndService ->
                         trackAndService.second.getGlobalStatus(trackAndService.first.status)
-                    }.map { status ->
+                    }.distinct().map { status ->
                         LibraryItem(manga, makeOrGetHeader(status))
                     }
 
