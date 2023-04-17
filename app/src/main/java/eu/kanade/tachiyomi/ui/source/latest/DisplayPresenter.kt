@@ -209,12 +209,10 @@ class DisplayPresenter(
     }
 
     fun updateMangaForChanges() {
-        if (isScopeInitialized) {
-            presenterScope.launch {
-                val newDisplayManga = _displayScreenState.value.allDisplayManga.resync(db).toImmutableList()
-                _displayScreenState.update {
-                    it.copy(allDisplayManga = newDisplayManga, filteredDisplayManga = newDisplayManga.filterVisibility(preferences).toImmutableList())
-                }
+        presenterScope.launch {
+            val newDisplayManga = _displayScreenState.value.allDisplayManga.resync(db).toImmutableList()
+            _displayScreenState.update {
+                it.copy(allDisplayManga = newDisplayManga, filteredDisplayManga = newDisplayManga.filterVisibility(preferences).toImmutableList())
             }
         }
     }

@@ -753,7 +753,7 @@ class BrowsePresenter(
     }
 
     fun updateMangaForChanges() {
-        if (isScopeInitialized) {
+        if (!_browseScreenState.value.firstLoad) {
             presenterScope.launch {
                 val newHomePageManga = _browseScreenState.value.homePageManga.resync(db).updateVisibility(preferences)
                 _browseScreenState.update {

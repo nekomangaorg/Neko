@@ -302,9 +302,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        if (presenter.isScopeInitialized) {
-            presenter.resume()
-        }
+        presenter.resume()
     }
 
     companion object {

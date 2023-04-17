@@ -1,14 +1,14 @@
 package eu.kanade.tachiyomi.ui.base.presenter
 
+import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import java.lang.ref.WeakReference
+import kotlinx.coroutines.isActive
 
 open class BaseCoroutinePresenter<T> {
-    lateinit var presenterScope: CoroutineScope
-    val isScopeInitialized get() = this::presenterScope.isInitialized
+    var presenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var weakView: WeakReference<T>? = null
     protected val view: T?
         get() = weakView?.get()
@@ -20,12 +20,12 @@ open class BaseCoroutinePresenter<T> {
      */
     open fun attachView(view: T?) {
         weakView = WeakReference(view)
+        if (!presenterScope.isActive) {
+            presenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        }
     }
 
     open fun onCreate() {
-        if (!isScopeInitialized) {
-            presenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        }
     }
 
     open fun onDestroy() {

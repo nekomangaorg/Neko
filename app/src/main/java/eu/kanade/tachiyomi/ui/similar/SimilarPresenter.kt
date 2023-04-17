@@ -167,20 +167,18 @@ class SimilarPresenter(
     }
 
     fun updateCovers() {
-        if (isScopeInitialized) {
-            presenterScope.launch {
-                val newDisplayManga = _similarScreenState.value.displayManga.map { entry ->
-                    Pair(
-                        entry.key,
-                        entry.value.map {
-                            val dbManga = db.getManga(it.mangaId).executeOnIO()!!
-                            it.copy(currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
-                        }.toImmutableList(),
-                    )
-                }.toMap().toImmutableMap()
-                _similarScreenState.update {
-                    it.copy(displayManga = newDisplayManga)
-                }
+        presenterScope.launch {
+            val newDisplayManga = _similarScreenState.value.displayManga.map { entry ->
+                Pair(
+                    entry.key,
+                    entry.value.map {
+                        val dbManga = db.getManga(it.mangaId).executeOnIO()!!
+                        it.copy(currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
+                    }.toImmutableList(),
+                )
+            }.toMap().toImmutableMap()
+            _similarScreenState.update {
+                it.copy(displayManga = newDisplayManga)
             }
         }
     }
