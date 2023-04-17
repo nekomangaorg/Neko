@@ -5,8 +5,8 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.core.content.getSystemService
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
@@ -22,7 +22,7 @@ class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPrese
     @Composable
     override fun ScreenContent() {
         AboutScreen(
-            aboutScreenState = presenter.aboutScreenState.collectAsState(),
+            aboutScreenState = presenter.aboutScreenState.collectAsStateWithLifecycle(),
             checkForUpdate = presenter::checkForUpdate,
             onDownloadClicked = { url ->
                 presenter.hideUpdateDialog()

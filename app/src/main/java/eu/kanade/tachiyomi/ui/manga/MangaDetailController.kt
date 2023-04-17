@@ -11,9 +11,9 @@ import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -72,13 +72,13 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
         val context = LocalContext.current
         MangaScreen(
-            generalState = presenter.generalState.collectAsState(),
-            mangaState = presenter.mangaState.collectAsState(),
-            trackMergeState = presenter.trackMergeState.collectAsState(),
+            generalState = presenter.generalState.collectAsStateWithLifecycle(),
+            mangaState = presenter.mangaState.collectAsStateWithLifecycle(),
+            trackMergeState = presenter.trackMergeState.collectAsStateWithLifecycle(),
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
-            isRefreshing = presenter.isRefreshing.collectAsState(),
-            isSearching = presenter.isSearching.collectAsState(),
+            isRefreshing = presenter.isRefreshing.collectAsStateWithLifecycle(),
+            isSearching = presenter.isSearching.collectAsStateWithLifecycle(),
             onRefresh = presenter::onRefresh,
             onSearch = presenter::onSearch,
             categoryActions = CategoryActions(
@@ -259,10 +259,12 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 (activity as? MainActivity)?.goToTab(R.id.nav_browse)
                 router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
             }
+
             is BrowseController -> {
                 router.handleBack()
                 previousController
             }
+
             else -> {
                 if (backstackNumber == 1) {
                     null
@@ -286,6 +288,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 router.handleBack()
                 previousController.search(text)
             }
+
             is BrowseController, is RecentsController -> {
                 // Manually navigate to LibraryController
                 router.handleBack()

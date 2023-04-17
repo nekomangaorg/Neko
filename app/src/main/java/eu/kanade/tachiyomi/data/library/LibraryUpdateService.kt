@@ -454,6 +454,7 @@ class LibraryUpdateService(
                         }.flatten()
                     }
                 }
+
                 false -> emptyList()
             }
 

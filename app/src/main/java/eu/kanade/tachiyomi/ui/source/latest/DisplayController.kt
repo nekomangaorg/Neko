@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.source.latest
 import android.os.Bundle
 import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -23,7 +23,7 @@ class DisplayController(private val displayScreenType: DisplayScreenType) :
     @Composable
     override fun ScreenContent() {
         DisplayScreen(
-            displayScreenState = presenter.displayScreenState.collectAsState(),
+            displayScreenState = presenter.displayScreenState.collectAsStateWithLifecycle(),
             switchDisplayClick = presenter::switchDisplayMode,
             switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
             onBackPress = { activity?.onBackPressed() },
