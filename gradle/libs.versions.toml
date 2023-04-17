@@ -111,7 +111,7 @@ retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serializati
 #test libs
 junit = "junit:junit:4.13.2"
 mockk = "io.mockk:mockk:1.13.5"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.5.5"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.6.0"
 
 [plugins]
 kotlinter = { id = "org.jmailen.kotlinter", version = "3.14.0" }
