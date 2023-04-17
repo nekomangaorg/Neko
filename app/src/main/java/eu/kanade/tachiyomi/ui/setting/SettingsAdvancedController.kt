@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.PREF_DOH_360
 import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
@@ -269,19 +268,6 @@ class SettingsAdvancedController : SettingsController() {
                 onChange {
                     activity?.toast(R.string.requires_app_restart)
                     true
-                }
-            }
-        }
-
-        preferenceCategory {
-            titleRes = R.string.library
-            preference {
-                key = "refresh_teacking_meta"
-                titleRes = R.string.refresh_tracking_metadata
-                summaryRes = R.string.updates_tracking_details
-
-                onClick {
-                    TrackingSyncJob.doWorkNow(context)
                 }
             }
         }

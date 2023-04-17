@@ -1,7 +1,10 @@
 package eu.kanade.tachiyomi.jobs.tracking
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants
+import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.loggycat
@@ -11,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import logcat.LogPriority
+import org.nekomanga.domain.track.toTrackServiceItem
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -18,6 +22,7 @@ class TrackingSyncService {
 
     val db: DatabaseHelper = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get()
 
     val scope = CoroutineScope(Dispatchers.IO)
 
@@ -28,11 +33,53 @@ class TrackingSyncService {
         var count = 0
         val librayMangaList = db.getLibraryMangaList().executeAsBlocking()
         val loggedServices = trackManager.services.values.filter { it.isLogged() }
+        val autoAddTracker = preferences.autoAddTracker().get()
+        val trackingCoordinator: TrackingCoordinator = Injekt.get()
+
 
         librayMangaList.forEach { manga ->
             updateNotification(manga.title, count++, librayMangaList.size)
 
             val tracks = db.getTracks(manga).executeOnIO()
+
+
+            if (autoAddTracker.size > 1) {
+                val validContentRatings = preferences.autoTrackContentRatingSelections()
+                val contentRating = manga.getContentRating()
+                if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
+                    autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->
+                        if (tracks.firstOrNull { it.sync_id == autoAddTrackerId } == null) {
+                            loggedServices
+                                .firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
+                                    scope.launchIO {
+                                        try {
+                                            val trackServiceItem = trackService.toTrackServiceItem()
+                                            val id = trackManager.getIdFromManga(trackServiceItem, manga)
+                                            if (id != null) {
+                                                val trackResult = trackingCoordinator.searchTrackerNonFlow("", trackManager.getService(trackService.id)!!.toTrackServiceItem(), manga, false)
+                                                when (trackResult) {
+                                                    is TrackingConstants.TrackSearchResult.Success -> {
+                                                        val trackSearchItem = trackResult.trackSearchResult[0]
+                                                        trackingCoordinator.registerTracking(TrackingConstants.TrackAndService(trackSearchItem.trackItem, trackServiceItem), manga.id!!)
+                                                    }
+
+                                                    else -> Unit
+
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            if (e !is CancellationException) {
+                                                loggycat(LogPriority.ERROR, e)
+                                            }
+                                        }
+                                    }
+                                }
+                            delay(1.seconds)
+                        }
+                    }
+                }
+            }
+
             tracks.forEach { track ->
                 val service = trackManager.getService(track.sync_id)
                 if (service != null && service in loggedServices) {
@@ -46,8 +93,8 @@ class TrackingSyncService {
                             }
                         }
                     }
+                    delay(1.seconds)
                 }
-                delay(1.seconds)
             }
         }
         completeNotification()
