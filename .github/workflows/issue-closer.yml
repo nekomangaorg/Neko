@@ -1,0 +1,17 @@
+name: Close issues
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  auto_close_issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: weekly-issue-closure
+        uses: bdougie/close-issues-based-on-label@master
+        env:
+          LABEL: Fixed in future release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
