@@ -20,7 +20,13 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
                 it.chapter.name
             }
         }.sortedBy { it.chapter.chapterNumber }
-            .map { floor(it.chapter.chapterNumber).toInt() }.toList().toIntArray()
+            .mapNotNull {
+                when (it.chapter.chapterText.isEmpty() && !it.chapter.isMergedChapter()) {
+                    true -> null
+                    false -> floor(it.chapter.chapterNumber).toInt()
+
+                }
+            }.toList().toIntArray()
 
         if (chapterNumberArray.isNotEmpty()) {
             if (chapterNumberArray.first() > 1) {
