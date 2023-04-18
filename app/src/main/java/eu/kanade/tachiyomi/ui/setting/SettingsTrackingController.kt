@@ -64,7 +64,7 @@ class SettingsTrackingController :
         }
 
         preference {
-            key = "refresh_teacking_meta"
+            key = "refresh_tracking_meta"
             titleRes = R.string.refresh_tracking_metadata
             summaryRes = R.string.updates_tracking_details
 
