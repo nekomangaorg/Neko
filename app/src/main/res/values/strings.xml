@@ -1326,7 +1326,7 @@
     <string name="site_specific_settings">MangaDex settings</string>
     <string name="content_rating_title">Content Ratings</string>
     <string name="content_rating_summary">Choose which ratings to show in results. Choosing none is the same as choosing all.</string>
-    <string name="auto_track_content_rating_title">Auto Track Content Ratings</string>
+    <string name="auto_track_content_rating_title">Auto track content ratings</string>
     <string name="auto_track_content_rating_summary">Choose which ratings you want to auto track (when enabled). Choosing none is the same as choosing all.</string>
 
     <string name="content_rating_safe">Safe (No sexual themes)</string>
