@@ -138,6 +138,10 @@ fun FilterBrowseSheet(
             SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
         }
 
+        var queryText by remember {
+            mutableStateOf(filters.query.text)
+        }
+
         ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -154,20 +158,20 @@ fun FilterBrowseSheet(
                     QueryType.Title -> {
                         R.string.title
                     }
+
                     QueryType.Author -> {
                         R.string.author
                     }
+
                     QueryType.Group -> {
                         R.string.scanlator_group
                     }
+
                     QueryType.List -> {
                         R.string.list_id
                     }
                 }
 
-                var queryText by remember {
-                    mutableStateOf(filters.query.text)
-                }
 
                 FlowRow(Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 8.dp) {
                     FilterChipWrapper(
@@ -337,7 +341,10 @@ fun FilterBrowseSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(
-                    onClick = resetClick,
+                    onClick = {
+                        queryText = ""
+                        resetClick()
+                    },
                     shape = RoundedCornerShape(35),
                     colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
