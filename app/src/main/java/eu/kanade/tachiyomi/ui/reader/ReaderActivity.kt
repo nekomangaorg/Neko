@@ -26,7 +26,6 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.widget.Toast
@@ -38,7 +37,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
-import androidx.core.transition.addListener
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -58,8 +56,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.platform.MaterialContainerTransform
-import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
@@ -270,22 +266,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called when the activity is created. Initializes the view model and configuration.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Setup shared element transitions
-        if (intent.extras?.getString(TRANSITION_NAME) != null) {
-            window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-            findViewById<View>(android.R.id.content)?.let { contentView ->
-                MainActivity.chapterIdToExitTo = 0L
-                contentView.transitionName = intent.extras?.getString(TRANSITION_NAME)
-                visibleChapterRange = intent.extras?.getLongArray(VISIBLE_CHAPTERS) ?: longArrayOf()
-                didTransistionFromChapter = contentView.transitionName.contains("details chapter")
-                setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
-                window.sharedElementEnterTransition = buildContainerTransform(true)
-                window.sharedElementReturnTransition = buildContainerTransform(false)
-                // Postpone custom transition until manga ready
-                postponeEnterTransition()
-            }
-        }
-
         super.onCreate(savedInstanceState)
         binding = ReaderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -374,21 +354,27 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         viewModel.manga?.let(::setManga)
                         viewModel.state.value.viewerChapters?.let(::setChapters)
                     }
+
                     ReaderViewModel.Event.ReloadViewerChapters -> {
                         viewModel.state.value.viewerChapters?.let(::setChapters)
                     }
+
                     is ReaderViewModel.Event.SetOrientation -> {
                         setOrientation(event.orientation)
                     }
+
                     is ReaderViewModel.Event.SavedImage -> {
                         onSaveImageResult(event.result)
                     }
+
                     is ReaderViewModel.Event.ShareImage -> {
                         onShareImageResult(event.file, event.page)
                     }
+
                     is ReaderViewModel.Event.SetCoverResult -> {
                         onSetAsCoverResult(event.result)
                     }
+
                     is ReaderViewModel.Event.ShareTrackingError -> {
                         showTrackingError(event.errors)
                     }
@@ -568,6 +554,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             R.id.action_shift_double_page -> {
                 shiftDoublePages()
             }
+
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -635,6 +622,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 }
                 return true
             }
+
             KeyEvent.KEYCODE_P -> {
                 if (viewer !is R2LPagerViewer) {
                     binding.readerNav.leftChapter.performClick()
@@ -643,22 +631,27 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 }
                 return true
             }
+
             KeyEvent.KEYCODE_L -> {
                 binding.readerNav.leftChapter.performClick()
                 return true
             }
+
             KeyEvent.KEYCODE_R -> {
                 binding.readerNav.rightChapter.performClick()
                 return true
             }
+
             KeyEvent.KEYCODE_E -> {
                 viewer?.moveToNext()
                 return true
             }
+
             KeyEvent.KEYCODE_Q -> {
                 viewer?.moveToPrevious()
                 return true
             }
+
             else -> return super.onKeyUp(keyCode, event)
         }
     }
@@ -670,21 +663,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
         val handled = viewer?.handleGenericMotionEvent(event) ?: false
         return handled || super.dispatchGenericMotionEvent(event)
-    }
-
-    private fun buildContainerTransform(entering: Boolean): MaterialContainerTransform {
-        return MaterialContainerTransform(this, entering).apply {
-            duration = (
-                resources?.getInteger(
-                    if (entering) {
-                        android.R.integer.config_longAnimTime
-                    } else {
-                        android.R.integer.config_mediumAnimTime
-                    },
-                ) ?: 500
-                ).toLong()
-            addTarget(android.R.id.content)
-        }
     }
 
     /**
@@ -904,7 +882,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 firstPass = false
                 lastVis = vis
             }
-            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
             if (!fullscreen && sheetManageNavColor) {
                 window.navigationBarColor = getResourceColor(R.attr.colorSurface)
             }
@@ -996,6 +974,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 window.navigationBarColor = getResourceColor(R.attr.colorPrimaryVariant)
                 false
             }
+
             Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1 -> {
                 // basically if in landscape on a phone
                 // For lollipop, draw opaque nav bar
@@ -1007,14 +986,17 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                             179,
                         )
                     }
+
                     else -> Color.argb(179, 0, 0, 0)
                 }
                 !insets.hasSideNavBar()
             }
+
             insets.isBottomTappable() -> {
                 window.navigationBarColor = Color.TRANSPARENT
                 false
             }
+
             insets.hasSideNavBar() -> {
                 window.navigationBarColor = getResourceColor(R.attr.colorSurface)
                 false
@@ -1100,7 +1082,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         } else {
             if (preferences.fullscreen().get()) {
                 wic.hide(systemBars())
-                wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+                wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
             }
 
             if (animate && binding.appBar.isVisible) {
@@ -1157,16 +1139,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             }
         }
 
-        if (window.sharedElementEnterTransition is MaterialContainerTransform &&
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.S
-        ) {
-            // Wait until transition is complete to avoid crash on API 26
-            window.sharedElementEnterTransition.addListener(
-                onEnd = { setOrientation(viewModel.getMangaOrientationType()) },
-            )
-        } else {
-            setOrientation(viewModel.getMangaOrientationType())
-        }
+
+        setOrientation(viewModel.getMangaOrientationType())
 
         // Destroy previous viewer if there was one
         if (prevViewer != null) {
@@ -1609,6 +1583,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             is ReaderViewModel.SaveImageResult.Success -> {
                 toast(R.string.picture_saved)
             }
+
             is ReaderViewModel.SaveImageResult.Error -> {
                 loggycat(LogPriority.ERROR, result.error)
             }
@@ -1885,7 +1860,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
          */
         private fun setFullscreen(enabled: Boolean) {
             WindowCompat.setDecorFitsSystemWindows(window, !enabled || isSplitScreen)
-            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
             binding.root.rootWindowInsetsCompat?.let { setNavColor(it) }
         }
 
@@ -1964,9 +1939,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 value > 0 -> {
                     value / 100f
                 }
+
                 value < 0 -> {
                     0.01f
                 }
+
                 else -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             }
 
