@@ -35,6 +35,9 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         val trackings = preferences.trackingsToAddOnline().get().toMutableSet().mapNotNull {
             val items = it.split(":")
             if (items.size != 3) {
+                loggycat(LogPriority.ERROR) {
+                    "items size was not 3 after split for: $it"
+                }
                 null
             } else {
                 val mangaId = items[0].toLongOrNull() ?: return@mapNotNull null
