@@ -105,7 +105,7 @@ fuzzysearch = "me.xdrop:fuzzywuzzy:1.4.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }
-retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
+retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
 
 #test libs
 junit = "junit:junit:4.13.2"
