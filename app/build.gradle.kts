@@ -65,7 +65,7 @@ android {
         ndk {
             abiFilters += supportedAbis
         }
-        packaging {
+        packagingOptions {
             jniLibs.excludes.addAll(
                 listOf(
                     "**/libjxl.so",
