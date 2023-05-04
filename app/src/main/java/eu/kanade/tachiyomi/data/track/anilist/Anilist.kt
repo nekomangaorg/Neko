@@ -66,12 +66,12 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getGlobalStatus(status: Int): String = with(context) {
         when (status) {
-            READING -> getString(R.string.reading)
-            PLAN_TO_READ -> getString(R.string.plan_to_read)
-            COMPLETED -> getString(R.string.completed)
-            PAUSED -> getString(R.string.on_hold)
-            DROPPED -> getString(R.string.dropped)
-            REREADING -> getString(R.string.rereading)
+            READING -> getString(R.string.follows_reading)
+            PLAN_TO_READ -> getString(R.string.follows_plan_to_read)
+            COMPLETED -> getString(R.string.follows_completed)
+            PAUSED -> getString(R.string.follows_on_hold)
+            DROPPED -> getString(R.string.follows_dropped)
+            REREADING -> getString(R.string.follows_re_reading)
             else -> ""
         }
     }
@@ -124,12 +124,14 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
                 0f -> "0 ★"
                 else -> "${((score + 10) / 20).toInt()} ★"
             }
+
             POINT_3 -> when {
                 score == 0f -> "0"
                 score <= 35 -> "😦"
                 score <= 60 -> "😐"
                 else -> "😊"
             }
+
             else -> track.toAnilistScore()
         }
     }

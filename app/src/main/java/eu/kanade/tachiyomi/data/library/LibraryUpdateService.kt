@@ -324,7 +324,7 @@ class LibraryUpdateService(
                 val tracks = db.getTracks(libraryManga).executeAsBlocking()
                 val foundNonReadingEntry = tracks.any { track ->
                     val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
-                    return@any status != null && status != getString(R.string.follows_re_reading) && status != getString(R.string.follows_re_reading) && status != getString(R.string.follows_unfollowed)
+                    return@any status != null && status != getString(R.string.follows_reading) && status != getString(R.string.follows_re_reading) && status != getString(R.string.follows_unfollowed)
                 }
                 if (foundNonReadingEntry) {
                     skippedUpdates[libraryManga] = getString(R.string.skipped_reason_track_status)
