@@ -42,6 +42,15 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
 
             invertDoublePages.bindToPreference(preferences.invertDoublePages())
 
+            doublePageRotateToFit.bindToPreference(preferences.doublePageRotate()) { doublePageRotateEnabled ->
+                when (doublePageRotateEnabled) {
+                    true -> doublePageRotateToFitInvert.visibility = VISIBLE
+                    false -> doublePageRotateToFitInvert.visibility = GONE
+                }
+
+            }
+            doublePageRotateToFitInvert.bindToPreference(preferences.doublePageRotateReverse())
+
             pageLayout.title = pageLayout.title.toString().addBetaTag(context)
 
             val mangaViewer = (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
@@ -96,6 +105,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
             SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP,
             -> true
+
             else -> false
         }
         val ogView = (context as? Activity)?.window?.decorView

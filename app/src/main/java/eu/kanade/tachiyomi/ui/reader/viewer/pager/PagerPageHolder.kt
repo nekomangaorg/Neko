@@ -370,12 +370,14 @@ class PagerPageHolder(
                 launchProgressJob()
                 setDownloading()
             }
+
             Page.State.READY -> {
                 if (extraStatus == Page.State.READY || extraPage == null) {
                     setImage()
                 }
                 cancelProgressJob(1)
             }
+
             Page.State.ERROR -> {
                 setError()
                 cancelProgressJob(1)
@@ -396,12 +398,14 @@ class PagerPageHolder(
                 launchProgressJob2()
                 setDownloading()
             }
+
             Page.State.READY -> {
                 if (this.status == Page.State.READY) {
                     setImage()
                 }
                 cancelProgressJob(2)
             }
+
             Page.State.ERROR -> {
                 setError()
                 cancelProgressJob(2)
@@ -494,7 +498,16 @@ class PagerPageHolder(
                 val stream = streamFn().buffered(16)
 
                 val stream2 = streamFn2?.invoke()?.buffered(16)
-                openStream = this@PagerPageHolder.mergeOrSplitPages(stream, stream2)
+                openStream = when (viewer.config.doublePageRotate && stream2 == null && ImageUtil.isWideImage(stream)) {
+                    true -> {
+                        val rotation = if (viewer.config.doublePageRotateReverse) -90f else 90f
+                        ImageUtil.rotateImage(stream, rotation)
+                    }
+
+                    false -> this@PagerPageHolder.mergeOrSplitPages(stream, stream2)
+
+                }
+
                 ImageUtil.isAnimatedAndSupported(stream) ||
                     if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2) else false
             }

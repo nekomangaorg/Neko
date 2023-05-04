@@ -370,6 +370,10 @@ class PreferencesHelper(val context: Context) {
 
     fun splitTallImages() = flowPrefs.getBoolean("split_tall_images", false)
 
+    fun doublePageRotate() = flowPrefs.getBoolean("double_page_rotate", false)
+
+    fun doublePageRotateReverse() = flowPrefs.getBoolean("double_page_rotate_reverse", false)
+
     fun downloadNewChapters() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
     fun downloadNewChaptersInCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())

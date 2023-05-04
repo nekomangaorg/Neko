@@ -288,6 +288,16 @@ class SettingsReaderController : SettingsController() {
                     .asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE.value }
             }
 
+            switchPreference {
+                bindTo(preferences.doublePageRotate())
+                titleRes = R.string.double_page_rotate
+            }
+            switchPreference {
+                bindTo(preferences.doublePageRotateReverse())
+                titleRes = R.string.double_page_rotate_reverse
+                visibleIf(preferences.doublePageRotate()) { it }
+            }
+
             intListPreference(activity) {
                 key = Keys.doublePageGap
                 titleRes = R.string.double_page_gap
