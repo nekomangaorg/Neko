@@ -61,6 +61,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Padding
 import toolTipBuilder
 
 /**
@@ -151,6 +152,7 @@ fun DescriptionBlock(
                     themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
                     resetClick = altTitleResetClick,
+                    shouldWrap = true,
                 )
                 Gap(8.dp)
                 Genres(genresProvider(), tagColor, themeColorState.buttonColor, genreSearch, genreSearchLibrary)
@@ -173,6 +175,7 @@ fun DescriptionBlock(
                 AltTitles(
                     altTitles = altTitlesProvider(),
                     currentTitle = titleProvider(),
+                    shouldWrap = false,
                     tagColor = tagColor,
                     themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
@@ -221,7 +224,15 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
 }
 
 @Composable
-private fun AltTitles(altTitles: ImmutableList<String>, currentTitle: String, tagColor: Color, themeColorState: ThemeColorState, altTitleClick: (String) -> Unit, resetClick: () -> Unit) {
+private fun AltTitles(
+    altTitles: ImmutableList<String>,
+    currentTitle: String,
+    shouldWrap: Boolean,
+    tagColor: Color,
+    themeColorState: ThemeColorState,
+    altTitleClick: (String) -> Unit,
+    resetClick: () -> Unit,
+) {
     if (altTitles.isNotEmpty()) {
         val isCustomTitle = altTitles.contains(currentTitle)
         val onChipColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = NekoColors.mediumAlphaHighContrast)
@@ -231,58 +242,140 @@ private fun AltTitles(altTitles: ImmutableList<String>, currentTitle: String, ta
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .layout { measurable, constraints ->
-                    val placeable = measurable.measure(
-                        constraints.copy(
-                            minWidth = constraints.maxWidth + 16.dp.roundToPx(),
-                            maxWidth = constraints.maxWidth + 16.dp.roundToPx(),
-                        ),
-                    )
-                    layout(placeable.width, placeable.height) {
-                        placeable.place(0, 0)
+        if (shouldWrap) {
+            flowableAltTitles(
+                altTitles = altTitles,
+                currentTitle = currentTitle,
+                isCustomTitle = isCustomTitle,
+                tagColor = tagColor,
+                themeColorState = themeColorState,
+                altTitleClick = altTitleClick,
+                resetClick = resetClick,
+                onChipColor = onChipColor,
+            )
+        } else {
+            scrollableAltTitles(
+                altTitles = altTitles,
+                currentTitle = currentTitle,
+                isCustomTitle = isCustomTitle,
+                tagColor = tagColor,
+                themeColorState = themeColorState,
+                altTitleClick = altTitleClick,
+                resetClick = resetClick,
+                onChipColor = onChipColor,
+            )
+        }
+    }
+}
+
+@Composable
+private fun flowableAltTitles(
+    altTitles: ImmutableList<String>,
+    currentTitle: String,
+    isCustomTitle: Boolean,
+    tagColor: Color,
+    themeColorState: ThemeColorState,
+    altTitleClick: (String) -> Unit,
+    resetClick: () -> Unit,
+    onChipColor: Color,
+) {
+    FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisSpacing = Padding.small) {
+        if (isCustomTitle) {
+            TextButton(onClick = resetClick) {
+                Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+            }
+        }
+        altTitles.forEach { title ->
+            val currentlySelected = isCustomTitle && title == currentTitle
+            AssistChip(
+                onClick = {
+                    if (!currentlySelected) {
+                        altTitleClick(title)
                     }
                 },
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (isCustomTitle) {
-                item {
-                    TextButton(onClick = resetClick) {
-                        Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                colors = AssistChipDefaults.assistChipColors(containerColor = tagColor, labelColor = onChipColor),
+                border = null,
+                leadingIcon = {
+                    if (currentlySelected) {
+                        Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = onChipColor)
                     }
+                },
+                label = {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier
+                            .padding(0.dp),
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun scrollableAltTitles(
+    altTitles: ImmutableList<String>,
+    currentTitle: String,
+    isCustomTitle: Boolean,
+    tagColor: Color,
+    themeColorState: ThemeColorState,
+    altTitleClick: (String) -> Unit,
+    resetClick: () -> Unit,
+    onChipColor: Color,
+) {
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(
+                    constraints.copy(
+                        minWidth = constraints.maxWidth + Padding.medium.roundToPx(),
+                        maxWidth = constraints.maxWidth + Padding.medium.roundToPx(),
+                    ),
+                )
+                layout(placeable.width, placeable.height) {
+                    placeable.place(0, 0)
+                }
+            },
+        horizontalArrangement = Arrangement.spacedBy(Padding.tiny),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (isCustomTitle) {
+            item {
+                TextButton(onClick = resetClick) {
+                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
                 }
             }
-
-            items(altTitles) { title ->
-                val currentlySelected = isCustomTitle && title == currentTitle
-                AssistChip(
-                    onClick = {
-                        if (!currentlySelected) {
-                            altTitleClick(title)
-                        }
-                    },
-                    colors = AssistChipDefaults.assistChipColors(containerColor = tagColor, labelColor = onChipColor),
-                    border = null,
-                    leadingIcon = {
-                        if (currentlySelected) {
-                            Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = onChipColor)
-                        }
-                    },
-                    label = {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier
-                                .padding(0.dp),
-                        )
-                    },
-                )
-            }
-            item { Gap(8.dp) }
         }
+
+        items(altTitles) { title ->
+            val currentlySelected = isCustomTitle && title == currentTitle
+
+            AssistChip(
+                onClick = {
+                    if (!currentlySelected) {
+                        altTitleClick(title)
+                    }
+                },
+                colors = AssistChipDefaults.assistChipColors(containerColor = tagColor, labelColor = onChipColor),
+                border = null,
+                leadingIcon = {
+                    if (currentlySelected) {
+                        Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = onChipColor)
+                    }
+                },
+                label = {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier
+                            .padding(0.dp),
+                    )
+                },
+            )
+        }
+        item { Gap(8.dp) }
     }
 }
 
