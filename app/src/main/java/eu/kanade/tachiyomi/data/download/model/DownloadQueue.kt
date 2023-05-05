@@ -30,6 +30,8 @@ class DownloadQueue(
             download.setStatusCallback(::setPagesFor)
             download.status = Download.State.QUEUE
         }
+        downloadListeners.forEach { it.updateDownloads() }
+
         queue.addAll(downloads)
         store.addAll(downloads)
         updatedRelay.call(Unit)
