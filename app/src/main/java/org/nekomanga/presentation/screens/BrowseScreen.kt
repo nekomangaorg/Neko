@@ -194,6 +194,7 @@ fun BrowseScreen(
                                     onClick = switchDisplayClick,
                                 ),
                             )
+
                             false -> emptyList()
                         } +
                             listOf(
@@ -286,6 +287,7 @@ fun BrowseScreen(
                                     onLongClick = ::mangaLongClick,
                                     contentPadding = recyclerContentPadding,
                                 )
+
                                 BrowseScreenType.Follows -> {
                                     BrowseFollowsPage(
                                         displayMangaHolder = browseScreenState.value.displayMangaHolder,
@@ -322,6 +324,7 @@ fun BrowseScreen(
                                         loadNextPage = loadNextPage,
                                     )
                                 }
+
                                 BrowseScreenType.None -> Unit
                             }
                         }
@@ -396,7 +399,7 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
         }
         item {
             FooterFilterChip(
-                selected = screenType == BrowseScreenType.Filter,
+                selected = screenType == BrowseScreenType.Filter || screenType == BrowseScreenType.Other,
                 onClick = { screenTypeClick(BrowseScreenType.Filter) },
                 name = stringResource(R.string.search),
             )

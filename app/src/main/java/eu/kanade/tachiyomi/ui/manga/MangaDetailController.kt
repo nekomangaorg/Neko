@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
+import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.getBestColor
@@ -253,15 +254,14 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
         val position = router.backstackSize - backstackNumber
         if (position < 0) return null
         return when (val previousController = router.backstack[position].controller) {
-            is LibraryController, is RecentsController -> {
-                // Manually navigate to LibraryController
-                router.handleBack()
+            is LibraryController, is RecentsController, is DisplayController, is SimilarController -> {
+                router.popToRoot()
                 (activity as? MainActivity)?.goToTab(R.id.nav_browse)
                 router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
             }
 
             is BrowseController -> {
-                router.handleBack()
+                router.popCurrentController()
                 previousController
             }
 
@@ -289,7 +289,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 previousController.search(text)
             }
 
-            is BrowseController, is RecentsController -> {
+            is BrowseController, is RecentsController, is DisplayController -> {
                 // Manually navigate to LibraryController
                 router.handleBack()
                 (activity as? MainActivity)?.goToTab(R.id.nav_library)
