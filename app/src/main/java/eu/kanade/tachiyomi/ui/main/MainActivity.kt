@@ -659,6 +659,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun onSupportActionModeFinished(mode: ActionMode) {
+        actionMode = null
+        reEnableBackPressedCallBack()
         lifecycleScope.launchUI {
             val scale = Settings.Global.getFloat(
                 contentResolver,

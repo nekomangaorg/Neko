@@ -45,6 +45,7 @@
         android:preserveLegacyExternalStorage="true"
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
