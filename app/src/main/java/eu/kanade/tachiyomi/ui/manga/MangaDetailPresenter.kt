@@ -1433,7 +1433,7 @@ class MangaDetailPresenter(
 
                 is DownloadAction.DownloadNextUnread -> {
                     val filteredChapters =
-                        generalState.value.activeChapters.filter { !it.chapter.read && !it.isDownloaded }.sortedWith(chapterSort.sortComparator(currentManga(), true))
+                        generalState.value.activeChapters.filter { !it.chapter.read && it.isNotDownloaded }.sortedWith(chapterSort.sortComparator(currentManga(), true))
                             .take(downloadAction.numberToDownload)
                             .map { it.chapter.toDbChapter() }
                     downloadManager.downloadChapters(currentManga(), filteredChapters)

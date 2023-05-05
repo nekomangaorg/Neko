@@ -168,6 +168,8 @@ data class ChapterItem(
 ) {
     val isDownloaded = downloadState == Download.State.DOWNLOADED
 
+    val isNotDownloaded = downloadState == Download.State.NOT_DOWNLOADED || downloadState == Download.State.default
+
     val isNotDefaultDownload = downloadState != Download.State.default
 }
 
