@@ -17,7 +17,7 @@ kotlin_result = "1.1.17"
 google-services-gradle = "com.google.gms:google-services:4.3.15"
 firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.5"
 
-material = "com.google.android.material:material:1.8.0"
+material = "com.google.android.material:material:1.9.0"
 desugaring = "com.android.tools:desugar_jdk_libs:2.0.3"
 firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.2.2"
 firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.3.7"
