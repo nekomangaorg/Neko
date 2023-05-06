@@ -73,7 +73,7 @@ class MangaMappings(context: Context) {
         if (!dbMappings.isOpen) {
             return null
         }
-        val queryString = "SELECT mu_new FROM mappings WHERE mu = ? LIMIT 1"
+        val queryString = "SELECT mu_new FROM mappings WHERE mu = ? AND mu_new IS NOT NULL LIMIT 1"
         val whereArgs = arrayOf(id)
         val cursor = dbMappings.rawQuery(queryString, whereArgs) ?: return ""
         if (cursor.moveToFirst()) {
