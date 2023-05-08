@@ -1,12 +1,11 @@
 package org.nekomanga.presentation.components.dropdown
 
-import androidx.compose.foundation.background
 import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
+import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
@@ -16,7 +15,6 @@ import androidx.compose.ui.window.PopupProperties
 import kotlinx.collections.immutable.ImmutableList
 import me.saket.cascade.CascadeColumnScope
 import me.saket.cascade.CascadeDropdownMenu
-import me.saket.cascade.DropdownMenuHeader
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -78,7 +76,6 @@ private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem,
 
 @Composable
 private fun Item(modifier: Modifier, text: String, style: TextStyle, onClick: () -> Unit, onDismiss: () -> Unit) {
-    val scope = rememberCoroutineScope()
     MaterialDropdownMenuItem(
         modifier = modifier,
         text = {

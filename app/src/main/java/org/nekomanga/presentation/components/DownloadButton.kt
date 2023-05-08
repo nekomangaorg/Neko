@@ -44,11 +44,9 @@ private const val iconSize = 20
 private const val borderSize = 2.5
 
 @Composable
-fun DownloadButton(buttonColor: Color, downloadStateProvider: () -> Download.State, downloadProgressProvider: () -> Float, modifier: Modifier = Modifier) {
+fun DownloadButton(buttonColor: Color, downloadState: Download.State, downloadProgress: Float, modifier: Modifier = Modifier) {
     var downloadComplete by remember { mutableStateOf(false) }
     var wasDownloading by remember { mutableStateOf(false) }
-
-    val downloadState = downloadStateProvider()
 
     LaunchedEffect(downloadState) {
         when (downloadState) {
@@ -72,7 +70,7 @@ fun DownloadButton(buttonColor: Color, downloadStateProvider: () -> Download.Sta
         Download.State.NOT_DOWNLOADED -> NotDownloaded(buttonColor, modifier)
         Download.State.QUEUE -> Queued(modifier)
         Download.State.DOWNLOADED -> Downloaded(buttonColor, downloadComplete, modifier)
-        Download.State.DOWNLOADING -> Downloading(buttonColor, modifier, downloadProgressProvider)
+        Download.State.DOWNLOADING -> Downloading(buttonColor, modifier, downloadProgress)
         else -> Unit
     }
 }
@@ -127,8 +125,7 @@ private fun Queued(modifier: Modifier) {
 }
 
 @Composable
-private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgressProvider: () -> Float) {
-    val downloadProgress = downloadProgressProvider()
+private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress: Float) {
     val (bgColor, iconColor, progressColor) = when {
         downloadProgress >= 1f -> Triple(buttonColor, MaterialTheme.colorScheme.surface, Color.Transparent)
         else -> Triple(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast), buttonColor)
@@ -137,7 +134,7 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
     val backgroundColor by animateColorAsState(targetValue = bgColor)
 
     val animatedProgress = animateFloatAsState(
-        targetValue = downloadProgressProvider(),
+        targetValue = downloadProgress,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
     ).value
 
@@ -169,7 +166,8 @@ private fun DownloadIcon(color: Color, icon: Painter, alpha: Float = 1f) {
     Icon(
         painter = icon,
         contentDescription = null,
-        modifier = Modifier.requiredSize(iconSize.dp),
+        modifier = Modifier
+            .requiredSize(iconSize.dp),
         tint = color.copy(alpha = alpha),
     )
 }

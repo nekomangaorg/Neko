@@ -127,6 +127,18 @@ class PagerConfig(
             },
         )
 
+        preferences.doublePageRotate()
+            .register(
+                { doublePageRotate = it },
+                { imagePropertyChangedListener?.invoke() },
+            )
+
+        preferences.doublePageRotateReverse()
+            .register(
+                { doublePageRotateReverse = it },
+                { imagePropertyChangedListener?.invoke() },
+            )
+
         preferences.pageLayout()
             .asFlow()
             .drop(1)
@@ -193,6 +205,7 @@ class PagerConfig(
             SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
             SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP,
             -> true
+
             else -> false
         }
     }

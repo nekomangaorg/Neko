@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.resync
@@ -62,7 +63,6 @@ class BrowsePresenter(
             outlineCovers = preferences.outlineOnCovers().get(),
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
-            promptForCategories = preferences.defaultCategory() == -1,
             filters = createInitialDexFilter(incomingQuery),
             defaultContentRatings = preferences.contentRatingSelections().toImmutableSet(),
             screenType = BrowseScreenType.Homepage,
@@ -145,13 +145,13 @@ class BrowsePresenter(
         }
 
         presenterScope.launch {
-            if (browseScreenState.value.promptForCategories) {
-                val categories = db.getCategories().executeAsBlocking()
-                _browseScreenState.update {
-                    it.copy(
-                        categories = categories.map { category -> category.toCategoryItem() }.toPersistentList(),
-                    )
-                }
+            val categories = db.getCategories().executeAsBlocking().map { category -> category.toCategoryItem() }.toPersistentList()
+
+            _browseScreenState.update {
+                it.copy(
+                    categories = categories,
+                    promptForCategories = CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                )
             }
         }
         presenterScope.launch {
@@ -280,6 +280,7 @@ class BrowsePresenter(
                                 }
                             }
                         }
+
                         QueryType.List -> {
                             if (!currentQuery.isUUID()) {
                                 _browseScreenState.update { state ->
@@ -307,6 +308,7 @@ class BrowsePresenter(
                                 }
                             }
                         }
+
                         else -> {
                             if (_browseScreenState.value.filters.authorId.isNotBlankAndInvalidUUID()) {
                                 _browseScreenState.update { state ->
@@ -322,6 +324,7 @@ class BrowsePresenter(
                         }
                     }
                 }
+
                 DeepLinkType.Error -> {
                     _browseScreenState.update {
                         it.copy(isDeepLink = true, title = UiText.String(""), initialLoading = false, error = UiText.String(uuid))
@@ -340,9 +343,10 @@ class BrowsePresenter(
                         if (incomingQuery.isNotBlank() && !_browseScreenState.value.handledIncomingQuery) {
                             _browseScreenState.update { it.copy(filters = it.filters.copy(query = Filter.Query("", QueryType.Title)), handledIncomingQuery = true) }
                         }
-                        controller?.openManga(dm.mangaId, true)
+                        view?.openManga(dm.mangaId, true)
                     }
                 }
+
                 DeepLinkType.List -> {
                     _browseScreenState.update {
                         it.copy(isDeepLink = true, title = UiText.StringResource(R.string.list))
@@ -374,6 +378,7 @@ class BrowsePresenter(
                         }
                     }
                 }
+
                 DeepLinkType.Author -> {
                     _browseScreenState.update {
                         it.copy(isDeepLink = true, title = UiText.StringResource(R.string.author))
@@ -387,6 +392,7 @@ class BrowsePresenter(
                     }
                     paginator.loadNextItems()
                 }
+
                 DeepLinkType.Group -> {
                     _browseScreenState.update {
                         it.copy(isDeepLink = true, title = UiText.StringResource(R.string.scanlator_group))
@@ -445,7 +451,7 @@ class BrowsePresenter(
                 _browseScreenState.update {
                     it.copy(initialLoading = false)
                 }
-                controller?.openManga(displayManga.mangaId)
+                view?.openManga(displayManga.mangaId)
             }
         }
     }
@@ -588,7 +594,18 @@ class BrowsePresenter(
             _browseScreenState.update {
                 it.copy(filters = filters)
             }
-            paginator.loadNextItems()
+            getSearchPage()
+        }
+    }
+
+    fun searchCreator(creator: String) {
+        presenterScope.launch {
+            val blankFilter = createInitialDexFilter("")
+            _browseScreenState.update {
+                it.copy(filters = blankFilter.copy(queryMode = QueryType.Author, query = Filter.Query(creator, QueryType.Author)))
+            }
+
+            getSearchPage()
         }
     }
 
@@ -604,22 +621,27 @@ class BrowsePresenter(
                         browseScreenState.value.filters.copy(contentRatings = list)
                     }
                 }
+
                 is Filter.OriginalLanguage -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.originalLanguage, { it.language == newFilter.language }, newFilter)
                     browseScreenState.value.filters.copy(originalLanguage = list)
                 }
+
                 is Filter.PublicationDemographic -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.publicationDemographics, { it.demographic == newFilter.demographic }, newFilter)
                     browseScreenState.value.filters.copy(publicationDemographics = list)
                 }
+
                 is Filter.Status -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.statuses, { it.status == newFilter.status }, newFilter)
                     browseScreenState.value.filters.copy(statuses = list)
                 }
+
                 is Filter.Tag -> {
                     val list = lookupAndReplaceEntry(browseScreenState.value.filters.tags, { it.tag == newFilter.tag }, newFilter)
                     browseScreenState.value.filters.copy(tags = list)
                 }
+
                 is Filter.Sort -> {
                     val filterMode = when (newFilter.state) {
                         true -> newFilter.sort
@@ -628,26 +650,33 @@ class BrowsePresenter(
 
                     browseScreenState.value.filters.copy(sort = Filter.Sort.getSortList(filterMode))
                 }
+
                 is Filter.HasAvailableChapters -> {
                     browseScreenState.value.filters.copy(hasAvailableChapters = newFilter)
                 }
+
                 is Filter.TagInclusionMode -> {
                     browseScreenState.value.filters.copy(tagInclusionMode = newFilter)
                 }
+
                 is Filter.TagExclusionMode -> {
                     browseScreenState.value.filters.copy(tagExclusionMode = newFilter)
                 }
+
                 is Filter.Query -> {
                     when (newFilter.type) {
                         QueryType.Title -> {
                             browseScreenState.value.filters.copy(queryMode = QueryType.Title, query = newFilter)
                         }
+
                         QueryType.Author -> {
                             browseScreenState.value.filters.copy(queryMode = QueryType.Author, query = newFilter)
                         }
+
                         QueryType.Group -> {
                             browseScreenState.value.filters.copy(queryMode = QueryType.Group, query = newFilter)
                         }
+
                         QueryType.List -> {
                             browseScreenState.value.filters.copy(queryMode = QueryType.List, query = newFilter)
                         }
@@ -724,7 +753,7 @@ class BrowsePresenter(
     }
 
     fun updateMangaForChanges() {
-        if (isScopeInitialized) {
+        if (!_browseScreenState.value.firstLoad) {
             presenterScope.launch {
                 val newHomePageManga = _browseScreenState.value.homePageManga.resync(db).updateVisibility(preferences)
                 _browseScreenState.update {
@@ -749,7 +778,7 @@ class BrowsePresenter(
      * Check if can access internet
      */
     private fun isOnline(): Boolean {
-        return if (controller?.activity?.isOnline() == true) {
+        return if (view?.activity?.isOnline() == true) {
             true
         } else {
             presenterScope.launch {

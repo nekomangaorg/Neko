@@ -24,6 +24,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.closeQuietly
 import org.jsoup.nodes.Element
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 
 class Toonily : ReducedHttpSource() {
@@ -223,6 +224,10 @@ class Toonily : ReducedHttpSource() {
             element.hasAttr("srcset") -> element.attr("abs:srcset").substringBefore(" ")
             else -> element.attr("abs:src")
         }
+    }
+
+    override fun getChapterUrl(simpleChapter: SimpleChapter): String {
+        return simpleChapter.url
     }
 
     companion object {

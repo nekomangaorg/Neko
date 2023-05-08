@@ -43,11 +43,11 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getGlobalStatus(status: Int) = with(context) {
         when (status) {
-            READING_LIST -> getString(R.string.reading)
-            COMPLETE_LIST -> getString(R.string.completed)
-            ON_HOLD_LIST -> getString(R.string.on_hold)
-            UNFINISHED_LIST -> getString(R.string.dropped)
-            WISH_LIST -> getString(R.string.plan_to_read)
+            READING_LIST -> getString(R.string.follows_reading)
+            COMPLETE_LIST -> getString(R.string.follows_completed)
+            ON_HOLD_LIST -> getString(R.string.follows_on_hold)
+            UNFINISHED_LIST -> getString(R.string.follows_dropped)
+            WISH_LIST -> getString(R.string.follows_plan_to_read)
             else -> ""
         }
     }
@@ -104,6 +104,8 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun canRemoveFromService(): Boolean = true
+
+    override fun isAutoAddTracker() = preferences.autoAddTracker().get().contains(id.toString())
 
     override suspend fun removeFromService(track: Track): Boolean {
         return api.removeSeriesFromList(track)

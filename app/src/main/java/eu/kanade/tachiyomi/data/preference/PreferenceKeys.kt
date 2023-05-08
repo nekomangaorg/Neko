@@ -95,6 +95,8 @@ object PreferenceKeys {
 
     const val updateOnlyNonCompleted = "pref_update_only_non_completed_key"
 
+    const val updateOnlyWhenTrackingIsNotFinished = "pref_update_only_tracking_not_finished_key"
+
     const val fasterLibraryUpdates = "faster_library_updates"
 
     const val autoUpdateTrack = "pref_auto_update_manga_sync_key"

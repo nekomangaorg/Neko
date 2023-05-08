@@ -15,6 +15,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 
@@ -22,6 +23,7 @@ object MangaConstants {
 
     data class MangaScreenGeneralState(
         val activeChapters: ImmutableList<ChapterItem> = persistentListOf(),
+        val searchChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allCategories: ImmutableList<CategoryItem> = persistentListOf(),
         val allChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
@@ -61,11 +63,10 @@ object MangaConstants {
         val isPornographic: Boolean = false,
         val langFlag: String? = null,
         val missingChapters: String? = null,
-        val estimatedMissingChapters: ImmutableList<String>? = null,
+        val estimatedMissingChapters: String? = null,
         val originalTitle: String = "",
-        val rating: String? = null,
+        val stats: Stats? = null,
         val status: Int = 0,
-        val users: String? = null,
     )
 
     data class MangaScreenTrackMergeState(
@@ -188,10 +189,16 @@ object MangaConstants {
     )
 
     class DescriptionActions(
-        val genreClick: (String) -> Unit,
-        val genreLongClick: (String) -> Unit,
+        val genreSearch: (String) -> Unit,
+        val genreSearchLibrary: (String) -> Unit,
         val altTitleClick: (String) -> Unit,
         val altTitleResetClick: () -> Unit,
+    )
+
+    class InformationActions(
+        val titleLongClick: (String) -> Unit,
+        val creatorCopy: (String) -> Unit,
+        val creatorSearch: (String) -> Unit,
     )
 
     class TrackActions(
@@ -222,8 +229,10 @@ object MangaConstants {
         val clearRemoved: () -> Unit,
         val download: (List<ChapterItem>, DownloadAction) -> Unit,
         val delete: (List<ChapterItem>) -> Unit,
-        val open: (Context, ChapterItem) -> Unit,
+        val open: (ChapterItem) -> Unit,
         val blockScanlator: (String) -> Unit,
-        val openNext: (Context) -> Unit,
+        val openNext: () -> Unit,
+        val openComment: (String) -> Unit,
+        val openInBrowser: (ChapterItem) -> Unit,
     )
 }

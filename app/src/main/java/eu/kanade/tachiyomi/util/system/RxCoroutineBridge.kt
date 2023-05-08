@@ -4,10 +4,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import logcat.LogPriority
 import rx.Emitter
@@ -63,21 +61,22 @@ internal fun <T> CancellableContinuation<T>.unsubscribeOnCancellation(sub: Subsc
 fun <T> runAsObservable(
     scope: CoroutineScope = GlobalScope,
     backpressureMode: Emitter.BackpressureMode = Emitter.BackpressureMode.NONE,
+    tag: String = "",
     block: suspend () -> T,
 ): Observable<T> {
     return Observable.create(
         { emitter ->
-            val job = scope.launch(CoroutineName("runAsObservable")) {
+            val job = scope.launchIO {
                 try {
                     emitter.onNext(block())
                     emitter.onCompleted()
                 } catch (e: Throwable) {
                     // Ignore `CancellationException` as error, since it indicates "normal cancellation"
                     if (e !is CancellationException) {
-                        loggycat { "coroutine is cancelled" }
+                        loggycat(LogPriority.ERROR, e, tag) { "Error in coroutine bridge" }
                         emitter.onError(e)
                     } else {
-                        loggycat(LogPriority.ERROR, e) { "Error in coroutine bridge" }
+                        loggycat(LogPriority.DEBUG) { "Coroutine cancelled" }
                         emitter.onCompleted()
                     }
                 }

@@ -31,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -120,23 +121,28 @@ class MangaHandler {
 
     private fun CoroutineScope.statsAsync(mangaUUID: String) = async {
         service.mangaStatistics(mangaUUID)
-            .getOrResultError("trying to get rating for $mangaUUID")
+            .getOrResultError("trying to get stats for $mangaUUID")
             .mapBoth(
                 success = { statResult ->
                     val stats = statResult.statistics[mangaUUID]
                     when (stats == null) {
-                        true -> null to null
+                        true -> Stats()
                         false -> {
-                            val rating = stats.rating.bayesian ?: 0.0
+                            val rating = stats.rating?.bayesian ?: 0.0
                             val strRating = when (rating > 0) {
                                 true -> rating.toString()
                                 false -> null
                             }
-                            strRating to stats.follows.toString()
+                            Stats(
+                                rating = strRating,
+                                follows = stats.follows.toString(),
+                                threadId = stats.comments?.threadId?.toString(),
+                                repliesCount = stats.comments?.repliesCount?.toString(),
+                            )
                         }
                     }
                 },
-                failure = { null to null },
+                failure = { Stats() },
             )
     }
 
@@ -167,6 +173,12 @@ class MangaHandler {
                     fetchOffset(mangaUUID, langs, pos * limit)
                 }
             }.awaitAll().mapNotNull { it.getOrElse { null }?.data }.flatten()
+        }
+    }
+
+    suspend fun fetchChapterCommentId(chapterUUID: String): Result<String?, ResultError> {
+        return service.chapterStatistics(chapterUUID).getOrResultError("Trying to get chapter comments").andThen {
+            Ok(it.statistics[chapterUUID]?.comments?.threadId?.toString())
         }
     }
 

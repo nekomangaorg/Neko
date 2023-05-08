@@ -193,7 +193,7 @@ class ChapterCache(private val context: Context) {
     fun isImageInCache(imageUrl: String): Boolean {
         return try {
             loggycat { "is image in cache $imageUrl" }
-            diskCache.get(DiskUtil.hashKeyForDisk(imageUrl)) != null
+            diskCache.get(DiskUtil.hashKeyForDisk(imageUrl)).use { it != null }
         } catch (e: IOException) {
             loggycat(LogPriority.ERROR, e)
             false
@@ -230,14 +230,14 @@ class ChapterCache(private val context: Context) {
             editor = diskCache.edit(key) ?: throw IOException("Unable to edit key")
 
             // Get OutputStream and write image with Okio.
-            response.body!!.source().saveTo(editor.newOutputStream(0))
+            response.body.source().saveTo(editor.newOutputStream(0))
 
             diskCache.flush()
             editor.commit()
         } catch (e: Exception) {
             loggycat(LogPriority.ERROR, e)
         } finally {
-            response.body?.close()
+            response.body.close()
             editor?.abortUnlessCommitted()
             loggycat { "finished image to cache $imageUrl" }
         }

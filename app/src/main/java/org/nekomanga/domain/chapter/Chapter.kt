@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
@@ -41,16 +42,20 @@ data class SimpleChapter(
     fun isMergedChapterOfType(mergeType: MergeType) =
         MergeType.getMergeTypeName(mergeType) == this.scanlator
 
+    fun getHttpSource(sourceManager: SourceManager): HttpSource {
+        val mergeType = MergeType.getMergeTypeFromName(this.scanlator)
+        return when (mergeType == null) {
+            true -> sourceManager.mangaDex
+            false -> MergeType.getSource(mergeType, sourceManager)
+        }
+    }
+
     fun scanlatorList(): List<String> {
         return ChapterUtil.getScanlators(this.scanlator)
     }
 
-    fun fullUrl(): String {
-        return when {
-            isMergedChapterOfType(MergeType.MangaLife) -> Injekt.get<SourceManager>().mangaLife.baseUrl + url
-            isMergedChapterOfType(MergeType.Komga) -> Injekt.get<SourceManager>().komga.hostUrl() + url
-            else -> MdUtil.baseUrl + url
-        }
+    fun commentUrl(threadId: String): String {
+        return MdUtil.forumUrl + threadId
     }
 
     fun toSChapter(): SChapter {
@@ -165,6 +170,8 @@ data class ChapterItem(
     val downloadProgress: Float = -1f,
 ) {
     val isDownloaded = downloadState == Download.State.DOWNLOADED
+
+    val isNotDownloaded = downloadState == Download.State.NOT_DOWNLOADED || downloadState == Download.State.default
 
     val isNotDefaultDownload = downloadState != Download.State.default
 }

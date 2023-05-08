@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
 
 @Composable
@@ -47,10 +48,11 @@ fun WebViewScreen(
 
     NekoScaffold(
         title = title,
+        subtitle = url,
+        type = NekoScaffoldType.TitleAndSubtitle,
         onNavigationIconClicked = onClose,
         navigationIcon = Icons.Filled.Close,
         navigationIconLabel = stringResource(id = R.string.close),
-        subtitle = url,
         actions = {
             AppBarActions(
                 actions = listOf(

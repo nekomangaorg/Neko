@@ -1,9 +1,9 @@
 [versions]
-accompanist_version = "0.28.0"
+accompanist_version = "0.30.1"
 #sorta of stuck here until 1.4.0 hopefully, that or swipeable snackbar needs rewritten
-compose_version = "1.3.1"
-compose_material3_version = "1.0.1"
-compose_compiler_version = "1.3.2"
+compose_version = "1.4.3"
+compose_material3_version = "1.1.0-rc01"
+compose_compiler_version = "1.4.0"
 
 [libraries]
 
@@ -16,28 +16,32 @@ accompanist-themeadapter = { module = "com.google.accompanist:accompanist-themea
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
-activity = "androidx.activity:activity-compose:1.6.1"
+activity = "androidx.activity:activity-compose:1.7.1"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
+
+lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.6.1"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
 #Fix material swipe refresh bug
-material = { module = "androidx.compose.material:material", version = "1.4.0-alpha03" }
+material = { module = "androidx.compose.material:material", version = "1.4.3" }
 material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose_version" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose_version" }
 
 charty = "com.himanshoe:charty:1.1.3-alpha05"
 
+balloon = "com.github.skydoves:balloon-compose:1.5.3"
+
+
 gap = "jp.wasabeef:gap:1.1.0"
 
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
-date-fieled = "com.github.LanarsInc:compose-date-text-field:1.0.2"
+date-fieled = "com.github.CarlosEsco:compose-date-text-field:3c64e08381"
 markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
 
 
 [bundles]
 accompanist = ["accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
-compose = ["activity", "animations", "material3-core", "material3-windowsize", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
+compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
 charting = ["charty"]

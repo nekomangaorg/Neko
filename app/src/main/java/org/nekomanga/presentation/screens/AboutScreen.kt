@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.screens
 
-import ToolTipIconButton
+import ToolTipButton
 import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.theme.Padding
@@ -68,6 +69,7 @@ fun AboutScreen(
 
     NekoScaffold(
         title = stringResource(id = R.string.about),
+        type = NekoScaffoldType.Title,
         onNavigationIconClicked = onBackPressed,
         snackBarHost = snackbarHost(snackbarHostState),
     ) { contentPadding ->
@@ -246,7 +248,7 @@ private fun LinkIcon(
 ) {
     val uriHandler = LocalUriHandler.current
 
-    ToolTipIconButton(
+    ToolTipButton(
         label,
         iconModifier = Modifier.size(24.dp),
         icon = icon,

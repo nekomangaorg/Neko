@@ -4,7 +4,7 @@ object MdApi {
     const val baseUrl = "https://api.mangadex.org"
     const val manga = "/manga"
     const val list = "/list"
-    const val statistics = "/statistics/manga"
+    const val statistics = "/statistics"
     const val chapter = "/chapter"
     const val cover = "/cover"
     const val group = "/group"

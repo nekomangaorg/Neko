@@ -87,6 +87,10 @@ open class MangaImpl : Manga {
 
     override var user_title: String? = null
 
+    override var replies_count: String? = null
+
+    override var thread_id: String? = null
+
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl &&
             other.title.isNotBlank() && other.title != title

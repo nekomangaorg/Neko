@@ -31,6 +31,7 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePaddingRelative
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -122,7 +123,12 @@ fun Controller.removeQueryListener(includeSearchTB: Boolean = true) {
     )
 }
 
-fun <T> Controller.liftAppbarWith(recyclerOrNested: T, padView: Boolean = false) {
+fun <T> Controller.liftAppbarWith(
+    recyclerOrNested: T,
+    padView: Boolean = false,
+    changeMarginsInstead: Boolean = false,
+    liftOnScroll: ((Boolean) -> Unit)? = null,
+) {
     val recycler = recyclerOrNested as? RecyclerView ?: recyclerOrNested as? NestedScrollView ?: return
     if (padView) {
         var appBarHeight = (
@@ -139,20 +145,36 @@ fun <T> Controller.liftAppbarWith(recyclerOrNested: T, padView: Boolean = false)
             }
         }
         recycler.updatePaddingRelative(
-            top = activityBinding!!.toolbar.y.toInt() + appBarHeight,
+            top = if (changeMarginsInstead) 0 else activityBinding!!.toolbar.y.toInt() + appBarHeight,
             bottom = recycler.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom ?: 0,
         )
+        if (changeMarginsInstead) {
+            recycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = activityBinding!!.toolbar.y.toInt() + appBarHeight
+            }
+        }
         recycler.applyBottomAnimatedInsets(setPadding = true) { view, insets ->
             val headerHeight = insets.getInsets(systemBars()).top + appBarHeight
-            view.updatePaddingRelative(top = headerHeight)
+            if (changeMarginsInstead) {
+                view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = headerHeight
+                }
+            } else {
+                view.updatePaddingRelative(top = headerHeight)
+            }
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             recycler.doOnApplyWindowInsetsCompat { view, insets, _ ->
                 val headerHeight = insets.getInsets(systemBars()).top + appBarHeight
                 view.updatePaddingRelative(
-                    top = headerHeight,
+                    top = if (changeMarginsInstead) 0 else headerHeight,
                     bottom = insets.getInsets(ime() or systemBars()).bottom,
                 )
+                if (changeMarginsInstead) {
+                    view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin = headerHeight
+                    }
+                }
             }
         }
     } else {

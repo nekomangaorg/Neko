@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.external.BookWalker
 import eu.kanade.tachiyomi.data.external.CdJapan
 import eu.kanade.tachiyomi.data.external.Dex
 import eu.kanade.tachiyomi.data.external.DexApi
+import eu.kanade.tachiyomi.data.external.DexComments
 import eu.kanade.tachiyomi.data.external.EBookJapan
 import eu.kanade.tachiyomi.data.external.Engtl
 import eu.kanade.tachiyomi.data.external.ExternalLink
@@ -199,6 +200,10 @@ interface Manga : SManga {
         val list = mutableListOf<ExternalLink>()
         list.add(Dex(MdUtil.getMangaUUID(url)))
         list.add(DexApi(MdUtil.getMangaUUID(url)))
+
+        thread_id?.let {
+            list.add(DexComments(it))
+        }
 
         kitsu_id?.let {
             list.add(Kitsu(it))

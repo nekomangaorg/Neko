@@ -26,9 +26,9 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import okhttp3.internal.toImmutableMap
 import uy.kohesive.injekt.injectLazy
 
 class LibraryUpdateNotifier(private val context: Context) {
@@ -112,6 +112,43 @@ class LibraryUpdateNotifier(private val context: Context) {
                 setStyle(
                     NotificationCompat.BigTextStyle().bigText(
                         errors.joinToString("\n") {
+                            it.chop(TITLE_MAX_LEN)
+                        },
+                    ),
+                )
+                setContentIntent(pendingIntent)
+                setSmallIcon(R.drawable.ic_neko_notification)
+                addAction(
+                    R.drawable.ic_help_24dp,
+                    context.getString(R.string.open_log),
+                    pendingIntent,
+                )
+            }
+                .build(),
+        )
+    }
+
+    /**
+     * Shows notification containing update entries that were skipped with actions to open full log and learn more.
+     *
+     * @param skips List of entry titles that were skipped.
+     * @param uri Uri for error log file containing all titles that were skipped.
+     */
+    fun showUpdateSkippedNotification(skips: List<String>, uri: Uri) {
+        if (skips.isEmpty()) {
+            return
+        }
+
+        val pendingIntent = NotificationReceiver.openErrorLogPendingActivity(context, uri)
+
+        context.notificationManager.notify(
+            Notifications.ID_LIBRARY_ERROR,
+            context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
+                setContentTitle(context.getString(R.string.notification_update_skipped, skips.size))
+                setContentText(context.getString(R.string.tap_to_see_details))
+                setStyle(
+                    NotificationCompat.BigTextStyle().bigText(
+                        skips.joinToString("\n") {
                             it.chop(TITLE_MAX_LEN)
                         },
                     ),

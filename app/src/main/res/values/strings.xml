@@ -50,7 +50,7 @@
     <!-- Security -->
     <string name="unlock_library">Unlock to access Library</string>
     <string name="unlock">Unlock</string>
-    <string name="lock_with_biometrics">Lock with biometrics</string>
+    <string name="lock_with_biometrics">Require unlock</string>
     <string name="lock_when_idle">Lock when idle</string>
 
     <!-- Chapters -->
@@ -169,8 +169,10 @@
     <string name="collapse_all_categories">Collapse all categories</string>
     <string name="reorder_filters">Reorder filters</string>
     <string name="_unread">%d unread</string>
-    <string name="search_globally">Search \"%1$s\" on MangaDex</string>
+    <string name="search_library">Search library</string>
+    <string name="search_globally">Search \"%1$s\" MangaDex</string>
 
+    <string name="copy">Copy</string>
     <string name="read_progress">Read progress</string>
     <string name="series_type">Series type</string>
     <string name="series">Series</string>
@@ -231,12 +233,16 @@
         <item quantity="other">and %1$d more chapters</item>
     </plurals>
     <string name="notification_update_error">%1$d update(s) failed</string>
+    <string name="notification_update_skipped">%1$d update(s) skipped</string>
+    <string name="skipped_reason_completed">Skipped because series is complete</string>
+    <string name="skipped_reason_track_status">Skipped because at least one tracker was not in a reading status</string>
 
     <plurals name="notification_update_failed">
         <item quantity="one">1 update failed</item>
         <item quantity="other">%1$d updates failed</item>
     </plurals>
     <string name="channel_errors">Errors</string>
+    <string name="channel_skipped">Skipped</string>
 
     <string name="number_of_migrated">only %d manga needed to be migrated</string>
 
@@ -247,6 +253,7 @@
     <string name="library_update_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
     <string name="only_update_ongoing">Only update ongoing manga</string>
+    <string name="only_update_based_on_tracking">Only update manga with tracking status\'s of Reading, Re Reading, Unfollowed</string>
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
@@ -363,7 +370,7 @@
     <string name="page_">Page %1$d</string>
     <string name="pages_">Pages %1$s</string>
     <string name="next_chapter_not_found">Next chapter not found</string>
-    <string name="decode_image_error">The image could not be decoded</string>
+    <string name="decode_image_error">The image couldn\'t be loaded</string>
     <string name="use_image_as_cover">Use this image as cover art?</string>
     <string name="reading_mode">Reading mode</string>
     <string name="changing_will_reset_reading_mode">Changing this will reset the reading mode for this series</string>
@@ -415,6 +422,8 @@
     <string name="use_custom_brightness">Use custom brightness</string>
     <string name="grayscale">Grayscale</string>
     <string name="pref_inverted_colors">Inverted</string>
+    <string name="double_page_rotate">Rotate wide pages to fit</string>
+    <string name="double_page_rotate_reverse">Flip orientation of rotated wide pages</string>
     <string name="use_custom_color_filter">Use custom color filter</string>
     <string name="color_filter_blend_mode">Color filter blend mode</string>
     <string name="overlay">Overlay</string>
@@ -517,7 +526,7 @@
         <item quantity="other">%1$d pages</item>
     </plurals>
     <plurals name="missing_chapters_warning">
-        <item quantity="one">Skipping 1 chapter, either the source is missing it or it has been filtered out</item>
+        <item quantity="one">Skipping %d chapter, either the source is missing it or it has been filtered out</item>
         <item quantity="other">Skipping %d chapters, either the source is missing them or they have been filtered out</item>
     </plurals>
 
@@ -637,6 +646,7 @@
     <string name="use_suggested_date">Use suggested date</string>
     <string name="use_suggested_date_of_">Use suggested date of: %1$s</string>
 
+    <string name="failed_to_update_">Failed to update %1$s</string>
 
     <!-- Migration -->
     <string name="select_sources">Select sources</string>
@@ -732,7 +742,7 @@
     <string name="date_format">Date format</string>
     <string name="manage_notifications">Manage notifications</string>
     <string name="check_for_updates">Check for updates</string>
-
+    <string name="app_updates">App updates</string>
     <string name="updated_to_">Updated to v%1$s</string>
     <string name="secure_screen">Secure screen</string>
     <string name="secure_screen_summary">Secure screen hides app contents when switching apps and block screenshots</string>
@@ -850,7 +860,7 @@
     <string name="updates_covers_genres_desc">Updates covers, genres, description and manga status information</string>
     <string name="refresh_tracking_metadata">Refresh tracking metadata</string>
     <string name="refresh_tracking_complete">Refresh tracking complete</string>
-    <string name="updates_tracking_details">Updates status, score and last chapter read from the tracking services</string>
+    <string name="updates_tracking_details">Updates status, score and last chapter read from the tracking services and auto adds if enabled and missing.</string>
     <string name="clean_up_downloaded_chapters">Clean up downloaded chapters</string>
     <string name="delete_unused_chapters">Delete non-existent, partially downloaded,
             and read chapter folders</string>
@@ -977,6 +987,7 @@
     <string name="statistics_details">Statistics details</string>
     <string name="total_manga">Total manga</string>
     <string name="chapters_read">Read chapters</string>
+    <string name="chapters_bookmarked">Bookmarked chapters</string>
     <string name="most_entries">Most entries</string>
     <string name="read_chapter_count">Read chapters count</string>
     <string name="average_score">Avg manga score</string>
@@ -1094,6 +1105,7 @@
     <string name="ignore">Ignore</string>
     <string name="include_">Include: %s</string>
     <string name="install">Install</string>
+    <string name="installing">Installing</string>
     <string name="keep">Keep</string>
     <string name="keep_in_">Keep in %1$s</string>
     <string name="left">Left</string>
@@ -1128,8 +1140,9 @@
     <string name="no_animation">No animation</string>
     <string name="normal">Normal</string>
     <string name="oldest">Oldest</string>
-    <string name="open_in_browser">Open in browser</string>
+    <string name="open">Open</string>
     <string name="open_in_app">Open in app</string>
+    <string name="open_in_browser">Open in browser</string>
 
     <string name="open_log">Open log</string>
     <string name="open_in_webview">Open in WebView</string>
@@ -1232,8 +1245,7 @@
     <string name="links">Links</string>
     <string name="open_external">Open external links</string>
     <string name="comments">Comments</string>
-    <string name="comments_unavailable">"Comments not available for merged chapters"</string>
-    <string name="comments_unavailable_dex">"Comments not available on MangaDex at this time"</string>
+    <string name="comments_unavailable">"Comments not available"</string>
     <string name="remove_bookmark">Remove bookmark</string>
     <string name="add_bookmark">Add bookmark</string>
     <string name="merge_other">Merge another source to fill potential missing chapters</string>
@@ -1310,13 +1322,14 @@
 
     <!-- Merge Settings -->
     <string name="merge_source_settings">Merge source settings</string>
+    <string name="minimum_komga_version">Minimum required Komga version: 0.151.0</string>
 
 
     <!-- Site Settings -->
     <string name="site_specific_settings">MangaDex settings</string>
     <string name="content_rating_title">Content Ratings</string>
     <string name="content_rating_summary">Choose which ratings to show in results. Choosing none is the same as choosing all.</string>
-    <string name="auto_track_content_rating_title">Auto Track Content Ratings</string>
+    <string name="auto_track_content_rating_title">Auto track content ratings</string>
     <string name="auto_track_content_rating_summary">Choose which ratings you want to auto track (when enabled). Choosing none is the same as choosing all.</string>
 
     <string name="content_rating_safe">Safe (No sexual themes)</string>

@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.data.notification
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import androidx.core.app.NotificationManagerCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.notificationManager
 
@@ -18,6 +20,7 @@ object Notifications {
         const val Tracking = "tracking_channel"
         const val Updated = "updated_channel"
         const val v5Migration = "v5_migration_channel"
+        const val Installing = "installing_channel"
         const val ID_V5_MIGRATION_PROGRESS = -901
         const val ID_V5_MIGRATION_ERROR = -902
     }
@@ -53,6 +56,9 @@ object Notifications {
     const val ID_UPDATER = 1
     const val ID_DOWNLOAD_IMAGE = 2
     const val ID_INSTALL = 3
+    const val CHANNEL_UPDATED = "updated_channel"
+    const val ID_INSTALLED = -6
+    const val GROUP_APP_UPDATES = "eu.kanade.tachiyomi.APP_UPDATES"
 
     /**
      * Notification channel and ids used by the downloader.
@@ -80,6 +86,8 @@ object Notifications {
     const val ID_LIBRARY_PROGRESS = -101
     const val CHANNEL_LIBRARY_ERROR = "library_errors_channel"
     const val ID_LIBRARY_ERROR = -102
+    const val CHANNEL_LIBRARY_SKIPPED = "library_skipped_channel"
+    const val ID_LIBRARY_SKIPPED = -103
 
     /**
      * Notification channel and ids used for backup and restore.
@@ -128,6 +136,7 @@ object Notifications {
                 context.getString(R.string.group_backup_restore),
             ),
             NotificationChannelGroup(GROUP_DOWNLOADER, context.getString(R.string.group_downloader)),
+            NotificationChannelGroup(GROUP_APP_UPDATES, context.getString(R.string.app_updates)),
         ).forEach(context.notificationManager::createNotificationChannelGroup)
 
         val channels = listOf(
@@ -147,6 +156,14 @@ object Notifications {
             NotificationChannel(
                 CHANNEL_LIBRARY_ERROR,
                 context.getString(R.string.channel_errors),
+                NotificationManager.IMPORTANCE_LOW,
+            ).apply {
+                group = GROUP_LIBRARY
+                setShowBadge(false)
+            },
+            NotificationChannel(
+                CHANNEL_LIBRARY_SKIPPED,
+                context.getString(R.string.channel_skipped),
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 group = GROUP_LIBRARY
@@ -231,6 +248,13 @@ object Notifications {
                 setSound(null, null)
             },
             NotificationChannel(
+                CHANNEL_INCOGNITO_MODE,
+                context.getString(R.string.incognito_mode),
+                NotificationManager.IMPORTANCE_LOW,
+            ).apply {
+                lockscreenVisibility = Notification.VISIBILITY_SECRET
+            },
+            NotificationChannel(
                 Channel.Status,
                 context.getString(R.string.sync_follows_to_library),
                 NotificationManager.IMPORTANCE_LOW,
@@ -245,6 +269,16 @@ object Notifications {
                 setShowBadge(false)
             },
             NotificationChannel(
+                Channel.Installing,
+                context.getString(R.string.install),
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                setShowBadge(false)
+                setSound(null, null)
+                enableVibration(false)
+                group = GROUP_APP_UPDATES
+            },
+            NotificationChannel(
                 CHANNEL_CRASH_LOGS,
                 context.getString(R.string.channel_crash_logs),
                 NotificationManager.IMPORTANCE_HIGH,
@@ -254,6 +288,21 @@ object Notifications {
                 context.getString(R.string.incognito_mode),
                 NotificationManager.IMPORTANCE_LOW,
             ),
-        ).forEach(context.notificationManager::createNotificationChannel)
+        )
+        context.notificationManager.createNotificationChannels(channels)
+    }
+
+    fun isNotificationChannelEnabled(context: Context, channelId: String?): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!channelId.isNullOrBlank()) {
+                val manager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val channel = manager.getNotificationChannel(channelId)
+                return channel.importance != NotificationManager.IMPORTANCE_NONE
+            }
+            false
+        } else {
+            NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
     }
 }

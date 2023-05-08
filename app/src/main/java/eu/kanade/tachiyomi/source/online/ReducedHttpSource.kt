@@ -1,9 +1,8 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.github.michaelbull.result.Result
-import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.newCallWithProgress
+import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -17,11 +16,7 @@ abstract class ReducedHttpSource : HttpSource() {
     abstract suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError>
 
     override suspend fun fetchImage(page: Page): Response {
-        val request = imageRequest(page).newBuilder()
-            // images will be cached or saved manually, so don't take up network cache
-            .cacheControl(CACHE_CONTROL_NO_STORE)
-            .build()
-        return client.newCallWithProgress(request, page).await()
+        return client.newCachelessCallWithProgress(imageRequest(page), page).await()
     }
 
     companion object {

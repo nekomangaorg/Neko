@@ -11,12 +11,14 @@ import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults.libraryPadding
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.BasicComposeController
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 
 class LicensesController : BasicComposeController() {
     @Composable
     override fun ScreenContent() {
         NekoScaffold(
             title = stringResource(id = R.string.open_source_licenses),
+            type = NekoScaffoldType.Title,
             onNavigationIconClicked = { activity?.onBackPressed() },
         ) { contentPadding ->
             LibrariesContainer(

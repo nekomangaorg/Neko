@@ -32,7 +32,7 @@ class GlobalExceptionHandler private constructor(
 
     override fun uncaughtException(thread: Thread, exception: Throwable) {
         try {
-            loggycat(priority = LogPriority.ERROR, throwable = exception)
+            loggycat(priority = LogPriority.ERROR, throwable = exception) { "Uncaught Exception" }
             launchActivity(applicationContext, activityToBeLaunched, exception)
             exitProcess(0)
         } catch (_: Exception) {

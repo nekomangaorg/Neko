@@ -1,27 +1,53 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package org.nekomanga.presentation.components
 
-import ToolTipIconButton
+import ToolTipButton
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.luminance
@@ -36,19 +62,24 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Padding
 
 @Composable
 fun NekoScaffold(
-    title: String,
+
+    type: NekoScaffoldType,
     onNavigationIconClicked: () -> Unit,
     modifier: Modifier = Modifier,
     themeColorState: ThemeColorState = defaultThemeColorState(),
+    title: String = "",
+    subtitle: String = "",
+    searchPlaceHolder: String = "",
     incognitoMode: Boolean = false,
     isRoot: Boolean = false,
-    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
+    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(state = rememberTopAppBarState()),
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
-    subtitle: String = "",
+    onSearch: (String?) -> Unit = {},
     snackBarHost: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
@@ -65,13 +96,13 @@ fun NekoScaffold(
         topBar =
         {
             CompositionLocalProvider(LocalRippleTheme provides (themeColorState.rippleTheme)) {
-                if (subtitle.isEmpty() && (title.isNotEmpty()) || isRoot) {
-                    TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, isRoot, scrollBehavior)
-                } else if (title.isEmpty()) {
-                    NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
-                } else {
-                    TitleAndSubtitleTopAppBar(color, title, subtitle, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
+                when (type) {
+                    NekoScaffoldType.Title -> TitleOnlyTopAppBar(color, title, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, incognitoMode, isRoot, scrollBehavior)
+                    NekoScaffoldType.NoTitle -> NoTitleTopAppBar(color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
+                    NekoScaffoldType.TitleAndSubtitle -> TitleAndSubtitleTopAppBar(color, title, subtitle, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
+                    NekoScaffoldType.Search -> NoTitleSearchTopAppBar(onSearch, searchPlaceHolder, color, navigationIconLabel, navigationIcon, onNavigationIconClicked, actions, scrollBehavior)
                 }
+
             }
         },
     ) { paddingValues ->
@@ -113,14 +144,14 @@ private fun TitleAndSubtitleTopAppBar(
         },
         modifier = Modifier.statusBarsPadding(),
         navigationIcon = {
-            ToolTipIconButton(
+            ToolTipButton(
                 toolTipLabel = navigationIconLabel,
                 icon = navigationIcon,
                 buttonClicked = onNavigationIconClicked,
             )
         },
         actions = actions,
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = topAppBarColors(
             containerColor = color,
             scrolledContainerColor = color,
         ),
@@ -134,21 +165,126 @@ private fun NoTitleTopAppBar(
     navigationIconLabel: String,
     navigationIcon: ImageVector,
     onNavigationIconClicked: () -> Unit,
-    actions: @Composable() (RowScope.() -> Unit),
+    actions: @Composable (RowScope.() -> Unit),
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     TopAppBar(
         title = {},
         modifier = Modifier.statusBarsPadding(),
         navigationIcon = {
-            ToolTipIconButton(
+            ToolTipButton(
                 toolTipLabel = navigationIconLabel,
                 icon = navigationIcon,
                 buttonClicked = onNavigationIconClicked,
             )
         },
         actions = actions,
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = topAppBarColors(
+            containerColor = color,
+            scrolledContainerColor = color,
+        ),
+        scrollBehavior = scrollBehavior,
+    )
+}
+
+@Composable
+private fun NoTitleSearchTopAppBar(
+    onSearchText: (String?) -> Unit,
+    searchPlaceHolder: String,
+    color: Color,
+    navigationIconLabel: String,
+    navigationIcon: ImageVector,
+    onNavigationIconClicked: () -> Unit,
+    actions: @Composable (RowScope.() -> Unit),
+    scrollBehavior: TopAppBarScrollBehavior,
+) {
+    var searchText by rememberSaveable { mutableStateOf("") }
+    var showTextField by rememberSaveable { mutableStateOf(false) }
+    var alreadyRequestedFocus by rememberSaveable { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    TopAppBar(
+        title = {},
+        modifier = Modifier.statusBarsPadding(),
+        navigationIcon = {
+            ToolTipButton(
+                toolTipLabel = navigationIconLabel,
+                icon = navigationIcon,
+                buttonClicked = onNavigationIconClicked,
+            )
+        },
+        actions = {
+            AnimatedVisibility(visible = showTextField, enter = fadeIn() + slideInVertically(), exit = fadeOut() + slideOutVertically()) {
+                //research on configuration change
+
+                OutlinedTextField(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = Padding.small, bottom = Padding.small, start = Padding.extraLarge)
+                        .focusRequester(focusRequester),
+                    value = searchText,
+                    placeholder = { Text(text = stringResource(id = R.string.search_chapters)) },
+                    onValueChange = {
+                        searchText = it
+                        onSearchText(it)
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        containerColor = Color.Transparent,
+                        cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current),
+                    ),
+                    trailingIcon = {
+                        AnimatedVisibility(visible = searchText.isNotBlank(), enter = fadeIn(), exit = fadeOut()) {
+
+                            ToolTipButton(
+                                toolTipLabel = stringResource(id = R.string.clear),
+                                icon = Icons.Filled.Close,
+                                buttonClicked = {
+                                    onSearchText("")
+                                    searchText = ""
+
+                                },
+                            )
+                        }
+
+                    },
+                    maxLines = 1,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = androidx.compose.ui.text.input.ImeAction.Search),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            onSearchText(searchText)
+                        },
+                    ),
+                )
+                LaunchedEffect(Unit) {
+                    if (!alreadyRequestedFocus) {
+                        focusRequester.requestFocus()
+                        alreadyRequestedFocus = true
+                    }
+                    if (searchText.isNotBlank()) {
+                        onSearchText(searchText)
+                    }
+                }
+            }
+            val icon = when (showTextField) {
+                true -> Icons.Filled.SearchOff
+                false -> Icons.Filled.Search
+            }
+            ToolTipButton(
+                toolTipLabel = searchPlaceHolder,
+                icon = icon,
+                buttonClicked = {
+                    searchText = ""
+                    alreadyRequestedFocus = false
+                    onSearchText(null)
+                    showTextField = !showTextField
+                },
+            )
+            actions()
+        },
+        colors = topAppBarColors(
             containerColor = color,
             scrolledContainerColor = color,
         ),
@@ -169,7 +305,7 @@ private fun TitleOnlyTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.smallTopAppBarColors(
+        colors = topAppBarColors(
             containerColor = color,
             scrolledContainerColor = color,
         ),
@@ -192,7 +328,7 @@ private fun TitleOnlyTopAppBar(
                         .size(32.dp),
                 )
             } else if (!isRoot) {
-                ToolTipIconButton(
+                ToolTipButton(
                     toolTipLabel = navigationIconLabel,
                     icon = navigationIcon,
                     buttonClicked = onNavigationIconClicked,
@@ -210,4 +346,11 @@ fun getTopAppBarColor(title: String): Color {
         true -> Color.Transparent
         false -> MaterialTheme.colorScheme.surface.copy(alpha = .7f)
     }
+}
+
+enum class NekoScaffoldType {
+    TitleAndSubtitle,
+    Title,
+    NoTitle,
+    Search
 }

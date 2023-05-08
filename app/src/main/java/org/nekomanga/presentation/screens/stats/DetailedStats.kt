@@ -600,6 +600,8 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
                 Line(stringResource(id = R.string.start_year), manga.startYear?.toString() ?: stringResource(id = R.string.n_a))
             }
             Line(stringResource(id = R.string.read_chapter_count), manga.readChapters.toString() + " / " + manga.totalChapters.toString())
+            Line(stringResource(id = R.string.chapters_bookmarked), manga.bookmarkedChapters.toString())
+
             Line(stringResource(id = R.string.categories), manga.categories.joinToString(", "))
         }
     }

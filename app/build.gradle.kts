@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 178
-    const val versionName = "2.12.4"
+    const val versionCode = 187
+    const val versionName = "2.13.1"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -135,11 +135,12 @@ android {
      }*/
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     namespace = "eu.kanade.tachiyomi"
 }
@@ -148,10 +149,13 @@ dependencies {
 
     implementation(kotlinx.bundles.kotlin)
 
+    coreLibraryDesugaring(libs.desugaring)
+
     // Modified dependencies
     implementation(libs.j2k.subsample) {
         exclude(module = "image-decoder")
     }
+
 
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)
@@ -185,10 +189,10 @@ dependencies {
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
 
     // Database
-    implementation("androidx.sqlite:sqlite:2.2.0")
+    implementation("androidx.sqlite:sqlite:2.3.1")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.github.requery:sqlite-android:3.39.2")
+    implementation("com.github.requery:sqlite-android:3.41.1")
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)
@@ -212,8 +216,8 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
-    implementation("me.saket.cascade:cascade:2.0.0-beta1")
-    implementation("me.saket.cascade:cascade-compose:2.0.0-beta1")
+    implementation("me.saket.cascade:cascade-compose:2.0.0-rc02")
+    implementation("me.saket.cascade:cascade:2.0.0-rc02")
 
     //Compose
     implementation(compose.bundles.compose)
@@ -222,6 +226,7 @@ dependencies {
     implementation(compose.number.picker)
 
     implementation(compose.bundles.charting)
+    implementation(compose.balloon)
 
 
     implementation(libs.pastelplaceholders)

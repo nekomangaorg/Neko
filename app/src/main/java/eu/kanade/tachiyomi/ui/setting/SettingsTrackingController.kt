@@ -1,16 +1,17 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.app.Activity
 import androidx.preference.Preference
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
+import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -61,6 +62,17 @@ class SettingsTrackingController :
 
             defaultValue = listOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic)
         }
+
+        preference {
+            key = "refresh_tracking_meta"
+            titleRes = R.string.refresh_tracking_metadata
+            summaryRes = R.string.updates_tracking_details
+
+            onClick {
+                TrackingSyncJob.doWorkNow(context)
+            }
+        }
+
         preferenceCategory {
             titleRes = R.string.services
 
@@ -165,6 +177,26 @@ class SettingsTrackingController :
                 val dialog = TrackLoginDialog(trackManager.mangaUpdates, R.string.username)
                 dialog.targetController = this@SettingsTrackingController
                 dialog.showDialog(router)
+            }
+
+            switchPreference {
+                key = "auto_add_mangaupdates"
+                isPersistent = true
+                isIconSpaceReserved = true
+                title = context.getString(
+                    R.string.auto_track,
+                )
+
+                preferences.getStringPref(Keys.trackUsername(trackManager.mangaUpdates.id))
+                    .asImmediateFlowIn(viewScope) {
+                        isVisible = it.isNotEmpty()
+                    }
+
+                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.MANGA_UPDATES.toString())
+
+                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+                    updateAutoAddTracker(newValue as Boolean, TrackManager.MANGA_UPDATES)
+                }
             }
         }
     }

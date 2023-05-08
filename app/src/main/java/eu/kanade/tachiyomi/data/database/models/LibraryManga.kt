@@ -7,6 +7,8 @@ class LibraryManga : MangaImpl() {
 
     var category: Int = 0
 
+    var bookmarkCount: Int = 0
+
     val totalChapters
         get() = read + unread
 

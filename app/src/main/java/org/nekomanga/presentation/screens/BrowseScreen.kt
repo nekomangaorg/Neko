@@ -59,6 +59,7 @@ import org.nekomanga.presentation.components.FooterFilterChip
 import org.nekomanga.presentation.components.Loading
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
@@ -79,6 +80,7 @@ fun BrowseScreen(
     switchDisplayClick: () -> Unit,
     switchLibraryVisibilityClick: () -> Unit,
     windowSizeClass: WindowSizeClass,
+    legacySideNav: Boolean,
     onBackPress: () -> Unit,
     openManga: (Long) -> Unit,
     addNewCategory: (String) -> Unit,
@@ -126,7 +128,7 @@ fun BrowseScreen(
     }
 
     val sideNav = rememberSideBarVisible(windowSizeClass, browseScreenState.value.sideNavMode)
-    val navBarPadding = rememberNavBarPadding(sideNav, browseScreenState.value.isDeepLink)
+    val navBarPadding = rememberNavBarPadding(sideNav || legacySideNav, browseScreenState.value.isDeepLink)
 
     // set the current sheet to null when bottom sheet is closed
     LaunchedEffect(key1 = sheetState.isVisible) {
@@ -173,6 +175,7 @@ fun BrowseScreen(
                 incognitoMode = browseScreenState.value.incognitoMode,
                 isRoot = true,
                 title = browseScreenState.value.title.asString(),
+                type = NekoScaffoldType.Title,
                 onNavigationIconClicked = onBackPress,
                 actions = {
                     AppBarActions(
@@ -184,6 +187,7 @@ fun BrowseScreen(
                                     onClick = switchDisplayClick,
                                 ),
                             )
+
                             false -> emptyList()
                         } +
                             listOf(
@@ -276,6 +280,7 @@ fun BrowseScreen(
                                     onLongClick = ::mangaLongClick,
                                     contentPadding = recyclerContentPadding,
                                 )
+
                                 BrowseScreenType.Follows -> {
                                     BrowseFollowsPage(
                                         displayMangaHolder = browseScreenState.value.displayMangaHolder,
@@ -312,6 +317,7 @@ fun BrowseScreen(
                                         loadNextPage = loadNextPage,
                                     )
                                 }
+
                                 BrowseScreenType.None -> Unit
                             }
                         }
@@ -386,7 +392,7 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
         }
         item {
             FooterFilterChip(
-                selected = screenType == BrowseScreenType.Filter,
+                selected = screenType == BrowseScreenType.Filter || screenType == BrowseScreenType.Other,
                 onClick = { screenTypeClick(BrowseScreenType.Filter) },
                 name = stringResource(R.string.search),
             )

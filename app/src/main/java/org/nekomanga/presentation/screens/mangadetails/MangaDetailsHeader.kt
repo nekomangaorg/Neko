@@ -1,6 +1,12 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import android.graphics.drawable.Drawable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -37,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
@@ -53,10 +60,9 @@ fun MangaDetailsHeader(
     mangaState: State<MangaConstants.MangaScreenMangaState>,
     windowSizeClass: WindowSizeClass,
     isLoggedIntoTrackersProvider: () -> Boolean,
+    isSearching: Boolean,
     themeColorState: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
-    titleLongClick: (String) -> Unit = {},
-    creatorLongClick: (String) -> Unit = {},
     toggleFavorite: () -> Unit = {},
     moveCategories: () -> Unit = {},
     trackingClick: () -> Unit = {},
@@ -66,6 +72,7 @@ fun MangaDetailsHeader(
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
     descriptionActions: DescriptionActions,
+    informationActions: InformationActions,
     quickReadClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
@@ -77,10 +84,14 @@ fun MangaDetailsHeader(
                 false -> mutableStateOf(!mangaState.value.inLibrary)
             }
         }
-
-        val backdropHeight = when (generalState.value.extraLargeBackdrop) {
-            true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
-            false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
+        val backdropHeight = when (isSearching) {
+            true -> (LocalConfiguration.current.screenHeightDp / 4).dp
+            false -> {
+                when (generalState.value.extraLargeBackdrop) {
+                    true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
+                    false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
+                }
+            }
         }
 
         Column {
@@ -90,6 +101,7 @@ fun MangaDetailsHeader(
                     artworkProvider = { mangaState.value.currentArtwork },
                     showBackdropProvider = { generalState.value.themeBasedOffCovers },
                     modifier = Modifier
+                        .animateContentSize()
                         .fillMaxWidth()
                         .requiredHeightIn(250.dp, maxOf(250.dp, backdropHeight)),
                     generatePalette = generatePalette,
@@ -108,11 +120,11 @@ fun MangaDetailsHeader(
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
                     InformationBlock(
+                        themeColorState = themeColorState,
                         titleProvider = { mangaState.value.currentTitle },
                         authorProvider = { mangaState.value.author },
                         artistProvider = { mangaState.value.artist },
-                        ratingProvider = { mangaState.value.rating },
-                        usersProvider = { mangaState.value.users },
+                        statsProvider = { mangaState.value.stats },
                         langFlagProvider = { mangaState.value.langFlag },
                         statusProvider = { mangaState.value.status },
                         isPornographicProvider = { mangaState.value.isPornographic },
@@ -123,68 +135,81 @@ fun MangaDetailsHeader(
                             .padding(top = 70.dp),
                         isExpandedProvider = { isExpanded.value },
                         showMergedIconProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes && !generalState.value.hideButtonText },
-                        titleLongClick = titleLongClick,
-                        creatorLongClicked = creatorLongClick,
+                        titleLongClick = informationActions.titleLongClick,
+                        creatorCopyClick = informationActions.creatorCopy,
+                        creatorSearchClick = informationActions.creatorSearch,
                     )
-                    Gap(height = 16.dp)
-                    ButtonBlock(
-                        hideButtonTextProvider = { generalState.value.hideButtonText },
-                        isInitializedProvider = { mangaState.value.initialized },
-                        isMergedProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes },
-                        inLibraryProvider = { mangaState.value.inLibrary },
-                        loggedIntoTrackersProvider = isLoggedIntoTrackersProvider,
-                        trackServiceCountProvider = { generalState.value.trackServiceCount },
-                        themeColorState = themeColorState,
-                        favoriteClick = {
-                            if (!mangaState.value.inLibrary) {
-                                toggleFavorite()
-                            } else {
-                                favoriteExpanded = true
-                            }
-                        },
+                    AnimatedVisibility(visible = !isSearching, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
+                        Column {
 
-                        trackingClick = trackingClick,
-                        artworkClick = artworkClick,
-                        similarClick = similarClick,
-                        mergeClick = mergeClick,
-                        linksClick = linksClick,
-                        shareClick = shareClick,
-                    )
-                    FavoriteDropDown(
-                        favoriteExpanded = favoriteExpanded,
-                        themeColorState = themeColorState,
-                        moveCategories = moveCategories,
-                        toggleFavorite = toggleFavorite,
-                        onDismiss = { favoriteExpanded = false },
-                    )
+                            Gap(height = 16.dp)
+                            ButtonBlock(
+                                hideButtonTextProvider = { generalState.value.hideButtonText },
+                                isInitializedProvider = { mangaState.value.initialized },
+                                isMergedProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes },
+                                inLibraryProvider = { mangaState.value.inLibrary },
+                                loggedIntoTrackersProvider = isLoggedIntoTrackersProvider,
+                                trackServiceCountProvider = { generalState.value.trackServiceCount },
+                                themeColorState = themeColorState,
+                                favoriteClick = {
+                                    if (!mangaState.value.inLibrary) {
+                                        toggleFavorite()
+                                    } else {
+                                        favoriteExpanded = true
+                                    }
+                                },
+
+                                trackingClick = trackingClick,
+                                artworkClick = artworkClick,
+                                similarClick = similarClick,
+                                mergeClick = mergeClick,
+                                linksClick = linksClick,
+                                shareClick = shareClick,
+                            )
+                            FavoriteDropDown(
+                                favoriteExpanded = favoriteExpanded,
+                                themeColorState = themeColorState,
+                                moveCategories = moveCategories,
+                                toggleFavorite = toggleFavorite,
+                                onDismiss = { favoriteExpanded = false },
+                            )
+                            Gap(height = 16.dp)
+                        }
+                    }
                 }
             }
-            if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
-                QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
-            }
-            Gap(8.dp)
-            DescriptionBlock(
-                windowSizeClass = windowSizeClass,
-                titleProvider = { mangaState.value.currentTitle },
-                descriptionProvider = { mangaState.value.currentDescription },
-                isInitializedProvider = { mangaState.value.initialized },
-                altTitlesProvider = { mangaState.value.alternativeTitles },
-                genresProvider = { mangaState.value.genres },
-                themeColorState = themeColorState,
-                isExpanded = isExpanded.value,
-                expandCollapseClick = {
-                    isExpanded.value = !isExpanded.value
-                },
-                genreClick = descriptionActions.genreClick,
-                genreLongClick = descriptionActions.genreLongClick,
-                altTitleClick = descriptionActions.altTitleClick,
-                altTitleResetClick = descriptionActions.altTitleResetClick,
-            )
-            if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
-                QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
+        }
+        AnimatedVisibility(visible = !isSearching, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
+            Column {
+
+                if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
+                    QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
+                }
                 Gap(8.dp)
+                DescriptionBlock(
+                    windowSizeClass = windowSizeClass,
+                    titleProvider = { mangaState.value.currentTitle },
+                    descriptionProvider = { mangaState.value.currentDescription },
+                    isInitializedProvider = { mangaState.value.initialized },
+                    altTitlesProvider = { mangaState.value.alternativeTitles },
+                    genresProvider = { mangaState.value.genres },
+                    themeColorState = themeColorState,
+                    isExpanded = isExpanded.value,
+                    expandCollapseClick = {
+                        isExpanded.value = !isExpanded.value
+                    },
+                    genreSearch = descriptionActions.genreSearch,
+                    genreSearchLibrary = descriptionActions.genreSearchLibrary,
+                    altTitleClick = descriptionActions.altTitleClick,
+                    altTitleResetClick = descriptionActions.altTitleResetClick,
+                )
+                if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
+                    QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
+                    Gap(8.dp)
+                }
             }
         }
+
     }
 }
 

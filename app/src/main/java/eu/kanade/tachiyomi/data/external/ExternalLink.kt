@@ -48,7 +48,8 @@ data class MangaUpdatesLink(override val id: String) : ExternalLink() {
     override val name = "MangaUpdates"
     override val logo = R.drawable.ic_tracker_manga_updates_logo
     override val logoColor: Long = 0xFF89a4c3
-    override fun getUrl() = when (id.isDigitsOnly()) {
+    // 200591 is the last ID of the old IDs
+    override fun getUrl() = when (id.isDigitsOnly() && id.toLong() <= 200591) {
         true -> "https://www.mangaupdates.com/series.html?id=$id"
         false -> "https://www.mangaupdates.com/series/$id"
     }
@@ -59,6 +60,13 @@ data class Dex(override val id: String) : ExternalLink() {
     override val logo = R.drawable.ic_tracker_mangadex_logo
     override val logoColor: Long = 0xFF2B3035
     override fun getUrl() = "${MdUtil.baseUrl}/title/$id"
+}
+
+data class DexComments(override val id: String) : ExternalLink() {
+    override val name = "Comments"
+    override val logo = R.drawable.ic_tracker_mangadex_logo
+    override val logoColor: Long = 0xFF2B3035
+    override fun getUrl() = "${MdUtil.forumUrl}${id}"
 }
 
 data class DexApi(override val id: String) : ExternalLink() {

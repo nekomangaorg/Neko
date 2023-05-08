@@ -213,6 +213,8 @@ class PreferencesHelper(val context: Context) {
 
     fun updateOnlyNonCompleted() = prefs.getBoolean(Keys.updateOnlyNonCompleted, false)
 
+    fun updateOnlyWhenTrackingIsNotFinished() = prefs.getBoolean(Keys.updateOnlyWhenTrackingIsNotFinished, false)
+
     fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)
 
     fun trackMarkedAsRead() = prefs.getBoolean(Keys.trackMarkedAsRead, false)
@@ -334,6 +336,8 @@ class PreferencesHelper(val context: Context) {
 
     fun filterCompleted() = flowPrefs.getInt(Keys.filterCompleted, 0)
 
+    fun filterBookmarked() = flowPrefs.getInt("pref_filter_bookmarked_key", 0)
+
     fun filterTracked() = flowPrefs.getInt(Keys.filterTracked, 0)
 
     fun filterMangaType() = flowPrefs.getInt(Keys.filterMangaType, 0)
@@ -366,6 +370,10 @@ class PreferencesHelper(val context: Context) {
 
     fun splitTallImages() = flowPrefs.getBoolean("split_tall_images", false)
 
+    fun doublePageRotate() = flowPrefs.getBoolean("double_page_rotate", false)
+
+    fun doublePageRotateReverse() = flowPrefs.getBoolean("double_page_rotate_reverse", false)
+
     fun downloadNewChapters() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
     fun downloadNewChaptersInCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
@@ -383,7 +391,7 @@ class PreferencesHelper(val context: Context) {
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, true)
 
-    fun skipDuplicates() = prefs.getBoolean(Keys.skipDuplicates, false)
+    fun skipDuplicates() = flowPrefs.getBoolean(Keys.skipDuplicates, false)
 
     fun useBiometrics() = flowPrefs.getBoolean(Keys.useBiometrics, false)
 

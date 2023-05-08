@@ -14,7 +14,7 @@ import java.io.OutputStream
  */
 class MangaMappings(context: Context) {
 
-    val dbMappings: SQLiteDatabase by lazy { openDatabase(context, "20220918_mappings.db") }
+    val dbMappings: SQLiteDatabase by lazy { openDatabase(context, "20230507_mappings.db") }
 
     private fun openDatabase(context: Context, dbPath: String): SQLiteDatabase {
         val dbFile: File = context.getDatabasePath(dbPath)
@@ -60,6 +60,20 @@ class MangaMappings(context: Context) {
             return null
         }
         val queryString = "SELECT ${service.lowercase()} FROM mappings WHERE mdex = ? LIMIT 1"
+        val whereArgs = arrayOf(id)
+        val cursor = dbMappings.rawQuery(queryString, whereArgs) ?: return ""
+        if (cursor.moveToFirst()) {
+            return cursor.getString(0)
+        }
+        cursor.close()
+        return null
+    }
+
+    fun getMuNewForMuID(id: String): String? {
+        if (!dbMappings.isOpen) {
+            return null
+        }
+        val queryString = "SELECT mu_new FROM mappings WHERE mu = ? AND mu_new IS NOT NULL LIMIT 1"
         val whereArgs = arrayOf(id)
         val cursor = dbMappings.rawQuery(queryString, whereArgs) ?: return ""
         if (cursor.moveToFirst()) {

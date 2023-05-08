@@ -27,7 +27,6 @@ object AuthenticatorUtil {
     fun FragmentActivity.startAuthentication(
         title: String,
         subtitle: String? = null,
-        confirmationRequired: Boolean = true,
         callback: AuthenticationCallback,
     ) {
         isAuthenticating = true

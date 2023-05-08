@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -31,6 +32,9 @@ class TrackingSyncJob(
 
     val trackingSyncService: TrackingSyncService by injectLazy()
 
+    // List containing failed updates
+    private val failedUpdates = mutableMapOf<Manga, String?>()
+
     private val progressNotification =
         with(applicationContext.notificationBuilder(Notifications.Channel.Tracking)) {
             setContentTitle(context.getString(R.string.refresh_tracking_metadata))
@@ -43,8 +47,15 @@ class TrackingSyncJob(
             )
         }
 
+    private val completeNotification =
+        with(applicationContext.notificationBuilder(Notifications.Channel.Tracking)) {
+            setContentTitle(context.getString(R.string.refresh_tracking_complete))
+            setSmallIcon(R.drawable.ic_neko_notification)
+        }
+
     override suspend fun doWork(): Result = coroutineScope {
         withUIContext {
+            failedUpdates.clear()
             val notification = progressNotification.build()
             val foregroundInfo = ForegroundInfo(Notifications.Id.Tracking.Progress, notification)
             setForeground(foregroundInfo)
@@ -80,13 +91,16 @@ class TrackingSyncJob(
     }
 
     private fun completeNotification() {
-        val notification = progressNotification
-            .setContentTitle(context.getString(R.string.refresh_tracking_complete))
+        val notification = completeNotification
             .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Tracking.Complete,
             notification,
         )
+    }
+
+    private fun failed(manga: Manga, error: String) {
+        failedUpdates[manga] = error
     }
 
     companion object {

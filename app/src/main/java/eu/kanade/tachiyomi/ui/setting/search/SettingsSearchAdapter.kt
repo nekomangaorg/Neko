@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.setting.search
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
+import androidx.core.os.BundleCompat
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.ui.setting.SettingsController
@@ -68,7 +69,7 @@ class SettingsSearchAdapter(val controller: SettingsSearchController) :
      */
     private fun restoreHolderState(holder: RecyclerView.ViewHolder) {
         val key = "holder_${holder.bindingAdapterPosition}"
-        bundle.getSparseParcelableArray<Parcelable>(key)?.let {
+        BundleCompat.getSparseParcelableArray(bundle, key, Parcelable::class.java)?.let {
             holder.itemView.restoreHierarchyState(it)
             bundle.remove(key)
         }

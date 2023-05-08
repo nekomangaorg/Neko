@@ -488,13 +488,13 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onDestroy() {
         super.onDestroy()
+        binding.downloadBottomSheet.root.onDestroy()
         snack?.dismiss()
         snack = null
     }
 
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)
-        binding.downloadBottomSheet.root.onDestroy()
         displaySheet?.dismiss()
         displaySheet = null
     }
@@ -785,7 +785,6 @@ class RecentsController(bundle: Bundle? = null) :
                 (activity as? MainActivity)?.showTabBar(true)
             }
         } else {
-            if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
             val lastController = router.backstack.lastOrNull()?.controller
             if (lastController !is DialogController) {
                 (activity as? MainActivity)?.showTabBar(show = false, animate = lastController !is SmallToolbarInterface)

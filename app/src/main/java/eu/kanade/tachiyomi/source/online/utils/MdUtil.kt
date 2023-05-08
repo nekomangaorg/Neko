@@ -12,6 +12,7 @@ class MdUtil {
     companion object {
         const val cdnUrl = "https://uploads.mangadex.org"
         const val baseUrl = "https://mangadex.org"
+        const val forumUrl = "https://forums.mangadex.org/threads/"
         const val apiUrl = "https://api.mangadex.org"
         const val imageUrlCacheNotFound =
             "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"

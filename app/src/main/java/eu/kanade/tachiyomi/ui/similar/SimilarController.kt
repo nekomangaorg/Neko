@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.similar
 import android.os.Bundle
 import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -21,7 +21,7 @@ class SimilarController(mangaUUID: String) : BaseComposeController<SimilarPresen
     @Composable
     override fun ScreenContent() {
         SimilarScreen(
-            similarScreenState = presenter.similarScreenState.collectAsState(),
+            similarScreenState = presenter.similarScreenState.collectAsStateWithLifecycle(),
             switchDisplayClick = presenter::switchDisplayMode,
             onBackPress = { activity?.onBackPressed() },
             mangaClick = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },

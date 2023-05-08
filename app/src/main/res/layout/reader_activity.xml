@@ -28,6 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="12dp"
         android:padding="4dp"
         android:textStyle="bold" />
 
@@ -51,7 +52,7 @@
         tools:visibility="visible"
         android:layout_height="wrap_content">
 
-            <com.google.android.material.appbar.MaterialToolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             app:navigationContentDescription="@string/close"
@@ -59,10 +60,10 @@
             tools:title="Chapter 3"
             tools:subtitle="Chapter name"
             app:titleTextColor="?actionBarTintColor"
-                app:titleCentered="true"
-                app:titleTextAppearance="@style/Neko.Toolbar.TitleText"
-                app:subtitleCentered="true"
-                app:subtitleTextAppearance="@style/Neko.Toolbar.SubTitleText"
+            app:titleCentered="true"
+            app:titleTextAppearance="@style/Neko.Toolbar.TitleText"
+            app:subtitleCentered="true"
+            app:subtitleTextAppearance="@style/Neko.Toolbar.SubTitleText"
             app:subtitleTextColor="@color/action_bar_tint_alpha"
             android:background="@drawable/reader_toolbar_ripple" />
     </FrameLayout>

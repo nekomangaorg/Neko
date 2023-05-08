@@ -11,8 +11,9 @@ import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -27,16 +28,19 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterFilterActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
+import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.sharedCacheDir
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -67,33 +71,40 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
+        val context = LocalContext.current
         MangaScreen(
-            generalState = presenter.generalState.collectAsState(),
-            mangaState = presenter.mangaState.collectAsState(),
-            trackMergeState = presenter.trackMergeState.collectAsState(),
+            generalState = presenter.generalState.collectAsStateWithLifecycle(),
+            mangaState = presenter.mangaState.collectAsStateWithLifecycle(),
+            trackMergeState = presenter.trackMergeState.collectAsStateWithLifecycle(),
             snackbar = presenter.snackBarState,
             windowSizeClass = windowSizeClass,
-            isRefreshing = presenter.isRefreshing.collectAsState(),
+            isRefreshing = presenter.isRefreshing.collectAsStateWithLifecycle(),
+            isSearching = presenter.isSearching.collectAsStateWithLifecycle(),
             onRefresh = presenter::onRefresh,
+            onSearch = presenter::onSearch,
             categoryActions = CategoryActions(
                 set = { enabledCategories -> presenter.updateMangaCategories(enabledCategories) },
                 addNew = { newCategory -> presenter.addNewCategory(newCategory) },
             ),
+            informationActions = InformationActions(
+                titleLongClick = {
+                    presenter.copiedToClipboard(it)
+                    copyToClipboard(context, it, R.string.title)
+                },
+                creatorCopy = {
+                    presenter.copiedToClipboard(it)
+                    copyToClipboard(context, it, R.string.creator)
+                },
+                creatorSearch = this::creatorClicked,
+            ),
             descriptionActions = DescriptionActions(
-                genreClick = this::tagClicked,
-                genreLongClick = this::tagLongClicked,
+                genreSearch = this::genreSearch,
+                genreSearchLibrary = this::genreSearchLibrary,
                 altTitleClick = presenter::setAltTitle,
                 altTitleResetClick = { presenter.setAltTitle(null) },
             ),
             generatePalette = this::setPalette,
-            titleLongClick = { context, content ->
-                presenter.copiedToClipboard(context.getString(R.string.title))
-                copyToClipboard(context, content, R.string.title)
-            },
-            creatorLongClick = { context, content ->
-                presenter.copiedToClipboard(context.getString(R.string.creator))
-                copyToClipboard(context, content, R.string.creator)
-            },
+
             toggleFavorite = presenter::toggleFavorite,
             dateFormat = preferences.dateFormat(),
             trackActions = TrackActions(
@@ -111,7 +122,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 add = presenter::addMergedManga,
             ),
             similarClick = { router.pushController(SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction()) },
-            shareClick = this::shareManga,
+            shareClick = { shareManga(context) },
             coverActions = CoverActions(
                 share = this::shareCover,
                 set = presenter::setCover,
@@ -131,13 +142,18 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 download = presenter::downloadChapters,
                 delete = presenter::deleteChapters,
                 clearRemoved = presenter::clearRemovedChapters,
-                openNext = { context ->
+                openNext = {
                     presenter.generalState.value.nextUnreadChapter.simpleChapter?.let {
                         openChapter(context, it.toDbChapter())
                     }
                 },
-                open = { context, chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
+                open = { chapterItem -> openChapter(context, chapterItem.chapter.toDbChapter()) },
                 blockScanlator = presenter::blockScanlator,
+                openComment = { chapterId -> presenter.openComment(context, chapterId) },
+                openInBrowser = { chapterItem ->
+                    val url = presenter.getChapterUrl(chapterItem.chapter)
+                    context.openInBrowser(url)
+                },
             ),
         ) { activity?.onBackPressed() }
     }
@@ -221,36 +237,48 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
     }
 
     /**
-     * Navigate to browse screen when a tag is clicked and search there
+     * Search by author on browse screen
      */
-    private fun tagClicked(text: String) {
-        if (router.backstackSize < 2) {
-            return
-        }
+    private fun creatorClicked(text: String) {
+        getBrowseController()?.searchByCreator(text)
+    }
 
-        val controller =
-            when (val previousController = router.backstack[router.backstackSize - 2].controller) {
-                is LibraryController, is RecentsController -> {
-                    // Manually navigate to LibraryController
-                    router.handleBack()
-                    (activity as? MainActivity)?.goToTab(R.id.nav_browse)
-                    router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
-                }
-                is BrowseController -> {
-                    router.handleBack()
-                    previousController
-                }
-                else -> null
+    /**
+     * Search by tag on browse screen
+     */
+    private fun genreSearch(text: String) {
+        getBrowseController()?.searchByTag(text)
+    }
+
+    private fun getBrowseController(backstackNumber: Int = 2): BrowseController? {
+        val position = router.backstackSize - backstackNumber
+        if (position < 0) return null
+        return when (val previousController = router.backstack[position].controller) {
+            is LibraryController, is RecentsController, is DisplayController, is SimilarController -> {
+                router.popToRoot()
+                (activity as? MainActivity)?.goToTab(R.id.nav_browse)
+                router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseController
             }
-        controller?.let {
-            controller.searchByTag(text)
+
+            is BrowseController -> {
+                router.popCurrentController()
+                previousController
+            }
+
+            else -> {
+                if (backstackNumber == 1) {
+                    null
+                } else {
+                    getBrowseController(backstackNumber - 1)
+                }
+            }
         }
     }
 
     /**
      * Navigate back to library when a tag is long clicked and search there
      */
-    private fun tagLongClicked(text: String) {
+    private fun genreSearchLibrary(text: String) {
         if (router.backstackSize < 2) {
             return
         }
@@ -260,7 +288,8 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 router.handleBack()
                 previousController.search(text)
             }
-            is BrowseController, is RecentsController -> {
+
+            is BrowseController, is RecentsController, is DisplayController -> {
                 // Manually navigate to LibraryController
                 router.handleBack()
                 (activity as? MainActivity)?.goToTab(R.id.nav_library)
@@ -273,9 +302,7 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        if (presenter.isScopeInitialized) {
-            presenter.resume()
-        }
+        presenter.resume()
     }
 
     companion object {

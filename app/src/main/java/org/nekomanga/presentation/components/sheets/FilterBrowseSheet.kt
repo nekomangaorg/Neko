@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.components.sheets
 
-import ToolTipIconButton
+import ToolTipButton
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -138,6 +138,10 @@ fun FilterBrowseSheet(
             SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
         }
 
+        var queryText by remember {
+            mutableStateOf(filters.query.text)
+        }
+
         ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -154,20 +158,20 @@ fun FilterBrowseSheet(
                     QueryType.Title -> {
                         R.string.title
                     }
+
                     QueryType.Author -> {
                         R.string.author
                     }
+
                     QueryType.Group -> {
                         R.string.scanlator_group
                     }
+
                     QueryType.List -> {
                         R.string.list_id
                     }
                 }
 
-                var queryText by remember {
-                    mutableStateOf(filters.query.text)
-                }
 
                 FlowRow(Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 8.dp) {
                     FilterChipWrapper(
@@ -337,7 +341,10 @@ fun FilterBrowseSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(
-                    onClick = resetClick,
+                    onClick = {
+                        queryText = ""
+                        resetClick()
+                    },
                     shape = RoundedCornerShape(35),
                     colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
@@ -624,13 +631,13 @@ fun SavedFilters(
                     // AnimatedVisibility(visible = isEnabled, enter = slideInHorizontally() + fadeIn(), exit = slideOutHorizontally() + fadeOut()) {
                     if (isEnabled) {
                         Row(modifier = Modifier.animateItemPlacement()) {
-                            ToolTipIconButton(toolTipLabel = stringResource(id = R.string.delete_filter), icon = Icons.Outlined.Delete, buttonClicked = { deleteFilterClick(nameOfEnabledFilter) })
+                            ToolTipButton(toolTipLabel = stringResource(id = R.string.delete_filter), icon = Icons.Outlined.Delete, buttonClicked = { deleteFilterClick(nameOfEnabledFilter) })
                             val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
                             val (textRes, makeDefault, icon) = when (isDefault) {
                                 true -> Triple(R.string.remove_default, false, Icons.Default.HeartBroken)
                                 false -> Triple(R.string.make_default, true, Icons.Default.Favorite)
                             }
-                            ToolTipIconButton(toolTipLabel = stringResource(textRes), icon = icon, buttonClicked = { filterDefaultClick(nameOfEnabledFilter, makeDefault) })
+                            ToolTipButton(toolTipLabel = stringResource(textRes), icon = icon, buttonClicked = { filterDefaultClick(nameOfEnabledFilter, makeDefault) })
                         }
                     }
                     Gap(4.dp)

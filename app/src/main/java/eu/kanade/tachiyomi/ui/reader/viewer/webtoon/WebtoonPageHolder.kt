@@ -23,13 +23,16 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import java.io.BufferedInputStream
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import java.io.BufferedInputStream
+import java.io.InputStream
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.
@@ -75,19 +78,26 @@ class WebtoonPageHolder(
      */
     private var page: ReaderPage? = null
 
-    /**
-     * Subscription for status changes of the page.
-     */
-    private var statusSubscription: Subscription? = null
+    private val scope = MainScope()
 
     /**
-     * Subscription for progress changes of the page.
+     * Job for loading the page.
      */
-    private var progressSubscription: Subscription? = null
+    private var loadJob: Job? = null
+
+    /**
+     * Job for status changes of the page.
+     */
+    private var statusJob: Job? = null
+
+    /**
+     * Job for progress changes of the page.
+     */
+    private var progressJob: Job? = null
 
     /**
      * Subscription used to read the header of the image. This is needed in order to instantiate
-     * the appropiate image view depending if the image is animated (GIF).
+     * the appropriate image view depending if the image is animated (GIF).
      */
     private var readImageHeaderSubscription: Subscription? = null
 
@@ -105,7 +115,7 @@ class WebtoonPageHolder(
      */
     fun bind(page: ReaderPage) {
         this.page = page
-        observeStatus()
+        launchLoadJob()
         refreshLayoutParams()
     }
 
@@ -124,8 +134,8 @@ class WebtoonPageHolder(
      * Called when the view is recycled and added to the view pool.
      */
     override fun recycle() {
-        unsubscribeStatus()
-        unsubscribeProgress()
+        cancelLoadJob()
+        cancelProgressJob()
         unsubscribeReadImageHeader()
 
         removeDecodeErrorLayout()
@@ -138,34 +148,30 @@ class WebtoonPageHolder(
      *
      * @see processStatus
      */
-    private fun observeStatus() {
-        unsubscribeStatus()
+    private fun launchLoadJob() {
+        cancelLoadJob()
 
         val page = page ?: return
         val loader = page.chapter.pageLoader ?: return
-        statusSubscription = loader.getPage(page)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { processStatus(it) }
-
-        addSubscription(statusSubscription)
+        loadJob = scope.launch {
+            loader.loadPage(page)
+        }
+        statusJob = scope.launch {
+            page.statusFlow.collectLatest { processStatus(it) }
+        }
     }
 
     /**
      * Observes the progress of the page and updates view.
      */
-    private fun observeProgress() {
-        unsubscribeProgress()
+    private fun launchProgressJob() {
+        cancelProgressJob()
 
         val page = page ?: return
 
-        progressSubscription = Observable.interval(100, TimeUnit.MILLISECONDS)
-            .map { page.progress }
-            .distinctUntilChanged()
-            .onBackpressureLatest()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { value -> progressBar.setProgress(value) }
-
-        addSubscription(progressSubscription)
+        progressJob = scope.launch {
+            page.progressFlow.collectLatest { value -> progressBar.setProgress(value) }
+        }
     }
 
     /**
@@ -173,39 +179,41 @@ class WebtoonPageHolder(
      *
      * @param status the new status of the page.
      */
-    private fun processStatus(status: Int) {
+    private fun processStatus(status: Page.State) {
         when (status) {
-            Page.QUEUE -> setQueued()
-            Page.LOAD_PAGE -> setLoading()
-            Page.DOWNLOAD_IMAGE -> {
-                observeProgress()
+            Page.State.QUEUE -> setQueued()
+            Page.State.LOAD_PAGE -> setLoading()
+            Page.State.DOWNLOAD_IMAGE -> {
+                launchProgressJob()
                 setDownloading()
             }
-            Page.READY -> {
+            Page.State.READY -> {
                 setImage()
-                unsubscribeProgress()
+                cancelProgressJob()
             }
-            Page.ERROR -> {
+            Page.State.ERROR -> {
                 setError()
-                unsubscribeProgress()
+                cancelProgressJob()
             }
         }
     }
 
     /**
-     * Unsubscribes from the status subscription.
+     * Cancels loading the page and processing changes to the page's status.
      */
-    private fun unsubscribeStatus() {
-        removeSubscription(statusSubscription)
-        statusSubscription = null
+    private fun cancelLoadJob() {
+        loadJob?.cancel()
+        loadJob = null
+        statusJob?.cancel()
+        statusJob = null
     }
 
     /**
      * Unsubscribes from the progress subscription.
      */
-    private fun unsubscribeProgress() {
-        removeSubscription(progressSubscription)
-        progressSubscription = null
+    private fun cancelProgressJob() {
+        progressJob?.cancel()
+        progressJob = null
     }
 
     /**

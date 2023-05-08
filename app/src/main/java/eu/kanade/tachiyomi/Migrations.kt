@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.toast
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,7 @@ object Migrations {
             remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY)
         }
         val oldVersion = preferences.lastVersionCode().get()
+        loggycat { "last version $oldVersion" }
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 
@@ -141,6 +143,14 @@ object Migrations {
                 preferences.removeTokens()
                 preferences.removeOldCredentials(MangaDex())
             }
+
+            if (oldVersion < 182) {
+                LibraryPresenter.updateSavedFilters()
+                val updated = preferences.langsToShow().get().split(",").filter { it != "NULL" }
+                preferences.langsToShow().set(updated.joinToString(","))
+            }
+
+
 
             return true
         }

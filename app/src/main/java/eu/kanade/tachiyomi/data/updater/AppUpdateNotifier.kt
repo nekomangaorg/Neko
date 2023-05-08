@@ -128,6 +128,17 @@ internal class AppUpdateNotifier(private val context: Context) {
         notificationBuilder.show()
     }
 
+    fun onInstalling() {
+        with(NotificationCompat.Builder(context, Notifications.Channel.Installing)) {
+            setContentTitle(context.getString(R.string.installing))
+            setSmallIcon(android.R.drawable.stat_sys_download)
+            setProgress(0, 0, true)
+            setOnlyAlertOnce(true)
+            clearActions()
+            show(Notifications.ID_INSTALL)
+        }
+    }
+
     /**
      * Call when apk download is finished.
      *
@@ -179,6 +190,11 @@ internal class AppUpdateNotifier(private val context: Context) {
             )
             setContentIntent(pendingIntent)
             clearActions()
+            addAction(
+                R.drawable.ic_system_update_24dp,
+                context.getString(R.string.open),
+                pendingIntent,
+            )
             addReleasePageAction()
             show(Notifications.Id.Updated.Installed)
         }
@@ -249,5 +265,9 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     fun cancel() {
         NotificationReceiver.dismissNotification(context, Notifications.ID_UPDATER)
+    }
+
+    fun cancelInstallNotification() {
+        NotificationReceiver.dismissNotification(context, Notifications.ID_INSTALL)
     }
 }

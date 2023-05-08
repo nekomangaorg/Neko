@@ -139,12 +139,8 @@ class EpubFile(file: File) : Closeable {
      */
     private fun getPagesFromDocument(document: Document): List<String> {
         val pages = document.select("manifest > item")
-            .filter { element ->
-                "application/xhtml+xml" == element.attr("media-type")
-            }
-            .associateBy { element ->
-                element.attr("id")
-            }
+            .filter { node -> "application/xhtml+xml" == node.attr("media-type") }
+            .associateBy { it.attr("id") }
 
         val spine = document.select("spine > itemref").map { it.attr("idref") }
         return spine.mapNotNull { pages[it] }.map { it.attr("href") }

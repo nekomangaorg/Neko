@@ -35,7 +35,7 @@ data class BrowseScreenState(
     val outlineCovers: Boolean,
     val isComfortableGrid: Boolean,
     val rawColumnCount: Float,
-    val promptForCategories: Boolean,
+    val promptForCategories: Boolean = false,
     val filters: DexFilters,
     val defaultContentRatings: ImmutableSet<String>,
     val handledIncomingQuery: Boolean = false,

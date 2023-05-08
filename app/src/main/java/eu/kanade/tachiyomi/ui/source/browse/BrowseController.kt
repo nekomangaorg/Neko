@@ -22,6 +22,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
+        val isSideNav = (this.activity as? MainActivity)?.isSideNavigation() ?: false
 
         BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
             (this.activity as? MainActivity)?.backCallback?.invoke()
@@ -33,6 +34,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
             switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
             onBackPress = { activity?.finish() },
             windowSizeClass = windowSizeClass,
+            legacySideNav = isSideNav,
             homeScreenTitleClick = ::openDisplayScreen,
             openManga = ::openManga,
             filterActions = FilterActions(
@@ -63,7 +65,11 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
         presenter.searchTag(tag)
     }
 
-    fun openDisplayScreen(displayScreenType: DisplayScreenType) {
+    fun searchByCreator(creator: String) {
+        presenter.searchCreator(creator)
+    }
+
+    private fun openDisplayScreen(displayScreenType: DisplayScreenType) {
         viewScope.launchUI {
             router.pushController(DisplayController(displayScreenType).withFadeTransaction())
         }

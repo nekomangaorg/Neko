@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track.mangaupdates
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdatesHelper.getMangaUpdatesApiId
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Context
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.ListItem
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Rating
@@ -147,8 +148,31 @@ class MangaUpdatesApi(
     }
 
     suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<Record> {
+        if (!wasPreviouslyTracked) {
+            val muId = getMangaUpdatesApiId(manga);
+
+            if(muId != null) {
+                return client.newCall(
+                    GET("$baseUrl/v1/series/$muId"),
+                )
+                    .await()
+                    .parseAs<JsonObject>()
+                    .let { obj ->
+                        listOf(json.decodeFromJsonElement<Record>(obj))
+                    }
+                    .orEmpty()
+            }
+        }
+
         val body = buildJsonObject {
             put("search", query)
+            put(
+                "filter_types",
+                buildJsonArray {
+                    add("drama cd")
+                    add("novel")
+                },
+            )
         }
         return client.newCall(
             POST(

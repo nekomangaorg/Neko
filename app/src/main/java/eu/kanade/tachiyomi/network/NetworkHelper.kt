@@ -111,7 +111,7 @@ class NetworkHelper(val context: Context) {
     private fun loggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor(logger).apply {
             level = when (preferences.verboseLogging()) {
-                true -> HttpLoggingInterceptor.Level.HEADERS
+                true -> HttpLoggingInterceptor.Level.BODY
                 false -> HttpLoggingInterceptor.Level.HEADERS
             }
             redactHeader("Authorization")
@@ -120,7 +120,7 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildRateLimitedClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).build()
+        return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).addInterceptor(loggingInterceptor()).build()
     }
 
     private fun buildCdnRateLimitedClient(): OkHttpClient {
@@ -139,6 +139,7 @@ class NetworkHelper(val context: Context) {
         return nonRateLimitedClient.newBuilder()
             .addInterceptor(UserAgentInterceptor())
             .addInterceptor(CloudflareInterceptor(context))
+            .addInterceptor(loggingInterceptor())
             .build()
     }
 
@@ -155,7 +156,7 @@ class NetworkHelper(val context: Context) {
     private val authClient = buildRateLimitedAuthenticatedClient()
 
     val headers = Headers.Builder().apply {
-        add("User-Agent", "Neko " + System.getProperty("http.agent"))
+        add("User-Agent", "Neko ${BuildConfig.VERSION_NAME}" + System.getProperty("http.agent"))
         add("Referer", MdUtil.baseUrl)
         add("Content-Type", "application/json")
     }.build()

@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.screens
 
-import ToolTipIconButton
+import ToolTipButton
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.screens.stats.DetailedStats
 import org.nekomanga.presentation.screens.stats.SimpleStats
 
@@ -55,19 +56,25 @@ fun StatsScreen(
     val isSimple = rememberSaveable(statsState.value.screenState) { statsState.value.screenState is StatsConstants.ScreenState.Simple }
     val hideAction = rememberSaveable(statsState.value.screenState) { statsState.value.screenState is StatsConstants.ScreenState.NoResults || statsState.value.screenState is Loading }
 
-    val (actionIcon, actionText, titleText) = rememberSaveable(isSimple) {
+    val (actionText, titleText) = rememberSaveable(isSimple) {
         when (isSimple) {
-            true -> Triple(Icons.Default.ZoomInMap, R.string.view_detailed_statistics, R.string.simple_stats)
-            false -> Triple(Icons.Default.ZoomOutMap, R.string.view_simple_statistics, R.string.detailed_stats)
+            true -> Pair(R.string.view_detailed_statistics, R.string.simple_stats)
+            false -> Pair(R.string.view_simple_statistics, R.string.detailed_stats)
         }
+    }
+
+    val actionIcon = when (titleText == R.string.simple_stats) {
+        true -> Icons.Default.ZoomInMap
+        false -> Icons.Default.ZoomOutMap
     }
 
     NekoScaffold(
         title = stringResource(id = titleText),
+        type = NekoScaffoldType.Title,
         onNavigationIconClicked = onBackPressed,
         actions = {
             if (!hideAction) {
-                ToolTipIconButton(
+                ToolTipButton(
                     toolTipLabel = stringResource(id = actionText),
                     icon = actionIcon,
                     buttonClicked = onSwitchClick,

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -8,7 +9,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.DEVICE_BATTERY_NOT_LOW
 import eu.kanade.tachiyomi.data.preference.DEVICE_CHARGING
 import eu.kanade.tachiyomi.data.preference.DEVICE_ONLY_ON_WIFI
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.ui.category.CategoryController
@@ -156,6 +156,12 @@ class SettingsLibraryController : SettingsController() {
             switchPreference {
                 key = Keys.updateOnlyNonCompleted
                 titleRes = R.string.only_update_ongoing
+                defaultValue = false
+            }
+
+            switchPreference {
+                key = Keys.updateOnlyWhenTrackingIsNotFinished
+                titleRes = R.string.only_update_based_on_tracking
                 defaultValue = false
             }
 

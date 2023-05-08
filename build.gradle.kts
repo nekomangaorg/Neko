@@ -17,11 +17,6 @@ plugins {
 
 subprojects {
     apply<org.jmailen.gradle.kotlinter.KotlinterPlugin>()
-
-    kotlinter {
-        experimentalRules = true
-        disabledRules = arrayOf("experimental:argument-list-wrapping")
-    }
 }
 
 
