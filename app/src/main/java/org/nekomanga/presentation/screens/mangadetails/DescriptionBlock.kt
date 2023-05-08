@@ -338,7 +338,7 @@ private fun scrollableAltTitles(
                     placeable.place(0, 0)
                 }
             },
-        horizontalArrangement = Arrangement.spacedBy(Padding.tiny),
+        horizontalArrangement = Arrangement.spacedBy(Padding.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isCustomTitle) {

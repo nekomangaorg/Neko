@@ -47,6 +47,7 @@ import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.FooterFilterChip
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
@@ -139,6 +140,7 @@ fun FeedScreen(
             },
         ) {
             NekoScaffold(
+                type = NekoScaffoldType.Search,
                 incognitoMode = feedScreenState.value.incognitoMode,
                 isRoot = true,
                 title = "",

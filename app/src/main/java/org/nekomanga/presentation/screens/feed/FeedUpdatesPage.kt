@@ -66,6 +66,7 @@ fun FeedUpdatePage(
                     )
                 }
             }
+
             false -> feedChapters
         }
 
@@ -159,8 +160,8 @@ fun FeedUpdatePage(
                     Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
                         DownloadButton(
                             themeColorState.buttonColor,
-                            { Download.State.NOT_DOWNLOADED },
-                            { 0f },
+                            Download.State.NOT_DOWNLOADED,
+                            0f,
                             Modifier
                                 .combinedClickable(
                                     onClick = {
