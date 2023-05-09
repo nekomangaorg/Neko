@@ -61,6 +61,9 @@ class FeedPresenter(
         super.onCreate()
 
         if (_feedScreenState.value.initialLoad) {
+            _feedScreenState.update { state ->
+                state.copy(initialLoad = false)
+            }
             presenterScope.launchIO { loadNextPage() }
         }
 
