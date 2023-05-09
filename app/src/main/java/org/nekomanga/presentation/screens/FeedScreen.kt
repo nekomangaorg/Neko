@@ -55,7 +55,7 @@ import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
-import org.nekomanga.presentation.screens.feed.FeedUpdatePage
+import org.nekomanga.presentation.screens.feed.FeedPage
 import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
 
@@ -167,11 +167,12 @@ fun FeedScreen(
                         .fillMaxSize(),
                 ) {
 
-                    FeedUpdatePage(
+                    FeedPage(
                         contentPadding = recyclerContentPadding,
-                        feedChapters = feedScreenState.value.allFeedManga,
+                        feedMangaList = feedScreenState.value.allFeedManga,
                         hasMoreResults = feedScreenState.value.hasMoreResults,
-                        groupChaptersUpdates = feedScreenState.value.groupChaptersUpdates,
+                        feedScreenType = feedScreenState.value.feedScreenType,
+                        historyScreenGrouping = feedScreenState.value.historyGrouping,
                         mangaClick = mangaClick,
                         outlineCovers = feedScreenState.value.outlineCovers,
                         loadNextPage = loadNextPage,

@@ -48,8 +48,8 @@ class FeedRepository(
                     val chapters = db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO().mapNotNull {
                         it.manga.id ?: return@mapNotNull null
                         it.chapter.id ?: return@mapNotNull null
-                        val simpleChapter = it.chapter.toSimpleChapter()!!
-
+                        val simpleChapter = it.chapter.toSimpleChapter(it.history.last_read)!!
+                        it.history.last_read
                         FeedManga(
                             mangaId = it.manga.id!!,
                             mangaTitle = it.manga.title,
