@@ -177,19 +177,12 @@ class RecentsPresenter(
             }
 
             viewType == VIEW_TYPE_ONLY_UPDATES -> {
-                if (groupChaptersUpdates) {
-                    db.getUpdatedChaptersDistinct(
-                        query,
-                        if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage,
-                    )
-                } else {
-                    db.getRecentChapters(
-                        query,
-                        if (isCustom) ENDLESS_LIMIT else pageOffset,
-                        !updatePageCount && !isOnFirstPage,
-                    )
-                }.executeOnIO()
+                db.getRecentChapters(
+                    query,
+                    if (isCustom) ENDLESS_LIMIT else pageOffset,
+                    !updatePageCount && !isOnFirstPage,
+                )
+                    .executeOnIO()
                     .map {
                         MangaChapterHistory(
                             it.manga,

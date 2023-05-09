@@ -21,10 +21,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.recents.FeedScreenState
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
+import eu.kanade.tachiyomi.ui.recents.FeedSettingActions
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.components.AppBar
@@ -48,10 +50,11 @@ import org.nekomanga.presentation.components.FooterFilterChip
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
-import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
+import org.nekomanga.presentation.screens.feed.FeedBottomSheet
 import org.nekomanga.presentation.screens.feed.FeedUpdatePage
 import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
@@ -61,7 +64,8 @@ fun FeedScreen(
     feedScreenState: State<FeedScreenState>,
     windowSizeClass: WindowSizeClass,
     loadNextPage: () -> Unit,
-    toggleGroupChaptersUpdates: () -> Unit,
+    feedSettingActions: FeedSettingActions,
+    viewTypeClick: (FeedScreenType) -> Unit,
     mangaClick: (Long) -> Unit,
     onBackPress: () -> Unit,
     incognitoClick: () -> Unit,
@@ -77,10 +81,6 @@ fun FeedScreen(
             skipHalfExpanded = true,
             animationSpec = tween(durationMillis = 150, easing = LinearEasing),
         )
-
-    var currentBottomSheet: BrowseBottomSheetScreen? by remember {
-        mutableStateOf(null)
-    }
 
     var mainDropdownShowing by remember {
         mutableStateOf(false)
@@ -98,20 +98,6 @@ fun FeedScreen(
     val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
     val navBarPadding = rememberNavBarPadding(sideNav)
 
-    // set the current sheet to null when bottom sheet is closed
-    LaunchedEffect(key1 = sheetState.isVisible) {
-        if (!sheetState.isVisible) {
-            currentBottomSheet = null
-        }
-    }
-
-    val openSheet: (BrowseBottomSheetScreen) -> Unit = {
-        scope.launch {
-            currentBottomSheet = it
-            sheetState.show()
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -126,16 +112,12 @@ fun FeedScreen(
             sheetShape = RoundedCornerShape(Shapes.sheetRadius),
             sheetContent = {
                 Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
-                    /* currentBottomSheet?.let { currentSheet ->
-                         BrowseBottomSheet(
-                             currentScreen = currentSheet,
-                             browseScreenState = browseScreenState,
-                             addNewCategory = addNewCategory,
-                             contentPadding = navBarPadding,
-                             closeSheet = { scope.launch { sheetState.hide() } },
-                             filterActions = filterActions,
-                         )
-                     }*/
+                    FeedBottomSheet(
+                        feedScreenState = feedScreenState,
+                        contentPadding = navBarPadding,
+                        closeSheet = { scope.launch { sheetState.hide() } },
+                        feedActions = feedSettingActions,
+                    )
                 }
             },
         ) {
@@ -150,6 +132,11 @@ fun FeedScreen(
                         actions =
 
                         listOf(
+                            AppBar.Action(
+                                title = UiText.StringResource(R.string.settings),
+                                icon = Icons.Outlined.Tune,
+                                onClick = { scope.launch { sheetState.show() } },
+                            ),
                             AppBar.MainDropdown(
                                 incognitoMode = feedScreenState.value.incognitoMode,
                                 incognitoModeClick = incognitoClick,
@@ -182,10 +169,9 @@ fun FeedScreen(
 
                     FeedUpdatePage(
                         contentPadding = recyclerContentPadding,
-                        feedChapters = feedScreenState.value.allFeedChapters,
+                        feedChapters = feedScreenState.value.allFeedManga,
                         hasMoreResults = feedScreenState.value.hasMoreResults,
                         groupChaptersUpdates = feedScreenState.value.groupChaptersUpdates,
-                        toggleGroupChaptersUpdates = toggleGroupChaptersUpdates,
                         mangaClick = mangaClick,
                         outlineCovers = feedScreenState.value.outlineCovers,
                         loadNextPage = loadNextPage,
@@ -201,11 +187,9 @@ fun FeedScreen(
                             },
                         screenTypeClick = { newScreenType: FeedScreenType ->
                             scope.launch { sheetState.hide() }
-                            val sameScreen = feedScreenType == newScreenType
-                            if (!sameScreen) {
-                                //changeScreenType(newScreenType)
+                            if (feedScreenType != newScreenType) {
+                                viewTypeClick(newScreenType)
                             }
-
                         },
                     )
                 }

@@ -228,14 +228,14 @@ object PreferenceKeys {
 
     const val groupChaptersHistory = "group_chapters_history"
 
+    const val historyChapterGrouping = "history_chapter_grouping"
+
     const val showUpdatedTime = "show_updated_time"
     const val groupChaptersUpdates = "group_chapters_updates"
 
     const val categoryNumberOfItems = "display_number_of_items"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
-
-    const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
 
     const val sideNavIconAlignment = "pref_side_nav_icon_alignment"
 

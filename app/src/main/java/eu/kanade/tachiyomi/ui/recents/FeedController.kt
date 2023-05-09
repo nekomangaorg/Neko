@@ -30,7 +30,10 @@ class FeedController : BaseComposeController<FeedPresenter>() {
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,
             mangaClick = ::openManga,
-            toggleGroupChaptersUpdates = presenter::toggleGroupChaptersUpdates,
+            viewTypeClick = presenter::switchViewType,
+            feedSettingActions = FeedSettingActions(
+                groupHistoryClick = presenter::toggleGroupHistoryType,
+            ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },
             aboutClick = { (this.activity as? MainActivity)?.showAbout() },

@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,9 +24,11 @@ class FeedPresenter(
 
     private val _feedScreenState = MutableStateFlow(
         FeedScreenState(
+            feedScreenType = preferences.feedViewType().get(),
             outlineCovers = preferences.outlineOnCovers().get(),
             incognitoMode = preferences.incognitoMode().get(),
             groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
+            historyGrouping = preferences.historyChapterGrouping().get(),
         ),
     )
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
@@ -34,7 +37,7 @@ class FeedPresenter(
         initialKey = _feedScreenState.value.offset,
         onLoadUpdated = { },
         onRequest = {
-            feedRepository.getPage(_feedScreenState.value.offset, _feedScreenState.value.feedScreenType)
+            feedRepository.getPage(_feedScreenState.value.offset, _feedScreenState.value.feedScreenType, _feedScreenState.value.historyGrouping)
         },
         getNextKey = {
             _feedScreenState.value.offset + ENDLESS_LIMIT
@@ -45,7 +48,7 @@ class FeedPresenter(
         onSuccess = { hasNextPage, items, newKey ->
             _feedScreenState.update { state ->
                 state.copy(
-                    allFeedChapters = (state.allFeedChapters + items).toImmutableList(),
+                    allFeedManga = (state.allFeedManga + items).toImmutableList(),
                     offset = newKey,
                     hasMoreResults = hasNextPage,
                 )
@@ -57,8 +60,8 @@ class FeedPresenter(
     override fun onCreate() {
         super.onCreate()
 
-        if (_feedScreenState.value.allFeedChapters.size == 0) {
-            loadNextPage()
+        if (_feedScreenState.value.initialLoad) {
+            presenterScope.launchIO { loadNextPage() }
         }
 
         presenterScope.launch {
@@ -66,6 +69,7 @@ class FeedPresenter(
                 it.copy(sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()))
             }
         }
+
 
         presenterScope.launch {
             preferences.incognitoMode().asFlow().collectLatest {
@@ -81,6 +85,24 @@ class FeedPresenter(
                 }
             }
         }
+
+        presenterScope.launch {
+            preferences.historyChapterGrouping().asFlow().collectLatest {
+                _feedScreenState.update { state ->
+                    state.copy(historyGrouping = it)
+                }
+            }
+        }
+
+        presenterScope.launch {
+            preferences.feedViewType().asFlow().collectLatest {
+                _feedScreenState.update { state ->
+                    state.copy(feedScreenType = it, offset = 0, allFeedManga = persistentListOf())
+                }
+                paginator.reset()
+                loadNextPage()
+            }
+        }
     }
 
     fun loadNextPage() {
@@ -89,9 +111,16 @@ class FeedPresenter(
         }
     }
 
-    fun toggleGroupChaptersUpdates() {
+    fun switchViewType(feedScreenType: FeedScreenType) {
         presenterScope.launch {
-            preferences.groupChaptersUpdates().set(!preferences.groupChaptersUpdates().get())
+            preferences.feedViewType().set(feedScreenType)
+        }
+    }
+
+    fun toggleGroupHistoryType(historyGrouping: FeedHistoryGroup) {
+        presenterScope.launch {
+            preferences.historyChapterGrouping().set(historyGrouping)
+
         }
     }
 

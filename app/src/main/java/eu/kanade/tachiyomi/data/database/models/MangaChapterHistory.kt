@@ -12,3 +12,5 @@ data class MangaChapterHistory(val manga: Manga, val chapter: Chapter, val histo
         fun createBlank() = MangaChapterHistory(MangaImpl(), ChapterImpl(), HistoryImpl())
     }
 }
+
+data class ChapterHistory(val chapter: Chapter, var history: History? = null) : Chapter by chapter

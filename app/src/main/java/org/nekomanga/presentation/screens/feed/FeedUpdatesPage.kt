@@ -25,19 +25,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Calendar
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
-import org.nekomanga.domain.chapter.FeedChapter
-import org.nekomanga.presentation.components.CheckboxRow
+import org.nekomanga.domain.chapter.FeedManga
 import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.HeaderCard
 import org.nekomanga.presentation.components.MangaCover
@@ -48,11 +45,10 @@ import org.nekomanga.presentation.theme.Padding
 @Composable
 fun FeedUpdatePage(
     contentPadding: PaddingValues,
-    feedChapters: ImmutableList<FeedChapter>,
+    feedChapters: ImmutableList<FeedManga>,
     outlineCovers: Boolean,
     hasMoreResults: Boolean,
     groupChaptersUpdates: Boolean,
-    toggleGroupChaptersUpdates: () -> Unit,
     mangaClick: (Long) -> Unit,
     loadNextPage: () -> Unit,
 ) {
@@ -73,7 +69,7 @@ fun FeedUpdatePage(
 
         chapters.groupBy {
             val cal = Calendar.getInstance()
-            cal.time = Date(it.simpleChapter.dateFetch)
+            cal.time = Date(it.date)
             cal[Calendar.HOUR_OF_DAY] = 0
             cal[Calendar.MINUTE] = 0
             cal[Calendar.SECOND] = 0
@@ -95,9 +91,6 @@ fun FeedUpdatePage(
         contentPadding = contentPadding,
     ) {
 
-        item {
-            CheckboxRow(checkedState = groupChaptersUpdates, checkedChange = { toggleGroupChaptersUpdates() }, rowText = stringResource(id = R.string.group_chapters_together))
-        }
         items(grouped) { group ->
             HeaderCard {
                 Text(
@@ -111,17 +104,17 @@ fun FeedUpdatePage(
             }
 
             Gap(Padding.small)
-            group.second.forEach { feedChapter ->
+            group.second.forEach { feedManga ->
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .background(color = Color.Magenta),
                 ) {
-                    Box(modifier = Modifier.clickable { mangaClick(feedChapter.mangaId) }) {
+                    Box(modifier = Modifier.clickable { mangaClick(feedManga.mangaId) }) {
 
                     }
                     MangaCover.Square.invoke(
-                        artwork = feedChapter.artwork,
+                        artwork = feedManga.artwork,
                         shouldOutlineCover = outlineCovers,
                         modifier = Modifier
                             .size(56.dp)
@@ -134,24 +127,24 @@ fun FeedUpdatePage(
                             .padding(horizontal = Padding.extraSmall),
                     ) {
 
-                        val textColor = when (feedChapter.simpleChapter.read) {
+                        val textColor = when (feedManga.simpleChapter.first().read) {
                             true -> LocalContentColor.current.copy(alpha = NekoColors.disabledAlphaLowContrast)
                             false -> LocalContentColor.current
                         }
 
 
-                        Text(text = feedChapter.mangaTitle, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
-                        Text(text = feedChapter.simpleChapter.chapterText, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
+                        Text(text = feedManga.mangaTitle, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
+                        Text(text = feedManga.simpleChapter.first().chapterText, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
                         Text(
-                            text = "Updated ${feedChapter.simpleChapter.dateUpload.timeSpanFromNow}",
+                            text = "Updated ${feedManga.simpleChapter.first().dateUpload.timeSpanFromNow}",
                             style = MaterialTheme.typography.bodySmall,
                             color = updatedColor,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        if (feedChapter.totalChapter > 1) {
+                        if (feedManga.totalChapter > 1) {
                             Text(
-                                text = "${feedChapter.totalChapter} other recently added chapters",
+                                text = "${feedManga.totalChapter} other recently added chapters",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = updatedColor,
                                 maxLines = 1,
@@ -183,7 +176,7 @@ fun FeedUpdatePage(
                 Gap(Padding.small)
 
                 LaunchedEffect(scrollState) {
-                    if (hasMoreResults && feedChapters.indexOf(feedChapter) >= feedChapters.size - 4) {
+                    if (hasMoreResults && feedChapters.indexOf(feedManga) >= feedChapters.size - 4) {
                         loadNextPage()
                     }
                 }

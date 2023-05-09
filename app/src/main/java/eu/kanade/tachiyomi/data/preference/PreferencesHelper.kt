@@ -26,6 +26,8 @@ import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
+import eu.kanade.tachiyomi.ui.recents.FeedScreenType
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
 import java.io.File
@@ -424,6 +426,8 @@ class PreferencesHelper(val context: Context) {
 
     fun recentsViewType() = flowPrefs.getInt("recents_view_type", 0)
 
+    fun feedViewType() = flowPrefs.getEnum("feed_view_type", FeedScreenType.Updates)
+
     fun showRecentsDownloads() =
         flowPrefs.getEnum(Keys.showDLsInRecents, RecentMangaAdapter.ShowRecentsDLs.All)
 
@@ -438,6 +442,8 @@ class PreferencesHelper(val context: Context) {
     fun groupChaptersUpdates() = flowPrefs.getBoolean(Keys.groupChaptersUpdates, false)
 
     fun groupChaptersHistory() = flowPrefs.getBoolean(Keys.groupChaptersHistory, true)
+
+    fun historyChapterGrouping() = flowPrefs.getEnum(Keys.historyChapterGrouping, FeedHistoryGroup.Series)
 
     fun showTitleFirstInRecents() = flowPrefs.getBoolean(Keys.showTitleFirstInRecents, false)
 

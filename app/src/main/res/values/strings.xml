@@ -314,6 +314,11 @@
     <string name="show_updated_time">Show updated time</string>
     <string name="sort_fetched_time">Sort by fetched time</string>
     <string name="group_chapters_together">Group chapters together</string>
+    <string name="group_never">Never</string>
+    <string name="group_by_series">By series</string>
+    <string name="group_by_day">By day</string>
+    <string name="group_by_week">By week</string>
+
     <string name="uniform_covers">Uniform covers</string>
     <string name="affects_library_grid">Affects library grid covers</string>
 
