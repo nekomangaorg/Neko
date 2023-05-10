@@ -14,8 +14,38 @@ object Configs {
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
-fun getCommitCount() = runCommand("git rev-list --count HEAD")
-fun getGitSha() = runCommand("git rev-parse --short HEAD")
+fun getCommitCount() = providers.of(GitCommitCount::class) {}.get()
+fun getGitSha() = providers.of(GitSha::class) {}.get()
+
+// runCommand("git rev-list --count HEAD")
+//fun getGitSha() = runCommand("git rev-parse --short HEAD")
+
+abstract class GitSha : ValueSource<String, ValueSourceParameters.None> {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+    override fun obtain(): String {
+        val byteOut = ByteArrayOutputStream()
+        execOperations.exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+            standardOutput = byteOut
+        }
+        return String(byteOut.toByteArray()).trim()
+    }
+}
+
+abstract class GitCommitCount : ValueSource<String, ValueSourceParameters.None> {
+    @get:Inject
+    abstract val execOperations: ExecOperations
+    override fun obtain(): String {
+        val byteOut = ByteArrayOutputStream()
+        execOperations.exec {
+            commandLine("git", "rev-list", "--count", "HEAD")
+            standardOutput = byteOut
+        }
+        return String(byteOut.toByteArray()).trim()
+    }
+}
+
 fun runCommand(command: String): String {
     val byteOut = ByteArrayOutputStream()
     project.exec {
