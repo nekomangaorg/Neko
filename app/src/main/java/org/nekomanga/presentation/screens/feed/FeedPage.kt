@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -132,28 +133,27 @@ fun FeedPage(
                 if (feedScreenType == FeedScreenType.History) {
                     IconButton(modifier = Modifier.align(Alignment.CenterVertically), onClick = { }) {
                         Icon(
-                            imageVector = Icons.Filled.Read,
+                            imageVector = Icons.Filled.VisibilityOff,
                             contentDescription = null,
                         )
                     }
-                } else {
-                    Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
-                        DownloadButton(
-                            themeColorState.buttonColor,
-                            Download.State.NOT_DOWNLOADED,
-                            0f,
-                            Modifier
-                                .combinedClickable(
-                                    onClick = {
-                                        when (Download.State.NOT_DOWNLOADED) {
-                                            Download.State.NOT_DOWNLOADED -> Unit //onDownload(MangaConstants.DownloadAction.Download)
-                                            else -> chapterDropdown = true
-                                        }
-                                    },
-                                    onLongClick = {},
-                                ),
-                        )
-                    }
+                }
+                Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
+                    DownloadButton(
+                        themeColorState.buttonColor,
+                        Download.State.NOT_DOWNLOADED,
+                        0f,
+                        Modifier
+                            .combinedClickable(
+                                onClick = {
+                                    when (Download.State.NOT_DOWNLOADED) {
+                                        Download.State.NOT_DOWNLOADED -> Unit //onDownload(MangaConstants.DownloadAction.Download)
+                                        else -> chapterDropdown = true
+                                    }
+                                },
+                                onLongClick = {},
+                            ),
+                    )
                 }
 
             }
