@@ -182,7 +182,6 @@ data class FeedManga(
     val date: Long,
     val mangaId: Long,
     val artwork: Artwork,
-    val simpleChapter: ImmutableList<SimpleChapter>,
-    val totalChapter: Int = 1,
+    val chapters: ImmutableList<SimpleChapter>,
 )
 

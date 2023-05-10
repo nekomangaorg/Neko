@@ -38,7 +38,7 @@ class FeedRepository(
                                 mangaTitle = it.manga.title,
                                 date = simpleChapter.dateFetch,
                                 artwork = it.manga.toDisplayManga().currentArtwork,
-                                simpleChapter = persistentListOf(simpleChapter),
+                                chapters = persistentListOf(simpleChapter),
                             )
                         }
                     Pair(chapters.isNotEmpty(), chapters)
@@ -55,7 +55,7 @@ class FeedRepository(
                             mangaTitle = it.manga.title,
                             date = it.history.last_read,
                             artwork = it.manga.toDisplayManga().currentArtwork,
-                            simpleChapter = persistentListOf(simpleChapter),
+                            chapters = persistentListOf(simpleChapter),
                         )
                     }
                     /*val dbChapters = when (group) {
