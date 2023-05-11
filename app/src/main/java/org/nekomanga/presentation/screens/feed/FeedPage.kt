@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,7 +88,6 @@ fun FeedPage(
         contentPadding = contentPadding,
     ) {
         items(feedMangaList) { feedManga ->
-            Gap(Padding.small)
             Column(modifier = Modifier.fillMaxWidth()) {
                 var expanded by rememberSaveable { mutableStateOf(false) }
                 Text(
@@ -95,6 +95,7 @@ fun FeedPage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = Padding.small, vertical = Padding.extraSmall),
+                    textAlign = TextAlign.Center,
                 )
                 Row(
                     modifier = Modifier
@@ -208,7 +209,7 @@ fun FeedPage(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start = 64.dp + Padding.small, end = Padding.small, top = Padding.small, bottom = Padding.small),
+                                    .padding(start = 64.dp + Padding.medium, end = Padding.small, top = Padding.small, bottom = Padding.small),
                             ) {
                                 Column(
                                     modifier = Modifier
@@ -305,28 +306,6 @@ fun FeedPage(
 
                                     }
                                 }
-                                /* Column(modifier = Modifier.fillMaxWidth()) {
-                                     val textColor = when (simpleChapter.read) {
-                                         true -> LocalContentColor.current.copy(alpha = NekoColors.disabledAlphaLowContrast)
-                                         false -> LocalContentColor.current
-                                     }
-                                     val extra = when (!simpleChapter.read && simpleChapter.pagesLeft > 0) {
-                                         true -> {
-                                             " • " + pluralStringResource(id = R.plurals.pages_left, count = 1, simpleChapter.pagesLeft)
-                                         }
-
-                                         false -> ""
-                                     }
-                                     Text(text = simpleChapter.chapterText, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
-                                     Gap(Padding.extraSmall)
-                                     Text(
-                                         text = "Read ${simpleChapter.lastRead.timeSpanFromNow}$extra",
-                                         style = MaterialTheme.typography.bodySmall,
-                                         color = updatedColor,
-                                         maxLines = 1,
-                                         overflow = TextOverflow.Ellipsis,
-                                     )
-                                 }*/
                             }
                         }
                     }

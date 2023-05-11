@@ -244,7 +244,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
             true
         }
-        for (id in listOf(R.id.nav_recents, R.id.nav_browse)) {
+        for (id in listOf(R.id.nav_feed, R.id.nav_browse)) {
             nav.getItemView(id)?.setOnLongClickListener {
                 nav.selectedItemId = id
                 nav.post {
@@ -310,7 +310,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (router.hasRootController()) {
             nav.selectedItemId =
                 when (router.backstack.firstOrNull()?.controller) {
-                    is RecentsController -> R.id.nav_recents
+                    is FeedController -> R.id.nav_feed
                     is BrowseController -> R.id.nav_browse
                     else -> R.id.nav_library
                 }
@@ -334,7 +334,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 setRoot(
                     when (id) {
                         R.id.nav_library -> LibraryController()
-                        R.id.nav_recents -> RecentsController()
                         R.id.nav_feed -> FeedController()
                         else -> BrowseController()
                     },
@@ -704,7 +703,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             downloadManager.hasQueue() && !preferences.shownDownloadQueueTutorial().get()
         ) {
             if (!isBindingInitialized) return
-            val recentsItem = nav.getItemView(R.id.nav_recents) ?: return
+            val recentsItem = nav.getItemView(R.id.nav_feed) ?: return
             preferences.shownDownloadQueueTutorial().set(true)
             TapTargetView.showFor(
                 this,
@@ -724,7 +723,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 object : TapTargetView.Listener() {
                     override fun onTargetClick(view: TapTargetView) {
                         super.onTargetClick(view)
-                        nav.selectedItemId = R.id.nav_recents
+                        nav.selectedItemId = R.id.nav_feed
                     }
                 },
             )
@@ -783,8 +782,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         when (intent.action) {
             SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
-                if (nav.selectedItemId != R.id.nav_recents) {
-                    nav.selectedItemId = R.id.nav_recents
+                if (nav.selectedItemId != R.id.nav_feed) {
+                    nav.selectedItemId = R.id.nav_feed
                 } else {
                     router.popToRoot()
                 }
@@ -822,7 +821,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
 
             SHORTCUT_DOWNLOADS -> {
-                nav.selectedItemId = R.id.nav_recents
+                nav.selectedItemId = R.id.nav_feed
                 router.popToRoot()
                 nav.post {
                     val controller =
@@ -1239,10 +1238,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val hasQueue = downloading || downloadManager.hasQueue()
         lifecycleScope.launchUI {
             if (hasQueue) {
-                nav.getOrCreateBadge(R.id.nav_recents)
+                nav.getOrCreateBadge(R.id.nav_feed)
                 showDLQueueTutorial()
             } else {
-                nav.removeBadge(R.id.nav_recents)
+                nav.removeBadge(R.id.nav_feed)
             }
         }
     }
