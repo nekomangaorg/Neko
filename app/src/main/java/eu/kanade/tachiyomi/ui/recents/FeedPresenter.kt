@@ -92,8 +92,10 @@ class FeedPresenter(
         presenterScope.launch {
             preferences.historyChapterGrouping().asFlow().collectLatest {
                 _feedScreenState.update { state ->
-                    state.copy(historyGrouping = it)
+                    state.copy(historyGrouping = it, offset = 0, allFeedManga = persistentListOf())
                 }
+                paginator.reset()
+                loadNextPage()
             }
         }
 

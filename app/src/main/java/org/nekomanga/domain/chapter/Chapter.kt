@@ -10,8 +10,6 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
-import kotlinx.collections.immutable.ImmutableList
-import org.nekomanga.domain.manga.Artwork
 
 data class SimpleChapter(
     val id: Long,
@@ -177,11 +175,4 @@ data class ChapterItem(
     val isNotDefaultDownload = downloadState != Download.State.default
 }
 
-data class FeedManga(
-    val mangaTitle: String,
-    val date: Long,
-    val mangaId: Long,
-    val artwork: Artwork,
-    val chapters: ImmutableList<SimpleChapter>,
-)
 

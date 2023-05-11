@@ -8,10 +8,12 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.toDisplayManga
 import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import logcat.LogPriority
-import org.nekomanga.domain.chapter.FeedManga
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
@@ -28,6 +30,7 @@ class FeedRepository(
         return com.github.michaelbull.result.runCatching {
             when (type) {
                 FeedScreenType.Updates -> {
+                    //TODO this isnt done
                     val chapters = db.getRecentChapters(offset = offset, isResuming = false).executeAsBlocking()
                         .mapNotNull {
                             it.manga.id ?: return@mapNotNull null
@@ -45,19 +48,67 @@ class FeedRepository(
                 }
 
                 FeedScreenType.History -> {
-                    val chapters = db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO().mapNotNull {
-                        it.manga.id ?: return@mapNotNull null
-                        it.chapter.id ?: return@mapNotNull null
-                        val simpleChapter = it.chapter.toSimpleChapter(it.history.last_read)!!
-                        it.history.last_read
-                        FeedManga(
-                            mangaId = it.manga.id!!,
-                            mangaTitle = it.manga.title,
-                            date = it.history.last_read,
-                            artwork = it.manga.toDisplayManga().currentArtwork,
-                            chapters = persistentListOf(simpleChapter),
-                        )
+
+                    val chapters = when (group) {
+                        FeedHistoryGroup.Series -> {
+                            db.getRecentMangaLimit(offset = offset, isResuming = false).executeOnIO()
+                                .mapNotNull {
+                                    it.manga.id ?: return@mapNotNull null
+                                    it.chapter.id ?: return@mapNotNull null
+                                    val simpleChapter = it.chapter.toSimpleChapter(it.history.last_read)!!
+                                    FeedManga(
+                                        mangaId = it.manga.id!!,
+                                        mangaTitle = it.manga.title,
+                                        date = it.history.last_read,
+                                        artwork = it.manga.toDisplayManga().currentArtwork,
+                                        chapters = persistentListOf(simpleChapter),
+                                    )
+                                }
+                        }
+
+                        FeedHistoryGroup.Day, FeedHistoryGroup.Week -> {
+                            val pattern = when (group == FeedHistoryGroup.Week) {
+                                true -> "yyyy-w"
+                                false -> "yyyy-MM-dd"
+                            }
+                            val dateFormat = SimpleDateFormat(pattern, Locale.getDefault())
+                            val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) % 7 + 1
+                            dateFormat.calendar.firstDayOfWeek = dayOfWeek
+                            db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO().groupBy {
+                                val date = it.history.last_read
+                                it.manga to (if (date <= 0L) "-1" else dateFormat.format(Date(date)))
+                            }.mapNotNull { (manga, matches) ->
+                                val simpleChapters = matches.map {
+                                    loggycat { "esco: ${it.history.last_read}" }
+                                    it.chapter.toSimpleChapter(it.history.last_read)!!
+                                }.toPersistentList()
+                                FeedManga(
+                                    mangaId = manga.first.id!!,
+                                    mangaTitle = manga.first.title,
+                                    date = 0L,
+                                    artwork = manga.first.toDisplayManga().currentArtwork,
+                                    chapters = simpleChapters,
+                                )
+                            }
+                        }
+
+                        else -> {
+                            db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO().mapNotNull {
+                                it.manga.id ?: return@mapNotNull null
+                                it.chapter.id ?: return@mapNotNull null
+                                val simpleChapter = it.chapter.toSimpleChapter(it.history.last_read)!!
+                                it.history.last_read
+                                FeedManga(
+                                    mangaId = it.manga.id!!,
+                                    mangaTitle = it.manga.title,
+                                    date = it.history.last_read,
+                                    artwork = it.manga.toDisplayManga().currentArtwork,
+                                    chapters = persistentListOf(simpleChapter),
+                                )
+                            }
+                        }
                     }
+
                     /*val dbChapters = when (group) {
                         FeedHistoryGroup.Never -> db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO()
                         FeedHistoryGroup.Series -> db.getRecentChapters(offset = offset, isResuming = false).executeOnIO()

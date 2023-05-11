@@ -926,7 +926,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private fun startingTab(): Int {
         return when (preferences.startingTab().get()) {
             0, -1 -> R.id.nav_library
-            1, -2 -> R.id.nav_recents
+            1, -2 -> R.id.nav_feed
             -3 -> R.id.nav_browse
             else -> R.id.nav_library
         }

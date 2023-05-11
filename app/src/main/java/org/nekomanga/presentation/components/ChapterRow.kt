@@ -119,6 +119,7 @@ fun ChapterRow(
                         }
                         Background(icon, Alignment.CenterEnd, color, stringResource(id = text), themeColor.buttonColor)
                     }
+
                     DismissDirection.StartToEnd -> {
                         val (icon, text) = when (bookmark) {
                             true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
@@ -126,6 +127,7 @@ fun ChapterRow(
                         }
                         Background(icon, Alignment.CenterStart, color, stringResource(id = text), themeColor.buttonColor)
                     }
+
                     else -> Unit
                 }
             },
@@ -328,7 +330,7 @@ private fun ChapterInfo(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (language.isNotNullOrEmpty() && language.equals("en", true).not()) {
+                if (language.isNotNullOrEmpty() && !language.equals("en", true)) {
                     val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
 
                     when (iconRes == null) {
@@ -343,6 +345,7 @@ private fun ChapterInfo(
                                 ),
                             )
                         }
+
                         false -> {
                             val painter = rememberDrawablePainter(drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes))
                             Image(
@@ -367,7 +370,6 @@ private fun ChapterInfo(
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                statuses.joinToString(" • ")
             }
         }
         Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
@@ -406,6 +408,7 @@ private fun ChapterInfo(
                             ),
                         )
                     }
+
                     else -> {
                         persistentListOf(
                             SimpleDropDownItem.Action(
