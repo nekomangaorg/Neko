@@ -1186,43 +1186,6 @@ class MangaDetailPresenter(
     }
 
     /**
-     * Hides/Shows the titles of the chapters
-     */
-    fun hideTitlesOption(hide: Boolean) {
-        presenterScope.launchIO {
-            val manga = currentManga()
-            loggycat {
-                """Before:
-                    |readFilter = ${manga.readFilter(preferences)}
-                    |downloadedFilter = ${manga.downloadedFilter(preferences)}
-                    |bookmarkedFilter = ${manga.bookmarkedFilter(preferences)}
-                    |hideChapter = ${manga.hideChapterTitle(preferences)}
-                """.trimMargin()
-            }
-            manga.displayMode = if (hide) Manga.CHAPTER_DISPLAY_NUMBER else Manga.CHAPTER_DISPLAY_NAME
-            getFilter()
-            manga.setFilterToLocal()
-            db.updateChapterFlags(manga).executeAsBlocking()
-            loggycat {
-                """After:
-                    |readFilter = ${manga.readFilter}
-                    |downloadedFilter = ${manga.downloadedFilter}
-                    |bookmarkedFilter = ${manga.bookmarkedFilter}
-                    |hideChapter = ${manga.hideChapterTitles}hideChapterTitles
-                """.trimMargin()
-            }
-
-            if (mangaFilterMatchesDefault(currentManga())) {
-                manga.setFilterToGlobal()
-                db.updateChapterFlags(manga).executeAsBlocking()
-            }
-            updateMangaFlow()
-            updateFilterFlow()
-            updateChapterFlows()
-        }
-    }
-
-    /**
      * Changes the filtered scanlators, if null then it resets the scanlator filter
      */
     fun setGlobalOption(option: MangaConstants.SetGlobal) {
