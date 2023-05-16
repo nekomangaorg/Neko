@@ -161,7 +161,6 @@ class MangaDetailPresenter(
                 hasDefaultCategory = preferences.defaultCategory() != -1,
                 hideButtonText = preferences.hideButtonText().get(),
                 extraLargeBackdrop = preferences.extraLargeBackdrop().get(),
-                hideChapterTitles = getHideTitlesFilter(),
                 themeBasedOffCovers = preferences.themeMangaDetails(),
                 validMergeTypes = validMergeTypes,
                 vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
@@ -945,13 +944,14 @@ class MangaDetailPresenter(
      * Get current sort filter
      */
     private fun getSortFilter(): MangaConstants.SortFilter {
-        val sortOrder = currentManga().chapterOrder(preferences)
-        val status = when (currentManga().sortDescending(preferences)) {
+        val manga = currentManga()
+        val sortOrder = manga.chapterOrder(preferences)
+        val status = when (manga.sortDescending(preferences)) {
             true -> MangaConstants.SortState.Descending
             false -> MangaConstants.SortState.Ascending
         }
 
-        val matchesDefaults = mangaSortMatchesDefault()
+        val matchesDefaults = mangaSortMatchesDefault(manga)
 
         return when (sortOrder) {
             Manga.CHAPTER_SORTING_NUMBER -> MangaConstants.SortFilter(chapterNumberSort = status, matchesGlobalDefaults = matchesDefaults)
@@ -963,28 +963,35 @@ class MangaDetailPresenter(
     /**
      * Get current sort filter
      */
-    private fun getFilter(): MangaConstants.Filter {
-        val read = when (currentManga().readFilter(preferences)) {
+    private fun getFilter(): MangaConstants.ChapterDisplay {
+        val manga = currentManga()
+        val read = when (manga.readFilter(preferences)) {
             Manga.CHAPTER_SHOW_UNREAD -> ToggleableState.On
             Manga.CHAPTER_SHOW_READ -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
         }
-        val bookmark = when (currentManga().bookmarkedFilter(preferences)) {
+        val bookmark = when (manga.bookmarkedFilter(preferences)) {
             Manga.CHAPTER_SHOW_BOOKMARKED -> ToggleableState.On
             Manga.CHAPTER_SHOW_NOT_BOOKMARKED -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
         }
 
-        val downloaded = when (currentManga().downloadedFilter(preferences)) {
+        val downloaded = when (manga.downloadedFilter(preferences)) {
             Manga.CHAPTER_SHOW_DOWNLOADED -> ToggleableState.On
             Manga.CHAPTER_SHOW_NOT_DOWNLOADED -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
         }
+
+        val hideTitle = when (manga.hideChapterTitle(preferences)) {
+            true -> ToggleableState.On
+            else -> ToggleableState.Off
+        }
+
         val all = read == ToggleableState.Off && bookmark == ToggleableState.Off && downloaded == ToggleableState.Off
 
-        val matchesDefaults = mangaFilterMatchesDefault()
+        val matchesDefaults = mangaFilterMatchesDefault(manga)
 
-        return MangaConstants.Filter(showAll = all, unread = read, downloaded = downloaded, bookmarked = bookmark, matchesGlobalDefaults = matchesDefaults)
+        return MangaConstants.ChapterDisplay(showAll = all, unread = read, downloaded = downloaded, bookmarked = bookmark, hideChapterTitles = hideTitle, matchesGlobalDefaults = matchesDefaults)
     }
 
     /**
@@ -1022,15 +1029,15 @@ class MangaDetailPresenter(
         return currentManga().hideChapterTitle(preferences)
     }
 
-    private fun getFilterText(filter: MangaConstants.Filter, chapterScanlatorFilter: MangaConstants.ScanlatorFilter): String {
+    private fun getFilterText(chapterDisplay: MangaConstants.ChapterDisplay, chapterScanlatorFilter: MangaConstants.ScanlatorFilter): String {
         val hasDisabledScanlators = chapterScanlatorFilter.scanlators.any { it.disabled }
         val filtersId = mutableListOf<Int?>()
-        filtersId.add(if (filter.unread == ToggleableState.Indeterminate) R.string.read else null)
-        filtersId.add(if (filter.unread == ToggleableState.On) R.string.unread else null)
-        filtersId.add(if (filter.downloaded == ToggleableState.On) R.string.downloaded else null)
-        filtersId.add(if (filter.downloaded == ToggleableState.Indeterminate) R.string.not_downloaded else null)
-        filtersId.add(if (filter.bookmarked == ToggleableState.On) R.string.bookmarked else null)
-        filtersId.add(if (filter.bookmarked == ToggleableState.Indeterminate) R.string.not_bookmarked else null)
+        filtersId.add(if (chapterDisplay.unread == ToggleableState.Indeterminate) R.string.read else null)
+        filtersId.add(if (chapterDisplay.unread == ToggleableState.On) R.string.unread else null)
+        filtersId.add(if (chapterDisplay.downloaded == ToggleableState.On) R.string.downloaded else null)
+        filtersId.add(if (chapterDisplay.downloaded == ToggleableState.Indeterminate) R.string.not_downloaded else null)
+        filtersId.add(if (chapterDisplay.bookmarked == ToggleableState.On) R.string.bookmarked else null)
+        filtersId.add(if (chapterDisplay.bookmarked == ToggleableState.Indeterminate) R.string.not_bookmarked else null)
         filtersId.add(if (hasDisabledScanlators) R.string.scanlators else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
@@ -1068,7 +1075,7 @@ class MangaDetailPresenter(
     /**
      * Get current merge result
      */
-    fun changeFilterOption(filterOption: MangaConstants.FilterOption?) {
+    fun changeFilterOption(filterOption: MangaConstants.ChapterDisplayOptions?) {
         presenterScope.launchIO {
             val manga = currentManga()
 
@@ -1081,44 +1088,52 @@ class MangaDetailPresenter(
             if (filterOption == null) {
                 manga.setFilterToGlobal()
             } else {
-                when (filterOption.filterType) {
-                    MangaConstants.FilterType.All -> {
+                when (filterOption.displayType) {
+                    MangaConstants.ChapterDisplayType.All -> {
                         manga.readFilter = Manga.SHOW_ALL
                         manga.bookmarkedFilter = Manga.SHOW_ALL
                         manga.downloadedFilter = Manga.SHOW_ALL
                     }
 
-                    MangaConstants.FilterType.Unread -> {
-                        manga.readFilter = when (filterOption.filterState) {
+                    MangaConstants.ChapterDisplayType.Unread -> {
+                        manga.readFilter = when (filterOption.displayState) {
                             ToggleableState.On -> Manga.CHAPTER_SHOW_UNREAD
                             ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_READ
                             else -> Manga.SHOW_ALL
                         }
                     }
 
-                    MangaConstants.FilterType.Bookmarked -> {
-                        manga.bookmarkedFilter = when (filterOption.filterState) {
+                    MangaConstants.ChapterDisplayType.Bookmarked -> {
+                        manga.bookmarkedFilter = when (filterOption.displayState) {
                             ToggleableState.On -> Manga.CHAPTER_SHOW_BOOKMARKED
                             ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
                             else -> Manga.SHOW_ALL
                         }
                     }
 
-                    MangaConstants.FilterType.Downloaded -> {
-                        manga.downloadedFilter = when (filterOption.filterState) {
+                    MangaConstants.ChapterDisplayType.Downloaded -> {
+                        manga.downloadedFilter = when (filterOption.displayState) {
                             ToggleableState.On -> Manga.CHAPTER_SHOW_DOWNLOADED
                             ToggleableState.Indeterminate -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
                             else -> Manga.SHOW_ALL
                         }
                     }
+
+                    MangaConstants.ChapterDisplayType.HideTitles -> {
+                        manga.displayMode = when (filterOption.displayState) {
+                            ToggleableState.On -> Manga.CHAPTER_DISPLAY_NUMBER
+                            else -> Manga.CHAPTER_DISPLAY_NAME
+                        }
+                    }
+
                 }
                 manga.setFilterToLocal()
-                if (mangaFilterMatchesDefault()) {
+                if (mangaFilterMatchesDefault(manga)) {
                     manga.setFilterToGlobal()
                 }
             }
 
-            db.insertManga(manga).executeOnIO()
+            db.updateChapterFlags(manga).executeOnIO()
             updateMangaFlow()
             updateFilterFlow()
             updateChapterFlows()
@@ -1175,13 +1190,31 @@ class MangaDetailPresenter(
     fun hideTitlesOption(hide: Boolean) {
         presenterScope.launchIO {
             val manga = currentManga()
-
-            manga.displayMode = if (hide) Manga.CHAPTER_DISPLAY_NUMBER else Manga.CHAPTER_DISPLAY_NAME
-            manga.setFilterToLocal()
-            if (mangaFilterMatchesDefault()) {
-                manga.setFilterToGlobal()
+            loggycat {
+                """Before:
+                    |readFilter = ${manga.readFilter(preferences)}
+                    |downloadedFilter = ${manga.downloadedFilter(preferences)}
+                    |bookmarkedFilter = ${manga.bookmarkedFilter(preferences)}
+                    |hideChapter = ${manga.hideChapterTitle(preferences)}
+                """.trimMargin()
             }
+            manga.displayMode = if (hide) Manga.CHAPTER_DISPLAY_NUMBER else Manga.CHAPTER_DISPLAY_NAME
+            getFilter()
+            manga.setFilterToLocal()
             db.updateChapterFlags(manga).executeAsBlocking()
+            loggycat {
+                """After:
+                    |readFilter = ${manga.readFilter}
+                    |downloadedFilter = ${manga.downloadedFilter}
+                    |bookmarkedFilter = ${manga.bookmarkedFilter}
+                    |hideChapter = ${manga.hideChapterTitles}hideChapterTitles
+                """.trimMargin()
+            }
+
+            if (mangaFilterMatchesDefault(currentManga())) {
+                manga.setFilterToGlobal()
+                db.updateChapterFlags(manga).executeAsBlocking()
+            }
             updateMangaFlow()
             updateFilterFlow()
             updateChapterFlows()
@@ -1205,31 +1238,32 @@ class MangaDetailPresenter(
                     preferences.filterChapterByRead().set(manga.readFilter)
                     preferences.filterChapterByDownloaded().set(manga.downloadedFilter)
                     preferences.filterChapterByBookmarked().set(manga.bookmarkedFilter)
+                    preferences.hideChapterTitlesByDefault().set(manga.hideChapterTitles)
                     manga.setFilterToGlobal()
                 }
 
                 else -> Unit
             }
-            db.insertManga(manga).executeAsBlocking()
+            db.updateChapterFlags(manga).executeOnIO()
             updateMangaFlow()
             updateFilterFlow()
         }
     }
 
-    private fun mangaSortMatchesDefault(): Boolean {
+    private fun mangaSortMatchesDefault(manga: Manga): Boolean {
         return (
-            currentManga().sortDescending == preferences.chaptersDescAsDefault().get() &&
-                currentManga().sorting == preferences.sortChapterOrder().get()
-            ) || !currentManga().usesLocalSort
+            manga.sortDescending == preferences.chaptersDescAsDefault().get() &&
+                manga.sorting == preferences.sortChapterOrder().get()
+            ) || !manga.usesLocalSort
     }
 
-    private fun mangaFilterMatchesDefault(): Boolean {
+    private fun mangaFilterMatchesDefault(manga: Manga): Boolean {
         return (
-            currentManga().readFilter == preferences.filterChapterByRead().get() &&
-                currentManga().downloadedFilter == preferences.filterChapterByDownloaded().get() &&
-                currentManga().bookmarkedFilter == preferences.filterChapterByBookmarked().get() &&
-                currentManga().hideChapterTitles == preferences.hideChapterTitlesByDefault().get()
-            ) || !currentManga().usesLocalFilter
+            manga.readFilter == preferences.filterChapterByRead().get() &&
+                manga.downloadedFilter == preferences.filterChapterByDownloaded().get() &&
+                manga.bookmarkedFilter == preferences.filterChapterByBookmarked().get() &&
+                manga.hideChapterTitles == preferences.hideChapterTitlesByDefault().get()
+            ) || !manga.usesLocalFilter
     }
 
     /**
@@ -1302,16 +1336,17 @@ class MangaDetailPresenter(
             val filter = getFilter()
             val scanlatorFilter = getScanlatorFilter()
             val languageFilter = getLangaugeFilter()
+            val hideTitle = getHideTitlesFilter()
 
             _generalState.update {
                 it.copy(
                     chapterSortFilter = getSortFilter(),
                     chapterFilter = filter,
-                    hideChapterTitles = getHideTitlesFilter(),
                     chapterFilterText = getFilterText(filter, scanlatorFilter),
                     chapterScanlatorFilter = scanlatorFilter,
                     chapterLanguageFilter = languageFilter,
-                )
+
+                    )
             }
         }
     }

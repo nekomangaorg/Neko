@@ -134,7 +134,6 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 changeFilter = presenter::changeFilterOption,
                 changeScanlator = presenter::changeScanlatorOption,
                 changeLanguage = presenter::changeLanguageOption,
-                hideTitles = presenter::hideTitlesOption,
                 setAsGlobal = presenter::setGlobalOption,
             ),
             chapterActions = ChapterActions(

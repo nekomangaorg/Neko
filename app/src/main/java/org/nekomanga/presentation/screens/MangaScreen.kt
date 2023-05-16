@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
@@ -468,7 +469,7 @@ private fun ChapterRow(
         isMerged = chapterItem.chapter.isMergedChapter(),
         downloadStateProvider = { chapterItem.downloadState },
         downloadProgressProvider = { chapterItem.downloadProgress },
-        shouldHideChapterTitles = generalState.value.hideChapterTitles,
+        shouldHideChapterTitles = generalState.value.chapterFilter.hideChapterTitles == ToggleableState.On,
         onClick = { chapterActions.open(chapterItem) },
         onBookmark = {
             chapterActions.mark(

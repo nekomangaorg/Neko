@@ -29,7 +29,7 @@ object MangaConstants {
         val allScanlators: ImmutableSet<String> = persistentSetOf(),
         val allLanguages: ImmutableSet<String> = persistentSetOf(),
         val validMergeTypes: ImmutableList<MergeType> = persistentListOf(),
-        val chapterFilter: Filter = Filter(),
+        val chapterFilter: ChapterDisplay = ChapterDisplay(),
         val chapterFilterText: String = "",
         val chapterSortFilter: SortFilter = SortFilter(),
         val chapterScanlatorFilter: ScanlatorFilter = ScanlatorFilter(persistentListOf()),
@@ -38,7 +38,6 @@ object MangaConstants {
         val hasDefaultCategory: Boolean = false,
         val hideButtonText: Boolean = false,
         val extraLargeBackdrop: Boolean = false,
-        val hideChapterTitles: Boolean = false,
         val nextUnreadChapter: NextUnreadChapter = NextUnreadChapter(),
         val removedChapters: ImmutableList<ChapterItem> = persistentListOf(),
         val themeBasedOffCovers: Boolean = false,
@@ -111,24 +110,26 @@ object MangaConstants {
         val disabled: Boolean = false,
     )
 
-    data class Filter(
+    data class ChapterDisplay(
         val showAll: Boolean = false,
         val unread: ToggleableState = ToggleableState.Off,
         val downloaded: ToggleableState = ToggleableState.Off,
         val bookmarked: ToggleableState = ToggleableState.Off,
+        val hideChapterTitles: ToggleableState = ToggleableState.Off,
         val matchesGlobalDefaults: Boolean = true,
     )
 
-    data class FilterOption(
-        val filterType: FilterType,
-        val filterState: ToggleableState,
+    data class ChapterDisplayOptions(
+        val displayType: ChapterDisplayType,
+        val displayState: ToggleableState,
     )
 
-    enum class FilterType {
+    enum class ChapterDisplayType {
         All,
         Unread,
         Downloaded,
         Bookmarked,
+        HideTitles,
     }
 
     enum class SortType {
@@ -145,17 +146,15 @@ object MangaConstants {
     }
 
     enum class SetGlobal {
-        HideTitles,
         Sort,
         Filter,
     }
 
     class ChapterFilterActions(
         val changeSort: (sortOptions: SortOption?) -> Unit,
-        val changeFilter: (filterOption: FilterOption?) -> Unit,
+        val changeFilter: (filterOption: ChapterDisplayOptions?) -> Unit,
         val changeScanlator: (scanlatorOption: ScanlatorOption?) -> Unit,
         val changeLanguage: (languageOption: LanguageOption?) -> Unit,
-        val hideTitles: (Boolean) -> Unit,
         val setAsGlobal: (SetGlobal) -> Unit,
     )
 

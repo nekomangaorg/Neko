@@ -72,6 +72,7 @@ fun DetailsBottomSheet(
             confirmClicked = currentScreen.setCategories,
             addToLibraryClick = currentScreen.addToLibraryClick,
         )
+
         is DetailsBottomSheetScreen.TrackingSheet -> TrackingSheet(
             themeColor = themeColorState,
             inLibrary = mangaState.value.inLibrary,
@@ -102,6 +103,7 @@ fun DetailsBottomSheet(
                 )
             },
         )
+
         is DetailsBottomSheetScreen.TrackingSearchSheet -> {
             // do the initial search this way we dont need to "reset" the state after the sheet closes
             LaunchedEffect(key1 = currentScreen.trackingService.id) {
@@ -128,6 +130,7 @@ fun DetailsBottomSheet(
                 },
             )
         }
+
         is DetailsBottomSheetScreen.TrackingDateSheet -> {
             TrackingDateSheet(
                 themeColorState = themeColorState,
@@ -145,6 +148,7 @@ fun DetailsBottomSheet(
                 },
             )
         }
+
         is DetailsBottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
                 themeColorState = themeColorState,
@@ -200,6 +204,7 @@ fun DetailsBottomSheet(
                 },
             )
         }
+
         is DetailsBottomSheetScreen.FilterChapterSheet -> {
             FilterChapterSheet(
                 themeColorState = themeColorState,
@@ -209,10 +214,8 @@ fun DetailsBottomSheet(
                 filter = generalState.value.chapterFilter,
                 scanlatorFilter = generalState.value.chapterScanlatorFilter,
                 languageFilter = generalState.value.chapterLanguageFilter,
-                hideTitlesFilter = generalState.value.hideChapterTitles,
                 changeScanlatorFilter = chapterFilterActions.changeScanlator,
                 changeLanguageFilter = chapterFilterActions.changeLanguage,
-                changeHideTitles = chapterFilterActions.hideTitles,
                 setAsGlobal = chapterFilterActions.setAsGlobal,
             )
         }

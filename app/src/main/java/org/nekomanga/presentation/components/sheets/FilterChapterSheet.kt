@@ -36,15 +36,13 @@ import org.nekomanga.presentation.screens.ThemeColorState
 fun FilterChapterSheet(
     themeColorState: ThemeColorState,
     sortFilter: MangaConstants.SortFilter,
-    filter: MangaConstants.Filter,
+    filter: MangaConstants.ChapterDisplay,
     scanlatorFilter: MangaConstants.ScanlatorFilter,
     languageFilter: MangaConstants.LanguageFilter,
-    hideTitlesFilter: Boolean,
     changeSort: (SortOption?) -> Unit,
-    changeFilter: (MangaConstants.FilterOption?) -> Unit,
+    changeFilter: (MangaConstants.ChapterDisplayOptions?) -> Unit,
     changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit,
     changeLanguageFilter: (MangaConstants.LanguageOption?) -> Unit,
-    changeHideTitles: (Boolean) -> Unit,
     setAsGlobal: (MangaConstants.SetGlobal) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
@@ -60,7 +58,7 @@ fun FilterChapterSheet(
                     Sort(themeColorState = themeColorState, sortFilter, changeSort) { setAsGlobal(MangaConstants.SetGlobal.Sort) }
                 }
                 item {
-                    Filter(themeColorState = themeColorState, filter, hideTitlesFilter, changeFilter, changeHideTitles) { setAsGlobal(MangaConstants.SetGlobal.Filter) }
+                    Filter(themeColorState = themeColorState, filter, changeFilter) { setAsGlobal(MangaConstants.SetGlobal.Filter) }
                 }
 
                 item {
@@ -118,10 +116,8 @@ private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: 
 @Composable
 private fun Filter(
     themeColorState: ThemeColorState,
-    filter: MangaConstants.Filter,
-    hideTitlesFilter: Boolean,
-    changeFilter: (MangaConstants.FilterOption?) -> Unit,
-    changeHideTitles: (Boolean) -> Unit,
+    filter: MangaConstants.ChapterDisplay,
+    changeFilter: (MangaConstants.ChapterDisplayOptions?) -> Unit,
     setGlobal: () -> Unit,
 ) {
     Column(
@@ -156,39 +152,51 @@ private fun Filter(
             checked = filter.showAll,
             disabledOnChecked = true,
             text = stringResource(id = R.string.show_all),
-            onChecked = { changeFilter(MangaConstants.FilterOption(filterType = MangaConstants.FilterType.All, filterState = ToggleableState(!filter.showAll))) },
+            onChecked = { changeFilter(MangaConstants.ChapterDisplayOptions(displayType = MangaConstants.ChapterDisplayType.All, displayState = ToggleableState(!filter.showAll))) },
         )
         FilterLine(
             themeColorState = themeColorState,
-            state = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.Unread, filterState = filter.unread),
+            state = MangaConstants.ChapterDisplayOptions(displayType = MangaConstants.ChapterDisplayType.Unread, displayState = filter.unread),
             text = stringResource(id = R.string.show_unread_chapters),
             changeFilter = changeFilter,
         )
         FilterLine(
             themeColorState = themeColorState,
-            state = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.Downloaded, filterState = filter.downloaded),
+            state = MangaConstants.ChapterDisplayOptions(displayType = MangaConstants.ChapterDisplayType.Downloaded, displayState = filter.downloaded),
             text = stringResource(id = R.string.show_downloaded_chapters),
             changeFilter = changeFilter,
         )
         FilterLine(
             themeColorState = themeColorState,
-            state = MangaConstants.FilterOption(filterType = MangaConstants.FilterType.Bookmarked, filterState = filter.bookmarked),
+            state = MangaConstants.ChapterDisplayOptions(displayType = MangaConstants.ChapterDisplayType.Bookmarked, displayState = filter.bookmarked),
             text = stringResource(id = R.string.show_bookmarked_chapters),
             changeFilter = changeFilter,
         )
 
-        CheckboxLine(themeColorState = themeColorState, checked = hideTitlesFilter, text = stringResource(id = R.string.hide_chapter_titles)) {
-            changeHideTitles(!hideTitlesFilter)
-        }
+        CheckboxLine(
+            themeColorState = themeColorState, checked = filter.hideChapterTitles == ToggleableState.On,
+            text = stringResource(id = R.string.hide_chapter_titles),
+            onChecked = {
+                changeFilter(
+                    MangaConstants.ChapterDisplayOptions(
+                        displayType = MangaConstants.ChapterDisplayType.HideTitles,
+                        displayState = when (filter.hideChapterTitles == ToggleableState.On) {
+                            true -> ToggleableState.Off
+                            false -> ToggleableState.On
+                        },
+                    ),
+                )
+            },
+        )
     }
 }
 
 @Composable
-private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.FilterOption, text: String, changeFilter: (MangaConstants.FilterOption) -> Unit) {
+private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.ChapterDisplayOptions, text: String, changeFilter: (MangaConstants.ChapterDisplayOptions) -> Unit) {
     TriStateCheckboxRow(
         modifier = Modifier.fillMaxWidth(),
-        state = state.filterState,
-        toggleState = { newState -> changeFilter(state.copy(filterState = newState)) },
+        state = state.displayState,
+        toggleState = { newState -> changeFilter(state.copy(displayState = newState)) },
         rowText = text,
         themeColorState = themeColorState,
     )
