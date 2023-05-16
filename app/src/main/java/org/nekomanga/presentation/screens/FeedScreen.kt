@@ -172,9 +172,9 @@ fun FeedScreen(
                         feedMangaList = feedScreenState.value.allFeedManga,
                         hasMoreResults = feedScreenState.value.hasMoreResults,
                         feedScreenType = feedScreenState.value.feedScreenType,
-                        historyScreenGrouping = feedScreenState.value.historyGrouping,
                         mangaClick = mangaClick,
                         outlineCovers = feedScreenState.value.outlineCovers,
+                        hideChapterTitles = feedScreenState.value.hideChapterTitles,
                         loadNextPage = loadNextPage,
                     )
 

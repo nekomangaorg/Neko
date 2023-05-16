@@ -11,6 +11,7 @@ data class FeedScreenState(
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean,
+    val hideChapterTitles: Boolean,
     val offset: Int = 0,
     val hasMoreResults: Boolean = true,
     val groupChaptersUpdates: Boolean = false,

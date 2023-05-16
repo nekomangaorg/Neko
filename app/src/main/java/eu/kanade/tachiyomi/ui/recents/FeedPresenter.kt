@@ -29,6 +29,7 @@ class FeedPresenter(
             incognitoMode = preferences.incognitoMode().get(),
             groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
             historyGrouping = preferences.historyChapterGrouping().get(),
+            hideChapterTitles = preferences.hideChapterTitlesByDefault().get(),
         ),
     )
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
