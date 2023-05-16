@@ -76,6 +76,7 @@ fun DescriptionBlock(
     altTitlesProvider: () -> ImmutableList<String>,
     genresProvider: () -> ImmutableList<String>,
     themeColorState: ThemeColorState,
+    wrapAltTitles: Boolean,
     isExpanded: Boolean,
     expandCollapseClick: () -> Unit = {},
     genreSearch: (String) -> Unit = {},
@@ -152,7 +153,7 @@ fun DescriptionBlock(
                     themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
                     resetClick = altTitleResetClick,
-                    shouldWrap = true,
+                    shouldWrap = wrapAltTitles,
                 )
                 Gap(8.dp)
                 Genres(genresProvider(), tagColor, themeColorState.buttonColor, genreSearch, genreSearchLibrary)
@@ -175,7 +176,7 @@ fun DescriptionBlock(
                 AltTitles(
                     altTitles = altTitlesProvider(),
                     currentTitle = titleProvider(),
-                    shouldWrap = false,
+                    shouldWrap = wrapAltTitles,
                     tagColor = tagColor,
                     themeColorState = themeColorState,
                     altTitleClick = altTitleClick,

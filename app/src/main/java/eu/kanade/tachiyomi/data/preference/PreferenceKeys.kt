@@ -250,6 +250,8 @@ object PreferenceKeys {
 
     const val themeMangaDetails = "theme_manga_details"
 
+    const val wrapAltTitles = "wrap_alt_titles_manga_details"
+
     const val hideMangaDetailButtonText = "hide_manga_detail_button_text"
 
     const val extraLargeBackdrop = "extra_large_backdrop"

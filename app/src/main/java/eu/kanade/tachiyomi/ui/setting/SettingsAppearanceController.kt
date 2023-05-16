@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
@@ -78,6 +78,12 @@ class SettingsAppearanceController : SettingsController() {
             switchPreference {
                 key = Keys.extraLargeBackdrop
                 titleRes = R.string.extra_large_backdrop
+                defaultValue = false
+            }
+
+            switchPreference {
+                key = Keys.wrapAltTitles
+                titleRes = R.string.wrap_alt_titles
                 defaultValue = false
             }
         }

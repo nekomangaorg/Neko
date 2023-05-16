@@ -471,6 +471,8 @@ class PreferencesHelper(val context: Context) {
 
     fun extraLargeBackdrop() = flowPrefs.getBoolean(Keys.extraLargeBackdrop, false)
 
+    fun wrapAltTitles() = flowPrefs.getBoolean(Keys.wrapAltTitles, false)
+
     fun fasterLibraryUpdates() = flowPrefs.getBoolean(Keys.fasterLibraryUpdates, false)
 
     fun autohideHopper() = flowPrefs.getBoolean(Keys.autoHideHopper, true)

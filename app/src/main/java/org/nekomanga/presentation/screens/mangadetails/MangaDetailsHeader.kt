@@ -195,6 +195,7 @@ fun MangaDetailsHeader(
                     genresProvider = { mangaState.value.genres },
                     themeColorState = themeColorState,
                     isExpanded = isExpanded.value,
+                    wrapAltTitles = generalState.value.wrapAltTitles,
                     expandCollapseClick = {
                         isExpanded.value = !isExpanded.value
                     },

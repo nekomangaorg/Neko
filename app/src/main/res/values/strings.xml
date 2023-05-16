@@ -754,6 +754,7 @@
     <string name="pure_black_dark_mode">Pure black dark mode</string>
     <string name="details_page">Details page</string>
     <string name="theme_buttons_based_on_cover">Theme buttons based on cover</string>
+    <string name="wrap_alt_titles">Wrap the alternative titles, default is horizontal scrollable</string>
     <string name="expanded_toolbar">Expanded toolbar</string>
     <string name="show_larger_toolbar">Show a larger, expanded toolbar at the top of most pages (does not show on smaller devices regardless of setting)</string>
     <string name="hides_on_scroll">Hides when scrolling</string>

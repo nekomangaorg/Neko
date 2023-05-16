@@ -162,6 +162,7 @@ class MangaDetailPresenter(
                 hideButtonText = preferences.hideButtonText().get(),
                 extraLargeBackdrop = preferences.extraLargeBackdrop().get(),
                 themeBasedOffCovers = preferences.themeMangaDetails(),
+                wrapAltTitles = preferences.wrapAltTitles().get(),
                 validMergeTypes = validMergeTypes,
                 vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
             )
