@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
+import eu.kanade.tachiyomi.source.online.models.dto.CustomListListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
@@ -9,6 +10,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.ReadChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusMapDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
+import eu.kanade.tachiyomi.source.online.models.dto.UserDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.http.Body
@@ -21,6 +23,18 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface MangaDexAuthorizedUserService {
+
+    @Headers("Cache-Control: no-cache")
+    @GET(MdApi.userInfo)
+    suspend fun getUserInfo(): ApiResponse<UserDto>
+
+    @Headers("Cache-Control: no-cache")
+    @GET(MdApi.listMigrated)
+    suspend fun isMigrated(): ApiResponse<String>
+
+    @Headers("Cache-Control: no-cache")
+    @GET("${MdApi.user}${MdApi.list}?limit=100")
+    suspend fun userList(@Query("offset") offset: Int): ApiResponse<CustomListListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.userFollows}?limit=100&includes[]=${MdConstants.Types.coverArt}")

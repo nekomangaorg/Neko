@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.fredporciuncula.flow.preferences.FlowSharedPreferences
 import com.fredporciuncula.flow.preferences.Preference
@@ -244,9 +245,9 @@ class PreferencesHelper(val context: Context) {
 
     fun sourceUrl(source: Source) = prefs.getString(Keys.sourceUrl(source.id), "")
 
-    fun mangaDexUserName() = prefs.getString(Keys.mangadexUserName, "")
+    fun mangaDexUserName() = flowPrefs.getString(Keys.mangadexUserName, "")
 
-    fun removeMangaDexUserName() = prefs.edit().remove(Keys.mangadexUserName).apply()
+    fun mangadexUserUUID() = prefs.getString(Keys.mangadexUserUUID, "")
 
     fun removeOldCredentials(source: Source) {
         prefs.edit()
@@ -580,7 +581,7 @@ class PreferencesHelper(val context: Context) {
 
     fun refreshToken() = prefs.getString(Keys.refreshToken, "")
 
-    fun removeTokens() {
+    fun clearTokens() {
         prefs.edit()
             .remove(Keys.sessionToken)
             .remove(Keys.refreshToken)
@@ -600,6 +601,22 @@ class PreferencesHelper(val context: Context) {
             .putString(Keys.refreshToken, refresh)
             .putLong(Keys.lastRefreshTokenTime, time)
             .apply()
+    }
+
+    fun setUserInfo(userUUID: String, userName: String) {
+        prefs.edit {
+            putString(Keys.mangadexUserName, userName)
+            putString(Keys.mangadexUserUUID, userUUID)
+            apply()
+        }
+    }
+
+    fun clearUserInfo() {
+        prefs.edit {
+            remove(Keys.mangadexUserName)
+            remove(Keys.mangadexUserUUID)
+            apply()
+        }
     }
 
     fun lastRefreshTime(): Long {

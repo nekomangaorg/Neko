@@ -140,7 +140,7 @@ object Migrations {
             }
 
             if (oldVersion < 177) {
-                preferences.removeTokens()
+                preferences.clearTokens()
                 preferences.removeOldCredentials(MangaDex())
             }
 

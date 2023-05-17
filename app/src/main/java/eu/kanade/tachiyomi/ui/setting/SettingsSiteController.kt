@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
+import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -13,16 +14,20 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -40,7 +45,9 @@ class SettingsSiteController :
             title = "MangaDex Login"
             key = PreferenceKeys.refreshToken
 
-            /*this.username = preferences.sourceUsername(mdex) ?: ""*/
+            preferences.mangaDexUserName().asImmediateFlowIn(viewScope) { userName ->
+                this.username = userName
+            }
 
             setOnLoginClickListener {
                 when (mangaDexLoginHelper.isLoggedIn()) {
@@ -49,6 +56,7 @@ class SettingsSiteController :
                         dialog.targetController = this@SettingsSiteController
                         dialog.showDialog(router)
                     }
+
                     false -> {
                         val url = MdConstants.Login.authUrl(preferences.codeVerifer())
                         when (BuildConfig.DEBUG) {
@@ -213,6 +221,22 @@ class SettingsSiteController :
 
             onClick {
                 StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
+            }
+        }
+
+        preference {
+            title = "Test"
+
+            onClick {
+                GlobalScope.launchIO {
+                    Injekt.get<NetworkHelper>().authService.userList(0).getOrThrow().data.forEach {
+                        loggycat {
+                            """
+                                    ESCO - id: ${it.id} name: ${it.attributes.name}
+                                """.trimIndent()
+                        }
+                    }
+                }
             }
         }
 

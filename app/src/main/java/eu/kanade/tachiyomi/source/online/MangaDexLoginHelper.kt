@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
+import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.POST
@@ -92,9 +93,16 @@ class MangaDexLoginHelper {
                     body = loginFormBody,
                 ),
             ).await().parseAs<LoginResponseDto>()
+
             preferences.setTokens(
                 data.refreshToken,
                 data.accessToken,
+            )
+
+            val userInfo = networkHelper.authService.getUserInfo().getOrThrow()
+            preferences.setUserInfo(
+                userInfo.data.id,
+                userInfo.data.attributes.username,
             )
 
         }.exceptionOrNull()
@@ -147,8 +155,8 @@ class MangaDexLoginHelper {
      * Clears the session and refresh tokens
      */
     fun invalidate() {
-        preferences.removeMangaDexUserName()
-        preferences.removeTokens()
+        preferences.clearUserInfo()
+        preferences.clearTokens()
     }
 
     fun isLoggedIn(): Boolean {

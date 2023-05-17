@@ -302,6 +302,8 @@ object PreferenceKeys {
 
     const val mangadexUserName = "mangadex_username"
 
+    const val mangadexUserUUID = "mangadex_user_uuid"
+
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"

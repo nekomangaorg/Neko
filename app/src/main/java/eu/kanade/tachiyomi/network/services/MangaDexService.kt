@@ -7,10 +7,10 @@ import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.models.dto.CustomListDto
 import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
-import eu.kanade.tachiyomi.source.online.models.dto.ListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
@@ -47,7 +47,7 @@ interface MangaDexService {
     @GET("${MdApi.manga}?&order[createdAt]=desc&includes[]=${MdConstants.Types.coverArt}")
     suspend fun recentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
-    @GET("${MdApi.manga}?&order[followedCount]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
+    @GET("${MdApi.manga}?order[${MdConstants.Sort.bookmarkCount}]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
     suspend fun popularNewReleases(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
     @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
@@ -110,8 +110,11 @@ interface MangaDexService {
     @GET(MdApi.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
+    @GET("${MdApi.list}/{id}${MdApi.manga}")
+    suspend fun viewCustomListManga(@Path("id") id: String, @Query("offset") offset: Int): ApiResponse<MangaListDto>
+
     @GET("${MdApi.list}/{id}")
-    suspend fun viewList(@Path("id") id: String): ApiResponse<ListDto>
+    suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>
 
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>

@@ -13,14 +13,11 @@ class MdUtil {
         const val cdnUrl = "https://uploads.mangadex.org"
         const val baseUrl = "https://mangadex.org"
         const val forumUrl = "https://forums.mangadex.org/threads/"
-        const val apiUrl = "https://api.mangadex.org"
         const val imageUrlCacheNotFound =
             "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
         const val chapterSuffix = "/chapter/"
 
-        const val mangaUrl = "$apiUrl/manga"
-
-        const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
+        const val mangaUrl = "${MdApi.baseUrl}/manga"
 
         /**
          * Get the manga offset pages are 1 based, so subtract 1

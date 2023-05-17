@@ -5,9 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexService
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -29,36 +27,36 @@ class ListHandler {
 
     suspend fun retrieveList(listUUID: String): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
-            service.viewList(listUUID)
-                .getOrResultError("Error getting list")
-                .andThen { listDto ->
-                    val mangaIds = listDto.data.relationships.filter { it.type == MdConstants.Types.manga }.map { it.id }
-                    when (mangaIds.isEmpty()) {
-                        true -> Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
-                        false -> {
-                            val enabledContentRatings = preferencesHelper.contentRatingSelections()
-                            val contentRatings = MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
 
-                            val queryParameters =
-                                mutableMapOf(
-                                    "ids[]" to mangaIds,
-                                    "limit" to mangaIds.size,
-                                    "contentRating[]" to contentRatings,
+            val enabledContentRatings = preferencesHelper.contentRatingSelections()
+            val contentRatings = MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
+            val coverQuality = preferencesHelper.thumbnailQuality()
+
+            val queryParameters =
+                mutableMapOf(
+                    "contentRating[]" to contentRatings,
+                    "offset" to 0,
+                )
+
+            service.viewCustomListInfo(listUUID).getOrResultError("Error getting list with UUID: $listUUID").andThen { customListDto ->
+                val listName = customListDto.data.attributes.name
+
+                service.viewCustomListManga(listUUID, 0)
+                    .getOrResultError("Error getting list manga")
+                    .andThen { mangaListDto ->
+                        when (mangaListDto.data.isEmpty()) {
+                            true -> Ok(ListResults(DisplayScreenType.List(listName, listUUID), persistentListOf()))
+                            false -> {
+                                Ok(
+                                    ListResults(
+                                        displayScreenType = DisplayScreenType.List(listName, listUUID),
+                                        sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) }.toImmutableList(),
+                                    ),
                                 )
-                            val coverQuality = preferencesHelper.thumbnailQuality()
-                            service.search(ProxyRetrofitQueryMap(queryParameters))
-                                .getOrResultError("Error trying to load manga list")
-                                .andThen { mangaListDto ->
-                                    Ok(
-                                        ListResults(
-                                            displayScreenType = DisplayScreenType.List(listDto.data.attributes.name ?: "", listUUID),
-                                            sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) }.toImmutableList(),
-                                        ),
-                                    )
-                                }
+                            }
                         }
                     }
-                }
+            }
         }
     }
 }

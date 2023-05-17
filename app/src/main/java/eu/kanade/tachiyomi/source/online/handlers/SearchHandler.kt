@@ -186,7 +186,7 @@ class SearchHandler {
             }
             val thumbQuality = preferencesHelper.thumbnailQuality()
             service.popularNewReleases(ProxyRetrofitQueryMap(queryParameters))
-                .getOrResultError("Error getting recently added")
+                .getOrResultError("Error popular new releases")
                 .andThen { mangaListDto ->
                     val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 

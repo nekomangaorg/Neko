@@ -97,7 +97,7 @@ class BrowseRepository(
             Err(blockedScanlatorUUIDs.getAllErrors().first())
         } else {
             val uuids = blockedScanlatorUUIDs.getAll().map { it.uuid }
-            mangaDex.fetchHomePageInfo(MdConstants.currentSeasonalId, uuids)
+            mangaDex.fetchHomePageInfo(MdConstants.oldSeasonalId, uuids)
                 .andThen { listResults ->
                     Ok(
                         listResults.map { listResult ->

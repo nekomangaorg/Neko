@@ -37,6 +37,7 @@ object MdConstants {
     }
 
     const val currentSeasonalId = "77430796-6625-4684-b673-ffae5140f337"
+    const val oldSeasonalId = "a153b4e6-1fcc-4f45-a990-f37f989c0d74"
 
     object Limits {
         const val manga = 20
@@ -50,7 +51,7 @@ object MdConstants {
     object Sort {
         const val latest = "latestUploadedChapter"
         const val relevance = "relevance"
-        const val followCount = "followedCount"
+        const val bookmarkCount = "bookmarkCount"
         const val createdAt = "createdAt"
         const val updatedAt = "updatedAt"
         const val title = "title"
