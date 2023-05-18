@@ -10,8 +10,8 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
+import eu.kanade.tachiyomi.network.services.MangaDexAtHomeService
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
-import eu.kanade.tachiyomi.network.services.MangaDexCdnService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.SimilarService
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -121,8 +121,12 @@ class NetworkHelper(val context: Context) {
         return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).addInterceptor(loggingInterceptor()).build()
     }
 
-    private fun buildCdnRateLimitedClient(): OkHttpClient {
+    private fun buildAtHomeRateLimitedClient(): OkHttpClient {
         return nonRateLimitedClient.newBuilder().rateLimit(permits = 40, period = 1, unit = TimeUnit.MINUTES).addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
+    }
+
+    private fun buildCdnRateLimitedClient(): OkHttpClient {
+        return nonRateLimitedClient.newBuilder().rateLimit(20).addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
     }
 
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
@@ -141,7 +145,7 @@ class NetworkHelper(val context: Context) {
             .build()
     }
 
-    val nonRateLimitedClient = buildNonRateLimitedClient()
+    private val nonRateLimitedClient = buildNonRateLimitedClient()
 
     val cloudFlareClient = buildCloudFlareClient()
 
@@ -149,7 +153,9 @@ class NetworkHelper(val context: Context) {
 
     val mangadexClient = client.newBuilder().addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
 
-    private val cdnClient = buildCdnRateLimitedClient()
+    val cdnClient = buildCdnRateLimitedClient()
+
+    private val atHomeClient = buildAtHomeRateLimitedClient()
 
     private val authClient = buildRateLimitedAuthenticatedClient()
 
@@ -171,10 +177,10 @@ class NetworkHelper(val context: Context) {
             .client(mangadexClient).build()
             .create(MangaDexService::class.java)
 
-    val cdnService: MangaDexCdnService =
+    val atHomeService: MangaDexAtHomeService =
         jsonRetrofitClient.baseUrl(MdConstants.Api.baseUrl)
-            .client(cdnClient).build()
-            .create(MangaDexCdnService::class.java)
+            .client(atHomeClient).build()
+            .create(MangaDexAtHomeService::class.java)
 
     val authService: MangaDexAuthorizedUserService = jsonRetrofitClient.baseUrl(MdConstants.Api.baseUrl)
         .client(authClient).build()

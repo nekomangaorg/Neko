@@ -21,7 +21,7 @@ import uy.kohesive.injekt.api.get
 class CoilSetup(context: Context) {
     init {
         val imageLoader = ImageLoader.Builder(context).apply {
-            val callFactoryInit = { Injekt.get<NetworkHelper>().nonRateLimitedClient }
+            val callFactoryInit = { Injekt.get<NetworkHelper>().cdnClient }
             val diskCacheInit = { CoilDiskCache.get(context) }
             val isCurrSDKPieOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
             components {

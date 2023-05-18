@@ -70,8 +70,6 @@ abstract class HttpSource : Source {
      */
     open val client: OkHttpClient = network.client
 
-    val nonRateLimitedClient = network.nonRateLimitedClient
-
     /**
      * Visible name of the source.
      */

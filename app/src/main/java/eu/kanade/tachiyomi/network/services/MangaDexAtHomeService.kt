@@ -8,7 +8,7 @@ import retrofit2.http.Headers
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface MangaDexCdnService {
+interface MangaDexAtHomeService {
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.atHomeServer}/{chapterId}")
