@@ -29,51 +29,51 @@ import retrofit2.http.QueryMap
 
 interface MangaDexService {
 
-    @GET("${MdApi.manga}?includes[]=${MdConstants.Types.coverArt}")
+    @GET("${MdConstants.Api.manga}?includes[]=${MdConstants.Types.coverArt}")
     suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
-    @GET(MdApi.author)
+    @GET(MdConstants.Api.author)
     suspend fun searchAuthor(
         @Query(value = "name") query: String,
         @Query(value = "limit") limit: Int,
     ): ApiResponse<AuthorListDto>
 
-    @GET(MdApi.group)
+    @GET(MdConstants.Api.group)
     suspend fun searchGroup(
         @Query(value = "name") query: String,
         @Query(value = "limit") limit: Int,
     ): ApiResponse<GroupListDto>
 
-    @GET("${MdApi.manga}?&order[createdAt]=desc&includes[]=${MdConstants.Types.coverArt}")
+    @GET("${MdConstants.Api.manga}?&order[createdAt]=desc&includes[]=${MdConstants.Types.coverArt}")
     suspend fun recentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
-    @GET("${MdApi.manga}?order[${MdConstants.Sort.bookmarkCount}]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
+    @GET("${MdConstants.Api.manga}?&order[${MdConstants.Sort.bookmarkCount}]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
     suspend fun popularNewReleases(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
-    @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
+    @GET("${MdConstants.Api.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
     suspend fun viewManga(@Path("id") id: String): ApiResponse<MangaDto>
 
-    @GET("${MdApi.manga}/{id}/aggregate")
+    @GET("${MdConstants.Api.manga}/{id}/aggregate")
     suspend fun aggregateChapters(
         @Path("id") mangaId: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
     ): ApiResponse<AggregateDto>
 
-    @GET("${MdApi.statistics}${MdApi.manga}/{id}")
+    @GET("${MdConstants.Api.statistics}${MdConstants.Api.manga}/{id}")
     suspend fun mangaStatistics(
         @Path("id") mangaId: String,
     ): ApiResponse<StatisticResponseDto>
 
-    @GET("${MdApi.statistics}${MdApi.chapter}/{id}")
+    @GET("${MdConstants.Api.statistics}${MdConstants.Api.chapter}/{id}")
     suspend fun chapterStatistics(
         @Path("id") chapterId: String,
     ): ApiResponse<StatisticResponseDto>
 
-    @GET("${MdApi.manga}/{id}/relation")
+    @GET("${MdConstants.Api.manga}/{id}/relation")
     suspend fun relatedManga(@Path("id") id: String): ApiResponse<RelationListDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/{id}/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
+    @GET("${MdConstants.Api.manga}/{id}/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
@@ -81,7 +81,7 @@ interface MangaDexService {
     ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.chapter}?order[readableAt]=desc&includeFutureUpdates=0")
+    @GET("${MdConstants.Api.chapter}?order[readableAt]=desc&includeFutureUpdates=0")
     suspend fun latestChapters(
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
@@ -91,7 +91,7 @@ interface MangaDexService {
     ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.cover}?order[volume]=desc")
+    @GET("${MdConstants.Api.cover}?order[volume]=desc")
     suspend fun viewArtwork(
         @Query("manga[]") mangaUUID: String,
         @Query("limit") limit: Int,
@@ -99,24 +99,27 @@ interface MangaDexService {
     ): ApiResponse<RelationshipDtoList>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.chapter}/{id}")
+    @GET("${MdConstants.Api.chapter}/{id}")
     suspend fun viewChapter(@Path("id") id: String): ApiResponse<ChapterDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/random")
+    @GET("${MdConstants.Api.manga}/random")
     suspend fun randomManga(@Query("contentRating[]") contentRating: List<String>): ApiResponse<MangaDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET(MdApi.group)
+    @GET(MdConstants.Api.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
-    @GET("${MdApi.list}/{id}${MdApi.manga}")
+
+    @GET("${MdConstants.Api.list}/{id}${MdConstants.Api.manga}")
     suspend fun viewCustomListManga(@Path("id") id: String, @Query("offset") offset: Int): ApiResponse<MangaListDto>
 
-    @GET("${MdApi.list}/{id}")
+    @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>
 
-    @POST(MdApi.legacyMapping)
+
+
+    @POST(MdConstants.Api.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
 
     @POST(MdConstants.atHomeReportUrl)

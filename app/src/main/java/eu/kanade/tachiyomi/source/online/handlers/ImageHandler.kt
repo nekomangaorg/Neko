@@ -59,7 +59,7 @@ class ImageHandler {
                 else -> {
                     val request = imageRequest(page, isLogged)
                     val response = try {
-                        network.nonRateLimitedClient.newCachelessCallWithProgress(request, page)
+                        network.cdnClient.newCachelessCallWithProgress(request, page)
                             .await()
                     } catch (e: Exception) {
                         if (e !is CancellationException) {
@@ -130,7 +130,7 @@ class ImageHandler {
                     loggycat(tag = tag) { "Time has expired get new at home url isLogged $isLogged" }
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
 
-                    network.cdnService.getAtHomeServer(
+                    network.atHomeService.getAtHomeServer(
                         page.mangaDexChapterId,
                         preferences.usePort443Only(),
                     )

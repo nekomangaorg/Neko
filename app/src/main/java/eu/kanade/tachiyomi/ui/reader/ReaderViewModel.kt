@@ -33,7 +33,7 @@ import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
@@ -282,7 +282,7 @@ class ReaderViewModel(
     }
 
     suspend fun loadChapterURL(urlChapterId: String) {
-        val dbChapter = db.getChapter(MdUtil.chapterSuffix + urlChapterId).executeAsBlocking()
+        val dbChapter = db.getChapter(MdConstants.chapterSuffix + urlChapterId).executeAsBlocking()
         if (dbChapter?.manga_id != null) {
             val dbManga = db.getManga(dbChapter.manga_id!!).executeAsBlocking()
             if (dbManga != null) {
@@ -318,7 +318,7 @@ class ReaderViewModel(
 
             if (chapters.isNotEmpty()) {
                 val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
-                val currentChapter = newChapters.find { it.url == MdUtil.chapterSuffix + urlChapterId }
+                val currentChapter = newChapters.find { it.url == MdConstants.chapterSuffix + urlChapterId }
                 if (currentChapter?.id != null) {
                     withContext(Dispatchers.Main) {
                         init(manga.id!!, currentChapter.id!!)
@@ -740,7 +740,7 @@ class ReaderViewModel(
         val chapter = page.chapter.chapter
 
         // create chapter name so its always sorted correctly  max character is 75
-        val pageName = parseChapterName(chapter.name, page.number.toString(), chapter.scanlator)
+        val pageName = parseChapterName(chapter.name, page.number.toString())
         // take only 150 characters so this file maxes at 225
         val trimmedTitle = (prefix + manga.title).take(150)
 
@@ -760,7 +760,6 @@ class ReaderViewModel(
     private fun parseChapterName(
         chapterName: String,
         pageNumber: String,
-        scanlator: String?,
     ): String {
         val builder = StringBuilder()
         var title = ""

@@ -7,10 +7,43 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 object MdConstants {
+    const val currentSeasonalId = "77430796-6625-4684-b673-ffae5140f337"
+    const val oldSeasonalId = "a153b4e6-1fcc-4f45-a990-f37f989c0d74"
+
     const val baseUrl = "https://mangadex.org"
     const val cdnUrl = "https://uploads.mangadex.org"
+    const val forumUrl = "https://forums.mangadex.org/threads/"
     const val atHomeReportUrl = "https://api.mangadex.network/report"
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
+    const val imageUrlCacheNotFound =
+        "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
+
+    const val chapterSuffix = "/chapter/"
+
+    object Api {
+        const val baseUrl = "https://api.mangadex.org"
+        const val manga = "/manga"
+        const val list = "/list"
+        const val statistics = "/statistics"
+        const val chapter = "/chapter"
+        const val cover = "/cover"
+        const val group = "/group"
+        const val author = "/author"
+        const val userFollows = "/user/follows/manga"
+        const val readingStatusForAllManga = "/manga/status"
+        const val rating = "/rating"
+        const val atHomeServer = "/at-home/server"
+        const val user = "/user"
+        const val userInfo = "$user/me"
+        const val listMigrated = "$list/migrated"
+        const val legacyMapping = "/legacy/mapping"
+
+        const val baseAuthUrl = "https://auth.mangadex.org"
+        private const val auth = "/realms/mangadex/protocol/openid-connect"
+        const val login = "$auth/auth"
+        const val logout = "$auth/logout"
+        const val token = "$auth/token"
+    }
 
     object Login {
         val redirectUri = if (BuildConfig.DEBUG) "neko://mangadex-auth-debug" else "neko://mangadex-auth"
@@ -26,7 +59,7 @@ object MdConstants {
             val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
             val codeChallenge = Base64.encodeToString(digest, encoding)
 
-            return MdApi.baseAuthUrl + MdApi.login.toUri().buildUpon()
+            return Api.baseAuthUrl + Api.login.toUri().buildUpon()
                 .appendQueryParameter("client_id", clientId)
                 .appendQueryParameter("response_type", "code")
                 .appendQueryParameter("redirect_uri", redirectUri)
@@ -35,9 +68,6 @@ object MdConstants {
                 .build().toString()
         }
     }
-
-    const val currentSeasonalId = "77430796-6625-4684-b673-ffae5140f337"
-    const val oldSeasonalId = "a153b4e6-1fcc-4f45-a990-f37f989c0d74"
 
     object Limits {
         const val manga = 20

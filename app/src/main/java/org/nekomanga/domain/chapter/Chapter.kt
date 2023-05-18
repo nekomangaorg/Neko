@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
 
@@ -52,7 +52,7 @@ data class SimpleChapter(
     }
 
     fun commentUrl(threadId: String): String {
-        return MdUtil.forumUrl + threadId
+        return MdConstants.forumUrl + threadId
     }
 
     fun toSChapter(): SChapter {

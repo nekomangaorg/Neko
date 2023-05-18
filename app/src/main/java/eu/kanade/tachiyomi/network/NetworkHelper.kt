@@ -10,14 +10,12 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
+import eu.kanade.tachiyomi.network.services.MangaDexAtHomeService
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
-import eu.kanade.tachiyomi.network.services.MangaDexCdnService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.SimilarService
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.util.UUID
@@ -123,8 +121,12 @@ class NetworkHelper(val context: Context) {
         return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).addInterceptor(loggingInterceptor()).build()
     }
 
-    private fun buildCdnRateLimitedClient(): OkHttpClient {
+    private fun buildAtHomeRateLimitedClient(): OkHttpClient {
         return nonRateLimitedClient.newBuilder().rateLimit(permits = 40, period = 1, unit = TimeUnit.MINUTES).addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
+    }
+
+    private fun buildCdnRateLimitedClient(): OkHttpClient {
+        return nonRateLimitedClient.newBuilder().rateLimit(20).addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
     }
 
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
@@ -143,7 +145,7 @@ class NetworkHelper(val context: Context) {
             .build()
     }
 
-    val nonRateLimitedClient = buildNonRateLimitedClient()
+    private val nonRateLimitedClient = buildNonRateLimitedClient()
 
     val cloudFlareClient = buildCloudFlareClient()
 
@@ -151,13 +153,15 @@ class NetworkHelper(val context: Context) {
 
     val mangadexClient = client.newBuilder().addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
 
-    private val cdnClient = buildCdnRateLimitedClient()
+    val cdnClient = buildCdnRateLimitedClient()
+
+    private val atHomeClient = buildAtHomeRateLimitedClient()
 
     private val authClient = buildRateLimitedAuthenticatedClient()
 
     val headers = Headers.Builder().apply {
         add("User-Agent", "Neko ${BuildConfig.VERSION_NAME}" + System.getProperty("http.agent"))
-        add("Referer", MdUtil.baseUrl)
+        add("Referer", MdConstants.baseUrl)
         add("Content-Type", "application/json")
     }.build()
 
@@ -169,16 +173,16 @@ class NetworkHelper(val context: Context) {
         .client(client)
 
     val service: MangaDexService =
-        jsonRetrofitClient.baseUrl(MdApi.baseUrl)
+        jsonRetrofitClient.baseUrl(MdConstants.Api.baseUrl)
             .client(mangadexClient).build()
             .create(MangaDexService::class.java)
 
-    val cdnService: MangaDexCdnService =
-        jsonRetrofitClient.baseUrl(MdApi.baseUrl)
-            .client(cdnClient).build()
-            .create(MangaDexCdnService::class.java)
+    val atHomeService: MangaDexAtHomeService =
+        jsonRetrofitClient.baseUrl(MdConstants.Api.baseUrl)
+            .client(atHomeClient).build()
+            .create(MangaDexAtHomeService::class.java)
 
-    val authService: MangaDexAuthorizedUserService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
+    val authService: MangaDexAuthorizedUserService = jsonRetrofitClient.baseUrl(MdConstants.Api.baseUrl)
         .client(authClient).build()
         .create(MangaDexAuthorizedUserService::class.java)
 
@@ -195,7 +199,7 @@ class NetworkHelper(val context: Context) {
             val request = chain.request().newBuilder()
                 .removeHeader("User-Agent")
                 .header("User-Agent", "Neko " + System.getProperty("http.agent"))
-                .header("Referer", MdUtil.baseUrl)
+                .header("Referer", MdConstants.baseUrl)
                 .header("Content-Type", "application/json")
                 .header("x-request-id", "Neko-" + UUID.randomUUID())
                 .build()

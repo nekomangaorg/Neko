@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -82,11 +83,12 @@ class V5MigrationService(
                         db.insertManga(manga).executeAsBlocking()
                         val tracks = db.getTracks(manga).executeAsBlocking()
                         tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
-                            it.tracking_url = MdUtil.baseUrl + manga.url
+                            it.tracking_url = MdConstants.baseUrl + manga.url
                             db.insertTrack(it).executeAsBlocking()
                         }
                         actualMigrated++
                     }
+
                     is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*>,
                     -> {
                         responseDto.log(" trying to map legacy id")
@@ -132,11 +134,12 @@ class V5MigrationService(
                                 val newId = dataDto.attributes.newId
                                 val chapter = chapterMap[oldId]!!
                                 chapter.mangadex_chapter_id = newId
-                                chapter.url = MdUtil.chapterSuffix + newId
+                                chapter.url = MdConstants.chapterSuffix + newId
                                 chapter.old_mangadex_id = oldId.toString()
                                 db.insertChapter(chapter).executeAsBlocking()
                             }
                         }
+
                         is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*>,
                         -> {
                             legacyIds.forEach {

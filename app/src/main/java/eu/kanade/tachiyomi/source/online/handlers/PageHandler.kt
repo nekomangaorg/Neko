@@ -56,9 +56,11 @@ class PageHandler {
                         "azuki manga".equals(chapter.scanlator, true) -> {
                             return@withContext azukiHandler.fetchPageList(externalUrl)
                         }
+
                         "mangahot".equals(chapter.scanlator, true) -> {
                             return@withContext mangaHotHandler.fetchPageList(externalUrl)
                         }
+
                         "mangaplus".equals(chapter.scanlator, true) -> {
                             return@withContext mangaPlusHandler.fetchPageList(externalUrl)
                         }
@@ -68,6 +70,7 @@ class PageHandler {
                         "bilibili comics".equals(chapter.scanlator, true) -> {
                             return@withContext bilibiliHandler.fetchPageList(externalUrl)
                         }
+
                         else -> throw Exception("${chapter.scanlator} not supported, try webview")
                     }
                 }
@@ -76,7 +79,7 @@ class PageHandler {
                     throw Exception("This chapter has no pages, it might not be release yet, try refreshing")
                 }
 
-                val atHomeDto = network.cdnService.getAtHomeServer(
+                val atHomeDto = network.atHomeService.getAtHomeServer(
                     chapter.mangadex_chapter_id,
                     preferences.usePort443Only(),
                 ).getOrResultError("trying to get at home response")

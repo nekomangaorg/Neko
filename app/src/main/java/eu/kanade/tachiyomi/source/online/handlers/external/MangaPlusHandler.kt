@@ -32,7 +32,7 @@ class MangaPlusHandler {
     private val json: Json by injectLazy()
 
     val client: OkHttpClient by lazy {
-        Injekt.get<NetworkHelper>().nonRateLimitedClient.newBuilder()
+        Injekt.get<NetworkHelper>().client.newBuilder()
             .addInterceptor { imageIntercept(it) }
             .build()
     }
@@ -50,7 +50,7 @@ class MangaPlusHandler {
     }
 
     private fun Response.asMangaPlusResponse(): MangaPlusResponse = use {
-        json.decodeFromString(body!!.string())
+        json.decodeFromString(body.string())
     }
 
     private fun pageListParse(response: Response): List<Page> {
@@ -82,7 +82,7 @@ class MangaPlusHandler {
 
         val response = chain.proceed(request)
 
-        val image = decodeImage(encryptionKey, response.body!!.bytes())
+        val image = decodeImage(encryptionKey, response.body.bytes())
 
         val body = image.toResponseBody("image/jpeg".toMediaTypeOrNull())
         return response.newBuilder().body(body).build()
