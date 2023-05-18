@@ -69,7 +69,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -1547,7 +1547,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 R.string.chapter_,
                 decimalFormat.format(chapter.chapter_number),
             )
-        }, $pageNumber, <${MdUtil.baseUrl + manga.url}>"
+        }, $pageNumber, <${MdConstants.baseUrl + manga.url}>"
 
         val stream = file.getUriCompat(this)
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -1608,7 +1608,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         if (threadId == null) {
                             toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
                         } else {
-                            this@ReaderActivity.openInBrowser(MdUtil.forumUrl + threadId)
+                            this@ReaderActivity.openInBrowser(MdConstants.forumUrl + threadId)
                         }
                     }
                 }

@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
-import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.loggycat
 import java.util.concurrent.TimeUnit
@@ -53,7 +52,7 @@ class MangaDexLoginHelper {
         val error = kotlin.runCatching {
             val data = networkHelper.client.newCall(
                 POST(
-                    url = MdApi.baseAuthUrl + MdApi.token,
+                    url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
                     body = formBody,
                 ),
             ).await().parseAs<LoginResponseDto>()
@@ -88,7 +87,7 @@ class MangaDexLoginHelper {
         val error = kotlin.runCatching {
             val data = networkHelper.mangadexClient.newCall(
                 POST(
-                    url = MdApi.baseAuthUrl + MdApi.token,
+                    url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
                     body = loginFormBody,
                 ),
             ).await().parseAs<LoginResponseDto>()
@@ -126,7 +125,7 @@ class MangaDexLoginHelper {
         val error = kotlin.runCatching {
             networkHelper.mangadexClient.newCall(
                 POST(
-                    url = MdApi.baseAuthUrl + MdApi.logout,
+                    url = MdConstants.Api.baseAuthUrl + MdConstants.Api.logout,
                     headers = Headers.Builder().add("Authorization", "Bearer $sessionToken").build(),
                     body = formBody,
                 ),

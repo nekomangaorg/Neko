@@ -150,7 +150,7 @@ class ApiMangaParser {
     ): SChapter {
         val chapter = SChapter.create()
         val attributes = networkChapter.attributes
-        chapter.url = MdUtil.chapterSuffix + networkChapter.id
+        chapter.url = MdConstants.chapterSuffix + networkChapter.id
 
         chapter.name = networkChapter.buildChapterName(chapter, lastChapterNumber)
         // Convert from unix time

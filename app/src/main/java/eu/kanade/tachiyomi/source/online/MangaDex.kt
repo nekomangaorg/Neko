@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -228,7 +227,7 @@ open class MangaDex : HttpSource() {
     }
 
     override fun getChapterUrl(simpleChapter: SimpleChapter): String {
-        return MdUtil.baseUrl + simpleChapter.url
+        return MdConstants.baseUrl + simpleChapter.url
     }
 
     override val headers: Headers

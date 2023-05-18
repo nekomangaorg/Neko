@@ -10,17 +10,6 @@ import org.jsoup.parser.Parser
 class MdUtil {
 
     companion object {
-        const val cdnUrl = "https://uploads.mangadex.org"
-        const val baseUrl = "https://mangadex.org"
-        const val forumUrl = "https://forums.mangadex.org/threads/"
-        const val apiUrl = "https://api.mangadex.org"
-        const val imageUrlCacheNotFound =
-            "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
-        const val chapterSuffix = "/chapter/"
-
-        const val mangaUrl = "$apiUrl/manga"
-
-        const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
 
         /**
          * Get the manga offset pages are 1 based, so subtract 1
@@ -41,22 +30,6 @@ class MdUtil {
                 prettyPrint = true
             }
 
-        val validOneShotFinalChapters = listOf("0", "1")
-
-        val englishDescriptionTags = listOf(
-            "[b][u]English:",
-            "[b][u]English",
-            "English:",
-            "English :",
-            "[English]:",
-            "English Translaton:",
-            "[B][ENG][/B]",
-        )
-
-        val bbCodeToRemove = listOf(
-            "list", "*", "hr", "u", "b", "i", "s", "center", "spoiler=",
-        )
-
         // Get the ID from the manga url
         fun getMangaUUID(url: String): String {
             return url.trimEnd('/').substringAfterLast("/")
@@ -64,23 +37,8 @@ class MdUtil {
 
         fun getChapterUUID(url: String) = url.substringAfterLast("/")
 
-        fun cleanString(string: String): String {
-            var cleanedString = string
-
-            bbCodeToRemove.forEach {
-                cleanedString = cleanedString.replace("[$it]", "", true)
-                    .replace("[/$it]", "", true)
-            }
-
-            val bbRegex =
-                """\[(\w+)[^]]*](.*?)\[/\1]""".toRegex()
-
-            // Recursively remove nested bbcode
-            while (bbRegex.containsMatchIn(cleanedString)) {
-                cleanedString = cleanedString.replace(bbRegex, "$2")
-            }
-
-            return Parser.unescapeEntities(cleanedString, false)
+        fun cleanString(dirtyString: String): String {
+            return Parser.unescapeEntities(dirtyString, false)
         }
 
         val apiDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
@@ -98,7 +56,7 @@ class MdUtil {
                 2 -> ".256.jpg"
                 else -> ""
             }
-            return "$cdnUrl/covers/$dexId/$fileName$coverQualitySuffix"
+            return "${MdConstants.cdnUrl}/covers/$dexId/$fileName$coverQualitySuffix"
         }
 
         fun getLangsToShow(preferences: PreferencesHelper) =
@@ -108,13 +66,15 @@ class MdUtil {
             titleMap: Map<String, String?>,
             originalLanguage: String,
         ): String {
-            return titleMap["en"]
+            return titleMap[MdLang.ENGLISH.lang]
                 ?: titleMap[originalLanguage]
                 ?: titleMap["$originalLanguage-ro"]
-                ?: titleMap["jp"]
-                ?: titleMap["ja"]
-                ?: titleMap["kr"]
-                ?: titleMap["zh"]
+                ?: titleMap[MdLang.JAPANESE.lang]
+                ?: titleMap["${MdLang.JAPANESE.lang}-ro"]
+                ?: titleMap[MdLang.KOREAN.lang]
+                ?: titleMap["${MdLang.KOREAN.lang}-ro"]
+                ?: titleMap[MdLang.CHINESE_TRAD.lang]
+                ?: titleMap[MdLang.CHINESE_SIMPLIFIED.lang]
                 ?: titleMap.entries.firstOrNull()?.value ?: ""
         }
     }

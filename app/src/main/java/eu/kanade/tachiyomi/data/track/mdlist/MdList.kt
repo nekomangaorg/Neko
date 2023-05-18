@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Dispatchers
@@ -139,7 +140,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         val track = Track.create(TrackManager.MDLIST)
         track.manga_id = manga.id!!
         track.status = FollowStatus.UNFOLLOWED.int
-        track.tracking_url = MdUtil.baseUrl + manga.url
+        track.tracking_url = MdConstants.baseUrl + manga.url
         track.title = manga.title
         return track
     }
@@ -152,7 +153,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         val track = TrackSearch.create(TrackManager.MDLIST).apply {
             this.manga_id = manga.id!!
             this.status = FollowStatus.UNFOLLOWED.int
-            this.tracking_url = MdUtil.baseUrl + manga.url
+            this.tracking_url = MdConstants.baseUrl + manga.url
             this.title = manga.title
         }
 

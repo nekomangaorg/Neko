@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -129,6 +129,7 @@ class FollowsHandler {
                     response.log("trying to update reading status for manga $mangaId")
                     false
                 }
+
                 else -> true
             }
         }
@@ -192,7 +193,7 @@ class FollowsHandler {
                 ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaUUID]
             val track = Track.create(TrackManager.MDLIST).apply {
                 status = followStatus.int
-                tracking_url = "$baseUrl/title/$mangaUUID"
+                tracking_url = "${MdConstants.baseUrl}/title/$mangaUUID"
                 score = rating?.rating?.toFloat() ?: 0f
             }
             return@withContext track

@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
@@ -38,7 +38,7 @@ abstract class HttpSource : Source {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    open val baseUrl = MdUtil.baseUrl
+    open val baseUrl = MdConstants.baseUrl
 
     override val name = "MangaDex"
 

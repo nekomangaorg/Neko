@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.text.isDigitsOnly
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 
 data class AnimePlanet(override val id: String) : ExternalLink() {
     override val name = "AnimePlanet"
@@ -48,6 +47,7 @@ data class MangaUpdatesLink(override val id: String) : ExternalLink() {
     override val name = "MangaUpdates"
     override val logo = R.drawable.ic_tracker_manga_updates_logo
     override val logoColor: Long = 0xFF89a4c3
+
     // 200591 is the last ID of the old IDs
     override fun getUrl() = when (id.isDigitsOnly() && id.toLong() <= 200591) {
         true -> "https://www.mangaupdates.com/series.html?id=$id"
@@ -59,14 +59,14 @@ data class Dex(override val id: String) : ExternalLink() {
     override val name = "MangaDex"
     override val logo = R.drawable.ic_tracker_mangadex_logo
     override val logoColor: Long = 0xFF2B3035
-    override fun getUrl() = "${MdUtil.baseUrl}/title/$id"
+    override fun getUrl() = "${MdConstants.baseUrl}/title/$id"
 }
 
 data class DexComments(override val id: String) : ExternalLink() {
     override val name = "Comments"
     override val logo = R.drawable.ic_tracker_mangadex_logo
     override val logoColor: Long = 0xFF2B3035
-    override fun getUrl() = "${MdUtil.forumUrl}${id}"
+    override fun getUrl() = "${MdConstants.forumUrl}${id}"
 }
 
 data class DexApi(override val id: String) : ExternalLink() {
@@ -74,7 +74,7 @@ data class DexApi(override val id: String) : ExternalLink() {
     override val logo = R.drawable.ic_tracker_mangadex_logo
     override val logoColor: Long = 0xFF2B3035
     override fun getUrl() =
-        "${MdUtil.apiUrl}/manga/$id/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc"
+        "${MdConstants.Api.baseUrl}/manga/$id/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc"
 }
 
 data class Raw(override val id: String) : ExternalLink() {

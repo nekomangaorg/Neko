@@ -1673,7 +1673,7 @@ class MangaDetailPresenter(
                             ),
                         )
                     } else {
-                        context.openInWebView(MdUtil.forumUrl + threadId)
+                        context.openInWebView(MdConstants.forumUrl + threadId)
                     }
                 }
             }
