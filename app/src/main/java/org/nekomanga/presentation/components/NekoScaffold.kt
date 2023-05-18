@@ -56,6 +56,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -228,11 +229,13 @@ private fun NoTitleSearchTopAppBar(
                         searchText = it
                         onSearchText(it)
                     },
-                    colors = TextFieldDefaults.textFieldColors(
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        containerColor = Color.Transparent,
-                        cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current),
                     ),
                     trailingIcon = {
                         AnimatedVisibility(visible = searchText.isNotBlank(), enter = fadeIn(), exit = fadeOut()) {
@@ -311,12 +314,7 @@ private fun TitleOnlyTopAppBar(
         ),
         modifier = Modifier.statusBarsPadding(),
         title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            AutoSizeText(text = title, style = MaterialTheme.typography.titleLarge.copy(letterSpacing = (-.6).sp))
         },
         navigationIcon = {
             if (incognitoMode) {
