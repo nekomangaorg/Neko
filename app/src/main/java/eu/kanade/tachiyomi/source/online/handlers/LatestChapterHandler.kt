@@ -7,6 +7,7 @@ import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
+import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -20,17 +21,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import org.nekomanga.domain.network.ResultError
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class LatestChapterHandler {
-    private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
+    private val networkHelper: NetworkHelper by injectLazy()
+    private val service: MangaDexService by lazy { networkHelper.service }
+    private val authService: MangaDexAuthorizedUserService by lazy { networkHelper.authService }
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
     private val uniqueManga = mutableSetOf<String>()
 
-    suspend fun getPage(page: Int = 1, blockedScanlatorUUIDs: List<String>, limit: Int = MdConstants.Limits.latest): Result<MangaListPage, ResultError> {
+    suspend fun getPage(
+        page: Int = 1,
+        blockedScanlatorUUIDs: List<String>,
+        limit: Int = MdConstants.Limits.latest,
+        feedType: MdConstants.FeedType = MdConstants.FeedType.Latest,
+    ): Result<MangaListPage, ResultError> {
         if (page == 1) uniqueManga.clear()
         return withContext(Dispatchers.IO) {
             val offset = MdUtil.getLatestChapterListOffset(page)
@@ -39,11 +45,15 @@ class LatestChapterHandler {
 
             val contentRatings = preferencesHelper.contentRatingSelections().toList()
 
-            return@withContext service.latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
-                .getOrResultError("getting latest chapters")
-                .andThen {
-                    latestChapterParse(it)
-                }
+            return@withContext when (feedType) {
+                MdConstants.FeedType.Latest -> service.latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+                    .getOrResultError("getting latest chapters")
+
+                MdConstants.FeedType.Subscription -> authService.subscriptionFeed(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+                    .getOrResultError("getting subscription feed")
+            }.andThen {
+                latestChapterParse(it)
+            }
         }
     }
 

@@ -32,6 +32,9 @@ sealed interface DisplayScreenType : Parcelable {
     data class LatestChapters(val titleRes: Int = R.string.latest) : DisplayScreenType
 
     @Parcelize
+    data class SubscriptionFeed(val titleRes: Int = R.string.subscription_feed) : DisplayScreenType
+
+    @Parcelize
     data class RecentlyAdded(val titleRes: Int = R.string.recently_added) : DisplayScreenType
 
     @Parcelize

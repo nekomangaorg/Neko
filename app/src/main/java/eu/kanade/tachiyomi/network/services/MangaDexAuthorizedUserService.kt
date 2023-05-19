@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.CustomListListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
@@ -30,6 +31,16 @@ interface MangaDexAuthorizedUserService {
     @Headers("Cache-Control: no-cache")
     @GET(MdConstants.Api.listMigrated)
     suspend fun isMigrated(): ApiResponse<String>
+
+    @Headers("Cache-Control: no-cache")
+    @GET(MdConstants.Api.subscriptionFeed)
+    suspend fun subscriptionFeed(
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+        @Query("translatedLanguage[]") translatedLanguages: List<String>,
+        @Query("contentRating[]") contentRating: List<String>,
+        @Query("excludedGroups[]") blockedScanlators: List<String>,
+    ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.user}${MdConstants.Api.list}?limit=100")

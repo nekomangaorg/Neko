@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
+import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -29,7 +29,7 @@ class FollowsSyncService {
     val db: DatabaseHelper = Injekt.get()
     val sourceManager: SourceManager = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
-    val followsHandler: FollowsHandler = Injekt.get()
+    val followsHandler: SubscriptionHandler = Injekt.get()
 
     /**
      * Syncs follows list manga into library based off the preference

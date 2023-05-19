@@ -37,7 +37,7 @@ import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
+import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
@@ -286,7 +286,7 @@ class SettingsAdvancedController : SettingsController() {
                 onClick {
                     launchIO {
                         val db = Injekt.get<DatabaseHelper>()
-                        val followsHandler = Injekt.get<FollowsHandler>()
+                        val followsHandler = Injekt.get<SubscriptionHandler>()
                         val trackManager: TrackManager = Injekt.get()
                         db.getLibraryMangaList().executeAsBlocking().forEach {
                             followsHandler.updateFollowStatus(

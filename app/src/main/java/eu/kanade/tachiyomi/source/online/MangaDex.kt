@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.uuid
-import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.ListHandler
@@ -24,6 +23,7 @@ import eu.kanade.tachiyomi.source.online.handlers.ListResults
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
+import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
@@ -48,7 +48,7 @@ open class MangaDex : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
 
-    private val followsHandler: FollowsHandler by injectLazy()
+    private val followsHandler: SubscriptionHandler by injectLazy()
 
     private val mangaHandler: MangaHandler by injectLazy()
 
@@ -128,7 +128,7 @@ open class MangaDex : HttpSource() {
         return listHandler.retrieveList(listId)
     }
 
-    suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>): Result<List<ListResults>, ResultError> {
+    suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>, showSubscriptionFeed: Boolean): Result<List<ListResults>, ResultError> {
         return withIOContext {
             binding {
                 val seasonal = async {
@@ -136,6 +136,17 @@ open class MangaDex : HttpSource() {
                         Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
                     }
                         .bind()
+                }
+
+                val subscriptionFeed = async {
+                    if (showSubscriptionFeed) {
+                        latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs, limit = MdConstants.Limits.latestSmaller, feedType = MdConstants.FeedType.Subscription)
+                            .andThen { mangaListPage ->
+                                Ok(ListResults(displayScreenType = DisplayScreenType.SubscriptionFeed(), sourceManga = mangaListPage.sourceManga))
+                            }.bind()
+                    } else {
+                        null
+                    }
                 }
 
                 val popularNewTitles = async {
@@ -158,7 +169,7 @@ open class MangaDex : HttpSource() {
                     }.bind()
                 }
 
-                listOf(popularNewTitles.await(), latestChapter.await(), seasonal.await(), recentlyAdded.await())
+                listOfNotNull(subscriptionFeed.await(), popularNewTitles.await(), latestChapter.await(), seasonal.await(), recentlyAdded.await())
             }
         }
     }
@@ -171,8 +182,8 @@ open class MangaDex : HttpSource() {
         return searchHandler.popularNewTitles(page)
     }
 
-    suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>): Result<MangaListPage, ResultError> {
-        return latestChapterHandler.getPage(page, blockedScanlatorUUIDs)
+    suspend fun latestChapters(page: Int, blockedScanlatorUUIDs: List<String>, feedType: MdConstants.FeedType): Result<MangaListPage, ResultError> {
+        return latestChapterHandler.getPage(page, blockedScanlatorUUIDs, feedType = feedType)
     }
 
     suspend fun getMangaDetails(mangaUUID: String, fetchArtwork: Boolean = true): Result<Pair<SManga, List<SourceArtwork>>, ResultError> {

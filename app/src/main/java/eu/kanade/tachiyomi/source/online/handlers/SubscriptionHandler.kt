@@ -38,7 +38,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class FollowsHandler {
+class SubscriptionHandler {
 
     val preferences: PreferencesHelper by injectLazy()
     val statusHandler: StatusHandler by injectLazy()

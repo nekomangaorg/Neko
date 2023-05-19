@@ -29,6 +29,7 @@ object MdConstants {
         const val cover = "/cover"
         const val group = "/group"
         const val author = "/author"
+        const val subscriptionFeed = "/subscription/feed"
         const val userFollows = "/user/follows/manga"
         const val readingStatusForAllManga = "/manga/status"
         const val rating = "/rating"
@@ -97,6 +98,11 @@ object MdConstants {
         const val coverArt = "cover_art"
         const val manga = "manga"
         const val scanlator = "scanlation_group"
+    }
+
+    enum class FeedType {
+        Subscription,
+        Latest
     }
 
     object ContentRating {
