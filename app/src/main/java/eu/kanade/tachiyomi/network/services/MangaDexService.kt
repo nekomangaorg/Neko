@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
-import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -47,7 +46,7 @@ interface MangaDexService {
     @GET("${MdConstants.Api.manga}?&order[createdAt]=desc&includes[]=${MdConstants.Types.coverArt}")
     suspend fun recentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
-    @GET("${MdConstants.Api.manga}?&order[${MdConstants.Sort.bookmarkCount}]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
+    @GET("${MdConstants.Api.manga}?&order[${MdConstants.Sort.subscribedCount}]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
     suspend fun popularNewReleases(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
     @GET("${MdConstants.Api.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
@@ -110,14 +109,11 @@ interface MangaDexService {
     @GET(MdConstants.Api.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
-
     @GET("${MdConstants.Api.list}/{id}${MdConstants.Api.manga}")
     suspend fun viewCustomListManga(@Path("id") id: String, @Query("offset") offset: Int): ApiResponse<MangaListDto>
 
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>
-
-
 
     @POST(MdConstants.Api.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>

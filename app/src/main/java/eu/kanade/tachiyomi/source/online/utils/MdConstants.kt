@@ -11,7 +11,7 @@ object MdConstants {
     const val oldSeasonalId = "a153b4e6-1fcc-4f45-a990-f37f989c0d74"
 
     const val baseUrl = "https://mangadex.org"
-    const val cdnUrl = "https://uploads.mangadex.org"
+    const val cdnUrl = "https://uploads.mangadex.dev"
     const val forumUrl = "https://forums.mangadex.org/threads/"
     const val atHomeReportUrl = "https://api.mangadex.network/report"
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
@@ -21,7 +21,7 @@ object MdConstants {
     const val chapterSuffix = "/chapter/"
 
     object Api {
-        const val baseUrl = "https://api.mangadex.org"
+        const val baseUrl = "https://api.mangadex.dev"
         const val manga = "/manga"
         const val list = "/list"
         const val statistics = "/statistics"
@@ -38,7 +38,7 @@ object MdConstants {
         const val listMigrated = "$list/migrated"
         const val legacyMapping = "/legacy/mapping"
 
-        const val baseAuthUrl = "https://auth.mangadex.org"
+        const val baseAuthUrl = "https://auth.mangadex.dev"
         private const val auth = "/realms/mangadex/protocol/openid-connect"
         const val login = "$auth/auth"
         const val logout = "$auth/logout"
@@ -81,7 +81,7 @@ object MdConstants {
     object Sort {
         const val latest = "latestUploadedChapter"
         const val relevance = "relevance"
-        const val bookmarkCount = "bookmarkCount"
+        const val subscribedCount = "subscribedCount"
         const val createdAt = "createdAt"
         const val updatedAt = "updatedAt"
         const val title = "title"
