@@ -58,8 +58,8 @@ class BrowseRepository(
         }
     }
 
-    suspend fun getList(listUuid: String): Result<List<DisplayManga>, ResultError> {
-        return mangaDex.fetchList(listUuid, false).andThen { resultListPage ->
+    suspend fun getList(listUuid: String, page: Int): Result<List<DisplayManga>, ResultError> {
+        return mangaDex.fetchList(listUuid, page, false).andThen { resultListPage ->
             val displayManga = resultListPage.sourceManga.map { it.toDisplayManga(db, sourceId = mangaDex.id) }.toImmutableList()
             Ok(displayManga)
         }

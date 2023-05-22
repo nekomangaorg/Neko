@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.model.ResultListPage
@@ -33,7 +34,7 @@ class ListHandler {
 
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
-    suspend fun retrieveList(listUUID: String, privateList: Boolean): Result<ListResults, ResultError> {
+    suspend fun retrieveList(listUUID: String, page: Int, privateList: Boolean): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
 
             val enabledContentRatings = preferencesHelper.contentRatingSelections()
@@ -41,9 +42,12 @@ class ListHandler {
             val coverQuality = preferencesHelper.thumbnailQuality()
 
             val queryParameters =
-                mutableMapOf(
-                    "contentRating[]" to contentRatings,
-                    "offset" to 0,
+                ProxyRetrofitQueryMap(
+                    mutableMapOf(
+                        MdConstants.SearchParameters.contentRatingParam to contentRatings,
+                        MdConstants.SearchParameters.offset to MdUtil.getMangaListOffset(page),
+                        MdConstants.SearchParameters.limit to MdConstants.Limits.manga,
+                    ),
                 )
 
             when (privateList) {
@@ -55,18 +59,19 @@ class ListHandler {
                     val listName = customListDto.data.attributes.name
 
                     when (privateList) {
-                        true -> authService.viewCustomListManga(listUUID, 0)
-                        false -> service.viewCustomListManga(listUUID, 0)
+                        true -> authService.viewCustomListManga(listUUID, queryParameters)
+                        false -> service.viewCustomListManga(listUUID, queryParameters)
                     }
                         .getOrResultError("Error getting list manga")
                         .andThen { mangaListDto ->
                             when (mangaListDto.data.isEmpty()) {
-                                true -> Ok(ListResults(DisplayScreenType.List(listName, listUUID), persistentListOf()))
+                                true -> Ok(ListResults(DisplayScreenType.List(listName, listUUID), persistentListOf(), false))
                                 false -> {
                                     Ok(
                                         ListResults(
                                             displayScreenType = DisplayScreenType.List(listName, listUUID),
                                             sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) }.toImmutableList(),
+                                            hasNextPage = mangaListDto.limit + mangaListDto.offset < mangaListDto.total,
                                         ),
                                     )
                                 }
@@ -99,4 +104,6 @@ class ListHandler {
     }
 }
 
-data class ListResults(val displayScreenType: DisplayScreenType, val sourceManga: ImmutableList<SourceManga>)
+data class ListResults(
+    val displayScreenType: DisplayScreenType, val sourceManga: ImmutableList<SourceManga>, val hasNextPage: Boolean = false,
+)

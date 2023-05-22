@@ -128,15 +128,15 @@ open class MangaDex : HttpSource() {
         return listHandler.retrieveUserLists(page)
     }
 
-    suspend fun fetchList(listId: String, privateList: Boolean): Result<ListResults, ResultError> {
-        return listHandler.retrieveList(listId, privateList)
+    suspend fun fetchList(listId: String, page: Int, privateList: Boolean): Result<ListResults, ResultError> {
+        return listHandler.retrieveList(listId, page, privateList)
     }
 
     suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>, showSubscriptionFeed: Boolean): Result<List<ListResults>, ResultError> {
         return withIOContext {
             binding {
                 val seasonal = async {
-                    fetchList(listId, false).andThen { listResults ->
+                    fetchList(listId, 1, false).andThen { listResults ->
                         Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
                     }
                         .bind()

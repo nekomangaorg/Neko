@@ -110,7 +110,7 @@ interface MangaDexService {
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
 
     @GET("${MdConstants.Api.list}/{id}${MdConstants.Api.manga}")
-    suspend fun viewCustomListManga(@Path("id") id: String, @Query("offset") offset: Int): ApiResponse<MangaListDto>
+    suspend fun viewCustomListManga(@Path("id") id: String, @QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>

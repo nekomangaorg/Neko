@@ -287,7 +287,7 @@ class BrowsePresenter(
                                     state.copy(error = UiText.String("Invalid List UUID"), initialLoading = false)
                                 }
                             } else {
-                                browseRepository.getList(uuid).onFailure {
+                                browseRepository.getList(uuid, 1).onFailure {
                                     _browseScreenState.update { state ->
                                         state.copy(error = UiText.String(it.message()), initialLoading = false)
                                     }
@@ -302,7 +302,6 @@ class BrowsePresenter(
                                             ),
                                             initialLoading = false,
                                             pageLoading = false,
-                                            endReached = true,
                                         )
                                     }
                                 }
@@ -358,7 +357,7 @@ class BrowsePresenter(
                     if (!_browseScreenState.value.handledIncomingQuery) {
                         _browseScreenState.update { it.copy(handledIncomingQuery = true) }
                     }
-                    browseRepository.getList(uuid).onFailure {
+                    browseRepository.getList(uuid, 1).onFailure {
                         _browseScreenState.update { state ->
                             state.copy(error = UiText.String(it.message()), initialLoading = false)
                         }
