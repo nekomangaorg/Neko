@@ -1,10 +1,6 @@
 package eu.kanade.tachiyomi.jobs.follows
 
-import com.github.michaelbull.result.onFailure
-import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -15,11 +11,9 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
-import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -40,55 +34,56 @@ class FollowsSyncService {
         completeNotification: () -> Unit,
     ): Int {
         return withContext(Dispatchers.IO) {
-            loggycat { "Starting from MangaDex sync" }
-            val count = AtomicInteger(0)
-            val countOfAdded = AtomicInteger(0)
+            0
+            /*  loggycat { "Starting from MangaDex sync" }
+              val count = AtomicInteger(0)
+              val countOfAdded = AtomicInteger(0)
 
-            val syncFollowStatusInts =
-                preferences.mangadexSyncToLibraryIndexes().get().map { it.toInt() }
+              val syncFollowStatusInts =
+                  preferences.mangadexSyncToLibraryIndexes().get().map { it.toInt() }
 
-            sourceManager.mangaDex.fetchAllFollows().onFailure {
-                errorNotification((it as? ResultError.Generic)?.errorString ?: "Error fetching follows")
-            }.onSuccess { unfilteredManga ->
+              sourceManager.mangaDex.fetchAllFollows().onFailure {
+                  errorNotification((it as? ResultError.Generic)?.errorString ?: "Error fetching follows")
+              }.onSuccess { unfilteredManga ->
 
-                val listManga = unfilteredManga.groupBy { FollowStatus.fromStringRes(it.displayTextRes).int }.filter { it.key in syncFollowStatusInts }.values.flatten()
+                  val listManga = unfilteredManga.groupBy { FollowStatus.fromStringRes(it.displayTextRes).int }.filter { it.key in syncFollowStatusInts }.values.flatten()
 
-                loggycat { "total number from mangadex is ${listManga.size}" }
+                  loggycat { "total number from mangadex is ${listManga.size}" }
 
-                val categories = db.getCategories().executeAsBlocking()
-                val defaultCategoryId = preferences.defaultCategory()
-                val defaultCategory = categories.find { it.id == defaultCategoryId }
+                  val categories = db.getCategories().executeAsBlocking()
+                  val defaultCategoryId = preferences.defaultCategory()
+                  val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-                listManga.forEach { networkManga ->
-                    updateNotification(networkManga.title, count.andIncrement, listManga.size)
+                  listManga.forEach { networkManga ->
+                      updateNotification(networkManga.title, count.andIncrement, listManga.size)
 
-                    var dbManga = db.getManga(networkManga.url, sourceManager.mangaDex.id)
-                        .executeAsBlocking()
-                    if (dbManga == null) {
-                        dbManga = Manga.create(
-                            networkManga.url,
-                            networkManga.title,
-                            sourceManager.mangaDex.id,
-                        )
-                        dbManga.date_added = Date().time
-                    }
+                      var dbManga = db.getManga(networkManga.url, sourceManager.mangaDex.id)
+                          .executeAsBlocking()
+                      if (dbManga == null) {
+                          dbManga = Manga.create(
+                              networkManga.url,
+                              networkManga.title,
+                              sourceManager.mangaDex.id,
+                          )
+                          dbManga.date_added = Date().time
+                      }
 
-                    // Increment and update if it is not already favorited
-                    if (!dbManga.favorite) {
-                        countOfAdded.incrementAndGet()
-                        dbManga.favorite = true
-                        if (defaultCategory != null) {
-                            val mc = MangaCategory.create(dbManga, defaultCategory)
-                            db.setMangaCategories(listOf(mc), listOf(dbManga))
-                        }
+                      // Increment and update if it is not already favorited
+                      if (!dbManga.favorite) {
+                          countOfAdded.incrementAndGet()
+                          dbManga.favorite = true
+                          if (defaultCategory != null) {
+                              val mc = MangaCategory.create(dbManga, defaultCategory)
+                              db.setMangaCategories(listOf(mc), listOf(dbManga))
+                          }
 
-                        db.insertManga(dbManga).executeAsBlocking()
-                    }
-                }
-            }
+                          db.insertManga(dbManga).executeAsBlocking()
+                      }
+                  }
+              }
 
-            completeNotification()
-            countOfAdded.get()
+              completeNotification()
+              countOfAdded.get()*/
         }
     }
 

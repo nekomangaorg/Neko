@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.DisplayResult
@@ -60,7 +59,7 @@ class BrowseRepository(
     }
 
     suspend fun getList(listUuid: String): Result<List<DisplayManga>, ResultError> {
-        return mangaDex.fetchList(listUuid).andThen { resultListPage ->
+        return mangaDex.fetchList(listUuid, false).andThen { resultListPage ->
             val displayManga = resultListPage.sourceManga.map { it.toDisplayManga(db, sourceId = mangaDex.id) }.toImmutableList()
             Ok(displayManga)
         }
@@ -75,6 +74,13 @@ class BrowseRepository(
 
     suspend fun getGroups(groupQuery: String): Result<List<DisplayResult>, ResultError> {
         return mangaDex.searchForGroup(groupQuery).andThen { resultListPage ->
+            val displayManga = resultListPage.results.map { it.toDisplayResult() }
+            Ok(displayManga)
+        }
+    }
+
+    suspend fun getLists(page: Int): Result<List<DisplayResult>, ResultError> {
+        return mangaDex.fetchUserLists(page).andThen { resultListPage ->
             val displayManga = resultListPage.results.map { it.toDisplayResult() }
             Ok(displayManga)
         }
@@ -109,13 +115,6 @@ class BrowseRepository(
                     )
                 }
         }
-    }
-
-    suspend fun getFollows(): Result<ImmutableList<DisplayManga>, ResultError> {
-        return mangaDex.fetchAllFollows()
-            .andThen { sourceManga ->
-                Ok(sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toImmutableList())
-            }
     }
 }
 

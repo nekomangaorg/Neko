@@ -210,20 +210,20 @@ class BrowsePresenter(
         }
     }
 
-    private fun getFollows(forceUpdate: Boolean) {
+    private fun getListPage(forceUpdate: Boolean) {
         presenterScope.launchIO {
             if (!isOnline()) return@launchIO
-            if (forceUpdate || _browseScreenState.value.displayMangaHolder.resultType != BrowseScreenType.Follows) {
+            if (forceUpdate || _browseScreenState.value.displayMangaHolder.resultType != BrowseScreenType.Lists) {
                 _browseScreenState.update { state ->
                     state.copy(initialLoading = true)
                 }
-                browseRepository.getFollows().onFailure {
+                browseRepository.getLists(1).onFailure {
                     _browseScreenState.update { state ->
                         state.copy(error = UiText.String(it.message()), initialLoading = false)
                     }
-                }.onSuccess {
-                    _browseScreenState.update { state ->
-                        state.copy(displayMangaHolder = DisplayMangaHolder(BrowseScreenType.Follows, it.toImmutableList(), it.filterVisibility(preferences).toImmutableList()), initialLoading = false)
+                }.onSuccess { dr ->
+                    _browseScreenState.update {
+                        it.copy(otherResults = dr.toImmutableList(), screenType = BrowseScreenType.Lists, initialLoading = false)
                     }
                 }
             }
@@ -725,7 +725,7 @@ class BrowsePresenter(
     fun changeScreenType(browseScreenType: BrowseScreenType, forceUpdate: Boolean = false) {
         presenterScope.launch {
             when (browseScreenType) {
-                BrowseScreenType.Follows -> getFollows(forceUpdate)
+                BrowseScreenType.Lists -> getListPage(forceUpdate)
                 BrowseScreenType.Filter -> getSearchPage()
                 else -> Unit
             }

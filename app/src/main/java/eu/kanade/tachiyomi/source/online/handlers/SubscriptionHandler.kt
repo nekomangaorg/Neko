@@ -1,10 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.getOrElse
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
@@ -14,26 +9,16 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
-import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
-import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
-import eu.kanade.tachiyomi.source.online.utils.toSourceManga
-import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
-import org.nekomanga.domain.manga.SourceManga
-import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -41,62 +26,7 @@ import uy.kohesive.injekt.injectLazy
 class SubscriptionHandler {
 
     val preferences: PreferencesHelper by injectLazy()
-    val statusHandler: StatusHandler by injectLazy()
     private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkHelper>().authService }
-
-    /**
-     * fetch all follows
-     */
-    suspend fun fetchAllFollows(): Result<List<SourceManga>, ResultError> {
-        return withContext(Dispatchers.IO) {
-            return@withContext runCatching {
-                val readingFuture = async {
-                    statusHandler.fetchReadingStatusForAllManga()
-                }
-
-                fetchOffset(0).andThen { mangaListDto ->
-                    Ok(
-                        when (mangaListDto.total > mangaListDto.limit) {
-                            true -> fetchRestOfFollows(mangaListDto.limit, mangaListDto.total) + mangaListDto
-                            false -> listOf(mangaListDto)
-                        }.map { it.data }.flatten(),
-                    )
-                }
-                    .andThen { allResults ->
-                        Ok(allFollowsParser(allResults, readingFuture.await()))
-                    }
-            }.getOrElse {
-                loggycat(LogPriority.ERROR, it) { "Error fetching all follows" }
-                Err(ResultError.Generic("Unknown error fetching all follows"))
-            }
-        }
-    }
-
-    private suspend fun fetchRestOfFollows(limit: Int, total: Int): List<MangaListDto> {
-        return withContext(Dispatchers.IO) {
-            val totalRequestNo = (total / limit)
-
-            (1..totalRequestNo).map { pos ->
-                async {
-                    fetchOffset(pos * limit)
-                }
-            }.awaitAll().mapNotNull { it.getOrElse { null } }
-        }
-    }
-
-    private suspend fun fetchOffset(offset: Int): Result<MangaListDto, ResultError> {
-        return authService.userFollowList(offset).getOrResultError("Failed to get follows")
-    }
-
-    private fun allFollowsParser(mangaDataDtoList: List<MangaDataDto>, readingStatusMap: Map<String, String?>): List<SourceManga> {
-        val coverQuality = preferences.thumbnailQuality()
-        return mangaDataDtoList.asSequence().map {
-            val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
-            it.toSourceManga(coverQuality, displayTextRes = followStatus.stringRes)
-        }
-            .sortedBy { it.title }
-            .toList()
-    }
 
     /**
      * Change the status of a manga
@@ -133,35 +63,6 @@ class SubscriptionHandler {
                 else -> true
             }
         }
-    }
-
-    suspend fun updateReadingProgress(track: Track): Boolean {
-        return true
-        /*return withContext(Dispatchers.IO) {
-            val mangaID = getMangaId(track.tracking_url)
-            val formBody = FormBody.Builder()
-                .add("volume", "0")
-                .add("chapter", track.last_chapter_read.toString())
-            XLog.d("chapter to update %s", track.last_chapter_read.toString())
-            val result = runCatching {
-                network.authClient.newCall(
-                    POST(
-                        "$baseUrl/ajax/actions.ajax.php?function=edit_progress&id=$mangaID",
-                        headers,
-                        formBody.build()
-                    )
-                ).execute()
-            }
-            result.exceptionOrNull()?.let {
-                if (it is EOFException) {
-                    return@withContext true
-                } else {
-                    XLog.e("error updating reading progress", it)
-                    return@withContext false
-                }
-            }
-            return@withContext result.isSuccess
-        }*/
     }
 
     suspend fun updateRating(track: Track): Boolean {

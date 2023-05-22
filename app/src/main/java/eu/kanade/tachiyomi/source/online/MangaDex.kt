@@ -124,15 +124,19 @@ open class MangaDex : HttpSource() {
         return searchHandler.searchForGroup(groupQuery)
     }
 
-    suspend fun fetchList(listId: String): Result<ListResults, ResultError> {
-        return listHandler.retrieveList(listId)
+    suspend fun fetchUserLists(page: Int): Result<ResultListPage, ResultError> {
+        return listHandler.retrieveUserLists(page)
+    }
+
+    suspend fun fetchList(listId: String, privateList: Boolean): Result<ListResults, ResultError> {
+        return listHandler.retrieveList(listId, privateList)
     }
 
     suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>, showSubscriptionFeed: Boolean): Result<List<ListResults>, ResultError> {
         return withIOContext {
             binding {
                 val seasonal = async {
-                    fetchList(listId).andThen { listResults ->
+                    fetchList(listId, false).andThen { listResults ->
                         Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
                     }
                         .bind()
@@ -208,14 +212,6 @@ open class MangaDex : HttpSource() {
 
     override suspend fun fetchImage(page: Page): Response {
         return imageHandler.getImage(page, loginHelper.isLoggedIn())
-    }
-
-    suspend fun fetchAllFollows(): Result<List<SourceManga>, ResultError> {
-        return followsHandler.fetchAllFollows()
-    }
-
-    open suspend fun updateReadingProgress(track: Track): Boolean {
-        return followsHandler.updateReadingProgress(track)
     }
 
     open suspend fun updateRating(track: Track): Boolean {

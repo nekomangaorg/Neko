@@ -55,8 +55,8 @@ data class DisplayMangaHolder(
 enum class BrowseScreenType {
     Homepage,
     Other,
+    Lists,
     Filter,
-    Follows,
     None,
 }
 

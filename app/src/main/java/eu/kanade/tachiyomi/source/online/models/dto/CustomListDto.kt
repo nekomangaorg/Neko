@@ -4,6 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CustomListListDto(
+    val limit: Int,
+    val offset: Int,
+    val total: Int,
+    val result: String,
     val data: List<CustomListDataDto>,
 )
 

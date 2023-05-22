@@ -28,7 +28,7 @@ class DisplayRepository(
         return when (displayScreenType) {
             is DisplayScreenType.LatestChapters -> getLatestChapterPage(page)
             is DisplayScreenType.SubscriptionFeed -> getLatestChapterPage(page, feedType = MdConstants.FeedType.Subscription)
-            is DisplayScreenType.List -> getListPage(displayScreenType.listUUID)
+            is DisplayScreenType.List -> getListPage(displayScreenType.listUUID, displayScreenType.privateList)
             is DisplayScreenType.RecentlyAdded -> getRecentlyAddedPage(page)
             is DisplayScreenType.PopularNewTitles -> getPopularNewTitles(page)
         }
@@ -57,8 +57,8 @@ class DisplayRepository(
         )
     }
 
-    private suspend fun getListPage(listUUID: String): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
-        return mangaDex.fetchList(listUUID).mapBoth(
+    private suspend fun getListPage(listUUID: String, privateList: Boolean): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        return mangaDex.fetchList(listUUID, privateList).mapBoth(
             success = { listResults ->
                 val displayMangaList = listResults.sourceManga.map { sourceManga ->
                     sourceManga.toDisplayManga(db, mangaDex.id)

@@ -22,7 +22,7 @@ import org.nekomanga.domain.DisplayResult
 fun ResultList(
     results: ImmutableList<DisplayResult>,
     contentPadding: PaddingValues = PaddingValues(),
-    onClick: (String) -> Unit = {},
+    onClick: (DisplayResult) -> Unit = {},
 ) {
     val scrollState = rememberLazyListState()
 
@@ -37,7 +37,7 @@ fun ResultList(
         items(results) { displayResult ->
             ResultRow(
                 displayResult = displayResult,
-                onClick = { onClick(displayResult.uuid) },
+                onClick = { onClick(displayResult) },
             )
         }
     }

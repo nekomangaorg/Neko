@@ -95,7 +95,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                         manga.follow_status = newFollowStatus
                         db.insertManga(manga).executeAsBlocking()
                     }
-                    mdex.updateReadingProgress(track)
                 } else if (track.last_chapter_read.toInt() != 0) {
                     // When followStatus has been changed to unfollowed 0 out read chapters since dex does
                     track.last_chapter_read = 0f

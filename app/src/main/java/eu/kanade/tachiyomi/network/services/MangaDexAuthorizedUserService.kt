@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.models.dto.CustomListDto
 import eu.kanade.tachiyomi.source.online.models.dto.CustomListListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
@@ -43,12 +44,14 @@ interface MangaDexAuthorizedUserService {
     ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdConstants.Api.user}${MdConstants.Api.list}?limit=100")
-    suspend fun userList(@Query("offset") offset: Int): ApiResponse<CustomListListDto>
+    @GET("${MdConstants.Api.user}${MdConstants.Api.list}")
+    suspend fun usersLists(@Query("offset") offset: Int, @Query("limit") limit: Int): ApiResponse<CustomListListDto>
 
-    @Headers("Cache-Control: no-cache")
-    @GET("${MdConstants.Api.userFollows}?limit=100&includes[]=${MdConstants.Types.coverArt}")
-    suspend fun userFollowList(@Query("offset") offset: Int): ApiResponse<MangaListDto>
+    @GET("${MdConstants.Api.list}/{id}")
+    suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>
+
+    @GET("${MdConstants.Api.list}/{id}${MdConstants.Api.manga}")
+    suspend fun viewCustomListManga(@Path("id") id: String, @Query("offset") offset: Int): ApiResponse<MangaListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.manga}/{id}/status")

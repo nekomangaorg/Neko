@@ -8,7 +8,7 @@ import org.nekomanga.presentation.components.ResultList
 import org.nekomanga.presentation.screens.NoResultsEmptyScreen
 
 @Composable
-fun BrowseOtherPage(results: ImmutableList<DisplayResult>, contentPadding: PaddingValues = PaddingValues(), onClick: (String) -> Unit) {
+fun BrowseOtherPage(results: ImmutableList<DisplayResult>, contentPadding: PaddingValues = PaddingValues(), onClick: (DisplayResult) -> Unit) {
     if (results.isEmpty()) {
         NoResultsEmptyScreen(contentPaddingValues = contentPadding)
     } else {

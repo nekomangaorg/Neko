@@ -75,7 +75,6 @@ import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
 import org.nekomanga.presentation.screens.browse.BrowseFilterPage
-import org.nekomanga.presentation.screens.browse.BrowseFollowsPage
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
 import org.nekomanga.presentation.screens.browse.BrowseOtherPage
 import org.nekomanga.presentation.theme.Padding
@@ -95,6 +94,7 @@ fun BrowseScreen(
     loadNextPage: () -> Unit,
     retryClick: () -> Unit,
     otherClick: (String) -> Unit,
+    listClick: (String, String) -> Unit,
     filterActions: FilterActions,
     changeScreenType: (BrowseScreenType) -> Unit,
     homeScreenTitleClick: (DisplayScreenType) -> Unit,
@@ -288,24 +288,19 @@ fun BrowseScreen(
                                     contentPadding = recyclerContentPadding,
                                 )
 
-                                BrowseScreenType.Follows -> {
-                                    BrowseFollowsPage(
-                                        displayMangaHolder = browseScreenState.value.displayMangaHolder,
-                                        isList = browseScreenState.value.isList,
-                                        isComfortableGrid = browseScreenState.value.isComfortableGrid,
-                                        outlineCovers = browseScreenState.value.outlineCovers,
-                                        rawColumnCount = browseScreenState.value.rawColumnCount,
-                                        contentPadding = recyclerContentPadding,
-                                        onClick = openManga,
-                                        onLongClick = ::mangaLongClick,
-                                    )
-                                }
-
                                 BrowseScreenType.Other -> {
                                     BrowseOtherPage(
                                         results = browseScreenState.value.otherResults,
                                         contentPadding = recyclerContentPadding,
-                                        onClick = otherClick,
+                                        onClick = { displayResult -> otherClick(displayResult.uuid) },
+                                    )
+                                }
+
+                                BrowseScreenType.Lists -> {
+                                    BrowseOtherPage(
+                                        results = browseScreenState.value.otherResults,
+                                        contentPadding = recyclerContentPadding,
+                                        onClick = { displayResult -> listClick(displayResult.title, displayResult.uuid) },
                                     )
                                 }
 
@@ -391,9 +386,9 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
         if (isLoggedIn) {
             item {
                 FooterFilterChip(
-                    selected = screenType == BrowseScreenType.Follows,
-                    onClick = { screenTypeClick(BrowseScreenType.Follows) },
-                    name = stringResource(R.string.follows),
+                    selected = screenType == BrowseScreenType.Lists,
+                    onClick = { screenTypeClick(BrowseScreenType.Lists) },
+                    name = stringResource(R.string.my_lists),
                 )
             }
         }

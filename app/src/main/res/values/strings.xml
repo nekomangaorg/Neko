@@ -1292,6 +1292,7 @@
 
     <string name="sync_follows_failed">Syncing follows failed</string>
     <string name="follows">My follows</string>
+    <string name="my_lists">My lists</string>
     <string name="add_to_follows">Add to MangaDex follows</string>
     <string name="follows_status">Follows Status</string>
     <string name="follows_unfollowed">Unfollowed</string>
