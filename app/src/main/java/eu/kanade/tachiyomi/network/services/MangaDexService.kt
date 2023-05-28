@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
-import eu.kanade.tachiyomi.source.online.models.dto.CustomListDto
 import eu.kanade.tachiyomi.source.online.models.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
@@ -26,7 +25,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
-interface MangaDexService {
+interface MangaDexService : ListFunctions {
 
     @GET("${MdConstants.Api.manga}?includes[]=${MdConstants.Types.coverArt}")
     suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
@@ -108,12 +107,6 @@ interface MangaDexService {
     @Headers("Cache-Control: no-cache")
     @GET(MdConstants.Api.group)
     suspend fun scanlatorGroup(@Query("name") scanlator: String): ApiResponse<GroupListDto>
-
-    @GET("${MdConstants.Api.list}/{id}${MdConstants.Api.manga}")
-    suspend fun viewCustomListManga(@Path("id") id: String, @QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
-
-    @GET("${MdConstants.Api.list}/{id}")
-    suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>
 
     @POST(MdConstants.Api.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>

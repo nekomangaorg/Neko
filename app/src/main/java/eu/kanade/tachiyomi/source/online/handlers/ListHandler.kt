@@ -37,6 +37,11 @@ class ListHandler {
     suspend fun retrieveList(listUUID: String, page: Int, privateList: Boolean): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
 
+            val currentService = when (privateList) {
+                true -> authService
+                false -> service
+            }
+
             val enabledContentRatings = preferencesHelper.contentRatingSelections()
             val contentRatings = MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
             val coverQuality = preferencesHelper.thumbnailQuality()
@@ -50,18 +55,13 @@ class ListHandler {
                     ),
                 )
 
-            when (privateList) {
-                true -> authService.viewCustomListInfo(listUUID)
-                false -> service.viewCustomListInfo(listUUID)
-            }
+
+            currentService.viewCustomListInfo(listUUID)
                 .getOrResultError("Error getting list with UUID: $listUUID")
                 .andThen { customListDto ->
                     val listName = customListDto.data.attributes.name
 
-                    when (privateList) {
-                        true -> authService.viewCustomListManga(listUUID, queryParameters)
-                        false -> service.viewCustomListManga(listUUID, queryParameters)
-                    }
+                    currentService.viewCustomListManga(listUUID, queryParameters)
                         .getOrResultError("Error getting list manga")
                         .andThen { mangaListDto ->
                             when (mangaListDto.data.isEmpty()) {

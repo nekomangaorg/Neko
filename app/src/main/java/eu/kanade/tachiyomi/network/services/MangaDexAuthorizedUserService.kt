@@ -1,11 +1,8 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
-import eu.kanade.tachiyomi.source.online.models.dto.CustomListDto
 import eu.kanade.tachiyomi.source.online.models.dto.CustomListListDto
-import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingResponseDto
@@ -23,9 +20,8 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.QueryMap
 
-interface MangaDexAuthorizedUserService {
+interface MangaDexAuthorizedUserService : ListFunctions {
 
     @Headers("Cache-Control: no-cache")
     @GET(MdConstants.Api.userInfo)
@@ -48,12 +44,6 @@ interface MangaDexAuthorizedUserService {
     @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.user}${MdConstants.Api.list}")
     suspend fun usersLists(@Query("offset") offset: Int, @Query("limit") limit: Int): ApiResponse<CustomListListDto>
-
-    @GET("${MdConstants.Api.list}/{id}")
-    suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>
-
-    @GET("${MdConstants.Api.list}/{id}${MdConstants.Api.manga}")
-    suspend fun viewCustomListManga(@Path("id") id: String, @QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.manga}/{id}/status")
