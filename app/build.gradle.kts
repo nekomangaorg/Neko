@@ -246,7 +246,7 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
-    implementation("me.saket.cascade:cascade-compose:2.0.0-rc02")
+    implementation("me.saket.cascade:cascade-compose:2.1.0")
     implementation("me.saket.cascade:cascade:2.0.0-rc02")
 
     //Compose
