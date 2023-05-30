@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.github.michaelbull.result.get
+import com.github.michaelbull.result.getError
 import com.github.michaelbull.result.getOrThrow
+import com.github.michaelbull.result.onSuccess
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
@@ -58,28 +61,47 @@ class ImageHandler {
 
                 else -> {
                     val request = imageRequest(page, isLogged)
-                    val response = try {
-                        network.cdnClient.newCachelessCallWithProgress(request, page)
-                            .await()
-                    } catch (e: Exception) {
-                        if (e !is CancellationException) {
-                            loggycat(LogPriority.ERROR, e, tag) { "error getting images" }
-                            reportFailedImage(request.url.toString())
-                        }
-                        throw (e)
-                    }
-                    withNonCancellableContext {
-                        reportImageWithResponse(response)
-                    }
-
-                    if (!response.isSuccessful) {
-                        response.close()
-                        loggycat(LogPriority.ERROR, tag = tag) { "response for image was not successful http status code ${response.code}" }
-                        throw Exception("HTTP error ${response.code}")
-                    }
-                    response
+                    requestImage(request, page)
                 }
             }
+        }
+    }
+
+    private suspend fun requestImage(request: Request, page: Page): Response {
+
+        var attempt = com.github.michaelbull.result.runCatching {
+            network.cdnClient.newCachelessCallWithProgress(request, page).await()
+        }.onSuccess { response ->
+            withNonCancellableContext {
+                reportImageWithResponse(response)
+            }
+        }
+
+        if ((attempt.getError() != null || !attempt.get()!!.isSuccessful) && !request.url.toString().startsWith(MdConstants.cdnUrl)) {
+            loggycat(LogPriority.ERROR, attempt.getError(), tag) { "error getting image from at home node falling back to cdn" }
+
+            attempt = com.github.michaelbull.result.runCatching {
+                val newRequest = buildRequest(MdConstants.cdnUrl + page.imageUrl, network.headers)
+                network.cdnClient.newCachelessCallWithProgress(newRequest, page).await()
+            }
+        }
+
+        attempt.onSuccess { response ->
+            if (!response.isSuccessful) {
+                response.close()
+                loggycat(LogPriority.ERROR, tag = tag) { "response for image was not successful http status code ${response.code}" }
+                throw Exception("HTTP error ${response.code}")
+            }
+        }
+
+        return attempt.getOrThrow { e ->
+            if (e !is CancellationException) {
+                loggycat(LogPriority.ERROR, e, tag) { "error getting images" }
+                withNonCancellableContext {
+                    reportFailedImage(request.url.toString())
+                }
+            }
+            e
         }
     }
 
