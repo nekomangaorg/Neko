@@ -519,8 +519,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         val enabledButtons = preferences.readerBottomButtons().get()
         with(binding.chaptersSheet) {
             readingMode.isVisible =
-                viewModel.manga?.isLongStrip() != true &&
-                    ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
                 ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&

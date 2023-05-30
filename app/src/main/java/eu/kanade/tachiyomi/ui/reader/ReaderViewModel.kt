@@ -637,10 +637,7 @@ class ReaderViewModel(
         val default = preferences.defaultReadingMode()
         val manga = manga ?: return default
         val readerType = manga.defaultReaderType()
-        if (manga.viewer_flags == -1 ||
-            // Force webtoon mode
-            (manga.isLongStrip() && readerType != manga.readingModeType)
-        ) {
+        if (manga.viewer_flags == -1) {
             val cantSwitchToLTR =
                 (
                     readerType == ReadingModeType.LEFT_TO_RIGHT.flagValue &&
