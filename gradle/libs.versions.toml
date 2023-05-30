@@ -11,7 +11,6 @@ retrofit_version = "2.9.0"
 rxbinding_version = "1.0.1"
 roboelectric_version = "4.8.1"
 kotlin_result = "1.1.17"
-cascade_version = "2.1.0"
 
 
 [libraries]
@@ -72,10 +71,6 @@ ka-helpers-activity = { module = "com.github.FunkyMuse.KAHelpers:activity", vers
 ka-helpers-string = { module = "com.github.FunkyMuse.KAHelpers:string", version.ref = "ka_helpers_version" }
 ka-helpers-common = { module = "com.github.FunkyMuse.KAHelpers:common", version.ref = "ka_helpers_version" }
 
-
-cascade-compose = { module = "me.saket.cascade:cascade-compose", version.ref = "cascade_version" }
-cascade = { module = "me.saket.cascade:cascade", version.ref = "cascade_version" }
-
 chucker-debug = { module = "com.github.ChuckerTeam.Chucker:library", version.ref = "chucker_version" }
 chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", version.ref = "chucker_version" }
 
@@ -123,7 +118,6 @@ kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.6.2"
 kotlinter = { id = "org.jmailen.kotlinter", version = "3.15.0" }
 
 [bundles]
-cascade = ["cascade", "cascade-compose"]
 coil = ["coil", "coil-gif", "coil-svg", "coil-compose"]
 conductor = ["conductor", "conductor-supportpref"]
 fastadapter = ["fast-adapter", "fast-adapter-binding"]
