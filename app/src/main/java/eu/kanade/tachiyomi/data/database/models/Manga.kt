@@ -157,12 +157,17 @@ interface Manga : SManga {
     fun defaultReaderType(): Int {
         val currentTags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
         return when {
+            isLongStrip() -> {
+                ReadingModeType.WEBTOON.flagValue
+            }
+
             currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
             } == true -> {
                 ReadingModeType.WEBTOON.flagValue
             }
+
             currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
@@ -170,6 +175,7 @@ interface Manga : SManga {
             } == true -> {
                 ReadingModeType.LEFT_TO_RIGHT.flagValue
             }
+
             else -> 0
         }
     }

@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 188
-    const val versionName = "2.13.2"
+    const val versionCode = 189
+    const val versionName = "2.13.3"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -222,7 +222,7 @@ dependencies {
     implementation("androidx.sqlite:sqlite:2.3.1")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.github.requery:sqlite-android:3.41.1")
+    implementation("com.github.requery:sqlite-android:3.42.0")
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)
@@ -246,8 +246,8 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
-    implementation("me.saket.cascade:cascade-compose:2.0.0-rc02")
-    implementation("me.saket.cascade:cascade:2.0.0-rc02")
+    implementation("me.saket.cascade:cascade:2.1.0")
+    implementation("me.saket.cascade:cascade-compose:2.1.0")
 
     //Compose
     implementation(compose.bundles.compose)
