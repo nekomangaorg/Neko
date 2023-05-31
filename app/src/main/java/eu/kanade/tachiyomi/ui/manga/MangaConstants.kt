@@ -206,6 +206,8 @@ object MangaConstants {
         val scoreChange: (Int, TrackingConstants.TrackAndService) -> Unit,
         val chapterChange: (Int, TrackingConstants.TrackAndService) -> Unit,
         val dateChange: (TrackingConstants.TrackDateChange) -> Unit,
+        val listAdd: (String, TrackingConstants.TrackAndService) -> Unit,
+        val listRemove: (String, TrackingConstants.TrackAndService) -> Unit,
         val search: (String, TrackServiceItem) -> Unit,
         val searchItemClick: (TrackingConstants.TrackAndService) -> Unit,
         val remove: (Boolean, TrackServiceItem) -> Unit,

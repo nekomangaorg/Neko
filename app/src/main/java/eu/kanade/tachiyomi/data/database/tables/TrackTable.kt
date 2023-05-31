@@ -24,6 +24,8 @@ object TrackTable {
 
     const val COL_TOTAL_CHAPTERS = "total_chapters"
 
+    const val COL_LIST_ID = "list_id"
+
     const val COL_TRACKING_URL = "remote_url"
 
     const val COL_START_DATE = "start_date"
@@ -43,6 +45,7 @@ object TrackTable {
             $COL_TOTAL_CHAPTERS INTEGER NOT NULL,
             $COL_STATUS INTEGER NOT NULL,
             $COL_SCORE FLOAT NOT NULL,
+            $COL_LIST_ID TEXT NOT NULL,
             $COL_TRACKING_URL TEXT NOT NULL,
             $COL_START_DATE LONG NOT NULL,
             $COL_FINISH_DATE LONG NOT NULL,
@@ -78,4 +81,7 @@ object TrackTable {
 
     val dropTempTable: String
         get() = "DROP TABLE ${TABLE}_tmp"
+
+    val addListId: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LIST_ID TEXT DEFAULT ''"
 }

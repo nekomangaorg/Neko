@@ -111,6 +111,8 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                 statusChange = { statusIndex, trackAndService -> presenter.updateTrackStatus(statusIndex, trackAndService) },
                 scoreChange = { statusIndex, trackAndService -> presenter.updateTrackScore(statusIndex, trackAndService) },
                 chapterChange = { newChapterNumber, trackAndService -> presenter.updateTrackChapter(newChapterNumber, trackAndService) },
+                listAdd = { listId, trackAndService -> presenter.updateTrackList(listId, true, trackAndService) },
+                listRemove = { listId, trackAndService -> presenter.updateTrackList(listId, false, trackAndService) },
                 search = { title, service -> presenter.searchTracker(title, service) },
                 searchItemClick = { trackAndService -> presenter.registerTracking(trackAndService) },
                 remove = { alsoRemoveFromTracker, service -> presenter.removeTracking(alsoRemoveFromTracker, service) },

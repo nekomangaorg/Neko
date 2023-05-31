@@ -4,15 +4,16 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import androidx.core.text.isDigitsOnly
+import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackList
+import eu.kanade.tachiyomi.data.track.TrackListService
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.loggycat
@@ -22,13 +23,54 @@ import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class MdList(private val context: Context, id: Int) : TrackService(id) {
+class MdList(private val context: Context, id: Int) : TrackListService(id) {
 
     private val mdex by lazy { Injekt.get<SourceManager>().mangaDex }
 
     private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
+    private var lists: List<TrackList> = emptyList()
+
     override fun nameRes() = R.string.mdlist
+    override suspend fun populateLists() {
+        mdex.fetchAllUserLists().onSuccess { resultListPage ->
+            lists = resultListPage.results.map { TrackList(id = it.uuid, name = it.title) }
+        }
+    }
+
+    override fun viewLists(): List<TrackList> {
+        return lists
+    }
+
+    override suspend fun addToList(track: Track, listId: String): Track {
+        return withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                if (mdex.addToCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
+                    track.listIds = (track.listIds + listOf(listId)).distinct()
+                    db.insertTrack(track).executeAsBlocking()
+                }
+            }.onFailure { e ->
+                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+            }
+
+            track
+        }
+    }
+
+    override suspend fun removeFromList(track: Track, listId: String): Track {
+        return withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                if (mdex.removeFromCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
+                    track.listIds = track.listIds.filterNot { it == listId }
+                    db.insertTrack(track).executeAsBlocking()
+                }
+            }.onFailure { e ->
+                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+            }
+
+            track
+        }
+    }
 
     override fun isAutoAddTracker() = true
 
@@ -39,15 +81,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun getLogoColor(): Int {
         return Color.rgb(43, 48, 53)
     }
-
-    override fun getStatusList(): List<Int> {
-        return FollowStatus.values().map { it.int }
-    }
-
-    override fun getStatus(status: Int): String =
-        context.resources.getStringArray(R.array.follows_options).asList()[status]
-
-    override fun getGlobalStatus(status: Int): String = getStatus(status)
 
     override fun getScoreList() = IntRange(0, 10).map(Int::toString)
 
@@ -63,57 +96,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-    override suspend fun update(track: Track, setToRead: Boolean): Track {
-        return withContext(Dispatchers.IO) {
-            try {
-                val manga = db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
-                    .executeAsBlocking() ?: return@withContext track
-                val followStatus = FollowStatus.fromInt(track.status)
-
-                // allow follow status to update
-                mdex.updateFollowStatus(MdUtil.getMangaUUID(track.tracking_url), followStatus)
-                manga.follow_status = followStatus
-                db.insertManga(manga).executeAsBlocking()
-
-                // mangadex wont update chapters if manga is not follows this prevents unneeded network call
-
-                if (followStatus != FollowStatus.UNFOLLOWED) {
-                    if (track.total_chapters != 0 && track.last_chapter_read.toInt() == track.total_chapters) {
-                        track.status = FollowStatus.COMPLETED.int
-                        mdex.updateFollowStatus(
-                            MdUtil.getMangaUUID(track.tracking_url),
-                            FollowStatus.COMPLETED,
-                        )
-                    }
-                    if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
-                        val newFollowStatus = FollowStatus.READING
-                        track.status = FollowStatus.READING.int
-                        mdex.updateFollowStatus(
-                            MdUtil.getMangaUUID(track.tracking_url),
-                            newFollowStatus,
-                        )
-                        manga.follow_status = newFollowStatus
-                        db.insertManga(manga).executeAsBlocking()
-                    }
-                } else if (track.last_chapter_read.toInt() != 0) {
-                    // When followStatus has been changed to unfollowed 0 out read chapters since dex does
-                    track.last_chapter_read = 0f
-                }
-            } catch (e: Exception) {
-                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
-            }
-            db.insertTrack(track).executeAsBlocking()
-            track
-        }
-    }
-
-    override fun isCompletedStatus(index: Int) =
-        getStatusList()[index] == FollowStatus.COMPLETED.int
-
-    override fun completedStatus() = FollowStatus.COMPLETED.int
-    override fun readingStatus() = FollowStatus.READING.int
-    override fun planningStatus() = FollowStatus.PLAN_TO_READ.int
-
     override suspend fun bind(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
             loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
@@ -121,7 +103,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
         track.copyPersonalFrom(remoteTrack)
-        return update(track)
+        db.insertTrack(track).executeAsBlocking()
+        return track
     }
 
     override suspend fun refresh(track: Track): Track {
@@ -138,7 +121,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     fun createInitialTracker(manga: Manga): Track {
         val track = Track.create(TrackManager.MDLIST)
         track.manga_id = manga.id!!
-        track.status = FollowStatus.UNFOLLOWED.int
         track.tracking_url = MdConstants.baseUrl + manga.url
         track.title = manga.title
         return track
@@ -151,7 +133,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     ): List<TrackSearch> {
         val track = TrackSearch.create(TrackManager.MDLIST).apply {
             this.manga_id = manga.id!!
-            this.status = FollowStatus.UNFOLLOWED.int
             this.tracking_url = MdConstants.baseUrl + manga.url
             this.title = manga.title
         }
@@ -168,6 +149,4 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun isLogged() = mangaDexLoginHelper.isLoggedIn()
 
     override fun isMdList() = true
-
-    fun isUnfollowed(track: Track) = track.status == 0
 }

@@ -25,7 +25,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
-interface MangaDexService : ListFunctions {
+interface MangaDexService : CommonListFunctions {
 
     @GET("${MdConstants.Api.manga}?includes[]=${MdConstants.Types.coverArt}")
     suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>

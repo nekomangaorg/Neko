@@ -2,7 +2,9 @@ package eu.kanade.tachiyomi.ui.manga
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.track.TrackListService
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
@@ -30,12 +32,20 @@ class TrackingCoordinator {
      * Update tracker with new status
      */
     suspend fun updateTrackStatus(statusIndex: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
-        var track = trackAndService.track.copy(status = trackAndService.service.statusList[statusIndex])
+        val service = trackManager.getService(trackAndService.service.id)
+        var track = trackAndService.track.copy(status = trackAndService.service.statusList!![statusIndex])
 
-        if (trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) && track.totalChapters > 0) {
+        if (service is TrackStatusService && service.isCompletedStatus(statusIndex) && track.totalChapters > 0) {
             track = track.copy(lastChapterRead = track.totalChapters.toFloat())
         }
-        return updateTrackingService(track, trackAndService.service)
+        return updateTrackingStatusService(track, trackAndService.service)
+    }
+
+    /**
+     * Update tracker with new status
+     */
+    suspend fun updateTrackList(listId: String, addToList: Boolean, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
+        return updateTrackingListService(trackAndService.track, trackAndService.service, listId, addToList)
     }
 
     /**
@@ -54,7 +64,7 @@ class TrackingCoordinator {
                 TrackingUpdate.Error("Error updating MangaDex Score", it)
             }
         } else {
-            updateTrackingService(trackItem, trackAndService.service)
+            updateTrackingStatusService(trackItem, trackAndService.service)
         }
     }
 
@@ -63,7 +73,7 @@ class TrackingCoordinator {
      */
     suspend fun updateTrackChapter(newChapterNumber: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
         val track = trackAndService.track.copy(lastChapterRead = newChapterNumber.toFloat())
-        return updateTrackingService(track, trackAndService.service)
+        return updateTrackingStatusService(track, trackAndService.service)
     }
 
     /**
@@ -74,6 +84,7 @@ class TrackingCoordinator {
             is TrackingConstants.TrackDateChange.EditTrackingDate -> {
                 trackDateChange.newDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
             }
+
             else -> 0L
         }
         val track =
@@ -82,7 +93,7 @@ class TrackingCoordinator {
                 TrackingConstants.ReadingDate.Finish -> trackDateChange.trackAndService.track.copy(finishedReadingDate = date)
             }
 
-        return updateTrackingService(track, trackDateChange.trackAndService.service)
+        return updateTrackingStatusService(track, trackDateChange.trackAndService.service)
     }
 
     /**
@@ -127,9 +138,26 @@ class TrackingCoordinator {
     /**
      * Updates the remote tracking service with tracking changes
      */
-    suspend fun updateTrackingService(track: TrackItem, service: TrackServiceItem): TrackingUpdate {
+    suspend fun updateTrackingStatusService(track: TrackItem, service: TrackServiceItem): TrackingUpdate {
         return runCatching {
-            val updatedTrack = trackManager.getService(service.id)!!.update(track.toDbTrack())
+            val updatedTrack = (trackManager.getService(service.id)!! as TrackStatusService).update(track.toDbTrack())
+            db.insertTrack(updatedTrack).executeOnIO()
+            TrackingUpdate.Success
+        }.getOrElse {
+            TrackingUpdate.Error("Error updating tracker", it)
+        }
+    }
+
+    /**
+     * Updates the remote tracking service with tracking changes
+     */
+    suspend fun updateTrackingListService(track: TrackItem, service: TrackServiceItem, listId: String, addToList: Boolean): TrackingUpdate {
+        return runCatching {
+            val service = (trackManager.getService(service.id)!! as TrackListService)
+            val updatedTrack = when (addToList) {
+                true -> service.addToList(track.toDbTrack(), listId)
+                false -> service.removeFromList(track.toDbTrack(), listId)
+            }
             db.insertTrack(updatedTrack).executeOnIO()
             TrackingUpdate.Success
         }.getOrElse {

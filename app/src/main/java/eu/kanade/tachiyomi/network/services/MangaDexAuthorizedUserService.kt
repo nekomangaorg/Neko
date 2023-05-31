@@ -21,7 +21,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface MangaDexAuthorizedUserService : ListFunctions {
+interface MangaDexAuthorizedUserService : CommonListFunctions {
 
     @Headers("Cache-Control: no-cache")
     @GET(MdConstants.Api.userInfo)
@@ -44,6 +44,15 @@ interface MangaDexAuthorizedUserService : ListFunctions {
     @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.user}${MdConstants.Api.list}")
     suspend fun usersLists(@Query("offset") offset: Int, @Query("limit") limit: Int): ApiResponse<CustomListListDto>
+
+    @POST("${MdConstants.Api.manga}/{mangaId}${MdConstants.Api.list}/{listId}")
+    suspend fun addToCustomList(@Path("mangaId") mangaUUID: String, @Path("listId") listUUID: String): ApiResponse<ResultDto>
+
+    @DELETE("${MdConstants.Api.manga}/{mangaId}${MdConstants.Api.list}/{listId}")
+    suspend fun removeFromCustomList(@Path("mangaId") mangaUUID: String, @Path("listId") listUUID: String): ApiResponse<ResultDto>
+
+    @GET("${MdConstants.Api.manga}/{mangaId}${MdConstants.Api.list}")
+    suspend fun customListsContainingManga(@Path("mangaId") mangaUUID: String): ApiResponse<CustomListListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdConstants.Api.manga}/{id}/status")

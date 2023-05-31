@@ -6,13 +6,12 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.copyTo
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.toTrackSearch
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 
-class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
+class MangaUpdates(private val context: Context, id: Int) : TrackStatusService(id) {
 
     private val interceptor by lazy { MangaUpdatesInterceptor(this) }
 

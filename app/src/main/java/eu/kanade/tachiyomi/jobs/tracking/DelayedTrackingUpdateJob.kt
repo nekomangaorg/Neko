@@ -12,6 +12,7 @@ import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.util.system.loggycat
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                 entry.value.map { delayedTracking ->
                     val service = trackManager.getService(delayedTracking.syncId)
                     val track = trackList.find { track -> track.sync_id == delayedTracking.syncId }
-                    if (service != null && track != null) {
+                    if (service != null && track != null && service is TrackStatusService) {
                         try {
                             track.last_chapter_read = delayedTracking.lastReadChapter
                             service.update(track, true)

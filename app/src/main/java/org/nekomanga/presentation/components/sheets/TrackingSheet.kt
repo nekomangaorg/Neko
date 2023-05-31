@@ -49,11 +49,13 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
 import java.text.DateFormat
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.dialog.RemoveTrackingDialog
 import org.nekomanga.presentation.components.dialog.TrackingChapterDialog
+import org.nekomanga.presentation.components.dialog.TrackingListDialog
 import org.nekomanga.presentation.components.dialog.TrackingScoreDialog
 import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
 import org.nekomanga.presentation.extensions.conditional
@@ -70,6 +72,8 @@ fun TrackingSheet(
     onLogoClick: (String, String) -> Unit,
     onSearchTrackClick: (TrackServiceItem, TrackItem?) -> Unit,
     trackStatusChanged: (Int, TrackAndService) -> Unit,
+    trackListAdd: (String, TrackAndService) -> Unit,
+    trackListRemove: (String, TrackAndService) -> Unit,
     trackScoreChanged: (Int, TrackAndService) -> Unit,
     trackChapterChanged: (Int, TrackAndService) -> Unit,
     trackingRemoved: (Boolean, TrackServiceItem) -> Unit,
@@ -86,13 +90,30 @@ fun TrackingSheet(
     BaseSheet(themeColor = themeColor) {
         if (statusDialog is ShowDialog) {
             val trackAndService = (statusDialog as ShowDialog).trackAndService
-            TrackingStatusDialog(
-                themeColorState = themeColor,
-                initialStatus = trackAndService.track.status,
-                service = trackAndService.service,
-                onDismiss = { statusDialog = HideDialog },
-                trackStatusChange = { statusIndex -> trackStatusChanged(statusIndex, trackAndService) },
-            )
+            when (trackAndService.service.lists == null) {
+                true -> {
+                    TrackingStatusDialog(
+                        themeColorState = themeColor,
+                        initialStatus = trackAndService.track.status,
+                        service = trackAndService.service,
+                        onDismiss = { statusDialog = HideDialog },
+                        trackStatusChange = { statusIndex -> trackStatusChanged(statusIndex, trackAndService) },
+                    )
+                }
+
+                false -> {
+                    if (trackAndService.service.lists.isNotEmpty()) {
+                        TrackingListDialog(
+                            themeColorState = themeColor,
+                            currentLists = trackAndService.track.listIds.mapNotNull { trackAndService.service.currentList(it) }.toImmutableList(),
+                            service = trackAndService.service,
+                            onDismiss = { statusDialog = HideDialog },
+                            addToListClick = { listId -> trackListAdd(listId, trackAndService) },
+                            removeFromListClick = { listId -> trackListRemove(listId, trackAndService) },
+                        )
+                    }
+                }
+            }
         } else if (scoreDialog is ShowDialog) {
             val trackAndService = (scoreDialog as ShowDialog).trackAndService
             TrackingScoreDialog(
@@ -303,8 +324,15 @@ private fun TrackRowTwo(track: TrackItem, service: TrackServiceItem, statusClick
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TrackingBox(clickable = statusClick) {
+            val text = when {
+                service.status(track.status) != null -> service.status(track.status) ?: ""
+                track.listIds.size > 1 -> stringResource(id = R.string.multiple_lists)
+                track.listIds.isEmpty() -> ""
+                else -> service.currentList(track.listIds.first())!!.name
+            }
+
             Text(
-                service.status(track.status),
+                text,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -318,15 +346,18 @@ private fun TrackRowTwo(track: TrackItem, service: TrackServiceItem, statusClick
                     track.totalChapters > 0 && track.lastChapterRead.toInt() == track.totalChapters -> stringResource(
                         R.string.all_chapters_read,
                     )
+
                     track.totalChapters > 0 -> stringResource(
                         R.string.chapter_x_of_y,
                         track.lastChapterRead.toInt(),
                         track.totalChapters,
                     )
+
                     track.lastChapterRead > 0 -> stringResource(
                         R.string.chapter_,
                         track.lastChapterRead.toInt().toString(),
                     )
+
                     else -> stringResource(R.string.not_started)
                 }
 
@@ -352,6 +383,7 @@ private fun TrackRowTwo(track: TrackItem, service: TrackServiceItem, statusClick
                         )
                     }
                 }
+
                 else -> Text(service.displayScore(track), color = MaterialTheme.colorScheme.onSurface)
             }
         }

@@ -6,9 +6,8 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import eu.kanade.tachiyomi.util.system.loggycat
 import java.text.DecimalFormat
 import kotlinx.serialization.decodeFromString
@@ -17,7 +16,7 @@ import kotlinx.serialization.json.Json
 import logcat.LogPriority
 import uy.kohesive.injekt.injectLazy
 
-class Kitsu(private val context: Context, id: Int) : TrackService(id) {
+class Kitsu(private val context: Context, id: Int) : TrackStatusService(id) {
 
     companion object {
         const val READING = 1

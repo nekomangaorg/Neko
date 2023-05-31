@@ -9,7 +9,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
 
-interface ListFunctions {
+interface CommonListFunctions {
 
     @GET("${MdConstants.Api.list}/{id}")
     suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>

@@ -26,6 +26,7 @@ interface SManga : Serializable {
 
     var initialized: Boolean
 
+    @Deprecated("Not used any more")
     var follow_status: FollowStatus?
 
     var lang_flag: String?
@@ -136,7 +137,7 @@ interface SManga : Serializable {
         users = other.users
         thread_id = other.thread_id
         replies_count = other.replies_count
-        
+
         if (!initialized) {
             initialized = other.initialized
         }

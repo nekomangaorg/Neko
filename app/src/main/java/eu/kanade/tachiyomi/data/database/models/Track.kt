@@ -24,6 +24,8 @@ interface Track : Serializable {
 
     var status: Int
 
+    var listIds: List<String>
+
     var tracking_url: String
 
     var started_reading_date: Long
@@ -39,6 +41,7 @@ interface Track : Serializable {
     }
 
     companion object {
+        val LIST_SEPERATOR = "~||~"
         fun create(serviceId: Int): Track = TrackImpl().apply {
             sync_id = serviceId
         }

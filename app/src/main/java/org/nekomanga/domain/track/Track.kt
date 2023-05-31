@@ -1,10 +1,14 @@
 package org.nekomanga.domain.track
 
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackList
+import eu.kanade.tachiyomi.data.track.TrackListService
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 
 data class TrackItem(
     val id: Long?,
@@ -17,6 +21,7 @@ data class TrackItem(
     val totalChapters: Int,
     val score: Float,
     val status: Int,
+    val listIds: List<String>,
     val trackingUrl: String,
     val startedReadingDate: Long,
     val finishedReadingDate: Long,
@@ -27,12 +32,14 @@ data class TrackServiceItem(
     val nameRes: Int,
     val logoRes: Int,
     val logoColor: Int,
-    val statusList: ImmutableList<Int>,
+    val statusList: ImmutableList<Int>?,
+    val lists: ImmutableList<TrackList>?,
     val supportsReadingDates: Boolean,
     val canRemoveFromService: Boolean,
     val isAutoAddTracker: Boolean,
     val isMdList: Boolean,
-    val status: (Int) -> String,
+    val status: (Int) -> String?,
+    val currentList: (String) -> TrackList?,
     val displayScore: (TrackItem) -> String,
     val scoreList: ImmutableList<String>,
     val indexToScore: (Int) -> Float,
@@ -44,12 +51,30 @@ fun TrackService.toTrackServiceItem(): TrackServiceItem {
         nameRes = this.nameRes(),
         logoRes = this.getLogo(),
         logoColor = this.getLogoColor(),
-        statusList = this.getStatusList().toImmutableList(),
+        statusList = when (this) {
+            is TrackListService -> null
+            is TrackStatusService -> this.getStatusList().toImmutableList()
+        },
+        lists = when (this) {
+            is TrackListService -> this.viewLists().toPersistentList()
+            is TrackStatusService -> null
+        },
         supportsReadingDates = this.supportsReadingDates,
         canRemoveFromService = this.canRemoveFromService(),
         isAutoAddTracker = this.isAutoAddTracker(),
         isMdList = this.isMdList(),
-        status = { num -> this.getStatus(num) },
+        status = { num ->
+            when (this) {
+                is TrackListService -> null
+                is TrackStatusService -> this.getStatus(num)
+            }
+        },
+        currentList = { listId ->
+            when (this) {
+                is TrackListService -> this.viewLists().find { it.id == listId }
+                is TrackStatusService -> null
+            }
+        },
         displayScore = { track -> this.displayScore(track.toDbTrack()) },
         scoreList = this.getScoreList().toImmutableList(),
         indexToScore = { index -> this.indexToScore(index) },
@@ -75,6 +100,7 @@ fun TrackItem.toDbTrack(): Track {
 }
 
 fun Track.toTrackItem(): TrackItem {
+
     return TrackItem(
         id = this.id,
         mangaId = this.manga_id,
@@ -86,6 +112,7 @@ fun Track.toTrackItem(): TrackItem {
         totalChapters = this.total_chapters,
         score = this.score,
         status = this.status,
+        listIds = this.listIds,
         trackingUrl = this.tracking_url,
         startedReadingDate = this.started_reading_date,
         finishedReadingDate = this.finished_reading_date,

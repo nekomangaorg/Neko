@@ -243,6 +243,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
             true
         }
+
         for (id in listOf(R.id.nav_recents, R.id.nav_browse)) {
             nav.getItemView(id)?.setOnLongClickListener {
                 nav.selectedItemId = id

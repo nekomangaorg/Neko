@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
@@ -323,7 +324,8 @@ class LibraryUpdateService(
             if (skipBasedOnTracking) {
                 val tracks = db.getTracks(libraryManga).executeAsBlocking()
                 val foundNonReadingEntry = tracks.any { track ->
-                    val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
+
+                    val status = (trackManager.getService(track.sync_id) as? TrackStatusService)?.getGlobalStatus(track.status)
                     return@any status != null && status != getString(R.string.follows_reading) && status != getString(R.string.follows_re_reading) && status != getString(R.string.follows_unfollowed)
                 }
                 if (foundNonReadingEntry) {

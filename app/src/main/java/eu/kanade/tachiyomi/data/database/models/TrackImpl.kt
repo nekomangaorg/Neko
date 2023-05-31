@@ -22,6 +22,8 @@ class TrackImpl : Track {
 
     override var status: Int = 0
 
+    override var listIds: List<String> = emptyList()
+
     override var tracking_url: String = ""
 
     override var started_reading_date: Long = 0

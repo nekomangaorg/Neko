@@ -35,7 +35,7 @@ class TrackManager(context: Context) {
 
     val mangaUpdates = MangaUpdates(context, MANGA_UPDATES)
 
-    val services = hashMapOf(mdList.id to mdList, myAnimeList.id to myAnimeList, aniList.id to aniList, kitsu.id to kitsu, mangaUpdates.id to mangaUpdates)
+    val services = hashMapOf<Int, TrackService>(mdList.id to mdList, myAnimeList.id to myAnimeList, aniList.id to aniList, kitsu.id to kitsu, mangaUpdates.id to mangaUpdates)
 
     fun getService(id: Int) = services[id]
 

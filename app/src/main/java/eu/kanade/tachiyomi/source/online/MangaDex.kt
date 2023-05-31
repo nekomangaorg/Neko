@@ -5,10 +5,13 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.binding.binding
+import com.skydoves.sandwich.getOrThrow
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -24,12 +27,16 @@ import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
+import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
+import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
+import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.collections.immutable.toImmutableList
@@ -66,6 +73,14 @@ open class MangaDex : HttpSource() {
 
     suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         return followsHandler.updateFollowStatus(mangaID, followStatus)
+    }
+
+    suspend fun addToCustomList(mangaID: String, listID: String): Boolean {
+        return listHandler.addToCustomList(mangaID, listID).result?.equals("Ok") ?: false
+    }
+
+    suspend fun removeFromCustomList(mangaID: String, listID: String): Boolean {
+        return listHandler.removeFromCustomList(mangaID, listID).result?.equals("Ok") ?: false
     }
 
     suspend fun getRandomManga(): Result<SourceManga, ResultError> {
@@ -126,6 +141,10 @@ open class MangaDex : HttpSource() {
 
     suspend fun fetchUserLists(page: Int): Result<ResultListPage, ResultError> {
         return listHandler.retrieveUserLists(page)
+    }
+
+    suspend fun fetchAllUserLists(): Result<ResultListPage, ResultError> {
+        return listHandler.retrieveAllUserLists()
     }
 
     suspend fun fetchList(listId: String, page: Int, privateList: Boolean): Result<ListResults, ResultError> {
@@ -222,7 +241,25 @@ open class MangaDex : HttpSource() {
         if (!loginHelper.isLoggedIn()) {
             throw Exception("Not Logged in to MangaDex")
         }
-        return followsHandler.fetchTrackingInfo(url)
+        return withContext(Dispatchers.IO) {
+            val mangaUUID = MdUtil.getMangaUUID(url)
+            val ratingResponse = network.authService.retrieveRating(mangaUUID)
+            val list = network.authService.customListsContainingManga(mangaUUID)
+
+            list.onFailure {
+                this.log("trying to fetch list status for $mangaUUID")
+                throw Exception("error trying to get tracking info")
+            }
+
+            val rating =
+                ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaUUID]
+            val track = Track.create(TrackManager.MDLIST).apply {
+                listIds = list.getOrThrow().data.map { it.id }
+                tracking_url = "${MdConstants.baseUrl}/title/$mangaUUID"
+                score = rating?.rating?.toFloat() ?: 0f
+            }
+            return@withContext track
+        }
     }
 
     suspend fun checkIfUp(): Boolean {

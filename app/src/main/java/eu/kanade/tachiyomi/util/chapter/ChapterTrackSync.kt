@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.jobs.tracking.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -39,7 +40,7 @@ fun syncChaptersWithTrackServiceTwoWay(db: DatabaseHelper, chapters: List<Chapte
 
     launchIO {
         try {
-            service.update(remoteTrack)
+            //service.update(remoteTrack)
             db.insertTrack(remoteTrack).executeAsBlocking()
         } catch (e: Throwable) {
             loggycat(LogPriority.WARN, e)
@@ -92,7 +93,7 @@ suspend fun updateTrackChapterRead(
     val failures = mutableListOf<Pair<TrackService, String?>>()
     trackList.map { track ->
         val service = trackManager.getService(track.sync_id)
-        if (service != null && service.isLogged() && newChapterRead > track.last_chapter_read) {
+        if (service != null && service.isLogged() && newChapterRead > track.last_chapter_read && service is TrackStatusService) {
             if (retryWhenOnline && !preferences.context.isOnline()) {
                 delayTrackingUpdate(preferences, mangaId, newChapterRead, track)
             } else if (preferences.context.isOnline()) {

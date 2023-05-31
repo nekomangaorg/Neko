@@ -2,18 +2,14 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
-import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
-import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -75,29 +71,6 @@ class SubscriptionHandler {
             }
 
             response.getOrNull()?.result == "ok"
-        }
-    }
-
-    suspend fun fetchTrackingInfo(url: String): Track {
-        return withContext(Dispatchers.IO) {
-            val mangaUUID = getMangaUUID(url)
-            val readingStatusResponse = authService.readingStatusForManga(mangaUUID)
-            val ratingResponse = authService.retrieveRating(mangaUUID)
-
-            readingStatusResponse.onFailure {
-                this.log("trying to fetch reading status for $mangaUUID")
-                throw Exception("error trying to get tracking info")
-            }
-            val followStatus =
-                FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
-            val rating =
-                ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaUUID]
-            val track = Track.create(TrackManager.MDLIST).apply {
-                status = followStatus.int
-                tracking_url = "${MdConstants.baseUrl}/title/$mangaUUID"
-                score = rating?.rating?.toFloat() ?: 0f
-            }
-            return@withContext track
         }
     }
 }

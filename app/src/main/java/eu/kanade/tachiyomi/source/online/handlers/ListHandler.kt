@@ -1,14 +1,19 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
+import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.model.ResultListPage
+import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
@@ -81,6 +86,29 @@ class ListHandler {
         }
     }
 
+    suspend fun retrieveAllUserLists(): Result<ResultListPage, ResultError> {
+        var hasPages = true
+        var page = 1
+        val list: MutableList<SourceResult> = mutableListOf()
+        var resultError: ResultError? = null
+        while (hasPages) {
+            retrieveUserLists(page)
+                .onFailure {
+                    hasPages = false
+                    resultError = it
+                }
+                .onSuccess {
+                    page++
+                    hasPages = it.hasNextPage
+                    list += it.results
+                }
+        }
+        return when (resultError != null) {
+            true -> Err(resultError!!)
+            false -> Ok(ResultListPage(false, list.toPersistentList()))
+        }
+    }
+
     suspend fun retrieveUserLists(page: Int): Result<ResultListPage, ResultError> {
         val offset = MdUtil.getLatestChapterListOffset(page)
         return authService.usersLists(offset, MdConstants.Limits.latest).getOrResultError("Error getting user's lists")
@@ -101,6 +129,14 @@ class ListHandler {
                     )
                 }
             }
+    }
+
+    suspend fun addToCustomList(mangaId: String, listUUID: String): ResultDto {
+        return authService.addToCustomList(mangaId, listUUID).getOrThrow()
+    }
+
+    suspend fun removeFromCustomList(mangaId: String, listUUID: String): ResultDto {
+        return authService.removeFromCustomList(mangaId, listUUID).getOrThrow()
     }
 }
 

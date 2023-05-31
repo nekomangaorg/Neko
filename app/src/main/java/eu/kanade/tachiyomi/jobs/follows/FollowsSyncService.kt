@@ -128,8 +128,8 @@ class FollowsSyncService {
                         )
 
                         mdListTrack.status = FollowStatus.READING.int
-                        val returnedTracker = trackManager.mdList.update(mdListTrack)
-                        db.insertTrack(returnedTracker).executeOnIO()
+                        //val returnedTracker = trackManager.mdList.update(mdListTrack)
+                        //    db.insertTrack(returnedTracker).executeOnIO()
                     }
                     countNew.incrementAndGet()
                 }

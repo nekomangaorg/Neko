@@ -25,7 +25,6 @@ import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -325,6 +324,16 @@ class MangaDetailPresenter(
     }
 
     /**
+     * Update tracker with new status
+     */
+    fun updateTrackList(listId: String, addToList: Boolean, trackAndService: TrackAndService) {
+        presenterScope.launchIO {
+            val trackingUpdate = trackingCoordinator.updateTrackList(listId, addToList, trackAndService)
+            handleTrackingUpdate(trackingUpdate)
+        }
+    }
+
+    /**
      * Update tracker with new score
      */
     fun updateTrackScore(scoreIndex: Int, trackAndService: TrackAndService) {
@@ -400,6 +409,8 @@ class MangaDetailPresenter(
                 }
                 return@launchIO
             }
+
+            trackManager.mdList.populateLists()
             // add a slight delay in case the tracking flow is slower
 
             var count = 0
@@ -858,7 +869,7 @@ class MangaDetailPresenter(
                     val shouldAddAsPlanToRead = currentManga().favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
                     if (shouldAddAsPlanToRead && isOnline()) {
                         track.status = FollowStatus.PLAN_TO_READ.int
-                        trackingCoordinator.updateTrackingService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem())
+                        // trackingCoordinator.updateTrackingService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem())
                     }
                 }
 
@@ -913,11 +924,7 @@ class MangaDetailPresenter(
                 trackMergeState.value.tracks.any { track ->
                     // return true if track matches and not MDList
                     // or track matches and MDlist is anything but Unfollowed
-                    trackService.matchingTrack(track) &&
-                        (
-                            trackService.isMdList().not() ||
-                                (trackService.isMdList() && !FollowStatus.isUnfollowed(track.status))
-                            )
+                    trackService.matchingTrack(track) && !trackService.isMdList() || (trackService.isMdList() && track.listIds.isEmpty())
                 }
             }
 

@@ -24,6 +24,8 @@ class TrackSearch : Track {
 
     override var status: Int = 0
 
+    override var listIds: List<String> = emptyList()
+
     override lateinit var tracking_url: String
 
     var cover_url: String = ""

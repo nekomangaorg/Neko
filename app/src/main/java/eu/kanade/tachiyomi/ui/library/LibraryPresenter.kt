@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.source.SourceManager
@@ -805,7 +806,7 @@ class LibraryPresenter(
                             else -> null
                         }
                     }.map { trackAndService ->
-                        trackAndService.second.getGlobalStatus(trackAndService.first.status)
+                        (trackAndService.second as TrackStatusService).getGlobalStatus(trackAndService.first.status)
                     }.distinct().map { status ->
                         LibraryItem(manga, makeOrGetHeader(status))
                     }

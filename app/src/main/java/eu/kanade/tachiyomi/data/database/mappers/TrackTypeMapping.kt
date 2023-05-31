@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_FINISH_DATE
 import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_ID
 import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_LAST_CHAPTER_READ
 import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_LIBRARY_ID
+import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_LIST_ID
 import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_MANGA_ID
 import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_MEDIA_ID
 import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_SCORE
@@ -54,6 +55,7 @@ class TrackPutResolver : DefaultPutResolver<Track>() {
         put(COL_LAST_CHAPTER_READ, obj.last_chapter_read)
         put(COL_TOTAL_CHAPTERS, obj.total_chapters)
         put(COL_STATUS, obj.status)
+        put(COL_LIST_ID, obj.listIds.joinToString(Track.LIST_SEPERATOR))
         put(COL_TRACKING_URL, obj.tracking_url)
         put(COL_SCORE, obj.score)
         put(COL_START_DATE, obj.started_reading_date)
@@ -74,6 +76,13 @@ class TrackGetResolver : DefaultGetResolver<Track>() {
         total_chapters = cursor.getInt(cursor.getColumnIndexOrThrow(COL_TOTAL_CHAPTERS))
         status = cursor.getInt(cursor.getColumnIndexOrThrow(COL_STATUS))
         score = cursor.getFloat(cursor.getColumnIndexOrThrow(COL_SCORE))
+
+        val ids = cursor.getString(cursor.getColumnIndexOrThrow(COL_LIST_ID))
+        listIds = when (ids.isEmpty()) {
+            true -> emptyList()
+            false -> ids.split(Track.LIST_SEPERATOR)
+        }
+
         tracking_url = cursor.getString(cursor.getColumnIndexOrThrow(COL_TRACKING_URL))
         started_reading_date = cursor.getLong(cursor.getColumnIndexOrThrow(COL_START_DATE))
         finished_reading_date = cursor.getLong(cursor.getColumnIndexOrThrow(COL_FINISH_DATE))
