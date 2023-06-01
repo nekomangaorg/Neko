@@ -3,6 +3,7 @@ package org.nekomanga.presentation.components.dialog
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.AlertDialog
@@ -24,6 +25,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackList
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.screens.ThemeColorState
 
@@ -46,19 +49,33 @@ fun TrackingListDialog(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     service.lists?.forEachIndexed { index, list ->
 
+                        val clicked = { enabled: Boolean ->
+                            scope.launch {
+                                delay(100L)
+                                when (enabled) {
+                                    true -> removeFromListClick(list.id)
+                                    false -> addToListClick(list.id)
+                                }
+                                onDismiss()
+                            }
+                        }
+
+
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = (currentLists.contains(list)),
+                                    onClick = {
+                                        clicked(!currentLists.contains(list))
+                                    },
+                                ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Checkbox(
                                 checked = (currentLists.contains(list)),
                                 onCheckedChange = { enabled ->
-                                    when (enabled) {
-                                        true -> removeFromListClick(list.id)
-                                        false -> addToListClick(list.id)
-                                    }
-                                    onDismiss()
+                                    clicked(enabled)
 
                                 },
                                 colors = CheckboxDefaults.colors(checkedColor = themeColorState.buttonColor),
