@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
+import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -76,11 +77,11 @@ open class MangaDex : HttpSource() {
     }
 
     suspend fun addToCustomList(mangaID: String, listID: String): Boolean {
-        return listHandler.addToCustomList(mangaID, listID).result?.equals("Ok") ?: false
+        return listHandler.addToCustomList(mangaID, listID).result?.equals("ok", true) ?: false
     }
 
     suspend fun removeFromCustomList(mangaID: String, listID: String): Boolean {
-        return listHandler.removeFromCustomList(mangaID, listID).result?.equals("Ok") ?: false
+        return listHandler.removeFromCustomList(mangaID, listID).result?.equals("ok", true) ?: false
     }
 
     suspend fun getRandomManga(): Result<SourceManga, ResultError> {
@@ -244,17 +245,16 @@ open class MangaDex : HttpSource() {
         return withContext(Dispatchers.IO) {
             val mangaUUID = MdUtil.getMangaUUID(url)
             val ratingResponse = network.authService.retrieveRating(mangaUUID)
-            val list = network.authService.customListsContainingManga(mangaUUID)
-
-            list.onFailure {
+            loggycat { "mangaUUID $mangaUUID" }
+            val list = network.authService.customListsContainingManga(mangaUUID).onFailure {
                 this.log("trying to fetch list status for $mangaUUID")
                 throw Exception("error trying to get tracking info")
-            }
+            }.getOrThrow()
 
             val rating =
                 ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaUUID]
             val track = Track.create(TrackManager.MDLIST).apply {
-                listIds = list.getOrThrow().data.map { it.id }
+                listIds = list.data.map { it.id }
                 tracking_url = "${MdConstants.baseUrl}/title/$mangaUUID"
                 score = rating?.rating?.toFloat() ?: 0f
             }

@@ -96,6 +96,7 @@ fun TrackItem.toDbTrack(): Track {
         this.tracking_url = this@toDbTrack.trackingUrl
         this.started_reading_date = this@toDbTrack.startedReadingDate
         this.finished_reading_date = this@toDbTrack.finishedReadingDate
+        this.listIds = this@toDbTrack.listIds
     }
 }
 

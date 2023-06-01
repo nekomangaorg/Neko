@@ -55,8 +55,8 @@ fun TrackingListDialog(
                                 checked = (currentLists.contains(list)),
                                 onCheckedChange = { enabled ->
                                     when (enabled) {
-                                        true -> addToListClick(list.id)
-                                        false -> removeFromListClick(list.id)
+                                        true -> removeFromListClick(list.id)
+                                        false -> addToListClick(list.id)
                                     }
                                     onDismiss()
 

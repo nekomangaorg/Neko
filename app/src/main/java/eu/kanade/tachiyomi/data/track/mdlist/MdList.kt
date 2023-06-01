@@ -47,7 +47,6 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
             kotlin.runCatching {
                 if (mdex.addToCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
                     track.listIds = (track.listIds + listOf(listId)).distinct()
-                    db.insertTrack(track).executeAsBlocking()
                 }
             }.onFailure { e ->
                 loggycat(LogPriority.ERROR, e) { "error updating MDList" }
@@ -62,7 +61,6 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
             kotlin.runCatching {
                 if (mdex.removeFromCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
                     track.listIds = track.listIds.filterNot { it == listId }
-                    db.insertTrack(track).executeAsBlocking()
                 }
             }.onFailure { e ->
                 loggycat(LogPriority.ERROR, e) { "error updating MDList" }

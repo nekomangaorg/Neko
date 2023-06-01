@@ -38,6 +38,7 @@ interface Track : Serializable {
         status = other.status
         started_reading_date = other.started_reading_date
         finished_reading_date = other.finished_reading_date
+        listIds = other.listIds
     }
 
     companion object {

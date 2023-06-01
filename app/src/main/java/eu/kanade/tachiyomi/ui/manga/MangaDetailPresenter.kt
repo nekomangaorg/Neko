@@ -850,7 +850,7 @@ class MangaDetailPresenter(
             if (checkForMissingTrackers) {
                 val autoAddTracker = preferences.autoAddTracker().get()
 
-                // Always add the mdlist initial unfollowed tracker, also add it as PTR if need be
+                // Always add the mdlist initial tracker, also add it as PTR if need be
                 trackMergeState.value.loggedInTrackService.firstOrNull { it.isMdList }?.let { _ ->
                     val mdList = trackManager.mdList
 
@@ -909,7 +909,7 @@ class MangaDetailPresenter(
                         }.awaitAll()
                     }
                 }
-                // update the tracks incase they were updated above
+                // update the tracks in case they were updated above
                 _trackMergeState.update { mergeState ->
                     mergeState.copy(
                         tracks = db.getTracks(mangaId).executeAsBlocking().map { it.toTrackItem() }.toImmutableList(),
@@ -923,8 +923,8 @@ class MangaDetailPresenter(
                 val trackService = trackManager.getService(trackServiceItem.id)!!
                 trackMergeState.value.tracks.any { track ->
                     // return true if track matches and not MDList
-                    // or track matches and MDlist is anything but Unfollowed
-                    trackService.matchingTrack(track) && !trackService.isMdList() || (trackService.isMdList() && track.listIds.isEmpty())
+                    // or track matches and MDlist is any list
+                    trackService.matchingTrack(track) && (!trackService.isMdList() || (trackService.isMdList() && track.listIds.isNotEmpty()))
                 }
             }
 

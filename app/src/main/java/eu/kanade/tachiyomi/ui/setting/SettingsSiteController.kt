@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
+import com.skydoves.sandwich.getOrNull
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -13,16 +14,19 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -223,15 +227,12 @@ class SettingsSiteController :
             title = "Test"
 
             onClick {
-                /*GlobalScope.launchIO {
-                    Injekt.get<NetworkHelper>().authService.userList(0).getOrThrow().data.forEach {
-                        loggycat {
-                            """
-                                    ESCO - id: ${it.id} name: ${it.attributes.name}
-                                """.trimIndent()
-                        }
-                    }
-                }*/
+                GlobalScope.launchIO {
+                    val listId = "6067f0ff-025e-4d5c-9522-e16375a236c8"
+                    val mangaID = "4a4786cf-c185-4ad3-89a9-294a1ec0bfc9"
+                    Injekt.get<NetworkHelper>().authService.addToCustomList(mangaID, listId).getOrNull()
+                    Injekt.get<NetworkHelper>().authService.customListsContainingManga("4a4786cf-c185-4ad3-89a9-294a1ec0bfc9").getOrNull()
+                }
             }
         }
 
