@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.tables.BrowseFilterTable
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
+import eu.kanade.tachiyomi.data.database.tables.CustomListTable
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
@@ -39,9 +40,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         execSQL(SimilarTable.createTableQuery)
         execSQL(ArtworkTable.createTableQuery)
         execSQL(ScanlatorTable.createTableQuery)
+        execSQL(CustomListTable.createTableQuery)
         execSQL(BrowseFilterTable.createTableQuery)
         execSQL(MergeMangaTable.createTableQuery)
-
         // DB indexes
         execSQL(MangaTable.createUrlIndexQuery)
         execSQL(MangaTable.createLibraryIndexQuery)
@@ -165,6 +166,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
 
         if (oldVersion < 37) {
             db.execSQL(TrackTable.addListId)
+            db.execSQL(CustomListTable.createTableQuery)
         }
     }
 

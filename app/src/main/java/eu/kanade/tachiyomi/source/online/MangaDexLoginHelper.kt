@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online
 
 import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
@@ -21,6 +22,7 @@ class MangaDexLoginHelper {
 
     private val networkHelper: NetworkHelper by lazy { Injekt.get() }
     private val preferences: PreferencesHelper by injectLazy()
+    private val trackManager: TrackManager by injectLazy()
 
     val tag = "||LoginHelper"
 
@@ -61,6 +63,9 @@ class MangaDexLoginHelper {
                 data.refreshToken,
                 data.accessToken,
             )
+
+            trackManager.mdList.populateLists()
+
         }.exceptionOrNull()
 
         return when (error == null) {
@@ -103,6 +108,8 @@ class MangaDexLoginHelper {
                 userInfo.data.id,
                 userInfo.data.attributes.username,
             )
+
+            trackManager.mdList.populateLists()
 
         }.exceptionOrNull()
 

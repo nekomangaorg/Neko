@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
+import eu.kanade.tachiyomi.data.track.TrackListService
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
@@ -37,6 +38,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_CONTENT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LANGUAGE
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LIST
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
@@ -90,14 +92,19 @@ class LibraryPresenter(
     private val viewContext
         get() = view?.view?.context
 
-    private val loggedServices by lazy { Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() } }
+    private val trackManager by lazy { Injekt.get<TrackManager>() }
+
+    private val loggedServices by lazy { trackManager.services.values.filter { it.isLogged() || it.isMdList() } }
 
     private val statusHandler: StatusHandler by injectLazy()
 
     var groupType = preferences.groupLibraryBy().get()
 
-    val isLoggedIntoTracking
-        get() = loggedServices.isNotEmpty()
+    val isLoggedIntoTrackingStatus
+        get() = loggedServices.filter { it is TrackStatusService }.isNotEmpty()
+
+    val isLoggedIntoTrackingList
+        get() = loggedServices.filter { it is TrackListService }.isNotEmpty()
 
     private val loginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
@@ -800,19 +807,41 @@ class LibraryPresenter(
                 BY_TRACK_STATUS -> {
                     val tracks = db.getTracks(manga).executeAsBlocking()
                     val results = tracks.mapNotNull { track ->
-                        val service = Injekt.get<TrackManager>().getService(track.sync_id)
-                        return@mapNotNull when (service?.isLogged()) {
+                        val service = trackManager.getService(track.sync_id)
+                        return@mapNotNull when (service?.isLogged() == true && service is TrackStatusService) {
                             true -> Pair(track, service)
                             else -> null
                         }
                     }.map { trackAndService ->
-                        (trackAndService.second as TrackStatusService).getGlobalStatus(trackAndService.first.status)
+                        trackAndService.second.getGlobalStatus(trackAndService.first.status)
                     }.distinct().map { status ->
                         LibraryItem(manga, makeOrGetHeader(status))
                     }
 
                     when (results.isEmpty()) {
                         true -> listOf(LibraryItem(manga, makeOrGetHeader(context.getString(R.string.not_tracked))))
+                        false -> results
+                    }
+                }
+
+                BY_LIST -> {
+                    val tracks = db.getTracks(manga).executeAsBlocking()
+                    val results = tracks.asSequence().mapNotNull { track ->
+                        val service = trackManager.getService(track.sync_id)
+                        return@mapNotNull when (service?.isLogged() == true && service.isMdList() && service is TrackListService) {
+                            true -> Pair(track, service)
+                            else -> null
+                        }
+                    }.map { trackAndService ->
+                        val lists = trackAndService.second.viewLists()
+                        trackAndService.first.listIds.map { listId -> lists.firstOrNull { trackList -> trackList.id == listId }?.name ?: listId }
+                    }.flatten()
+                        .distinct().map { status ->
+                            LibraryItem(manga, makeOrGetHeader(status))
+                        }.toList()
+
+                    when (results.isEmpty()) {
+                        true -> listOf(LibraryItem(manga, makeOrGetHeader(context.getString(R.string.not_applicable))))
                         false -> results
                     }
                 }

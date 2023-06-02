@@ -327,7 +327,7 @@ private fun TrackRowTwo(track: TrackItem, service: TrackServiceItem, statusClick
             val (text, color) = when {
                 service.status(track.status) != null -> (service.status(track.status) ?: "") to MaterialTheme.colorScheme.onSurface
                 track.listIds.size > 1 -> stringResource(id = R.string.multiple_lists) to MaterialTheme.colorScheme.onSurface
-                track.listIds.isEmpty() -> stringResource(id = R.string.none) to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
+                track.listIds.isEmpty() -> stringResource(id = R.string.not_applicable) to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
                 else -> service.currentList(track.listIds.first())!!.name to MaterialTheme.colorScheme.onSurface
             }
 

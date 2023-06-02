@@ -11,6 +11,7 @@ object LibraryGroup {
     const val BY_AUTHOR = 6
     const val BY_CONTENT = 7
     const val BY_LANGUAGE = 8
+    const val BY_LIST = 9
     const val UNGROUPED = 5
 
     fun groupTypeStringRes(type: Int, hasCategories: Boolean = true): Int {
@@ -22,6 +23,7 @@ object LibraryGroup {
             UNGROUPED -> R.string.ungrouped
             BY_CONTENT -> R.string.content_rating
             BY_LANGUAGE -> R.string.original_language
+            BY_LIST -> R.string.custom_lists
             else -> if (hasCategories) R.string.categories else R.string.ungrouped
         }
     }
@@ -35,6 +37,7 @@ object LibraryGroup {
             UNGROUPED -> R.drawable.ic_ungroup_24dp
             BY_CONTENT -> R.drawable.ic_local_library_24dp
             BY_LANGUAGE -> R.drawable.ic_language_24dp
+            BY_LIST -> R.drawable.ic_view_list_24dp
             else -> R.drawable.ic_label_outline_24dp
         }
     }

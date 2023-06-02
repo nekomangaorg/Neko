@@ -6,6 +6,7 @@ import android.graphics.Color
 import androidx.core.text.isDigitsOnly
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.CustomListImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackList
@@ -16,6 +17,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,17 +31,16 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
 
     private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
-    private var lists: List<TrackList> = emptyList()
-
     override fun nameRes() = R.string.mdlist
     override suspend fun populateLists() {
         mdex.fetchAllUserLists().onSuccess { resultListPage ->
-            lists = resultListPage.results.map { TrackList(id = it.uuid, name = it.title) }
+            val customLists = resultListPage.results.map { CustomListImpl(name = it.title, uuid = it.uuid) }
+            db.insertCustomsLists(customLists).executeOnIO()
         }
     }
 
     override fun viewLists(): List<TrackList> {
-        return lists
+        return db.getCustomLists().executeAsBlocking().map { TrackList(name = it.name, id = it.uuid) }
     }
 
     override suspend fun addToList(track: Track, listId: String): Track {

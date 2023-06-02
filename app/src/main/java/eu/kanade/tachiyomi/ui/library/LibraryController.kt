@@ -77,6 +77,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_AUTHOR
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_CONTENT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LANGUAGE
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_LIST
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
@@ -336,6 +337,7 @@ class LibraryController(
                 RecyclerView.SCROLL_STATE_DRAGGING -> {
                     binding.fastScroller.showScrollbar()
                 }
+
                 RecyclerView.SCROLL_STATE_IDLE -> {
                     updateHopperPosition()
                 }
@@ -507,8 +509,11 @@ class LibraryController(
 
     private fun showGroupOptions() {
         val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_STATUS, BY_AUTHOR, BY_CONTENT, BY_LANGUAGE)
-        if (presenter.isLoggedIntoTracking) {
+        if (presenter.isLoggedIntoTrackingStatus) {
             groupItems.add(BY_TRACK_STATUS)
+        }
+        if (presenter.isLoggedIntoTrackingList) {
+            groupItems.add(BY_LIST)
         }
         if (presenter.allCategories.size > 1) {
             groupItems.add(UNGROUPED)
@@ -672,6 +677,7 @@ class LibraryController(
                             updateLibrary(it)
                         }
                     }
+
                     else -> updateLibrary()
                 }
             }
@@ -1531,9 +1537,11 @@ class LibraryController(
             lastClickPosition > position -> for (i in position until lastClickPosition) setSelection(
                 i,
             )
+
             lastClickPosition < position -> for (i in lastClickPosition + 1..position) setSelection(
                 i,
             )
+
             else -> setSelection(position)
         }
         lastClickPosition = position
@@ -1911,6 +1919,7 @@ class LibraryController(
                     showDisplayOptions()
                 }
             }
+
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -1987,9 +1996,11 @@ class LibraryController(
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
             R.id.action_download_unread -> {
                 presenter.downloadUnread(selectedMangaSet.toList())
             }
+
             R.id.action_delete_downloads -> {
                 activity!!.materialAlertDialog()
                     .setTitle(R.string.remove)
@@ -2000,6 +2011,7 @@ class LibraryController(
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
             R.id.action_mark_as_read -> {
                 activity!!.materialAlertDialog()
                     .setMessage(R.string.mark_all_chapters_as_read)
@@ -2009,6 +2021,7 @@ class LibraryController(
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
             R.id.action_mark_as_unread -> {
                 activity!!.materialAlertDialog()
                     .setMessage(R.string.mark_all_chapters_as_unread)
@@ -2018,10 +2031,12 @@ class LibraryController(
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
             R.id.action_sync_to_dex -> {
                 presenter.syncMangaToDex(selectedMangaSet.toList())
                 destroyActionModeIfNeeded()
             }
+
             else -> return false
         }
         return true

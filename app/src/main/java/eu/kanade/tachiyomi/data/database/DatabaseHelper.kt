@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.mappers.ArtworkTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.BrowseFilterTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.CategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.ChapterTypeMapping
+import eu.kanade.tachiyomi.data.database.mappers.CustomListTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.HistoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MangaCategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MangaTypeMapping
@@ -19,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.ArtworkImpl
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.CustomListImpl
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -31,6 +33,7 @@ import eu.kanade.tachiyomi.data.database.queries.ArtworkQueries
 import eu.kanade.tachiyomi.data.database.queries.BrowseFilterQueries
 import eu.kanade.tachiyomi.data.database.queries.CategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.ChapterQueries
+import eu.kanade.tachiyomi.data.database.queries.CustomListQueries
 import eu.kanade.tachiyomi.data.database.queries.HistoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaCategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaQueries
@@ -56,6 +59,7 @@ open class DatabaseHelper(context: Context) :
     HistoryQueries,
     SearchMetadataQueries,
     ScanlatorQueries,
+    CustomListQueries,
     SimilarQueries {
 
     private val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
@@ -76,6 +80,7 @@ open class DatabaseHelper(context: Context) :
         .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
         .addTypeMapping(ArtworkImpl::class.java, ArtworkTypeMapping())
         .addTypeMapping(ScanlatorImpl::class.java, ScanlatorTypeMapping())
+        .addTypeMapping(CustomListImpl::class.java, CustomListTypeMapping())
         .addTypeMapping(BrowseFilterImpl::class.java, BrowseFilterTypeMapping())
         .addTypeMapping(MergeMangaImpl::class.java, MergeMangaTypeMapping())
         .build()
