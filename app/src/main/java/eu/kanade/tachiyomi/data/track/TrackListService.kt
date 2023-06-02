@@ -119,6 +119,9 @@ abstract class TrackListService(_id: Int) : TrackService(_id) {
 
     abstract suspend fun addToList(track: Track, listId: String): Track
     abstract suspend fun removeFromList(track: Track, listId: String): Track
+
+    abstract suspend fun addToLists(track: Track, listIds: List<String>): Track
+    abstract suspend fun removeFromLists(track: Track, listIds: List<String>): Track
 }
 
 abstract class TrackStatusService(_id: Int) : TrackService(_id) {

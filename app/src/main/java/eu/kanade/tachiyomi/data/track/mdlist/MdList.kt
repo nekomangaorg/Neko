@@ -71,6 +71,38 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
         }
     }
 
+    override suspend fun addToLists(track: Track, listIds: List<String>): Track {
+        return withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                listIds.forEach { listId ->
+                    if (mdex.addToCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
+                        track.listIds = (track.listIds + listOf(listId)).distinct()
+                    }
+                }
+            }.onFailure { e ->
+                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+            }
+
+            track
+        }
+    }
+
+    override suspend fun removeFromLists(track: Track, listIds: List<String>): Track {
+        return withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                listIds.forEach { listId ->
+                    if (mdex.removeFromCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
+                        track.listIds = track.listIds.filterNot { it == listId }
+                    }
+                }
+            }.onFailure { e ->
+                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+            }
+
+            track
+        }
+    }
+
     override fun isAutoAddTracker() = true
 
     override fun getLogo(): Int {

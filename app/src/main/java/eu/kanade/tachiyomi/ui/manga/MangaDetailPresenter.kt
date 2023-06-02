@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -866,10 +865,15 @@ class MangaDetailPresenter(
                         }
                         db.insertTrack(track).executeOnIO()
                     }
-                    val shouldAddAsPlanToRead = currentManga().favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
-                    if (shouldAddAsPlanToRead && isOnline()) {
-                        track.status = FollowStatus.PLAN_TO_READ.int
-                        // trackingCoordinator.updateTrackingService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem())
+                    val enabledDefaultLists = preferences.enableDefaultCustomLists().get()
+                    val defaultCustomListUUID = preferences.getAddToLibraryToSpecificCustomList()
+                    val shouldAddToDefaultCustomList = currentManga().favorite && enabledDefaultLists && defaultCustomListUUID.isNotEmpty()
+                    if (shouldAddToDefaultCustomList && isOnline()) {
+                        defaultCustomListUUID.filterNot { id -> id in track.listIds }
+                        val idsToAdd = defaultCustomListUUID.filterNot { id -> id in track.listIds }
+                        if (idsToAdd.isNotEmpty()) {
+                            trackingCoordinator.updateTrackingListService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem(), idsToAdd, true)
+                        }
                     }
                 }
 

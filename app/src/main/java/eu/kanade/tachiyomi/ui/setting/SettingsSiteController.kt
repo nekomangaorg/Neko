@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -237,11 +238,24 @@ class SettingsSiteController :
         }
 
         switchPreference {
-            key = PreferenceKeys.addToLibraryAsPlannedToRead
-            titleRes = R.string.add_favorites_as_planned_to_read
-            summaryRes = R.string.add_favorites_as_planned_to_read_summary
+            key = PreferenceKeys.enableDefaultCustomLists
+            titleRes = R.string.enable_default_custom_lists
+            summaryRes = R.string.enable_default_custom_lists_summary
             defaultValue = false
         }
+
+        preference {
+            preferences.enableDefaultCustomLists().asImmediateFlowIn(viewScope) {
+                isVisible = it
+            }
+            titleRes = R.string.default_custom_lists
+            onClick {
+                val ctrl = ChooseCustomListDialog(preferences)
+                ctrl.targetController = this@SettingsSiteController
+                ctrl.showDialog(router)
+            }
+        }
+
 
         preference {
             titleRes = R.string.v5_migration_service
@@ -255,6 +269,50 @@ class SettingsSiteController :
                     }
                     .show()
             }
+        }
+    }
+
+    class ChooseCustomListDialog() : DialogController() {
+        constructor(preferences: PreferencesHelper) : this() {
+            this.preferences = preferences
+        }
+
+        var preferences: PreferencesHelper? = null
+
+        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+            val activity = activity!!
+
+            val trackManager: TrackManager = Injekt.get()
+
+            val options = trackManager.mdList.viewLists()
+
+            val initialIds = preferences!!.getAddToLibraryToSpecificCustomList()
+                .map { id -> options.indexOfFirst { it.id == id } }.toIntArray()
+
+            val allLists = ((options.map { it.name })).toTypedArray()
+            val enabledIds =
+                (List(options.size) { index -> initialIds.contains(index) }).toBooleanArray()
+
+            return activity.materialAlertDialog()
+                .setTitle(R.string.default_custom_lists)
+                .setMultiChoiceItems(
+                    allLists,
+                    enabledIds,
+                ) { dialog, position, _ ->
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok) { dialog, t ->
+                    val listView = (dialog as AlertDialog).listView
+                    val selectedUUID = mutableListOf<String>()
+
+                    for (i in 0 until listView.count) {
+                        if (listView.isItemChecked(i)) {
+                            selectedUUID.add(options[i].id)
+                        }
+                    }
+                    preferences!!.changeAddToLibraryToSpecificCustomList(selectedUUID)
+                }
+                .create()
         }
     }
 

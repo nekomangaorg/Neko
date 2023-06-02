@@ -15,6 +15,7 @@ import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
@@ -558,8 +559,14 @@ class PreferencesHelper(val context: Context) {
 
     fun showContentRatingFilter(): Boolean = prefs.getBoolean(Keys.showContentRatingFilter, true)
 
-    fun addToLibraryAsPlannedToRead(): Boolean =
-        prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
+    fun enableDefaultCustomLists() = flowPrefs.getBoolean(Keys.enableDefaultCustomLists, false)
+
+    fun getAddToLibraryToSpecificCustomList(): List<String> =
+        prefs.getString(Keys.defaultCustomLists, "")?.split(Track.LIST_SEPERATOR) ?: emptyList()
+
+    fun changeAddToLibraryToSpecificCustomList(uuid: List<String>) {
+        prefs.edit().putString(Keys.defaultCustomLists, uuid.joinToString(Track.LIST_SEPERATOR)).apply()
+    }
 
     fun contentRatingSelections(): MutableSet<String> =
         prefs.getStringSet(

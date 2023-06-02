@@ -328,7 +328,9 @@ object PreferenceKeys {
 
     const val verboseLogging = "verbose_logging"
 
-    const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
+    const val enableDefaultCustomLists = "enable_default_custom_lists"
+
+    const val defaultCustomLists = "default_custom_lists"
 
     const val mangadexSyncToLibraryIndexes = "pref_mangadex_sync_to_library_indexes"
 

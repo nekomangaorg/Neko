@@ -165,6 +165,20 @@ class TrackingCoordinator {
         }
     }
 
+    suspend fun updateTrackingListService(track: TrackItem, service: TrackServiceItem, ids: List<String>, addToList: Boolean): TrackingUpdate {
+        return runCatching {
+            val service = (trackManager.getService(service.id)!! as TrackListService)
+            val updatedTrack = when (addToList) {
+                true -> service.addToLists(track.toDbTrack(), ids)
+                false -> service.removeFromLists(track.toDbTrack(), ids)
+            }
+            db.insertTrack(updatedTrack).executeOnIO()
+            TrackingUpdate.Success
+        }.getOrElse {
+            TrackingUpdate.Error("Error updating tracker", it)
+        }
+    }
+
     /**
      * Search Tracker
      */
