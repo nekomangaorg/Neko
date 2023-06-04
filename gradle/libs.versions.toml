@@ -1,7 +1,7 @@
 [versions]
 aboutlib_version = "10.7.0"
 chucker_version = "3.5.2"
-coil_version = "2.3.0"
+coil_version = "2.4.0"
 fast_adapter_version = "5.7.0"
 nucleus_version = "3.0.0"
 iconics_version = "5.4.0"
