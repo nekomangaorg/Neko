@@ -219,6 +219,15 @@ class SettingsSiteController :
                 }
             }
 
+            preference {
+                titleRes = R.string.delete_custom_list
+                onClick {
+                    val ctrl = DeleteCustomListDialog(viewScope)
+                    ctrl.targetController = this@SettingsSiteController
+                    ctrl.showDialog(router)
+                }
+            }
+
         }
 
 
@@ -303,25 +312,27 @@ class SettingsSiteController :
         }
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val activity = activity!!
 
             lateinit var binding: CreateCustomListDialogBinding
+            val trackManager: TrackManager = Injekt.get()
+            val sourceManager: SourceManager = Injekt.get()
 
-            return activity.materialAlertDialog().apply {
+            return activity!!.materialAlertDialog().apply {
                 setTitle(R.string.add_custom_list)
-                binding = CreateCustomListDialogBinding.inflate(activity.layoutInflater)
+                binding = CreateCustomListDialogBinding.inflate(activity!!.layoutInflater)
                 setView(binding.root)
                 setNegativeButton(android.R.string.cancel, null)
                 setPositiveButton(R.string.save) { dialog, _ ->
                     val customListName = binding.title.text.toString()
                     val isPublic = binding.makePublicCheckbox.checkedState == STATE_CHECKED
                     if (customListName.isNotEmpty()) {
-                        val sourceManager: SourceManager = Injekt.get()
                         scope?.launchIO {
                             if (!sourceManager.mangaDex.createCustomList(customListName, isPublic)) {
                                 launchUI {
-                                    activity.toast(R.string.failed_to_create_list)
+                                    activity?.toast(R.string.failed_to_create_list)
                                 }
+                            } else {
+                                trackManager.mdList.populateLists()
                             }
                         }
                         dismissDialog()
@@ -329,6 +340,44 @@ class SettingsSiteController :
 
                 }
             }.create()
+        }
+    }
+
+    class DeleteCustomListDialog(bundle: Bundle? = null) : DialogController() {
+
+        var scope: CoroutineScope? = null
+        val trackManager: TrackManager = Injekt.get()
+        val sourceManager: SourceManager = Injekt.get()
+
+        constructor(scope: CoroutineScope) : this() {
+            this.scope = scope
+            scope.launchIO {
+                trackManager.mdList.populateLists()
+            }
+        }
+
+        val options = trackManager.mdList.viewLists()
+
+        val allLists = ((options.map { it.name })).toTypedArray()
+        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+
+            return activity!!.materialAlertDialog().apply {
+                setTitle(R.string.delete)
+                setSingleChoiceItems(allLists, -1) { dialog, position ->
+                    val listUUID = options[position].id
+                    scope?.launchIO {
+                        if (!sourceManager.mangaDex.deleteCustomList(listUUID)) {
+                            launchUI {
+                                activity?.toast(R.string.failed_to_delete_list)
+                            }
+                        } else {
+                            trackManager.mdList.populateLists()
+                        }
+                    }
+                    dismissDialog()
+                }
+            }
+                .create()
         }
     }
 

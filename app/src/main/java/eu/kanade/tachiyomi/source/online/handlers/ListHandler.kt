@@ -150,6 +150,10 @@ class ListHandler {
         )
         return authService.createCustomList(newCustomListDto).getOrThrow()
     }
+
+    suspend fun deleteCustomList(listId: String): ResultDto {
+        return authService.deleteCustomList(listId).getOrThrow()
+    }
 }
 
 data class ListResults(

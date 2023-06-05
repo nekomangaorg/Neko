@@ -55,6 +55,9 @@ interface MangaDexAuthorizedUserService : CommonListFunctions {
     @POST(MdConstants.Api.list)
     suspend fun createCustomList(@Body newCustomListDto: NewCustomListDto): ApiResponse<ResultDto>
 
+    @DELETE("${MdConstants.Api.list}/{listId}")
+    suspend fun deleteCustomList(@Path("listId") listUUID: String): ApiResponse<ResultDto>
+
     @GET("${MdConstants.Api.manga}/{mangaId}${MdConstants.Api.list}")
     suspend fun customListsContainingManga(@Path("mangaId") mangaUUID: String): ApiResponse<CustomListListDto>
 

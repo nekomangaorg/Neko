@@ -88,6 +88,10 @@ open class MangaDex : HttpSource() {
         return listHandler.createCustomList(listName, isPublic).result?.equals("ok", true) ?: false
     }
 
+    suspend fun deleteCustomList(listID: String): Boolean {
+        return listHandler.deleteCustomList(listID).result?.equals("ok", true) ?: false
+    }
+
     suspend fun getRandomManga(): Result<SourceManga, ResultError> {
         return withIOContext {
             val response = network.service.randomManga(preferences.contentRatingSelections().toList())

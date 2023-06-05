@@ -1373,6 +1373,8 @@
     <string name="list_name">List name</string>
     <string name="public_list">Public list</string>
     <string name="failed_to_create_list">Failed to create custom list</string>
+    <string name="delete_custom_list">Delete custom list</string>
+    <string name="failed_to_delete_list">Failed to delete custom list</string>
 
 
     <!-- Backup Settings -->
