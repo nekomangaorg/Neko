@@ -323,11 +323,12 @@ class MangaDetailPresenter(
     }
 
     /**
-     * Update tracker with new status
+     * Update tracker with new lists
      */
-    fun updateTrackList(listId: String, addToList: Boolean, trackAndService: TrackAndService) {
+
+    fun updateTrackList(listIdsToAdd: List<String>, listIdsToRemove: List<String>, trackAndService: TrackAndService) {
         presenterScope.launchIO {
-            val trackingUpdate = trackingCoordinator.updateTrackList(listId, addToList, trackAndService)
+            val trackingUpdate = trackingCoordinator.updateTrackLists(listIdsToAdd, listIdsToRemove, trackAndService)
             handleTrackingUpdate(trackingUpdate)
         }
     }
@@ -872,7 +873,7 @@ class MangaDetailPresenter(
                         defaultCustomListUUID.filterNot { id -> id in track.listIds }
                         val idsToAdd = defaultCustomListUUID.filterNot { id -> id in track.listIds }
                         if (idsToAdd.isNotEmpty()) {
-                            trackingCoordinator.updateTrackingListService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem(), idsToAdd, true)
+                            trackingCoordinator.updateTrackingListService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem(), idsToAdd = idsToAdd)
                         }
                     }
                 }

@@ -87,8 +87,7 @@ fun DetailsBottomSheet(
                 )
             },
             trackStatusChanged = trackActions.statusChange,
-            trackListAdd = trackActions.listRemove,
-            trackListRemove = trackActions.listAdd,
+            trackListChange = trackActions.listChange,
             trackScoreChanged = trackActions.scoreChange,
             trackingRemoved = trackActions.remove,
             trackChapterChanged = trackActions.chapterChange,

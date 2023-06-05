@@ -15,7 +15,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,7 +33,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackList
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -36,11 +43,26 @@ fun TrackingListDialog(
     currentLists: ImmutableList<TrackList>,
     service: TrackServiceItem,
     onDismiss: () -> Unit,
-    addToListClick: (String) -> Unit,
-    removeFromListClick: (String) -> Unit,
+    trackListChange: (List<String>, List<String>) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
         val scope = rememberCoroutineScope()
+
+        val saver = listSaver<MutableList<Int>, Int>(
+            save = {
+                when (it.isEmpty()) {
+                    true -> emptyList()
+                    false -> it.toList()
+                }
+            },
+            restore = {
+                it.toMutableStateList()
+            },
+        )
+
+        val positionOfItemsToAdd = rememberSaveable(saver = saver) { mutableStateListOf() }
+        val positionOfItemsToRemove = rememberSaveable(saver = saver) { mutableStateListOf() }
+
         AlertDialog(
             title = {
                 Text(text = stringResource(id = R.string.list), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
@@ -48,36 +70,42 @@ fun TrackingListDialog(
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     service.lists?.forEachIndexed { index, list ->
+                        var isSelected by remember {
+                            mutableStateOf(currentLists.contains(list) || positionOfItemsToAdd.contains(index))
+                        }
 
                         val clicked = { enabled: Boolean ->
                             scope.launch {
-                                delay(100L)
+                                isSelected = enabled
                                 when (enabled) {
-                                    true -> removeFromListClick(list.id)
-                                    false -> addToListClick(list.id)
+                                    true -> {
+                                        positionOfItemsToRemove.remove(index)
+                                        if (currentLists.firstOrNull { it.id == service.lists[index].id } == null)
+                                            positionOfItemsToAdd.add(index)
+                                    }
+
+                                    false -> {
+                                        positionOfItemsToAdd.remove(index)
+                                        positionOfItemsToRemove.add(index)
+                                    }
                                 }
-                                onDismiss()
                             }
                         }
-
 
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .selectable(
-                                    selected = (currentLists.contains(list)),
+                                    selected = isSelected,
                                     onClick = {
-                                        clicked(!currentLists.contains(list))
+                                        clicked(!isSelected)
                                     },
                                 ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Checkbox(
-                                checked = (currentLists.contains(list)),
-                                onCheckedChange = { enabled ->
-                                    clicked(enabled)
-
-                                },
+                                checked = (isSelected),
+                                onCheckedChange = { enabled -> clicked(enabled) },
                                 colors = CheckboxDefaults.colors(checkedColor = themeColorState.buttonColor),
                             )
                             Gap(width = 8.dp)
@@ -87,9 +115,25 @@ fun TrackingListDialog(
                 }
             },
             onDismissRequest = onDismiss,
-            confirmButton = {
+            dismissButton = {
                 TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.cancel))
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (service.lists != null) {
+                            trackListChange
+                            val itemsToAddUUIDs = positionOfItemsToAdd.map { service.lists[it].id }
+                            val itemsToRemoveUUIDs = positionOfItemsToRemove.map { service.lists[it].id }
+                            trackListChange(itemsToAddUUIDs, itemsToRemoveUUIDs)
+                        }
+                        onDismiss()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
+                    Text(text = stringResource(id = android.R.string.ok))
                 }
             },
         )

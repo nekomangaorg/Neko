@@ -72,8 +72,7 @@ fun TrackingSheet(
     onLogoClick: (String, String) -> Unit,
     onSearchTrackClick: (TrackServiceItem, TrackItem?) -> Unit,
     trackStatusChanged: (Int, TrackAndService) -> Unit,
-    trackListAdd: (String, TrackAndService) -> Unit,
-    trackListRemove: (String, TrackAndService) -> Unit,
+    trackListChange: (List<String>, List<String>, TrackAndService) -> Unit,
     trackScoreChanged: (Int, TrackAndService) -> Unit,
     trackChapterChanged: (Int, TrackAndService) -> Unit,
     trackingRemoved: (Boolean, TrackServiceItem) -> Unit,
@@ -108,8 +107,7 @@ fun TrackingSheet(
                             currentLists = trackAndService.track.listIds.mapNotNull { trackAndService.service.currentList(it) }.toImmutableList(),
                             service = trackAndService.service,
                             onDismiss = { statusDialog = HideDialog },
-                            addToListClick = { listId -> trackListAdd(listId, trackAndService) },
-                            removeFromListClick = { listId -> trackListRemove(listId, trackAndService) },
+                            trackListChange = { listIdsToAdd, listIdsToRemove -> trackListChange(listIdsToAdd, listIdsToRemove, trackAndService) },
                         )
                     }
                 }
