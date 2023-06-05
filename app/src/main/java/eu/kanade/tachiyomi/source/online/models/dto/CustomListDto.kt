@@ -3,6 +3,12 @@ package eu.kanade.tachiyomi.source.online.models.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class NewCustomListDto(
+    val name: String,
+    val visibility: String,
+)
+
+@Serializable
 data class CustomListListDto(
     val limit: Int,
     val offset: Int,

@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/category_text_layout"
+        android:id="@+id/custom_list_title"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,31 +24,17 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/category"
+            android:hint="@string/list_name"
             android:inputType="textCapSentences" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <eu.kanade.tachiyomi.widget.TriStateCheckBox
-        android:id="@+id/download_new"
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/make_public_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
-        android:text="@string/download_new_chapters" />
-
-    <eu.kanade.tachiyomi.widget.TriStateCheckBox
-        android:id="@+id/include_global"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:text="@string/include_in_global_update" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/edit_categories"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/Theme.Widget.Button.TextButton"
-        android:text="@string/edit_categories" />
+        android:text="@string/public_list" />
 </LinearLayout>

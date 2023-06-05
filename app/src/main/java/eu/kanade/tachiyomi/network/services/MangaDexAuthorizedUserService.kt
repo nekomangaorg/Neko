@@ -4,6 +4,7 @@ import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.CustomListListDto
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
+import eu.kanade.tachiyomi.source.online.models.dto.NewCustomListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadChapterDto
@@ -50,6 +51,9 @@ interface MangaDexAuthorizedUserService : CommonListFunctions {
 
     @DELETE("${MdConstants.Api.manga}/{mangaId}${MdConstants.Api.list}/{listId}")
     suspend fun removeFromCustomList(@Path("mangaId") mangaUUID: String, @Path("listId") listUUID: String): ApiResponse<ResultDto>
+
+    @POST(MdConstants.Api.list)
+    suspend fun createCustomList(@Body newCustomListDto: NewCustomListDto): ApiResponse<ResultDto>
 
     @GET("${MdConstants.Api.manga}/{mangaId}${MdConstants.Api.list}")
     suspend fun customListsContainingManga(@Path("mangaId") mangaUUID: String): ApiResponse<CustomListListDto>

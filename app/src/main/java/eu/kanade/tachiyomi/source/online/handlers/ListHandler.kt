@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.model.ResultListPage
+import eu.kanade.tachiyomi.source.online.models.dto.NewCustomListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -137,6 +138,17 @@ class ListHandler {
 
     suspend fun removeFromCustomList(mangaId: String, listUUID: String): ResultDto {
         return authService.removeFromCustomList(mangaId, listUUID).getOrThrow()
+    }
+
+    suspend fun createCustomList(listName: String, isPublic: Boolean): ResultDto {
+        val newCustomListDto = NewCustomListDto(
+            name = listName,
+            visibility = when (isPublic) {
+                true -> MdConstants.Visibility.public
+                false -> MdConstants.Visibility.private
+            },
+        )
+        return authService.createCustomList(newCustomListDto).getOrThrow()
     }
 }
 

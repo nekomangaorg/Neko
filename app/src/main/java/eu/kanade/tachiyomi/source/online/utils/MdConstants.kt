@@ -100,6 +100,11 @@ object MdConstants {
         const val scanlator = "scanlation_group"
     }
 
+    object Visibility {
+        const val public = "public"
+        const val private = "private"
+    }
+
     enum class FeedType {
         Subscription,
         Latest

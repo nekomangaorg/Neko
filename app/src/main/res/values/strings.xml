@@ -1366,13 +1366,14 @@
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
 
-    <string name="enable_default_custom_lists">Add manga to default current lists</string>
+    <string name="enable_default_custom_lists">Add manga by default to custom lists</string>
     <string name="enable_default_custom_lists_summary">When enabled, manga added to your library will  be added to the selected custom lists by default</string>
     <string name="default_custom_lists">Choose default custom lists</string>
-    <string name="use_cache_source">Use cached source</string>
-    <string name="use_cache_source_summary">Recommended to not use at this time, this was a legacy feature for V3 of MangaDex</string>
+    <string name="add_custom_list">Add a new custom list</string>
+    <string name="list_name">List name</string>
+    <string name="public_list">Public list</string>
+    <string name="failed_to_create_list">Failed to create custom list</string>
 
-    <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
 
     <!-- Backup Settings -->
     <string name="restore_neko">Data from the backup file will be restored.\n\n If this a pre v5 backup you will need to v5 migrate after you restore.</string>

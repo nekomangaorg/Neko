@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
+import com.google.android.material.checkbox.MaterialCheckBox.STATE_CHECKED
 import com.skydoves.sandwich.getOrNull
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
@@ -13,20 +14,25 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.databinding.CreateCustomListDialogBinding
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInFirefox
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
@@ -182,6 +188,40 @@ class SettingsSiteController :
             defaultValue = false
         }
 
+        preferenceCategory {
+            titleRes = R.string.custom_lists
+
+            switchPreference {
+                key = PreferenceKeys.enableDefaultCustomLists
+                titleRes = R.string.enable_default_custom_lists
+                summaryRes = R.string.enable_default_custom_lists_summary
+                defaultValue = false
+            }
+
+            preference {
+                preferences.enableDefaultCustomLists().asImmediateFlowIn(viewScope) {
+                    isVisible = it
+                }
+                titleRes = R.string.default_custom_lists
+                onClick {
+                    val ctrl = ChooseCustomListDialog(preferences)
+                    ctrl.targetController = this@SettingsSiteController
+                    ctrl.showDialog(router)
+                }
+            }
+
+            preference {
+                titleRes = R.string.add_custom_list
+                onClick {
+                    val ctrl = AddCustomListDialog(viewScope)
+                    ctrl.targetController = this@SettingsSiteController
+                    ctrl.showDialog(router)
+                }
+            }
+
+        }
+
+
         preference {
             titleRes = R.string.sync_follows_to_library
             summaryRes = R.string.sync_follows_to_library_summary
@@ -237,24 +277,6 @@ class SettingsSiteController :
             }
         }
 
-        switchPreference {
-            key = PreferenceKeys.enableDefaultCustomLists
-            titleRes = R.string.enable_default_custom_lists
-            summaryRes = R.string.enable_default_custom_lists_summary
-            defaultValue = false
-        }
-
-        preference {
-            preferences.enableDefaultCustomLists().asImmediateFlowIn(viewScope) {
-                isVisible = it
-            }
-            titleRes = R.string.default_custom_lists
-            onClick {
-                val ctrl = ChooseCustomListDialog(preferences)
-                ctrl.targetController = this@SettingsSiteController
-                ctrl.showDialog(router)
-            }
-        }
 
 
         preference {
@@ -269,6 +291,44 @@ class SettingsSiteController :
                     }
                     .show()
             }
+        }
+    }
+
+    class AddCustomListDialog(bundle: Bundle? = null) : DialogController() {
+
+        var scope: CoroutineScope? = null
+
+        constructor(scope: CoroutineScope) : this() {
+            this.scope = scope
+        }
+
+        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+            val activity = activity!!
+
+            lateinit var binding: CreateCustomListDialogBinding
+
+            return activity.materialAlertDialog().apply {
+                setTitle(R.string.add_custom_list)
+                binding = CreateCustomListDialogBinding.inflate(activity.layoutInflater)
+                setView(binding.root)
+                setNegativeButton(android.R.string.cancel, null)
+                setPositiveButton(R.string.save) { dialog, _ ->
+                    val customListName = binding.title.text.toString()
+                    val isPublic = binding.makePublicCheckbox.checkedState == STATE_CHECKED
+                    if (customListName.isNotEmpty()) {
+                        val sourceManager: SourceManager = Injekt.get()
+                        scope?.launchIO {
+                            if (!sourceManager.mangaDex.createCustomList(customListName, isPublic)) {
+                                launchUI {
+                                    activity.toast(R.string.failed_to_create_list)
+                                }
+                            }
+                        }
+                        dismissDialog()
+                    }
+
+                }
+            }.create()
         }
     }
 
