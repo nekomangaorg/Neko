@@ -34,8 +34,6 @@ import tachiyomi.core.preference.Preference
 import tachiyomi.core.preference.PreferenceStore
 import tachiyomi.core.preference.getEnum
 
-fun Preference<Boolean>.toggle() = set(!get())
-
 operator fun <T> Preference<Set<T>>.plusAssign(item: T) {
     set(get() + item)
 }
