@@ -6,9 +6,6 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.preference.MANGA_HAS_UNREAD
-import eu.kanade.tachiyomi.data.preference.MANGA_NON_COMPLETED
-import eu.kanade.tachiyomi.data.preference.MANGA_NON_READ
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -30,6 +27,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.nekomanga.core.preferences.MANGA_HAS_UNREAD
+import org.nekomanga.core.preferences.MANGA_NON_COMPLETED
+import org.nekomanga.core.preferences.MANGA_NON_READ
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
@@ -144,6 +144,7 @@ class StatsPresenter(
                 is StatsConstants.ScreenState.Simple -> {
                     StatsConstants.ScreenState.Detailed
                 }
+
                 else -> {
                     StatsConstants.ScreenState.Simple
                 }

@@ -153,7 +153,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
             }
         }
 
-        preferences.incognitoMode()
+        securityPreferences.incognitoMode()
             .changes().onEach {
                 SecureActivityDelegate.setSecure(this)
             }.launchIn(lifecycleScope)

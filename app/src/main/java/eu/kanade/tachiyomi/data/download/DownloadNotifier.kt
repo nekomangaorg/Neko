@@ -11,11 +11,11 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.regex.Pattern
+import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -25,7 +25,7 @@ import uy.kohesive.injekt.injectLazy
  */
 internal class DownloadNotifier(private val context: Context) {
 
-    private val preferences: PreferencesHelper by injectLazy()
+    private val securityPreferences: SecurityPreferences by injectLazy()
 
     /**
      * Notification builder.
@@ -131,7 +131,7 @@ internal class DownloadNotifier(private val context: Context) {
                 context.getString(R.string.downloading_progress)
                     .format(download.downloadedImages, download.pages!!.size)
 
-            if (preferences.hideNotificationContent().get()) {
+            if (securityPreferences.hideNotificationContent().get()) {
                 setContentTitle(downloadingProgressText)
             } else {
                 val title = download.manga.title.chop(15)

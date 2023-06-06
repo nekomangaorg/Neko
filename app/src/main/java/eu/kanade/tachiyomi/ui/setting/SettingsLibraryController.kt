@@ -6,9 +6,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.data.preference.DEVICE_BATTERY_NOT_LOW
-import eu.kanade.tachiyomi.data.preference.DEVICE_CHARGING
-import eu.kanade.tachiyomi.data.preference.DEVICE_ONLY_ON_WIFI
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
@@ -18,6 +15,9 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.core.preferences.DEVICE_BATTERY_NOT_LOW
+import org.nekomanga.core.preferences.DEVICE_CHARGING
+import org.nekomanga.core.preferences.DEVICE_ONLY_ON_WIFI
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

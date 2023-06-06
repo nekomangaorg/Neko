@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.util.system.setThemeByPref
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.presentation.screens.WebViewScreen
 import org.nekomanga.presentation.theme.NekoTheme
 import uy.kohesive.injekt.injectLazy
@@ -27,6 +28,7 @@ open class WebViewActivity : AppCompatActivity() {
 
     private val sourceManager by injectLazy<SourceManager>()
     private val preferences: PreferencesHelper by injectLazy()
+    private val securityPreferences: SecurityPreferences by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +41,7 @@ open class WebViewActivity : AppCompatActivity() {
             return
         }
 
-        preferences.incognitoMode()
+        securityPreferences.incognitoMode()
             .changes().onEach {
                 SecureActivityDelegate.setSecure(this)
             }.launchIn(lifecycleScope)

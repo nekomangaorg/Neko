@@ -8,12 +8,12 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.data.preference.DEVICE_BATTERY_NOT_LOW
-import eu.kanade.tachiyomi.data.preference.DEVICE_CHARGING
-import eu.kanade.tachiyomi.data.preference.DEVICE_ONLY_ON_WIFI
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import java.util.concurrent.TimeUnit
+import org.nekomanga.core.preferences.DEVICE_BATTERY_NOT_LOW
+import org.nekomanga.core.preferences.DEVICE_CHARGING
+import org.nekomanga.core.preferences.DEVICE_ONLY_ON_WIFI
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

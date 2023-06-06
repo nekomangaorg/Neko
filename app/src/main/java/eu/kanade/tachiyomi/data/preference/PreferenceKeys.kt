@@ -205,14 +205,6 @@ object PreferenceKeys {
 
     const val downloadBadge = "display_download_badge"
 
-    const val useBiometrics = "use_biometrics"
-
-    const val lockAfter = "lock_after"
-
-    const val lastUnlock = "last_unlock"
-
-    const val hideNotificationContent = "hide_notification_content"
-
     const val removeArticles = "remove_articles"
 
     const val skipPreMigration = "skip_pre_migration"
@@ -255,8 +247,6 @@ object PreferenceKeys {
     const val hideMangaDetailButtonText = "hide_manga_detail_button_text"
 
     const val extraLargeBackdrop = "extra_large_backdrop"
-
-    const val incognitoMode = "incognito_mode"
 
     const val sideNavMode = "side_nav_mode"
 

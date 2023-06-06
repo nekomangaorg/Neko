@@ -39,12 +39,14 @@ import logcat.AndroidLogcatLogger
 import logcat.LogPriority
 import logcat.LogcatLogger
 import org.conscrypt.Conscrypt
+import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.injectLazy
 
 open class App : Application(), DefaultLifecycleObserver {
 
     val preferences: PreferencesHelper by injectLazy()
+    val securityPreferences: SecurityPreferences by injectLazy()
 
     private val disableIncognitoReceiver = DisableIncognitoReceiver()
 
@@ -92,7 +94,7 @@ open class App : Application(), DefaultLifecycleObserver {
         }.launchIn((ProcessLifecycleOwner.get().lifecycleScope))
 
         // Show notification to disable Incognito Mode when it's enabled
-        preferences.incognitoMode().changes()
+        securityPreferences.incognitoMode().changes()
             .onEach { enabled ->
                 val notificationManager = NotificationManagerCompat.from(this)
                 if (enabled) {
@@ -122,7 +124,7 @@ open class App : Application(), DefaultLifecycleObserver {
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        if (!AuthenticatorUtil.isAuthenticating && preferences.lockAfter().get() >= 0) {
+        if (!AuthenticatorUtil.isAuthenticating && securityPreferences.lockAfter().get() >= 0) {
             SecureActivityDelegate.locked = true
         }
     }
@@ -146,7 +148,7 @@ open class App : Application(), DefaultLifecycleObserver {
         private var registered = false
 
         override fun onReceive(context: Context, intent: Intent) {
-            preferences.incognitoMode().set(false)
+            securityPreferences.incognitoMode().set(false)
         }
 
         fun register() {

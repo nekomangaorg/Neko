@@ -320,7 +320,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         config = ReaderConfig()
         initializeMenu()
 
-        preferences.incognitoMode()
+        securityPreferences.incognitoMode()
             .changes()
             .onEach {
                 SecureActivityDelegate.setSecure(this)

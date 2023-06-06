@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
+import org.nekomanga.core.security.SecurityPreferences
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
 import uy.kohesive.injekt.api.InjektModule
@@ -149,6 +150,10 @@ class PreferenceModule(val application: Application) : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
         addSingletonFactory<PreferenceStore> {
             AndroidPreferenceStore(application)
+        }
+
+        addSingletonFactory {
+            SecurityPreferences(get())
         }
 
         addSingletonFactory {

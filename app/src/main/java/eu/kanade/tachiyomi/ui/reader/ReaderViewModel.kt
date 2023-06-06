@@ -76,6 +76,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
@@ -92,6 +93,7 @@ class ReaderViewModel(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val securityPreferences: SecurityPreferences = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
     private val chapterItemFilter: ChapterItemFilter = Injekt.get(),
 
@@ -462,13 +464,13 @@ class ReaderViewModel(
         val selectedChapter = page.chapter
 
         // Save last page read and mark as read if needed
-        if (!preferences.incognitoMode().get()) {
+        if (!securityPreferences.incognitoMode().get()) {
             selectedChapter.chapter.last_page_read = page.index
             selectedChapter.chapter.pages_left =
                 (selectedChapter.pages?.size ?: page.index) - page.index
         }
         val shouldTrack =
-            !preferences.incognitoMode().get() || hasTrackers || preferences.readingSync().get()
+            !securityPreferences.incognitoMode().get() || hasTrackers || preferences.readingSync().get()
         if (shouldTrack &&
             // For double pages, check if the second to last page is doubled up
             (
@@ -476,7 +478,7 @@ class ReaderViewModel(
                     (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index)
                 )
         ) {
-            if (!preferences.incognitoMode().get()) {
+            if (!securityPreferences.incognitoMode().get()) {
                 selectedChapter.chapter.read = true
                 updateTrackChapterAfterReading(selectedChapter)
                 updateReadingStatus(selectedChapter)
@@ -584,7 +586,7 @@ class ReaderViewModel(
         db.getChapter(readerChapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
             readerChapter.chapter.bookmark = dbChapter.bookmark
         }
-        if (!preferences.incognitoMode().get() || hasTrackers) {
+        if (!securityPreferences.incognitoMode().get() || hasTrackers) {
             db.updateChapterProgress(readerChapter.chapter).executeAsBlocking()
         }
     }
@@ -593,7 +595,7 @@ class ReaderViewModel(
      * Saves this [readerChapter] last read history.
      */
     private fun saveChapterHistory(readerChapter: ReaderChapter) {
-        if (!preferences.incognitoMode().get()) {
+        if (!securityPreferences.incognitoMode().get()) {
             val readAt = Date().time
             val sessionReadDuration = chapterReadStartTime?.let { readAt - it } ?: 0
             val oldTimeRead = db.getHistoryByChapterUrl(readerChapter.chapter.url).executeAsBlocking()?.time_read ?: 0

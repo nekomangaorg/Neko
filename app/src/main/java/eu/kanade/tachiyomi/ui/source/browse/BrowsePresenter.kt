@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.category.CategoryUtil
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -51,6 +53,7 @@ class BrowsePresenter(
     private val incomingQuery: String,
     private val browseRepository: BrowseRepository = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
+    val securityPreferences: SecurityPreferences = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<BrowseController>() {
 
@@ -162,7 +165,7 @@ class BrowsePresenter(
         }
 
         presenterScope.launch {
-            preferences.incognitoMode().changes().collectLatest {
+            securityPreferences.incognitoMode().changes().collectLatest {
                 _browseScreenState.update { state ->
                     state.copy(incognitoMode = it)
                 }
@@ -431,7 +434,7 @@ class BrowsePresenter(
 
     fun toggleIncognitoMode() {
         presenterScope.launch {
-            preferences.incognitoMode().set(!preferences.incognitoMode().get())
+            securityPreferences.incognitoMode().toggle()
         }
     }
 

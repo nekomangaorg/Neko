@@ -1,6 +1,6 @@
-package eu.kanade.tachiyomi.data.preference
+package org.nekomanga.core.preferences
 
-import eu.kanade.tachiyomi.R
+import org.nekomanga.core.R
 
 // Library
 const val MANGA_NON_COMPLETED = "manga_ongoing"
@@ -13,11 +13,6 @@ const val DEVICE_CHARGING = "ac"
 const val DEVICE_BATTERY_NOT_LOW = "battery_not_low"
 
 object PreferenceValues {
-    enum class SecureScreenMode(val titleResId: Int) {
-        ALWAYS(R.string.always),
-        INCOGNITO(R.string.incognito_mode),
-        NEVER(R.string.never),
-    }
 
     enum class ReaderHideThreshold(val titleResId: Int, val threshold: Int) {
         HIGHEST(R.string.pref_highest, 5),

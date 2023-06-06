@@ -14,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -50,7 +51,7 @@ class TachiyomiTextInputEditText @JvmOverloads constructor(
          */
         fun EditText.setIncognito(viewScope: CoroutineScope) {
             try {
-                Injekt.get<PreferencesHelper>().incognitoMode().changes().onEach {
+                Injekt.get<SecurityPreferences>().incognitoMode().changes().onEach {
                     imeOptions = if (it) {
                         imeOptions or EditorInfoCompat.IME_FLAG_NO_PERSONALIZED_LEARNING
                     } else {

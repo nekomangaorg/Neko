@@ -7,18 +7,18 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
 import java.util.concurrent.TimeUnit
+import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 
 internal class BackupNotifier(private val context: Context) {
 
-    val preferences: PreferencesHelper by injectLazy()
+    private val securityPreferences: SecurityPreferences by injectLazy()
 
     private val progressNotificationBuilder =
         context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS) {
@@ -97,7 +97,7 @@ internal class BackupNotifier(private val context: Context) {
         val builder = with(progressNotificationBuilder) {
             setContentTitle(context.getString(R.string.restoring_backup))
 
-            if (!preferences.hideNotificationContent().get()) {
+            if (!securityPreferences.hideNotificationContent().get()) {
                 setContentText(content)
             }
 

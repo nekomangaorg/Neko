@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
-import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
@@ -14,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.core.preferences.PreferenceValues
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

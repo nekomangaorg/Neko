@@ -119,6 +119,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":constants"))
     implementation(project(":core"))
     implementation(kotlinx.bundles.kotlin)
 

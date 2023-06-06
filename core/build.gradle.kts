@@ -28,6 +28,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":constants"))
     api(androidx.preferencektx)
     api(kotlinx.coroutines.core)
     api(kotlinx.serialization.json)

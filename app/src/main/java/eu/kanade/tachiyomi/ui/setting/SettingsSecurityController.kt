@@ -3,20 +3,22 @@ package eu.kanade.tachiyomi.ui.setting
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
-import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.core.security.SecurityPreferences
+import uy.kohesive.injekt.injectLazy
 
 class SettingsSecurityController : SettingsController() {
+
+    val securityPreferences: SecurityPreferences by injectLazy()
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.security
 
         if (context.isAuthenticationSupported()) {
             switchPreference {
-                key = PreferenceKeys.useBiometrics
+                key = securityPreferences.useBiometrics().key()
                 titleRes = R.string.lock_with_biometrics
                 defaultValue = false
 
@@ -26,7 +28,9 @@ class SettingsSecurityController : SettingsController() {
                 )
             }
             intListPreference(activity) {
-                key = PreferenceKeys.lockAfter
+                securityPreferences.useBiometrics().changes().onEach { isVisible = it }.launchIn(viewScope)
+
+                key = securityPreferences.lockAfter().key()
                 titleRes = R.string.lock_when_idle
                 val values = listOf(0, 2, 5, 10, 20, 30, 60, 90, 120, -1)
                 entries = values.mapNotNull {
@@ -43,21 +47,20 @@ class SettingsSecurityController : SettingsController() {
                 entryValues = values
                 defaultValue = 0
 
-                preferences.useBiometrics().changes().onEach { isVisible = it }.launchIn(viewScope)
             }
         }
 
         switchPreference {
-            key = PreferenceKeys.hideNotificationContent
+            key = securityPreferences.hideNotificationContent().key()
             titleRes = R.string.hide_notification_content
             defaultValue = false
         }
 
         listPreference(activity) {
-            bindTo(preferences.secureScreen())
+            bindTo(securityPreferences.secureScreen())
             titleRes = R.string.secure_screen
-            entriesRes = PreferenceValues.SecureScreenMode.values().map { it.titleResId }.toTypedArray()
-            entryValues = PreferenceValues.SecureScreenMode.values().map { it.name }
+            entriesRes = SecurityPreferences.SecureScreenMode.values().map { it.titleResId }.toTypedArray()
+            entryValues = SecurityPreferences.SecureScreenMode.values().map { it.name }
 
             onChange {
                 it as String

@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.data.preference
 
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
+import org.nekomanga.core.preferences.PreferenceValues as Values
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
@@ -362,16 +362,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun skipDuplicates() = this.preferenceStore.getBoolean(Keys.skipDuplicates, false)
 
-    fun useBiometrics() = this.preferenceStore.getBoolean(Keys.useBiometrics, false)
-
-    fun lockAfter() = this.preferenceStore.getInt(Keys.lockAfter, 0)
-
-    fun lastUnlock() = this.preferenceStore.getLong(Keys.lastUnlock, 0)
-
-    fun secureScreen() = this.preferenceStore.getEnum("secure_screen_v2", Values.SecureScreenMode.INCOGNITO)
-
-    fun hideNotificationContent() = this.preferenceStore.getBoolean(Keys.hideNotificationContent, false)
-
     fun removeArticles() = this.preferenceStore.getBoolean(Keys.removeArticles, false)
 
     fun migrateFlags() = this.preferenceStore.getInt("migrate_flags", Int.MAX_VALUE)
@@ -477,8 +467,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
     fun openChapterInShortcuts() = this.preferenceStore.getBoolean(Keys.openChapterInShortcuts, true)
-
-    fun incognitoMode() = this.preferenceStore.getBoolean(Keys.incognitoMode, false)
 
     fun hasPromptedBeforeUpdateAll() = this.preferenceStore.getBoolean("has_prompted_update_all", false)
 

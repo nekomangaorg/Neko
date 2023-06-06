@@ -37,3 +37,4 @@ dependencyResolutionManagement {
 rootProject.name = "Neko"
 include(":app")
 include(":core")
+include(":constants")

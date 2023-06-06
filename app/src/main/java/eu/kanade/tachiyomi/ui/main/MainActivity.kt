@@ -480,7 +480,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         if (savedInstanceState == null && this !is SearchActivity) {
             // Reset Incognito Mode on relaunch
-            preferences.incognitoMode().set(false)
+            securityPreferences.incognitoMode().set(false)
 
             // Show changelog if needed
             if (Migrations.upgrade(preferences, lifecycleScope)) {
@@ -492,7 +492,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
         }
 
-        preferences.incognitoMode().changes().onEach {
+        securityPreferences.incognitoMode().changes().onEach {
             binding.toolbar.setIncognitoMode(it)
             binding.searchToolbar.setIncognitoMode(it)
             SecureActivityDelegate.setSecure(this)
