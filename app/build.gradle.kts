@@ -119,7 +119,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":tachi-core"))
+    implementation(project(":core"))
     implementation(kotlinx.bundles.kotlin)
 
     coreLibraryDesugaring(libs.desugaring)

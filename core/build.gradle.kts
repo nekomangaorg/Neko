@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "eu.kanade.tachiyomi.core"
+    namespace = "org.nekomanga.core"
     compileSdk = AndroidConfig.compileSdkVersion
 
     defaultConfig {

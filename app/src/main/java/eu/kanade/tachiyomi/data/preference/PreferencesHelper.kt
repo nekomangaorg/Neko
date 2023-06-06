@@ -77,7 +77,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun getInt(key: String, default: Int) = this.preferenceStore.getInt(key, default)
     fun getStringPref(key: String, default: String = "") = this.preferenceStore.getString(key, default)
-    fun getStringSet(key: String, default: Set<String>) = this.preferenceStore.getStringSet(key, default)
 
     fun startingTab() = this.preferenceStore.getInt(Keys.startingTab, 0)
     fun backReturnsToStart() = this.preferenceStore.getBoolean(Keys.backToStart, true)

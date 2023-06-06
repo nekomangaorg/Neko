@@ -36,4 +36,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Neko"
 include(":app")
-include(":tachi-core")
+include(":core")
