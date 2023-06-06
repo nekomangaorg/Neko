@@ -40,6 +40,8 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
+import tachiyomi.core.preference.AndroidPreferenceStore
+import tachiyomi.core.preference.PreferenceStore
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
@@ -50,8 +52,6 @@ class AppModule(val app: Application) : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
         addSingleton(app)
-
-        addSingletonFactory { PreferencesHelper(app) }
 
         addSingletonFactory { DatabaseHelper(app) }
 
@@ -133,7 +133,6 @@ class AppModule(val app: Application) : InjektModule {
 
         // Asynchronously init expensive components for a faster cold start
         ContextCompat.getMainExecutor(app).execute {
-            get<PreferencesHelper>()
 
             get<NetworkHelper>()
 
@@ -142,6 +141,21 @@ class AppModule(val app: Application) : InjektModule {
             get<DatabaseHelper>()
 
             get<DownloadManager>()
+        }
+    }
+}
+
+class PreferenceModule(val application: Application) : InjektModule {
+    override fun InjektRegistrar.registerInjectables() {
+        addSingletonFactory<PreferenceStore> {
+            AndroidPreferenceStore(application)
+        }
+
+        addSingletonFactory {
+            PreferencesHelper(
+                context = application,
+                preferenceStore = get(),
+            )
         }
     }
 }

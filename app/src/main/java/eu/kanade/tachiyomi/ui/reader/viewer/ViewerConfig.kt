@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
-import com.fredporciuncula.flow.preferences.Preference
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import tachiyomi.core.preference.Preference
 
 /**
  * Common configuration for all viewers.
@@ -58,7 +58,7 @@ abstract class ViewerConfig(preferences: PreferencesHelper, protected val scope:
         valueAssignment: (T) -> Unit,
         onChanged: (T) -> Unit = {},
     ) {
-        asFlow()
+        changes()
             .onEach {
                 valueAssignment(it)
                 onChanged(it)

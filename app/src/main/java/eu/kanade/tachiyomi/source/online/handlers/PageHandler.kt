@@ -81,14 +81,14 @@ class PageHandler {
 
                 val atHomeDto = network.atHomeService.getAtHomeServer(
                     chapter.mangadex_chapter_id,
-                    preferences.usePort443Only(),
+                    preferences.usePort443Only().get(),
                 ).getOrResultError("trying to get at home response")
                     .getOrThrow { Exception(it.message()) }
 
                 return@withContext pageListParse(
                     chapter.mangadex_chapter_id,
                     atHomeDto,
-                    preferences.dataSaver(),
+                    preferences.dataSaver().get(),
                 )
             } catch (e: Exception) {
                 loggycat(LogPriority.ERROR, e) { "error processing page list" }

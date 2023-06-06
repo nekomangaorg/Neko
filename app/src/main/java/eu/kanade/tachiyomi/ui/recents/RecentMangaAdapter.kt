@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi.ui.recents
 
 import androidx.recyclerview.widget.ItemTouchHelper
-import com.fredporciuncula.flow.preferences.Preference
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -12,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.injectLazy
 
 class RecentMangaAdapter(val delegate: RecentsInterface) :
@@ -50,7 +49,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
         preferences.showUpdatedTime().register { showUpdatedTime = it }
         preferences.uniformGrid().register { uniformCovers = it }
-        preferences.sortFetchedTime().asImmediateFlowIn(delegate.scope()) { sortByFetched = it }
+        preferences.sortFetchedTime().changes().onEach { sortByFetched = it }.launchIn(delegate.scope())
         preferences.outlineOnCovers().register(false) {
             showOutline = it
             (0 until itemCount).forEach { i ->
@@ -60,7 +59,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     }
 
     private fun <T> Preference<T>.register(notify: Boolean = true, onChanged: (T) -> Unit) {
-        asFlow()
+        changes()
             .drop(1)
             .onEach {
                 onChanged(it)

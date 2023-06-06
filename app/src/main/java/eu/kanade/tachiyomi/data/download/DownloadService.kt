@@ -207,7 +207,7 @@ class DownloadService : Service() {
             stopSelf()
             return
         }
-        if (preferences.downloadOnlyOverWifi() && !isConnectedToWifi()) {
+        if (preferences.downloadOnlyOverWifi().get() && !isConnectedToWifi()) {
             stopReason = STOP_REASON_NO_WIFI
             stopSelf()
         } else {

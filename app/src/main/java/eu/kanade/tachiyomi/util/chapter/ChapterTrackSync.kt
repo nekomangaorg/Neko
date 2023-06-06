@@ -61,7 +61,7 @@ fun updateTrackChapterMarkedAsRead(
     delay: Long = 3000,
     fetchTracks: (suspend () -> Unit)? = null,
 ) {
-    if (!preferences.trackMarkedAsRead()) return
+    if (!preferences.trackMarkedAsRead().get()) return
     mangaId ?: return
 
     val newChapterRead = newLastChapter?.chapter_number ?: 0f

@@ -122,7 +122,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
                     ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom
-                    ?: 0
+                        ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -185,7 +185,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         setExpandText(controller.canCollapseOrExpandCategory(), false)
 
         clearButton.compatToolTipText = context.getString(R.string.clear_filters)
-        preferences.filterOrder().asFlow()
+        preferences.filterOrder().changes()
             .drop(1)
             .onEach {
                 filterOrder = it
@@ -445,6 +445,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     FILTER_TRACKER = view.nameOf(index) ?: ""
                     null
                 }
+
                 unreadProgress -> {
                     unread.reset()
                     preferences.filterUnread().set(
@@ -455,10 +456,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     )
                     null
                 }
+
                 unread -> {
                     unreadProgress.reset()
                     preferences.filterUnread()
                 }
+
                 downloaded -> preferences.filterDownloaded()
                 completed -> preferences.filterCompleted()
                 bookmarked -> preferences.filterBookmarked()
@@ -476,6 +479,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     preferences.filterMangaType().set(newIndex)
                     null
                 }
+
                 else -> null
             }?.set(index + 1)
             onGroupClicked(ACTION_FILTER)

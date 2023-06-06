@@ -49,11 +49,9 @@ class HttpPageLoader(
 
     init {
         // Adding flow since we can reach reader settings after this is created
-        preferences.preloadSize().asFlow()
-            .onEach {
-                preloadSize = it
-            }
-            .launchIn(scope)
+        preferences.preloadSize().changes().onEach {
+            preloadSize = it
+        }.launchIn(scope)
 
         scope.launchIO {
             flow {

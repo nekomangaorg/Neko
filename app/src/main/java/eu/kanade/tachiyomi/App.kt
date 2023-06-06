@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -41,9 +40,7 @@ import logcat.LogPriority
 import logcat.LogcatLogger
 import org.conscrypt.Conscrypt
 import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.injectLazy
-import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 open class App : Application(), DefaultLifecycleObserver {
 
@@ -74,10 +71,10 @@ open class App : Application(), DefaultLifecycleObserver {
             if (packageName != process) kotlin.runCatching { WebView.setDataDirectorySuffix(process) }
         }
 
-        Injekt = InjektScope(DefaultRegistrar())
+        Injekt.importModule(PreferenceModule(this))
         Injekt.importModule(AppModule(this))
 
-        if (!LogcatLogger.isInstalled && (preferences.verboseLogging())) {
+        if (!LogcatLogger.isInstalled && (preferences.verboseLogging().get())) {
             LogcatLogger.install(AndroidLogcatLogger(LogPriority.VERBOSE))
         }
 
@@ -90,12 +87,12 @@ open class App : Application(), DefaultLifecycleObserver {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         MangaCoverMetadata.load()
-        preferences.nightMode()
-            .asImmediateFlow { AppCompatDelegate.setDefaultNightMode(it) }
-            .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
+        preferences.nightMode().changes().onEach {
+            AppCompatDelegate.setDefaultNightMode(it)
+        }.launchIn((ProcessLifecycleOwner.get().lifecycleScope))
 
         // Show notification to disable Incognito Mode when it's enabled
-        preferences.incognitoMode().asFlow()
+        preferences.incognitoMode().changes()
             .onEach { enabled ->
                 val notificationManager = NotificationManagerCompat.from(this)
                 if (enabled) {

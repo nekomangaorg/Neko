@@ -118,8 +118,8 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         return true
     }
 
-    fun restoreSession(): String? {
-        return preferences.trackPassword(this)
+    fun restoreSession(): String {
+        return preferences.trackPassword(this).get()
     }
 
     companion object {

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.notification
 
+import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ClipData
@@ -9,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import androidx.work.WorkManager
-import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -97,6 +97,7 @@ class NotificationReceiver : BroadcastReceiver() {
                     intent.getLongExtra(EXTRA_CHAPTER_ID, -1),
                 )
             }
+
             ACTION_MARK_AS_READ -> {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (notificationId > -1) {
@@ -269,13 +270,12 @@ class NotificationReceiver : BroadcastReceiver() {
             db.updateChapterProgress(chapter).executeAsBlocking()
             chapter
         }
-        if (preferences.removeAfterMarkedAsRead()) {
+        if (preferences.removeAfterMarkedAsRead().get()) {
             val manga = db.getManga(mangaId).executeAsBlocking() ?: return
-            val source = sourceManager.get(manga.source) ?: return
             downloadManager.deleteChapters(dbChapters, manga)
         }
 
-        if (preferences.readingSync()) {
+        if (preferences.readingSync().get()) {
             val nonMergedChapterIds =
                 dbChapters.filter { !it.isMergedChapter() }.map { it.mangadex_chapter_id }
             if (nonMergedChapterIds.isNotEmpty()) {

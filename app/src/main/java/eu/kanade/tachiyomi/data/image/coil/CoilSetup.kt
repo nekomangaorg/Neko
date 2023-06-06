@@ -43,7 +43,7 @@ class CoilSetup(context: Context) {
             crossfade(true)
             allowRgb565(context.getSystemService<ActivityManager>()!!.isLowRamDevice)
             allowHardware(isCurrSDKPieOrGreater)
-            if (Injekt.get<PreferencesHelper>().verboseLogging()) {
+            if (Injekt.get<PreferencesHelper>().verboseLogging().get()) {
                 logger(DebugLogger())
             }
             // Coil spawns a new thread for every image load by default

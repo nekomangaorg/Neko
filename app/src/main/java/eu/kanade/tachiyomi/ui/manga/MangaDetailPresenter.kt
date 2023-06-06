@@ -158,10 +158,10 @@ class MangaDetailPresenter(
                 false -> MergeType.values().toList().filterNot { it == MergeType.Komga }.toPersistentList()
             }
             _generalState.value = MangaConstants.MangaScreenGeneralState(
-                hasDefaultCategory = preferences.defaultCategory() != -1,
+                hasDefaultCategory = preferences.defaultCategory().get() != -1,
                 hideButtonText = preferences.hideButtonText().get(),
                 extraLargeBackdrop = preferences.extraLargeBackdrop().get(),
-                themeBasedOffCovers = preferences.themeMangaDetails(),
+                themeBasedOffCovers = preferences.themeMangaDetails().get(),
                 wrapAltTitles = preferences.wrapAltTitles().get(),
                 validMergeTypes = validMergeTypes,
                 vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
@@ -433,7 +433,7 @@ class MangaDetailPresenter(
 
     private fun syncChaptersReadStatus() {
         presenterScope.launchIO {
-            if (!preferences.readingSync() || !loginHelper.isLoggedIn() || !isOnline()) return@launchIO
+            if (!preferences.readingSync().get() || !loginHelper.isLoggedIn() || !isOnline()) return@launchIO
 
             runCatching {
                 statusHandler.getReadChapterIds(currentManga().uuid()).collect { chapterIds ->
@@ -700,7 +700,7 @@ class MangaDetailPresenter(
     }
 
     private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): ImmutableList<Artwork> {
-        val quality = preferences.thumbnailQuality()
+        val quality = preferences.thumbnailQuality().get()
 
         return db.getArtwork(mangaId).executeAsBlocking().map { aw ->
             Artwork(
@@ -855,7 +855,7 @@ class MangaDetailPresenter(
                         }
                         db.insertTrack(track).executeOnIO()
                     }
-                    val shouldAddAsPlanToRead = currentManga().favorite && preferences.addToLibraryAsPlannedToRead() && FollowStatus.isUnfollowed(track.status)
+                    val shouldAddAsPlanToRead = currentManga().favorite && preferences.addToLibraryAsPlannedToRead().get() && FollowStatus.isUnfollowed(track.status)
                     if (shouldAddAsPlanToRead && isOnline()) {
                         track.status = FollowStatus.PLAN_TO_READ.int
                         trackingCoordinator.updateTrackingService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem())
@@ -863,7 +863,7 @@ class MangaDetailPresenter(
                 }
 
                 if (autoAddTracker.size > 1 && currentManga().favorite) {
-                    val validContentRatings = preferences.autoTrackContentRatingSelections()
+                    val validContentRatings = preferences.autoTrackContentRatingSelections().get()
                     val contentRating = currentManga().getContentRating()
                     if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
                         autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->
@@ -1337,7 +1337,7 @@ class MangaDetailPresenter(
             updateMangaFlow()
             // add to the default category if it exists and the user has the option set
             if (shouldAddToDefaultCategory && generalState.value.hasDefaultCategory) {
-                val defaultCategoryId = preferences.defaultCategory()
+                val defaultCategoryId = preferences.defaultCategory().get()
                 generalState.value.allCategories.firstOrNull { defaultCategoryId == it.id }?.let {
                     updateMangaCategories(listOf(it))
                 }
@@ -1507,7 +1507,7 @@ class MangaDetailPresenter(
 
             fun finalizeChapters() {
                 if (markAction is MangaConstants.MarkAction.Read) {
-                    if (preferences.removeAfterMarkedAsRead()) {
+                    if (preferences.removeAfterMarkedAsRead().get()) {
                         // dont delete bookmarked chapters
                         deleteChapters(newChapterItems.filter { !it.bookmark }.map { ChapterItem(chapter = it) }, newChapterItems.size == generalState.value.allChapters.size)
                     }
@@ -1533,7 +1533,7 @@ class MangaDetailPresenter(
                     else -> null
                 }
 
-                if (syncRead != null && !skipSync && preferences.readingSync()) {
+                if (syncRead != null && !skipSync && preferences.readingSync().get()) {
                     val chapterIds = newChapterItems.filter { !it.isMergedChapter() }.map { it.mangaDexChapterId }
                     if (chapterIds.isNotEmpty()) {
                         presenterScope.launchNonCancellable {

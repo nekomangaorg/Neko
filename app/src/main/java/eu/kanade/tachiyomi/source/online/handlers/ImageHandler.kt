@@ -154,7 +154,7 @@ class ImageHandler {
 
                     network.atHomeService.getAtHomeServer(
                         page.mangaDexChapterId,
-                        preferences.usePort443Only(),
+                        preferences.usePort443Only().get(),
                     )
                         .getOrResultError("getting image")
                         .getOrThrow { Exception(it.message()) }

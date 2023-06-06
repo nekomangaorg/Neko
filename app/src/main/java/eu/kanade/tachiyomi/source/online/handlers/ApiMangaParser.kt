@@ -34,7 +34,7 @@ class ApiMangaParser {
     fun mangaDetailsParse(mangaDto: MangaDataDto, stats: Stats, simpleChapters: List<String>): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
-            val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality())
+            val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality().get())
 
             manga.rating = stats.rating
             manga.users = stats.follows

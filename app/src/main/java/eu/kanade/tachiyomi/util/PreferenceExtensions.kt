@@ -5,8 +5,8 @@ import android.widget.CompoundButton
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
-import com.fredporciuncula.flow.preferences.Preference
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
+import tachiyomi.core.preference.Preference
 
 inline fun <reified T> SharedPreferences.getItem(key: String, default: T): T {
     @Suppress("UNCHECKED_CAST")

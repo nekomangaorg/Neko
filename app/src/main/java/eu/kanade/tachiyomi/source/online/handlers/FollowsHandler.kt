@@ -89,7 +89,7 @@ class FollowsHandler {
     }
 
     private fun allFollowsParser(mangaDataDtoList: List<MangaDataDto>, readingStatusMap: Map<String, String?>): List<SourceManga> {
-        val coverQuality = preferences.thumbnailQuality()
+        val coverQuality = preferences.thumbnailQuality().get()
         return mangaDataDtoList.asSequence().map {
             val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
             it.toSourceManga(coverQuality, displayTextRes = followStatus.stringRes)

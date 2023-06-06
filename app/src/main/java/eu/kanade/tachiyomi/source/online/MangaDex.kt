@@ -70,11 +70,11 @@ open class MangaDex : HttpSource() {
 
     suspend fun getRandomManga(): Result<SourceManga, ResultError> {
         return withIOContext {
-            val response = network.service.randomManga(preferences.contentRatingSelections().toList())
+            val response = network.service.randomManga(preferences.contentRatingSelections().get().toList())
 
             val result = response.getOrResultError("trying to get random Manga")
                 .andThen {
-                    Ok(it.data.toSourceManga(preferences.thumbnailQuality(), useNoCoverUrl = false))
+                    Ok(it.data.toSourceManga(preferences.thumbnailQuality().get(), useNoCoverUrl = false))
                 }
 
             return@withIOContext result

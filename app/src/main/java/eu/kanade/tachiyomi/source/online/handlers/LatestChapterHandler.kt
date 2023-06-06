@@ -37,7 +37,7 @@ class LatestChapterHandler {
 
             val langs = MdUtil.getLangsToShow(preferencesHelper)
 
-            val contentRatings = preferencesHelper.contentRatingSelections().toList()
+            val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
 
             return@withContext service.latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
                 .getOrResultError("getting latest chapters")
@@ -79,7 +79,7 @@ class LatestChapterHandler {
 
                     val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
 
-                    val thumbQuality = preferencesHelper.thumbnailQuality()
+                    val thumbQuality = preferencesHelper.thumbnailQuality().get()
                     val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }
                         .sortedByDescending { result[it.id]!!.first().attributes.readableAt }
                         .map {

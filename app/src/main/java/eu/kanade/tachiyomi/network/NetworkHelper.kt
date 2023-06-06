@@ -51,7 +51,7 @@ class NetworkHelper(val context: Context) {
 
     private fun authInterceptor() = Interceptor { chain ->
         val newRequest = when {
-            preferences.sessionToken().isNullOrBlank() -> chain.request()
+            preferences.sessionToken().get().isNullOrBlank() -> chain.request()
             else -> {
                 val originalRequest = chain.request()
                 originalRequest
@@ -82,7 +82,7 @@ class NetworkHelper(val context: Context) {
                             .build(),
                     )
                 }
-                when (preferences.dohProvider()) {
+                when (preferences.dohProvider().get()) {
                     PREF_DOH_CLOUDFLARE -> dohCloudflare()
                     PREF_DOH_GOOGLE -> dohGoogle()
                     PREF_DOH_ADGUARD -> dohAdGuard()
@@ -108,7 +108,7 @@ class NetworkHelper(val context: Context) {
 
     private fun loggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor(logger).apply {
-            level = when (preferences.verboseLogging()) {
+            level = when (preferences.verboseLogging().get()) {
                 true -> HttpLoggingInterceptor.Level.BODY
                 false -> HttpLoggingInterceptor.Level.HEADERS
             }

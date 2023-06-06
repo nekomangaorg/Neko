@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import eu.kanade.tachiyomi.util.system.loggycat
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
@@ -19,7 +18,7 @@ import uy.kohesive.injekt.injectLazy
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     private val json: Json by injectLazy()
-    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword()) }
+    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword().get()) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
     @StringRes

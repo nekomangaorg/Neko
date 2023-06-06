@@ -6,7 +6,7 @@ import org.nekomanga.domain.category.CategoryItem
 class CategoryUtil {
     companion object {
         fun shouldShowCategoryPrompt(preferencesHelper: PreferencesHelper, categoryItems: List<CategoryItem>): Boolean {
-            return preferencesHelper.defaultCategory() == -1 && categoryItems.isNotEmpty()
+            return preferencesHelper.defaultCategory().get() == -1 && categoryItems.isNotEmpty()
         }
     }
 }

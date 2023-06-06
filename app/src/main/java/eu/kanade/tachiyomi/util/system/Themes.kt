@@ -83,3 +83,4 @@ enum class Themes(
     @StringRes
     val darkNameRes: Int = altNameRes ?: nameRes
 }
+

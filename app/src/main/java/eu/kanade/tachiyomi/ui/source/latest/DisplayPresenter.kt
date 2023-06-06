@@ -100,18 +100,16 @@ class DisplayPresenter(
         }
 
         presenterScope.launch {
-            preferences.browseAsList().asFlow().collectLatest {
+            preferences.browseAsList().changes().collectLatest {
                 _displayScreenState.update { state ->
                     state.copy(isList = it)
                 }
             }
         }
         presenterScope.launch {
-            preferences.browseShowLibrary().asFlow().collectLatest { show ->
-                presenterScope.launch {
-                    _displayScreenState.update {
-                        it.copy(showLibraryEntries = show, filteredDisplayManga = it.allDisplayManga.filterVisibility(preferences).toImmutableList())
-                    }
+            preferences.browseShowLibrary().changes().collectLatest { show ->
+                _displayScreenState.update {
+                    it.copy(showLibraryEntries = show, filteredDisplayManga = it.allDisplayManga.filterVisibility(preferences).toImmutableList())
                 }
             }
         }
@@ -138,7 +136,7 @@ class DisplayPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory()
+                val defaultCategory = preferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _displayScreenState.value.categories.firstOrNull {

@@ -56,7 +56,7 @@ class FollowsSyncService {
                 loggycat { "total number from mangadex is ${listManga.size}" }
 
                 val categories = db.getCategories().executeAsBlocking()
-                val defaultCategoryId = preferences.defaultCategory()
+                val defaultCategoryId = preferences.defaultCategory().get()
                 val defaultCategory = categories.find { it.id == defaultCategoryId }
 
                 listManga.forEach { networkManga ->

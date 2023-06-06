@@ -157,7 +157,7 @@ class LibraryPresenter(
         lastCategories = null
         lastLibraryItems = null
         getLibrary()
-        if (preferences.showLibrarySearchSuggestions().isNotSet()) {
+        if (!preferences.showLibrarySearchSuggestions().isSet()) {
             DelayedLibrarySuggestionsJob.setupTask(context, true)
         } else if (preferences.showLibrarySearchSuggestions().get() &&
             Date().time >= preferences.lastLibrarySuggestion().get() + TimeUnit.HOURS.toMillis(2)
@@ -1295,7 +1295,7 @@ class LibraryPresenter(
         mangaList: HashMap<Manga, List<Chapter>>,
         markRead: Boolean,
     ) {
-        if (preferences.readingSync()) {
+        if (preferences.readingSync().get()) {
             mangaList.forEach { entry ->
                 val nonMergedChapterIds =
                     entry.value.filter { !it.isMergedChapter() }.map { it.mangadex_chapter_id }
@@ -1311,7 +1311,7 @@ class LibraryPresenter(
             }
         }
 
-        if (preferences.removeAfterMarkedAsRead() && markRead) {
+        if (preferences.removeAfterMarkedAsRead().get() && markRead) {
             mangaList.forEach { (manga, oldChapters) ->
                 deleteChapters(manga, oldChapters)
             }
@@ -1419,7 +1419,7 @@ class LibraryPresenter(
                 } ?: "",
             )
 
-            if (preferences.showLibrarySearchSuggestions().isNotSet()) {
+            if (!preferences.showLibrarySearchSuggestions().isSet()) {
                 preferences.showLibrarySearchSuggestions().set(true)
             }
             preferences.lastLibrarySuggestion().set(Date().time)

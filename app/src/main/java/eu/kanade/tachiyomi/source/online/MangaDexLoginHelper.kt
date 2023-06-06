@@ -24,7 +24,7 @@ class MangaDexLoginHelper {
     val tag = "||LoginHelper"
 
     fun wasTokenRefreshedRecently(): Boolean {
-        val lastRefreshTime = preferences.lastRefreshTime()
+        val lastRefreshTime = preferences.lastRefreshTime().get()
         loggycat(LogPriority.INFO, tag = tag) { "last refresh time $lastRefreshTime current time ${System.currentTimeMillis()}" }
 
         if ((lastRefreshTime + TimeUnit.MINUTES.toMillis(15)) > System.currentTimeMillis()) {
@@ -36,7 +36,7 @@ class MangaDexLoginHelper {
     }
 
     suspend fun refreshSessionToken(): Boolean {
-        val refreshToken = preferences.refreshToken()
+        val refreshToken = preferences.refreshToken().get()
         if (refreshToken.isNullOrEmpty()) {
             loggycat(LogPriority.INFO, tag = tag) { "refresh token is null can't extend session" }
             invalidate()
@@ -46,7 +46,7 @@ class MangaDexLoginHelper {
             .add("client_id", MdConstants.Login.clientId)
             .add("grant_type", MdConstants.Login.refreshToken)
             .add("refresh_token", refreshToken)
-            .add("code_verifier", preferences.codeVerifer())
+            .add("code_verifier", preferences.codeVerifier().get())
             .add("redirect_uri", MdConstants.Login.redirectUri)
             .build()
         val error = kotlin.runCatching {
@@ -80,7 +80,7 @@ class MangaDexLoginHelper {
             .add("client_id", MdConstants.Login.clientId)
             .add("grant_type", MdConstants.Login.authorizationCode)
             .add("code", authorizationCode)
-            .add("code_verifier", preferences.codeVerifer())
+            .add("code_verifier", preferences.codeVerifier().get())
             .add("redirect_uri", MdConstants.Login.redirectUri)
             .build()
 
@@ -109,9 +109,9 @@ class MangaDexLoginHelper {
     }
 
     suspend fun logout(): Boolean {
-        val sessionToken = preferences.sessionToken()
-        val refreshToken = preferences.refreshToken()
-        if (refreshToken == null || refreshToken.isEmpty() || sessionToken == null || sessionToken.isEmpty()) {
+        val sessionToken = preferences.sessionToken().get()
+        val refreshToken = preferences.refreshToken().get()
+        if (refreshToken.isEmpty() || sessionToken.isEmpty()) {
             invalidate()
             return true
         }
@@ -151,10 +151,10 @@ class MangaDexLoginHelper {
     }
 
     fun isLoggedIn(): Boolean {
-        return preferences.refreshToken()?.isNotEmpty() == true && preferences.sessionToken()?.isNotEmpty() == true
+        return preferences.refreshToken().get().isNotEmpty() && preferences.sessionToken().get().isNotEmpty()
     }
 
     fun sessionToken(): String {
-        return preferences.sessionToken() ?: ""
+        return preferences.sessionToken().get()
     }
 }

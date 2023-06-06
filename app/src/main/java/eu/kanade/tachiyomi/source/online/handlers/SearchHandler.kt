@@ -40,7 +40,7 @@ class SearchHandler {
         return service.viewManga(mangaUUID)
             .getOrResultError("trying to view manga with UUID $mangaUUID")
             .andThen { mangaDto ->
-                val sourceManga = persistentListOf(mangaDto.data.toSourceManga(preferencesHelper.thumbnailQuality(), false))
+                val sourceManga = persistentListOf(mangaDto.data.toSourceManga(preferencesHelper.thumbnailQuality().get(), false))
                 Ok(MangaListPage(sourceManga = sourceManga, hasNextPage = false))
             }
     }
@@ -153,11 +153,11 @@ class SearchHandler {
             val queryParameters = mutableMapOf<String, Any>()
             queryParameters["limit"] = MdConstants.Limits.manga
             queryParameters["offset"] = MdUtil.getMangaListOffset(page)
-            val contentRatings = preferencesHelper.contentRatingSelections().toList()
+            val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
             if (contentRatings.isNotEmpty()) {
                 queryParameters["contentRating[]"] = contentRatings
             }
-            val thumbQuality = preferencesHelper.thumbnailQuality()
+            val thumbQuality = preferencesHelper.thumbnailQuality().get()
             service.recentlyAdded(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error getting recently added")
                 .andThen { mangaListDto ->
@@ -180,11 +180,11 @@ class SearchHandler {
             calendar.add(Calendar.DAY_OF_MONTH, 1)
             calendar.add(Calendar.MONTH, -1)
             queryParameters["createdAtSince"] = MdUtil.apiDateFormat.format(calendar.time)
-            val contentRatings = preferencesHelper.contentRatingSelections().toList()
+            val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
             if (contentRatings.isNotEmpty()) {
                 queryParameters["contentRating[]"] = contentRatings
             }
-            val thumbQuality = preferencesHelper.thumbnailQuality()
+            val thumbQuality = preferencesHelper.thumbnailQuality().get()
             service.popularNewReleases(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error getting recently added")
                 .andThen { mangaListDto ->
@@ -203,7 +203,7 @@ class SearchHandler {
     private fun searchMangaParse(mangaListDto: MangaListDto): Result<MangaListPage, ResultError> {
         return com.github.michaelbull.result.runCatching {
             val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
-            val thumbQuality = preferencesHelper.thumbnailQuality()
+            val thumbQuality = preferencesHelper.thumbnailQuality().get()
             val mangaList = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()
             MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)
         }.mapError {

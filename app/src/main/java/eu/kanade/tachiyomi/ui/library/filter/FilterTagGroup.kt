@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
-import com.fredporciuncula.flow.preferences.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import tachiyomi.core.preference.Preference
 
 class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
-(context, attrs) {
+    (context, attrs) {
 
     private var listener: FilterTagGroupListener? = null
 

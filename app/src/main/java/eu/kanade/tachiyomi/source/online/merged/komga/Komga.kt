@@ -16,7 +16,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
 import okhttp3.Credentials
@@ -38,7 +37,7 @@ class Komga : ReducedHttpSource() {
     private val json: Json by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
-    fun hostUrl() = preferences.sourceUrl(this) ?: ""
+    fun hostUrl() = preferences.sourceUrl(this).get()
 
     suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
@@ -49,16 +48,16 @@ class Komga : ReducedHttpSource() {
     }
 
     fun hasCredentials(): Boolean {
-        val username = preferences.sourceUsername(this@Komga) ?: ""
-        val password = preferences.sourcePassword(this@Komga) ?: ""
+        val username = preferences.sourceUsername(this@Komga).get()
+        val password = preferences.sourcePassword(this@Komga).get()
         val url = hostUrl()
         return listOf(username, password, url).none { it.isBlank() }
     }
 
     suspend fun isLoggedIn(): Boolean {
         return withIOContext {
-            val username = preferences.sourceUsername(this@Komga) ?: ""
-            val password = preferences.sourcePassword(this@Komga) ?: ""
+            val username = preferences.sourceUsername(this@Komga).get()
+            val password = preferences.sourcePassword(this@Komga).get()
             val url = hostUrl()
             if (listOf(username, password, url).any { it.isBlank() }) {
                 return@withIOContext false
@@ -93,7 +92,7 @@ class Komga : ReducedHttpSource() {
             .build()
     }
 
-    fun customClient() = createClient(preferences.sourceUsername(this)!!, preferences.sourcePassword(this)!!)
+    fun customClient() = createClient(preferences.sourceUsername(this).get(), preferences.sourcePassword(this).get())
 
     override suspend fun searchManga(query: String): List<SManga> {
         if (hostUrl().isBlank()) {

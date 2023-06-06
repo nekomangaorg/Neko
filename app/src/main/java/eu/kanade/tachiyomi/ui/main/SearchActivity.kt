@@ -46,9 +46,9 @@ class SearchActivity : MainActivity() {
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
-                rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                ) && rootSearchController !is SmallToolbarInterface
+                    rootSearchController is RootSearchInterface ||
+                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                    ) && rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
             } else {
@@ -137,6 +137,7 @@ class SearchActivity : MainActivity() {
                     finish()
                 }
             }
+
             INTENT_SEARCH -> {
                 val host = intent.data?.host
                 val pathSegments = intent.data?.pathSegments
@@ -156,6 +157,7 @@ class SearchActivity : MainActivity() {
                                     false -> MdConstants.DeepLinkPrefix.manga + dexId
                                 }
                             }
+
                             host.contains("myanimelist", true) -> {
                                 val dexId = mappings.getMangadexID(id, "mal")
                                 when (dexId == null) {
@@ -163,6 +165,7 @@ class SearchActivity : MainActivity() {
                                     false -> MdConstants.DeepLinkPrefix.manga + dexId
                                 }
                             }
+
                             host.contains("mangaupdates", true) -> {
                                 val base = BigInteger(id, 36)
                                 val muID = base.toString(10)
@@ -172,15 +175,19 @@ class SearchActivity : MainActivity() {
                                     false -> MdConstants.DeepLinkPrefix.manga + dexId
                                 }
                             }
+
                             path.equals("GROUP", true) -> {
                                 MdConstants.DeepLinkPrefix.group + id
                             }
+
                             path.equals("AUTHOR", true) -> {
                                 MdConstants.DeepLinkPrefix.author + id
                             }
+
                             path.equals("LIST", true) -> {
                                 MdConstants.DeepLinkPrefix.list + id
                             }
+
                             else -> {
                                 MdConstants.DeepLinkPrefix.manga + id
                             }
@@ -193,9 +200,10 @@ class SearchActivity : MainActivity() {
                     }
                 }
             }
+
             SHORTCUT_MANGA, SHORTCUT_MANGA_BACK -> {
                 val extras = intent.extras ?: return false
-                if (intent.action == SHORTCUT_MANGA_BACK && preferences.openChapterInShortcuts()) {
+                if (intent.action == SHORTCUT_MANGA_BACK && preferences.openChapterInShortcuts().get()) {
                     val mangaId = extras.getLong(MangaDetailController.MANGA_EXTRA)
                     if (mangaId != 0L) {
                         val db = Injekt.get<DatabaseHelper>()
@@ -221,6 +229,7 @@ class SearchActivity : MainActivity() {
                         .popChangeHandler(FadeChangeHandler()),
                 )
             }
+
             SHORTCUT_SOURCE -> {
                 val extras = intent.extras ?: return false
                 SecureActivityDelegate.promptLockIfNeeded(this, true)
@@ -230,6 +239,7 @@ class SearchActivity : MainActivity() {
                         .popChangeHandler(FadeChangeHandler()),
                 )
             }
+
             SHORTCUT_READER_SETTINGS -> {
                 router.replaceTopController(
                     RouterTransaction.with(SettingsReaderController())
@@ -237,6 +247,7 @@ class SearchActivity : MainActivity() {
                         .popChangeHandler(FadeChangeHandler()),
                 )
             }
+
             else -> return false
         }
         return true

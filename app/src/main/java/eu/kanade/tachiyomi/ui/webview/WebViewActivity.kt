@@ -10,7 +10,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -18,6 +17,8 @@ import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.setThemeByPref
 import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.nekomanga.presentation.screens.WebViewScreen
 import org.nekomanga.presentation.theme.NekoTheme
 import uy.kohesive.injekt.injectLazy
@@ -39,9 +40,9 @@ open class WebViewActivity : AppCompatActivity() {
         }
 
         preferences.incognitoMode()
-            .asImmediateFlowIn(lifecycleScope) {
+            .changes().onEach {
                 SecureActivityDelegate.setSecure(this)
-            }
+            }.launchIn(lifecycleScope)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 

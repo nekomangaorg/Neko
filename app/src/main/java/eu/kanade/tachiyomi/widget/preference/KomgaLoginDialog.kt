@@ -43,9 +43,9 @@ class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = 
 
     override fun setCredentialsOnView(view: View) = with(view) {
         binding.dialogTitle.text = context.getString(R.string.log_in_to_, source.name)
-        binding.username.setText(preferences.sourceUsername(source))
-        binding.password.setText(preferences.sourcePassword(source))
-        binding.url.setText(preferences.sourceUrl(source))
+        binding.username.setText(preferences.sourceUsername(source).get())
+        binding.password.setText(preferences.sourcePassword(source).get())
+        binding.url.setText(preferences.sourceUrl(source).get())
     }
 
     override fun checkLogin() {

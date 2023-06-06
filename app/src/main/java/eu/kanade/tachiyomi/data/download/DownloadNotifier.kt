@@ -131,7 +131,7 @@ internal class DownloadNotifier(private val context: Context) {
                 context.getString(R.string.downloading_progress)
                     .format(download.downloadedImages, download.pages!!.size)
 
-            if (preferences.hideNotificationContent()) {
+            if (preferences.hideNotificationContent().get()) {
                 setContentTitle(downloadingProgressText)
             } else {
                 val title = download.manga.title.chop(15)

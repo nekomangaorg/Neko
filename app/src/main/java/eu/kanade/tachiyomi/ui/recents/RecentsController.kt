@@ -710,7 +710,7 @@ class RecentsController(bundle: Bundle? = null) :
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
                         if (!undoing && !wasRead) {
-                            if (preferences.removeAfterMarkedAsRead()) {
+                            if (preferences.removeAfterMarkedAsRead().get()) {
                                 lastChapterId = chapter.id
                                 presenter.deleteChapter(chapter, manga)
                             }

@@ -311,8 +311,8 @@ class LibraryUpdateService(
 
         preferences.libraryUpdateLastTimestamp().set(Date().time)
 
-        val skipCompleted = preferences.updateOnlyNonCompleted()
-        val skipBasedOnTracking = preferences.updateOnlyWhenTrackingIsNotFinished()
+        val skipCompleted = preferences.updateOnlyNonCompleted().get()
+        val skipBasedOnTracking = preferences.updateOnlyWhenTrackingIsNotFinished().get()
 
         val mangaToAdd = tempMangaToAdd.filter { libraryManga ->
 
@@ -553,7 +553,7 @@ class LibraryUpdateService(
 
             coroutineScope {
                 launch {
-                    if (preferences.readingSync() && mangaDexLoginHelper.isLoggedIn()) {
+                    if (preferences.readingSync().get() && mangaDexLoginHelper.isLoggedIn()) {
                         val dbChapters = db.getChapters(manga).executeAsBlocking()
                         statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.url))
                             .collect { chapterIds ->

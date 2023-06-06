@@ -33,7 +33,7 @@ class MangaShortcutManager(
     val context: Context = preferences.context
     fun updateShortcuts() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
-            if (!preferences.showSeriesInShortcuts()) {
+            if (!preferences.showSeriesInShortcuts().get()) {
                 val shortcutManager = context.getSystemService(ShortcutManager::class.java)
                 shortcutManager.removeAllDynamicShortcuts()
                 return
@@ -41,7 +41,7 @@ class MangaShortcutManager(
             GlobalScope.launchIO {
                 val shortcutManager = context.getSystemService(ShortcutManager::class.java)
 
-                val recentManga = if (preferences.showSeriesInShortcuts()) {
+                val recentManga = if (preferences.showSeriesInShortcuts().get()) {
                     RecentsPresenter.getRecentManga()
                 } else {
                     emptyList()

@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.nekomanga.domain.category.CategoryItem
@@ -64,20 +63,20 @@ class BrowsePresenter(
             isComfortableGrid = preferences.libraryLayout().get() == 2,
             rawColumnCount = preferences.gridSize().get(),
             filters = createInitialDexFilter(incomingQuery),
-            defaultContentRatings = preferences.contentRatingSelections().toImmutableSet(),
+            defaultContentRatings = preferences.contentRatingSelections().get().toImmutableSet(),
             screenType = BrowseScreenType.Homepage,
         ),
     )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
 
     private fun createInitialDexFilter(incomingQuery: String): DexFilters {
-        val enabledContentRatings = preferences.contentRatingSelections()
+        val enabledContentRatings = preferences.contentRatingSelections().get()
         val contentRatings = MangaContentRating.getOrdered().map { Filter.ContentRating(it, enabledContentRatings.contains(it.key)) }.toImmutableList()
 
         return DexFilters(
             query = Filter.Query(incomingQuery, QueryType.Title),
             contentRatings = contentRatings,
-            contentRatingVisible = preferences.showContentRatingFilter(),
+            contentRatingVisible = preferences.showContentRatingFilter().get(),
         )
     }
 
@@ -155,7 +154,7 @@ class BrowsePresenter(
             }
         }
         presenterScope.launch {
-            preferences.browseAsList().asFlow().collectLatest {
+            preferences.browseAsList().changes().collectLatest {
                 _browseScreenState.update { state ->
                     state.copy(isList = it)
                 }
@@ -163,7 +162,7 @@ class BrowsePresenter(
         }
 
         presenterScope.launch {
-            preferences.incognitoMode().asFlow().collectLatest {
+            preferences.incognitoMode().changes().collectLatest {
                 _browseScreenState.update { state ->
                     state.copy(incognitoMode = it)
                 }
@@ -171,7 +170,7 @@ class BrowsePresenter(
         }
 
         presenterScope.launch {
-            preferences.browseShowLibrary().asFlow().collectLatest { bool ->
+            preferences.browseShowLibrary().changes().collectLatest { bool ->
                 _browseScreenState.update {
                     it.copy(showLibraryEntries = bool)
                 }
@@ -471,7 +470,7 @@ class BrowsePresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory()
+                val defaultCategory = preferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _browseScreenState.value.categories.firstOrNull {

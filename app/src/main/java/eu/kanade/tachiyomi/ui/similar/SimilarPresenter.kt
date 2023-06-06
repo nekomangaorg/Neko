@@ -60,7 +60,7 @@ class SimilarPresenter(
             }
         }
         presenterScope.launch {
-            preferences.browseAsList().asFlow().collectLatest {
+            preferences.browseAsList().changes().collectLatest {
                 _similarScreenState.update { state ->
                     state.copy(isList = it)
                 }
@@ -102,7 +102,7 @@ class SimilarPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory()
+                val defaultCategory = preferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _similarScreenState.value.categories.firstOrNull {

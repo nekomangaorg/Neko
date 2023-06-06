@@ -59,14 +59,14 @@ class ChapterFilter(
         }
 
         // if filter preferences are not enabled don't even filter
-        if (!preferences.skipRead() && !preferences.skipFiltered() && !preferences.skipDuplicates().get()) {
+        if (!preferences.skipRead().get() && !preferences.skipFiltered().get() && !preferences.skipDuplicates().get()) {
             return filteredChapters
         }
 
-        if (preferences.skipRead()) {
+        if (preferences.skipRead().get()) {
             filteredChapters = filteredChapters.filter { !it.read }
         }
-        if (preferences.skipFiltered()) {
+        if (preferences.skipFiltered().get()) {
             filteredChapters = filterChapters(filteredChapters, manga)
         }
 

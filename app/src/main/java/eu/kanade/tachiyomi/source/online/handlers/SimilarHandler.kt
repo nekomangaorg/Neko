@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import logcat.LogPriority
 import org.nekomanga.domain.manga.SourceManga
@@ -60,7 +59,7 @@ class SimilarHandler {
 
             val mangaList = similarGetMangadexMangaList(mangaIdMap.keys.toList(), false)
 
-            val thumbQuality = preferencesHelper.thumbnailQuality()
+            val thumbQuality = preferencesHelper.thumbnailQuality().get()
             val relatedMangaList = mangaList.data.map {
                 it.toRelatedMangaDto(thumbQuality, mangaIdMap[it.id] ?: "")
             }
@@ -162,6 +161,7 @@ class SimilarHandler {
                     val text = String.format("%.2f", 100.0 * it.score) + "% match"
                     id to text
                 }
+
                 false -> null
             }
         }.toMap()
@@ -173,7 +173,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality()
+        val thumbQuality = preferencesHelper.thumbnailQuality().get()
         val mangaList = mangaListDto.data.map {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }
@@ -240,7 +240,7 @@ class SimilarHandler {
 
         val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key }, false)
 
-        val thumbQuality = preferencesHelper.thumbnailQuality()
+        val thumbQuality = preferencesHelper.thumbnailQuality().get()
         val mangaList = mangaListDto.data.map {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }
@@ -304,7 +304,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality()
+        val thumbQuality = preferencesHelper.thumbnailQuality().get()
         val mangaList = mangaListDto.data.map {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }
@@ -375,7 +375,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality()
+        val thumbQuality = preferencesHelper.thumbnailQuality().get()
         val mangaList = mangaListDto.data.map {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }

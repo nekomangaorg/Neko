@@ -44,7 +44,7 @@ class TrackingSyncService {
 
 
             if (autoAddTracker.size > 1) {
-                val validContentRatings = preferences.autoTrackContentRatingSelections()
+                val validContentRatings = preferences.autoTrackContentRatingSelections().get()
                 val contentRating = manga.getContentRating()
                 if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
                     autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->

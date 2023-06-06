@@ -26,15 +26,15 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
     override fun inflateBinding() = ReaderColorFilterBinding.bind(this)
     override fun initGeneralPreferences() {
         activity = context as? ReaderActivity ?: return
-        preferences.colorFilter().asFlow()
+        preferences.colorFilter().changes()
             .onEach { setColorFilter(it) }
             .launchIn(activity.scope)
 
-        preferences.colorFilterMode().asFlow()
+        preferences.colorFilterMode().changes()
             .onEach { setColorFilter(preferences.colorFilter().get()) }
             .launchIn(activity.scope)
 
-        preferences.customBrightness().asFlow()
+        preferences.customBrightness().changes()
             .onEach { setCustomBrightness(it) }
             .launchIn(activity.scope)
 
@@ -152,7 +152,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
      */
     private fun setCustomBrightness(enabled: Boolean) {
         if (enabled) {
-            preferences.customBrightnessValue().asFlow()
+            preferences.customBrightnessValue().changes()
                 .sample(100)
                 .onEach { setCustomBrightnessValue(it) }
                 .launchIn(activity.scope)
@@ -189,7 +189,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
      */
     private fun setColorFilter(enabled: Boolean) {
         if (enabled) {
-            preferences.colorFilterValue().asFlow()
+            preferences.colorFilterValue().changes()
                 .sample(100)
                 .onEach { setColorFilterValue(it) }
                 .launchIn(activity.scope)

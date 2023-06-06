@@ -36,7 +36,7 @@ class ListHandler {
                     when (mangaIds.isEmpty()) {
                         true -> Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
                         false -> {
-                            val enabledContentRatings = preferencesHelper.contentRatingSelections()
+                            val enabledContentRatings = preferencesHelper.contentRatingSelections().get()
                             val contentRatings = MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
 
                             val queryParameters =
@@ -45,7 +45,7 @@ class ListHandler {
                                     "limit" to mangaIds.size,
                                     "contentRating[]" to contentRatings,
                                 )
-                            val coverQuality = preferencesHelper.thumbnailQuality()
+                            val coverQuality = preferencesHelper.thumbnailQuality().get()
                             service.search(ProxyRetrofitQueryMap(queryParameters))
                                 .getOrResultError("Error trying to load manga list")
                                 .andThen { mangaListDto ->

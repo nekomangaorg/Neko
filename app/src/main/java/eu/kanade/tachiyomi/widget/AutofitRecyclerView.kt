@@ -143,7 +143,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
     fun setGridSize(preferences: PreferencesHelper) {
         // Migrate to float for grid size
-        if (preferences.gridSize().isNotSet()) {
+        if (!preferences.gridSize().isSet()) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val oldGridSize = prefs.getInt("grid_size", -1)
             if (oldGridSize != -1) {
@@ -170,10 +170,10 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
     private fun setSpan(force: Boolean = false) {
         if ((
-            spanCount == 0 || force ||
-                // Add 100dp check to make sure we dont update span for sidenav changes
-                (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)
-            ) &&
+                spanCount == 0 || force ||
+                    // Add 100dp check to make sure we dont update span for sidenav changes
+                    (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)
+                ) &&
             columnWidth > 0
         ) {
             val dpWidth = (width.pxToDp / 100f).roundToInt()

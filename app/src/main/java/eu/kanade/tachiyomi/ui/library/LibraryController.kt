@@ -47,7 +47,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.fredporciuncula.flow.preferences.Preference
 import com.github.florent37.viewtooltip.ViewTooltip
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -130,6 +129,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -336,6 +336,7 @@ class LibraryController(
                 RecyclerView.SCROLL_STATE_DRAGGING -> {
                     binding.fastScroller.showScrollbar()
                 }
+
                 RecyclerView.SCROLL_STATE_IDLE -> {
                     updateHopperPosition()
                 }
@@ -672,6 +673,7 @@ class LibraryController(
                             updateLibrary(it)
                         }
                     }
+
                     else -> updateLibrary()
                 }
             }
@@ -986,12 +988,11 @@ class LibraryController(
             preferences.gridSize(),
             preferences.useStaggeredGrid(),
         ).forEach {
-            it.asFlow()
+            it.changes()
                 .drop(1)
                 .onEach {
                     reattachAdapter()
-                }
-                .launchIn(viewScope)
+                }.launchIn(viewScope)
         }
         preferences.hideStartReadingButton().register()
         preferences.outlineOnCovers().register { adapter.showOutline = it }
@@ -1000,7 +1001,7 @@ class LibraryController(
 
     @SuppressLint("NotifyDataSetChanged")
     private fun <T> Preference<T>.register(onChanged: ((T) -> Unit)? = null) {
-        asFlow()
+        changes()
             .drop(1)
             .onEach {
                 onChanged?.invoke(it)
@@ -1531,9 +1532,11 @@ class LibraryController(
             lastClickPosition > position -> for (i in position until lastClickPosition) setSelection(
                 i,
             )
+
             lastClickPosition < position -> for (i in lastClickPosition + 1..position) setSelection(
                 i,
             )
+
             else -> setSelection(position)
         }
         lastClickPosition = position
@@ -1911,6 +1914,7 @@ class LibraryController(
                     showDisplayOptions()
                 }
             }
+
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -1987,9 +1991,11 @@ class LibraryController(
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
             R.id.action_download_unread -> {
                 presenter.downloadUnread(selectedMangaSet.toList())
             }
+
             R.id.action_delete_downloads -> {
                 activity!!.materialAlertDialog()
                     .setTitle(R.string.remove)
@@ -2000,6 +2006,7 @@ class LibraryController(
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
             R.id.action_mark_as_read -> {
                 activity!!.materialAlertDialog()
                     .setMessage(R.string.mark_all_chapters_as_read)
@@ -2009,6 +2016,7 @@ class LibraryController(
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
             R.id.action_mark_as_unread -> {
                 activity!!.materialAlertDialog()
                     .setMessage(R.string.mark_all_chapters_as_unread)
@@ -2018,10 +2026,12 @@ class LibraryController(
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             }
+
             R.id.action_sync_to_dex -> {
                 presenter.syncMangaToDex(selectedMangaSet.toList())
                 destroyActionModeIfNeeded()
             }
+
             else -> return false
         }
         return true

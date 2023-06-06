@@ -5,9 +5,10 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferenceValues
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class SettingsSecurityController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
@@ -42,7 +43,7 @@ class SettingsSecurityController : SettingsController() {
                 entryValues = values
                 defaultValue = 0
 
-                preferences.useBiometrics().asImmediateFlowIn(viewScope) { isVisible = it }
+                preferences.useBiometrics().changes().onEach { isVisible = it }.launchIn(viewScope)
             }
         }
 

@@ -26,7 +26,7 @@ class AppUpdateChecker {
     ): AppUpdateResult {
         // Limit checks to once a day at most
         if (!isUserPrompt && Date().time < preferences.lastAppCheck()
-            .get() + TimeUnit.DAYS.toMillis(1)
+                .get() + TimeUnit.DAYS.toMillis(1)
         ) {
             return AppUpdateResult.NoNewUpdate
         }
@@ -48,7 +48,7 @@ class AppUpdateChecker {
                 }
             if (doExtrasAfterNewUpdate && result is AppUpdateResult.NewUpdate) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    preferences.appShouldAutoUpdate() != AutoAppUpdaterJob.NEVER
+                    preferences.appShouldAutoUpdate().get() != AutoAppUpdaterJob.NEVER
                 ) {
                     AutoAppUpdaterJob.setupTask(context)
                 }

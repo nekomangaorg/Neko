@@ -19,7 +19,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
@@ -82,15 +81,14 @@ class ChapterCache(private val context: Context) {
         get() = Formatter.formatFileSize(context, realSize)
 
     init {
-        preferences.preloadSize().asFlow()
+        preferences.preloadSize().changes()
             .drop(1)
             .onEach {
                 // Save old cache for destruction later
                 val oldCache = diskCache
                 diskCache = setupDiskCache(it)
                 oldCache.close()
-            }
-            .launchIn(scope)
+            }.launchIn(scope)
     }
 
     private fun setupDiskCache(cacheSize: Int): DiskLruCache {

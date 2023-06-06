@@ -111,7 +111,7 @@ fun Manga.addOrRemoveToFavorites(
 ): Snackbar? {
     if (!favorite) {
         val categories = db.getCategories().executeAsBlocking()
-        val defaultCategoryId = preferences.defaultCategory()
+        val defaultCategoryId = preferences.defaultCategory().get()
         val defaultCategory = categories.find { it.id == defaultCategoryId }
         when {
             defaultCategory != null -> {
@@ -127,6 +127,7 @@ fun Manga.addOrRemoveToFavorites(
                     }
                 }
             }
+
             defaultCategoryId == 0 || categories.isEmpty() -> { // 'Default' or no category
                 favorite = true
                 date_added = Date().time
@@ -148,6 +149,7 @@ fun Manga.addOrRemoveToFavorites(
                     view.snack(R.string.added_to_library)
                 }
             }
+
             else -> {
                 val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()
                 val ids = categoriesForManga.mapNotNull { it.id }.toTypedArray()
@@ -304,6 +306,7 @@ fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayM
             true -> {
                 displayManga.copy(isVisible = true)
             }
+
             false -> {
                 displayManga.copy(isVisible = !displayManga.inLibrary)
             }

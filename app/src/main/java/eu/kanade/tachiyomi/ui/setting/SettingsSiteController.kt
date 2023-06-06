@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -23,6 +22,8 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -40,8 +41,6 @@ class SettingsSiteController :
             title = "MangaDex Login"
             key = PreferenceKeys.refreshToken
 
-            /*this.username = preferences.sourceUsername(mdex) ?: ""*/
-
             setOnLoginClickListener {
                 when (mangaDexLoginHelper.isLoggedIn()) {
                     true -> {
@@ -49,8 +48,9 @@ class SettingsSiteController :
                         dialog.targetController = this@SettingsSiteController
                         dialog.showDialog(router)
                     }
+
                     false -> {
-                        val url = MdConstants.Login.authUrl(preferences.codeVerifer())
+                        val url = MdConstants.Login.authUrl(preferences.codeVerifier().get())
                         when (BuildConfig.DEBUG) {
                             true -> activity?.openInFirefox(url)
                             false -> activity?.openInBrowser(url)
@@ -128,9 +128,9 @@ class SettingsSiteController :
         }
 
         preference {
-            preferences.blockedScanlators().asImmediateFlowIn(viewScope) {
+            preferences.blockedScanlators().changes().onEach {
                 isVisible = it.isNotEmpty()
-            }
+            }.launchIn(viewScope)
 
             titleRes = R.string.currently_blocked_scanlators
             onClick {

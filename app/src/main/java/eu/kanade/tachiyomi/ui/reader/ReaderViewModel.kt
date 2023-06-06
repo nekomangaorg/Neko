@@ -468,7 +468,7 @@ class ReaderViewModel(
                 (selectedChapter.pages?.size ?: page.index) - page.index
         }
         val shouldTrack =
-            !preferences.incognitoMode().get() || hasTrackers || preferences.readingSync()
+            !preferences.incognitoMode().get() || hasTrackers || preferences.readingSync().get()
         if (shouldTrack &&
             // For double pages, check if the second to last page is doubled up
             (
@@ -551,7 +551,7 @@ class ReaderViewModel(
     private fun deleteChapterIfNeeded(currentChapter: ReaderChapter) {
         // Determine which chapter should be deleted and enqueue
         val currentChapterPosition = chapterList.indexOf(currentChapter)
-        val removeAfterReadSlots = preferences.removeAfterReadSlots()
+        val removeAfterReadSlots = preferences.removeAfterReadSlots().get()
         val chapterToDelete = chapterList.getOrNull(currentChapterPosition - removeAfterReadSlots)
 
         if (removeAfterReadSlots != 0 && chapterToDownload != null) {
@@ -634,7 +634,7 @@ class ReaderViewModel(
      * Returns the viewer position used by this manga or the default one.
      */
     fun getMangaReadingMode(): Int {
-        val default = preferences.defaultReadingMode()
+        val default = preferences.defaultReadingMode().get()
         val manga = manga ?: return default
         val readerType = manga.defaultReaderType()
         if (manga.viewer_flags == -1) {
@@ -844,7 +844,7 @@ class ReaderViewModel(
         val baseDir = Environment.getExternalStorageDirectory().absolutePath +
             File.separator + Environment.DIRECTORY_PICTURES +
             File.separator + context.getString(R.string.app_name)
-        val destDir = if (preferences.folderPerManga()) {
+        val destDir = if (preferences.folderPerManga().get()) {
             File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
         } else {
             File(baseDir)
@@ -878,7 +878,7 @@ class ReaderViewModel(
             val baseDir = Environment.getExternalStorageDirectory().absolutePath +
                 File.separator + Environment.DIRECTORY_PICTURES +
                 File.separator + context.getString(R.string.app_name)
-            val destDir = if (preferences.folderPerManga()) {
+            val destDir = if (preferences.folderPerManga().get()) {
                 File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
             } else {
                 File(baseDir)
@@ -974,7 +974,7 @@ class ReaderViewModel(
     private fun updateReadingStatus(readerChapter: ReaderChapter) {
         manga ?: return
 
-        if (!preferences.readingSync() && !readerChapter.chapter.isMergedChapter()) return
+        if (!preferences.readingSync().get() && !readerChapter.chapter.isMergedChapter()) return
         scope.launchIO {
             statusHandler.marksChaptersStatus(manga!!.uuid(), listOf(readerChapter.chapter.mangadex_chapter_id))
         }
@@ -985,7 +985,7 @@ class ReaderViewModel(
      * will run in a background thread and errors are ignored.
      */
     private fun updateTrackChapterAfterReading(readerChapter: ReaderChapter) {
-        if (!preferences.autoUpdateTrack()) return
+        if (!preferences.autoUpdateTrack().get()) return
         viewModelScope.launchNonCancellable {
             val newChapterRead = readerChapter.chapter.chapter_number
             val errors = updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
