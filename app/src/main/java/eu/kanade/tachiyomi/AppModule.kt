@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
+import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
@@ -154,6 +155,10 @@ class PreferenceModule(val application: Application) : InjektModule {
 
         addSingletonFactory {
             SecurityPreferences(get())
+        }
+
+        addSingletonFactory {
+            NetworkPreferences(get(), BuildConfig.DEBUG)
         }
 
         addSingletonFactory {

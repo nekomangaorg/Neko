@@ -227,18 +227,10 @@ object PreferenceKeys {
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
-    const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
-
     const val sideNavIconAlignment = "pref_side_nav_icon_alignment"
 
     const val showSeriesInShortcuts = "show_series_shortcuts"
     const val openChapterInShortcuts = "open_chapter_shortcuts"
-
-    const val dohProvider = "doh_provider"
-
-    const val showNsfwSource = "show_nsfw_source"
-    const val showNsfwExtension = "show_nsfw_extension"
-    const val labelNsfwExtension = "label_nsfw_extension"
 
     const val themeMangaDetails = "theme_manga_details"
 
@@ -313,8 +305,6 @@ object PreferenceKeys {
     const val autoAddTracker = "auto_add_tracker"
 
     const val enablePort443Only = "use_port_443_only_for_image_server"
-
-    const val verboseLogging = "verbose_logging"
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
 

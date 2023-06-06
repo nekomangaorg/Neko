@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source.online.merged.mangalife
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.source.model.Page
@@ -17,7 +16,6 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
 import me.xdrop.fuzzywuzzy.FuzzySearch
@@ -25,6 +23,7 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.jsoup.nodes.Document
+import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy

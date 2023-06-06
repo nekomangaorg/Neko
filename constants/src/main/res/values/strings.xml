@@ -837,6 +837,11 @@
     <string name="dnsPod" translatable="false">DNSPod</string>
     <string name="dns_360" translatable="false">360</string>
     <string name="quad_101" translatable="false">Quad 101</string>
+    <string name="mullvad" translatable="false">Mullvad</string>
+    <string name="control_d" translatable="false">Control D</string>
+    <string name="njalla" translatable="false">Njalla</string>
+    <string name="shecan" translatable="false">Shecan</string>
+
     <string name="requires_app_restart">Requires app restart to take effect</string>
     <string name="used_">Used: %1$s</string>
     <plurals name="cache_cleared">

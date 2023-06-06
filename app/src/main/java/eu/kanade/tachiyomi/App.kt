@@ -39,6 +39,7 @@ import logcat.AndroidLogcatLogger
 import logcat.LogPriority
 import logcat.LogcatLogger
 import org.conscrypt.Conscrypt
+import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.injectLazy
@@ -46,6 +47,7 @@ import uy.kohesive.injekt.injectLazy
 open class App : Application(), DefaultLifecycleObserver {
 
     val preferences: PreferencesHelper by injectLazy()
+    val networkPreferences: NetworkPreferences by injectLazy()
     val securityPreferences: SecurityPreferences by injectLazy()
 
     private val disableIncognitoReceiver = DisableIncognitoReceiver()
@@ -76,7 +78,7 @@ open class App : Application(), DefaultLifecycleObserver {
         Injekt.importModule(PreferenceModule(this))
         Injekt.importModule(AppModule(this))
 
-        if (!LogcatLogger.isInstalled && (preferences.verboseLogging().get())) {
+        if (!LogcatLogger.isInstalled && (networkPreferences.verboseLogging().get())) {
             LogcatLogger.install(AndroidLogcatLogger(LogPriority.VERBOSE))
         }
 

@@ -6,8 +6,6 @@ import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onSuccess
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
@@ -33,6 +31,8 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
+import org.nekomanga.core.network.GET
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.injectLazy
 

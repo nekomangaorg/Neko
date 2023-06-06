@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
@@ -12,6 +11,7 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import io.github.g00fy2.versioncompare.Version
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import org.nekomanga.core.network.GET
 import uy.kohesive.injekt.injectLazy
 
 class AppUpdateChecker {

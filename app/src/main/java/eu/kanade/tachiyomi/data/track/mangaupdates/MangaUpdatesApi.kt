@@ -7,10 +7,6 @@ import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Context
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.ListItem
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Rating
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Record
-import eu.kanade.tachiyomi.network.DELETE
-import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.PUT
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.loggycat
@@ -29,6 +25,10 @@ import logcat.LogPriority
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.nekomanga.core.network.DELETE
+import org.nekomanga.core.network.GET
+import org.nekomanga.core.network.POST
+import org.nekomanga.core.network.PUT
 import uy.kohesive.injekt.injectLazy
 
 class MangaUpdatesApi(
@@ -151,7 +151,7 @@ class MangaUpdatesApi(
         if (!wasPreviouslyTracked) {
             val muId = getMangaUpdatesApiId(manga);
 
-            if(muId != null) {
+            if (muId != null) {
                 return client.newCall(
                     GET("$baseUrl/v1/series/$muId"),
                 )

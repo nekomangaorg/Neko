@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online
 
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
@@ -14,6 +13,7 @@ import java.util.Locale
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
 import rx.Observable
 import uy.kohesive.injekt.injectLazy

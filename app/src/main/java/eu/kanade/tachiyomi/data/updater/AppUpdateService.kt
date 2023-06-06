@@ -14,7 +14,6 @@ import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProgressListener
 import eu.kanade.tachiyomi.network.await
@@ -37,6 +36,7 @@ import logcat.LogPriority
 import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
 import okhttp3.internal.http2.StreamResetException
+import org.nekomanga.core.network.GET
 import uy.kohesive.injekt.injectLazy
 
 class AppUpdateService : Service() {

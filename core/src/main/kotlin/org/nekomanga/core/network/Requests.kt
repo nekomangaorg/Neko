@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.network
+package org.nekomanga.core.network
 
 import java.util.concurrent.TimeUnit.MINUTES
 import okhttp3.CacheControl
@@ -10,7 +10,7 @@ import okhttp3.RequestBody
 private val DEFAULT_CACHE_CONTROL = CacheControl.Builder().maxAge(10, MINUTES).build()
 private val DEFAULT_HEADERS = Headers.Builder().build()
 private val DEFAULT_BODY: RequestBody = FormBody.Builder().build()
-internal val CACHE_CONTROL_NO_STORE = CacheControl.Builder().noStore().build()
+val CACHE_CONTROL_NO_STORE = CacheControl.Builder().noStore().build()
 
 fun GET(
     url: String,
@@ -35,23 +35,6 @@ fun POST(
         .post(body)
         .headers(headers)
         .cacheControl(cache)
-        .build()
-}
-
-fun POSTWithCookie(
-    url: String,
-    cookieName: String,
-    cookieValue: String,
-    headers: Headers = DEFAULT_HEADERS,
-    body: RequestBody = DEFAULT_BODY,
-    cache: CacheControl = DEFAULT_CACHE_CONTROL,
-): Request {
-    return Request.Builder()
-        .url(url)
-        .post(body)
-        .headers(headers)
-        .cacheControl(cache)
-        .addHeader(cookieName, cookieValue)
         .build()
 }
 

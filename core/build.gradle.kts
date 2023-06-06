@@ -32,4 +32,5 @@ dependencies {
     api(androidx.preferencektx)
     api(kotlinx.coroutines.core)
     api(kotlinx.serialization.json)
+    api(libs.bundles.ok)
 }

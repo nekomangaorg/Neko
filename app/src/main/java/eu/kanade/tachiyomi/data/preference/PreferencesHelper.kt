@@ -461,8 +461,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun useLargeToolbar() = this.preferenceStore.getBoolean("use_large_toolbar", false)
 
-    fun dohProvider() = this.preferenceStore.getInt(Keys.dohProvider, -1)
-
     fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
     fun openChapterInShortcuts() = this.preferenceStore.getBoolean(Keys.openChapterInShortcuts, true)
 
@@ -507,8 +505,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun thumbnailQuality() = this.preferenceStore.getInt(Keys.thumbnailQuality, 0)
 
     fun usePort443Only() = this.preferenceStore.getBoolean(Keys.enablePort443Only, false)
-
-    fun verboseLogging() = this.preferenceStore.getBoolean(Keys.verboseLogging, BuildConfig.DEBUG)
 
     fun showContentRatingFilter() = this.preferenceStore.getBoolean(Keys.showContentRatingFilter, true)
 

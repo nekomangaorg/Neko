@@ -25,17 +25,8 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.PREF_DOH_360
-import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
-import eu.kanade.tachiyomi.network.PREF_DOH_ALIDNS
-import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
-import eu.kanade.tachiyomi.network.PREF_DOH_DNSPOD
-import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
-import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
-import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -58,6 +49,19 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import logcat.LogPriority
+import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.core.network.PREF_DOH_360
+import org.nekomanga.core.network.PREF_DOH_ADGUARD
+import org.nekomanga.core.network.PREF_DOH_ALIDNS
+import org.nekomanga.core.network.PREF_DOH_CLOUDFLARE
+import org.nekomanga.core.network.PREF_DOH_CONTROLD
+import org.nekomanga.core.network.PREF_DOH_DNSPOD
+import org.nekomanga.core.network.PREF_DOH_GOOGLE
+import org.nekomanga.core.network.PREF_DOH_MULLVAD
+import org.nekomanga.core.network.PREF_DOH_NJALLA
+import org.nekomanga.core.network.PREF_DOH_QUAD101
+import org.nekomanga.core.network.PREF_DOH_QUAD9
+import org.nekomanga.core.network.PREF_DOH_SHECAN
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -68,6 +72,7 @@ import uy.kohesive.injekt.injectLazy
 class SettingsAdvancedController : SettingsController() {
 
     private val network: NetworkHelper by injectLazy()
+    private val networkPreferences: NetworkPreferences by injectLazy()
 
     private val chapterCache: ChapterCache by injectLazy()
 
@@ -104,7 +109,7 @@ class SettingsAdvancedController : SettingsController() {
         }
 
         switchPreference {
-            key = PreferenceKeys.verboseLogging
+            key = networkPreferences.verboseLogging().key()
             titleRes = R.string.verbose_logging
             summaryRes = R.string.verbose_logging_summary
             defaultValue = BuildConfig.DEBUG
@@ -239,7 +244,7 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
             intListPreference(activity) {
-                key = PreferenceKeys.dohProvider
+                key = networkPreferences.dohProvider().key()
                 titleRes = R.string.doh
                 entriesRes = arrayOf(
                     R.string.disabled,
@@ -251,6 +256,10 @@ class SettingsAdvancedController : SettingsController() {
                     R.string.dnsPod,
                     R.string.dns_360,
                     R.string.quad_101,
+                    R.string.mullvad,
+                    R.string.control_d,
+                    R.string.njalla,
+                    R.string.shecan,
                 )
                 entryValues = listOf(
                     -1,
@@ -262,6 +271,10 @@ class SettingsAdvancedController : SettingsController() {
                     PREF_DOH_DNSPOD,
                     PREF_DOH_360,
                     PREF_DOH_QUAD101,
+                    PREF_DOH_MULLVAD,
+                    PREF_DOH_CONTROLD,
+                    PREF_DOH_NJALLA,
+                    PREF_DOH_SHECAN,
                 )
 
                 defaultValue = -1

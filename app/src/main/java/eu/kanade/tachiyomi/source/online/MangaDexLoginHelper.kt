@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
@@ -12,6 +11,7 @@ import java.util.concurrent.TimeUnit
 import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.Headers
+import org.nekomanga.core.network.POST
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy

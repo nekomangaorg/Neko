@@ -4,7 +4,6 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.loggycat
@@ -22,6 +21,7 @@ import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import org.nekomanga.core.network.POST
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.Body
@@ -156,7 +156,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         if (!wasPreviouslyTracked && !manga.kitsu_id.isNullOrBlank()) {
-            authClient.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!)))
+            authClient.newCall(org.nekomanga.core.network.GET(apiMangaUrl(manga.kitsu_id!!)))
                 .await().parseAs<JsonObject>().let {
                     val id = it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive
                     val map =

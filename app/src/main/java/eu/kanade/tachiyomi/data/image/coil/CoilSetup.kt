@@ -12,9 +12,9 @@ import coil.decode.SvgDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.util.DebugLogger
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import kotlinx.coroutines.Dispatchers
+import org.nekomanga.core.network.NetworkPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -43,7 +43,7 @@ class CoilSetup(context: Context) {
             crossfade(true)
             allowRgb565(context.getSystemService<ActivityManager>()!!.isLowRamDevice)
             allowHardware(isCurrSDKPieOrGreater)
-            if (Injekt.get<PreferencesHelper>().verboseLogging().get()) {
+            if (Injekt.get<NetworkPreferences>().verboseLogging().get()) {
                 logger(DebugLogger())
             }
             // Coil spawns a new thread for every image load by default

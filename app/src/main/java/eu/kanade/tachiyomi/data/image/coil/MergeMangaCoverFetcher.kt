@@ -8,7 +8,6 @@ import coil.fetch.SourceResult
 import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
-import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.system.loggycat
@@ -21,6 +20,7 @@ import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Request
 import okhttp3.Response
+import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 
 class MergeMangaCoverFetcher(
     private val url: String,
@@ -80,6 +80,7 @@ class MergeMangaCoverFetcher(
                 // don't take up okhttp cache
                 request.cacheControl(CACHE_CONTROL_NO_STORE)
             }
+
             else -> {
                 // This causes the request to fail with a 504 Unsatisfiable Request.
                 request.cacheControl(CACHE_CONTROL_NO_NETWORK_NO_CACHE)

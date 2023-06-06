@@ -29,12 +29,38 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
+import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.core.network.PREF_DOH_360
+import org.nekomanga.core.network.PREF_DOH_ADGUARD
+import org.nekomanga.core.network.PREF_DOH_ALIDNS
+import org.nekomanga.core.network.PREF_DOH_CLOUDFLARE
+import org.nekomanga.core.network.PREF_DOH_CONTROLD
+import org.nekomanga.core.network.PREF_DOH_DNSPOD
+import org.nekomanga.core.network.PREF_DOH_GOOGLE
+import org.nekomanga.core.network.PREF_DOH_MULLVAD
+import org.nekomanga.core.network.PREF_DOH_NJALLA
+import org.nekomanga.core.network.PREF_DOH_QUAD101
+import org.nekomanga.core.network.PREF_DOH_QUAD9
+import org.nekomanga.core.network.PREF_DOH_SHECAN
+import org.nekomanga.core.network.doh360
+import org.nekomanga.core.network.dohAdGuard
+import org.nekomanga.core.network.dohAliDNS
+import org.nekomanga.core.network.dohCloudflare
+import org.nekomanga.core.network.dohControlD
+import org.nekomanga.core.network.dohDNSPod
+import org.nekomanga.core.network.dohGoogle
+import org.nekomanga.core.network.dohMullvad
+import org.nekomanga.core.network.dohNajalla
+import org.nekomanga.core.network.dohQuad101
+import org.nekomanga.core.network.dohQuad9
+import org.nekomanga.core.network.dohShecan
 import retrofit2.Retrofit
 import uy.kohesive.injekt.injectLazy
 
 class NetworkHelper(val context: Context) {
 
     private val preferences: PreferencesHelper by injectLazy()
+    private val networkPreferences: NetworkPreferences by injectLazy()
 
     private val mangaDexLoginHelper: MangaDexLoginHelper by injectLazy()
 
@@ -64,33 +90,43 @@ class NetworkHelper(val context: Context) {
         chain.proceed(newRequest)
     }
 
-    private fun buildNonRateLimitedClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .callTimeout(1, TimeUnit.MINUTES)
-            .cache(Cache(cacheDir, cacheSize))
-            .cookieJar(cookieManager)
-            .apply {
-                if (BuildConfig.DEBUG) {
-                    addInterceptor(
-                        ChuckerInterceptor.Builder(context)
-                            .collector(ChuckerCollector(context))
-                            .maxContentLength(250000L)
-                            .redactHeaders(emptySet())
-                            .alwaysReadResponseBody(false)
-                            .build(),
-                    )
-                }
-                when (preferences.dohProvider().get()) {
-                    PREF_DOH_CLOUDFLARE -> dohCloudflare()
-                    PREF_DOH_GOOGLE -> dohGoogle()
-                    PREF_DOH_ADGUARD -> dohAdGuard()
-                    PREF_DOH_QUAD9 -> dohQuad9()
-                }
+    private val baseClientBuilder: OkHttpClient.Builder
+        get() {
+            val builder = OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .callTimeout(1, TimeUnit.MINUTES)
+                .cache(Cache(cacheDir, cacheSize))
+                .cookieJar(cookieManager)
+                .apply {
+                    if (BuildConfig.DEBUG) {
+                        addInterceptor(
+                            ChuckerInterceptor.Builder(context)
+                                .collector(ChuckerCollector(context))
+                                .maxContentLength(250000L)
+                                .redactHeaders(emptySet())
+                                .alwaysReadResponseBody(false)
+                                .build(),
+                        )
+                    }
+                    when (networkPreferences.dohProvider().get()) {
+                        PREF_DOH_CLOUDFLARE -> dohCloudflare()
+                        PREF_DOH_GOOGLE -> dohGoogle()
+                        PREF_DOH_ADGUARD -> dohAdGuard()
+                        PREF_DOH_QUAD9 -> dohQuad9()
+                        PREF_DOH_ALIDNS -> dohAliDNS()
+                        PREF_DOH_DNSPOD -> dohDNSPod()
+                        PREF_DOH_360 -> doh360()
+                        PREF_DOH_QUAD101 -> dohQuad101()
+                        PREF_DOH_MULLVAD -> dohMullvad()
+                        PREF_DOH_CONTROLD -> dohControlD()
+                        PREF_DOH_NJALLA -> dohNajalla()
+                        PREF_DOH_SHECAN -> dohShecan()
+                    }
 
-            }.build()
-    }
+                }
+            return builder
+        }
 
     private val logger: HttpLoggingInterceptor.Logger =
         HttpLoggingInterceptor.Logger { message ->
@@ -108,9 +144,9 @@ class NetworkHelper(val context: Context) {
 
     private fun loggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor(logger).apply {
-            level = when (preferences.verboseLogging().get()) {
+            level = when (networkPreferences.verboseLogging().get()) {
                 true -> HttpLoggingInterceptor.Level.BODY
-                false -> HttpLoggingInterceptor.Level.HEADERS
+                false -> HttpLoggingInterceptor.Level.BASIC
             }
             redactHeader("Authorization")
 
@@ -118,15 +154,15 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildRateLimitedClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder().rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).addInterceptor(loggingInterceptor()).build()
+        return baseClientBuilder.rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).addInterceptor(loggingInterceptor()).build()
     }
 
     private fun buildAtHomeRateLimitedClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder().rateLimit(permits = 40, period = 1, unit = TimeUnit.MINUTES).addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
+        return baseClientBuilder.rateLimit(permits = 40, period = 1, unit = TimeUnit.MINUTES).addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
     }
 
     private fun buildCdnRateLimitedClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder().rateLimit(20).addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
+        return baseClientBuilder.rateLimit(20).addInterceptor(HeadersInterceptor()).addInterceptor(loggingInterceptor()).build()
     }
 
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
@@ -138,14 +174,12 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildCloudFlareClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder()
+        return baseClientBuilder
             .addInterceptor(UserAgentInterceptor())
             .addInterceptor(CloudflareInterceptor(context))
             .addInterceptor(loggingInterceptor())
             .build()
     }
-
-    private val nonRateLimitedClient = buildNonRateLimitedClient()
 
     val cloudFlareClient = buildCloudFlareClient()
 
