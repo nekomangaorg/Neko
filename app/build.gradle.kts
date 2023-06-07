@@ -20,6 +20,7 @@ val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 android {
     compileSdk = AndroidConfig.compileSdkVersion
+    namespace = "eu.kanade.tachiyomi"
 
     defaultConfig {
         minSdk = AndroidConfig.minSdkVersion
@@ -115,7 +116,6 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
-    namespace = "eu.kanade.tachiyomi"
 }
 
 dependencies {
