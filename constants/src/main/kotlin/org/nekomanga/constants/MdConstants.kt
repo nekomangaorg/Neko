@@ -1,8 +1,7 @@
-package eu.kanade.tachiyomi.source.online.utils
+package org.nekomanga.constants
 
 import android.util.Base64
 import androidx.core.net.toUri
-import eu.kanade.tachiyomi.BuildConfig
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 

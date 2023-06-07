@@ -20,7 +20,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
@@ -30,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.loggycat
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError

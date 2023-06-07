@@ -25,7 +25,6 @@ import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -38,6 +37,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.SourceManga

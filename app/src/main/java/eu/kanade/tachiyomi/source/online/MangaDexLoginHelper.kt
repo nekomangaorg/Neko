@@ -3,12 +3,12 @@ package eu.kanade.tachiyomi.source.online
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.concurrent.TimeUnit
 import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.Headers
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.POST
 import tachiyomi.core.network.await

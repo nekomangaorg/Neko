@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import retrofit2.http.Body
 import retrofit2.http.GET

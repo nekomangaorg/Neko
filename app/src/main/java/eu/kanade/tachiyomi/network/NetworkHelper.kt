@@ -7,7 +7,6 @@ import com.google.common.net.HttpHeaders
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
@@ -15,6 +14,7 @@ import okhttp3.Cache
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import org.nekomanga.constants.Constants
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.network.interceptor.HeadersInterceptor
 import org.nekomanga.core.network.interceptor.UserAgentInterceptor

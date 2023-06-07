@@ -3,10 +3,10 @@ package eu.kanade.tachiyomi.network.services
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.skydoves.sandwich.adapters.ApiResponseCallAdapterFactory
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import org.nekomanga.constants.MdConstants
 import retrofit2.Retrofit
 import uy.kohesive.injekt.injectLazy
 

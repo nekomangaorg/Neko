@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelatedMangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDatabaseDto
 import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.log
@@ -26,6 +25,7 @@ import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.serialization.encodeToString
 import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.SourceManga

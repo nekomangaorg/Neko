@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.utils
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.SourceManga
 
 fun MangaDataDto.toBasicManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = true): SManga {

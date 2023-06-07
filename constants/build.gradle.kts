@@ -19,4 +19,8 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
+
+    dependencies {
+        api(androidx.core.kts)
+    }
 }

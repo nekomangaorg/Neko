@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import org.nekomanga.constants.MdConstants
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Path

@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.ReadChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusMapDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import org.nekomanga.constants.MdConstants
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET

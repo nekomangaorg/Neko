@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.source.online.utils
 
-import eu.kanade.tachiyomi.R
+import org.nekomanga.constants.R
 
 enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int) {
     ARABIC("ar", "Arabic", R.drawable.ic_flag_sa),

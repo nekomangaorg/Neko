@@ -136,7 +136,7 @@ interface SManga : Serializable {
         users = other.users
         thread_id = other.thread_id
         replies_count = other.replies_count
-        
+
         if (!initialized) {
             initialized = other.initialized
         }
