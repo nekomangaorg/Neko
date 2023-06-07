@@ -4,7 +4,7 @@ import com.github.michaelbull.result.getOrThrow
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkServices
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler

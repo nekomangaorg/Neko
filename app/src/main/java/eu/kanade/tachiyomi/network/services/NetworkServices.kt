@@ -1,11 +1,8 @@
-package eu.kanade.tachiyomi.network
+package eu.kanade.tachiyomi.network.services
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.skydoves.sandwich.adapters.ApiResponseCallAdapterFactory
-import eu.kanade.tachiyomi.network.services.MangaDexAtHomeService
-import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
-import eu.kanade.tachiyomi.network.services.MangaDexService
-import eu.kanade.tachiyomi.network.services.SimilarService
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json

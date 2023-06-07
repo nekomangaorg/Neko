@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.jobs.follows.FollowsSyncService
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationService
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncService
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.NetworkServices
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser

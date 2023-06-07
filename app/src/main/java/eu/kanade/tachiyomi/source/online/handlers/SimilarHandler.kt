@@ -8,7 +8,7 @@ import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkServices
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.AnilistMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.models.dto.MUMangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MalMangaRecommendationsDto

@@ -6,8 +6,8 @@ import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.getOrElse
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkServices
 import eu.kanade.tachiyomi.network.services.MangaDexService
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
