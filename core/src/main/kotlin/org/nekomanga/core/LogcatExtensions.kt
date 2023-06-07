@@ -1,7 +1,6 @@
-package eu.kanade.tachiyomi.util.system
+package org.nekomanga.core
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import eu.kanade.tachiyomi.BuildConfig
 import logcat.AndroidLogcatLogger
 import logcat.LogPriority
 import logcat.asLog

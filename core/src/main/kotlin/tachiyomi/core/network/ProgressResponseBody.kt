@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.network
+package tachiyomi.core.network
 
 import java.io.IOException
 import okhttp3.MediaType

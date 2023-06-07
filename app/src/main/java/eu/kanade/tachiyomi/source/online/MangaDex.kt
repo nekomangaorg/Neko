@@ -70,7 +70,7 @@ open class MangaDex : HttpSource() {
 
     suspend fun getRandomManga(): Result<SourceManga, ResultError> {
         return withIOContext {
-            val response = network.service.randomManga(preferences.contentRatingSelections().get().toList())
+            val response = networkServices.service.randomManga(preferences.contentRatingSelections().get().toList())
 
             val result = response.getOrResultError("trying to get random Manga")
                 .andThen {
@@ -89,7 +89,7 @@ open class MangaDex : HttpSource() {
 
     suspend fun getScanlator(scanlator: String): Result<Scanlator, ResultError> {
         return withIOContext {
-            network.service.scanlatorGroup(scanlator).getOrResultError("Trying to get scanlator")
+            networkServices.service.scanlatorGroup(scanlator).getOrResultError("Trying to get scanlator")
                 .andThen { groupListDto ->
                     val groupDto = groupListDto.data.firstOrNull()
                     when (groupDto == null) {

@@ -1058,10 +1058,10 @@
     <string name="file_picker_error">No file picker app found</string>
 
     <!-- Webview -->
-    <string name="failed_to_bypass_cloudflare">Failed to bypass Cloudflare</string>
-    <string name="please_update_webview">Please update the WebView app for better compatibility</string>
+    <string name="information_cloudflare_bypass_failure">Failed to bypass Cloudflare</string>
+    <string name="information_webview_outdated">Please update the WebView app for better compatibility</string>
     <!-- Do not translate "WebView" -->
-    <string name="webview_is_required">WebView is required for Neko</string>
+    <string name="information_webview_required">WebView is required for Neko</string>
 
     <!-- Miscellaneous -->
     <string name="add">Add</string>

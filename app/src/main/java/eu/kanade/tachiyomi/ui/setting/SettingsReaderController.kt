@@ -264,7 +264,7 @@ class SettingsReaderController : SettingsController() {
             }
             intListPreference(activity) {
                 key = Keys.pageLayout
-                title = context.getString(R.string.page_layout).addBetaTag(context)
+                title = context.getString(R.string.page_layout).addBetaTag(context, R.attr.colorSecondary)
                 dialogTitleRes = R.string.page_layout
                 val enumConstants = PageLayout.values()
                 entriesRes = enumConstants.map { it.fullStringRes }.toTypedArray()

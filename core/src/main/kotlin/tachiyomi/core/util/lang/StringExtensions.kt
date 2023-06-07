@@ -11,15 +11,14 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.text.style.SuperscriptSpan
+import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.core.text.parseAsHtml
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.MergeType
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import java.util.Locale
-import kotlin.math.floor
+import org.nekomanga.core.R
 import org.nekomanga.domain.network.ResultError
+import tachiyomi.core.util.system.getResourceColor
 
 /**
  * Replaces the given string to have at most [count] characters using [replacement] at its end.
@@ -64,25 +63,6 @@ fun String.removeArticles(): String {
 
 val String.sqLite: String
     get() = replace("'", "''")
-
-fun String.trimOrNull(): String? {
-    val trimmed = trim()
-    return if (trimmed.isBlank()) null else trimmed
-}
-
-/**
- * Replaces the given string to have at most [count] characters using [replacement] near the center.
- * If [replacement] is longer than [count] an exception will be thrown when `length > count`.
- */
-fun String.truncateCenter(count: Int, replacement: String = "..."): String {
-    if (length <= count) {
-        return this
-    }
-
-    val pieceLength: Int = floor((count - replacement.length).div(2.0)).toInt()
-
-    return "${take(pieceLength)}$replacement${takeLast(pieceLength)}"
-}
 
 fun String.capitalizeWords(): String {
     val firstReplace = split(" ").joinToString(" ") {
@@ -162,7 +142,7 @@ fun String.withSubtitle(context: Context, subtitle: String): Spanned {
     return spannable
 }
 
-fun String.addBetaTag(context: Context): Spanned {
+fun String.addBetaTag(context: Context, @AttrRes color: Int): Spanned {
     val betaText = context.getString(R.string.beta)
     val betaSpan = SpannableStringBuilder(this + betaText)
     betaSpan.setSpan(
@@ -184,7 +164,7 @@ fun String.addBetaTag(context: Context): Spanned {
         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
     )
     betaSpan.setSpan(
-        ForegroundColorSpan(context.getResourceColor(R.attr.colorSecondary)),
+        ForegroundColorSpan(context.getResourceColor(color)),
         length,
         length + betaText.length,
         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
@@ -215,6 +195,3 @@ fun String.htmlDecode(): String {
 }
 
 fun String.toResultError() = ResultError.Generic(errorString = this)
-
-fun String.containsMergeSourceName() =
-    MergeType.values().any { this.contains(MergeType.getMergeTypeName(it)) }

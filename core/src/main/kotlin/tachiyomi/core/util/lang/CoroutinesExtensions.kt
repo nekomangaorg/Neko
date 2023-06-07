@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -44,27 +43,18 @@ fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
 fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)
 
-fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
-    launch(Dispatchers.IO, block = block)
-
 fun CoroutineScope.launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     launch(Dispatchers.Main, block = block)
+
+fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
+    launch(Dispatchers.IO, block = block)
 
 fun CoroutineScope.launchNonCancellable(block: suspend CoroutineScope.() -> Unit): Job =
     launchIO { withContext(NonCancellable, block) }
 
-fun CoroutineScope.launchDelayed(timeMillis: Long = 150L, block: () -> Unit) {
-    this.launch {
-        delay(timeMillis)
-        block()
-    }
-}
-
 suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.Main, block)
 
 suspend fun <T> withIOContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.IO, block)
-
-suspend fun <T> withDefContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.Default, block)
 
 suspend fun <T> withNonCancellableContext(block: suspend CoroutineScope.() -> T) =
     withContext(NonCancellable, block)

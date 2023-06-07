@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.NetworkServices
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -26,7 +26,7 @@ import uy.kohesive.injekt.api.get
 class V5MigrationService(
     private val db: DatabaseHelper = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
-    private val networkHelper: NetworkHelper = Injekt.get(),
+    private val networkServices: NetworkServices = Injekt.get(),
 ) {
 
     // List containing failed updates
@@ -67,7 +67,7 @@ class V5MigrationService(
             // We skip mangaList which have already been converted (non-numeric ids)
             var mangaErroredOut = false
             if (isNumericId) {
-                val responseDto = networkHelper.service.legacyMapping(
+                val responseDto = networkServices.service.legacyMapping(
                     LegacyIdDto(
                         type = "manga",
                         listOf(oldMangaId.toInt()),
@@ -120,7 +120,7 @@ class V5MigrationService(
 
                 chapterChunks.asSequence().forEach { legacyIds ->
                     val responseDto =
-                        networkHelper.service.legacyMapping(
+                        networkServices.service.legacyMapping(
                             LegacyIdDto(
                                 "chapter",
                                 legacyIds,

@@ -1,12 +1,14 @@
-package eu.kanade.tachiyomi.network
+package tachiyomi.core.network
 
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.okio.decodeFromBufferedSource
+import kotlinx.serialization.serializer
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -125,9 +127,18 @@ fun OkHttpClient.newCachelessCallWithProgress(request: Request, listener: Progre
     return progressClient.newCall(request)
 }
 
-inline fun <reified T> Response.parseAs(): T {
-    this.use {
-        val responseBody = it.body.string()
-        return MdUtil.jsonParser.decodeFromString(responseBody)
+context(Json)
+    inline fun <reified T> Response.parseAs(): T {
+    return decodeFromJsonResponse(serializer(), this)
+}
+
+context(Json)
+fun <T> decodeFromJsonResponse(
+    deserializer: DeserializationStrategy<T>,
+    response: Response,
+): T {
+    return response.body.source().use {
+        decodeFromBufferedSource(deserializer, it)
     }
 }
+

@@ -8,9 +8,7 @@ import coil.fetch.SourceResult
 import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +18,9 @@ import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Request
 import okhttp3.Response
+import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
+import tachiyomi.core.network.await
 
 class MergeMangaCoverFetcher(
     private val url: String,

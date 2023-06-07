@@ -7,8 +7,7 @@ import com.github.michaelbull.result.onSuccess
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
+import eu.kanade.tachiyomi.network.NetworkServices
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
@@ -19,7 +18,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.Date
@@ -31,13 +29,17 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 import org.nekomanga.core.network.GET
 import org.nekomanga.domain.network.message
+import tachiyomi.core.network.await
+import tachiyomi.core.network.newCachelessCallWithProgress
 import uy.kohesive.injekt.injectLazy
 
 class ImageHandler {
     val network: NetworkHelper by injectLazy()
+    val NetworkServices: NetworkServices by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
     private val azukiHandler: AzukiHandler by injectLazy()
     private val mangaHotHandler: MangaHotHandler by injectLazy()
@@ -136,7 +138,7 @@ class ImageHandler {
             loggycat(tag = tag) { "image is at CDN don't report to md@home node" }
             return
         }
-        network.service.atHomeImageReport(atHomeImageReportDto).onFailure {
+        NetworkServices.service.atHomeImageReport(atHomeImageReportDto).onFailure {
             this.log("trying to post to dex@home")
         }
     }
@@ -152,7 +154,7 @@ class ImageHandler {
                     loggycat(tag = tag) { "Time has expired get new at home url isLogged $isLogged" }
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
 
-                    network.atHomeService.getAtHomeServer(
+                    NetworkServices.atHomeService.getAtHomeServer(
                         page.mangaDexChapterId,
                         preferences.usePort443Only().get(),
                     )

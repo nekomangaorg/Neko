@@ -100,7 +100,6 @@ import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
@@ -126,6 +125,7 @@ import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import me.saket.cascade.CascadePopupMenu
 import me.saket.cascade.overrideAllPopupMenus
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy

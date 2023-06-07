@@ -1,4 +1,4 @@
-package org.nekomanga.core.network
+package tachiyomi.core.network
 
 import java.net.InetAddress
 import okhttp3.HttpUrl.Companion.toHttpUrl

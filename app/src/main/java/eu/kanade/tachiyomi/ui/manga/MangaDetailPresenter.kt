@@ -50,14 +50,12 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -82,6 +80,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -96,6 +95,7 @@ import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

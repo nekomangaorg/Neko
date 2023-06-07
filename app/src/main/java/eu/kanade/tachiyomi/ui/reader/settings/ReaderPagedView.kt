@@ -51,7 +51,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             }
             doublePageRotateToFitInvert.bindToPreference(preferences.doublePageRotateReverse())
 
-            pageLayout.title = pageLayout.title.toString().addBetaTag(context)
+            pageLayout.title = pageLayout.title.toString().addBetaTag(context, R.attr.colorSecondary)
 
             val mangaViewer = (context as? ReaderActivity)?.viewModel?.getMangaReadingMode() ?: 0
             val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)

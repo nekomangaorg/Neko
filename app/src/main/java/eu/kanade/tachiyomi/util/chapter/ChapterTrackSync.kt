@@ -9,10 +9,10 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.jobs.tracking.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

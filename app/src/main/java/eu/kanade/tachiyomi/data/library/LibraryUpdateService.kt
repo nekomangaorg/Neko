@@ -46,7 +46,6 @@ import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
 import java.util.Date
@@ -61,6 +60,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt

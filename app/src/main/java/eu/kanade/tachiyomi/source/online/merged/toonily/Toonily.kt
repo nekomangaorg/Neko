@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.source.online.merged.toonily
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -24,8 +22,10 @@ import okhttp3.internal.closeQuietly
 import org.jsoup.nodes.Element
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
+import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import tachiyomi.core.network.await
 
 class Toonily : ReducedHttpSource() {
     override val name = Toonily.name

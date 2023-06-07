@@ -5,8 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
+import eu.kanade.tachiyomi.network.NetworkServices
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -14,18 +13,19 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
+import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class LatestChapterHandler {
-    private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
+    private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
     private val uniqueManga = mutableSetOf<String>()

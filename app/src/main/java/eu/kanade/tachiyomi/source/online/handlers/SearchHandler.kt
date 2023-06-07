@@ -6,8 +6,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
+import eu.kanade.tachiyomi.network.NetworkServices
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.ResultListPage
@@ -18,13 +17,14 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.util.Calendar
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
+import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.SourceResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.network.ResultError
@@ -33,7 +33,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class SearchHandler {
-    private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
+    private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
     suspend fun searchForManga(mangaUUID: String): Result<MangaListPage, ResultError> {

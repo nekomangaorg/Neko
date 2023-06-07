@@ -31,13 +31,13 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy

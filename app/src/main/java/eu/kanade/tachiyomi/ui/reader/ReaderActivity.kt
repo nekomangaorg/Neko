@@ -106,7 +106,6 @@ import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -144,6 +143,7 @@ import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.core.preferences.toggle
 
 /**

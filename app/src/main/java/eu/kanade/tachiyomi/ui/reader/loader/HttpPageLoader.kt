@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
@@ -24,6 +23,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy

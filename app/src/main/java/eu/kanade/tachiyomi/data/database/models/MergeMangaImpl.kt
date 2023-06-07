@@ -64,5 +64,10 @@ enum class MergeType(val id: Int) {
                 Toonily -> sourceManager.toonily
             }
         }
+
+        fun containsMergeSourceName(name: String?): Boolean {
+            name ?: false
+            return MergeType.values().any { name!!.contains(MergeType.getMergeTypeName(it)) }
+        }
     }
 }

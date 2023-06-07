@@ -6,7 +6,7 @@ import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.getOrElse
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.NetworkServices
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
@@ -23,8 +23,7 @@ import uy.kohesive.injekt.injectLazy
 
 class ArtworkHandler {
     val preferences: PreferencesHelper by injectLazy()
-    val statusHandler: StatusHandler by injectLazy()
-    val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
+    val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
 
     suspend fun getArtwork(mangaUUID: String): Result<List<SourceArtwork>, ResultError> {
         return withContext(Dispatchers.IO) {

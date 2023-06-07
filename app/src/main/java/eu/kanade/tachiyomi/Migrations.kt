@@ -12,12 +12,12 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.toast
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
+import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.NetworkPreferences
-import org.nekomanga.core.network.PREF_DOH_CLOUDFLARE
+import tachiyomi.core.network.PREF_DOH_CLOUDFLARE
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

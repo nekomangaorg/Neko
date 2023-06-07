@@ -8,8 +8,8 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
+import org.nekomanga.core.loggycat
 
 /**
  * Loader used to retrieve the [PageLoader] for a given chapter.

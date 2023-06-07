@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
-import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
 
 data class SimpleChapter(
     val id: Long,
@@ -34,7 +33,7 @@ data class SimpleChapter(
 ) {
     val isRecognizedNumber = chapterNumber >= 0f
 
-    fun isMergedChapter() = this.scanlator.containsMergeSourceName()
+    fun isMergedChapter() = MergeType.containsMergeSourceName(this.scanlator)
 
     fun isMergedChapterOfType(mergeType: MergeType) =
         MergeType.getMergeTypeName(mergeType) == this.scanlator

@@ -30,7 +30,15 @@ android {
 dependencies {
     implementation(project(":constants"))
     api(androidx.preferencektx)
+
+    api(androidx.preferencektx)
     api(kotlinx.coroutines.core)
     api(kotlinx.serialization.json)
+    api(kotlinx.serialization.okio)
     api(libs.bundles.ok)
+    api(libs.tokenbucket)
+    api(libs.logcat)
+    api(libs.rx.java)
+    api(libs.tachi.unifile)
+    api(libs.firebase.crashlytics)
 }

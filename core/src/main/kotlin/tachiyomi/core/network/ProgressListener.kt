@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.network
+package tachiyomi.core.network
 
 interface ProgressListener {
     fun update(bytesRead: Long, contentLength: Long, done: Boolean)

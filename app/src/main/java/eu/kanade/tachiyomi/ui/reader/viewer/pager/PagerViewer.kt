@@ -19,9 +19,9 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 /**

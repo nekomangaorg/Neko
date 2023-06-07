@@ -17,9 +17,9 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlin.math.min
 import kotlinx.coroutines.GlobalScope
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

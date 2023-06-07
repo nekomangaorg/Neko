@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.util.lang
+package tachiyomi.core.util.lang
 
 import java.security.MessageDigest
 

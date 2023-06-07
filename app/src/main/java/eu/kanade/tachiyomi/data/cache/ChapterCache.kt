@@ -6,9 +6,7 @@ import com.jakewharton.disklrucache.DiskLruCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.io.IOException
 import kotlin.math.pow
@@ -25,6 +23,8 @@ import logcat.LogPriority
 import okhttp3.Response
 import okio.buffer
 import okio.sink
+import org.nekomanga.core.loggycat
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.injectLazy
 
 /**

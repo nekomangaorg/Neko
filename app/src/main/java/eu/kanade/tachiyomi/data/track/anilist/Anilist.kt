@@ -8,10 +8,10 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackService(id) {

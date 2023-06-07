@@ -8,10 +8,10 @@ import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.launchNow
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {

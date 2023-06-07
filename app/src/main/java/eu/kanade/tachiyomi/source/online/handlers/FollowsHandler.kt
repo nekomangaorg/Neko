@@ -12,7 +12,7 @@ import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.NetworkServices
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
@@ -25,13 +25,13 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
@@ -42,7 +42,7 @@ class FollowsHandler {
 
     val preferences: PreferencesHelper by injectLazy()
     val statusHandler: StatusHandler by injectLazy()
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkHelper>().authService }
+    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
 
     /**
      * fetch all follows

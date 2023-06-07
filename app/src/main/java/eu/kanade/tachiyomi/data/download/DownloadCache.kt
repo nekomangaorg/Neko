@@ -7,12 +7,11 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
 import eu.kanade.tachiyomi.util.lang.isUUID
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
@@ -22,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -132,7 +132,7 @@ class DownloadCache(
             val ids = mangaFiles[manga.id]!!.second
             var count = files.size
             files.forEach {
-                if (!it.containsMergeSourceName()) {
+                if (!MergeType.containsMergeSourceName(it)) {
                     val mangadexId = it.substringAfterLast("- ")
                     if (mangadexId.isNotBlank() && mangadexId.isDigitsOnly() && !ids.contains(
                             mangadexId,
@@ -233,7 +233,7 @@ class DownloadCache(
         val files = mangaFiles[id]
         val mangadexId = chapterDirName.substringAfterLast("- ")
 
-        val set = when (chapterDirName.containsMergeSourceName()) {
+        val set = when (MergeType.containsMergeSourceName(chapterDirName)) {
             true -> mutableSetOf()
             false -> mutableSetOf(mangadexId)
         }
@@ -242,7 +242,7 @@ class DownloadCache(
             mangaFiles[id] = Pair(mutableSetOf(chapterDirName), set)
         } else {
             mangaFiles[id]?.first?.add(chapterDirName)
-            if (!chapterDirName.containsMergeSourceName()) {
+            if (!MergeType.containsMergeSourceName(chapterDirName)) {
                 mangaFiles[id]?.second?.add(mangadexId)
             }
         }
@@ -279,7 +279,7 @@ class DownloadCache(
             if (chapter in mangaFiles[id]!!.first) {
                 mangaFiles[id]!!.first.remove(chapter)
             }
-            if (!chapter.containsMergeSourceName()) {
+            if (!MergeType.containsMergeSourceName(chapter)) {
                 val mangadexId = chapter.substringAfterLast("- ")
                 mangaFiles[id]!!.second.remove(mangadexId)
             }

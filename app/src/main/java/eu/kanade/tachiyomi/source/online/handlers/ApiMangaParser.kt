@@ -17,9 +17,9 @@ import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlin.math.floor
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy

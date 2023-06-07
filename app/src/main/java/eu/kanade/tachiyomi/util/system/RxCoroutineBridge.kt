@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.suspendCancellableCoroutine
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import rx.Emitter
 import rx.Observable
 import rx.Subscriber

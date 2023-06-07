@@ -14,12 +14,14 @@ coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-androi
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization_version" }
 serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "serialization_version" }
 serialization-gradle = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin_version" }
+serialization-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "serialization_version" }
+
 
 immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5"
 
 [bundles]
 
-kotlin = ["stdlib", "reflect", "coroutines-core", "coroutines-android", "serialization-json", "serialization-protobuf", "immutables"]
+kotlin = ["stdlib", "reflect", "coroutines-core", "coroutines-android", "serialization-json", "serialization-protobuf", "serialization-okio", "immutables"]
 
 [plugins]
 

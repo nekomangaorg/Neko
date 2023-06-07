@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.jobs.follows.FollowsSyncService
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationService
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncService
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.NetworkServices
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
@@ -63,6 +64,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { NetworkHelper(app) }
 
+        addSingletonFactory { NetworkServices() }
+
         addSingletonFactory { SourceManager() }
 
         addSingletonFactory { DownloadManager(app) }
@@ -73,7 +76,12 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { ChapterItemFilter() }
 
-        addSingletonFactory { Json { ignoreUnknownKeys = true } }
+        addSingletonFactory {
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+        }
 
         addSingletonFactory { MangaMappings(app.applicationContext) }
 

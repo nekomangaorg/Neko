@@ -7,11 +7,10 @@ import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import eu.kanade.tachiyomi.source.online.models.dto.ErrorResponse
-import eu.kanade.tachiyomi.util.system.loggycat
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
 import org.jsoup.Jsoup
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.network.ResultError
 
 /**
@@ -80,6 +79,7 @@ fun ApiResponse<*>.log(type: String) {
         is ApiResponse.Failure.Exception -> {
             loggycat(LogPriority.ERROR, this.exception) { "Exception $type ${this.message}" }
         }
+
         is ApiResponse.Failure.Error -> {
             loggycat(LogPriority.ERROR) {
                 """
@@ -89,6 +89,7 @@ fun ApiResponse<*>.log(type: String) {
                 """.trimIndent()
             }
         }
+
         else -> {
             loggycat(LogPriority.ERROR) { "error $type" }
         }
@@ -100,9 +101,11 @@ fun ApiResponse<*>.throws(type: String) {
         is ApiResponse.Failure.Error -> {
             throw Exception("Error $type http code: ${this.statusCode.code}")
         }
+
         is ApiResponse.Failure.Exception -> {
             throw Exception("Error $type ${this.message} ${this.exception}")
         }
+
         else -> {
             throw Exception("Error $type ")
         }

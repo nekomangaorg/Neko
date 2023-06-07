@@ -2,16 +2,17 @@ package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import eu.kanade.tachiyomi.util.system.loggycat
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.concurrent.TimeUnit
 import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.Headers
+import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.POST
+import tachiyomi.core.network.await
+import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -50,16 +51,18 @@ class MangaDexLoginHelper {
             .add("redirect_uri", MdConstants.Login.redirectUri)
             .build()
         val error = kotlin.runCatching {
-            val data = networkHelper.client.newCall(
-                POST(
-                    url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
-                    body = formBody,
-                ),
-            ).await().parseAs<LoginResponseDto>()
-            preferences.setTokens(
-                data.refreshToken,
-                data.accessToken,
-            )
+            with(MdUtil.jsonParser) {
+                val data = networkHelper.client.newCall(
+                    POST(
+                        url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
+                        body = formBody,
+                    ),
+                ).await().parseAs<LoginResponseDto>()
+                preferences.setTokens(
+                    data.refreshToken,
+                    data.accessToken,
+                )
+            }
         }.exceptionOrNull()
 
         return when (error == null) {
@@ -85,16 +88,18 @@ class MangaDexLoginHelper {
             .build()
 
         val error = kotlin.runCatching {
-            val data = networkHelper.mangadexClient.newCall(
-                POST(
-                    url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
-                    body = loginFormBody,
-                ),
-            ).await().parseAs<LoginResponseDto>()
-            preferences.setTokens(
-                data.refreshToken,
-                data.accessToken,
-            )
+            with(MdUtil.jsonParser) {
+                val data = networkHelper.mangadexClient.newCall(
+                    POST(
+                        url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
+                        body = loginFormBody,
+                    ),
+                ).await().parseAs<LoginResponseDto>()
+                preferences.setTokens(
+                    data.refreshToken,
+                    data.accessToken,
+                )
+            }
 
         }.exceptionOrNull()
 

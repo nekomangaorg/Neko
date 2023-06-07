@@ -524,9 +524,9 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
         autoAddTracker().set(trackersToAutoAdd)
     }
 
-    fun sessionToken() = this.preferenceStore.getString(Keys.sessionToken, "")
+    fun sessionToken() = this.preferenceStore.getString(Keys.sessionToken)
 
-    fun refreshToken() = this.preferenceStore.getString(Keys.refreshToken, "")
+    fun refreshToken() = this.preferenceStore.getString(Keys.refreshToken)
 
     fun removeTokens() {
         sessionToken().delete()

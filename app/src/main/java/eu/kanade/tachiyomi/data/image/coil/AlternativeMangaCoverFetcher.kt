@@ -10,9 +10,7 @@ import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import java.util.Date
@@ -30,8 +28,10 @@ import okio.Path.Companion.toOkioPath
 import okio.Source
 import okio.buffer
 import okio.sink
+import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 import org.nekomanga.domain.manga.Artwork
+import tachiyomi.core.network.await
 
 class AlternativeMangaCoverFetcher(
     private val url: String,

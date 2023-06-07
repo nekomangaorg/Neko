@@ -15,10 +15,10 @@ import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

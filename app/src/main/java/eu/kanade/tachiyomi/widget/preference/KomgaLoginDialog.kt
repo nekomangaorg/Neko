@@ -10,11 +10,11 @@ import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

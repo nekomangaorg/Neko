@@ -221,6 +221,7 @@ dependencies {
 tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.freeCompilerArgs += listOf(
+            "-Xcontext-receivers",
             "-opt-in=kotlin.Experimental",
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",

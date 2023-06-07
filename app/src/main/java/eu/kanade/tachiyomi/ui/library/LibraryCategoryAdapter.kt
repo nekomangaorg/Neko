@@ -14,9 +14,9 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
-import eu.kanade.tachiyomi.util.system.withDefContext
 import java.util.Locale
 import kotlin.math.roundToInt
+import org.nekomanga.core.util.withDefContext
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -199,6 +199,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                 vibrateOnCategoryChange(item.category.name)
                 item.category.name
             }
+
             is LibraryItem -> {
                 val text = if (item.manga.isBlank()) {
                     return item.header?.category?.name.orEmpty()
@@ -217,22 +218,26 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                                 }
                             }
                         }
+
                         LibrarySort.Rating -> {
                             item.manga.rating ?: return "N/A"
                             ((item.manga.rating!!.toDouble() * 100).roundToInt() / 100.0).toString()
                         }
+
                         LibrarySort.DateFetched -> {
                             val id = item.manga.id ?: return ""
                             val history = db.getChapters(id).executeAsBlocking()
                             val last = history.maxOfOrNull { it.date_fetch }
                             context.timeSpanFromNow(R.string.fetched_, last ?: 0)
                         }
+
                         LibrarySort.LastRead -> {
                             val id = item.manga.id ?: return ""
                             val history = db.getHistoryByMangaId(id).executeAsBlocking()
                             val last = history.maxOfOrNull { it.last_read }
                             context.timeSpanFromNow(R.string.read_, last ?: 0)
                         }
+
                         LibrarySort.Unread -> {
                             val unread = item.manga.unread
                             if (unread > 0) {
@@ -241,6 +246,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                                 context.getString(R.string.read)
                             }
                         }
+
                         LibrarySort.TotalChapters -> {
                             val total = item.manga.totalChapters
                             if (total > 0) {
@@ -253,12 +259,15 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                                 "N/A"
                             }
                         }
+
                         LibrarySort.LatestChapter -> {
                             context.timeSpanFromNow(R.string.updated_, item.manga.last_update)
                         }
+
                         LibrarySort.DateAdded -> {
                             context.timeSpanFromNow(R.string.added_, item.manga.date_added)
                         }
+
                         LibrarySort.Title -> {
                             val title = if (preferences.removeArticles().get()) {
                                 item.manga.title.removeArticles()
@@ -278,6 +287,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                     else -> item.header?.category?.name.orEmpty() + " - " + text
                 }
             }
+
             else -> ""
         }
     }

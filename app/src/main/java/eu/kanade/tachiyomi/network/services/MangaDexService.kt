@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.skydoves.sandwich.ApiResponse
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.AuthorListDto
@@ -18,6 +17,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers

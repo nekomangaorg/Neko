@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.util.system
+package tachiyomi.core.util.system
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,10 +7,11 @@ import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 
 object WebViewUtil {
 
-    const val MINIMUM_WEBVIEW_VERSION = 102
+    const val MINIMUM_WEBVIEW_VERSION = 109
 
     fun supportsWebView(context: Context): Boolean {
         try {

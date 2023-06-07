@@ -9,10 +9,10 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlin.math.max
 import kotlinx.coroutines.delay
+import org.nekomanga.core.loggycat
 
 /**
  * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
@@ -321,12 +321,12 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 otherItems.getOrNull(pagedIndex)?.let {
                     val lastPage = subJoinedItems.lastOrNull()?.first as? ReaderPage
                     if (lastPage == null || (
-                        if (it is ChapterTransition.Next) {
-                            it.from.chapter.id == lastPage.chapter.chapter.id
-                        } else {
-                            true
-                        }
-                        )
+                            if (it is ChapterTransition.Next) {
+                                it.from.chapter.id == lastPage.chapter.chapter.id
+                            } else {
+                                true
+                            }
+                            )
                     ) {
                         subJoinedItems.add(Pair(it, null))
                         pagedIndex++
@@ -350,6 +350,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             when {
                 (oldCurrent?.first as? ReaderPage)?.chapter != currentChapter &&
                     (oldCurrent?.first as? ChapterTransition)?.from != currentChapter -> subItems.find { (it as? ReaderPage)?.chapter == currentChapter }
+
                 useSecondPage && oldCurrent?.second is ReaderPage -> (oldCurrent.second ?: oldCurrent.first)
                 else -> oldCurrent?.first ?: return
             }

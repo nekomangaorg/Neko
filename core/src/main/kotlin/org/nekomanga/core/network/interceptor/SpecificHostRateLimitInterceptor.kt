@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.network.interceptor
+package org.nekomanga.core.network.interceptor
 
 import android.os.SystemClock
 import java.io.IOException

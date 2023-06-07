@@ -3,13 +3,11 @@ package eu.kanade.tachiyomi.source.online.merged.komga
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -23,9 +21,11 @@ import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
+import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
 class Komga : ReducedHttpSource() {

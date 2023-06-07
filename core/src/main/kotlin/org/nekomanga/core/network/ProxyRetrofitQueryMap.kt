@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.network
+package org.nekomanga.core.network
 
 /**
  * Allow retrofit to handle multi values for same query https://github.com/square/retrofit/issues/1324

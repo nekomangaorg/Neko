@@ -24,12 +24,10 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
 import eu.kanade.tachiyomi.util.lang.plusAssign
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNow
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.runAsObservable
 import java.io.BufferedOutputStream
 import java.io.File
@@ -39,10 +37,12 @@ import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.async
 import logcat.LogPriority
 import okhttp3.Response
+import org.nekomanga.core.loggycat
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.injectLazy
 
 /**
