@@ -15,8 +15,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.ui.library.LibraryItem
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
@@ -183,32 +181,17 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun preloadSize() = this.preferenceStore.getInt(Keys.preloadSize, 6)
 
-    fun updateOnlyNonCompleted() = this.preferenceStore.getBoolean(Keys.updateOnlyNonCompleted, false)
-
-    fun updateOnlyWhenTrackingIsNotFinished() = this.preferenceStore.getBoolean(Keys.updateOnlyWhenTrackingIsNotFinished, false)
-
     fun autoUpdateTrack() = this.preferenceStore.getBoolean(Keys.autoUpdateTrack, true)
 
     fun trackMarkedAsRead() = this.preferenceStore.getBoolean(Keys.trackMarkedAsRead, false)
 
     fun trackingsToAddOnline() = this.preferenceStore.getStringSet(Keys.trackingsToAddOnline, emptySet())
 
-    fun lastUsedCatalogueSource() = this.preferenceStore.getLong(Keys.lastUsedCatalogueSource, -1)
-
-    fun lastUsedCategory() = this.preferenceStore.getInt(Keys.lastUsedCategory, 0)
-
-    fun lastUsedSources() = this.preferenceStore.getStringSet("last_used_sources", emptySet())
-
     fun lastVersionCode() = this.preferenceStore.getInt("last_version_code", 0)
 
     fun browseAsList() = this.preferenceStore.getBoolean(Keys.catalogueAsList, false)
 
     fun browseShowLibrary() = this.preferenceStore.getBoolean(Keys.catalogueShowLibrary, true)
-
-    fun enabledLanguages() =
-        this.preferenceStore.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
-
-    fun sourceSorting() = this.preferenceStore.getInt(Keys.sourcesSort, 0)
 
     fun sourceUsername(source: Source) = this.preferenceStore.getString(Keys.sourceUsername(source.id), "")
 
@@ -260,13 +243,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun folderPerManga() = this.preferenceStore.getBoolean(Keys.folderPerManga, false)
 
-    fun librarySearchSuggestion() = this.preferenceStore.getString(Keys.librarySearchSuggestion, "")
-
-    fun showLibrarySearchSuggestions() =
-        this.preferenceStore.getBoolean(Keys.showLibrarySearchSuggestions, false)
-
-    fun lastLibrarySuggestion() = this.preferenceStore.getLong("last_library_suggestion", 0L)
-
     fun numberOfBackups() = this.preferenceStore.getInt(Keys.numberOfBackups, 2)
 
     fun backupInterval() = this.preferenceStore.getInt(Keys.backupInterval, 0)
@@ -274,64 +250,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)
 
     fun removeAfterMarkedAsRead() = this.preferenceStore.getBoolean(Keys.removeAfterMarkedAsRead, false)
-
-    fun libraryUpdateInterval() = this.preferenceStore.getInt(Keys.libraryUpdateInterval, 24)
-
-    fun libraryUpdateLastTimestamp() = this.preferenceStore.getLong("library_update_last_timestamp", 0L)
-
-    fun libraryUpdateDeviceRestriction() =
-        this.preferenceStore.getStringSet(Keys.libraryUpdateDeviceRestriction, emptySet())
-
-    fun libraryUpdateCategories() = this.preferenceStore.getStringSet(Keys.libraryUpdateCategories, emptySet())
-    fun libraryUpdateCategoriesExclude() = this.preferenceStore.getStringSet(Keys.libraryUpdateCategoriesExclude, emptySet())
-
-    fun libraryUpdatePrioritization() = this.preferenceStore.getInt(Keys.libraryUpdatePrioritization, 0)
-
-    fun libraryLayout() = this.preferenceStore.getInt(Keys.libraryLayout, LibraryItem.LAYOUT_COMFORTABLE_GRID)
-
-    fun gridSize() = this.preferenceStore.getFloat(Keys.gridSize, 1f)
-
-    fun uniformGrid() = this.preferenceStore.getBoolean(Keys.uniformGrid, true)
-
-    fun outlineOnCovers() = this.preferenceStore.getBoolean(Keys.outlineOnCovers, true)
-
-    fun downloadBadge() = this.preferenceStore.getBoolean(Keys.downloadBadge, false)
-
-    fun filterDownloaded() = this.preferenceStore.getInt(Keys.filterDownloaded, 0)
-
-    fun filterUnread() = this.preferenceStore.getInt(Keys.filterUnread, 0)
-
-    fun filterCompleted() = this.preferenceStore.getInt(Keys.filterCompleted, 0)
-
-    fun filterBookmarked() = this.preferenceStore.getInt("pref_filter_bookmarked_key", 0)
-
-    fun filterTracked() = this.preferenceStore.getInt(Keys.filterTracked, 0)
-
-    fun filterMangaType() = this.preferenceStore.getInt(Keys.filterMangaType, 0)
-
-    fun showEmptyCategoriesWhileFiltering() =
-        this.preferenceStore.getBoolean(Keys.showEmptyCategoriesFiltering, false)
-
-    fun filterMerged() = this.preferenceStore.getInt(Keys.filterMerged, 0)
-
-    fun filterMissingChapters() = this.preferenceStore.getInt(Keys.filterMissingChapters, 0)
-
-    fun librarySortingMode() = this.preferenceStore.getInt(Keys.librarySortingMode, 0)
-
-    fun librarySortingAscending() = this.preferenceStore.getBoolean("library_sorting_ascending", true)
-
-    fun automaticUpdates() = this.preferenceStore.getBoolean(Keys.automaticUpdates, true)
-
-    fun collapsedCategories() = this.preferenceStore.getStringSet("collapsed_categories", mutableSetOf())
-
-    fun collapsedDynamicCategories() =
-        this.preferenceStore.getStringSet("collapsed_dynamic_categories", mutableSetOf())
-
-    fun collapsedDynamicAtBottom() = this.preferenceStore.getBoolean("collapsed_dynamic_at_bottom", false)
-
-    fun hiddenSources() = this.preferenceStore.getStringSet("hidden_catalogues", mutableSetOf())
-
-    fun pinnedCatalogues() = this.preferenceStore.getStringSet("pinned_catalogues", mutableSetOf())
 
     fun saveChaptersAsCBZ() = this.preferenceStore.getBoolean("save_chapter_as_cbz", true)
 
@@ -341,10 +259,11 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun doublePageRotateReverse() = this.preferenceStore.getBoolean("double_page_rotate_reverse", false)
 
-    fun downloadNewChapters() = this.preferenceStore.getBoolean(Keys.downloadNew, false)
+    fun downloadNewChapters() = this.preferenceStore.getBoolean("download_new")
 
-    fun downloadNewChaptersInCategories() = this.preferenceStore.getStringSet(Keys.downloadNewCategories, emptySet())
-    fun excludeCategoriesInDownloadNew() = this.preferenceStore.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
+    fun downloadNewChaptersInCategories() = this.preferenceStore.getStringSet("download_new_categories")
+
+    fun excludeCategoriesInDownloadNew() = this.preferenceStore.getStringSet("download_new_categories_exclude")
 
     fun lang() = this.preferenceStore.getString(Keys.lang, "")
 
@@ -359,25 +278,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun skipFiltered() = this.preferenceStore.getBoolean(Keys.skipFiltered, true)
 
     fun skipDuplicates() = this.preferenceStore.getBoolean(Keys.skipDuplicates, false)
-
-    fun removeArticles() = this.preferenceStore.getBoolean(Keys.removeArticles, false)
-
-    fun migrateFlags() = this.preferenceStore.getInt("migrate_flags", Int.MAX_VALUE)
-
-    fun trustedSignatures() = this.preferenceStore.getStringSet("trusted_signatures", emptySet())
-
-    // using string instead of set so it is ordered
-    fun migrationSources() = this.preferenceStore.getString("migrate_sources", "")
-
-    fun useSourceWithMost() = this.preferenceStore.getBoolean("use_source_with_most", false)
-
-    fun skipPreMigration() = this.preferenceStore.getBoolean(Keys.skipPreMigration, false)
-
-    fun defaultMangaOrder() = this.preferenceStore.getString("default_manga_order", "")
-
-    fun refreshCoversToo() = this.preferenceStore.getBoolean(Keys.refreshCoversToo, true)
-
-    fun updateOnRefresh() = this.preferenceStore.getInt(Keys.updateOnRefresh, -1)
 
     fun recentsViewType() = this.preferenceStore.getInt("recents_view_type", 0)
 
@@ -398,31 +298,11 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun showTitleFirstInRecents() = this.preferenceStore.getBoolean(Keys.showTitleFirstInRecents, false)
 
-    fun lastExtCheck() = this.preferenceStore.getLong("last_ext_check", 0)
-
     fun lastAppCheck() = this.preferenceStore.getLong("last_app_check", 0)
-
-    fun unreadBadgeType() = this.preferenceStore.getInt("unread_badge_type", 2)
-
-    fun categoryNumberOfItems() = this.preferenceStore.getBoolean(Keys.categoryNumberOfItems, false)
-
-    fun hideStartReadingButton() = this.preferenceStore.getBoolean("hide_reading_button", false)
 
     fun alwaysShowChapterTransition() = this.preferenceStore.getBoolean(Keys.alwaysShowChapterTransition, true)
 
     fun deleteRemovedChapters() = this.preferenceStore.getInt(Keys.deleteRemovedChapters, 0)
-
-    fun showAllCategories() = this.preferenceStore.getBoolean("show_all_categories", true)
-
-    fun showAllCategoriesWhenSearchingSingleCategory() = this.preferenceStore.getBoolean("show_all_categories_when_searching_single_category", false)
-
-    fun hopperGravity() = this.preferenceStore.getInt("hopper_gravity", 1)
-
-    fun filterOrder() = this.preferenceStore.getString("filter_order", FilterBottomSheet.Filters.DEFAULT_ORDER)
-
-    fun hopperLongPressAction() = this.preferenceStore.getInt(Keys.hopperLongPress, 0)
-
-    fun hideHopper() = this.preferenceStore.getBoolean("hide_hopper", false)
 
     fun hideButtonText() = this.preferenceStore.getBoolean(Keys.hideMangaDetailButtonText, false)
 
@@ -430,26 +310,16 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun wrapAltTitles() = this.preferenceStore.getBoolean(Keys.wrapAltTitles, false)
 
-    fun fasterLibraryUpdates() = this.preferenceStore.getBoolean(Keys.fasterLibraryUpdates, false)
-
-    fun autohideHopper() = this.preferenceStore.getBoolean(Keys.autoHideHopper, true)
-
-    fun groupLibraryBy() = this.preferenceStore.getInt("group_library_by", 0)
-
-    fun showCategoryInTitle() = this.preferenceStore.getBoolean("category_in_title", false)
-
-    fun onlySearchPinned() = this.preferenceStore.getBoolean(Keys.onlySearchPinned, false)
-
     // Tutorial preferences
     fun shownFilterTutorial() = this.preferenceStore.getBoolean("shown_filter_tutorial", false)
+
+    fun shownLongPressCategoryTutorial() = this.preferenceStore.getBoolean("shown_long_press_category")
+
+    fun shownHopperSwipeTutorial() = this.preferenceStore.getBoolean("shown_hopper_swipe")
 
     fun shownChapterSwipeTutorial() = this.preferenceStore.getBoolean("shown_swipe_tutorial", false)
 
     fun shownDownloadQueueTutorial() = this.preferenceStore.getBoolean("shown_download_queue", false)
-
-    fun shownLongPressCategoryTutorial() = this.preferenceStore.getBoolean("shown_long_press_category", false)
-
-    fun shownHopperSwipeTutorial() = this.preferenceStore.getBoolean("shown_hopper_swipe", false)
 
     fun shownDownloadSwipeTutorial() = this.preferenceStore.getBoolean("shown_download_tutorial", false)
 
@@ -463,8 +333,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
     fun openChapterInShortcuts() = this.preferenceStore.getBoolean(Keys.openChapterInShortcuts, true)
-
-    fun hasPromptedBeforeUpdateAll() = this.preferenceStore.getBoolean("has_prompted_update_all", false)
 
     fun sideNavMode() = this.preferenceStore.getInt(Keys.sideNavMode, 0)
 
@@ -486,9 +354,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun chaptersDescAsDefault() = this.preferenceStore.getBoolean(Keys.chaptersDescAsDefault, true)
 
-    fun sortChapterByAscendingOrDescending() =
-        this.preferenceStore.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
-
     fun blockedScanlators() =
         this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
 
@@ -497,8 +362,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun coverColors() = this.preferenceStore.getStringSet(Keys.coverColors, emptySet())
 
     fun coverVibrantColors() = this.preferenceStore.getStringSet(Keys.coverVibrantColors, emptySet())
-
-    fun useStaggeredGrid() = this.preferenceStore.getBoolean("use_staggered_grid", false)
 
     fun dataSaver() = this.preferenceStore.getBoolean(Keys.dataSaver, false)
 

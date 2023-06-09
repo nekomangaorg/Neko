@@ -14,7 +14,6 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.databinding.FilterBottomSheetBinding
 import eu.kanade.tachiyomi.ui.library.LibraryController
@@ -40,6 +39,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -51,7 +51,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     /**
      * Preferences helper.
      */
-    private val preferences: PreferencesHelper by injectLazy()
+    private val libraryPreferences: LibraryPreferences by injectLazy()
 
     private lateinit var binding: FilterBottomSheetBinding
 
@@ -82,7 +82,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     var sheetBehavior: BottomSheetBehavior<View>? = null
 
-    var filterOrder = preferences.filterOrder().get()
+    var filterOrder = libraryPreferences.filterOrder().get()
 
     private lateinit var clearButton: ImageView
 
@@ -185,7 +185,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         setExpandText(controller.canCollapseOrExpandCategory(), false)
 
         clearButton.compatToolTipText = context.getString(R.string.clear_filters)
-        preferences.filterOrder().changes()
+        libraryPreferences.filterOrder().changes()
             .drop(1)
             .onEach {
                 filterOrder = it
@@ -263,14 +263,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private fun hasActiveFilters() = filterItems.any { it.isActivated }
 
     private fun hasActiveFiltersFromPref(): Boolean {
-        return preferences.filterDownloaded().get() > 0 ||
-            preferences.filterUnread().get() > 0 ||
-            preferences.filterCompleted().get() > 0 ||
-            preferences.filterTracked().get() > 0 ||
-            preferences.filterMangaType().get() > 0 ||
-            preferences.filterMerged().get() > 0 ||
-            preferences.filterMissingChapters().get() > 0 ||
-            preferences.filterBookmarked().get() > 0 ||
+        return libraryPreferences.filterDownloaded().get() > 0 ||
+            libraryPreferences.filterUnread().get() > 0 ||
+            libraryPreferences.filterCompleted().get() > 0 ||
+            libraryPreferences.filterTracked().get() > 0 ||
+            libraryPreferences.filterMangaType().get() > 0 ||
+            libraryPreferences.filterMerged().get() > 0 ||
+            libraryPreferences.filterMissingChapters().get() > 0 ||
+            libraryPreferences.filterBookmarked().get() > 0 ||
             FILTER_TRACKER.isNotEmpty()
     }
 
@@ -335,7 +335,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
             withUIContext {
                 mangaType?.setState(
-                    when (preferences.filterMangaType().get()) {
+                    when (libraryPreferences.filterMangaType().get()) {
                         Manga.TYPE_MANGA -> context.getString(R.string.manga)
                         Manga.TYPE_MANHUA -> context.getString(R.string.manhua)
                         Manga.TYPE_MANHWA -> context.getString(R.string.manhwa)
@@ -343,8 +343,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         else -> ""
                     },
                 )
-                missingChapters.setState(preferences.filterMissingChapters())
-                merged.setState(preferences.filterMerged())
+                missingChapters.setState(libraryPreferences.filterMissingChapters())
+                merged.setState(libraryPreferences.filterMerged())
 
                 reorderFilters()
                 reSortViews()
@@ -378,16 +378,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private suspend fun setFilterStates() {
         withContext(Dispatchers.Main) {
-            downloaded.setState(preferences.filterDownloaded())
-            completed.setState(preferences.filterCompleted())
-            bookmarked.setState(preferences.filterBookmarked())
-            val unreadP = preferences.filterUnread().get()
+            downloaded.setState(libraryPreferences.filterDownloaded())
+            completed.setState(libraryPreferences.filterCompleted())
+            bookmarked.setState(libraryPreferences.filterBookmarked())
+            val unreadP = libraryPreferences.filterUnread().get()
             if (unreadP <= 2) {
                 unread.state = unreadP - 1
             } else {
                 unreadProgress.state = unreadP - 3
             }
-            tracked?.setState(preferences.filterTracked())
+            tracked?.setState(libraryPreferences.filterTracked())
             reorderFilters()
             reSortViews()
         }
@@ -448,7 +448,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
                 unreadProgress -> {
                     unread.reset()
-                    preferences.filterUnread().set(
+                    libraryPreferences.filterUnread().set(
                         when (index) {
                             in 0..1 -> index + 3
                             else -> 0
@@ -459,15 +459,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
                 unread -> {
                     unreadProgress.reset()
-                    preferences.filterUnread()
+                    libraryPreferences.filterUnread()
                 }
 
-                downloaded -> preferences.filterDownloaded()
-                completed -> preferences.filterCompleted()
-                bookmarked -> preferences.filterBookmarked()
-                tracked -> preferences.filterTracked()
-                merged -> preferences.filterMerged()
-                missingChapters -> preferences.filterMissingChapters()
+                downloaded -> libraryPreferences.filterDownloaded()
+                completed -> libraryPreferences.filterCompleted()
+                bookmarked -> libraryPreferences.filterBookmarked()
+                tracked -> libraryPreferences.filterTracked()
+                merged -> libraryPreferences.filterMerged()
+                missingChapters -> libraryPreferences.filterMissingChapters()
                 mangaType -> {
                     val newIndex = when (view.nameOf(index)) {
                         context.getString(R.string.manga) -> Manga.TYPE_MANGA
@@ -476,7 +476,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         context.getString(R.string.comic) -> Manga.TYPE_COMIC
                         else -> 0
                     }
-                    preferences.filterMangaType().set(newIndex)
+                    libraryPreferences.filterMangaType().set(newIndex)
                     null
                 }
 
@@ -506,14 +506,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun clearFilters() {
-        preferences.filterDownloaded().set(0)
-        preferences.filterUnread().set(0)
-        preferences.filterCompleted().set(0)
-        preferences.filterBookmarked().set(0)
-        preferences.filterTracked().set(0)
-        preferences.filterMerged().set(0)
-        preferences.filterMissingChapters().set(0)
-        preferences.filterMangaType().set(0)
+        libraryPreferences.filterDownloaded().set(0)
+        libraryPreferences.filterUnread().set(0)
+        libraryPreferences.filterCompleted().set(0)
+        libraryPreferences.filterBookmarked().set(0)
+        libraryPreferences.filterTracked().set(0)
+        libraryPreferences.filterMerged().set(0)
+        libraryPreferences.filterMissingChapters().set(0)
+        libraryPreferences.filterMangaType().set(0)
         FILTER_TRACKER = ""
 
         val transition = androidx.transition.AutoTransition()

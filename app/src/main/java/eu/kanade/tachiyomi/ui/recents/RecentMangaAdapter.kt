@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.library.LibraryPreferences
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.injectLazy
 
@@ -17,13 +18,14 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     BaseChapterAdapter<IFlexible<*>>(delegate) {
 
     val preferences: PreferencesHelper by injectLazy()
+    val libraryPreferences: LibraryPreferences by injectLazy()
 
     var showDownloads = preferences.showRecentsDownloads().get()
     var showRemoveHistory = preferences.showRecentsRemHistory().get()
     var showTitleFirst = preferences.showTitleFirstInRecents().get()
     var showUpdatedTime = preferences.showUpdatedTime().get()
-    var uniformCovers = preferences.uniformGrid().get()
-    var showOutline = preferences.outlineOnCovers().get()
+    var uniformCovers = libraryPreferences.uniformGrid().get()
+    var showOutline = libraryPreferences.outlineOnCovers().get()
     var sortByFetched = preferences.sortFetchedTime().get()
 
     val viewType: Int
@@ -48,9 +50,9 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showRecentsRemHistory().register { showRemoveHistory = it }
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
         preferences.showUpdatedTime().register { showUpdatedTime = it }
-        preferences.uniformGrid().register { uniformCovers = it }
+        libraryPreferences.uniformGrid().register { uniformCovers = it }
         preferences.sortFetchedTime().changes().onEach { sortByFetched = it }.launchIn(delegate.scope())
-        preferences.outlineOnCovers().register(false) {
+        libraryPreferences.outlineOnCovers().register(false) {
             showOutline = it
             (0 until itemCount).forEach { i ->
                 (recyclerView.findViewHolderForAdapterPosition(i) as? RecentMangaHolder)?.updateCards()

@@ -22,6 +22,7 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -33,14 +34,15 @@ class SimilarPresenter(
     private val repo: SimilarRepository = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val libraryPreferences: LibraryPreferences = Injekt.get(),
 ) : BaseCoroutinePresenter<SimilarController>() {
 
     private val _similarScreenState = MutableStateFlow(
         SimilarScreenState(
             isList = preferences.browseAsList().get(),
-            outlineCovers = preferences.outlineOnCovers().get(),
-            isComfortableGrid = preferences.libraryLayout().get() == 2,
-            rawColumnCount = preferences.gridSize().get(),
+            outlineCovers = libraryPreferences.outlineOnCovers().get(),
+            isComfortableGrid = libraryPreferences.layout().get() == 2,
+            rawColumnCount = libraryPreferences.gridSize().get(),
         ),
     )
 

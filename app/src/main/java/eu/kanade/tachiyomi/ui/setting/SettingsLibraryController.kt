@@ -18,26 +18,29 @@ import kotlinx.coroutines.flow.onEach
 import org.nekomanga.core.preferences.DEVICE_BATTERY_NOT_LOW
 import org.nekomanga.core.preferences.DEVICE_CHARGING
 import org.nekomanga.core.preferences.DEVICE_ONLY_ON_WIFI
+import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class SettingsLibraryController : SettingsController() {
 
-    private val db: DatabaseHelper = Injekt.get()
+    private val db: DatabaseHelper by injectLazy()
+    private val libraryPreferences: LibraryPreferences by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.library
         preferenceCategory {
             titleRes = R.string.general
             switchPreference {
-                key = Keys.removeArticles
+                key = libraryPreferences.removeArticles().key()
                 titleRes = R.string.sort_by_ignoring_articles
                 summaryRes = R.string.when_sorting_ignore_articles
                 defaultValue = false
             }
 
             switchPreference {
-                key = Keys.showLibrarySearchSuggestions
+                key = libraryPreferences.showSearchSuggestions().key()
                 titleRes = R.string.search_suggestions
                 summaryRes = R.string.search_tips_show_periodically
 
@@ -45,11 +48,11 @@ class SettingsLibraryController : SettingsController() {
                     it as Boolean
                     if (it) {
                         launchIO {
-                            LibraryPresenter.setSearchSuggestion(preferences, db, Injekt.get())
+                            LibraryPresenter.setSearchSuggestion(libraryPreferences, db, Injekt.get())
                         }
                     } else {
                         DelayedLibrarySuggestionsJob.setupTask(context, false)
-                        preferences.librarySearchSuggestion().set("")
+                        libraryPreferences.searchSuggestions().set("")
                     }
                     true
                 }
@@ -112,7 +115,7 @@ class SettingsLibraryController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.global_updates
             intListPreference(activity) {
-                key = Keys.libraryUpdateInterval
+                key = libraryPreferences.updateInterval().key()
                 titleRes = R.string.library_update_frequency
                 entriesRes = arrayOf(
                     R.string.manual,
@@ -137,14 +140,14 @@ class SettingsLibraryController : SettingsController() {
                 }
             }
             multiSelectListPreferenceMat(activity) {
-                key = Keys.libraryUpdateDeviceRestriction
+                key = libraryPreferences.updateRestrictions().key()
                 titleRes = R.string.library_update_restriction
                 entriesRes = arrayOf(R.string.wifi, R.string.charging, R.string.battery_not_low)
                 entryValues = listOf(DEVICE_ONLY_ON_WIFI, DEVICE_CHARGING, DEVICE_BATTERY_NOT_LOW)
                 preSummaryRes = R.string.restrictions_
                 noSelectionRes = R.string.none
 
-                preferences.libraryUpdateInterval().changes().onEach {
+                libraryPreferences.updateInterval().changes().onEach {
                     isVisible = it > 0
                 }.launchIn(viewScope)
 
@@ -155,25 +158,25 @@ class SettingsLibraryController : SettingsController() {
                 }
             }
             switchPreference {
-                key = Keys.updateOnlyNonCompleted
+                key = libraryPreferences.updateOnlyNonCompleted().key()
                 titleRes = R.string.only_update_ongoing
                 defaultValue = false
             }
 
             switchPreference {
-                key = Keys.updateOnlyWhenTrackingIsNotFinished
+                key = libraryPreferences.updateOnlyWhenTrackingIsNotFinished().key()
                 titleRes = R.string.only_update_based_on_tracking
                 defaultValue = false
             }
 
             switchPreference {
-                key = Keys.fasterLibraryUpdates
+                key = libraryPreferences.updateFaster().key()
                 titleRes = R.string.faster_library_update
                 defaultValue = false
             }
 
             intListPreference(activity) {
-                key = Keys.libraryUpdatePrioritization
+                key = libraryPreferences.updatePrioritization().key()
                 titleRes = R.string.library_update_order
 
                 // The following array lines up with the list rankingScheme in:
@@ -188,8 +191,8 @@ class SettingsLibraryController : SettingsController() {
             }
 
             triStateListPreference(activity) {
-                preferences.apply {
-                    bindTo(libraryUpdateCategories(), libraryUpdateCategoriesExclude())
+                libraryPreferences.apply {
+                    bindTo(whichCategoriesToUpdate(), whichCategoriesToExclude())
                 }
                 titleRes = R.string.categories
 
@@ -201,7 +204,7 @@ class SettingsLibraryController : SettingsController() {
             }
 
             intListPreference(activity) {
-                key = Keys.updateOnRefresh
+                key = libraryPreferences.whatToUpdateOnRefresh().key()
                 titleRes = R.string.categories_on_manual
 
                 entriesRes = arrayOf(
@@ -213,7 +216,7 @@ class SettingsLibraryController : SettingsController() {
             }
 
             switchPreference {
-                key = Keys.refreshCoversToo
+                key = libraryPreferences.updateCovers().key()
                 titleRes = R.string.auto_refresh_covers
                 summaryRes = R.string.auto_refresh_covers_summary
                 defaultValue = true

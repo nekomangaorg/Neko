@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Locale
 import kotlin.math.roundToInt
 import org.nekomanga.core.util.withDefContext
+import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -29,11 +30,11 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
 
     val sourceManager by injectLazy<SourceManager>()
 
-    private val preferences: PreferencesHelper by injectLazy()
+    private val libraryPreferences: LibraryPreferences by injectLazy()
 
-    var showNumber = preferences.categoryNumberOfItems().get()
+    var showNumber = libraryPreferences.showCategoriesHeaderCount().get()
 
-    var showOutline = preferences.outlineOnCovers().get()
+    var showOutline = libraryPreferences.outlineOnCovers().get()
 
     private var lastCategory = ""
 
@@ -211,7 +212,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                                 category ?: context.getString(R.string.default_value)
                             } else {
                                 val title = item.manga.title
-                                if (preferences.removeArticles().get()) {
+                                if (libraryPreferences.removeArticles().get()) {
                                     title.removeArticles().chop(15)
                                 } else {
                                     title.take(10)
@@ -269,7 +270,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         }
 
                         LibrarySort.Title -> {
-                            val title = if (preferences.removeArticles().get()) {
+                            val title = if (libraryPreferences.removeArticles().get()) {
                                 item.manga.title.removeArticles()
                             } else {
                                 item.manga.title

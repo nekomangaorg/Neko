@@ -41,6 +41,7 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.domain.network.message
@@ -53,6 +54,7 @@ class BrowsePresenter(
     private val incomingQuery: String,
     private val browseRepository: BrowseRepository = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
+    private val libraryPreferences: LibraryPreferences = Injekt.get(),
     val securityPreferences: SecurityPreferences = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<BrowseController>() {
@@ -62,9 +64,9 @@ class BrowsePresenter(
             isList = preferences.browseAsList().get(),
             hideFooterButton = true,
             showLibraryEntries = preferences.browseShowLibrary().get(),
-            outlineCovers = preferences.outlineOnCovers().get(),
-            isComfortableGrid = preferences.libraryLayout().get() == 2,
-            rawColumnCount = preferences.gridSize().get(),
+            outlineCovers = libraryPreferences.outlineOnCovers().get(),
+            isComfortableGrid = libraryPreferences.layout().get() == 2,
+            rawColumnCount = libraryPreferences.gridSize().get(),
             filters = createInitialDexFilter(incomingQuery),
             defaultContentRatings = preferences.contentRatingSelections().get().toImmutableSet(),
             screenType = BrowseScreenType.Homepage,

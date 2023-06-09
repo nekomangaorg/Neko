@@ -9,7 +9,6 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.pxToDp
@@ -18,6 +17,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import org.nekomanga.domain.library.LibraryPreferences
 
 class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     androidx.recyclerview.widget.RecyclerView(context, attrs) {
@@ -86,11 +86,11 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         lastMeasuredWidth = width
     }
 
-    fun useStaggered(preferences: PreferencesHelper) {
+    fun useStaggered(libraryPreferences: LibraryPreferences) {
         useStaggered(
-            preferences.useStaggeredGrid().get() &&
-                !preferences.uniformGrid().get() &&
-                preferences.libraryLayout().get() != LibraryItem.LAYOUT_LIST,
+            libraryPreferences.staggeredGrid().get() &&
+                !libraryPreferences.uniformGrid().get() &&
+                libraryPreferences.layout().get() != LibraryItem.LAYOUT_LIST,
         )
     }
 
@@ -141,13 +141,13 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
             ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset).findFirstCompletelyVisibleItemPosition()
     }
 
-    fun setGridSize(preferences: PreferencesHelper) {
+    fun setGridSize(libraryPreferences: LibraryPreferences) {
         // Migrate to float for grid size
-        if (!preferences.gridSize().isSet()) {
+        if (!libraryPreferences.gridSize().isSet()) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val oldGridSize = prefs.getInt("grid_size", -1)
             if (oldGridSize != -1) {
-                preferences.gridSize().set(
+                libraryPreferences.gridSize().set(
                     when (oldGridSize) {
                         4 -> 3f
                         3 -> 1.5f
@@ -163,7 +163,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
             }
         }
 
-        val size = 1.5f.pow(preferences.gridSize().get())
+        val size = 1.5f.pow(libraryPreferences.gridSize().get())
         val trueSize = MULTIPLE * ((size * 100 / MULTIPLE).roundToInt()) / 100f
         columnWidth = trueSize
     }

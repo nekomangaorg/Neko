@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
@@ -29,6 +30,7 @@ class DisplayPresenter(
     displayScreenType: DisplayScreenType,
     private val displayRepository: DisplayRepository = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val libraryPreferences: LibraryPreferences = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<DisplayController>() {
 
@@ -38,9 +40,9 @@ class DisplayPresenter(
             title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
             titleRes = (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
             ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
-            outlineCovers = preferences.outlineOnCovers().get(),
-            isComfortableGrid = preferences.libraryLayout().get() == 2,
-            rawColumnCount = preferences.gridSize().get(),
+            outlineCovers = libraryPreferences.outlineOnCovers().get(),
+            isComfortableGrid = libraryPreferences.layout().get() == 2,
+            rawColumnCount = libraryPreferences.gridSize().get(),
             showLibraryEntries = preferences.browseShowLibrary().get(),
         ),
     )

@@ -6,9 +6,9 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import java.util.concurrent.TimeUnit
+import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -16,10 +16,10 @@ class DelayedLibrarySuggestionsJob(context: Context, workerParams: WorkerParamet
     CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        val preferences = Injekt.get<PreferencesHelper>()
-        if (!preferences.showLibrarySearchSuggestions().isSet()) {
-            preferences.showLibrarySearchSuggestions().set(true)
-            LibraryPresenter.setSearchSuggestion(preferences, Injekt.get(), Injekt.get())
+        val libraryPreferences = Injekt.get<LibraryPreferences>()
+        if (!libraryPreferences.showSearchSuggestions().isSet()) {
+            libraryPreferences.showSearchSuggestions().set(true)
+            LibraryPresenter.setSearchSuggestion(libraryPreferences, Injekt.get(), Injekt.get())
         }
         return Result.success()
     }
