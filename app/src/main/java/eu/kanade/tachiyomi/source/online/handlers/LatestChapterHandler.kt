@@ -5,7 +5,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -20,12 +19,10 @@ import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.network.ResultError
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class LatestChapterHandler {
-    private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
+    private val networkServices: NetworkServices by injectLazy()
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
     private val uniqueManga = mutableSetOf<String>()
@@ -45,10 +42,10 @@ class LatestChapterHandler {
             val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
 
             return@withContext when (feedType) {
-                MdConstants.FeedType.Latest -> service.latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+                MdConstants.FeedType.Latest -> networkServices.service.latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
                     .getOrResultError("getting latest chapters")
 
-                MdConstants.FeedType.Subscription -> authService.subscriptionFeed(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+                MdConstants.FeedType.Subscription -> networkServices.authService.subscriptionFeed(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
                     .getOrResultError("getting subscription feed")
             }.andThen {
                 latestChapterParse(it)
@@ -82,7 +79,7 @@ class LatestChapterHandler {
                     "contentRating[]" to allContentRating,
                 )
 
-            service.search(ProxyRetrofitQueryMap(queryParameters))
+            networkServices.service.search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("trying to search manga from latest chapters").andThen { mangaListDto ->
                     val hasMoreResults = chapterListDto.limit + chapterListDto.offset < chapterListDto.total
 

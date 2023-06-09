@@ -8,12 +8,10 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.online.models.dto.NewCustomListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
@@ -30,13 +28,10 @@ import org.nekomanga.domain.SourceResult
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class ListHandler {
-    private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkHelper>().authService }
+    private val networkServices: NetworkServices by injectLazy()
 
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
@@ -44,13 +39,13 @@ class ListHandler {
         return withContext(Dispatchers.IO) {
 
             val currentService = when (privateList) {
-                true -> authService
-                false -> service
+                true -> networkServices.authService
+                false -> networkServices.service
             }
 
-            val enabledContentRatings = preferencesHelper.contentRatingSelections()
+            val enabledContentRatings = preferencesHelper.contentRatingSelections().get()
             val contentRatings = MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
-            val coverQuality = preferencesHelper.thumbnailQuality()
+            val coverQuality = preferencesHelper.thumbnailQuality().get()
 
             val queryParameters =
                 ProxyRetrofitQueryMap(
@@ -112,7 +107,7 @@ class ListHandler {
 
     suspend fun retrieveUserLists(page: Int): Result<ResultListPage, ResultError> {
         val offset = MdUtil.getLatestChapterListOffset(page)
-        return authService.usersLists(offset, MdConstants.Limits.latest).getOrResultError("Error getting user's lists")
+        return networkServices.authService.usersLists(offset, MdConstants.Limits.latest).getOrResultError("Error getting user's lists")
             .andThen { customListListDto ->
                 when (customListListDto.data.isEmpty()) {
                     true -> Ok(ResultListPage(false, persistentListOf()))
@@ -133,11 +128,11 @@ class ListHandler {
     }
 
     suspend fun addToCustomList(mangaId: String, listUUID: String): ResultDto {
-        return authService.addToCustomList(mangaId, listUUID).getOrThrow()
+        return networkServices.authService.addToCustomList(mangaId, listUUID).getOrThrow()
     }
 
     suspend fun removeFromCustomList(mangaId: String, listUUID: String): ResultDto {
-        return authService.removeFromCustomList(mangaId, listUUID).getOrThrow()
+        return networkServices.authService.removeFromCustomList(mangaId, listUUID).getOrThrow()
     }
 
     suspend fun createCustomList(listName: String, isPublic: Boolean): ResultDto {
@@ -148,11 +143,11 @@ class ListHandler {
                 false -> MdConstants.Visibility.private
             },
         )
-        return authService.createCustomList(newCustomListDto).getOrThrow()
+        return networkServices.authService.createCustomList(newCustomListDto).getOrThrow()
     }
 
     suspend fun deleteCustomList(listId: String): ResultDto {
-        return authService.deleteCustomList(listId).getOrThrow()
+        return networkServices.authService.deleteCustomList(listId).getOrThrow()
     }
 }
 

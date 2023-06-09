@@ -4,6 +4,7 @@ import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.concurrent.TimeUnit
@@ -15,13 +16,12 @@ import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.POST
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class MangaDexLoginHelper {
 
-    private val networkHelper: NetworkHelper by lazy { Injekt.get() }
+    private val networkServices: NetworkServices by injectLazy()
+    private val network: NetworkHelper by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
     private val trackManager: TrackManager by injectLazy()
 
@@ -41,7 +41,7 @@ class MangaDexLoginHelper {
 
     suspend fun refreshSessionToken(): Boolean {
         val refreshToken = preferences.refreshToken().get()
-        if (refreshToken.isNullOrEmpty()) {
+        if (refreshToken.isEmpty()) {
             loggycat(LogPriority.INFO, tag = tag) { "refresh token is null can't extend session" }
             invalidate()
             return false
@@ -55,16 +55,18 @@ class MangaDexLoginHelper {
             .build()
         val error = kotlin.runCatching {
             with(MdUtil.jsonParser) {
-                val data = networkHelper.client.newCall(
+                val data = network.client.newCall(
                     POST(
                         url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
                         body = formBody,
                     ),
                 ).await().parseAs<LoginResponseDto>()
+
                 preferences.setTokens(
                     data.refreshToken,
                     data.accessToken,
                 )
+            }
 
             trackManager.mdList.populateLists()
 
@@ -94,7 +96,7 @@ class MangaDexLoginHelper {
 
         val error = kotlin.runCatching {
             with(MdUtil.jsonParser) {
-                val data = networkHelper.mangadexClient.newCall(
+                val data = network.mangadexClient.newCall(
                     POST(
                         url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
                         body = loginFormBody,
@@ -107,7 +109,7 @@ class MangaDexLoginHelper {
                 )
             }
 
-            val userInfo = networkHelper.authService.getUserInfo().getOrThrow()
+            val userInfo = networkServices.authService.getUserInfo().getOrThrow()
             preferences.setUserInfo(
                 userInfo.data.id,
                 userInfo.data.attributes.username,
@@ -142,7 +144,7 @@ class MangaDexLoginHelper {
             .build()
 
         val error = kotlin.runCatching {
-            networkHelper.mangadexClient.newCall(
+            network.mangadexClient.newCall(
                 POST(
                     url = MdConstants.Api.baseAuthUrl + MdConstants.Api.logout,
                     headers = Headers.Builder().add("Authorization", "Bearer $sessionToken").build(),

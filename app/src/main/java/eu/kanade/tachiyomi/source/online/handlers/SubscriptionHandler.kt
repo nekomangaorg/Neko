@@ -5,8 +5,8 @@ import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -22,7 +22,7 @@ import uy.kohesive.injekt.injectLazy
 class SubscriptionHandler {
 
     val preferences: PreferencesHelper by injectLazy()
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkHelper>().authService }
+    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
 
     /**
      * Change the status of a manga

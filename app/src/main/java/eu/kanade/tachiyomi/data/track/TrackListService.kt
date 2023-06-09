@@ -73,7 +73,7 @@ sealed class TrackService(val id: Int) {
         preferences.setTrackCredentials(this, "", "")
     }
 
-    open fun isLogged(): Boolean = getUsername().isNotEmpty() && getPassword().isNotEmpty()
+    open fun isLogged(): Boolean = getUsername().get().isNotEmpty() && getPassword().get().isNotEmpty()
 
     fun getUsername() = preferences.trackUsername(this)!!
 

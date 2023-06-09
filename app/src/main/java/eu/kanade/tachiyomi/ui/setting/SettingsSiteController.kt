@@ -12,12 +12,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.databinding.CreateCustomListDialogBinding
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
-import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -31,10 +30,10 @@ import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.Injekt
@@ -53,9 +52,9 @@ class SettingsSiteController :
             title = "MangaDex Login"
             key = PreferenceKeys.refreshToken
 
-            preferences.mangaDexUserName().asImmediateFlowIn(viewScope) { userName ->
+            preferences.mangaDexUserName().changes().onEach { userName ->
                 this.username = userName
-            }
+            }.launchIn(viewScope)
 
             setOnLoginClickListener {
                 when (mangaDexLoginHelper.isLoggedIn()) {
@@ -201,9 +200,10 @@ class SettingsSiteController :
             }
 
             preference {
-                preferences.enableDefaultCustomLists().asImmediateFlowIn(viewScope) {
+                preferences.enableDefaultCustomLists().changes().onEach {
                     isVisible = it
-                }
+                }.launchIn(viewScope)
+
                 titleRes = R.string.default_custom_lists
                 onClick {
                     val ctrl = ChooseCustomListDialog(preferences)
@@ -282,8 +282,8 @@ class SettingsSiteController :
                 GlobalScope.launchIO {
                     val listId = "6067f0ff-025e-4d5c-9522-e16375a236c8"
                     val mangaID = "4a4786cf-c185-4ad3-89a9-294a1ec0bfc9"
-                    Injekt.get<NetworkHelper>().authService.addToCustomList(mangaID, listId).getOrNull()
-                    Injekt.get<NetworkHelper>().authService.customListsContainingManga("4a4786cf-c185-4ad3-89a9-294a1ec0bfc9").getOrNull()
+                    Injekt.get<NetworkServices>().authService.addToCustomList(mangaID, listId).getOrNull()
+                    Injekt.get<NetworkServices>().authService.customListsContainingManga("4a4786cf-c185-4ad3-89a9-294a1ec0bfc9").getOrNull()
                 }
             }
         }
@@ -397,7 +397,7 @@ class SettingsSiteController :
 
             val options = trackManager.mdList.viewLists()
 
-            val initialIds = preferences!!.getAddToLibraryToSpecificCustomList()
+            val initialIds = preferences!!.getAddToLibraryToSpecificCustomList().get()
                 .map { id -> options.indexOfFirst { it.id == id } }.toIntArray()
 
             val allLists = ((options.map { it.name })).toTypedArray()
@@ -414,7 +414,7 @@ class SettingsSiteController :
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok) { dialog, t ->
                     val listView = (dialog as AlertDialog).listView
-                    val selectedUUID = mutableListOf<String>()
+                    val selectedUUID = mutableSetOf<String>()
 
                     for (i in 0 until listView.count) {
                         if (listView.isItemChecked(i)) {

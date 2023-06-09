@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.source.model.isMergedChapterOfType
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
@@ -868,7 +867,7 @@ class MangaDetailPresenter(
                         db.insertTrack(track).executeOnIO()
                     }
                     val enabledDefaultLists = preferences.enableDefaultCustomLists().get()
-                    val defaultCustomListUUID = preferences.getAddToLibraryToSpecificCustomList()
+                    val defaultCustomListUUID = preferences.getAddToLibraryToSpecificCustomList().get()
                     val shouldAddToDefaultCustomList = currentManga().favorite && enabledDefaultLists && defaultCustomListUUID.isNotEmpty()
                     if (shouldAddToDefaultCustomList && isOnline()) {
                         defaultCustomListUUID.filterNot { id -> id in track.listIds }

@@ -373,17 +373,14 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun showContentRatingFilter() = this.preferenceStore.getBoolean(Keys.showContentRatingFilter, true)
 
-    fun addToLibraryAsPlannedToRead() = this.preferenceStore.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
-
     fun contentRatingSelections() = this.preferenceStore.getStringSet(Keys.contentRating, setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive))
 
-    fun enableDefaultCustomLists() = flowPrefs.getBoolean(Keys.enableDefaultCustomLists, false)
+    fun enableDefaultCustomLists() = this.preferenceStore.getBoolean(Keys.enableDefaultCustomLists, false)
 
-    fun getAddToLibraryToSpecificCustomList(): List<String> =
-        prefs.getString(Keys.defaultCustomLists, "")?.split(Track.LIST_SEPERATOR) ?: emptyList()
+    fun getAddToLibraryToSpecificCustomList() = this.preferenceStore.getStringSet(Keys.defaultCustomLists)
 
-    fun changeAddToLibraryToSpecificCustomList(uuid: List<String>) {
-        prefs.edit().putString(Keys.defaultCustomLists, uuid.joinToString(Track.LIST_SEPERATOR)).apply()
+    fun changeAddToLibraryToSpecificCustomList(uuid: Set<String>) {
+        getAddToLibraryToSpecificCustomList().set(uuid)
     }
 
     fun autoTrackContentRatingSelections() =
@@ -422,19 +419,13 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     }
 
     fun setUserInfo(userUUID: String, userName: String) {
-        prefs.edit {
-            putString(Keys.mangadexUserName, userName)
-            putString(Keys.mangadexUserUUID, userUUID)
-            apply()
-        }
+        mangadexUserUUID().set(userUUID)
+        mangaDexUserName().set(userName)
     }
 
     fun clearUserInfo() {
-        prefs.edit {
-            remove(Keys.mangadexUserName)
-            remove(Keys.mangadexUserUUID)
-            apply()
-        }
+        mangadexUserUUID().delete()
+        mangaDexUserName().delete()
     }
 
     fun lastRefreshTime() = this.preferenceStore.getLong(Keys.lastRefreshTokenTime, 0)

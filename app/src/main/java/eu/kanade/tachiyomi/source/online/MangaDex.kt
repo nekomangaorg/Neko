@@ -30,13 +30,13 @@ import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +45,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.SourceManga
@@ -251,9 +252,9 @@ open class MangaDex : HttpSource() {
         }
         return withContext(Dispatchers.IO) {
             val mangaUUID = MdUtil.getMangaUUID(url)
-            val ratingResponse = network.authService.retrieveRating(mangaUUID)
+            val ratingResponse = networkServices.authService.retrieveRating(mangaUUID)
             loggycat { "mangaUUID $mangaUUID" }
-            val list = network.authService.customListsContainingManga(mangaUUID).onFailure {
+            val list = networkServices.authService.customListsContainingManga(mangaUUID).onFailure {
                 this.log("trying to fetch list status for $mangaUUID")
                 throw Exception("error trying to get tracking info")
             }.getOrThrow()
