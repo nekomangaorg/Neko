@@ -58,8 +58,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
-import eu.kanade.tachiyomi.util.system.launchDelayed
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
@@ -69,6 +67,8 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
+import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
@@ -119,6 +119,7 @@ fun ChapterRow(
                         }
                         Background(icon, Alignment.CenterEnd, color, stringResource(id = text), themeColor.buttonColor)
                     }
+
                     DismissDirection.StartToEnd -> {
                         val (icon, text) = when (bookmark) {
                             true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
@@ -126,6 +127,7 @@ fun ChapterRow(
                         }
                         Background(icon, Alignment.CenterStart, color, stringResource(id = text), themeColor.buttonColor)
                     }
+
                     else -> Unit
                 }
             },
@@ -343,6 +345,7 @@ private fun ChapterInfo(
                                 ),
                             )
                         }
+
                         false -> {
                             val painter = rememberDrawablePainter(drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes))
                             Image(
@@ -406,6 +409,7 @@ private fun ChapterInfo(
                             ),
                         )
                     }
+
                     else -> {
                         persistentListOf(
                             SimpleDropDownItem.Action(

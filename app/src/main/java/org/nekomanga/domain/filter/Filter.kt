@@ -2,10 +2,10 @@ package org.nekomanga.domain.filter
 
 import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.source.model.MangaTag
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.util.lang.isUUID
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaDemographic
 import org.nekomanga.domain.manga.MangaStatus

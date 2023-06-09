@@ -4,16 +4,17 @@ import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import eu.kanade.tachiyomi.util.system.loggycat
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.concurrent.TimeUnit
 import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.Headers
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.loggycat
+import org.nekomanga.core.network.POST
+import tachiyomi.core.network.await
+import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -27,7 +28,7 @@ class MangaDexLoginHelper {
     val tag = "||LoginHelper"
 
     fun wasTokenRefreshedRecently(): Boolean {
-        val lastRefreshTime = preferences.lastRefreshTime()
+        val lastRefreshTime = preferences.lastRefreshTime().get()
         loggycat(LogPriority.INFO, tag = tag) { "last refresh time $lastRefreshTime current time ${System.currentTimeMillis()}" }
 
         if ((lastRefreshTime + TimeUnit.MINUTES.toMillis(15)) > System.currentTimeMillis()) {
@@ -39,7 +40,7 @@ class MangaDexLoginHelper {
     }
 
     suspend fun refreshSessionToken(): Boolean {
-        val refreshToken = preferences.refreshToken()
+        val refreshToken = preferences.refreshToken().get()
         if (refreshToken.isNullOrEmpty()) {
             loggycat(LogPriority.INFO, tag = tag) { "refresh token is null can't extend session" }
             invalidate()
@@ -49,20 +50,21 @@ class MangaDexLoginHelper {
             .add("client_id", MdConstants.Login.clientId)
             .add("grant_type", MdConstants.Login.refreshToken)
             .add("refresh_token", refreshToken)
-            .add("code_verifier", preferences.codeVerifer())
+            .add("code_verifier", preferences.codeVerifier().get())
             .add("redirect_uri", MdConstants.Login.redirectUri)
             .build()
         val error = kotlin.runCatching {
-            val data = networkHelper.client.newCall(
-                POST(
-                    url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
-                    body = formBody,
-                ),
-            ).await().parseAs<LoginResponseDto>()
-            preferences.setTokens(
-                data.refreshToken,
-                data.accessToken,
-            )
+            with(MdUtil.jsonParser) {
+                val data = networkHelper.client.newCall(
+                    POST(
+                        url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
+                        body = formBody,
+                    ),
+                ).await().parseAs<LoginResponseDto>()
+                preferences.setTokens(
+                    data.refreshToken,
+                    data.accessToken,
+                )
 
             trackManager.mdList.populateLists()
 
@@ -86,22 +88,24 @@ class MangaDexLoginHelper {
             .add("client_id", MdConstants.Login.clientId)
             .add("grant_type", MdConstants.Login.authorizationCode)
             .add("code", authorizationCode)
-            .add("code_verifier", preferences.codeVerifer())
+            .add("code_verifier", preferences.codeVerifier().get())
             .add("redirect_uri", MdConstants.Login.redirectUri)
             .build()
 
         val error = kotlin.runCatching {
-            val data = networkHelper.mangadexClient.newCall(
-                POST(
-                    url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
-                    body = loginFormBody,
-                ),
-            ).await().parseAs<LoginResponseDto>()
+            with(MdUtil.jsonParser) {
+                val data = networkHelper.mangadexClient.newCall(
+                    POST(
+                        url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
+                        body = loginFormBody,
+                    ),
+                ).await().parseAs<LoginResponseDto>()
 
-            preferences.setTokens(
-                data.refreshToken,
-                data.accessToken,
-            )
+                preferences.setTokens(
+                    data.refreshToken,
+                    data.accessToken,
+                )
+            }
 
             val userInfo = networkHelper.authService.getUserInfo().getOrThrow()
             preferences.setUserInfo(
@@ -124,9 +128,9 @@ class MangaDexLoginHelper {
     }
 
     suspend fun logout(): Boolean {
-        val sessionToken = preferences.sessionToken()
-        val refreshToken = preferences.refreshToken()
-        if (refreshToken == null || refreshToken.isEmpty() || sessionToken == null || sessionToken.isEmpty()) {
+        val sessionToken = preferences.sessionToken().get()
+        val refreshToken = preferences.refreshToken().get()
+        if (refreshToken.isEmpty() || sessionToken.isEmpty()) {
             invalidate()
             return true
         }
@@ -166,10 +170,10 @@ class MangaDexLoginHelper {
     }
 
     fun isLoggedIn(): Boolean {
-        return preferences.refreshToken()?.isNotEmpty() == true && preferences.sessionToken()?.isNotEmpty() == true
+        return preferences.refreshToken().get().isNotEmpty() && preferences.sessionToken().get().isNotEmpty()
     }
 
     fun sessionToken(): String {
-        return preferences.sessionToken() ?: ""
+        return preferences.sessionToken().get()
     }
 }

@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.data.track.mangaupdates
 import androidx.core.text.isDigitsOnly
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.manga.MangaMappings
-import eu.kanade.tachiyomi.util.system.loggycat
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 object MangaUpdatesHelper {

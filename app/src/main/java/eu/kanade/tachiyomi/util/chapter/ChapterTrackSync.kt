@@ -10,10 +10,10 @@ import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.jobs.tracking.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -62,7 +62,7 @@ fun updateTrackChapterMarkedAsRead(
     delay: Long = 3000,
     fetchTracks: (suspend () -> Unit)? = null,
 ) {
-    if (!preferences.trackMarkedAsRead()) return
+    if (!preferences.trackMarkedAsRead().get()) return
     mangaId ?: return
 
     val newChapterRead = newLastChapter?.chapter_number ?: 0f

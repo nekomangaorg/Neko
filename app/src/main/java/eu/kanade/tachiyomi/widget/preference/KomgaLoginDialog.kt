@@ -10,11 +10,11 @@ import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -43,9 +43,9 @@ class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = 
 
     override fun setCredentialsOnView(view: View) = with(view) {
         binding.dialogTitle.text = context.getString(R.string.log_in_to_, source.name)
-        binding.username.setText(preferences.sourceUsername(source))
-        binding.password.setText(preferences.sourcePassword(source))
-        binding.url.setText(preferences.sourceUrl(source))
+        binding.username.setText(preferences.sourceUsername(source).get())
+        binding.password.setText(preferences.sourcePassword(source).get())
+        binding.url.setText(preferences.sourceUrl(source).get())
     }
 
     override fun checkLogin() {

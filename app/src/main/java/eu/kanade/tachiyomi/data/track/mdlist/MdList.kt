@@ -12,16 +12,17 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackList
 import eu.kanade.tachiyomi.data.track.TrackListService
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -134,6 +135,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
         track.copyPersonalFrom(remoteTrack)
+        //TODO should this be here
         db.insertTrack(track).executeAsBlocking()
         return track
     }

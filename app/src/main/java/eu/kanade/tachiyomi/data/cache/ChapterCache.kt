@@ -6,9 +6,7 @@ import com.jakewharton.disklrucache.DiskLruCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.io.IOException
 import kotlin.math.pow
@@ -19,13 +17,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
 import okhttp3.Response
 import okio.buffer
 import okio.sink
+import org.nekomanga.core.loggycat
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -82,15 +81,14 @@ class ChapterCache(private val context: Context) {
         get() = Formatter.formatFileSize(context, realSize)
 
     init {
-        preferences.preloadSize().asFlow()
+        preferences.preloadSize().changes()
             .drop(1)
             .onEach {
                 // Save old cache for destruction later
                 val oldCache = diskCache
                 diskCache = setupDiskCache(it)
                 oldCache.close()
-            }
-            .launchIn(scope)
+            }.launchIn(scope)
     }
 
     private fun setupDiskCache(cacheSize: Int): DiskLruCache {

@@ -8,17 +8,17 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.util.system.loggycat
-import kotlinx.serialization.decodeFromString
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 class MyAnimeList(private val context: Context, id: Int) : TrackStatusService(id) {
 
     private val json: Json by injectLazy()
-    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword()) }
+    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword().get()) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
     @StringRes

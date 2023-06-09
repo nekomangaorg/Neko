@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
-import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
 import java.io.Serializable
 import tachiyomi.source.model.ChapterInfo
 
@@ -70,7 +69,7 @@ interface SChapter : Serializable {
 
 fun SChapter.isLegacyMergedChapter() = this.scanlator?.equals(MangaLife.oldName) == true
 
-fun SChapter.isMergedChapter() = this.scanlator?.containsMergeSourceName() == true
+fun SChapter.isMergedChapter() = MergeType.containsMergeSourceName(this.scanlator)
 
 fun SChapter.isMergedChapterOfType(mergeType: MergeType) = MergeType.getMergeTypeName(mergeType) == this.scanlator
 

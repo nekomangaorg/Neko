@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi.ui.recents
 
 import androidx.recyclerview.widget.ItemTouchHelper
-import com.fredporciuncula.flow.preferences.Preference
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -12,19 +10,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.library.LibraryPreferences
+import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.injectLazy
 
 class RecentMangaAdapter(val delegate: RecentsInterface) :
     BaseChapterAdapter<IFlexible<*>>(delegate) {
 
     val preferences: PreferencesHelper by injectLazy()
+    val libraryPreferences: LibraryPreferences by injectLazy()
 
     var showDownloads = preferences.showRecentsDownloads().get()
     var showRemoveHistory = preferences.showRecentsRemHistory().get()
     var showTitleFirst = preferences.showTitleFirstInRecents().get()
     var showUpdatedTime = preferences.showUpdatedTime().get()
-    var uniformCovers = preferences.uniformGrid().get()
-    var showOutline = preferences.outlineOnCovers().get()
+    var uniformCovers = libraryPreferences.uniformGrid().get()
+    var showOutline = libraryPreferences.outlineOnCovers().get()
     var sortByFetched = preferences.sortFetchedTime().get()
 
     val viewType: Int
@@ -49,9 +50,9 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showRecentsRemHistory().register { showRemoveHistory = it }
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
         preferences.showUpdatedTime().register { showUpdatedTime = it }
-        preferences.uniformGrid().register { uniformCovers = it }
-        preferences.sortFetchedTime().asImmediateFlowIn(delegate.scope()) { sortByFetched = it }
-        preferences.outlineOnCovers().register(false) {
+        libraryPreferences.uniformGrid().register { uniformCovers = it }
+        preferences.sortFetchedTime().changes().onEach { sortByFetched = it }.launchIn(delegate.scope())
+        libraryPreferences.outlineOnCovers().register(false) {
             showOutline = it
             (0 until itemCount).forEach { i ->
                 (recyclerView.findViewHolderForAdapterPosition(i) as? RecentMangaHolder)?.updateCards()
@@ -60,7 +61,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     }
 
     private fun <T> Preference<T>.register(notify: Boolean = true, onChanged: (T) -> Unit) {
-        asFlow()
+        changes()
             .drop(1)
             .onEach {
                 onChanged(it)

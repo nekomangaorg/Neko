@@ -35,6 +35,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder
 

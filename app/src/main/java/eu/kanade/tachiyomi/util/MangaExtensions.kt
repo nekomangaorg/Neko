@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
@@ -22,6 +21,7 @@ import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
@@ -111,7 +111,7 @@ fun Manga.addOrRemoveToFavorites(
 ): Snackbar? {
     if (!favorite) {
         val categories = db.getCategories().executeAsBlocking()
-        val defaultCategoryId = preferences.defaultCategory()
+        val defaultCategoryId = preferences.defaultCategory().get()
         val defaultCategory = categories.find { it.id == defaultCategoryId }
         when {
             defaultCategory != null -> {
@@ -127,6 +127,7 @@ fun Manga.addOrRemoveToFavorites(
                     }
                 }
             }
+
             defaultCategoryId == 0 || categories.isEmpty() -> { // 'Default' or no category
                 favorite = true
                 date_added = Date().time
@@ -148,6 +149,7 @@ fun Manga.addOrRemoveToFavorites(
                     view.snack(R.string.added_to_library)
                 }
             }
+
             else -> {
                 val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()
                 val ids = categoriesForManga.mapNotNull { it.id }.toTypedArray()
@@ -304,6 +306,7 @@ fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayM
             true -> {
                 displayManga.copy(isVisible = true)
             }
+
             false -> {
                 displayManga.copy(isVisible = !displayManga.inLibrary)
             }

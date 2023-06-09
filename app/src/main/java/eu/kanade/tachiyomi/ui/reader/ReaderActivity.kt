@@ -63,13 +63,10 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
-import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -108,7 +105,6 @@ import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -146,6 +142,9 @@ import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.loggycat
+import org.nekomanga.core.preferences.toggle
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
@@ -321,10 +320,12 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         config = ReaderConfig()
         initializeMenu()
 
-        preferences.incognitoMode()
-            .asImmediateFlowIn(lifecycleScope) {
+        securityPreferences.incognitoMode()
+            .changes()
+            .onEach {
                 SecureActivityDelegate.setSecure(this)
             }
+            .launchIn(lifecycleScope)
         reEnableBackPressedCallBack()
 
         viewModel.state
@@ -449,7 +450,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     private fun canShowSplitAtBottom(): Boolean {
-        return if (preferences.readerBottomButtons().isNotSet()) {
+        return if (!preferences.readerBottomButtons().isSet()) {
             isTablet()
         } else {
             ReaderBottomButton.ShiftDoublePage.isIn(preferences.readerBottomButtons().get())
@@ -768,7 +769,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         listOf(preferences.cropBorders(), preferences.cropBordersWebtoon())
             .forEach { pref ->
-                pref.asFlow()
+                pref.changes()
                     .onEach { updateCropBordersShortcut() }
                     .launchIn(scope)
             }
@@ -881,7 +882,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 firstPass = false
                 lastVis = vis
             }
-            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             if (!fullscreen && sheetManageNavColor) {
                 window.navigationBarColor = getResourceColor(R.attr.colorSurface)
             }
@@ -1081,7 +1082,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         } else {
             if (preferences.fullscreen().get()) {
                 wic.hide(systemBars())
-                wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+                wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
 
             if (animate && binding.appBar.isVisible) {
@@ -1114,7 +1115,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         }
 
         if (noDefault && viewModel.manga?.readingModeType!! > 0 &&
-            viewModel.manga?.readingModeType!! != preferences.defaultReadingMode()
+            viewModel.manga?.readingModeType!! != preferences.defaultReadingMode().get()
         ) {
             snackbar = binding.readerLayout.snack(
                 getString(
@@ -1781,7 +1782,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
          * Initializes the reader subscriptions.
          */
         init {
-            preferences.defaultOrientationType().asFlow()
+            preferences.defaultOrientationType().changes()
                 .drop(1)
                 .onEach {
                     delay(250)
@@ -1789,23 +1790,23 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 }
                 .launchIn(scope)
 
-            preferences.showPageNumber().asImmediateFlowIn(scope) { setPageNumberVisibility(it) }
+            preferences.showPageNumber().changes().onEach { setPageNumberVisibility(it) }.launchIn(scope)
 
-            preferences.trueColor().asImmediateFlowIn(scope) { setTrueColor(it) }
+            preferences.trueColor().changes().onEach { setTrueColor(it) }.launchIn(scope)
 
-            preferences.fullscreen().asImmediateFlowIn(scope) { setFullscreen(it) }
+            preferences.fullscreen().changes().onEach { setFullscreen(it) }.launchIn(scope)
 
-            preferences.keepScreenOn().asImmediateFlowIn(scope) { setKeepScreenOn(it) }
+            preferences.keepScreenOn().changes().onEach { setKeepScreenOn(it) }.launchIn(scope)
 
-            preferences.customBrightness().asImmediateFlowIn(scope) { setCustomBrightness(it) }
+            preferences.customBrightness().changes().onEach { setCustomBrightness(it) }.launchIn(scope)
 
-            preferences.colorFilter().asImmediateFlowIn(scope) { setColorFilter(it) }
+            preferences.colorFilter().changes().onEach { setColorFilter(it) }.launchIn(scope)
 
-            preferences.colorFilterMode().asImmediateFlowIn(scope) {
+            preferences.colorFilterMode().changes().onEach {
                 setColorFilter(preferences.colorFilter().get())
-            }
+            }.launchIn(scope)
 
-            merge(preferences.grayscale().asFlow(), preferences.invertedColors().asFlow())
+            merge(preferences.grayscale().changes(), preferences.invertedColors().changes())
                 .onEach {
                     setLayerPaint(
                         preferences.grayscale().get(),
@@ -1814,13 +1815,13 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 }
                 .launchIn(lifecycleScope)
 
-            preferences.alwaysShowChapterTransition().asImmediateFlowIn(scope) {
+            preferences.alwaysShowChapterTransition().changes().onEach {
                 showNewChapter = it
-            }
+            }.launchIn(scope)
 
-            preferences.pageLayout().asImmediateFlowIn(scope) { setBottomNavButtons(it) }
+            preferences.pageLayout().changes().onEach { setBottomNavButtons(it) }.launchIn(scope)
 
-            preferences.automaticSplitsPage().asFlow()
+            preferences.automaticSplitsPage().changes()
                 .drop(1)
                 .onEach {
                     val isPaused =
@@ -1830,10 +1831,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                             reloadChapters(config.doublePages, true)
                         }
                     }
-                }
-                .launchIn(scope)
+                }.launchIn(scope)
 
-            preferences.readerBottomButtons().asImmediateFlowIn(scope) { updateBottomShortcuts() }
+            preferences.readerBottomButtons().changes().onEach { updateBottomShortcuts() }.launchIn(scope)
         }
 
         /**
@@ -1859,7 +1859,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
          */
         private fun setFullscreen(enabled: Boolean) {
             WindowCompat.setDecorFitsSystemWindows(window, !enabled || isSplitScreen)
-            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             binding.root.rootWindowInsetsCompat?.let { setNavColor(it) }
         }
 
@@ -1879,7 +1879,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
          */
         private fun setCustomBrightness(enabled: Boolean) {
             if (enabled) {
-                preferences.customBrightnessValue().asFlow()
+                preferences.customBrightnessValue().changes()
                     .sample(100)
                     .onEach { setCustomBrightnessValue(it) }
                     .launchIn(scope)
@@ -1893,7 +1893,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
          */
         private fun setColorFilter(enabled: Boolean) {
             if (enabled) {
-                preferences.colorFilterValue().asFlow()
+                preferences.colorFilterValue().changes()
                     .sample(100)
                     .onEach { setColorFilterValue(it) }
                     .launchIn(scope)

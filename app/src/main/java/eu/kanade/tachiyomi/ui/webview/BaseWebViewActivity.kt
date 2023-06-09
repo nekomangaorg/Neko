@@ -33,15 +33,16 @@ import androidx.webkit.WebSettingsCompat.setForceDark
 import androidx.webkit.WebSettingsCompat.setForceDarkStrategy
 import androidx.webkit.WebViewFeature
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
-import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.view.setStyle
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import tachiyomi.core.util.system.setDefaultSettings
 
 open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
 
@@ -152,10 +153,10 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
             }
         }
 
-        preferences.incognitoMode()
-            .asImmediateFlowIn(lifecycleScope) {
+        securityPreferences.incognitoMode()
+            .changes().onEach {
                 SecureActivityDelegate.setSecure(this)
-            }
+            }.launchIn(lifecycleScope)
     }
 
     private fun setWebDarkMode() {

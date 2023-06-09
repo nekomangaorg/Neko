@@ -6,13 +6,13 @@ import eu.kanade.tachiyomi.data.track.TrackListService
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.time.ZoneId
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack

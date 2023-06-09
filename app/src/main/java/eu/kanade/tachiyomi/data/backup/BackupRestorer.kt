@@ -15,13 +15,13 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.Job
 import logcat.LogPriority
 import okio.buffer
 import okio.gzip
 import okio.source
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 class BackupRestorer(val context: Context, val job: Job?) {

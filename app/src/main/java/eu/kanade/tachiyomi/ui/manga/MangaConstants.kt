@@ -6,11 +6,11 @@ import androidx.compose.ui.state.ToggleableState
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.external.ExternalLink
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter

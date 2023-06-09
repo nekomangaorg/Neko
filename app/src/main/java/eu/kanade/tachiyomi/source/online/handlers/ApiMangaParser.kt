@@ -11,15 +11,15 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlin.math.floor
 import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.injectLazy
@@ -34,7 +34,7 @@ class ApiMangaParser {
     fun mangaDetailsParse(mangaDto: MangaDataDto, stats: Stats, simpleChapters: List<String>): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
-            val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality())
+            val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality().get())
 
             manga.rating = stats.rating
             manga.users = stats.follows

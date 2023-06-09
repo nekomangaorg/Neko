@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -19,9 +18,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -33,14 +34,15 @@ class SimilarPresenter(
     private val repo: SimilarRepository = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val libraryPreferences: LibraryPreferences = Injekt.get(),
 ) : BaseCoroutinePresenter<SimilarController>() {
 
     private val _similarScreenState = MutableStateFlow(
         SimilarScreenState(
             isList = preferences.browseAsList().get(),
-            outlineCovers = preferences.outlineOnCovers().get(),
-            isComfortableGrid = preferences.libraryLayout().get() == 2,
-            rawColumnCount = preferences.gridSize().get(),
+            outlineCovers = libraryPreferences.outlineOnCovers().get(),
+            isComfortableGrid = libraryPreferences.layout().get() == 2,
+            rawColumnCount = libraryPreferences.gridSize().get(),
         ),
     )
 
@@ -60,7 +62,7 @@ class SimilarPresenter(
             }
         }
         presenterScope.launch {
-            preferences.browseAsList().asFlow().collectLatest {
+            preferences.browseAsList().changes().collectLatest {
                 _similarScreenState.update { state ->
                     state.copy(isList = it)
                 }
@@ -102,7 +104,7 @@ class SimilarPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory()
+                val defaultCategory = preferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _similarScreenState.value.categories.firstOrNull {

@@ -4,7 +4,7 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
 import eu.kanade.tachiyomi.util.system.HashCode
-import eu.kanade.tachiyomi.util.system.loggycat
+import org.nekomanga.core.loggycat
 
 data class ReaderChapter(val chapter: Chapter) {
 

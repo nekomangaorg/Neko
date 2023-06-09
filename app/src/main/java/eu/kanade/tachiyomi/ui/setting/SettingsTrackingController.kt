@@ -6,19 +6,20 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
 import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.TrackerPreference
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.injectLazy
 
 class SettingsTrackingController :
@@ -87,9 +88,9 @@ class SettingsTrackingController :
                 )
 
                 preferences.getStringPref(Keys.trackUsername(trackManager.myAnimeList.id))
-                    .asImmediateFlowIn(viewScope) {
+                    .changes().onEach {
                         isVisible = it.isNotEmpty()
-                    }
+                    }.launchIn(viewScope)
 
                 this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.MYANIMELIST.toString())
 
@@ -110,9 +111,9 @@ class SettingsTrackingController :
                 )
 
                 preferences.getStringPref(Keys.trackUsername(trackManager.aniList.id))
-                    .asImmediateFlowIn(viewScope) {
+                    .changes().onEach {
                         isVisible = it.isNotEmpty()
-                    }
+                    }.launchIn(viewScope)
 
                 onClick {
                     viewScope.launchIO {
@@ -138,9 +139,9 @@ class SettingsTrackingController :
                 )
 
                 preferences.getStringPref(Keys.trackUsername(trackManager.aniList.id))
-                    .asImmediateFlowIn(viewScope) {
+                    .changes().onEach {
                         isVisible = it.isNotEmpty()
-                    }
+                    }.launchIn(viewScope)
 
                 this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.ANILIST.toString())
 
@@ -162,9 +163,9 @@ class SettingsTrackingController :
                 )
 
                 preferences.getStringPref(Keys.trackUsername(trackManager.kitsu.id))
-                    .asImmediateFlowIn(viewScope) {
+                    .changes().onEach {
                         isVisible = it.isNotEmpty()
-                    }
+                    }.launchIn(viewScope)
 
                 this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.KITSU.toString())
 
@@ -188,9 +189,9 @@ class SettingsTrackingController :
                 )
 
                 preferences.getStringPref(Keys.trackUsername(trackManager.mangaUpdates.id))
-                    .asImmediateFlowIn(viewScope) {
+                    .changes().onEach {
                         isVisible = it.isNotEmpty()
-                    }
+                    }.launchIn(viewScope)
 
                 this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.MANGA_UPDATES.toString())
 
@@ -203,17 +204,17 @@ class SettingsTrackingController :
 
     private fun updateAutoAddTracker(newValue: Boolean, trackId: Int): Boolean {
         if (newValue) {
-            preferences.autoAddTracker().asImmediateFlowIn(viewScope) {
+            preferences.autoAddTracker().changes().onEach {
                 val mutableSet = it.toMutableSet()
                 mutableSet.add(trackId.toString())
                 preferences.setAutoAddTracker(mutableSet)
-            }
+            }.launchIn(viewScope)
         } else {
-            preferences.autoAddTracker().asImmediateFlowIn(viewScope) {
+            preferences.autoAddTracker().changes().onEach {
                 val mutableSet = it.toMutableSet()
                 mutableSet.remove(trackId.toString())
                 preferences.setAutoAddTracker(mutableSet)
-            }
+            }.launchIn(viewScope)
         }
 
         return true

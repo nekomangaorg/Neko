@@ -47,7 +47,6 @@ import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
 import java.util.Date
@@ -62,7 +61,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -81,6 +82,7 @@ class LibraryUpdateService(
     val coverCache: CoverCache = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
+    val libraryPreferences: LibraryPreferences = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     val trackManager: TrackManager = Injekt.get(),
     val mangaDexLoginHelper: MangaDexLoginHelper = Injekt.get(),
@@ -162,14 +164,14 @@ class LibraryUpdateService(
     }
 
     private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
-        val selectedScheme = preferences.libraryUpdatePrioritization().get()
+        val selectedScheme = libraryPreferences.updatePrioritization().get()
         val mangaList = manga.sortedWith(rankingScheme[selectedScheme])
         categoryIds.add(categoryId)
         addManga(mangaList)
     }
 
     private fun addCategory(categoryId: Int) {
-        val selectedScheme = preferences.libraryUpdatePrioritization().get()
+        val selectedScheme = libraryPreferences.updatePrioritization().get()
         val mangaList =
             getMangaToUpdate(categoryId, Target.CHAPTERS).sortedWith(
                 rankingScheme[selectedScheme],
@@ -193,7 +195,7 @@ class LibraryUpdateService(
             libraryManga.filter { it.category == categoryId }
         } else {
             val categoriesToUpdate =
-                preferences.libraryUpdateCategories().get().map(String::toInt)
+                libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
             if (categoriesToUpdate.isNotEmpty()) {
                 categoryIds.addAll(categoriesToUpdate)
                 libraryManga.filter { it.category in categoriesToUpdate }.distinctBy { it.id }
@@ -204,7 +206,7 @@ class LibraryUpdateService(
         }
 
         val categoriesToExclude =
-            preferences.libraryUpdateCategoriesExclude().get().map(String::toInt)
+            libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
         val listToExclude = if (categoriesToExclude.isNotEmpty()) {
             libraryManga.filter { it.category in categoriesToExclude }
         } else {
@@ -269,7 +271,7 @@ class LibraryUpdateService(
 
         instance = this
 
-        val selectedScheme = preferences.libraryUpdatePrioritization().get()
+        val selectedScheme = libraryPreferences.updatePrioritization().get()
         val savedMangaList = intent.getLongArrayExtra(KEY_MANGAS)?.asList()
 
         val mangaList = (
@@ -310,10 +312,10 @@ class LibraryUpdateService(
     private suspend fun updateChaptersJob(tempMangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
 
-        preferences.libraryUpdateLastTimestamp().set(Date().time)
+        libraryPreferences.lastUpdateTimestamp().set(Date().time)
 
-        val skipCompleted = preferences.updateOnlyNonCompleted()
-        val skipBasedOnTracking = preferences.updateOnlyWhenTrackingIsNotFinished()
+        val skipCompleted = libraryPreferences.updateOnlyNonCompleted().get()
+        val skipBasedOnTracking = libraryPreferences.updateOnlyWhenTrackingIsNotFinished().get()
 
         val mangaToAdd = tempMangaToAdd.filter { libraryManga ->
 
@@ -435,7 +437,7 @@ class LibraryUpdateService(
             val source = sourceManager.mangaDex
 
             val holder = withIOContext {
-                if (preferences.fasterLibraryUpdates().get()) {
+                if (libraryPreferences.updateFaster().get()) {
                     MangaDetailChapterInformation(null, emptyList(), source.fetchChapterList(manga).getOrThrow { Exception(it.message()) })
                 } else {
                     source.fetchMangaAndChapterDetails(manga, true).getOrThrow { Exception(it.message()) }
@@ -475,7 +477,7 @@ class LibraryUpdateService(
 
                 withIOContext {
                     // dont refresh covers while using cached source
-                    if (manga.thumbnail_url != null && preferences.refreshCoversToo()
+                    if (manga.thumbnail_url != null && libraryPreferences.updateCovers()
                             .get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
@@ -555,7 +557,7 @@ class LibraryUpdateService(
 
             coroutineScope {
                 launch {
-                    if (preferences.readingSync() && mangaDexLoginHelper.isLoggedIn()) {
+                    if (preferences.readingSync().get() && mangaDexLoginHelper.isLoggedIn()) {
                         val dbChapters = db.getChapters(manga).executeAsBlocking()
                         statusHandler.getReadChapterIds(MdUtil.getMangaUUID(manga.url))
                             .collect { chapterIds ->

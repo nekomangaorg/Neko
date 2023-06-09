@@ -47,7 +47,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.fredporciuncula.flow.preferences.Preference
 import com.github.florent37.viewtooltip.ViewTooltip
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -131,11 +130,14 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.library.LibraryPreferences
+import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class LibraryController(
     bundle: Bundle? = null,
+    val libraryPreferences: LibraryPreferences = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
 ) : BaseCoroutineController<LibraryControllerBinding, LibraryPresenter>(bundle),
     ActionMode.Callback,
@@ -156,8 +158,8 @@ class LibraryController(
     /**
      * Position of the active category.
      */
-    private var activeCategory: Int = preferences.lastUsedCategory().get()
-    private var lastUsedCategory: Int = preferences.lastUsedCategory().get()
+    private var activeCategory: Int = libraryPreferences.lastUsedCategory().get()
+    private var lastUsedCategory: Int = libraryPreferences.lastUsedCategory().get()
 
     private var justStarted = true
 
@@ -166,7 +168,7 @@ class LibraryController(
      */
     private var actionMode: ActionMode? = null
 
-    private var libraryLayout: Int = preferences.libraryLayout().get()
+    private var libraryLayout: Int = libraryPreferences.layout().get()
 
     var singleCategory: Boolean = false
         private set
@@ -209,7 +211,7 @@ class LibraryController(
     val hasActiveFilters: Boolean
         get() = presenter.hasActiveFilters
 
-    var hopperGravity: Int = preferences.hopperGravity().get()
+    var hopperGravity: Int = libraryPreferences.hopperGravity().get()
         @SuppressLint("RtlHardcoded")
         set(value) {
             field = value
@@ -229,7 +231,7 @@ class LibraryController(
     var hasMovedHopper = preferences.shownHopperSwipeTutorial().get()
     private var shouldScrollToTop = false
     private val showCategoryInTitle
-        get() = preferences.showCategoryInTitle().get() && presenter.showAllCategories
+        get() = libraryPreferences.showCategoryInTitle().get() && presenter.showAllCategories
     private lateinit var elevateAppBar: ((Boolean) -> Unit)
     private var hopperOffset = 0f
     private val maxHopperOffset: Float
@@ -258,10 +260,10 @@ class LibraryController(
     override fun getSearchTitle(): String? {
         setSubtitle()
         return searchTitle(
-            if (preferences.showLibrarySearchSuggestions().get() &&
-                preferences.librarySearchSuggestion().get().isNotBlank()
+            if (libraryPreferences.showSearchSuggestions().get() &&
+                libraryPreferences.searchSuggestions().get().isNotBlank()
             ) {
-                "\"${preferences.librarySearchSuggestion().get()}\""
+                "\"${libraryPreferences.searchSuggestions().get()}\""
             } else {
                 view?.context?.getString(R.string.your_library)?.lowercase(Locale.ROOT)
             },
@@ -296,11 +298,11 @@ class LibraryController(
             super.onScrolled(recyclerView, dx, dy)
             val recyclerCover = binding.recyclerCover
             if (!recyclerCover.isClickable && isAnimatingHopper != true) {
-                if (preferences.autohideHopper().get()) {
+                if (libraryPreferences.autoHideHopper().get()) {
                     hopperOffset += dy
                     hopperOffset = hopperOffset.coerceIn(0f, maxHopperOffset)
                 }
-                if (!preferences.hideBottomNavOnScroll().get() || activityBinding?.bottomNav == null) {
+                if (!false || activityBinding?.bottomNav == null) {
                     updateFilterSheetY()
                 }
                 if (!binding.fastScroller.isFastScrolling) {
@@ -327,7 +329,7 @@ class LibraryController(
             val savedCurrentCategory = getHeader(true)?.category ?: return
             if (savedCurrentCategory.order != lastUsedCategory) {
                 lastUsedCategory = savedCurrentCategory.order
-                preferences.lastUsedCategory().set(savedCurrentCategory.order)
+                libraryPreferences.lastUsedCategory().set(savedCurrentCategory.order)
             }
         }
 
@@ -392,14 +394,14 @@ class LibraryController(
         val shortAnimationDuration = resources?.getInteger(
             android.R.integer.config_shortAnimTime,
         ) ?: 0
-        if (preferences.autohideHopper().get()) {
+        if (libraryPreferences.autoHideHopper().get()) {
             // Flow same snap rules as bottom nav
             val closerToHopperBottom = hopperOffset > maxHopperOffset / 2
             val halfWayBottom = activityBinding?.bottomNav?.height?.toFloat()?.div(2) ?: 0f
             val closerToBottom = (activityBinding?.bottomNav?.translationY ?: 0f) > halfWayBottom
             val atTop = !binding.libraryGridRecycler.recycler.canScrollVertically(-1)
             val closerToEdge =
-                if (preferences.hideBottomNavOnScroll().get() && activityBinding?.bottomNav != null) {
+                if (true && activityBinding?.bottomNav != null) {
                     closerToBottom && !atTop
                 } else {
                     closerToHopperBottom
@@ -531,7 +533,7 @@ class LibraryController(
             activity!!.getString(R.string.group_library_by),
             presenter.groupType,
         ) { _, item ->
-            preferences.groupLibraryBy().set(item)
+            libraryPreferences.groupBy().set(item)
             presenter.groupType = item
             shouldScrollToTop = true
             presenter.getLibrary()
@@ -586,7 +588,7 @@ class LibraryController(
             false
         }
         binding.categoryRecycler.onShowAllClicked = { isChecked ->
-            preferences.showAllCategories().set(isChecked)
+            libraryPreferences.showAllCategories().set(isChecked)
             presenter.getLibrary()
         }
         setupFilterSheet()
@@ -743,7 +745,7 @@ class LibraryController(
         catGestureDetector = GestureDetectorCompat(binding.root.context, LibraryCategoryGestureDetector(this))
 
         binding.roundedCategoryHopper.categoryButton.setOnLongClickListener {
-            when (preferences.hopperLongPressAction().get()) {
+            when (libraryPreferences.hopperLongPressAction().get()) {
                 4 -> openRandomManga()
                 3 -> showGroupOptions()
                 2 -> showDisplayOptions()
@@ -759,9 +761,9 @@ class LibraryController(
         val gravityPref = if (!hasMovedHopper) {
             Random.nextInt(0..2)
         } else {
-            preferences.hopperGravity().get()
+            libraryPreferences.hopperGravity().get()
         }
-        hideHopper(preferences.hideHopper().get())
+        hideHopper(libraryPreferences.hideHopper().get())
         binding.categoryHopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
             gravity = Gravity.TOP or when (gravityPref) {
                 0 -> Gravity.LEFT
@@ -815,7 +817,7 @@ class LibraryController(
             activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y,
         )
         val insetBottom = insets?.getInsets(systemBars())?.bottom ?: 0
-        if (!preferences.autohideHopper().get() || activityBinding?.bottomNav == null) {
+        if (!libraryPreferences.autoHideHopper().get() || activityBinding?.bottomNav == null) {
             listOfYs.add(view.height - (insetBottom).toFloat())
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets?.isImeVisible() == true) {
@@ -957,7 +959,7 @@ class LibraryController(
                     bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0),
                 )
             }
-            useStaggered(preferences)
+            useStaggered(libraryPreferences)
             if (libraryLayout == LibraryItem.LAYOUT_LIST) {
                 spanCount = 1
                 updatePaddingRelative(
@@ -965,7 +967,7 @@ class LibraryController(
                     end = 0,
                 )
             } else {
-                setGridSize(preferences)
+                setGridSize(libraryPreferences)
                 updatePaddingRelative(
                     start = 5.dpToPx,
                     end = 5.dpToPx,
@@ -987,26 +989,25 @@ class LibraryController(
 
     private fun setPreferenceFlows() {
         listOf(
-            preferences.libraryLayout(),
-            preferences.uniformGrid(),
-            preferences.gridSize(),
-            preferences.useStaggeredGrid(),
+            libraryPreferences.layout(),
+            libraryPreferences.uniformGrid(),
+            libraryPreferences.gridSize(),
+            libraryPreferences.staggeredGrid(),
         ).forEach {
-            it.asFlow()
+            it.changes()
                 .drop(1)
                 .onEach {
                     reattachAdapter()
-                }
-                .launchIn(viewScope)
+                }.launchIn(viewScope)
         }
-        preferences.hideStartReadingButton().register()
-        preferences.outlineOnCovers().register { adapter.showOutline = it }
-        preferences.categoryNumberOfItems().register { adapter.showNumber = it }
+        libraryPreferences.hideStartReadingButton().register()
+        libraryPreferences.outlineOnCovers().register { adapter.showOutline = it }
+        libraryPreferences.showCategoriesHeaderCount().register { adapter.showNumber = it }
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun <T> Preference<T>.register(onChanged: ((T) -> Unit)? = null) {
-        asFlow()
+        changes()
             .drop(1)
             .onEach {
                 onChanged?.invoke(it)
@@ -1161,7 +1162,7 @@ class LibraryController(
             setActiveCategory()
         }
 
-        binding.categoryHopperFrame.isVisible = !singleCategory && !preferences.hideHopper().get()
+        binding.categoryHopperFrame.isVisible = !singleCategory && !libraryPreferences.hideHopper().get()
         adapter.isLongPressDragEnabled = canDrag()
         binding.categoryRecycler.setCategories(
             presenter.categories,
@@ -1332,7 +1333,7 @@ class LibraryController(
                 saveActiveCategory(it)
             }
             activeCategory = pos
-            preferences.lastUsedCategory().set(pos)
+            libraryPreferences.lastUsedCategory().set(pos)
             binding.libraryGridRecycler.recycler.post {
                 if (isControllerVisible) {
                     activityBinding.appBar.y = 0f
@@ -1357,7 +1358,7 @@ class LibraryController(
     }
 
     private fun reattachAdapter() {
-        libraryLayout = preferences.libraryLayout().get()
+        libraryLayout = libraryPreferences.layout().get()
         setRecyclerLayout()
         val position = binding.libraryGridRecycler.recycler.findFirstVisibleItemPosition()
         binding.libraryGridRecycler.recycler.adapter = adapter
@@ -1365,12 +1366,12 @@ class LibraryController(
     }
 
     fun search(query: String?): Boolean {
-        val isShowAllCategoriesSet = preferences.showAllCategories().get()
+        val isShowAllCategoriesSet = libraryPreferences.showAllCategories().get()
         if (!query.isNullOrBlank() && this.query.isBlank() && !isShowAllCategoriesSet) {
-            presenter.forceShowAllCategories = preferences.showAllCategoriesWhenSearchingSingleCategory().get()
+            presenter.forceShowAllCategories = libraryPreferences.showAllCategoriesWhenSearchingSingleCategory().get()
             presenter.getLibrary()
         } else if (query.isNullOrBlank() && this.query.isNotBlank() && !isShowAllCategoriesSet) {
-            preferences.showAllCategoriesWhenSearchingSingleCategory().set(presenter.forceShowAllCategories)
+            libraryPreferences.showAllCategoriesWhenSearchingSingleCategory().set(presenter.forceShowAllCategories)
             presenter.forceShowAllCategories = false
             presenter.getLibrary()
         }
@@ -1900,8 +1901,8 @@ class LibraryController(
     }
 
     override fun onSearchActionViewLongClickQuery(): String? {
-        if (preferences.showLibrarySearchSuggestions().get()) {
-            val suggestion = preferences.librarySearchSuggestion().get().takeIf { it.isNotBlank() }
+        if (libraryPreferences.showSearchSuggestions().get()) {
+            val suggestion = libraryPreferences.searchSuggestions().get().takeIf { it.isNotBlank() }
             return suggestion?.removeSuffix("…")
         }
         return null

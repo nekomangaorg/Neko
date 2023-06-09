@@ -4,20 +4,21 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.AppUpdateJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateService
-import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.toast
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
+import org.nekomanga.core.loggycat
+import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.domain.library.LibraryPreferences
+import tachiyomi.core.network.PREF_DOH_CLOUDFLARE
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -29,7 +30,7 @@ object Migrations {
      * @param preferences Preferences of the application.
      * @return true if a migration is performed, false otherwise.
      */
-    fun upgrade(preferences: PreferencesHelper, scope: CoroutineScope): Boolean {
+    fun upgrade(preferences: PreferencesHelper, networkPreferences: NetworkPreferences, libraryPreferences: LibraryPreferences, scope: CoroutineScope): Boolean {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit {
@@ -81,14 +82,14 @@ object Migrations {
                 val wasDohEnabled = prefs.getBoolean("enable_doh", false)
                 if (wasDohEnabled) {
                     prefs.edit {
-                        putInt(PreferenceKeys.dohProvider, PREF_DOH_CLOUDFLARE)
+                        putInt(networkPreferences.dohProvider().key(), PREF_DOH_CLOUDFLARE)
                         remove("enable_doh")
                     }
                 }
                 // Handle removed every 1 or 2, 3 hour library updates
-                val updateInterval = preferences.libraryUpdateInterval().get()
+                val updateInterval = libraryPreferences.updateInterval().get()
                 if (updateInterval == 1 || updateInterval == 2 || updateInterval == 3) {
-                    preferences.libraryUpdateInterval().set(6)
+                    libraryPreferences.updateInterval().set(6)
                     LibraryUpdateJob.setupTask(context, 6)
                 }
             }

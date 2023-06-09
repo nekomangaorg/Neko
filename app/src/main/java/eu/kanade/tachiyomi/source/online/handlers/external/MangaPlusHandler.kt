@@ -1,14 +1,11 @@
 package eu.kanade.tachiyomi.source.online.handlers.external
 
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource.Companion.USER_AGENT
 import eu.kanade.tachiyomi.source.online.models.dto.Language
 import eu.kanade.tachiyomi.source.online.models.dto.MangaPlusResponse
 import java.util.UUID
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.Interceptor
@@ -17,6 +14,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
+import org.nekomanga.core.network.GET
+import tachiyomi.core.network.await
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy

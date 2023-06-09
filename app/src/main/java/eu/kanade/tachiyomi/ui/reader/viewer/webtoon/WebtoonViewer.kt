@@ -18,11 +18,11 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import org.nekomanga.core.loggycat
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
@@ -298,6 +298,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                     if (!config.volumeKeysInverted) moveToNext() else moveToPrevious()
                 }
             }
+
             KeyEvent.KEYCODE_VOLUME_UP -> {
                 if (!config.volumeKeysEnabled || activity.menuVisible) {
                     return false
@@ -305,6 +306,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                     if (!config.volumeKeysInverted) moveToPrevious() else moveToNext()
                 }
             }
+
             KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
 
             KeyEvent.KEYCODE_DPAD_RIGHT,
@@ -316,6 +318,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
             KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_PAGE_DOWN,
             -> if (isUp) moveToNext()
+
             else -> return false
         }
         return true

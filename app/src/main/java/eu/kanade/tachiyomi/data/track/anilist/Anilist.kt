@@ -6,12 +6,12 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackStatusService
-import eu.kanade.tachiyomi.util.system.loggycat
-import kotlinx.serialization.decodeFromString
+import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
@@ -21,7 +21,7 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
 
     private val json: Json by injectLazy()
 
-    private val interceptor by lazy { AnilistInterceptor(this, getPassword()) }
+    private val interceptor by lazy { AnilistInterceptor(this, getPassword().get()) }
 
     private val api by lazy { AnilistApi(client, interceptor) }
 
@@ -146,7 +146,7 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
         updateTrackStatus(track, setToRead, setToComplete = true, mustReadToComplete = true)
         // If user was using API v1 fetch library_id
         if (track.library_id == null || track.library_id!! == 0L) {
-            val libManga = api.findLibManga(track, getUsername().toInt())
+            val libManga = api.findLibManga(track, getUsername().get().toInt())
                 ?: throw Exception("$track not found on user library")
             track.library_id = libManga.library_id
         }
@@ -155,7 +155,7 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
     }
 
     override suspend fun bind(track: Track): Track {
-        val remoteTrack = api.findLibManga(track, getUsername().toInt())
+        val remoteTrack = api.findLibManga(track, getUsername().get().toInt())
 
         return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
@@ -178,7 +178,7 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
         api.search(query, manga, wasPreviouslyTracked)
 
     override suspend fun refresh(track: Track): Track {
-        val remoteTrack = api.getLibManga(track, getUsername().toInt())
+        val remoteTrack = api.getLibManga(track, getUsername().get().toInt())
         track.copyPersonalFrom(remoteTrack)
         track.title = remoteTrack.title
         track.total_chapters = remoteTrack.total_chapters

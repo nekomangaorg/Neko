@@ -7,12 +7,12 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.system.logTimeTaken
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
 import uy.kohesive.injekt.Injekt

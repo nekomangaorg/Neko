@@ -24,12 +24,12 @@ import com.google.accompanist.web.rememberWebViewNavigator
 import com.google.accompanist.web.rememberWebViewState
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
+import tachiyomi.core.util.system.setDefaultSettings
 
 @Composable
 fun WebViewScreen(

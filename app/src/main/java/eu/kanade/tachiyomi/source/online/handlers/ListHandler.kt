@@ -8,10 +8,8 @@ import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
-import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
 import eu.kanade.tachiyomi.network.services.MangaDexService
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.ResultListPage
 import eu.kanade.tachiyomi.source.online.models.dto.NewCustomListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
@@ -26,6 +24,8 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.SourceResult
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.SourceManga

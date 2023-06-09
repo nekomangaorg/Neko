@@ -31,22 +31,22 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
     var mainView: View? = null
     override fun inflateBinding() = LibraryDisplayLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
-        binding.displayGroup.bindToPreference(preferences.libraryLayout())
-        binding.uniformGrid.bindToPreference(preferences.uniformGrid()) {
+        binding.displayGroup.bindToPreference(libraryPreferences.layout())
+        binding.uniformGrid.bindToPreference(libraryPreferences.uniformGrid()) {
             binding.staggeredGrid.isEnabled = !it
         }
-        binding.outlineOnCovers.bindToPreference(preferences.outlineOnCovers())
-        binding.staggeredGrid.text = context.getString(R.string.use_staggered_grid).addBetaTag(context)
-        binding.staggeredGrid.isEnabled = !preferences.uniformGrid().get()
-        binding.staggeredGrid.bindToPreference(preferences.useStaggeredGrid())
-        binding.gridSeekbar.value = ((preferences.gridSize().get() + .5f) * 2f).roundToInt().toFloat()
+        binding.outlineOnCovers.bindToPreference(libraryPreferences.outlineOnCovers())
+        binding.staggeredGrid.text = context.getString(R.string.use_staggered_grid).addBetaTag(context, R.attr.colorSecondary)
+        binding.staggeredGrid.isEnabled = !libraryPreferences.uniformGrid().get()
+        binding.staggeredGrid.bindToPreference(libraryPreferences.staggeredGrid())
+        binding.gridSeekbar.value = ((libraryPreferences.gridSize().get() + .5f) * 2f).roundToInt().toFloat()
         binding.resetGridSize.setOnClickListener {
             binding.gridSeekbar.value = 3f
         }
 
         binding.reorderFiltersButton.setOnClickListener {
             val recycler = RecyclerView(context)
-            var filterOrder = preferences.filterOrder().get()
+            var filterOrder = libraryPreferences.filterOrder().get()
             if (filterOrder.count() != 6) {
                 filterOrder = FilterBottomSheet.Filters.DEFAULT_ORDER
             }
@@ -71,7 +71,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.reorder) { _, _ ->
                     val order = adapter.currentItems.map { it.char }.joinToString("")
-                    preferences.filterOrder().set(order)
+                    libraryPreferences.filterOrder().set(order)
                     recycler.adapter = null
                 }
                 .show()
@@ -108,7 +108,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
         }
         binding.gridSeekbar.addOnChangeListener { _, value, fromUser ->
             if (!fromUser) {
-                preferences.gridSize().set((value / 2f) - .5f)
+                libraryPreferences.gridSize().set((value / 2f) - .5f)
             }
             setGridText(value)
         }
@@ -117,7 +117,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                 override fun onStartTrackingTouch(slider: Slider) {}
 
                 override fun onStopTrackingTouch(slider: Slider) {
-                    preferences.gridSize().set((slider.value / 2f) - .5f)
+                    libraryPreferences.gridSize().set((slider.value / 2f) - .5f)
                     setGridText(slider.value)
                 }
             },

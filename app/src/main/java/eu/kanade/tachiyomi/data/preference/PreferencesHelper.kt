@@ -1,28 +1,20 @@
 package eu.kanade.tachiyomi.data.preference
 
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.preference.PreferenceValues as Values
+import org.nekomanga.core.preferences.PreferenceValues as Values
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.edit
-import androidx.preference.PreferenceManager
-import com.fredporciuncula.flow.preferences.FlowSharedPreferences
-import com.fredporciuncula.flow.preferences.Preference
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import eu.kanade.tachiyomi.ui.library.LibraryItem
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
@@ -35,26 +27,10 @@ import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-
-fun <T> Preference<T>.asImmediateFlow(block: (value: T) -> Unit): Flow<T> {
-    block(get())
-    return asFlow()
-        .onEach { block(it) }
-}
-
-fun <T> Preference<T>.asImmediateFlowIn(scope: CoroutineScope, block: (value: T) -> Unit): Job {
-    block(get())
-    return asFlow()
-        .onEach { block(it) }
-        .launchIn(scope)
-}
-
-fun Preference<Boolean>.toggle() = set(!get())
+import org.nekomanga.constants.MdConstants
+import tachiyomi.core.preference.Preference
+import tachiyomi.core.preference.PreferenceStore
+import tachiyomi.core.preference.getEnum
 
 operator fun <T> Preference<Set<T>>.plusAssign(item: T) {
     set(get() + item)
@@ -72,10 +48,7 @@ operator fun <T> Preference<Set<T>>.minusAssign(item: Collection<T>) {
     set(get() - item)
 }
 
-class PreferencesHelper(val context: Context) {
-
-    private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-    private val flowPrefs = FlowSharedPreferences(prefs)
+class PreferencesHelper(val context: Context, val preferenceStore: PreferenceStore) {
 
     private val defaultFolder = context.getString(R.string.app_name) + when (BuildConfig.DEBUG) {
         true -> "_DEBUG"
@@ -98,466 +71,311 @@ class PreferencesHelper(val context: Context) {
         ),
     )
 
-    fun getInt(key: String, default: Int) = flowPrefs.getInt(key, default)
-    fun getStringPref(key: String, default: String = "") = flowPrefs.getString(key, default)
-    fun getStringSet(key: String, default: Set<String>) = flowPrefs.getStringSet(key, default)
+    fun getInt(key: String, default: Int) = this.preferenceStore.getInt(key, default)
+    fun getStringPref(key: String, default: String = "") = this.preferenceStore.getString(key, default)
 
-    fun startingTab() = flowPrefs.getInt(Keys.startingTab, 0)
-    fun backReturnsToStart() = flowPrefs.getBoolean(Keys.backToStart, true)
+    fun startingTab() = this.preferenceStore.getInt(Keys.startingTab, 0)
+    fun backReturnsToStart() = this.preferenceStore.getBoolean(Keys.backToStart, true)
 
-    fun hasDeniedA11FilePermission() = flowPrefs.getBoolean(Keys.deniedA11FilePermission, false)
+    fun hasDeniedA11FilePermission() = this.preferenceStore.getBoolean(Keys.deniedA11FilePermission, false)
 
-    fun clear() = prefs.edit().clear().apply()
-
-    fun nightMode() = flowPrefs.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    fun nightMode() = this.preferenceStore.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
     private val supportsDynamic = DynamicColors.isDynamicColorAvailable()
-    fun lightTheme() =
-        flowPrefs.getEnum(Keys.lightTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
+    fun lightTheme() = this.preferenceStore.getEnum(Keys.lightTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
 
-    fun darkTheme() =
-        flowPrefs.getEnum(Keys.darkTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
+    fun darkTheme() = this.preferenceStore.getEnum(Keys.darkTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
 
-    fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
+    fun pageTransitions() = this.preferenceStore.getBoolean(Keys.enableTransitions, true)
 
-    fun pagerCutoutBehavior() = flowPrefs.getInt(Keys.pagerCutoutBehavior, 0)
+    fun pagerCutoutBehavior() = this.preferenceStore.getInt(Keys.pagerCutoutBehavior, 0)
 
-    fun doubleTapAnimSpeed() = flowPrefs.getInt(Keys.doubleTapAnimationSpeed, 500)
+    fun doubleTapAnimSpeed() = this.preferenceStore.getInt(Keys.doubleTapAnimationSpeed, 500)
 
-    fun showPageNumber() = flowPrefs.getBoolean(Keys.showPageNumber, true)
+    fun showPageNumber() = this.preferenceStore.getBoolean(Keys.showPageNumber, true)
 
-    fun trueColor() = flowPrefs.getBoolean(Keys.trueColor, false)
+    fun trueColor() = this.preferenceStore.getBoolean(Keys.trueColor, false)
 
-    fun fullscreen() = flowPrefs.getBoolean(Keys.fullscreen, true)
+    fun fullscreen() = this.preferenceStore.getBoolean(Keys.fullscreen, true)
 
-    fun keepScreenOn() = flowPrefs.getBoolean(Keys.keepScreenOn, true)
+    fun keepScreenOn() = this.preferenceStore.getBoolean(Keys.keepScreenOn, true)
 
-    fun customBrightness() = flowPrefs.getBoolean(Keys.customBrightness, false)
+    fun customBrightness() = this.preferenceStore.getBoolean(Keys.customBrightness, false)
 
-    fun customBrightnessValue() = flowPrefs.getInt(Keys.customBrightnessValue, 0)
+    fun customBrightnessValue() = this.preferenceStore.getInt(Keys.customBrightnessValue, 0)
 
-    fun colorFilter() = flowPrefs.getBoolean(Keys.colorFilter, false)
+    fun colorFilter() = this.preferenceStore.getBoolean(Keys.colorFilter, false)
 
-    fun colorFilterValue() = flowPrefs.getInt(Keys.colorFilterValue, 0)
+    fun colorFilterValue() = this.preferenceStore.getInt(Keys.colorFilterValue, 0)
 
-    fun colorFilterMode() = flowPrefs.getInt(Keys.colorFilterMode, 0)
+    fun colorFilterMode() = this.preferenceStore.getInt(Keys.colorFilterMode, 0)
 
     fun defaultReadingMode() =
-        prefs.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
+        this.preferenceStore.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
 
     fun defaultOrientationType() =
-        flowPrefs.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
+        this.preferenceStore.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
 
-    fun imageScaleType() = flowPrefs.getInt(Keys.imageScaleType, 1)
+    fun imageScaleType() = this.preferenceStore.getInt(Keys.imageScaleType, 1)
 
-    fun doublePageGap() = flowPrefs.getInt(Keys.doublePageGap, 0)
+    fun doublePageGap() = this.preferenceStore.getInt(Keys.doublePageGap, 0)
 
-    fun zoomStart() = flowPrefs.getInt(Keys.zoomStart, 1)
+    fun zoomStart() = this.preferenceStore.getInt(Keys.zoomStart, 1)
 
-    fun readerTheme() = flowPrefs.getInt(Keys.readerTheme, 2)
+    fun readerTheme() = this.preferenceStore.getInt(Keys.readerTheme, 2)
 
-    fun cropBorders() = flowPrefs.getBoolean(Keys.cropBorders, false)
+    fun cropBorders() = this.preferenceStore.getBoolean(Keys.cropBorders, false)
 
-    fun cropBordersWebtoon() = flowPrefs.getBoolean(Keys.cropBordersWebtoon, false)
+    fun cropBordersWebtoon() = this.preferenceStore.getBoolean(Keys.cropBordersWebtoon, false)
 
-    fun navigateToPan() = flowPrefs.getBoolean("navigate_pan", true)
+    fun navigateToPan() = this.preferenceStore.getBoolean("navigate_pan", true)
 
-    fun landscapeZoom() = flowPrefs.getBoolean("landscape_zoom", false)
+    fun landscapeZoom() = this.preferenceStore.getBoolean("landscape_zoom", false)
 
-    fun grayscale() = flowPrefs.getBoolean("pref_grayscale", false)
+    fun grayscale() = this.preferenceStore.getBoolean("pref_grayscale", false)
 
-    fun invertedColors() = flowPrefs.getBoolean("pref_inverted_colors", false)
+    fun invertedColors() = this.preferenceStore.getBoolean("pref_inverted_colors", false)
 
-    fun webtoonSidePadding() = flowPrefs.getInt(Keys.webtoonSidePadding, 0)
+    fun webtoonSidePadding() = this.preferenceStore.getInt(Keys.webtoonSidePadding, 0)
 
-    fun webtoonEnableZoomOut() = flowPrefs.getBoolean(Keys.webtoonEnableZoomOut, false)
+    fun webtoonEnableZoomOut() = this.preferenceStore.getBoolean(Keys.webtoonEnableZoomOut, false)
 
-    fun readWithLongTap() = flowPrefs.getBoolean(Keys.readWithLongTap, true)
+    fun readWithLongTap() = this.preferenceStore.getBoolean(Keys.readWithLongTap, true)
 
-    fun readWithVolumeKeys() = flowPrefs.getBoolean(Keys.readWithVolumeKeys, false)
+    fun readWithVolumeKeys() = this.preferenceStore.getBoolean(Keys.readWithVolumeKeys, false)
 
-    fun readWithVolumeKeysInverted() = flowPrefs.getBoolean(Keys.readWithVolumeKeysInverted, false)
+    fun readWithVolumeKeysInverted() = this.preferenceStore.getBoolean(Keys.readWithVolumeKeysInverted, false)
 
-    fun navigationModePager() = flowPrefs.getInt(Keys.navigationModePager, 0)
+    fun navigationModePager() = this.preferenceStore.getInt(Keys.navigationModePager, 0)
 
-    fun navigationModeWebtoon() = flowPrefs.getInt(Keys.navigationModeWebtoon, 0)
+    fun navigationModeWebtoon() = this.preferenceStore.getInt(Keys.navigationModeWebtoon, 0)
 
     fun pagerNavInverted() =
-        flowPrefs.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
+        this.preferenceStore.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
     fun webtoonNavInverted() =
-        flowPrefs.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
+        this.preferenceStore.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
-    fun pageLayout() = flowPrefs.getInt(Keys.pageLayout, PageLayout.AUTOMATIC.value)
+    fun pageLayout() = this.preferenceStore.getInt(Keys.pageLayout, PageLayout.AUTOMATIC.value)
 
-    fun automaticSplitsPage() = flowPrefs.getBoolean(Keys.automaticSplitsPage, false)
+    fun automaticSplitsPage() = this.preferenceStore.getBoolean(Keys.automaticSplitsPage, false)
 
-    fun invertDoublePages() = flowPrefs.getBoolean(Keys.invertDoublePages, false)
+    fun invertDoublePages() = this.preferenceStore.getBoolean(Keys.invertDoublePages, false)
 
-    fun webtoonPageLayout() = flowPrefs.getInt(Keys.webtoonPageLayout, PageLayout.SINGLE_PAGE.value)
+    fun webtoonPageLayout() = this.preferenceStore.getInt(Keys.webtoonPageLayout, PageLayout.SINGLE_PAGE.value)
 
-    fun webtoonReaderHideThreshold() = flowPrefs.getEnum("reader_hide_threshold", Values.ReaderHideThreshold.LOW)
+    fun webtoonReaderHideThreshold() = this.preferenceStore.getEnum("reader_hide_threshold", Values.ReaderHideThreshold.LOW)
 
-    fun webtoonInvertDoublePages() = flowPrefs.getBoolean(Keys.webtoonInvertDoublePages, false)
+    fun webtoonInvertDoublePages() = this.preferenceStore.getBoolean(Keys.webtoonInvertDoublePages, false)
 
-    fun readerBottomButtons() = flowPrefs.getStringSet(
+    fun readerBottomButtons() = this.preferenceStore.getStringSet(
         Keys.readerBottomButtons,
         ReaderBottomButton.BUTTONS_DEFAULTS,
     )
 
     fun showNavigationOverlayNewUser() =
-        flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)
+        this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUser, true)
 
     fun showNavigationOverlayNewUserWebtoon() =
-        flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
+        this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
 
-    fun preloadSize() = flowPrefs.getInt(Keys.preloadSize, 6)
+    fun preloadSize() = this.preferenceStore.getInt(Keys.preloadSize, 6)
 
-    fun updateOnlyNonCompleted() = prefs.getBoolean(Keys.updateOnlyNonCompleted, false)
+    fun autoUpdateTrack() = this.preferenceStore.getBoolean(Keys.autoUpdateTrack, true)
 
-    fun updateOnlyWhenTrackingIsNotFinished() = prefs.getBoolean(Keys.updateOnlyWhenTrackingIsNotFinished, false)
+    fun trackMarkedAsRead() = this.preferenceStore.getBoolean(Keys.trackMarkedAsRead, false)
 
-    fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)
+    fun trackingsToAddOnline() = this.preferenceStore.getStringSet(Keys.trackingsToAddOnline, emptySet())
 
-    fun trackMarkedAsRead() = prefs.getBoolean(Keys.trackMarkedAsRead, false)
+    fun lastVersionCode() = this.preferenceStore.getInt("last_version_code", 0)
 
-    fun trackingsToAddOnline() = flowPrefs.getStringSet(Keys.trackingsToAddOnline, emptySet())
+    fun browseAsList() = this.preferenceStore.getBoolean(Keys.catalogueAsList, false)
 
-    fun lastUsedCatalogueSource() = flowPrefs.getLong(Keys.lastUsedCatalogueSource, -1)
+    fun browseShowLibrary() = this.preferenceStore.getBoolean(Keys.catalogueShowLibrary, true)
 
-    fun lastUsedCategory() = flowPrefs.getInt(Keys.lastUsedCategory, 0)
+    fun sourceUsername(source: Source) = this.preferenceStore.getString(Keys.sourceUsername(source.id), "")
 
-    fun lastUsedSources() = flowPrefs.getStringSet("last_used_sources", emptySet())
+    fun sourcePassword(source: Source) = this.preferenceStore.getString(Keys.sourcePassword(source.id), "")
 
-    fun lastVersionCode() = flowPrefs.getInt("last_version_code", 0)
+    fun sourceUrl(source: Source) = this.preferenceStore.getString(Keys.sourceUrl(source.id), "")
 
-    fun browseAsList() = flowPrefs.getBoolean(Keys.catalogueAsList, false)
+    fun mangaDexUserName() = this.preferenceStore.getString(Keys.mangadexUserName, "")
 
-    fun browseShowLibrary() = flowPrefs.getBoolean(Keys.catalogueShowLibrary, true)
+    fun removeMangaDexUserName() = mangaDexUserName().delete()
 
-    fun enabledLanguages() =
-        flowPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
-
-    fun sourceSorting() = flowPrefs.getInt(Keys.sourcesSort, 0)
-
-    fun sourceUsername(source: Source) = prefs.getString(Keys.sourceUsername(source.id), "")
-
-    fun sourcePassword(source: Source) = prefs.getString(Keys.sourcePassword(source.id), "")
-
-    fun sourceUrl(source: Source) = prefs.getString(Keys.sourceUrl(source.id), "")
-
-    fun mangaDexUserName() = flowPrefs.getString(Keys.mangadexUserName, "")
-
-    fun mangadexUserUUID() = prefs.getString(Keys.mangadexUserUUID, "")
+    fun mangadexUserUUID() = this.preferenceStore.getString(Keys.mangadexUserUUID)
 
     fun removeOldCredentials(source: Source) {
-        prefs.edit()
-            .remove(Keys.sourceUsername(source.id))
-            .remove(Keys.sourcePassword(source.id))
-            .apply()
+
+        this.preferenceStore.getString(Keys.sourceUsername(source.id)).delete()
+        this.preferenceStore.getString(Keys.sourcePassword(source.id)).delete()
     }
 
     fun setKomgaCredentials(source: Source, username: String, password: String, url: String) {
-        prefs.edit()
-            .putString(Keys.sourceUsername(source.id), username)
-            .putString(Keys.sourcePassword(source.id), password)
-            .putString(Keys.sourceUrl(source.id), url)
-            .apply()
+        this.preferenceStore.getString(Keys.sourceUsername(source.id)).set(username)
+        this.preferenceStore.getString(Keys.sourcePassword(source.id)).set(password)
+        this.preferenceStore.getString(Keys.sourceUrl(source.id)).set(url)
     }
 
-    fun trackUsername(sync: TrackService) = prefs.getString(Keys.trackUsername(sync.id), "")
+    fun trackUsername(sync: TrackService) = this.preferenceStore.getString(Keys.trackUsername(sync.id))
 
-    fun trackPassword(sync: TrackService) = prefs.getString(Keys.trackPassword(sync.id), "")
+    fun trackPassword(sync: TrackService) = this.preferenceStore.getString(Keys.trackPassword(sync.id))
 
     fun setTrackCredentials(sync: TrackService, username: String, password: String) {
-        prefs.edit()
-            .putString(Keys.trackUsername(sync.id), username)
-            .putString(Keys.trackPassword(sync.id), password)
-            .apply()
+        this.preferenceStore.getString(Keys.trackUsername(sync.id)).set(username)
+        this.preferenceStore.getString(Keys.trackPassword(sync.id)).set(password)
     }
 
-    fun trackToken(sync: TrackService) = flowPrefs.getString(Keys.trackToken(sync.id), "")
+    fun trackToken(sync: TrackService) = this.preferenceStore.getString(Keys.trackToken(sync.id))
 
-    fun anilistScoreType() = flowPrefs.getString("anilist_score_type", "POINT_10")
+    fun anilistScoreType() = this.preferenceStore.getString("anilist_score_type", "POINT_10")
 
-    fun backupsDirectory() = flowPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
+    fun backupsDirectory() = this.preferenceStore.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun dateFormat(format: String = flowPrefs.getString(Keys.dateFormat, "").get()): DateFormat =
+    fun dateFormat(format: String = this.preferenceStore.getString(Keys.dateFormat, "").get()): DateFormat =
         when (format) {
             "" -> DateFormat.getDateInstance(DateFormat.SHORT)
             else -> SimpleDateFormat(format, Locale.getDefault())
         }
 
     fun downloadsDirectory() =
-        flowPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
+        this.preferenceStore.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
-    fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
+    fun downloadOnlyOverWifi() = this.preferenceStore.getBoolean(Keys.downloadOnlyOverWifi, true)
 
-    fun folderPerManga() = prefs.getBoolean(Keys.folderPerManga, false)
+    fun folderPerManga() = this.preferenceStore.getBoolean(Keys.folderPerManga, false)
 
-    fun librarySearchSuggestion() = flowPrefs.getString(Keys.librarySearchSuggestion, "")
+    fun numberOfBackups() = this.preferenceStore.getInt(Keys.numberOfBackups, 2)
 
-    fun showLibrarySearchSuggestions() =
-        flowPrefs.getBoolean(Keys.showLibrarySearchSuggestions, false)
+    fun backupInterval() = this.preferenceStore.getInt(Keys.backupInterval, 0)
 
-    fun lastLibrarySuggestion() = flowPrefs.getLong("last_library_suggestion", 0L)
+    fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)
 
-    fun numberOfBackups() = flowPrefs.getInt(Keys.numberOfBackups, 2)
+    fun removeAfterMarkedAsRead() = this.preferenceStore.getBoolean(Keys.removeAfterMarkedAsRead, false)
 
-    fun backupInterval() = flowPrefs.getInt(Keys.backupInterval, 0)
+    fun saveChaptersAsCBZ() = this.preferenceStore.getBoolean("save_chapter_as_cbz", true)
 
-    fun removeAfterReadSlots() = prefs.getInt(Keys.removeAfterReadSlots, -1)
+    fun splitTallImages() = this.preferenceStore.getBoolean("split_tall_images", false)
 
-    fun removeAfterMarkedAsRead() = prefs.getBoolean(Keys.removeAfterMarkedAsRead, false)
+    fun doublePageRotate() = this.preferenceStore.getBoolean("double_page_rotate", false)
 
-    fun libraryUpdateInterval() = flowPrefs.getInt(Keys.libraryUpdateInterval, 24)
+    fun doublePageRotateReverse() = this.preferenceStore.getBoolean("double_page_rotate_reverse", false)
 
-    fun libraryUpdateLastTimestamp() = flowPrefs.getLong("library_update_last_timestamp", 0L)
+    fun downloadNewChapters() = this.preferenceStore.getBoolean("download_new")
 
-    fun libraryUpdateDeviceRestriction() =
-        flowPrefs.getStringSet(Keys.libraryUpdateDeviceRestriction, emptySet())
+    fun downloadNewChaptersInCategories() = this.preferenceStore.getStringSet("download_new_categories")
 
-    fun libraryUpdateCategories() = flowPrefs.getStringSet(Keys.libraryUpdateCategories, emptySet())
-    fun libraryUpdateCategoriesExclude() = flowPrefs.getStringSet(Keys.libraryUpdateCategoriesExclude, emptySet())
+    fun excludeCategoriesInDownloadNew() = this.preferenceStore.getStringSet("download_new_categories_exclude")
 
-    fun libraryUpdatePrioritization() = flowPrefs.getInt(Keys.libraryUpdatePrioritization, 0)
+    fun lang() = this.preferenceStore.getString(Keys.lang, "")
 
-    fun libraryLayout() = flowPrefs.getInt(Keys.libraryLayout, LibraryItem.LAYOUT_COMFORTABLE_GRID)
+    fun langsToShow() = this.preferenceStore.getString(Keys.langToShow, "en")
 
-    fun gridSize() = flowPrefs.getFloat(Keys.gridSize, 1f)
+    fun autoDownloadWhileReading() = this.preferenceStore.getInt("auto_download_while_reading", 0)
 
-    fun uniformGrid() = flowPrefs.getBoolean(Keys.uniformGrid, true)
+    fun defaultCategory() = this.preferenceStore.getInt(Keys.defaultCategory, -1)
 
-    fun outlineOnCovers() = flowPrefs.getBoolean(Keys.outlineOnCovers, true)
+    fun skipRead() = this.preferenceStore.getBoolean(Keys.skipRead, false)
 
-    fun downloadBadge() = flowPrefs.getBoolean(Keys.downloadBadge, false)
+    fun skipFiltered() = this.preferenceStore.getBoolean(Keys.skipFiltered, true)
 
-    fun filterDownloaded() = flowPrefs.getInt(Keys.filterDownloaded, 0)
+    fun skipDuplicates() = this.preferenceStore.getBoolean(Keys.skipDuplicates, false)
 
-    fun filterUnread() = flowPrefs.getInt(Keys.filterUnread, 0)
-
-    fun filterCompleted() = flowPrefs.getInt(Keys.filterCompleted, 0)
-
-    fun filterBookmarked() = flowPrefs.getInt("pref_filter_bookmarked_key", 0)
-
-    fun filterTracked() = flowPrefs.getInt(Keys.filterTracked, 0)
-
-    fun filterMangaType() = flowPrefs.getInt(Keys.filterMangaType, 0)
-
-    fun showEmptyCategoriesWhileFiltering() =
-        flowPrefs.getBoolean(Keys.showEmptyCategoriesFiltering, false)
-
-    fun filterMerged() = flowPrefs.getInt(Keys.filterMerged, 0)
-
-    fun filterMissingChapters() = flowPrefs.getInt(Keys.filterMissingChapters, 0)
-
-    fun librarySortingMode() = flowPrefs.getInt(Keys.librarySortingMode, 0)
-
-    fun librarySortingAscending() = flowPrefs.getBoolean("library_sorting_ascending", true)
-
-    fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
-
-    fun collapsedCategories() = flowPrefs.getStringSet("collapsed_categories", mutableSetOf())
-
-    fun collapsedDynamicCategories() =
-        flowPrefs.getStringSet("collapsed_dynamic_categories", mutableSetOf())
-
-    fun collapsedDynamicAtBottom() = flowPrefs.getBoolean("collapsed_dynamic_at_bottom", false)
-
-    fun hiddenSources() = flowPrefs.getStringSet("hidden_catalogues", mutableSetOf())
-
-    fun pinnedCatalogues() = flowPrefs.getStringSet("pinned_catalogues", mutableSetOf())
-
-    fun saveChaptersAsCBZ() = flowPrefs.getBoolean("save_chapter_as_cbz", true)
-
-    fun splitTallImages() = flowPrefs.getBoolean("split_tall_images", false)
-
-    fun doublePageRotate() = flowPrefs.getBoolean("double_page_rotate", false)
-
-    fun doublePageRotateReverse() = flowPrefs.getBoolean("double_page_rotate_reverse", false)
-
-    fun downloadNewChapters() = flowPrefs.getBoolean(Keys.downloadNew, false)
-
-    fun downloadNewChaptersInCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
-    fun excludeCategoriesInDownloadNew() = flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
-
-    fun lang() = prefs.getString(Keys.lang, "")
-
-    fun langsToShow() = flowPrefs.getString(Keys.langToShow, "en")
-
-    fun autoDownloadWhileReading() = flowPrefs.getInt("auto_download_while_reading", 0)
-
-    fun defaultCategory() = prefs.getInt(Keys.defaultCategory, -1)
-
-    fun skipRead() = prefs.getBoolean(Keys.skipRead, false)
-
-    fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, true)
-
-    fun skipDuplicates() = flowPrefs.getBoolean(Keys.skipDuplicates, false)
-
-    fun useBiometrics() = flowPrefs.getBoolean(Keys.useBiometrics, false)
-
-    fun lockAfter() = flowPrefs.getInt(Keys.lockAfter, 0)
-
-    fun lastUnlock() = flowPrefs.getLong(Keys.lastUnlock, 0)
-
-    fun secureScreen() = flowPrefs.getEnum("secure_screen_v2", Values.SecureScreenMode.INCOGNITO)
-
-    fun hideNotificationContent() = prefs.getBoolean(Keys.hideNotificationContent, false)
-
-    fun removeArticles() = flowPrefs.getBoolean(Keys.removeArticles, false)
-
-    fun migrateFlags() = flowPrefs.getInt("migrate_flags", Int.MAX_VALUE)
-
-    fun trustedSignatures() = flowPrefs.getStringSet("trusted_signatures", emptySet())
-
-    // using string instead of set so it is ordered
-    fun migrationSources() = flowPrefs.getString("migrate_sources", "")
-
-    fun useSourceWithMost() = flowPrefs.getBoolean("use_source_with_most", false)
-
-    fun skipPreMigration() = flowPrefs.getBoolean(Keys.skipPreMigration, false)
-
-    fun defaultMangaOrder() = flowPrefs.getString("default_manga_order", "")
-
-    fun refreshCoversToo() = flowPrefs.getBoolean(Keys.refreshCoversToo, true)
-
-    fun updateOnRefresh() = flowPrefs.getInt(Keys.updateOnRefresh, -1)
-
-    fun recentsViewType() = flowPrefs.getInt("recents_view_type", 0)
+    fun recentsViewType() = this.preferenceStore.getInt("recents_view_type", 0)
 
     fun showRecentsDownloads() =
-        flowPrefs.getEnum(Keys.showDLsInRecents, RecentMangaAdapter.ShowRecentsDLs.All)
+        this.preferenceStore.getEnum(Keys.showDLsInRecents, RecentMangaAdapter.ShowRecentsDLs.All)
 
-    fun showRecentsRemHistory() = flowPrefs.getBoolean(Keys.showRemHistoryInRecents, true)
+    fun showRecentsRemHistory() = this.preferenceStore.getBoolean(Keys.showRemHistoryInRecents, true)
 
-    fun showReadInAllRecents() = flowPrefs.getBoolean(Keys.showReadInAllRecents, false)
+    fun showReadInAllRecents() = this.preferenceStore.getBoolean(Keys.showReadInAllRecents, false)
 
-    fun showUpdatedTime() = flowPrefs.getBoolean(Keys.showUpdatedTime, false)
+    fun showUpdatedTime() = this.preferenceStore.getBoolean(Keys.showUpdatedTime, false)
 
-    fun sortFetchedTime() = flowPrefs.getBoolean("sort_fetched_time", false)
+    fun sortFetchedTime() = this.preferenceStore.getBoolean("sort_fetched_time", false)
 
-    fun groupChaptersUpdates() = flowPrefs.getBoolean(Keys.groupChaptersUpdates, false)
+    fun groupChaptersUpdates() = this.preferenceStore.getBoolean(Keys.groupChaptersUpdates, false)
 
-    fun groupChaptersHistory() = flowPrefs.getBoolean(Keys.groupChaptersHistory, true)
+    fun groupChaptersHistory() = this.preferenceStore.getBoolean(Keys.groupChaptersHistory, true)
 
-    fun showTitleFirstInRecents() = flowPrefs.getBoolean(Keys.showTitleFirstInRecents, false)
+    fun showTitleFirstInRecents() = this.preferenceStore.getBoolean(Keys.showTitleFirstInRecents, false)
 
-    fun lastExtCheck() = flowPrefs.getLong("last_ext_check", 0)
+    fun lastAppCheck() = this.preferenceStore.getLong("last_app_check", 0)
 
-    fun lastAppCheck() = flowPrefs.getLong("last_app_check", 0)
+    fun alwaysShowChapterTransition() = this.preferenceStore.getBoolean(Keys.alwaysShowChapterTransition, true)
 
-    fun unreadBadgeType() = flowPrefs.getInt("unread_badge_type", 2)
+    fun deleteRemovedChapters() = this.preferenceStore.getInt(Keys.deleteRemovedChapters, 0)
 
-    fun categoryNumberOfItems() = flowPrefs.getBoolean(Keys.categoryNumberOfItems, false)
+    fun hideButtonText() = this.preferenceStore.getBoolean(Keys.hideMangaDetailButtonText, false)
 
-    fun hideStartReadingButton() = flowPrefs.getBoolean("hide_reading_button", false)
+    fun extraLargeBackdrop() = this.preferenceStore.getBoolean(Keys.extraLargeBackdrop, false)
 
-    fun alwaysShowChapterTransition() = flowPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
-
-    fun deleteRemovedChapters() = flowPrefs.getInt(Keys.deleteRemovedChapters, 0)
-
-    fun showAllCategories() = flowPrefs.getBoolean("show_all_categories", true)
-
-    fun showAllCategoriesWhenSearchingSingleCategory() = flowPrefs.getBoolean("show_all_categories_when_searching_single_category", false)
-
-    fun hopperGravity() = flowPrefs.getInt("hopper_gravity", 1)
-
-    fun filterOrder() = flowPrefs.getString("filter_order", FilterBottomSheet.Filters.DEFAULT_ORDER)
-
-    fun hopperLongPressAction() = flowPrefs.getInt(Keys.hopperLongPress, 0)
-
-    fun hideHopper() = flowPrefs.getBoolean("hide_hopper", false)
-
-    fun hideButtonText() = flowPrefs.getBoolean(Keys.hideMangaDetailButtonText, false)
-
-    fun extraLargeBackdrop() = flowPrefs.getBoolean(Keys.extraLargeBackdrop, false)
-
-    fun wrapAltTitles() = flowPrefs.getBoolean(Keys.wrapAltTitles, false)
-
-    fun fasterLibraryUpdates() = flowPrefs.getBoolean(Keys.fasterLibraryUpdates, false)
-
-    fun autohideHopper() = flowPrefs.getBoolean(Keys.autoHideHopper, true)
-
-    fun groupLibraryBy() = flowPrefs.getInt("group_library_by", 0)
-
-    fun showCategoryInTitle() = flowPrefs.getBoolean("category_in_title", false)
-
-    fun onlySearchPinned() = flowPrefs.getBoolean(Keys.onlySearchPinned, false)
+    fun wrapAltTitles() = this.preferenceStore.getBoolean(Keys.wrapAltTitles, false)
 
     // Tutorial preferences
-    fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
+    fun shownFilterTutorial() = this.preferenceStore.getBoolean("shown_filter_tutorial", false)
 
-    fun shownChapterSwipeTutorial() = flowPrefs.getBoolean("shown_swipe_tutorial", false)
+    fun shownLongPressCategoryTutorial() = this.preferenceStore.getBoolean("shown_long_press_category")
 
-    fun shownDownloadQueueTutorial() = flowPrefs.getBoolean("shown_download_queue", false)
+    fun shownHopperSwipeTutorial() = this.preferenceStore.getBoolean("shown_hopper_swipe")
 
-    fun shownLongPressCategoryTutorial() = flowPrefs.getBoolean("shown_long_press_category", false)
+    fun shownChapterSwipeTutorial() = this.preferenceStore.getBoolean("shown_swipe_tutorial", false)
 
-    fun shownHopperSwipeTutorial() = flowPrefs.getBoolean("shown_hopper_swipe", false)
+    fun shownDownloadQueueTutorial() = this.preferenceStore.getBoolean("shown_download_queue", false)
 
-    fun shownDownloadSwipeTutorial() = flowPrefs.getBoolean("shown_download_tutorial", false)
+    fun shownDownloadSwipeTutorial() = this.preferenceStore.getBoolean("shown_download_tutorial", false)
 
-    fun hideBottomNavOnScroll() = flowPrefs.getBoolean("false_key") // flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, false)
+    fun hideBottomNavOnScroll() = this.preferenceStore.getBoolean("false_key") // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
 
-    fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
+    fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
 
-    fun themeMangaDetails() = prefs.getBoolean(Keys.themeMangaDetails, true)
+    fun themeMangaDetails() = this.preferenceStore.getBoolean(Keys.themeMangaDetails, true)
 
-    fun useLargeToolbar() = flowPrefs.getBoolean("use_large_toolbar", false)
+    fun useLargeToolbar() = this.preferenceStore.getBoolean("use_large_toolbar", false)
 
-    fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
+    fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
+    fun openChapterInShortcuts() = this.preferenceStore.getBoolean(Keys.openChapterInShortcuts, true)
 
-    fun showSeriesInShortcuts() = prefs.getBoolean(Keys.showSeriesInShortcuts, true)
-    fun openChapterInShortcuts() = prefs.getBoolean(Keys.openChapterInShortcuts, true)
-
-    fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
-
-    fun hasPromptedBeforeUpdateAll() = flowPrefs.getBoolean("has_prompted_update_all", false)
-
-    fun sideNavMode() = flowPrefs.getInt(Keys.sideNavMode, 0)
+    fun sideNavMode() = this.preferenceStore.getInt(Keys.sideNavMode, 0)
 
     fun appShouldAutoUpdate() =
-        prefs.getInt(Keys.shouldAutoUpdate, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
+        this.preferenceStore.getInt(Keys.shouldAutoUpdate, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
 
-    fun filterChapterByRead() = flowPrefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
+    fun filterChapterByRead() = this.preferenceStore.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
 
     fun filterChapterByDownloaded() =
-        flowPrefs.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)
+        this.preferenceStore.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)
 
     fun filterChapterByBookmarked() =
-        flowPrefs.getInt(Keys.defaultChapterFilterByBookmarked, Manga.SHOW_ALL)
+        this.preferenceStore.getInt(Keys.defaultChapterFilterByBookmarked, Manga.SHOW_ALL)
 
     fun sortChapterOrder() =
-        flowPrefs.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
+        this.preferenceStore.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
 
-    fun hideChapterTitlesByDefault() = flowPrefs.getBoolean(Keys.hideChapterTitles, false)
+    fun hideChapterTitlesByDefault() = this.preferenceStore.getBoolean(Keys.hideChapterTitles, false)
 
-    fun chaptersDescAsDefault() = flowPrefs.getBoolean(Keys.chaptersDescAsDefault, true)
-
-    fun sortChapterByAscendingOrDescending() =
-        prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
+    fun chaptersDescAsDefault() = this.preferenceStore.getBoolean(Keys.chaptersDescAsDefault, true)
 
     fun blockedScanlators() =
-        flowPrefs.getStringSet(Keys.blockedScanlators, emptySet())
+        this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
 
-    fun coverRatios() = flowPrefs.getStringSet(Keys.coverRatios, emptySet())
+    fun coverRatios() = this.preferenceStore.getStringSet(Keys.coverRatios, emptySet())
 
-    fun coverColors() = flowPrefs.getStringSet(Keys.coverColors, emptySet())
+    fun coverColors() = this.preferenceStore.getStringSet(Keys.coverColors, emptySet())
 
-    fun coverVibrantColors() = flowPrefs.getStringSet(Keys.coverVibrantColors, emptySet())
+    fun coverVibrantColors() = this.preferenceStore.getStringSet(Keys.coverVibrantColors, emptySet())
 
-    fun useStaggeredGrid() = flowPrefs.getBoolean("use_staggered_grid", false)
+    fun dataSaver() = this.preferenceStore.getBoolean(Keys.dataSaver, false)
 
-    fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
+    fun thumbnailQuality() = this.preferenceStore.getInt(Keys.thumbnailQuality, 0)
 
-    fun thumbnailQuality() = prefs.getInt(Keys.thumbnailQuality, 0)
+    fun usePort443Only() = this.preferenceStore.getBoolean(Keys.enablePort443Only, false)
 
-    fun usePort443Only() = prefs.getBoolean(Keys.enablePort443Only, false)
+    fun showContentRatingFilter() = this.preferenceStore.getBoolean(Keys.showContentRatingFilter, true)
 
-    fun verboseLogging() = prefs.getBoolean(Keys.verboseLogging, BuildConfig.DEBUG)
+    fun addToLibraryAsPlannedToRead() = this.preferenceStore.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
-    fun showContentRatingFilter(): Boolean = prefs.getBoolean(Keys.showContentRatingFilter, true)
+    fun contentRatingSelections() = this.preferenceStore.getStringSet(Keys.contentRating, setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive))
 
     fun enableDefaultCustomLists() = flowPrefs.getBoolean(Keys.enableDefaultCustomLists, false)
 
@@ -568,33 +386,27 @@ class PreferencesHelper(val context: Context) {
         prefs.edit().putString(Keys.defaultCustomLists, uuid.joinToString(Track.LIST_SEPERATOR)).apply()
     }
 
-    fun contentRatingSelections(): MutableSet<String> =
-        prefs.getStringSet(
-            Keys.contentRating,
-            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive),
-        )!!
-
-    fun autoTrackContentRatingSelections(): MutableSet<String> =
-        prefs.getStringSet(
+    fun autoTrackContentRatingSelections() =
+        this.preferenceStore.getStringSet(
             Keys.autoTrackContentRating,
             setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic),
-        )!!
+        )
 
-    fun autoAddTracker() = flowPrefs.getStringSet(Keys.autoAddTracker, setOf(TrackManager.MDLIST.toString()))
+    fun autoAddTracker() = this.preferenceStore.getStringSet(Keys.autoAddTracker, setOf(TrackManager.MDLIST.toString()))
 
-    fun setAutoAddTracker(trackersToAutoAdd: Set<String>) = prefs.edit().putStringSet(Keys.autoAddTracker, trackersToAutoAdd).apply()
+    fun setAutoAddTracker(trackersToAutoAdd: Set<String>) {
+        autoAddTracker().set(trackersToAutoAdd)
+    }
 
-    fun sessionToken() = prefs.getString(Keys.sessionToken, "")
+    fun sessionToken() = this.preferenceStore.getString(Keys.sessionToken)
 
-    fun refreshToken() = prefs.getString(Keys.refreshToken, "")
+    fun refreshToken() = this.preferenceStore.getString(Keys.refreshToken)
 
     fun clearTokens() {
-        prefs.edit()
-            .remove(Keys.sessionToken)
-            .remove(Keys.refreshToken)
-            .remove(Keys.lastRefreshTokenTime)
-            .remove(Keys.mangadexCodeVerifier)
-            .apply()
+        sessionToken().delete()
+        refreshToken().delete()
+        lastRefreshTime().delete()
+        codeVerifier().delete()
     }
 
     fun setTokens(refresh: String, session: String) {
@@ -603,11 +415,10 @@ class PreferencesHelper(val context: Context) {
         } else {
             System.currentTimeMillis()
         }
-        prefs.edit()
-            .putString(Keys.sessionToken, session)
-            .putString(Keys.refreshToken, refresh)
-            .putLong(Keys.lastRefreshTokenTime, time)
-            .apply()
+
+        sessionToken().set(session)
+        refreshToken().set(refresh)
+        lastRefreshTime().set(time)
     }
 
     fun setUserInfo(userUUID: String, userName: String) {
@@ -626,18 +437,15 @@ class PreferencesHelper(val context: Context) {
         }
     }
 
-    fun lastRefreshTime(): Long {
-        return prefs.getLong(Keys.lastRefreshTokenTime, 0)
-    }
-
-    fun readingSync(): Boolean = prefs.getBoolean(Keys.readingSync, false)
+    fun lastRefreshTime() = this.preferenceStore.getLong(Keys.lastRefreshTokenTime, 0)
+    fun readingSync() = this.preferenceStore.getBoolean(Keys.readingSync, false)
 
     fun mangadexSyncToLibraryIndexes() =
-        flowPrefs.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
+        this.preferenceStore.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
 
-    fun codeVerifer(): String {
-        val codeVerifier = prefs.getString(Keys.mangadexCodeVerifier, null)
-        return when (codeVerifier == null) {
+    fun codeVerifier(): Preference<String> {
+        val codeVerifier = this.preferenceStore.getString(Keys.mangadexCodeVerifier)
+        return when (codeVerifier.get().isEmpty()) {
             false -> codeVerifier
             true -> {
                 val secureRandom = SecureRandom()
@@ -645,8 +453,8 @@ class PreferencesHelper(val context: Context) {
                 secureRandom.nextBytes(bytes)
                 val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
                 val newCodeVerifier = Base64.encodeToString(bytes, encoding)
-                prefs.edit().putString(Keys.mangadexCodeVerifier, newCodeVerifier).apply()
-                newCodeVerifier
+                this.preferenceStore.getString(Keys.mangadexCodeVerifier).set(newCodeVerifier)
+                this.preferenceStore.getString(Keys.mangadexCodeVerifier)
             }
 
         }

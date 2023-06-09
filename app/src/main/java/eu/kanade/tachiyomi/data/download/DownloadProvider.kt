@@ -13,8 +13,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
-import eu.kanade.tachiyomi.util.storage.DiskUtil
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,6 +20,8 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -52,7 +52,7 @@ class DownloadProvider(private val context: Context) {
     }
 
     init {
-        preferences.downloadsDirectory().asFlow().drop(1).onEach {
+        preferences.downloadsDirectory().changes().drop(1).onEach {
             downloadsDir = UniFile.fromUri(context, it.toUri())
         }.launchIn(scope)
     }

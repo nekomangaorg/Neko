@@ -7,13 +7,13 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.track.toTrackServiceItem
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -44,7 +44,7 @@ class TrackingSyncService {
 
 
             if (autoAddTracker.size > 1) {
-                val validContentRatings = preferences.autoTrackContentRatingSelections()
+                val validContentRatings = preferences.autoTrackContentRatingSelections().get()
                 val contentRating = manga.getContentRating()
                 if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
                     autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->

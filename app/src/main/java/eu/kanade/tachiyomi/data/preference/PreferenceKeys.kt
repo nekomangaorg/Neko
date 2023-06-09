@@ -93,29 +93,15 @@ object PreferenceKeys {
 
     const val webtoonEnableZoomOut = "webtoon_enable_zoom_out"
 
-    const val updateOnlyNonCompleted = "pref_update_only_non_completed_key"
-
-    const val updateOnlyWhenTrackingIsNotFinished = "pref_update_only_tracking_not_finished_key"
-
-    const val fasterLibraryUpdates = "faster_library_updates"
-
     const val autoUpdateTrack = "pref_auto_update_manga_sync_key"
 
     const val trackMarkedAsRead = "track_marked_as_read"
 
     const val trackingsToAddOnline = "pref_tracking_for_online"
 
-    const val lastUsedCatalogueSource = "last_catalogue_source"
-
-    const val lastUsedCategory = "last_used_category"
-
     const val catalogueAsList = "pref_display_catalogue_as_list"
 
     const val catalogueShowLibrary = "pref_display_catalogue_already_in_library"
-
-    const val enabledLanguages = "source_languages"
-
-    const val sourcesSort = "sources_sort"
 
     const val backupDirectory = "backup_directory"
 
@@ -124,10 +110,6 @@ object PreferenceKeys {
     const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
 
     const val folderPerManga = "create_folder_per_manga"
-
-    const val showLibrarySearchSuggestions = "show_library_search_suggestions"
-
-    const val librarySearchSuggestion = "library_search_suggestion"
 
     const val numberOfBackups = "backup_slots"
 
@@ -139,55 +121,7 @@ object PreferenceKeys {
 
     const val removeAfterMarkedAsRead = "pref_remove_after_marked_as_read_key"
 
-    const val libraryUpdateInterval = "pref_library_update_interval_key"
-
-    const val libraryUpdateDeviceRestriction = "library_update_restriction"
-
-    const val libraryUpdateCategories = "library_update_categories"
-    const val libraryUpdateCategoriesExclude = "library_update_categories_exclude"
-
-    const val libraryUpdatePrioritization = "library_update_prioritization"
-
-    const val filterDownloaded = "pref_filter_downloaded_key"
-
-    const val filterUnread = "pref_filter_unread_key"
-
-    const val filterCompleted = "pref_filter_completed_key"
-
-    const val filterTracked = "pref_filter_tracked_key"
-
-    const val filterMangaType = "pref_filter_manga_type_key"
-
-    const val filterMerged = "pref_filter_merged_key"
-
-    const val filterMissingChapters = "pref_filter_missing_chapters_key"
-
     const val blockedScanlators = "blocked_scanlators"
-
-    const val showEmptyCategoriesFiltering = "show_empty_categories_filtering"
-
-    const val librarySortingMode = "library_sorting_mode"
-
-    const val automaticUpdates = "automatic_updates"
-
-    const val autoHideHopper = "autohide_hopper"
-
-    const val hopperLongPress = "hopper_long_press"
-
-    const val onlySearchPinned = "only_search_pinned"
-
-    const val downloadNew = "download_new"
-
-    const val downloadNewCategories = "download_new_categories"
-    const val downloadNewCategoriesExclude = "download_new_categories_exclude"
-
-    const val libraryLayout = "pref_display_library_layout"
-
-    const val gridSize = "grid_size_float"
-
-    const val uniformGrid = "uniform_grid"
-
-    const val outlineOnCovers = "outline_on_covers"
 
     const val lang = "app_language"
 
@@ -203,24 +137,6 @@ object PreferenceKeys {
 
     const val skipDuplicates = "skip_duplicates"
 
-    const val downloadBadge = "display_download_badge"
-
-    const val useBiometrics = "use_biometrics"
-
-    const val lockAfter = "lock_after"
-
-    const val lastUnlock = "last_unlock"
-
-    const val hideNotificationContent = "hide_notification_content"
-
-    const val removeArticles = "remove_articles"
-
-    const val skipPreMigration = "skip_pre_migration"
-
-    const val refreshCoversToo = "refresh_covers_too"
-
-    const val updateOnRefresh = "update_on_refresh"
-
     const val showDLsInRecents = "show_dls_in_recents"
     const val showRemHistoryInRecents = "show_rem_history_in_recents"
     const val showReadInAllRecents = "show_read_in_all_recents"
@@ -231,22 +147,12 @@ object PreferenceKeys {
     const val showUpdatedTime = "show_updated_time"
     const val groupChaptersUpdates = "group_chapters_updates"
 
-    const val categoryNumberOfItems = "display_number_of_items"
-
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
-
-    const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
 
     const val sideNavIconAlignment = "pref_side_nav_icon_alignment"
 
     const val showSeriesInShortcuts = "show_series_shortcuts"
     const val openChapterInShortcuts = "open_chapter_shortcuts"
-
-    const val dohProvider = "doh_provider"
-
-    const val showNsfwSource = "show_nsfw_source"
-    const val showNsfwExtension = "show_nsfw_extension"
-    const val labelNsfwExtension = "label_nsfw_extension"
 
     const val themeMangaDetails = "theme_manga_details"
 
@@ -255,8 +161,6 @@ object PreferenceKeys {
     const val hideMangaDetailButtonText = "hide_manga_detail_button_text"
 
     const val extraLargeBackdrop = "extra_large_backdrop"
-
-    const val incognitoMode = "incognito_mode"
 
     const val sideNavMode = "side_nav_mode"
 
@@ -325,8 +229,6 @@ object PreferenceKeys {
     const val autoAddTracker = "auto_add_tracker"
 
     const val enablePort443Only = "use_port_443_only_for_image_server"
-
-    const val verboseLogging = "verbose_logging"
 
     const val enableDefaultCustomLists = "enable_default_custom_lists"
 

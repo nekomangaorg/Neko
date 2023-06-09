@@ -9,10 +9,10 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 
 class RestoreHelper(val context: Context) {
 

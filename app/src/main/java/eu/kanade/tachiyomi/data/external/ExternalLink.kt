@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.external
 import androidx.annotation.DrawableRes
 import androidx.core.text.isDigitsOnly
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import org.nekomanga.constants.MdConstants
 
 data class AnimePlanet(override val id: String) : ExternalLink() {
     override val name = "AnimePlanet"

@@ -1,60 +1,3 @@
-import java.io.ByteArrayOutputStream
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-
-object Configs {
-    const val applicationId = "tachiyomi.mangadex"
-    const val compileSdkVersion = 33
-    const val minSdkVersion = 24
-    const val targetSdkVersion = 30
-    const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 189
-    const val versionName = "2.13.3"
-}
-
-fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
-fun getCommitCount() = providers.of(GitCommitCount::class) {}.get()
-fun getGitSha() = providers.of(GitSha::class) {}.get()
-
-// runCommand("git rev-list --count HEAD")
-//fun getGitSha() = runCommand("git rev-parse --short HEAD")
-
-abstract class GitSha : ValueSource<String, ValueSourceParameters.None> {
-    @get:Inject
-    abstract val execOperations: ExecOperations
-    override fun obtain(): String {
-        val byteOut = ByteArrayOutputStream()
-        execOperations.exec {
-            commandLine("git", "rev-parse", "--short", "HEAD")
-            standardOutput = byteOut
-        }
-        return String(byteOut.toByteArray()).trim()
-    }
-}
-
-abstract class GitCommitCount : ValueSource<String, ValueSourceParameters.None> {
-    @get:Inject
-    abstract val execOperations: ExecOperations
-    override fun obtain(): String {
-        val byteOut = ByteArrayOutputStream()
-        execOperations.exec {
-            commandLine("git", "rev-list", "--count", "HEAD")
-            standardOutput = byteOut
-        }
-        return String(byteOut.toByteArray()).trim()
-    }
-}
-
-fun runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
-    }
-    return String(byteOut.toByteArray()).trim()
-}
-
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -76,15 +19,16 @@ val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 
 android {
-    compileSdk = Configs.compileSdkVersion
+    compileSdk = AndroidConfig.compileSdkVersion
+    namespace = "eu.kanade.tachiyomi"
 
     defaultConfig {
-        minSdk = Configs.minSdkVersion
-        targetSdk = Configs.targetSdkVersion
-        applicationId = Configs.applicationId
-        versionCode = Configs.versionCode
-        versionName = Configs.versionName
-        testInstrumentationRunner = Configs.testInstrumentationRunner
+        minSdk = AndroidConfig.minSdkVersion
+        targetSdk = AndroidConfig.targetSdkVersion
+        applicationId = "tachiyomi.mangadex"
+        versionCode = 189
+        versionName = "2.13.3"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
@@ -172,11 +116,11 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
-    namespace = "eu.kanade.tachiyomi"
 }
 
 dependencies {
-
+    implementation(project(":constants"))
+    implementation(project(":core"))
     implementation(kotlinx.bundles.kotlin)
 
     coreLibraryDesugaring(libs.desugaring)
@@ -192,7 +136,6 @@ dependencies {
     implementation(libs.bundles.google)
     implementation(libs.bundles.firebase)
     implementation(libs.bundles.rx)
-    implementation(libs.flowprefs)
     implementation(libs.bundles.ok)
 
     // TLS 1.3 support for Android < 10
@@ -278,6 +221,7 @@ dependencies {
 tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.freeCompilerArgs += listOf(
+            "-Xcontext-receivers",
             "-opt-in=kotlin.Experimental",
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",

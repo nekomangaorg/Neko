@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 
 object MiuiUtil {
 

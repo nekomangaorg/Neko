@@ -12,11 +12,11 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.coroutineScope
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 
 class AppUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {

@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.source.model
 
 import android.net.Uri
-import eu.kanade.tachiyomi.network.ProgressListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import tachiyomi.core.network.ProgressListener
 
 @Serializable
 open class Page(

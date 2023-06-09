@@ -1,13 +1,16 @@
 package eu.kanade.tachiyomi.data.track.myanimelist
 
-import eu.kanade.tachiyomi.network.parseAs
 import java.io.IOException
+import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.Response
+import tachiyomi.core.network.parseAs
+import uy.kohesive.injekt.injectLazy
 
 class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var token: String?) : Interceptor {
 
     private var oauth: OAuth? = null
+    private val json: Json by injectLazy()
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
@@ -65,7 +68,9 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
             val oauthResponse = chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!))
 
             if (oauthResponse.isSuccessful) {
-                oauthResponse.parseAs<OAuth>()
+                with(json) {
+                    oauthResponse.parseAs<OAuth>()
+                }
             } else {
                 oauthResponse.close()
                 null

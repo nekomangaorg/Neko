@@ -4,7 +4,7 @@ import com.github.michaelbull.result.getOrThrow
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
@@ -16,17 +16,17 @@ import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.injectLazy
 
 class PageHandler {
 
-    val network: NetworkHelper by injectLazy()
+    val networkServices: NetworkServices by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
     val comikeyHandler: ComikeyHandler by injectLazy()
@@ -40,7 +40,7 @@ class PageHandler {
             loggycat { "fetching page list" }
 
             try {
-                val chapterAttributesDto = network.service.viewChapter(chapter.mangadex_chapter_id)
+                val chapterAttributesDto = networkServices.service.viewChapter(chapter.mangadex_chapter_id)
                     .onFailure {
                         this.log("trying to fetch page list")
                         throw Exception("error returned from chapterResponse")
@@ -79,16 +79,16 @@ class PageHandler {
                     throw Exception("This chapter has no pages, it might not be release yet, try refreshing")
                 }
 
-                val atHomeDto = network.atHomeService.getAtHomeServer(
+                val atHomeDto = networkServices.atHomeService.getAtHomeServer(
                     chapter.mangadex_chapter_id,
-                    preferences.usePort443Only(),
+                    preferences.usePort443Only().get(),
                 ).getOrResultError("trying to get at home response")
                     .getOrThrow { Exception(it.message()) }
 
                 return@withContext pageListParse(
                     chapter.mangadex_chapter_id,
                     atHomeDto,
-                    preferences.dataSaver(),
+                    preferences.dataSaver().get(),
                 )
             } catch (e: Exception) {
                 loggycat(LogPriority.ERROR, e) { "error processing page list" }

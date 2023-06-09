@@ -6,8 +6,8 @@ import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
@@ -22,7 +22,7 @@ import uy.kohesive.injekt.injectLazy
 
 class StatusHandler {
     val preferences: PreferencesHelper by injectLazy()
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkHelper>().authService }
+    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
 
     suspend fun fetchReadingStatusForAllManga(): Map<String, String?> {
         return withContext(Dispatchers.IO) {

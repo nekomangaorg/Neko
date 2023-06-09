@@ -16,19 +16,19 @@ import eu.davidea.flexibleadapter.items.IFilterable
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class LibraryItem(
     val manga: LibraryManga,
     header: LibraryHeaderItem,
-    private val preferences: PreferencesHelper = Injekt.get(),
+    private val libraryPreferences: LibraryPreferences = Injekt.get(),
 ) :
     AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
 
@@ -37,13 +37,13 @@ class LibraryItem(
     var filter = ""
 
     private val uniformSize: Boolean
-        get() = preferences.uniformGrid().get()
+        get() = libraryPreferences.uniformGrid().get()
 
     private val libraryLayout: Int
-        get() = preferences.libraryLayout().get()
+        get() = libraryPreferences.layout().get()
 
     val hideReadingButton: Boolean
-        get() = preferences.hideStartReadingButton().get()
+        get() = libraryPreferences.hideStartReadingButton().get()
 
     override fun getLayoutRes(): Int {
         return if (libraryLayout == LAYOUT_LIST || manga.isBlank()) {

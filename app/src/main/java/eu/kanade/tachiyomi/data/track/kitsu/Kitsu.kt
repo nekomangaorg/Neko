@@ -8,12 +8,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.util.system.loggycat
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import java.text.DecimalFormat
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 class Kitsu(private val context: Context, id: Int) : TrackStatusService(id) {
@@ -155,7 +155,7 @@ class Kitsu(private val context: Context, id: Int) : TrackStatusService(id) {
     }
 
     private fun getUserId(): String {
-        return getPassword()
+        return getPassword().get()
     }
 
     fun saveToken(oauth: OAuth?) {

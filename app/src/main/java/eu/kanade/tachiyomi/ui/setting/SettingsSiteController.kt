@@ -20,7 +20,6 @@ import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -32,9 +31,12 @@ import eu.kanade.tachiyomi.util.system.openInFirefox
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -64,7 +66,7 @@ class SettingsSiteController :
                     }
 
                     false -> {
-                        val url = MdConstants.Login.authUrl(preferences.codeVerifer())
+                        val url = MdConstants.Login.authUrl(preferences.codeVerifier().get())
                         when (BuildConfig.DEBUG) {
                             true -> activity?.openInFirefox(url)
                             false -> activity?.openInBrowser(url)
@@ -142,9 +144,9 @@ class SettingsSiteController :
         }
 
         preference {
-            preferences.blockedScanlators().asImmediateFlowIn(viewScope) {
+            preferences.blockedScanlators().changes().onEach {
                 isVisible = it.isNotEmpty()
-            }
+            }.launchIn(viewScope)
 
             titleRes = R.string.currently_blocked_scanlators
             onClick {

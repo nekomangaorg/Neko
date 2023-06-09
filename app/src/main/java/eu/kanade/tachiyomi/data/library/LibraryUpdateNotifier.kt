@@ -29,11 +29,13 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 
 class LibraryUpdateNotifier(private val context: Context) {
 
     private val preferences: PreferencesHelper by injectLazy()
+    private val securityPreferences: SecurityPreferences by injectLazy()
 
     /**
      * Pending intent of action that cancels the library update
@@ -76,7 +78,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param total the total progress.
      */
     fun showProgressNotification(manga: SManga, current: Int, total: Int) {
-        val title = if (preferences.hideNotificationContent()) {
+        val title = if (securityPreferences.hideNotificationContent().get()) {
             context.getString(R.string.checking_for_new_chapters)
         } else {
             manga.title
@@ -175,7 +177,7 @@ class LibraryUpdateNotifier(private val context: Context) {
         val updates = newUpdates.toImmutableMap()
         GlobalScope.launch {
             val notifications = ArrayList<Pair<Notification, Int>>()
-            if (!preferences.hideNotificationContent()) {
+            if (!securityPreferences.hideNotificationContent().get()) {
                 updates.forEach {
                     val manga = it.key
                     val chapters = it.value
@@ -274,7 +276,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     updates.size,
                                 ),
                             )
-                            if (!preferences.hideNotificationContent()) {
+                            if (!securityPreferences.hideNotificationContent().get()) {
                                 setStyle(
                                     NotificationCompat.BigTextStyle()
                                         .bigText(
@@ -284,7 +286,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                         ),
                                 )
                             }
-                        } else if (!preferences.hideNotificationContent()) {
+                        } else if (!securityPreferences.hideNotificationContent().get()) {
                             setContentText(updates.keys.first().title.chop(45))
                         }
                         priority = NotificationCompat.PRIORITY_HIGH

@@ -7,13 +7,13 @@ import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import kotlin.math.max
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class SettingsAppearanceController : SettingsController() {
 
@@ -55,7 +55,7 @@ class SettingsAppearanceController : SettingsController() {
                     }
                     true
                 }
-                preferences.nightMode().asImmediateFlow { mode ->
+                preferences.nightMode().changes().onEach { mode ->
                     isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }.launchIn(viewScope)
             }

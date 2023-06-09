@@ -13,12 +13,9 @@ import coil.request.Options
 import coil.request.Parameters
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import java.util.Date
@@ -37,7 +34,10 @@ import okio.Path.Companion.toOkioPath
 import okio.Source
 import okio.buffer
 import okio.sink
+import org.nekomanga.core.loggycat
+import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 import org.nekomanga.domain.manga.Artwork
+import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
 class MangaCoverFetcher(
@@ -72,6 +72,7 @@ class MangaCoverFetcher(
                 setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = File(url.substringAfter("file://")))
                 fileLoader(File(url.substringAfter("file://")))
             }
+
             null -> error("Invalid image")
         }
     }
@@ -179,6 +180,7 @@ class MangaCoverFetcher(
                 // don't take up okhttp cache
                 request.cacheControl(CACHE_CONTROL_NO_STORE)
             }
+
             else -> {
                 // This causes the request to fail with a 504 Unsatisfiable Request.
                 request.cacheControl(CACHE_CONTROL_NO_NETWORK_NO_CACHE)

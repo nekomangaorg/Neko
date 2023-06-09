@@ -48,14 +48,12 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.getMissingChapters
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
@@ -80,6 +78,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -94,6 +94,7 @@ import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -156,10 +157,10 @@ class MangaDetailPresenter(
                 false -> MergeType.values().toList().filterNot { it == MergeType.Komga }.toPersistentList()
             }
             _generalState.value = MangaConstants.MangaScreenGeneralState(
-                hasDefaultCategory = preferences.defaultCategory() != -1,
+                hasDefaultCategory = preferences.defaultCategory().get() != -1,
                 hideButtonText = preferences.hideButtonText().get(),
                 extraLargeBackdrop = preferences.extraLargeBackdrop().get(),
-                themeBasedOffCovers = preferences.themeMangaDetails(),
+                themeBasedOffCovers = preferences.themeMangaDetails().get(),
                 wrapAltTitles = preferences.wrapAltTitles().get(),
                 validMergeTypes = validMergeTypes,
                 vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
@@ -444,7 +445,7 @@ class MangaDetailPresenter(
 
     private fun syncChaptersReadStatus() {
         presenterScope.launchIO {
-            if (!preferences.readingSync() || !loginHelper.isLoggedIn() || !isOnline()) return@launchIO
+            if (!preferences.readingSync().get() || !loginHelper.isLoggedIn() || !isOnline()) return@launchIO
 
             runCatching {
                 statusHandler.getReadChapterIds(currentManga().uuid()).collect { chapterIds ->
@@ -711,7 +712,7 @@ class MangaDetailPresenter(
     }
 
     private fun createAltArtwork(manga: Manga, currentArtwork: Artwork): ImmutableList<Artwork> {
-        val quality = preferences.thumbnailQuality()
+        val quality = preferences.thumbnailQuality().get()
 
         return db.getArtwork(mangaId).executeAsBlocking().map { aw ->
             Artwork(
@@ -879,7 +880,7 @@ class MangaDetailPresenter(
                 }
 
                 if (autoAddTracker.size > 1 && currentManga().favorite) {
-                    val validContentRatings = preferences.autoTrackContentRatingSelections()
+                    val validContentRatings = preferences.autoTrackContentRatingSelections().get()
                     val contentRating = currentManga().getContentRating()
                     if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
                         autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->
@@ -1349,7 +1350,7 @@ class MangaDetailPresenter(
             updateMangaFlow()
             // add to the default category if it exists and the user has the option set
             if (shouldAddToDefaultCategory && generalState.value.hasDefaultCategory) {
-                val defaultCategoryId = preferences.defaultCategory()
+                val defaultCategoryId = preferences.defaultCategory().get()
                 generalState.value.allCategories.firstOrNull { defaultCategoryId == it.id }?.let {
                     updateMangaCategories(listOf(it))
                 }
@@ -1519,7 +1520,7 @@ class MangaDetailPresenter(
 
             fun finalizeChapters() {
                 if (markAction is MangaConstants.MarkAction.Read) {
-                    if (preferences.removeAfterMarkedAsRead()) {
+                    if (preferences.removeAfterMarkedAsRead().get()) {
                         // dont delete bookmarked chapters
                         deleteChapters(newChapterItems.filter { !it.bookmark }.map { ChapterItem(chapter = it) }, newChapterItems.size == generalState.value.allChapters.size)
                     }
@@ -1545,7 +1546,7 @@ class MangaDetailPresenter(
                     else -> null
                 }
 
-                if (syncRead != null && !skipSync && preferences.readingSync()) {
+                if (syncRead != null && !skipSync && preferences.readingSync().get()) {
                     val chapterIds = newChapterItems.filter { !it.isMergedChapter() }.map { it.mangaDexChapterId }
                     if (chapterIds.isNotEmpty()) {
                         presenterScope.launchNonCancellable {

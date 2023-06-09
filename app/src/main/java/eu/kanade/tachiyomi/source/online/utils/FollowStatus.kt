@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import java.util.Locale
+import org.nekomanga.constants.R
 
 enum class FollowStatus(val int: Int, @StringRes val stringRes: Int) {
     UNFOLLOWED(0, R.string.follows_unfollowed),

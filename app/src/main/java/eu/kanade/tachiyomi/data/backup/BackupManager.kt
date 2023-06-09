@@ -36,7 +36,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLegacyMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.FileOutputStream
 import kotlin.math.max
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -44,6 +43,7 @@ import logcat.LogPriority
 import okio.buffer
 import okio.gzip
 import okio.sink
+import org.nekomanga.core.loggycat
 import uy.kohesive.injekt.injectLazy
 
 class BackupManager(val context: Context) {

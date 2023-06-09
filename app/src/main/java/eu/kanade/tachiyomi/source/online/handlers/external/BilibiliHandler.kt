@@ -1,13 +1,11 @@
 package eu.kanade.tachiyomi.source.online.handlers.external
 
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.source.model.Page
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -20,8 +18,12 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.isomorphism.util.TokenBuckets
+import org.nekomanga.core.network.POST
+import tachiyomi.core.network.await
+import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class BilibiliHandler {
     val baseUrl = "https://www.bilibilicomics.com"
@@ -43,6 +45,8 @@ class BilibiliHandler {
         Injekt.get<NetworkHelper>().cloudFlareClient.newBuilder()
             .addInterceptor(rateLimitInterceptor).build()
     }
+
+    private val json: Json by injectLazy()
 
     private fun getChapterUrl(externalUrl: String): String {
         val comicId = externalUrl.substringAfterLast("/mc")
@@ -78,7 +82,7 @@ class BilibiliHandler {
     }
 
     private suspend fun pageListParse(response: Response): List<Page> {
-        val result = response.parseAs<BilibiliResultDto<BilibiliReader>>()
+        val result = with(json) { response.parseAs<BilibiliResultDto<BilibiliReader>>() }
 
         if (result.message.contains("need buy episode")) {
             throw Exception("Chapter is unavailable, requires reading and/or purchasing on BililBili")
@@ -94,7 +98,7 @@ class BilibiliHandler {
     }
 
     private fun imageUrlParse(response: Response): List<Page> {
-        val result = response.parseAs<BilibiliResultDto<List<BilibiliPageDto>>>()
+        val result = with(json) { response.parseAs<BilibiliResultDto<List<BilibiliPageDto>>>() }
         return result.data!!.mapIndexed { index, page ->
             Page(index = index, imageUrl = "${page.url}?token=${page.token}")
         }

@@ -1,13 +1,13 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.github.michaelbull.result.Result
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import okhttp3.Response
 import org.nekomanga.domain.network.ResultError
+import tachiyomi.core.network.await
+import tachiyomi.core.network.newCachelessCallWithProgress
 
 abstract class ReducedHttpSource : HttpSource() {
 

@@ -4,9 +4,6 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceValues
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
@@ -16,6 +13,8 @@ import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.view.activityBinding
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.nekomanga.core.preferences.PreferenceValues
 
 class SettingsReaderController : SettingsController() {
 
@@ -238,7 +237,9 @@ class SettingsReaderController : SettingsController() {
             switchPreference {
                 bindTo(preferences.landscapeZoom())
                 titleRes = R.string.zoom_double_page_spreads
-                visibleIf(preferences.imageScaleType()) { it == 1 }
+                preferences.imageScaleType().changes().onEach {
+                    isVisible = it == 1
+                }.launchIn(viewScope)
             }
             intListPreference(activity) {
                 key = Keys.zoomStart
@@ -263,7 +264,7 @@ class SettingsReaderController : SettingsController() {
             }
             intListPreference(activity) {
                 key = Keys.pageLayout
-                title = context.getString(R.string.page_layout).addBetaTag(context)
+                title = context.getString(R.string.page_layout).addBetaTag(context, R.attr.colorSecondary)
                 dialogTitleRes = R.string.page_layout
                 val enumConstants = PageLayout.values()
                 entriesRes = enumConstants.map { it.fullStringRes }.toTypedArray()
@@ -272,20 +273,20 @@ class SettingsReaderController : SettingsController() {
             }
             infoPreference(R.string.automatic_can_still_switch).apply {
                 preferences.pageLayout()
-                    .asImmediateFlowIn(viewScope) { isVisible = it == PageLayout.AUTOMATIC.value }
+                    .changes().onEach { isVisible = it == PageLayout.AUTOMATIC.value }.launchIn(viewScope)
             }
             switchPreference {
                 key = Keys.automaticSplitsPage
                 titleRes = R.string.split_double_pages_portrait
                 defaultValue = false
-                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it == PageLayout.AUTOMATIC.value }
+                preferences.pageLayout().changes().onEach { isVisible = it == PageLayout.AUTOMATIC.value }.launchIn(viewScope)
             }
             switchPreference {
                 key = Keys.invertDoublePages
                 titleRes = R.string.invert_double_pages
                 defaultValue = false
                 preferences.pageLayout()
-                    .asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE.value }
+                    .changes().onEach { isVisible = it != PageLayout.SINGLE_PAGE.value }.launchIn(viewScope)
             }
 
             switchPreference {
@@ -293,9 +294,11 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.double_page_rotate
             }
             switchPreference {
+                preferences.doublePageRotate().changes().onEach {
+                    isVisible = it
+                }.launchIn(viewScope)
                 bindTo(preferences.doublePageRotateReverse())
                 titleRes = R.string.double_page_rotate_reverse
-                visibleIf(preferences.doublePageRotate()) { it }
             }
 
             intListPreference(activity) {
@@ -408,7 +411,7 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.invert_volume_keys
                 defaultValue = false
 
-                preferences.readWithVolumeKeys().asImmediateFlow { isVisible = it }
+                preferences.readWithVolumeKeys().changes().onEach { isVisible = it }
                     .launchIn(viewScope)
             }
         }

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.network
 
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -10,6 +9,7 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
+import org.nekomanga.core.loggycat
 
 /**
  * Authenticator that intercepts 401 requests and tries to reauth the user

@@ -52,14 +52,14 @@ class ChapterItemFilter(
     ): List<T> {
         var filteredChapters = filterChaptersByScanlators(chapters, manga)
         // if neither preference is enabled don't even filter
-        if (!preferences.skipRead() && !preferences.skipFiltered()) {
+        if (!preferences.skipRead().get() && !preferences.skipFiltered().get()) {
             return filteredChapters
         }
 
-        if (preferences.skipRead()) {
+        if (preferences.skipRead().get()) {
             filteredChapters = filteredChapters.filter { !it.chapter.read }
         }
-        if (preferences.skipFiltered()) {
+        if (preferences.skipFiltered().get()) {
             filteredChapters = filterChapters(filteredChapters, manga)
         }
         // add the selected chapter to the list in case it was filtered out

@@ -9,11 +9,12 @@ import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.core.loggycat
+import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -51,7 +52,7 @@ class FollowsSyncService {
                   loggycat { "total number from mangadex is ${listManga.size}" }
 
                   val categories = db.getCategories().executeAsBlocking()
-                  val defaultCategoryId = preferences.defaultCategory()
+                val defaultCategoryId = preferences.defaultCategory().get()
                   val defaultCategory = categories.find { it.id == defaultCategoryId }
 
                   listManga.forEach { networkManga ->

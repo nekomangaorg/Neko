@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-import eu.kanade.tachiyomi.util.system.loggycat
+import org.nekomanga.core.loggycat
 
 data class ViewerChapters(
     val currChapter: ReaderChapter,
