@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.injectLazy
@@ -19,6 +20,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
 
     val preferences: PreferencesHelper by injectLazy()
     val libraryPreferences: LibraryPreferences by injectLazy()
+    val mangaDetailsPreferences: MangaDetailsPreferences by injectLazy()
 
     var showDownloads = preferences.showRecentsDownloads().get()
     var showRemoveHistory = preferences.showRecentsRemHistory().get()

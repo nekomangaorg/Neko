@@ -1261,7 +1261,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
-        binding.toolbar.subtitle = if (viewModel.manga!!.hideChapterTitle(preferences)) {
+        binding.toolbar.subtitle = if (viewModel.manga!!.hideChapterTitle(mangaDetailsPreferences)) {
             val number = decimalFormat.format(viewerChapters.currChapter.chapter.chapter_number.toDouble())
             getString(R.string.chapter_, number)
         } else {

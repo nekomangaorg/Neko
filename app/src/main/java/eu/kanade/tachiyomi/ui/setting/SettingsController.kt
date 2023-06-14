@@ -37,6 +37,7 @@ abstract class SettingsController : PreferenceController() {
 
     var preferenceKey: String? = null
     val preferences: PreferencesHelper = Injekt.get()
+
     val viewScope = MainScope()
 
     var untilDestroySubscriptions = CompositeSubscription()

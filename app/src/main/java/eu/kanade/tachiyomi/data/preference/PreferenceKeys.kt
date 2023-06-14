@@ -123,8 +123,6 @@ object PreferenceKeys {
 
     const val blockedScanlators = "blocked_scanlators"
 
-    const val lang = "app_language"
-
     const val langToShow = "mangadex_languages_new"
 
     const val dateFormat = "app_date_format"
@@ -154,39 +152,9 @@ object PreferenceKeys {
     const val showSeriesInShortcuts = "show_series_shortcuts"
     const val openChapterInShortcuts = "open_chapter_shortcuts"
 
-    const val themeMangaDetails = "theme_manga_details"
-
-    const val wrapAltTitles = "wrap_alt_titles_manga_details"
-
-    const val hideMangaDetailButtonText = "hide_manga_detail_button_text"
-
-    const val extraLargeBackdrop = "extra_large_backdrop"
-
     const val sideNavMode = "side_nav_mode"
 
     const val shouldAutoUpdate = "should_auto_update"
-
-    const val defaultChapterFilterByRead = "default_chapter_filter_by_read"
-
-    const val defaultChapterFilterByDownloaded = "default_chapter_filter_by_downloaded"
-
-    const val defaultChapterFilterByBookmarked = "default_chapter_filter_by_bookmarked"
-
-    const val defaultChapterSortBySourceOrNumber =
-        "default_chapter_sort_by_source_or_number" // and upload date
-
-    const val defaultChapterSortByAscendingOrDescending =
-        "default_chapter_sort_by_ascending_or_descending"
-
-    const val coverRatios = "cover_ratio"
-
-    const val coverColors = "cover_colors"
-
-    const val coverVibrantColors = "cover_vibrant_colors"
-
-    const val hideChapterTitles = "hide_chapter_titles"
-
-    const val chaptersDescAsDefault = "chapters_desc_as_default"
 
     const val saveChaptersAsCBZ = "save_chapter_as_cbz"
 

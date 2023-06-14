@@ -14,12 +14,17 @@ import eu.kanade.tachiyomi.util.system.getPrefTheme
 import kotlin.math.max
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.details.MangaDetailsPreferences
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class SettingsAppearanceController : SettingsController() {
 
     private var lastThemeXLight: Int? = null
     private var lastThemeXDark: Int? = null
     private var themePreference: ThemePreference? = null
+
+    val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
 
     @SuppressLint("NotifyDataSetChanged")
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
@@ -64,25 +69,25 @@ class SettingsAppearanceController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.details_page
             switchPreference {
-                key = Keys.themeMangaDetails
+                key = mangaDetailsPreferences.autoThemeByCover().key()
                 titleRes = R.string.theme_buttons_based_on_cover
                 defaultValue = true
             }
 
             switchPreference {
-                key = Keys.hideMangaDetailButtonText
+                key = mangaDetailsPreferences.hideButtonText().key()
                 titleRes = R.string.hide_button_text
                 defaultValue = false
             }
 
             switchPreference {
-                key = Keys.extraLargeBackdrop
+                key = mangaDetailsPreferences.extraLargeBackdrop().key()
                 titleRes = R.string.extra_large_backdrop
                 defaultValue = false
             }
 
             switchPreference {
-                key = Keys.wrapAltTitles
+                key = mangaDetailsPreferences.wrapAltTitles().key()
                 titleRes = R.string.wrap_alt_titles
                 defaultValue = false
             }

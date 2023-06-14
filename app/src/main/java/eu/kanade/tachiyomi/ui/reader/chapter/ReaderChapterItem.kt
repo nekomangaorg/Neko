@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.databinding.ReaderChapterItemBinding
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.injectLazy
 
 class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: Boolean) :
@@ -25,6 +26,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
         DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
 
     val preferences: PreferencesHelper by injectLazy()
+    val mangaDetailsPreferences: MangaDetailsPreferences by injectLazy()
 
     /** defines the type defining this item. must be unique. preferably an id */
     override val type: Int = R.id.reader_chapter_layout
@@ -55,7 +57,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 null
             }
 
-            binding.chapterTitle.text = if (manga.hideChapterTitle(item.preferences)) {
+            binding.chapterTitle.text = if (manga.hideChapterTitle(item.mangaDetailsPreferences)) {
                 val number = item.decimalFormat.format(item.chapter_number.toDouble())
                 itemView.context.getString(R.string.chapter_, number)
             } else {

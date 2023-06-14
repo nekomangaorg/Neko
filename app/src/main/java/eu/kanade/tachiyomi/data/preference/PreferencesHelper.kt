@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
@@ -265,8 +264,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun excludeCategoriesInDownloadNew() = this.preferenceStore.getStringSet("download_new_categories_exclude")
 
-    fun lang() = this.preferenceStore.getString(Keys.lang, "")
-
     fun langsToShow() = this.preferenceStore.getString(Keys.langToShow, "en")
 
     fun autoDownloadWhileReading() = this.preferenceStore.getInt("auto_download_while_reading", 0)
@@ -304,12 +301,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun deleteRemovedChapters() = this.preferenceStore.getInt(Keys.deleteRemovedChapters, 0)
 
-    fun hideButtonText() = this.preferenceStore.getBoolean(Keys.hideMangaDetailButtonText, false)
-
-    fun extraLargeBackdrop() = this.preferenceStore.getBoolean(Keys.extraLargeBackdrop, false)
-
-    fun wrapAltTitles() = this.preferenceStore.getBoolean(Keys.wrapAltTitles, false)
-
     // Tutorial preferences
     fun shownFilterTutorial() = this.preferenceStore.getBoolean("shown_filter_tutorial", false)
 
@@ -327,8 +318,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
 
-    fun themeMangaDetails() = this.preferenceStore.getBoolean(Keys.themeMangaDetails, true)
-
     fun useLargeToolbar() = this.preferenceStore.getBoolean("use_large_toolbar", false)
 
     fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
@@ -339,29 +328,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun appShouldAutoUpdate() =
         this.preferenceStore.getInt(Keys.shouldAutoUpdate, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
 
-    fun filterChapterByRead() = this.preferenceStore.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
-
-    fun filterChapterByDownloaded() =
-        this.preferenceStore.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)
-
-    fun filterChapterByBookmarked() =
-        this.preferenceStore.getInt(Keys.defaultChapterFilterByBookmarked, Manga.SHOW_ALL)
-
-    fun sortChapterOrder() =
-        this.preferenceStore.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
-
-    fun hideChapterTitlesByDefault() = this.preferenceStore.getBoolean(Keys.hideChapterTitles, false)
-
-    fun chaptersDescAsDefault() = this.preferenceStore.getBoolean(Keys.chaptersDescAsDefault, true)
-
     fun blockedScanlators() =
         this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
-
-    fun coverRatios() = this.preferenceStore.getStringSet(Keys.coverRatios, emptySet())
-
-    fun coverColors() = this.preferenceStore.getStringSet(Keys.coverColors, emptySet())
-
-    fun coverVibrantColors() = this.preferenceStore.getStringSet(Keys.coverVibrantColors, emptySet())
 
     fun dataSaver() = this.preferenceStore.getBoolean(Keys.dataSaver, false)
 

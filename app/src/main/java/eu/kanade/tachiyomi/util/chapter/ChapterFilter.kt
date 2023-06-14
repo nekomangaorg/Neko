@@ -5,34 +5,36 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ChapterFilter(
     val preferences: PreferencesHelper = Injekt.get(),
+    val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
 ) {
 
     /** filters chapters based on the manga values */
     fun <T : Chapter> filterChapters(chapters: List<T>, manga: Manga): List<T> {
-        val readEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_READ
-        val unreadEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_UNREAD
-        val downloadEnabled = manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_DOWNLOADED
+        val readEnabled = manga.readFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_READ
+        val unreadEnabled = manga.readFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNREAD
+        val downloadEnabled = manga.downloadedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_DOWNLOADED
         val notDownloadEnabled =
-            manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
-        val bookmarkEnabled = manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_BOOKMARKED
+            manga.downloadedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+        val bookmarkEnabled = manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_BOOKMARKED
         val notBookmarkEnabled =
-            manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+            manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
 
         // if none of the filters are enabled skip the filtering of them
         val filteredChapters = filterChaptersByScanlators(chapters, manga)
         return if (readEnabled || unreadEnabled || downloadEnabled || notDownloadEnabled || bookmarkEnabled || notBookmarkEnabled) {
             filteredChapters.filter {
-                if (readEnabled && it.read.not() ||
+                if (readEnabled && !it.read ||
                     (unreadEnabled && it.read) ||
-                    (bookmarkEnabled && it.bookmark.not()) ||
+                    (bookmarkEnabled && !it.bookmark) ||
                     (notBookmarkEnabled && it.bookmark) ||
-                    (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not()) ||
+                    (downloadEnabled && !downloadManager.isChapterDownloaded(it, manga)) ||
                     (notDownloadEnabled && downloadManager.isChapterDownloaded(it, manga))
                 ) {
                     return@filter false
