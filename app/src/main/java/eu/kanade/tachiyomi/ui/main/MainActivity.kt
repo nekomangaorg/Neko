@@ -483,7 +483,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             securityPreferences.incognitoMode().set(false)
 
             // Show changelog if needed
-            if (Migrations.upgrade(preferences, networkPreferences, libraryPreferences, lifecycleScope)) {
+            if (Migrations.upgrade(preferences, networkPreferences, libraryPreferences, readerPreferences, lifecycleScope)) {
                 if (!BuildConfig.DEBUG) {
                     content.post {
                         whatsNewSheet().show()

@@ -6,11 +6,13 @@ import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ChapterFilter(
     val preferences: PreferencesHelper = Injekt.get(),
+    val readerPreferences: ReaderPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
 ) {
@@ -61,18 +63,18 @@ class ChapterFilter(
         }
 
         // if filter preferences are not enabled don't even filter
-        if (!preferences.skipRead().get() && !preferences.skipFiltered().get() && !preferences.skipDuplicates().get()) {
+        if (!readerPreferences.skipRead().get() && !readerPreferences.skipFiltered().get() && !readerPreferences.skipDuplicates().get()) {
             return filteredChapters
         }
 
-        if (preferences.skipRead().get()) {
+        if (readerPreferences.skipRead().get()) {
             filteredChapters = filteredChapters.filter { !it.read }
         }
-        if (preferences.skipFiltered().get()) {
+        if (readerPreferences.skipFiltered().get()) {
             filteredChapters = filterChapters(filteredChapters, manga)
         }
 
-        if (preferences.skipDuplicates().get()) {
+        if (readerPreferences.skipDuplicates().get()) {
             filteredChapters = filteredChapters.groupBy { it.chapter_number }
                 .map { (_, chapters) ->
                     chapters.find { it.id == selectedChapter?.id }

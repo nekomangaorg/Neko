@@ -1,9 +1,6 @@
 package org.nekomanga.domain.details
 
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
-import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
-import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import tachiyomi.core.preference.PreferenceStore
 
 class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
@@ -32,10 +29,4 @@ class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
     fun hideButtonText() = this.preferenceStore.getBoolean("hide_manga_detail_button_text")
 
     fun extraLargeBackdrop() = this.preferenceStore.getBoolean("extra_large_backdrop")
-
-    fun defaultReadingMode() =
-        this.preferenceStore.getInt(PreferenceKeys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
-
-    fun defaultOrientationType() =
-        this.preferenceStore.getInt(PreferenceKeys.defaultOrientationType, OrientationType.FREE.flagValue)
 }

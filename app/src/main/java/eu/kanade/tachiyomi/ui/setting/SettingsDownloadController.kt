@@ -54,7 +54,7 @@ class SettingsDownloadController : SettingsController() {
             defaultValue = true
         }
         switchPreference {
-            bindTo(preferences.splitTallImages())
+            bindTo(readerPreferences.splitTallImages())
             titleRes = R.string.split_tall_images
             summaryRes = R.string.split_tall_images_summary
         }

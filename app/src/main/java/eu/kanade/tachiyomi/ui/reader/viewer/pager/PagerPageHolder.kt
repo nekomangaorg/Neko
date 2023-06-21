@@ -20,7 +20,6 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
@@ -49,6 +48,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import org.nekomanga.core.loggycat
+import org.nekomanga.domain.reader.ReaderPreferences
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -592,15 +592,15 @@ class PagerPageHolder(
 
     private suspend fun setBG(bytesArray: ByteArray): Drawable {
         return withContext(Default) {
-            val preferences by injectLazy<PreferencesHelper>()
+            val readerPreferences by injectLazy<ReaderPreferences>()
             ImageUtil.autoSetBackground(
                 BitmapFactory.decodeByteArray(
                     bytesArray,
                     0,
                     bytesArray.size,
                 ),
-                preferences.readerTheme().get() == 2,
-                preferences.readerTheme().get() == 4,
+                readerPreferences.readerTheme().get() == 2,
+                readerPreferences.readerTheme().get() == 4,
                 context,
             )
         }

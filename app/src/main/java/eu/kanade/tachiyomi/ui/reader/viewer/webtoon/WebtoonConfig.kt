@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.nekomanga.core.preferences.PreferenceValues
+import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -23,7 +24,8 @@ import uy.kohesive.injekt.api.get
 class WebtoonConfig(
     scope: CoroutineScope,
     preferences: PreferencesHelper = Injekt.get(),
-) : ViewerConfig(preferences, scope) {
+    readerPreferences: ReaderPreferences = Injekt.get(),
+) : ViewerConfig(preferences, readerPreferences, scope) {
 
     var webtoonCropBorders = false
         private set
@@ -39,17 +41,17 @@ class WebtoonConfig(
 
     var zoomPropertyChangedListener: ((Boolean) -> Unit)? = null
 
-    var splitPages = preferences.webtoonPageLayout().get() == PageLayout.SPLIT_PAGES.webtoonValue
+    var splitPages = readerPreferences.webtoonPageLayout().get() == PageLayout.SPLIT_PAGES.webtoonValue
 
     var invertDoublePages = false
 
     var menuThreshold = PreferenceValues.ReaderHideThreshold.LOW.threshold
 
     init {
-        preferences.navigationModeWebtoon()
+        readerPreferences.navigationModeWebtoon()
             .register({ navigationMode = it }, { updateNavigation(it) })
 
-        preferences.webtoonNavInverted()
+        readerPreferences.webtoonNavInverted()
             .register(
                 { tappingInverted = it },
                 {
@@ -57,32 +59,32 @@ class WebtoonConfig(
                 },
             )
 
-        preferences.webtoonNavInverted().changes()
+        readerPreferences.webtoonNavInverted().changes()
             .drop(1)
             .onEach {
                 navigationModeInvertedListener?.invoke()
             }
             .launchIn(scope)
 
-        preferences.cropBordersWebtoon()
+        readerPreferences.cropBordersWebtoon()
             .register({ webtoonCropBorders = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.cropBorders()
+        readerPreferences.cropBorders()
             .register({ verticalCropBorders = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.webtoonSidePadding()
+        readerPreferences.webtoonSidePadding()
             .register({ sidePadding = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.webtoonEnableZoomOut()
+        readerPreferences.webtoonEnableZoomOut()
             .register({ enableZoomOut = it }, { zoomPropertyChangedListener?.invoke(it) })
 
-        preferences.webtoonPageLayout()
+        readerPreferences.webtoonPageLayout()
             .register(
                 { splitPages = it == PageLayout.SPLIT_PAGES.webtoonValue },
                 { imagePropertyChangedListener?.invoke() },
             )
-        preferences.webtoonReaderHideThreshold().register({ menuThreshold = it.threshold })
-        preferences.webtoonInvertDoublePages()
+        readerPreferences.webtoonReaderHideThreshold().register({ menuThreshold = it.threshold })
+        readerPreferences.webtoonInvertDoublePages()
             .register({ invertDoublePages = it }, { imagePropertyChangedListener?.invoke() })
 
         navigationOverlayForNewUser = preferences.showNavigationOverlayNewUserWebtoon().get()

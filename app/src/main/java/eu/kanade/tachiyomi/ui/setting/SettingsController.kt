@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import java.util.Locale
 import kotlinx.coroutines.MainScope
+import org.nekomanga.domain.reader.ReaderPreferences
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -37,6 +38,7 @@ abstract class SettingsController : PreferenceController() {
 
     var preferenceKey: String? = null
     val preferences: PreferencesHelper = Injekt.get()
+    val readerPreferences: ReaderPreferences = Injekt.get()
 
     val viewScope = MainScope()
 

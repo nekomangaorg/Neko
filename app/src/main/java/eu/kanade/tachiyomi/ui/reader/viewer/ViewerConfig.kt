@@ -4,12 +4,13 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.reader.ReaderPreferences
 import tachiyomi.core.preference.Preference
 
 /**
  * Common configuration for all viewers.
  */
-abstract class ViewerConfig(preferences: PreferencesHelper, protected val scope: CoroutineScope) {
+abstract class ViewerConfig(preferences: PreferencesHelper, readerPreferences: ReaderPreferences, protected val scope: CoroutineScope) {
 
     var imagePropertyChangedListener: (() -> Unit)? = null
     var reloadChapterListener: ((Boolean) -> Unit)? = null
@@ -38,19 +39,19 @@ abstract class ViewerConfig(preferences: PreferencesHelper, protected val scope:
         protected set
 
     init {
-        preferences.readWithLongTap()
+        readerPreferences.readWithLongTap()
             .register({ longTapEnabled = it })
 
-        preferences.doubleTapAnimSpeed()
+        readerPreferences.doubleTapAnimSpeed()
             .register({ doubleTapAnimDuration = it })
 
-        preferences.readWithVolumeKeys()
+        readerPreferences.readWithVolumeKeys()
             .register({ volumeKeysEnabled = it })
 
-        preferences.readWithVolumeKeysInverted()
+        readerPreferences.readWithVolumeKeysInverted()
             .register({ volumeKeysInverted = it })
 
-        preferences.alwaysShowChapterTransition()
+        readerPreferences.alwaysShowChapterTransition()
             .register({ alwaysShowChapterTransition = it })
     }
 
