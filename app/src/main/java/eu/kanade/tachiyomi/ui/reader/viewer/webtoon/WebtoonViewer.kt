@@ -273,14 +273,24 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
      * Scrolls up by [scrollDistance].
      */
     override fun moveToPrevious() {
-        recycler.smoothScrollBy(0, -scrollDistance)
+        if (config.usePageTransitions) {
+            recycler.smoothScrollBy(0, -scrollDistance)
+        }
+        else {
+            recycler.scrollBy(0, -scrollDistance)
+        }
     }
 
     /**
      * Scrolls down by [scrollDistance].
      */
     override fun moveToNext() {
-        recycler.smoothScrollBy(0, scrollDistance)
+        if (config.usePageTransitions) {
+            recycler.smoothScrollBy(0, scrollDistance)
+        }
+        else {
+            recycler.scrollBy(0, scrollDistance)
+        }
     }
 
     /**

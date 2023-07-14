@@ -163,7 +163,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/page_transitions_webtoon"
+            android:id="@+id/webtoon_page_transitions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
