@@ -13,6 +13,8 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun animatedPageTransitions() = this.preferenceStore.getBoolean("pref_enable_transitions_key", true)
 
+    fun animatedPageTransitionsWebtoon() = this.preferenceStore.getBoolean("pref_enable_transitions_webtoon_key", true)
+
     fun pagerCutoutBehavior() = this.preferenceStore.getInt("pager_cutout_behavior")
 
     fun doubleTapAnimSpeed() = this.preferenceStore.getInt("pref_double_tap_anim_speed", 500)

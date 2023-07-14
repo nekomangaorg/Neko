@@ -487,6 +487,7 @@
     <string name="if_disabled_transition_will_skip">If disabled, the transition page will be
         skipped if the next chapter is loaded</string>
     <string name="pref_webtoon_side_padding">Side padding</string>
+    <string name="animate_page_transitions_webtoon">Animate page transitions</string>
     <string name="webtoon_side_padding_0">None</string>
     <string name="webtoon_side_padding_5">5%</string>
     <string name="webtoon_side_padding_10">10%</string>
