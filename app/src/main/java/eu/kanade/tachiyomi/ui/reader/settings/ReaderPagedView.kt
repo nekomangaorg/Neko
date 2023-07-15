@@ -66,6 +66,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             webtoonInvert.bindToPreference(readerPreferences.webtoonNavInverted())
             webtoonPageLayout.bindToPreference(readerPreferences.webtoonPageLayout())
             webtoonInvertDoublePages.bindToPreference(readerPreferences.webtoonInvertDoublePages())
+            webtoonPageTransitions.bindToPreference(readerPreferences.animatedPageTransitionsWebtoon())
+
 
             updatePagedGroup(!isWebtoonView)
         }
@@ -99,6 +101,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             binding.webtoonInvert,
             binding.webtoonPageLayout,
             binding.webtoonInvertDoublePages,
+            binding.webtoonPageTransitions,
         ).forEach { it.isVisible = !show }
         val isFullFit = when (readerPreferences.imageScaleType().get()) {
             SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,

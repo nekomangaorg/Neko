@@ -27,6 +27,9 @@ class WebtoonConfig(
     readerPreferences: ReaderPreferences = Injekt.get(),
 ) : ViewerConfig(preferences, readerPreferences, scope) {
 
+    var usePageTransitions = false
+        private set
+
     var webtoonCropBorders = false
         private set
 
@@ -48,6 +51,8 @@ class WebtoonConfig(
     var menuThreshold = PreferenceValues.ReaderHideThreshold.LOW.threshold
 
     init {
+        readerPreferences.animatedPageTransitionsWebtoon().register({ usePageTransitions = it })
+
         readerPreferences.navigationModeWebtoon()
             .register({ navigationMode = it }, { updateNavigation(it) })
 

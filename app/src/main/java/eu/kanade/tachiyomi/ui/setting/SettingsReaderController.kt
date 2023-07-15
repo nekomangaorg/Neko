@@ -46,11 +46,6 @@ class SettingsReaderController : SettingsController() {
                 // min is 1
                 defaultValue = 500
             }
-            switchPreference {
-                key = readerPreferences.animatedPageTransitions().key()
-                titleRes = R.string.animate_page_transitions
-                defaultValue = true
-            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 switchPreference {
                     key = readerPreferences.trueColor().key()
@@ -259,6 +254,11 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = false
             }
             switchPreference {
+                key = readerPreferences.animatedPageTransitions().key()
+                titleRes = R.string.animate_page_transitions
+                defaultValue = true
+            }
+            switchPreference {
                 bindTo(readerPreferences.navigateToPan())
                 titleRes = R.string.navigate_pan
             }
@@ -389,6 +389,12 @@ class SettingsReaderController : SettingsController() {
                 key = readerPreferences.webtoonInvertDoublePages().key()
                 titleRes = R.string.invert_double_pages
                 defaultValue = false
+            }
+
+            switchPreference {
+                key = readerPreferences.animatedPageTransitionsWebtoon().key()
+                titleRes = R.string.animate_page_transitions_webtoon
+                defaultValue = true
             }
 
             switchPreference {
