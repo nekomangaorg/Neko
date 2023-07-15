@@ -14,7 +14,7 @@ import java.io.OutputStream
  */
 class MangaMappings(context: Context) {
 
-    val dbMappings: SQLiteDatabase by lazy { openDatabase(context, "20230507_mappings.db") }
+    val dbMappings: SQLiteDatabase by lazy { openDatabase(context, "20230714_mappings.db") }
 
     private fun openDatabase(context: Context, dbPath: String): SQLiteDatabase {
         val dbFile: File = context.getDatabasePath(dbPath)
