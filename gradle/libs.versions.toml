@@ -15,12 +15,12 @@ kotlin_result = "1.1.18"
 
 [libraries]
 google-services-gradle = "com.google.gms:google-services:4.3.15"
-firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.6"
+firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.7"
 
 material = "com.google.android.material:material:1.9.0"
 desugaring = "com.android.tools:desugar_jdk_libs:2.0.3"
 firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.3.0"
-firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.3.7"
+firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.4.0"
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"
 flex-box = "com.google.android.flexbox:flexbox:3.0.0"
 #needed for token bucket to work
