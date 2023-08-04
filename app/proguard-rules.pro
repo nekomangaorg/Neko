@@ -11,6 +11,10 @@
 -keep,allowoptimization class com.google.gson.** { public protected *; }
 -keep,allowoptimization class uy.kohesive.injekt.** { public protected *; }
 -keep,allowoptimization class eu.davidea.flexibleadapter.** { public protected *; }
+-keep class androidx.window.** { *; }
+-dontwarn androidx.window.**
+-keep class org.slf4j.** { *; }
+-dontwarn org.slf4j.**
 -keep class com.crashlytics.** { *; }
 -dontwarn com.crashlytics.**
 # Design library
