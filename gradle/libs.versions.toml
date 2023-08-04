@@ -60,7 +60,7 @@ rxbinding-recycler-v7 = { module = "com.jakewharton.rxbinding:rxbinding-recycler
 
 j2k-subsample = "com.github.jays2kings:subsampling-scale-image-view:756849e"
 
-tachi-image-decoder = "com.github.tachiyomiorg:image-decoder:7481a4a"
+tachi-image-decoder = "com.github.tachiyomiorg:image-decoder:04384facd2"
 tachi-source-api = "org.tachiyomi:source-api:1.1"
 tachi-directional-view-pager = "com.github.tachiyomiorg:DirectionalViewPager:1.0.0"
 tachi-unifile = "com.github.tachiyomiorg:unifile:17bec43"
