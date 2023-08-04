@@ -63,7 +63,7 @@ fun MainDropdownMenu(
                 expanded = expanded,
                 offset = DpOffset(12.dp, 0.dp),
                 fixedWidth = 250.dp,
-                properties = PopupProperties(),
+                properties = PopupPrperties(),
                 onDismissRequest = onDismiss,
             ) {
                 val (incognitoText, incognitoIcon) = when (incognitoModeEnabled) {

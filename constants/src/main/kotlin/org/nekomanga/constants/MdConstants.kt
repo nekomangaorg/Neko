@@ -6,7 +6,7 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 object MdConstants {
-    const val currentSeasonalId = "77430796-6625-4684-b673-ffae5140f337"
+    const val currentSeasonalId = "1b9f88f8-9880-464d-9ed9-59b7e36392e2"
     const val baseUrl = "https://mangadex.org"
     const val cdnUrl = "https://uploads.mangadex.org"
     const val forumUrl = "https://forums.mangadex.org/threads/"
