@@ -312,12 +312,18 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     suspend fun checkForManhwa() {
         if (checked) return
         withIOContext {
-            val libraryManga = controller?.presenter?.allLibraryItems ?: return@withIOContext
+            val visibleManga = controller?.presenter?.allLibraryItems ?: emptyList()
+            val hiddenManga = controller?.presenter?.hiddenLibraryItems ?: emptyList()
+            val libraryManga = visibleManga + hiddenManga
+
+            if (libraryManga.isEmpty()) {
+                return@withIOContext
+            }
+
             checked = true
             val types = mutableListOf<Int>()
             if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
             if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
-            if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
             if (types.isNotEmpty()) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_tag_group) as FilterTagGroup
@@ -326,7 +332,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         R.string.manga,
                         types.first(),
                         types.getOrNull(1),
-                        types.getOrNull(2),
                     )
                     this@FilterBottomSheet.mangaType = mangaType
                     reorderFilters()
