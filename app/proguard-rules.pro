@@ -1,5 +1,6 @@
 -dontobfuscate
 
+-keepattributes Signature
 -keep,allowoptimization class eu.kanade.tachiyomi.** { public protected *; }
 -keep,allowoptimization class androidx.preference.** { *; }
 -keep,allowoptimization class kotlin.** { public protected *; }
