@@ -37,7 +37,7 @@ gap = "jp.wasabeef:gap:1.1.0"
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
 date-field = "com.github.CarlosEsco:compose-date-text-field:3c64e08381"
-markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.7.0"
+markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
 
 [bundles]
 accompanist = ["accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
