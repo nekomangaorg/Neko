@@ -71,7 +71,7 @@ private fun nekoMarkdownTypography() =
         h4 = MaterialTheme.typography.titleMedium,
         h5 = MaterialTheme.typography.titleSmall,
         h6 = MaterialTheme.typography.bodyLarge,
-        text = MaterialTheme.typography.bodyMedium,
-        paragraph = MaterialTheme.typography.bodySmall,
+        paragraph = MaterialTheme.typography.bodyMedium,
+        text = MaterialTheme.typography.bodySmall,
     )
 
