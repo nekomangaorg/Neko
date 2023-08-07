@@ -36,11 +36,10 @@ gap = "jp.wasabeef:gap:1.1.0"
 
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
-date-fieled = "com.github.CarlosEsco:compose-date-text-field:3c64e08381"
+date-field = "com.github.CarlosEsco:compose-date-text-field:3c64e08381"
 markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.7.0"
-
 
 [bundles]
 accompanist = ["accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
-compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
+compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown"]
 charting = ["charty"]

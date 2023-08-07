@@ -47,9 +47,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import com.mikepenz.markdown.Markdown
-import com.mikepenz.markdown.MarkdownColors
-import com.mikepenz.markdown.MarkdownDefaults
+import com.mikepenz.markdown.compose.Markdown
+import com.mikepenz.markdown.model.MarkdownColors
+import com.mikepenz.markdown.model.markdownColor
+import com.mikepenz.markdown.model.markdownTypography
 import com.skydoves.balloon.compose.Balloon
 import com.skydoves.balloon.compose.BalloonWindow
 import eu.kanade.tachiyomi.R
@@ -119,8 +120,8 @@ fun DescriptionBlock(
 
                 Markdown(
                     content = text,
-                    colors = markdownColors(),
-                    typography = markdownTypography(),
+                    colors = nekoMarkdownColors(),
+                    typography = nekoMarkdownTypography(),
                     flavour = CommonMarkFlavourDescriptor(),
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -164,8 +165,8 @@ fun DescriptionBlock(
             SelectionContainer {
                 Markdown(
                     content = text,
-                    colors = markdownColors(),
-                    typography = markdownTypography(),
+                    colors = nekoMarkdownColors(),
+                    typography = nekoMarkdownTypography(),
                     flavour = CommonMarkFlavourDescriptor(),
                     modifier = clickable,
                 )
@@ -244,7 +245,7 @@ private fun AltTitles(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
         if (shouldWrap) {
-            flowableAltTitles(
+            FlowableAltTitles(
                 altTitles = altTitles,
                 currentTitle = currentTitle,
                 isCustomTitle = isCustomTitle,
@@ -255,7 +256,7 @@ private fun AltTitles(
                 onChipColor = onChipColor,
             )
         } else {
-            scrollableAltTitles(
+            ScrollableAltTitles(
                 altTitles = altTitles,
                 currentTitle = currentTitle,
                 isCustomTitle = isCustomTitle,
@@ -270,7 +271,7 @@ private fun AltTitles(
 }
 
 @Composable
-private fun flowableAltTitles(
+private fun FlowableAltTitles(
     altTitles: ImmutableList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
@@ -315,7 +316,7 @@ private fun flowableAltTitles(
 }
 
 @Composable
-private fun scrollableAltTitles(
+private fun ScrollableAltTitles(
     altTitles: ImmutableList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
@@ -412,7 +413,7 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, b
             Balloon(
                 builder = toolTipBuilder(backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(tagColor, 16.dp), dismissable = false),
                 balloonContent = {
-                    genreBalloon(balloonWindow, genreSearch, genre, buttonColor, genreLibrarySearch)
+                    GenreBalloon(balloonWindow, genreSearch, genre, buttonColor, genreLibrarySearch)
                 },
             ) { window ->
 
@@ -432,7 +433,7 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, b
 }
 
 @Composable
-private fun genreBalloon(
+private fun GenreBalloon(
     balloonWindow: BalloonWindow?,
     genreSearch: (String) -> Unit,
     genre: String,
@@ -461,24 +462,22 @@ private fun genreBalloon(
 }
 
 @Composable
-private fun markdownColors(): MarkdownColors {
-    return MarkdownDefaults.markdownColors(
-        textColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-        backgroundColor = MaterialTheme.colorScheme.surface,
-    )
-}
+private fun nekoMarkdownColors(): MarkdownColors = markdownColor(
+    text = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+    backgroundCode = MaterialTheme.colorScheme.surface,
+)
 
 @Composable
-private fun markdownTypography() =
-    MarkdownDefaults.markdownTypography(
+private fun nekoMarkdownTypography() =
+    markdownTypography(
         h1 = MaterialTheme.typography.headlineMedium,
         h2 = MaterialTheme.typography.headlineSmall,
         h3 = MaterialTheme.typography.titleLarge,
         h4 = MaterialTheme.typography.titleMedium,
         h5 = MaterialTheme.typography.titleSmall,
         h6 = MaterialTheme.typography.bodyLarge,
-        body1 = MaterialTheme.typography.bodyLarge,
-        body2 = MaterialTheme.typography.bodySmall,
+        text = MaterialTheme.typography.bodyLarge,
+        paragraph = MaterialTheme.typography.bodySmall,
     )
 
 fun TimeInterpolator.toEasing() = Easing { x ->

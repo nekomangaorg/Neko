@@ -70,6 +70,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -730,6 +732,7 @@ class LibraryPresenter(
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
                         if (headerItem != null) {
+                            loggycat("DynamicCategory", LogPriority.DEBUG) { "library grouped: size ${mangaToRemove.size}" }
                             items.add(
                                 LibraryItem(
                                     LibraryManga.createHide(
@@ -903,6 +906,8 @@ class LibraryPresenter(
                 sectionedLibraryItems[catId] = mangaToRemove
                 items.removeAll { it.header.catId == catId }
                 if (headerItem != null) {
+                    loggycat("DynamicCategory", LogPriority.DEBUG) { "getCustomMangaItem- cat[${catId}] size[${mangaToRemove.size}]" }
+
                     items.add(
                         LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
                     )
