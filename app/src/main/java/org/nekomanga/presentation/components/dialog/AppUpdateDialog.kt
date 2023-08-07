@@ -11,9 +11,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.mikepenz.markdown.Markdown
-import com.mikepenz.markdown.MarkdownColors
-import com.mikepenz.markdown.MarkdownDefaults
+import com.mikepenz.markdown.compose.Markdown
+import com.mikepenz.markdown.model.MarkdownColors
+import com.mikepenz.markdown.model.markdownColor
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.GithubRelease
 
@@ -35,8 +35,8 @@ fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConf
                 item {
                     Markdown(
                         content = body,
-                        colors = markdownColors(),
-                        typography = markdownTypography(),
+                        colors = nekoMarkdownColors(),
+                        typography = nekoMarkdownTypography(),
                     )
                 }
             }
@@ -57,22 +57,21 @@ fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConf
 }
 
 @Composable
-private fun markdownColors(): MarkdownColors {
-    return MarkdownDefaults.markdownColors(
-        textColor = MaterialTheme.colorScheme.onSurface,
-        backgroundColor = MaterialTheme.colorScheme.surface,
-    )
-}
+private fun nekoMarkdownColors(): MarkdownColors = markdownColor(
+    text = MaterialTheme.colorScheme.onSurface,
+    backgroundCode = MaterialTheme.colorScheme.surface,
+)
 
 @Composable
-private fun markdownTypography() =
-    MarkdownDefaults.markdownTypography(
+private fun nekoMarkdownTypography() =
+    com.mikepenz.markdown.model.markdownTypography(
         h1 = MaterialTheme.typography.headlineMedium,
         h2 = MaterialTheme.typography.headlineSmall,
         h3 = MaterialTheme.typography.titleLarge,
         h4 = MaterialTheme.typography.titleMedium,
         h5 = MaterialTheme.typography.titleSmall,
         h6 = MaterialTheme.typography.bodyLarge,
-        body1 = MaterialTheme.typography.bodyMedium,
-        body2 = MaterialTheme.typography.bodySmall,
+        text = MaterialTheme.typography.bodyMedium,
+        paragraph = MaterialTheme.typography.bodySmall,
     )
+
