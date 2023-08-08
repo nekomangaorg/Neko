@@ -24,11 +24,12 @@ class LibraryHeaderGestureDetector(
     }
 
     override fun onScroll(
-        e1: MotionEvent,
+        e: MotionEvent?,
         e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
+        val e1 = e ?: return false
         if (binding == null || header == null) return false
         val distance = (e1.rawX - e2.rawX)
         val poa = 0.75f
@@ -58,11 +59,13 @@ class LibraryHeaderGestureDetector(
     }
 
     override fun onFling(
-        e1: MotionEvent,
+        e: MotionEvent?,
         e2: MotionEvent,
         velocityX: Float,
         velocityY: Float,
     ): Boolean {
+        val e1 = e ?: return false
+
         var result = false
         val diffY = e2.y - e1.y
         val diffX = e2.x - e1.x

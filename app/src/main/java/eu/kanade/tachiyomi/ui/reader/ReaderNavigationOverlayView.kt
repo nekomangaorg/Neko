@@ -68,7 +68,7 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
         strokeWidth = 8f
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         if (navigation == null) return
 
         navigation?.regions?.forEach {

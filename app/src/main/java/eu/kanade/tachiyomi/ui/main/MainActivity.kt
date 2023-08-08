@@ -1284,11 +1284,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         override fun onFling(
-            e1: MotionEvent,
+            e: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float,
         ): Boolean {
+            val e1 = e ?: return false
             var result = false
             val diffY = e2.y - e1.y
             val diffX = e2.x - e1.x

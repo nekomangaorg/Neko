@@ -74,7 +74,7 @@ class WebtoonFrame(context: Context) : FrameLayout(context) {
         }
 
         override fun onFling(
-            e1: MotionEvent,
+            e: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float,

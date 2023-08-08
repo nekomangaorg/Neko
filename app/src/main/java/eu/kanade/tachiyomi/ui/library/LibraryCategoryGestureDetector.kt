@@ -34,13 +34,9 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
         return startingOnLibraryView
     }
 
-    override fun onScroll(
-        e1: MotionEvent,
-        e2: MotionEvent,
-        distanceX: Float,
-        distanceY: Float,
-    ): Boolean {
+    override fun onScroll(e: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
         val controller = controller ?: return false
+        val e1 = e ?: return false
         val distance = e1.rawX - e2.rawX
         val totalDistanceY = e1.rawY - e2.rawY
         controller.binding.libraryGridRecycler.recycler.translationX =
@@ -58,12 +54,8 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
         return super.onScroll(e1, e2, distanceX, distanceY)
     }
 
-    override fun onFling(
-        e1: MotionEvent,
-        e2: MotionEvent,
-        velocityX: Float,
-        velocityY: Float,
-    ): Boolean {
+    override fun onFling(e: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+        val e1 = e ?: return false
         locked = false
         if (cancelled) {
             cancelled = false
