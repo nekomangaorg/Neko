@@ -43,7 +43,7 @@ operator fun <T> Preference<Set<T>>.minusAssign(item: Collection<T>) {
 
 class PreferencesHelper(val context: Context, val preferenceStore: PreferenceStore) {
 
-    private val defaultFolder = context.getString(R.string.app_name) + when (BuildConfig.DEBUG) {
+    private val defaultFolder = context.getString(R.string.app_name_neko) + when (BuildConfig.DEBUG) {
         true -> "_DEBUG"
         false -> ""
     }

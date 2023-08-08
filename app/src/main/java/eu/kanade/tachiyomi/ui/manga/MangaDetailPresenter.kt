@@ -520,7 +520,7 @@ class MangaDetailPresenter(
                 val directory = File(
                     Environment.getExternalStorageDirectory().absolutePath +
                         File.separator + Environment.DIRECTORY_PICTURES +
-                        File.separator + preferences.context.getString(R.string.app_name),
+                        File.separator + preferences.context.getString(R.string.app_name_neko),
                 )
                 saveCover(directory, artwork)
                 launchUI {

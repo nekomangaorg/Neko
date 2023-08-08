@@ -103,20 +103,21 @@ object DiskUtil {
         if (name.isEmpty()) {
             return "(invalid)"
         }
-        val sb = StringBuilder(name.length)
-        name.forEach { c ->
-            if (isValidFatFilenameChar(c)) {
-                sb.append(c)
+        val fatCompliantName = name.map { ch ->
+            if (isValidFatFilenameChar(ch)) {
+                ch
             } else {
-                sb.append('_')
+                "_"
             }
-        }
+        }.joinToString("")
+
+
         if (suffix.isNotEmpty()) {
-            return sb.toString().take(240 - suffix.length) + suffix
+            return fatCompliantName.take(240 - suffix.length) + suffix
         } else {
             // Even though vfat allows 255 UCS-2 chars, we might eventually write to
             // ext4 through a FUSE layer, so use that limit minus  reserved characters.
-            return sb.toString().take(240)
+            return fatCompliantName.take(240)
         }
     }
 

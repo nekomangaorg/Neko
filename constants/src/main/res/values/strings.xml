@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Neko</string>
+    <string name="app_name_neko" translatable="false">Neko</string>
 
     <string name="all_files_permission_required">File permissions required</string>
     <string name="external_storage_permission_notice">Neko requires access to all files in Android 11 to download chapters, and create automatic backups. \n\nOn the next screen, enable \"Allow access to manage all files.\"</string>
