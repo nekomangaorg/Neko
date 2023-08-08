@@ -8,6 +8,7 @@
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class okhttp3.** { public protected *; }
 -keep,allowoptimization class okio.** { public protected *; }
+-keep,allowoptimization class logcat.** { public protected *; }
 -keep,allowoptimization class rx.** { public protected *; }
 -keep,allowoptimization class org.jsoup.** { public protected *; }
 -keep,allowoptimization class com.google.gson.** { public protected *; }
@@ -17,6 +18,8 @@
 -dontwarn androidx.window.**
 -keep class com.crashlytics.** { *; }
 -dontwarn com.crashlytics.**
+-keep class com.google.firebase.installations.** {*; }
+-keep interface com.google.firebase.installations.** {*; }
 # Design library
 -dontwarn com.google.android.material.**
 -keep class com.google.android.material.** { *; }
