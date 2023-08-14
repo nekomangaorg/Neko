@@ -54,7 +54,7 @@ class SettingsDownloadController : SettingsController() {
             defaultValue = true
         }
         switchPreference {
-            bindTo(preferences.splitTallImages())
+            bindTo(readerPreferences.splitTallImages())
             titleRes = R.string.split_tall_images
             summaryRes = R.string.split_tall_images_summary
         }
@@ -202,7 +202,7 @@ class SettingsDownloadController : SettingsController() {
 
         private fun getExternalDirs(): List<File> {
             val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
-                File.separator + activity.resources?.getString(R.string.app_name) +
+                File.separator + activity.resources?.getString(R.string.app_name_neko) +
                 File.separator + "downloads"
 
             return mutableListOf(File(defaultDir)) +

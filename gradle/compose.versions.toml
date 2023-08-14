@@ -1,7 +1,7 @@
 [versions]
 accompanist_version = "0.30.1"
-compose_version = "1.4.3"
-compose_material3_version = "1.1.0"
+compose_version = "1.5.0-rc01"
+compose_material3_version = "1.1.1"
 compose_compiler_version = "1.4.7"
 
 [libraries]
@@ -29,18 +29,17 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 
 charty = "com.himanshoe:charty:1.1.3-alpha05"
 
-balloon = "com.github.skydoves:balloon-compose:1.5.3"
+balloon = "com.github.skydoves:balloon-compose:1.5.4"
 
 
 gap = "jp.wasabeef:gap:1.1.0"
 
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
-date-fieled = "com.github.CarlosEsco:compose-date-text-field:3c64e08381"
+date-field = "com.github.CarlosEsco:compose-date-text-field:3c64e08381"
 markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
-
 
 [bundles]
 accompanist = ["accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
-compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
+compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown"]
 charting = ["charty"]

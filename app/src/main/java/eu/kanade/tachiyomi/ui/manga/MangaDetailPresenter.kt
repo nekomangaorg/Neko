@@ -85,6 +85,7 @@ import org.nekomanga.domain.category.toDbCategory
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.message
@@ -100,6 +101,7 @@ import uy.kohesive.injekt.api.get
 class MangaDetailPresenter(
     private val mangaId: Long,
     val preferences: PreferencesHelper = Injekt.get(),
+    val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
@@ -157,10 +159,10 @@ class MangaDetailPresenter(
             }
             _generalState.value = MangaConstants.MangaScreenGeneralState(
                 hasDefaultCategory = preferences.defaultCategory().get() != -1,
-                hideButtonText = preferences.hideButtonText().get(),
-                extraLargeBackdrop = preferences.extraLargeBackdrop().get(),
-                themeBasedOffCovers = preferences.themeMangaDetails().get(),
-                wrapAltTitles = preferences.wrapAltTitles().get(),
+                hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
+                extraLargeBackdrop = mangaDetailsPreferences.extraLargeBackdrop().get(),
+                themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
+                wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),
                 validMergeTypes = validMergeTypes,
                 vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
             )
@@ -529,7 +531,7 @@ class MangaDetailPresenter(
                 val directory = File(
                     Environment.getExternalStorageDirectory().absolutePath +
                         File.separator + Environment.DIRECTORY_PICTURES +
-                        File.separator + preferences.context.getString(R.string.app_name),
+                        File.separator + preferences.context.getString(R.string.app_name_neko),
                 )
                 saveCover(directory, artwork)
                 launchUI {
@@ -958,8 +960,8 @@ class MangaDetailPresenter(
      */
     private fun getSortFilter(): MangaConstants.SortFilter {
         val manga = currentManga()
-        val sortOrder = manga.chapterOrder(preferences)
-        val status = when (manga.sortDescending(preferences)) {
+        val sortOrder = manga.chapterOrder(mangaDetailsPreferences)
+        val status = when (manga.sortDescending(mangaDetailsPreferences)) {
             true -> MangaConstants.SortState.Descending
             false -> MangaConstants.SortState.Ascending
         }
@@ -978,24 +980,24 @@ class MangaDetailPresenter(
      */
     private fun getFilter(): MangaConstants.ChapterDisplay {
         val manga = currentManga()
-        val read = when (manga.readFilter(preferences)) {
+        val read = when (manga.readFilter(mangaDetailsPreferences)) {
             Manga.CHAPTER_SHOW_UNREAD -> ToggleableState.On
             Manga.CHAPTER_SHOW_READ -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
         }
-        val bookmark = when (manga.bookmarkedFilter(preferences)) {
+        val bookmark = when (manga.bookmarkedFilter(mangaDetailsPreferences)) {
             Manga.CHAPTER_SHOW_BOOKMARKED -> ToggleableState.On
             Manga.CHAPTER_SHOW_NOT_BOOKMARKED -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
         }
 
-        val downloaded = when (manga.downloadedFilter(preferences)) {
+        val downloaded = when (manga.downloadedFilter(mangaDetailsPreferences)) {
             Manga.CHAPTER_SHOW_DOWNLOADED -> ToggleableState.On
             Manga.CHAPTER_SHOW_NOT_DOWNLOADED -> ToggleableState.Indeterminate
             else -> ToggleableState.Off
         }
 
-        val hideTitle = when (manga.hideChapterTitle(preferences)) {
+        val hideTitle = when (manga.hideChapterTitle(mangaDetailsPreferences)) {
             true -> ToggleableState.On
             else -> ToggleableState.Off
         }
@@ -1039,7 +1041,7 @@ class MangaDetailPresenter(
      * Get hide titles
      */
     private fun getHideTitlesFilter(): Boolean {
-        return currentManga().hideChapterTitle(preferences)
+        return currentManga().hideChapterTitle(mangaDetailsPreferences)
     }
 
     private fun getFilterText(chapterDisplay: MangaConstants.ChapterDisplay, chapterScanlatorFilter: MangaConstants.ScanlatorFilter): String {
@@ -1092,7 +1094,10 @@ class MangaDetailPresenter(
         presenterScope.launchIO {
             val manga = currentManga()
 
-            if (!manga.usesLocalFilter && manga.readFilter(preferences) == Manga.SHOW_ALL && manga.downloadedFilter(preferences) == Manga.SHOW_ALL && manga.bookmarkedFilter(preferences) == Manga.SHOW_ALL) {
+            if (!manga.usesLocalFilter && manga.readFilter(mangaDetailsPreferences) == Manga.SHOW_ALL && manga.downloadedFilter(mangaDetailsPreferences) == Manga.SHOW_ALL && manga.bookmarkedFilter(
+                    mangaDetailsPreferences,
+                ) == Manga.SHOW_ALL
+            ) {
                 manga.readFilter = Manga.SHOW_ALL
                 manga.bookmarkedFilter = Manga.SHOW_ALL
                 manga.downloadedFilter = Manga.SHOW_ALL
@@ -1205,16 +1210,16 @@ class MangaDetailPresenter(
             val manga = currentManga()
             when (option) {
                 MangaConstants.SetGlobal.Sort -> {
-                    preferences.sortChapterOrder().set(manga.sorting)
-                    preferences.chaptersDescAsDefault().set(manga.sortDescending)
+                    mangaDetailsPreferences.sortChapterOrder().set(manga.sorting)
+                    mangaDetailsPreferences.chaptersDescAsDefault().set(manga.sortDescending)
                     manga.setSortToGlobal()
                 }
 
                 MangaConstants.SetGlobal.Filter -> {
-                    preferences.filterChapterByRead().set(manga.readFilter)
-                    preferences.filterChapterByDownloaded().set(manga.downloadedFilter)
-                    preferences.filterChapterByBookmarked().set(manga.bookmarkedFilter)
-                    preferences.hideChapterTitlesByDefault().set(manga.hideChapterTitles)
+                    mangaDetailsPreferences.filterChapterByRead().set(manga.readFilter)
+                    mangaDetailsPreferences.filterChapterByDownloaded().set(manga.downloadedFilter)
+                    mangaDetailsPreferences.filterChapterByBookmarked().set(manga.bookmarkedFilter)
+                    mangaDetailsPreferences.hideChapterTitlesByDefault().set(manga.hideChapterTitles)
                     manga.setFilterToGlobal()
                 }
 
@@ -1228,17 +1233,17 @@ class MangaDetailPresenter(
 
     private fun mangaSortMatchesDefault(manga: Manga): Boolean {
         return (
-            manga.sortDescending == preferences.chaptersDescAsDefault().get() &&
-                manga.sorting == preferences.sortChapterOrder().get()
+            manga.sortDescending == mangaDetailsPreferences.chaptersDescAsDefault().get() &&
+                manga.sorting == mangaDetailsPreferences.sortChapterOrder().get()
             ) || !manga.usesLocalSort
     }
 
     private fun mangaFilterMatchesDefault(manga: Manga): Boolean {
         return (
-            manga.readFilter == preferences.filterChapterByRead().get() &&
-                manga.downloadedFilter == preferences.filterChapterByDownloaded().get() &&
-                manga.bookmarkedFilter == preferences.filterChapterByBookmarked().get() &&
-                manga.hideChapterTitles == preferences.hideChapterTitlesByDefault().get()
+            manga.readFilter == mangaDetailsPreferences.filterChapterByRead().get() &&
+                manga.downloadedFilter == mangaDetailsPreferences.filterChapterByDownloaded().get() &&
+                manga.bookmarkedFilter == mangaDetailsPreferences.filterChapterByBookmarked().get() &&
+                manga.hideChapterTitles == mangaDetailsPreferences.hideChapterTitlesByDefault().get()
             ) || !manga.usesLocalFilter
     }
 
@@ -1476,7 +1481,7 @@ class MangaDetailPresenter(
     fun markChapters(chapterItems: List<ChapterItem>, markAction: MangaConstants.MarkAction, skipSync: Boolean = false) {
         presenterScope.launchIO {
             val initialChapterItems = if (markAction is MangaConstants.MarkAction.PreviousRead || markAction is MangaConstants.MarkAction.PreviousUnread) {
-                when (currentManga().sortDescending(preferences)) {
+                when (currentManga().sortDescending(mangaDetailsPreferences)) {
                     true -> (markAction as? MangaConstants.MarkAction.PreviousRead)?.altChapters ?: (markAction as MangaConstants.MarkAction.PreviousUnread).altChapters
                     false -> chapterItems
                 }

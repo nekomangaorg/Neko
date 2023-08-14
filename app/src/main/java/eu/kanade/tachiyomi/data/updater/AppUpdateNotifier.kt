@@ -52,7 +52,7 @@ internal class AppUpdateNotifier(private val context: Context) {
         val pendingIntent = NotificationReceiver.openUpdatePendingActivity(context, body, url)
         releasePageUrl = releaseUrl
         with(notificationBuilder) {
-            setContentTitle(context.getString(R.string.app_name))
+            setContentTitle(context.getString(R.string.app_name_neko))
             setContentText(context.getString(R.string.new_version_available))
             setContentIntent(pendingIntent)
             setAutoCancel(true)

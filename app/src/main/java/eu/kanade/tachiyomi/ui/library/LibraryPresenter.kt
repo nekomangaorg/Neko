@@ -73,6 +73,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
+import org.nekomanga.core.loggycat
 import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -128,7 +130,7 @@ class LibraryPresenter(
         private set
     var allLibraryItems: List<LibraryItem> = emptyList()
         private set
-    private var hiddenLibraryItems: List<LibraryItem> = emptyList()
+    var hiddenLibraryItems: List<LibraryItem> = emptyList()
     var forceShowAllCategories = false
     val showAllCategories
         get() = forceShowAllCategories || libraryPreferences.showAllCategories().get()
@@ -689,15 +691,21 @@ class LibraryPresenter(
             val headerItems = (
                 categories.mapNotNull { category ->
                     val id = category.id
-                    if (id == null) null
-                    else id to LibraryHeaderItem({ getCategory(id) }, id)
+                    if (id == null) {
+                        null
+                    } else {
+                        id to LibraryHeaderItem({ getCategory(id) }, id)
+                    }
                 } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0))
                 ).toMap()
 
             val items = libraryManga.mapNotNull {
                 val headerItem = (
-                    if (!libraryIsGrouped) catItemAll
-                    else headerItems[it.category]
+                    if (!libraryIsGrouped) {
+                        catItemAll
+                    } else {
+                        headerItems[it.category]
+                    }
                     ) ?: return@mapNotNull null
                 categorySet.add(it.category)
                 LibraryItem(it, headerItem)
@@ -717,9 +725,11 @@ class LibraryPresenter(
                         (catId !in categoriesHidden || !showAll)
                     ) {
                         val headerItem = headerItems[catId]
-                        if (headerItem != null) items.add(
-                            LibraryItem(LibraryManga.createBlank(catId), headerItem),
-                        )
+                        if (headerItem != null) {
+                            items.add(
+                                LibraryItem(LibraryManga.createBlank(catId), headerItem),
+                            )
+                        }
                     } else if (catId in categoriesHidden && showAll && categories.size > 1) {
                         val mangaToRemove = items.filter { it.manga.category == catId }
                         val mergedTitle = mangaToRemove.joinToString("-") {
@@ -729,16 +739,19 @@ class LibraryPresenter(
                         hiddenItems.addAll(mangaToRemove)
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
-                        if (headerItem != null) items.add(
-                            LibraryItem(
-                                LibraryManga.createHide(
-                                    catId,
-                                    mergedTitle,
-                                    mangaToRemove.size,
+                        if (headerItem != null) {
+                            loggycat("DynamicCategory", LogPriority.DEBUG) { "library grouped: size ${mangaToRemove.size}" }
+                            items.add(
+                                LibraryItem(
+                                    LibraryManga.createHide(
+                                        catId,
+                                        mergedTitle,
+                                        mangaToRemove.size,
+                                    ),
+                                    headerItem,
                                 ),
-                                headerItem,
-                            ),
-                        )
+                            )
+                        }
                     }
                 }
             }
@@ -923,6 +936,8 @@ class LibraryPresenter(
                 sectionedLibraryItems[catId] = mangaToRemove
                 items.removeAll { it.header.catId == catId }
                 if (headerItem != null) {
+                    loggycat("DynamicCategory", LogPriority.DEBUG) { "getCustomMangaItem- cat[${catId}] size[${mangaToRemove.size}]" }
+
                     items.add(
                         LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
                     )

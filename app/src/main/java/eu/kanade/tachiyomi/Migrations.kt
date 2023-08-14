@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.reader.ReaderPreferences
 import tachiyomi.core.network.PREF_DOH_CLOUDFLARE
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -30,7 +31,7 @@ object Migrations {
      * @param preferences Preferences of the application.
      * @return true if a migration is performed, false otherwise.
      */
-    fun upgrade(preferences: PreferencesHelper, networkPreferences: NetworkPreferences, libraryPreferences: LibraryPreferences, scope: CoroutineScope): Boolean {
+    fun upgrade(preferences: PreferencesHelper, networkPreferences: NetworkPreferences, libraryPreferences: LibraryPreferences, readerPreferences: ReaderPreferences, scope: CoroutineScope): Boolean {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit {
@@ -121,8 +122,8 @@ object Migrations {
                 }
                 val oldReaderTap = prefs.getBoolean("reader_tap", true)
                 if (!oldReaderTap) {
-                    preferences.navigationModePager().set(5)
-                    preferences.navigationModeWebtoon().set(5)
+                    readerPreferences.navigationModePager().set(5)
+                    readerPreferences.navigationModeWebtoon().set(5)
                 }
             }
             if (oldVersion < 151) {

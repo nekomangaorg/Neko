@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.preference
 
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import org.nekomanga.core.preferences.PreferenceValues as Values
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
@@ -10,16 +9,10 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
-import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
-import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
-import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
-import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
 import java.io.File
@@ -50,7 +43,7 @@ operator fun <T> Preference<Set<T>>.minusAssign(item: Collection<T>) {
 
 class PreferencesHelper(val context: Context, val preferenceStore: PreferenceStore) {
 
-    private val defaultFolder = context.getString(R.string.app_name) + when (BuildConfig.DEBUG) {
+    private val defaultFolder = context.getString(R.string.app_name_neko) + when (BuildConfig.DEBUG) {
         true -> "_DEBUG"
         false -> ""
     }
@@ -86,100 +79,11 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun darkTheme() = this.preferenceStore.getEnum(Keys.darkTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
 
-    fun pageTransitions() = this.preferenceStore.getBoolean(Keys.enableTransitions, true)
-
-    fun pagerCutoutBehavior() = this.preferenceStore.getInt(Keys.pagerCutoutBehavior, 0)
-
-    fun doubleTapAnimSpeed() = this.preferenceStore.getInt(Keys.doubleTapAnimationSpeed, 500)
-
-    fun showPageNumber() = this.preferenceStore.getBoolean(Keys.showPageNumber, true)
-
-    fun trueColor() = this.preferenceStore.getBoolean(Keys.trueColor, false)
-
-    fun fullscreen() = this.preferenceStore.getBoolean(Keys.fullscreen, true)
-
-    fun keepScreenOn() = this.preferenceStore.getBoolean(Keys.keepScreenOn, true)
-
-    fun customBrightness() = this.preferenceStore.getBoolean(Keys.customBrightness, false)
-
-    fun customBrightnessValue() = this.preferenceStore.getInt(Keys.customBrightnessValue, 0)
-
-    fun colorFilter() = this.preferenceStore.getBoolean(Keys.colorFilter, false)
-
-    fun colorFilterValue() = this.preferenceStore.getInt(Keys.colorFilterValue, 0)
-
-    fun colorFilterMode() = this.preferenceStore.getInt(Keys.colorFilterMode, 0)
-
-    fun defaultReadingMode() =
-        this.preferenceStore.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
-
-    fun defaultOrientationType() =
-        this.preferenceStore.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
-
-    fun imageScaleType() = this.preferenceStore.getInt(Keys.imageScaleType, 1)
-
-    fun doublePageGap() = this.preferenceStore.getInt(Keys.doublePageGap, 0)
-
-    fun zoomStart() = this.preferenceStore.getInt(Keys.zoomStart, 1)
-
-    fun readerTheme() = this.preferenceStore.getInt(Keys.readerTheme, 2)
-
-    fun cropBorders() = this.preferenceStore.getBoolean(Keys.cropBorders, false)
-
-    fun cropBordersWebtoon() = this.preferenceStore.getBoolean(Keys.cropBordersWebtoon, false)
-
-    fun navigateToPan() = this.preferenceStore.getBoolean("navigate_pan", true)
-
-    fun landscapeZoom() = this.preferenceStore.getBoolean("landscape_zoom", false)
-
-    fun grayscale() = this.preferenceStore.getBoolean("pref_grayscale", false)
-
-    fun invertedColors() = this.preferenceStore.getBoolean("pref_inverted_colors", false)
-
-    fun webtoonSidePadding() = this.preferenceStore.getInt(Keys.webtoonSidePadding, 0)
-
-    fun webtoonEnableZoomOut() = this.preferenceStore.getBoolean(Keys.webtoonEnableZoomOut, false)
-
-    fun readWithLongTap() = this.preferenceStore.getBoolean(Keys.readWithLongTap, true)
-
-    fun readWithVolumeKeys() = this.preferenceStore.getBoolean(Keys.readWithVolumeKeys, false)
-
-    fun readWithVolumeKeysInverted() = this.preferenceStore.getBoolean(Keys.readWithVolumeKeysInverted, false)
-
-    fun navigationModePager() = this.preferenceStore.getInt(Keys.navigationModePager, 0)
-
-    fun navigationModeWebtoon() = this.preferenceStore.getInt(Keys.navigationModeWebtoon, 0)
-
-    fun pagerNavInverted() =
-        this.preferenceStore.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
-
-    fun webtoonNavInverted() =
-        this.preferenceStore.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
-
-    fun pageLayout() = this.preferenceStore.getInt(Keys.pageLayout, PageLayout.AUTOMATIC.value)
-
-    fun automaticSplitsPage() = this.preferenceStore.getBoolean(Keys.automaticSplitsPage, false)
-
-    fun invertDoublePages() = this.preferenceStore.getBoolean(Keys.invertDoublePages, false)
-
-    fun webtoonPageLayout() = this.preferenceStore.getInt(Keys.webtoonPageLayout, PageLayout.SINGLE_PAGE.value)
-
-    fun webtoonReaderHideThreshold() = this.preferenceStore.getEnum("reader_hide_threshold", Values.ReaderHideThreshold.LOW)
-
-    fun webtoonInvertDoublePages() = this.preferenceStore.getBoolean(Keys.webtoonInvertDoublePages, false)
-
-    fun readerBottomButtons() = this.preferenceStore.getStringSet(
-        Keys.readerBottomButtons,
-        ReaderBottomButton.BUTTONS_DEFAULTS,
-    )
-
     fun showNavigationOverlayNewUser() =
         this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUser, true)
 
     fun showNavigationOverlayNewUserWebtoon() =
         this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
-
-    fun preloadSize() = this.preferenceStore.getInt(Keys.preloadSize, 6)
 
     fun autoUpdateTrack() = this.preferenceStore.getBoolean(Keys.autoUpdateTrack, true)
 
@@ -255,31 +159,17 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun saveChaptersAsCBZ() = this.preferenceStore.getBoolean("save_chapter_as_cbz", true)
 
-    fun splitTallImages() = this.preferenceStore.getBoolean("split_tall_images", false)
-
-    fun doublePageRotate() = this.preferenceStore.getBoolean("double_page_rotate", false)
-
-    fun doublePageRotateReverse() = this.preferenceStore.getBoolean("double_page_rotate_reverse", false)
-
     fun downloadNewChapters() = this.preferenceStore.getBoolean("download_new")
 
     fun downloadNewChaptersInCategories() = this.preferenceStore.getStringSet("download_new_categories")
 
     fun excludeCategoriesInDownloadNew() = this.preferenceStore.getStringSet("download_new_categories_exclude")
 
-    fun lang() = this.preferenceStore.getString(Keys.lang, "")
-
     fun langsToShow() = this.preferenceStore.getString(Keys.langToShow, "en")
 
     fun autoDownloadWhileReading() = this.preferenceStore.getInt("auto_download_while_reading", 0)
 
     fun defaultCategory() = this.preferenceStore.getInt(Keys.defaultCategory, -1)
-
-    fun skipRead() = this.preferenceStore.getBoolean(Keys.skipRead, false)
-
-    fun skipFiltered() = this.preferenceStore.getBoolean(Keys.skipFiltered, true)
-
-    fun skipDuplicates() = this.preferenceStore.getBoolean(Keys.skipDuplicates, false)
 
     fun recentsViewType() = this.preferenceStore.getInt("recents_view_type", 0)
 
@@ -302,15 +192,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun lastAppCheck() = this.preferenceStore.getLong("last_app_check", 0)
 
-    fun alwaysShowChapterTransition() = this.preferenceStore.getBoolean(Keys.alwaysShowChapterTransition, true)
-
     fun deleteRemovedChapters() = this.preferenceStore.getInt(Keys.deleteRemovedChapters, 0)
-
-    fun hideButtonText() = this.preferenceStore.getBoolean(Keys.hideMangaDetailButtonText, false)
-
-    fun extraLargeBackdrop() = this.preferenceStore.getBoolean(Keys.extraLargeBackdrop, false)
-
-    fun wrapAltTitles() = this.preferenceStore.getBoolean(Keys.wrapAltTitles, false)
 
     // Tutorial preferences
     fun shownFilterTutorial() = this.preferenceStore.getBoolean("shown_filter_tutorial", false)
@@ -329,8 +211,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
 
-    fun themeMangaDetails() = this.preferenceStore.getBoolean(Keys.themeMangaDetails, true)
-
     fun useLargeToolbar() = this.preferenceStore.getBoolean("use_large_toolbar", false)
 
     fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
@@ -341,29 +221,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun appShouldAutoUpdate() =
         this.preferenceStore.getInt(Keys.shouldAutoUpdate, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
 
-    fun filterChapterByRead() = this.preferenceStore.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
-
-    fun filterChapterByDownloaded() =
-        this.preferenceStore.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)
-
-    fun filterChapterByBookmarked() =
-        this.preferenceStore.getInt(Keys.defaultChapterFilterByBookmarked, Manga.SHOW_ALL)
-
-    fun sortChapterOrder() =
-        this.preferenceStore.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
-
-    fun hideChapterTitlesByDefault() = this.preferenceStore.getBoolean(Keys.hideChapterTitles, false)
-
-    fun chaptersDescAsDefault() = this.preferenceStore.getBoolean(Keys.chaptersDescAsDefault, true)
-
     fun blockedScanlators() =
         this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
-
-    fun coverRatios() = this.preferenceStore.getStringSet(Keys.coverRatios, emptySet())
-
-    fun coverColors() = this.preferenceStore.getStringSet(Keys.coverColors, emptySet())
-
-    fun coverVibrantColors() = this.preferenceStore.getStringSet(Keys.coverVibrantColors, emptySet())
 
     fun dataSaver() = this.preferenceStore.getBoolean(Keys.dataSaver, false)
 

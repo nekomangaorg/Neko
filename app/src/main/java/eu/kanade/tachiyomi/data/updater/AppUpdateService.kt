@@ -60,7 +60,7 @@ class AppUpdateService : Service() {
 
         startForeground(
             Notifications.ID_UPDATER,
-            notifier.onDownloadStarted(getString(R.string.app_name)).build(),
+            notifier.onDownloadStarted(getString(R.string.app_name_neko)).build(),
         )
 
         wakeLock = acquireWakeLock(javaClass.name)
@@ -82,7 +82,7 @@ class AppUpdateService : Service() {
         }
 
         val url = intent.getStringExtra(EXTRA_DOWNLOAD_URL) ?: return START_NOT_STICKY
-        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.app_name)
+        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.app_name_neko)
         val notifyOnInstall = intent.getBooleanExtra(EXTRA_NOTIFY_ON_INSTALL, false)
 
         runningJob = GlobalScope.launch(handler) {
@@ -260,7 +260,7 @@ class AppUpdateService : Service() {
          */
         fun start(context: Context, url: String, notifyOnInstall: Boolean) {
             if (!isRunning()) {
-                val title = context.getString(R.string.app_name)
+                val title = context.getString(R.string.app_name_neko)
                 val intent = Intent(context, AppUpdateService::class.java).apply {
                     putExtra(EXTRA_DOWNLOAD_TITLE, title)
                     putExtra(EXTRA_DOWNLOAD_URL, url)

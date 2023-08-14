@@ -484,7 +484,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             securityPreferences.incognitoMode().set(false)
 
             // Show changelog if needed
-            if (Migrations.upgrade(preferences, networkPreferences, libraryPreferences, lifecycleScope)) {
+            if (Migrations.upgrade(preferences, networkPreferences, libraryPreferences, readerPreferences, lifecycleScope)) {
                 if (!BuildConfig.DEBUG) {
                     content.post {
                         whatsNewSheet().show()
@@ -1285,11 +1285,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         override fun onFling(
-            e1: MotionEvent,
+            e: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float,
         ): Boolean {
+            val e1 = e ?: return false
             var result = false
             val diffY = e2.y - e1.y
             val diffX = e2.x - e1.x

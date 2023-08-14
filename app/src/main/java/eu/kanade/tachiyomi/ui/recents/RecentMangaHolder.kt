@@ -95,7 +95,7 @@ class RecentMangaHolder(
         }
 
         binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
-        val chapterName = if (item.mch.manga.hideChapterTitle(adapter.preferences)) {
+        val chapterName = if (item.mch.manga.hideChapterTitle(adapter.mangaDetailsPreferences)) {
             val number = adapter.decimalFormat.format(item.chapter.chapter_number.toDouble())
             itemView.context.getString(R.string.chapter_, number)
         } else {
@@ -129,6 +129,7 @@ class RecentMangaHolder(
                 R.string.added_,
                 item.mch.manga.date_added.timeSpanFromNow(itemView.context),
             )
+
             isSmallUpdates -> ""
             item.mch.history.id == null -> {
                 if (adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES) {
@@ -153,6 +154,7 @@ class RecentMangaHolder(
                     )
                 }
             }
+
             item.chapter.id != item.mch.chapter.id ->
                 binding.body.context.getString(
                     R.string.read_,
@@ -161,6 +163,7 @@ class RecentMangaHolder(
                     if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
                     if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number),
                 )
+
             item.chapter.pages_left > 0 && !item.chapter.read ->
                 binding.body.context.getString(
                     R.string.read_,
@@ -170,6 +173,7 @@ class RecentMangaHolder(
                     item.chapter.pages_left,
                     item.chapter.pages_left,
                 )
+
             else -> binding.body.context.getString(
                 R.string.read_,
                 item.mch.history.last_read.timeSpanFromNow(itemView.context),
@@ -217,6 +221,7 @@ class RecentMangaHolder(
                 RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded,
                 ->
                     status !in Download.State.CHECKED..Download.State.NOT_DOWNLOADED || !isChapterRead
+
                 else -> binding.downloadButton.downloadButton.isVisible
             }
     }

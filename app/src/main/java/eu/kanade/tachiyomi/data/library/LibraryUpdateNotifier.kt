@@ -56,7 +56,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      */
     val progressNotificationBuilder by lazy {
         context.notificationBuilder(Notifications.CHANNEL_LIBRARY_PROGRESS) {
-            setContentTitle(context.getString(R.string.app_name))
+            setContentTitle(context.getString(R.string.app_name_neko))
             setSmallIcon(R.drawable.ic_refresh_24dp)
             setLargeIcon(notificationBitmap)
             setOngoing(true)

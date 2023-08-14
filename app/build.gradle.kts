@@ -26,8 +26,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "tachiyomi.mangadex"
-        versionCode = 189
-        versionName = "2.13.3"
+        versionCode = 191
+        versionName = "2.13.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -189,8 +189,8 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
-    implementation("me.saket.cascade:cascade:2.1.0")
-    implementation("me.saket.cascade:cascade-compose:2.1.0")
+    implementation("me.saket.cascade:cascade:2.2.0")
+    implementation("me.saket.cascade:cascade-compose:2.2.0")
 
     //Compose
     implementation(compose.bundles.compose)

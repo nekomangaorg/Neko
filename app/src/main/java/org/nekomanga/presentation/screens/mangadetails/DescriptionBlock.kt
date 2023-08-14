@@ -119,8 +119,8 @@ fun DescriptionBlock(
 
                 Markdown(
                     content = text,
-                    colors = markdownColors(),
-                    typography = markdownTypography(),
+                    colors = nekoMarkdownColors(),
+                    typography = nekoMarkdownTypography(),
                     flavour = CommonMarkFlavourDescriptor(),
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -164,8 +164,8 @@ fun DescriptionBlock(
             SelectionContainer {
                 Markdown(
                     content = text,
-                    colors = markdownColors(),
-                    typography = markdownTypography(),
+                    colors = nekoMarkdownColors(),
+                    typography = nekoMarkdownTypography(),
                     flavour = CommonMarkFlavourDescriptor(),
                     modifier = clickable,
                 )
@@ -244,7 +244,7 @@ private fun AltTitles(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
         if (shouldWrap) {
-            flowableAltTitles(
+            FlowableAltTitles(
                 altTitles = altTitles,
                 currentTitle = currentTitle,
                 isCustomTitle = isCustomTitle,
@@ -255,7 +255,7 @@ private fun AltTitles(
                 onChipColor = onChipColor,
             )
         } else {
-            scrollableAltTitles(
+            ScrollableAltTitles(
                 altTitles = altTitles,
                 currentTitle = currentTitle,
                 isCustomTitle = isCustomTitle,
@@ -270,7 +270,7 @@ private fun AltTitles(
 }
 
 @Composable
-private fun flowableAltTitles(
+private fun FlowableAltTitles(
     altTitles: ImmutableList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
@@ -315,7 +315,7 @@ private fun flowableAltTitles(
 }
 
 @Composable
-private fun scrollableAltTitles(
+private fun ScrollableAltTitles(
     altTitles: ImmutableList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
@@ -412,7 +412,7 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, b
             Balloon(
                 builder = toolTipBuilder(backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(tagColor, 16.dp), dismissable = false),
                 balloonContent = {
-                    genreBalloon(balloonWindow, genreSearch, genre, buttonColor, genreLibrarySearch)
+                    GenreBalloon(balloonWindow, genreSearch, genre, buttonColor, genreLibrarySearch)
                 },
             ) { window ->
 
@@ -432,7 +432,7 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, b
 }
 
 @Composable
-private fun genreBalloon(
+private fun GenreBalloon(
     balloonWindow: BalloonWindow?,
     genreSearch: (String) -> Unit,
     genre: String,
@@ -461,15 +461,13 @@ private fun genreBalloon(
 }
 
 @Composable
-private fun markdownColors(): MarkdownColors {
-    return MarkdownDefaults.markdownColors(
-        textColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-        backgroundColor = MaterialTheme.colorScheme.surface,
-    )
-}
+private fun nekoMarkdownColors(): MarkdownColors = MarkdownDefaults.markdownColors(
+    textColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+    backgroundColor = MaterialTheme.colorScheme.surface,
+)
 
 @Composable
-private fun markdownTypography() =
+private fun nekoMarkdownTypography() =
     MarkdownDefaults.markdownTypography(
         h1 = MaterialTheme.typography.headlineMedium,
         h2 = MaterialTheme.typography.headlineSmall,

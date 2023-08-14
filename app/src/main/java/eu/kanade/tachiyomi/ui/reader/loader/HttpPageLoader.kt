@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
 import eu.kanade.tachiyomi.data.cache.ChapterCache
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -24,6 +23,7 @@ import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
 import logcat.LogPriority
 import org.nekomanga.core.loggycat
+import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -44,12 +44,12 @@ class HttpPageLoader(
      */
     private val queue = PriorityBlockingQueue<PriorityPage>()
 
-    private val preferences by injectLazy<PreferencesHelper>()
-    private var preloadSize = preferences.preloadSize().get()
+    private val readerPreferences by injectLazy<ReaderPreferences>()
+    private var preloadSize = readerPreferences.preloadPageAmount().get()
 
     init {
         // Adding flow since we can reach reader settings after this is created
-        preferences.preloadSize().changes().onEach {
+        readerPreferences.preloadPageAmount().changes().onEach {
             preloadSize = it
         }.launchIn(scope)
 

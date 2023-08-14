@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.format.Formatter
 import com.jakewharton.disklrucache.DiskLruCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.storage.saveTo
 import java.io.File
@@ -24,6 +23,7 @@ import okhttp3.Response
 import okio.buffer
 import okio.sink
 import org.nekomanga.core.loggycat
+import org.nekomanga.domain.reader.ReaderPreferences
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.injectLazy
 
@@ -52,15 +52,14 @@ class ChapterCache(private val context: Context) {
         const val PARAMETER_CACHE_SIZE = 50L * 1024 * 1024
     }
 
-    /** Google Json class used for parsing JSON files.  */
     private val json: Json by injectLazy()
 
-    private val preferences: PreferencesHelper by injectLazy()
+    private val readerPreferences: ReaderPreferences by injectLazy()
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     /** Cache class used for cache management.  */
-    private var diskCache = setupDiskCache(preferences.preloadSize().get())
+    private var diskCache = setupDiskCache(readerPreferences.preloadPageAmount().get())
 
     /**
      * Returns directory of cache.
@@ -81,7 +80,7 @@ class ChapterCache(private val context: Context) {
         get() = Formatter.formatFileSize(context, realSize)
 
     init {
-        preferences.preloadSize().changes()
+        readerPreferences.preloadPageAmount().changes()
             .drop(1)
             .onEach {
                 // Save old cache for destruction later

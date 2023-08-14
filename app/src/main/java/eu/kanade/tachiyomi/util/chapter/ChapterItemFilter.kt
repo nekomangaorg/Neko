@@ -4,24 +4,28 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class ChapterItemFilter(
     val preferences: PreferencesHelper = Injekt.get(),
+    val readerPreferences: ReaderPreferences = Injekt.get(),
+    val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
 ) {
 
     /** filters chapters based on the manga values */
     fun <T : ChapterItem> filterChapters(chapters: List<T>, manga: Manga): List<T> {
-        val readEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_READ
-        val unreadEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_UNREAD
-        val downloadEnabled = manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_DOWNLOADED
+        val readEnabled = manga.readFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_READ
+        val unreadEnabled = manga.readFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_UNREAD
+        val downloadEnabled = manga.downloadedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_DOWNLOADED
         val notDownloadEnabled =
-            manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
-        val bookmarkEnabled = manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_BOOKMARKED
+            manga.downloadedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+        val bookmarkEnabled = manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_BOOKMARKED
         val notBookmarkEnabled =
-            manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+            manga.bookmarkedFilter(mangaDetailsPreferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
 
         // if none of the filters are enabled skip the filtering of them
         val filteredChapters = filterChaptersByLanguage(filterChaptersByScanlators(chapters, manga), manga)
@@ -52,14 +56,14 @@ class ChapterItemFilter(
     ): List<T> {
         var filteredChapters = filterChaptersByScanlators(chapters, manga)
         // if neither preference is enabled don't even filter
-        if (!preferences.skipRead().get() && !preferences.skipFiltered().get()) {
+        if (!readerPreferences.skipRead().get() && !readerPreferences.skipFiltered().get()) {
             return filteredChapters
         }
 
-        if (preferences.skipRead().get()) {
+        if (readerPreferences.skipRead().get()) {
             filteredChapters = filteredChapters.filter { !it.chapter.read }
         }
-        if (preferences.skipFiltered().get()) {
+        if (readerPreferences.skipFiltered().get()) {
             filteredChapters = filterChapters(filteredChapters, manga)
         }
         // add the selected chapter to the list in case it was filtered out

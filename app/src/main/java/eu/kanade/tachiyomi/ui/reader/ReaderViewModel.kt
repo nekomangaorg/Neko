@@ -78,6 +78,7 @@ import org.nekomanga.core.loggycat
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.reader.ReaderPreferences
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -93,6 +94,7 @@ class ReaderViewModel(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val readerPreferences: ReaderPreferences = Injekt.get(),
     private val securityPreferences: SecurityPreferences = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
     private val chapterItemFilter: ChapterItemFilter = Injekt.get(),
@@ -636,7 +638,7 @@ class ReaderViewModel(
      * Returns the viewer position used by this manga or the default one.
      */
     fun getMangaReadingMode(): Int {
-        val default = preferences.defaultReadingMode().get()
+        val default = readerPreferences.defaultReadingMode().get()
         val manga = manga ?: return default
         val readerType = manga.defaultReaderType()
         if (manga.viewer_flags == -1) {
@@ -689,7 +691,7 @@ class ReaderViewModel(
      * Returns the orientation type used by this manga or the default one.
      */
     fun getMangaOrientationType(): Int {
-        val default = preferences.defaultOrientationType().get()
+        val default = readerPreferences.defaultOrientationType().get()
         return when (manga?.orientationType) {
             OrientationType.DEFAULT.flagValue -> default
             else -> manga?.orientationType ?: default
@@ -845,7 +847,7 @@ class ReaderViewModel(
         // Pictures directory.
         val baseDir = Environment.getExternalStorageDirectory().absolutePath +
             File.separator + Environment.DIRECTORY_PICTURES +
-            File.separator + context.getString(R.string.app_name)
+            File.separator + context.getString(R.string.app_name_neko)
         val destDir = if (preferences.folderPerManga().get()) {
             File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
         } else {
@@ -879,7 +881,7 @@ class ReaderViewModel(
             // Pictures directory.
             val baseDir = Environment.getExternalStorageDirectory().absolutePath +
                 File.separator + Environment.DIRECTORY_PICTURES +
-                File.separator + context.getString(R.string.app_name)
+                File.separator + context.getString(R.string.app_name_neko)
             val destDir = if (preferences.folderPerManga().get()) {
                 File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
             } else {

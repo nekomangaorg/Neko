@@ -35,8 +35,8 @@ fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConf
                 item {
                     Markdown(
                         content = body,
-                        colors = markdownColors(),
-                        typography = markdownTypography(),
+                        colors = nekoMarkdownColors(),
+                        typography = nekoMarkdownTypography(),
                     )
                 }
             }
@@ -57,22 +57,20 @@ fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConf
 }
 
 @Composable
-private fun markdownColors(): MarkdownColors {
-    return MarkdownDefaults.markdownColors(
-        textColor = MaterialTheme.colorScheme.onSurface,
-        backgroundColor = MaterialTheme.colorScheme.surface,
-    )
-}
+private fun nekoMarkdownColors(): MarkdownColors = MarkdownDefaults.markdownColors(
+    textColor = MaterialTheme.colorScheme.onSurface,
+    backgroundColor = MaterialTheme.colorScheme.surface,
+)
 
 @Composable
-private fun markdownTypography() =
-    MarkdownDefaults.markdownTypography(
-        h1 = MaterialTheme.typography.headlineMedium,
-        h2 = MaterialTheme.typography.headlineSmall,
-        h3 = MaterialTheme.typography.titleLarge,
-        h4 = MaterialTheme.typography.titleMedium,
-        h5 = MaterialTheme.typography.titleSmall,
-        h6 = MaterialTheme.typography.bodyLarge,
-        body1 = MaterialTheme.typography.bodyMedium,
-        body2 = MaterialTheme.typography.bodySmall,
-    )
+private fun nekoMarkdownTypography() = MarkdownDefaults.markdownTypography(
+    h1 = MaterialTheme.typography.headlineMedium,
+    h2 = MaterialTheme.typography.headlineSmall,
+    h3 = MaterialTheme.typography.titleLarge,
+    h4 = MaterialTheme.typography.titleMedium,
+    h5 = MaterialTheme.typography.titleSmall,
+    h6 = MaterialTheme.typography.bodyLarge,
+    body1 = MaterialTheme.typography.bodyMedium,
+    body2 = MaterialTheme.typography.bodySmall,
+)
+

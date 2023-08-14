@@ -38,6 +38,7 @@ import kotlinx.coroutines.async
 import logcat.LogPriority
 import okhttp3.Response
 import org.nekomanga.core.loggycat
+import org.nekomanga.domain.reader.ReaderPreferences
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -66,6 +67,7 @@ class Downloader(
     private val sourceManager: SourceManager,
 ) {
     private val preferences: PreferencesHelper by injectLazy()
+    private val readerPreferences: ReaderPreferences by injectLazy()
     private val chapterCache: ChapterCache by injectLazy()
 
     /**
@@ -513,7 +515,7 @@ class Downloader(
     }
 
     private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile): Boolean {
-        if (!preferences.splitTallImages().get()) return true
+        if (!readerPreferences.splitTallImages().get()) return true
 
         val filename = String.format("%03d", page.number)
         val imageFile = tmpDir.listFiles()?.find { it.name!!.startsWith(filename) }

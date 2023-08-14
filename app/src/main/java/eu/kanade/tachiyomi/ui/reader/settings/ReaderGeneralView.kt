@@ -39,11 +39,11 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             } ?: 0,
         )
 
-        binding.backgroundColor.bindToPreference(preferences.readerTheme(), 0)
-        binding.showPageNumber.bindToPreference(preferences.showPageNumber())
-        binding.fullscreen.bindToPreference(preferences.fullscreen())
-        binding.keepscreen.bindToPreference(preferences.keepScreenOn())
-        binding.alwaysShowChapterTransition.bindToPreference(preferences.alwaysShowChapterTransition())
+        binding.backgroundColor.bindToPreference(readerPreferences.readerTheme(), 0)
+        binding.showPageNumber.bindToPreference(readerPreferences.showPageNumber())
+        binding.fullscreen.bindToPreference(readerPreferences.fullscreen())
+        binding.keepscreen.bindToPreference(readerPreferences.keepScreenOn())
+        binding.alwaysShowChapterTransition.bindToPreference(readerPreferences.alwaysShowChapterTransition())
     }
 
     /**
