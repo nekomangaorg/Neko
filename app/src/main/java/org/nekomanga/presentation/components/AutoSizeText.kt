@@ -18,8 +18,8 @@ fun AutoSizeText(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
 ) {
-    var scaledTextStyle by remember { mutableStateOf(style) }
-    var readyToDraw by remember { mutableStateOf(false) }
+    var scaledTextStyle by remember(text) { mutableStateOf(style) }
+    var readyToDraw by remember(text) { mutableStateOf(false) }
 
     Text(
         text,

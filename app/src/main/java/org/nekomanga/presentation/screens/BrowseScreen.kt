@@ -187,7 +187,7 @@ fun BrowseScreen(
                 actions = {
                     AppBarActions(
                         actions =
-                        when (browseScreenType != BrowseScreenType.Homepage && browseScreenType != BrowseScreenType.Other) {
+                        when (browseScreenType != BrowseScreenType.Homepage && browseScreenType != BrowseScreenType.Other && browseScreenType != BrowseScreenType.Lists) {
                             true -> listOf(
                                 listGridAppBarAction(
                                     isList = browseScreenState.value.isList,
@@ -276,7 +276,7 @@ fun BrowseScreen(
                             contentPadding = recyclerContentPadding,
                         )
                     } else {
-                        Crossfade(targetState = browseScreenType) { type ->
+                        Crossfade(targetState = browseScreenType, label = "Crossfade browse") { type ->
                             when (type) {
                                 BrowseScreenType.Homepage -> BrowseHomePage(
                                     browseHomePageManga = browseScreenState.value.homePageManga,

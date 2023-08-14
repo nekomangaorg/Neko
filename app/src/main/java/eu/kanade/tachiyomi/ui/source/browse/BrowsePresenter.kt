@@ -251,7 +251,7 @@ class BrowsePresenter(
             if (!isOnline()) return@launchIO
 
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, error = null, page = 1)
+                state.copy(initialLoading = true, title = UiText.StringResource(R.string.browse), error = null, page = 1)
             }
 
             val currentQuery = browseScreenState.value.filters.query.text
@@ -727,13 +727,22 @@ class BrowsePresenter(
 
     fun changeScreenType(browseScreenType: BrowseScreenType, forceUpdate: Boolean = false) {
         presenterScope.launch {
-            when (browseScreenType) {
-                BrowseScreenType.Lists -> getListPage(forceUpdate)
-                BrowseScreenType.Filter -> getSearchPage()
-                else -> Unit
+            val title = when (browseScreenType) {
+                BrowseScreenType.Lists -> {
+                    getListPage(forceUpdate)
+                    UiText.StringResource(R.string.my_lists)
+                }
+
+                BrowseScreenType.Filter -> {
+                    getSearchPage()
+                    UiText.StringResource(R.string.browse)
+                }
+
+                else -> UiText.StringResource(R.string.browse)
+
             }
             _browseScreenState.update {
-                it.copy(screenType = browseScreenType, error = null)
+                it.copy(screenType = browseScreenType, title = title, error = null)
             }
         }
     }
