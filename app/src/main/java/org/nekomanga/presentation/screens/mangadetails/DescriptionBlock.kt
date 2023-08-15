@@ -47,9 +47,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import com.mikepenz.markdown.Markdown
-import com.mikepenz.markdown.MarkdownColors
-import com.mikepenz.markdown.MarkdownDefaults
+import com.mikepenz.markdown.compose.Markdown
+import com.mikepenz.markdown.model.markdownColor
+import com.mikepenz.markdown.model.markdownTypography
 import com.skydoves.balloon.compose.Balloon
 import com.skydoves.balloon.compose.BalloonWindow
 import eu.kanade.tachiyomi.R
@@ -461,23 +461,23 @@ private fun GenreBalloon(
 }
 
 @Composable
-private fun nekoMarkdownColors(): MarkdownColors = MarkdownDefaults.markdownColors(
-    textColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-    backgroundColor = MaterialTheme.colorScheme.surface,
+private fun nekoMarkdownColors() = markdownColor(
+    text = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+    codeText = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+    codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
 )
 
 @Composable
-private fun nekoMarkdownTypography() =
-    MarkdownDefaults.markdownTypography(
-        h1 = MaterialTheme.typography.headlineMedium,
-        h2 = MaterialTheme.typography.headlineSmall,
-        h3 = MaterialTheme.typography.titleLarge,
-        h4 = MaterialTheme.typography.titleMedium,
-        h5 = MaterialTheme.typography.titleSmall,
-        h6 = MaterialTheme.typography.bodyLarge,
-        body1 = MaterialTheme.typography.bodyLarge,
-        body2 = MaterialTheme.typography.bodySmall,
-    )
+private fun nekoMarkdownTypography() = markdownTypography(
+    h1 = MaterialTheme.typography.headlineMedium,
+    h2 = MaterialTheme.typography.headlineSmall,
+    h3 = MaterialTheme.typography.titleLarge,
+    h4 = MaterialTheme.typography.titleMedium,
+    h5 = MaterialTheme.typography.titleSmall,
+    h6 = MaterialTheme.typography.bodyLarge,
+    paragraph = MaterialTheme.typography.bodyLarge,
+    text = MaterialTheme.typography.bodySmall,
+)
 
 fun TimeInterpolator.toEasing() = Easing { x ->
     getInterpolation(x)
