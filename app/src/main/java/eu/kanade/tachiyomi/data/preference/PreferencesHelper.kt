@@ -290,9 +290,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun lastRefreshTime() = this.preferenceStore.getLong(Keys.lastRefreshTokenTime, 0)
     fun readingSync() = this.preferenceStore.getBoolean(Keys.readingSync, false)
 
-    fun mangadexSyncToLibraryIndexes() =
-        this.preferenceStore.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
-
     fun codeVerifier(): Preference<String> {
         val codeVerifier = this.preferenceStore.getString(Keys.mangadexCodeVerifier)
         return when (codeVerifier.get().isEmpty()) {

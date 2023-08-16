@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateService
-import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.SourceManager
@@ -251,7 +251,7 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     private fun cancelFollowSync(context: Context) {
-        WorkManager.getInstance(context).cancelAllWorkByTag(StatusSyncJob.TAG)
+        WorkManager.getInstance(context).cancelAllWorkByTag(CustomListSyncJob.TAG)
         Handler().post { dismissNotification(context, Notifications.Id.Status.Progress) }
     }
 

@@ -22,7 +22,7 @@ import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackListService
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackStatusService
-import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncJob
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
@@ -1374,7 +1374,7 @@ class LibraryPresenter(
         presenterScope.launch {
             withContext(Dispatchers.IO) {
                 val mangaIds = mangaList.map { it.id }.filterNotNull().joinToString()
-                StatusSyncJob.doWorkNow(context, mangaIds)
+                CustomListSyncJob.doWorkNow(context, mangaIds, emptyList())
             }
         }
     }

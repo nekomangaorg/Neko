@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.database.models
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import uy.kohesive.injekt.injectLazy
 
 open class MangaImpl : Manga {
@@ -48,8 +47,6 @@ open class MangaImpl : Manga {
     override var chapter_flags: Int = 0
 
     override var date_added: Long = 0
-
-    override var follow_status: FollowStatus? = null
 
     override var lang_flag: String? = null
 

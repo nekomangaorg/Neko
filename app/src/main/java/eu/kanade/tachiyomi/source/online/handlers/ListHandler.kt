@@ -35,7 +35,7 @@ class ListHandler {
 
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
-    suspend fun retrieveList(listUUID: String, page: Int, privateList: Boolean): Result<ListResults, ResultError> {
+    suspend fun retrieveMangaFromList(listUUID: String, page: Int, privateList: Boolean): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
 
             val currentService = when (privateList) {
@@ -79,6 +79,30 @@ class ListHandler {
                             }
                         }
                 }
+        }
+    }
+
+    suspend fun retrieveAllMangaFromList(listUUID: String, privateList: Boolean): Result<ImmutableList<SourceManga>, ResultError> {
+        var hasPages = true
+        var page = 1
+        val list: MutableList<SourceManga> = mutableListOf()
+        var resultError: ResultError? = null
+        while (hasPages) {
+            retrieveMangaFromList(listUUID, page, privateList)
+                .onFailure {
+                    hasPages = false
+                    resultError = it
+                }
+                .onSuccess {
+                    page++
+                    hasPages = it.hasNextPage
+                    list += it.sourceManga
+                }
+        }
+
+        return when (resultError != null) {
+            true -> Err(resultError!!)
+            false -> Ok(list.toPersistentList())
         }
     }
 

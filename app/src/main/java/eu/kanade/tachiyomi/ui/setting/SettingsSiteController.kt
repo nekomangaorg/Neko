@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.databinding.CreateCustomListDialogBinding
-import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.SourceManager
@@ -234,46 +234,47 @@ class SettingsSiteController :
 
 
         preference {
-            titleRes = R.string.sync_follows_to_library
-            summaryRes = R.string.sync_follows_to_library_summary
+            titleRes = R.string.sync_custom_list_to_library
+            summaryRes = R.string.sync_custom_list_to_library_summary
 
             onClick {
+
+                val trackManager: TrackManager = Injekt.get()
+                val options = trackManager.mdList.viewLists()
+
                 activity!!.materialAlertDialog()
                     .setNegativeButton(android.R.string.cancel, null)
                     .setMultiChoiceItems(
-                        context.resources.getStringArray(R.array.follows_options).drop(1)
-                            .toTypedArray(),
-                        booleanArrayOf(true, false, false, false, false, true),
+                        options.map { it.name }.toTypedArray(),
+                        options.map { false }.toBooleanArray(),
                     ) { dialog, position, bool ->
                         val listView = (dialog as AlertDialog).listView
                         listView.setItemChecked(position, bool)
                     }
                     .setPositiveButton(android.R.string.ok) { dialog, t ->
                         val listView = (dialog as AlertDialog).listView
-                        val indiciesSelected = mutableListOf<String>()
+                        val uuidsSelected = mutableListOf<String>()
                         for (i in 0 until listView.count) {
                             if (listView.isItemChecked(i)) {
-                                indiciesSelected.add((i + 1).toString())
+                                uuidsSelected.add(options[i].id)
                             }
                         }
-                        if (indiciesSelected.size > 0) {
-                            preferences.mangadexSyncToLibraryIndexes()
-                                .set(indiciesSelected.toSet())
-                            StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
+                        if (uuidsSelected.size > 0) {
+                            CustomListSyncJob.doWorkNow(context, CustomListSyncJob.entireFollowsFromDex, uuidsSelected)
                         }
                     }
                     .show()
             }
         }
 
-        preference {
-            titleRes = R.string.push_favorites_to_mangadex
-            summaryRes = R.string.push_favorites_to_mangadex_summary
+        /*   preference {
+               titleRes = R.string.push_favorites_to_mangadex
+               summaryRes = R.string.push_favorites_to_mangadex_summary
 
-            onClick {
-                StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
-            }
-        }
+               onClick {
+                   StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
+               }
+           }*/
 
         preference {
             title = "Test"

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.jobs.follows
+package eu.kanade.tachiyomi.jobs.customlist
 
 import android.content.Context
 import android.widget.Toast
@@ -12,7 +12,6 @@ import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -30,14 +29,13 @@ import uy.kohesive.injekt.injectLazy
 /**
  * WorkManager job that syncs FollowsList to and from Neko
  */
-class StatusSyncJob(
+class CustomListSyncJob(
     val context: Context,
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
 
-    val followsSyncService: FollowsSyncService by injectLazy()
-    val source: SourceManager by injectLazy()
-    val loginHelper: MangaDexLoginHelper by injectLazy()
+    private val customListSyncService: CustomListSyncService by injectLazy()
+    private val loginHelper: MangaDexLoginHelper by injectLazy()
 
     private val progressNotification =
         applicationContext.notificationBuilder(Notifications.Channel.Status).apply {
@@ -62,10 +60,14 @@ class StatusSyncJob(
             errorNotification()
             return@coroutineScope Result.failure()
         }
+
+        val type = inputData.getString(SYNC_TO_MANGADEX)
+        val uuids = inputData.getStringArray(SYNC_UUIDS)
+
         try {
-            when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
+            when (type) {
                 null, "0" -> {
-                    followsSyncService.toMangaDex(
+                    customListSyncService.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
                         null,
@@ -73,7 +75,8 @@ class StatusSyncJob(
                 }
 
                 "1" -> {
-                    val total = followsSyncService.fromMangaDex(
+                    val total = customListSyncService.fromMangaDex(
+                        uuids!!.toList(),
                         ::errorNotification,
                         ::updateNotificationProgress,
                         ::completeNotificationFromDex,
@@ -81,7 +84,7 @@ class StatusSyncJob(
                     withUIContext {
                         applicationContext.toast(
                             applicationContext.getString(
-                                R.string.sync_follows_to_library_toast,
+                                R.string.sync_custom_list_to_library_toast,
                                 total,
                             ),
                             Toast.LENGTH_LONG,
@@ -90,10 +93,10 @@ class StatusSyncJob(
                 }
 
                 else -> {
-                    followsSyncService.toMangaDex(
+                    customListSyncService.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        ids,
+                        null,
                     )
                 }
             }
@@ -161,18 +164,19 @@ class StatusSyncJob(
 
     companion object {
 
-        val TAG = "follow_sync_job"
+        val TAG = "custom_list_sync_job"
         private const val SYNC_TO_MANGADEX = "sync_to_mangadex"
+        private const val SYNC_UUIDS = "sync_uuids"
 
         const val entireLibraryToDex: String = "0"
         const val entireFollowsFromDex = "1"
 
-        fun doWorkNow(context: Context, syncToMangadex: String) {
+        fun doWorkNow(context: Context, syncToMangadex: String, uuidsToSync: List<String>) {
             WorkManager.getInstance(context).enqueue(
-                OneTimeWorkRequestBuilder<StatusSyncJob>().apply {
+                OneTimeWorkRequestBuilder<CustomListSyncJob>().apply {
                     addTag(TAG)
                     setInputData(
-                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex)
+                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).putStringArray(SYNC_UUIDS, uuidsToSync.toTypedArray())
                             .build(),
                     )
                 }.build(),

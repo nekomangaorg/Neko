@@ -1291,7 +1291,7 @@
     <string name="crash_screen_restart_application">Restart the application</string>
 
 
-    <!-- Follows -->
+    <!-- Custom List -->
     <string name="status_channel">Manga status sync</string>
     <string name="syncing_follows">Begin syncing follows</string>
     <string name="sync_follows_complete">Syncing follows complete</string>
@@ -1299,10 +1299,8 @@
     <string name="not_logged_into_mangadex_cannot_sync">Not logged into MangaDex cannot sync</string>
 
     <string name="sync_follows_failed">Syncing follows failed</string>
-    <string name="follows">My follows</string>
     <string name="my_lists">My lists</string>
     <string name="add_to_follows">Add to MangaDex follows</string>
-    <string name="follows_status">Follows Status</string>
     <string name="follows_unfollowed">Unfollowed</string>
     <string name="follows_reading">Reading</string>
     <string name="follows_completed">Completed</string>
@@ -1357,9 +1355,9 @@
     <string name="low_thumb">Low</string>
 
 
-    <string name="sync_follows_to_library">Sync MangaDex Follows</string>
-    <string name="sync_follows_to_library_summary">Pulls Manga from your MangaDex Follows List into your Neko library if they are not already added.</string>
-    <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>
+    <string name="sync_custom_list_to_library">Sync MangaDex Custom List</string>
+    <string name="sync_custom_list_to_library_summary">Pulls Manga from your MangaDex Custom Lists into your Neko library if they are not already added.</string>
+    <string name="sync_custom_list_to_library_toast">Synced %d new manga from MangaDex</string>
     <string name="push_favorites_to_mangadex">Sync Library Manga to Follows</string>
     <string name="push_favorites_to_mangadex_summary">Syncs your entire library to your MangaDex Follows List with a Reading Status</string>
     <string name="push_favorites_to_mangadex_toast">Pushed %d manga to MangaDex</string>

@@ -9,7 +9,6 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.MaterialShapeDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.UnreadDownloadBadgeBinding
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -118,45 +117,6 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         } else {
             binding.downloadText.updatePaddingRelative(end = 5.dpToPx)
             binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
-        }
-    }
-
-    fun setChapters(chapters: Int?) {
-        setUnreadDownload(chapters ?: 0, 0, chapters != null, true)
-    }
-
-    fun setInLibrary(inLibrary: Boolean) {
-        this.isVisible = inLibrary
-        binding.unreadAngle.isVisible = false
-        binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
-        binding.unreadText.isVisible = inLibrary
-        binding.unreadText.text = resources.getText(R.string.in_library)
-        binding.unreadText.background =
-            MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
-                this.fillColor =
-                    ColorStateList.valueOf(context.getResourceColor(R.attr.unreadBadgeColor))
-            }
-    }
-
-    fun setStatus(status: FollowStatus, inLibrary: Boolean) {
-        this.isVisible = true
-        with(binding) {
-            unreadAngle.isVisible = inLibrary
-            downloadText.isVisible = inLibrary
-            downloadText.text = resources.getText(R.string.in_library)
-
-            unreadText.updatePaddingRelative(start = 5.dpToPx)
-            unreadText.isVisible = true
-            val statusText = when (status) {
-                FollowStatus.READING -> R.string.follows_reading
-                FollowStatus.UNFOLLOWED -> R.string.follows_unfollowed
-                FollowStatus.COMPLETED -> R.string.follows_completed
-                FollowStatus.ON_HOLD -> R.string.follows_on_hold
-                FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
-                FollowStatus.DROPPED -> R.string.follows_dropped
-                FollowStatus.RE_READING -> R.string.follows_re_reading
-            }
-            unreadText.text = resources.getText(statusText)
         }
     }
 }

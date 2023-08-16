@@ -1,28 +1,35 @@
-package eu.kanade.tachiyomi.jobs.follows
+package eu.kanade.tachiyomi.jobs.customlist
 
+import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.onFailure
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withIOContext
+import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import logcat.LogPriority
 import org.nekomanga.core.loggycat
-import org.nekomanga.domain.network.ResultError
+import org.nekomanga.domain.network.message
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class FollowsSyncService {
+class CustomListSyncService {
 
     val preferences: PreferencesHelper = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
-    val sourceManager: SourceManager = Injekt.get()
+    val mangadex: MangaDex = Injekt.get<SourceManager>().mangaDex
     val trackManager: TrackManager = Injekt.get()
     val followsHandler: SubscriptionHandler = Injekt.get()
 
@@ -30,61 +37,63 @@ class FollowsSyncService {
      * Syncs follows list manga into library based off the preference
      */
     suspend fun fromMangaDex(
+        listUuids: List<String>,
         errorNotification: (String) -> Unit,
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: () -> Unit,
     ): Int {
         return withContext(Dispatchers.IO) {
-            0
-            /*  loggycat { "Starting from MangaDex sync" }
-              val count = AtomicInteger(0)
-              val countOfAdded = AtomicInteger(0)
+            loggycat { "Starting from MangaDex sync" }
+            val count = AtomicInteger(0)
+            val countOfAdded = AtomicInteger(0)
 
-              val syncFollowStatusInts =
-                  preferences.mangadexSyncToLibraryIndexes().get().map { it.toInt() }
+            val categories = db.getCategories().executeAsBlocking()
+            val defaultCategoryId = preferences.defaultCategory().get()
+            val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-              sourceManager.mangaDex.fetchAllFollows().onFailure {
-                  errorNotification((it as? ResultError.Generic)?.errorString ?: "Error fetching follows")
-              }.onSuccess { unfilteredManga ->
+            val mangaToAdd = listUuids.map { listUUID ->
+                mangadex.fetchAllFromList(listUUID, true).onFailure {
+                    val errorMessage = "Error getting from list $listUUID. ${it.message()}"
+                    errorNotification(errorMessage)
+                    loggycat(LogPriority.ERROR) { errorMessage }
+                }.mapBoth(
+                    { it },
+                    {
+                        emptyList()
+                    },
+                )
+            }.flatten().distinct()
+            loggycat { "total number from mangadex is ${mangaToAdd.size}" }
 
-                  val listManga = unfilteredManga.groupBy { FollowStatus.fromStringRes(it.displayTextRes).int }.filter { it.key in syncFollowStatusInts }.values.flatten()
+            mangaToAdd.forEach { networkManga ->
+                updateNotification(networkManga.title, count.andIncrement, mangaToAdd.size)
 
-                  loggycat { "total number from mangadex is ${listManga.size}" }
+                var dbManga = db.getManga(networkManga.url, mangadex.id)
+                    .executeAsBlocking()
+                if (dbManga == null) {
+                    dbManga = Manga.create(
+                        networkManga.url,
+                        networkManga.title,
+                        mangadex.id,
+                    )
+                    dbManga.date_added = Date().time
+                }
 
-                  val categories = db.getCategories().executeAsBlocking()
-                val defaultCategoryId = preferences.defaultCategory().get()
-                  val defaultCategory = categories.find { it.id == defaultCategoryId }
+                // Increment and update if it is not already favorited
+                if (!dbManga.favorite) {
+                    countOfAdded.incrementAndGet()
+                    dbManga.favorite = true
+                    if (defaultCategory != null) {
+                        val mc = MangaCategory.create(dbManga, defaultCategory)
+                        db.setMangaCategories(listOf(mc), listOf(dbManga))
+                    }
 
-                  listManga.forEach { networkManga ->
-                      updateNotification(networkManga.title, count.andIncrement, listManga.size)
+                    db.insertManga(dbManga).executeAsBlocking()
+                }
+            }
 
-                      var dbManga = db.getManga(networkManga.url, sourceManager.mangaDex.id)
-                          .executeAsBlocking()
-                      if (dbManga == null) {
-                          dbManga = Manga.create(
-                              networkManga.url,
-                              networkManga.title,
-                              sourceManager.mangaDex.id,
-                          )
-                          dbManga.date_added = Date().time
-                      }
-
-                      // Increment and update if it is not already favorited
-                      if (!dbManga.favorite) {
-                          countOfAdded.incrementAndGet()
-                          dbManga.favorite = true
-                          if (defaultCategory != null) {
-                              val mc = MangaCategory.create(dbManga, defaultCategory)
-                              db.setMangaCategories(listOf(mc), listOf(dbManga))
-                          }
-
-                          db.insertManga(dbManga).executeAsBlocking()
-                      }
-                  }
-              }
-
-              completeNotification()
-              countOfAdded.get()*/
+            completeNotification()
+            countOfAdded.get()
         }
     }
 

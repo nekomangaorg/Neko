@@ -51,7 +51,6 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_USER_COVER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_USER_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_VIEWER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 
 class MangaTypeMapping : SQLiteTypeMapping<Manga>(
     MangaPutResolver(),
@@ -90,7 +89,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
         put(COL_DATE_ADDED, obj.date_added)
         put(COL_LANG_FLAG, obj.lang_flag)
-        put(COL_FOLLOW_STATUS, obj.follow_status?.int)
+        put(COL_FOLLOW_STATUS, 0)
         put(COL_ANILIST_ID, obj.anilist_id)
         put(COL_KITSU_ID, obj.kitsu_id)
         put(COL_MY_ANIME_LIST_ID, obj.my_anime_list_id)
@@ -145,8 +144,6 @@ interface BaseMangaGetResolver {
         users = cursor.getString(cursor.getColumnIndex(COL_USERS))
         merge_manga_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_URL))
         last_chapter_number = cursor.getIntOrNull(cursor.getColumnIndex(COL_MANGA_LAST_CHAPTER))
-        follow_status =
-            cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
         merge_manga_image_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_IMAGE_URL))
         alt_titles = cursor.getString(cursor.getColumnIndex(COL_ALT_TITLE))
         user_cover = cursor.getString(cursor.getColumnIndex(COL_USER_COVER))

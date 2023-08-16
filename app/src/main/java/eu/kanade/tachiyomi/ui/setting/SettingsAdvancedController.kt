@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
+import com.github.michaelbull.result.onSuccess
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.BuildConfig
@@ -28,8 +29,6 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.disableItems
@@ -295,20 +294,22 @@ class SettingsAdvancedController : SettingsController() {
         }
         if (BuildConfig.DEBUG) {
             preference {
-                title = "Unfollow all library manga"
+                title = "Remove library manga from all lists"
                 onClick {
                     launchIO {
                         val db = Injekt.get<DatabaseHelper>()
-                        val followsHandler = Injekt.get<SubscriptionHandler>()
+                        val mangaDex = Injekt.get<SourceManager>().mangaDex
                         val trackManager: TrackManager = Injekt.get()
-                        db.getLibraryMangaList().executeAsBlocking().forEach {
-                            followsHandler.updateFollowStatus(
-                                it.uuid(),
-                                FollowStatus.UNFOLLOWED,
-                            )
-                            db.getMDList(it).executeOnIO()?.let { _ ->
-                                db.deleteTrackForManga(it, trackManager.mdList)
-                                    .executeAsBlocking()
+                        mangaDex.fetchAllUserLists().onSuccess { resultListPage ->
+                            val listIds = resultListPage.results.map { it.uuid }
+                            db.getLibraryMangaList().executeAsBlocking().forEach { libraryManga ->
+                                listIds.forEach { id ->
+                                    mangaDex.removeFromCustomList(libraryManga.uuid(), id)
+                                }
+                                db.getMDList(libraryManga).executeOnIO()?.let { _ ->
+                                    db.deleteTrackForManga(libraryManga, trackManager.mdList)
+                                        .executeAsBlocking()
+                                }
                             }
                         }
                     }
@@ -379,11 +380,9 @@ class SettingsAdvancedController : SettingsController() {
 
         activity?.toast(R.string.starting_cleanup)
         job = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
-            val sourceManager: SourceManager = Injekt.get()
             val downloadProvider = DownloadProvider(activity!!)
             var foldersCleared = 0
             val mangaList = db.getMangaList().executeAsBlocking()
-            val source = sourceManager.mangaDex
             val mangaFolders = downloadManager.getMangaFolders()
 
             for (mangaFolder in mangaFolders) {

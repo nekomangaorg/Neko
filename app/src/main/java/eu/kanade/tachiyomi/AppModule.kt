@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.jobs.follows.FollowsSyncService
+import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncService
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationService
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncService
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -31,7 +31,6 @@ import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
-import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
@@ -43,9 +42,9 @@ import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.domain.details.MangaDetailsPreferences
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
 import uy.kohesive.injekt.api.InjektModule
@@ -122,7 +121,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(StatusHandler())
 
-        addSingleton(FollowsSyncService())
+        addSingleton(CustomListSyncService())
 
         addSingleton(V5MigrationService())
 
@@ -130,7 +129,6 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(SimilarRepository())
 
-        addSingleton(MangaUpdateCoordinator())
 
         addSingleton(TrackingCoordinator())
 

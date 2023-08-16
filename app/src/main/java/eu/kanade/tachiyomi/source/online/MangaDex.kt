@@ -29,7 +29,6 @@ import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
@@ -38,6 +37,7 @@ import eu.kanade.tachiyomi.util.lang.toResultError
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -71,10 +71,6 @@ open class MangaDex : HttpSource() {
     private val loginHelper: MangaDexLoginHelper by injectLazy()
 
     private val latestChapterHandler: LatestChapterHandler by injectLazy()
-
-    suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
-        return followsHandler.updateFollowStatus(mangaID, followStatus)
-    }
 
     suspend fun addToCustomList(mangaID: String, listID: String): Boolean {
         return listHandler.addToCustomList(mangaID, listID).result?.equals("ok", true) ?: false
@@ -157,7 +153,11 @@ open class MangaDex : HttpSource() {
     }
 
     suspend fun fetchList(listId: String, page: Int, privateList: Boolean): Result<ListResults, ResultError> {
-        return listHandler.retrieveList(listId, page, privateList)
+        return listHandler.retrieveMangaFromList(listId, page, privateList)
+    }
+
+    suspend fun fetchAllFromList(listId: String, privateList: Boolean): Result<ImmutableList<SourceManga>, ResultError> {
+        return listHandler.retrieveAllMangaFromList(listId, privateList)
     }
 
     suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>, showSubscriptionFeed: Boolean): Result<List<ListResults>, ResultError> {

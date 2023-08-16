@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.model
 
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.Serializable
 import tachiyomi.source.model.MangaInfo
@@ -25,9 +24,6 @@ interface SManga : Serializable {
     var thumbnail_url: String?
 
     var initialized: Boolean
-
-    @Deprecated("Not used any more")
-    var follow_status: FollowStatus?
 
     var lang_flag: String?
 
@@ -91,10 +87,6 @@ interface SManga : Serializable {
 
         if (other.lang_flag != null) {
             lang_flag = other.lang_flag
-        }
-
-        if (other.follow_status != null) {
-            follow_status = other.follow_status
         }
 
         if (other.anilist_id != null) {
