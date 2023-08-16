@@ -11,9 +11,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.mikepenz.markdown.Markdown
-import com.mikepenz.markdown.MarkdownColors
-import com.mikepenz.markdown.MarkdownDefaults
+import com.mikepenz.markdown.compose.Markdown
+import com.mikepenz.markdown.model.markdownColor
+import com.mikepenz.markdown.model.markdownTypography
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.GithubRelease
 
@@ -57,20 +57,21 @@ fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConf
 }
 
 @Composable
-private fun nekoMarkdownColors(): MarkdownColors = MarkdownDefaults.markdownColors(
-    textColor = MaterialTheme.colorScheme.onSurface,
-    backgroundColor = MaterialTheme.colorScheme.surface,
+private fun nekoMarkdownColors() = markdownColor(
+    text = MaterialTheme.colorScheme.onSurface,
+    codeText = MaterialTheme.colorScheme.onSurface,
+    codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
 )
 
 @Composable
-private fun nekoMarkdownTypography() = MarkdownDefaults.markdownTypography(
+private fun nekoMarkdownTypography() = markdownTypography(
     h1 = MaterialTheme.typography.headlineMedium,
     h2 = MaterialTheme.typography.headlineSmall,
     h3 = MaterialTheme.typography.titleLarge,
     h4 = MaterialTheme.typography.titleMedium,
     h5 = MaterialTheme.typography.titleSmall,
     h6 = MaterialTheme.typography.bodyLarge,
-    body1 = MaterialTheme.typography.bodyMedium,
-    body2 = MaterialTheme.typography.bodySmall,
+    paragraph = MaterialTheme.typography.bodyMedium,
+    text = MaterialTheme.typography.bodySmall,
 )
 
