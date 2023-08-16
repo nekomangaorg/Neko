@@ -472,11 +472,7 @@ class LibraryPresenter(
                 if (filterTrackers.isNotEmpty()) {
                     if (service != null) {
                         val hasServiceTrack = tracks.any {
-                            if (service.isMdList().not()) {
-                                it.sync_id == service.id
-                            } else {
-                                FollowStatus.UNFOLLOWED != FollowStatus.fromInt(it.status)
-                            }
+                            it.sync_id == service.id
                         }
                         if (hasServiceTrack) return false
                     }

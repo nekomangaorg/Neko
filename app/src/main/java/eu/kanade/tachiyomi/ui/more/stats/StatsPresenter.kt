@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedStatManga
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedState
@@ -169,11 +168,7 @@ class StatsPresenter(
     }
 
     private fun getMangaByTrackCount(mangaList: List<LibraryManga>, tracks: List<Track>): Int {
-        return mangaList.map { it.id!! }.map { mangaId ->
-            tracks.filter { it.manga_id == mangaId }.any {
-                !(it.sync_id == TrackManager.MDLIST && FollowStatus.isUnfollowed(it.status))
-            }
-        }.count { it }
+        return mangaList.map { it.id!! }.count()
     }
 
     private fun getLoggedTrackers(): List<TrackService> {

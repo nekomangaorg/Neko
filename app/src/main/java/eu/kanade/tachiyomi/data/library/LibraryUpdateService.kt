@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -45,7 +44,6 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.io.File
@@ -412,9 +410,7 @@ class LibraryUpdateService(
             }
             currentCount++
         }
-        GlobalScope.launchIO {
-            updateReadingStatus(mangaToUpdateMap[source])
-        }
+
         mangaToUpdateMap[source] = emptyList()
         return hasDownloads
     }
@@ -599,38 +595,6 @@ class LibraryUpdateService(
             db.insertManga(manga).executeOnIO()
         }
         return manga
-    }
-
-    suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) {
-        loggycat { "Attempting to update reading statuses" }
-        if (mangaList.isNullOrEmpty()) return
-        if (mangaDexLoginHelper.isLoggedIn() && job?.isCancelled == false) {
-            runCatching {
-                val readingStatus = statusHandler.fetchReadingStatusForAllManga()
-                if (readingStatus.isNotEmpty()) {
-                    loggycat { "Updating follow statuses" }
-                    mangaList.map { libraryManga ->
-                        runCatching {
-                            db.getTracks(libraryManga).executeOnIO()
-                                .toMutableList()
-                                .firstOrNull { it.sync_id == trackManager.mdList.id }
-                                ?.apply {
-                                    val result =
-                                        readingStatus[MdUtil.getMangaUUID(libraryManga.url)]
-                                    if (this.status != FollowStatus.fromDex(result).int) {
-                                        this.status = FollowStatus.fromDex(result).int
-                                        db.insertTrack(this).executeOnIO()
-                                    }
-                                }
-                        }.onFailure {
-                            loggycat(LogPriority.ERROR, it) { "Error refreshing tracking" }
-                        }
-                    }
-                }
-            }.onFailure {
-                loggycat(LogPriority.ERROR, it) { "error getting reading status" }
-            }
-        }
     }
 
     private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
