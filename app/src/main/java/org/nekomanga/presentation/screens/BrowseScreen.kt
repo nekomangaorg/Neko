@@ -197,12 +197,16 @@ fun BrowseScreen(
 
                             false -> emptyList()
                         } +
-                            listOf(
-                                showLibraryEntriesAction(
-                                    showEntries = browseScreenState.value.showLibraryEntries,
-                                    onClick = switchLibraryVisibilityClick,
-                                ),
-                            ) +
+                            when (browseScreenType == BrowseScreenType.Lists) {
+                                true -> emptyList()
+                                false -> listOf(
+                                    showLibraryEntriesAction(
+                                        showEntries = browseScreenState.value.showLibraryEntries,
+                                        onClick = switchLibraryVisibilityClick,
+                                    ),
+                                )
+                            }
+                            +
                             if (browseScreenState.value.isDeepLink) {
                                 emptyList()
                             } else {
