@@ -118,9 +118,9 @@ object PreferenceKeys {
 
     const val enablePort443Only = "use_port_443_only_for_image_server"
 
-    const val enableDefaultCustomLists = "enable_default_custom_lists"
+    const val enableDefaultCustomLists = "enable_default_mdlists"
 
-    const val defaultCustomLists = "default_custom_lists"
+    const val defaultCustomLists = "default_mdlists_"
 
     const val mangadexSyncToLibraryIndexes = "pref_mangadex_sync_to_library_indexes"
 

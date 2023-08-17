@@ -29,7 +29,7 @@ This is a <a href="https://mangadex.org/">MangaDex</a> specific fork of <a href=
 - Supports native login to MangaDex and 2FA
 - Use MDList as  Tracker
 - Similar Manga Recommendations
-- Manually sync of Manga to and from Mangadex follows list
+- Manually sync of Manga to and from Mangadex MDLists
 - Sync Followed Manga's read chapters from MangaDex into Neko automatically
 - Filter by Scanlation Group in chapter list
 - Look at an additional source for missing chapters not hosted on MangaDex

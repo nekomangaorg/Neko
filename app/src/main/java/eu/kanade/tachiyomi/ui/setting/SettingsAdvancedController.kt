@@ -294,7 +294,7 @@ class SettingsAdvancedController : SettingsController() {
         }
         if (BuildConfig.DEBUG) {
             preference {
-                title = "Remove library manga from all lists"
+                title = "Remove library manga from All MDLists"
                 onClick {
                     launchIO {
                         val db = Injekt.get<DatabaseHelper>()

@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.collections.immutable.toImmutableList
@@ -106,11 +107,15 @@ class BrowseRepository(
             mangaDex.fetchHomePageInfo(MdConstants.oldSeasonalId, uuids, isLoggedIn())
                 .andThen { listResults ->
                     Ok(
-                        listResults.map { listResult ->
-                            HomePageManga(
-                                displayScreenType = listResult.displayScreenType,
-                                displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList(),
-                            )
+                        listResults.mapNotNull { listResult ->
+                            if (listResult.sourceManga.isEmpty() && listResult.displayScreenType is DisplayScreenType.SubscriptionFeed) {
+                                null
+                            } else {
+                                HomePageManga(
+                                    displayScreenType = listResult.displayScreenType,
+                                    displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList(),
+                                )
+                            }
                         },
                     )
                 }

@@ -5,14 +5,12 @@ import com.github.michaelbull.result.onFailure
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
@@ -31,10 +29,9 @@ class CustomListSyncService {
     val db: DatabaseHelper = Injekt.get()
     val mangadex: MangaDex = Injekt.get<SourceManager>().mangaDex
     val trackManager: TrackManager = Injekt.get()
-    val followsHandler: SubscriptionHandler = Injekt.get()
 
     /**
-     * Syncs follows list manga into library based off the preference
+     * Syncs from a list of MdLists
      */
     suspend fun fromMangaDex(
         listUuids: List<String>,
@@ -101,50 +98,49 @@ class CustomListSyncService {
      * Syncs Library manga to MangaDex as Reading and puts them on the follows list
      */
     suspend fun toMangaDex(
+        listIds: List<String>,
+        mangaIds: List<Long>,
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: (total: Int) -> Unit,
-        ids: String? = null,
     ) {
         withContext(Dispatchers.IO) {
             loggycat { "Starting to MangaDex sync" }
             val count = AtomicInteger(0)
             val countNew = AtomicInteger(0)
 
-            val listManga =
-                ids?.split(", ")?.mapNotNull {
-                    db.getManga(it.toLong()).executeAsBlocking()
-                }?.toList()
-                    ?: db.getLibraryMangaList().executeAsBlocking()
+            loggycat { "Number of Manga ids to sync ${mangaIds.size}" }
 
-            // only add if the current tracker is not set to reading
+            val listManga = when (mangaIds.isEmpty()) {
+                true -> db.getLibraryMangaList().executeAsBlocking()
+                false -> mangaIds.mapNotNull { db.getManga(it).executeAsBlocking() }
+            }.distinctBy { it.uuid() }
 
-            listManga.distinctBy { it.uuid() }.forEach { manga ->
+            loggycat { "Number of Manga to Sync to MangaDex ${listManga.size}" }
+
+            listManga.forEach { manga ->
                 updateNotification(manga.title, count.andIncrement, listManga.size)
 
-                // Get this manga's trackers from the database
-                var mdListTrack = db.getMDList(manga).executeOnIO()
-
-                // create mdList if missing
-                if (mdListTrack == null) {
-                    mdListTrack = trackManager.mdList.createInitialTracker(manga)
-                    db.insertTrack(mdListTrack).executeAsBlocking()
+                val mdListTrack = getTrack(manga)
+                withIOContext {
+                    trackManager.mdList.addToLists(mdListTrack, listIds)
                 }
 
-                if (mdListTrack.status == FollowStatus.UNFOLLOWED.int) {
-                    withIOContext {
-                        followsHandler.updateFollowStatus(
-                            MdUtil.getMangaUUID(manga.url),
-                            FollowStatus.READING,
-                        )
-
-                        mdListTrack.status = FollowStatus.READING.int
-                        //val returnedTracker = trackManager.mdList.update(mdListTrack)
-                        //    db.insertTrack(returnedTracker).executeOnIO()
-                    }
-                    countNew.incrementAndGet()
-                }
+                countNew.incrementAndGet()
             }
             completeNotification(countNew.get())
         }
     }
+
+    private suspend fun getTrack(manga: Manga): Track {
+        // Get this manga's trackers from the database
+        var mdListTrack = db.getMDList(manga).executeOnIO()
+
+        // create mdList if missing
+        if (mdListTrack == null) {
+            mdListTrack = trackManager.mdList.createInitialTracker(manga)
+            db.insertTrack(mdListTrack).executeAsBlocking()
+        }
+        return mdListTrack
+    }
 }
+

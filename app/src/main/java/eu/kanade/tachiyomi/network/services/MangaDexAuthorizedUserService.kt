@@ -97,12 +97,6 @@ interface MangaDexAuthorizedUserService : CommonListFunctions {
         @Body markStatusDto: MarkStatusDto,
     ): ApiResponse<ResultDto>
 
-    @POST("${MdConstants.Api.manga}/{id}/follow")
-    suspend fun followManga(@Path("id") mangaId: String): ApiResponse<ResultDto>
-
-    @DELETE("${MdConstants.Api.manga}/{id}/follow")
-    suspend fun unfollowManga(@Path("id") mangaId: String): ApiResponse<ResultDto>
-
     @GET(MdConstants.Api.rating)
     suspend fun retrieveRating(@Query("manga[]") mangaId: String): ApiResponse<RatingResponseDto>
 

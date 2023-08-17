@@ -39,7 +39,7 @@ class CustomListSyncJob(
 
     private val progressNotification =
         applicationContext.notificationBuilder(Notifications.Channel.Status).apply {
-            setContentTitle(context.getString(R.string.syncing_follows))
+            setContentTitle(context.getString(R.string.begin_syncing_mdlist))
             setSmallIcon(R.drawable.ic_neko_notification)
             setAutoCancel(true)
             addAction(
@@ -61,20 +61,15 @@ class CustomListSyncJob(
             return@coroutineScope Result.failure()
         }
 
-        val type = inputData.getString(SYNC_TO_MANGADEX)
+        val type = inputData.getInt(SYNC_TO_MANGADEX, TO_DEX)
         val uuids = inputData.getStringArray(SYNC_UUIDS)
+        val mangaIds = inputData.getLongArray(MANGA_IDS)
+
+        loggycat { "Number of mangaIds ${mangaIds!!.size}" }
 
         try {
             when (type) {
-                null, "0" -> {
-                    customListSyncService.toMangaDex(
-                        ::updateNotificationProgress,
-                        ::completeNotificationToDex,
-                        null,
-                    )
-                }
-
-                "1" -> {
+                FROM_DEX -> {
                     val total = customListSyncService.fromMangaDex(
                         uuids!!.toList(),
                         ::errorNotification,
@@ -84,7 +79,7 @@ class CustomListSyncJob(
                     withUIContext {
                         applicationContext.toast(
                             applicationContext.getString(
-                                R.string.sync_custom_list_to_library_toast,
+                                R.string.sync_mdlist_to_library_toast,
                                 total,
                             ),
                             Toast.LENGTH_LONG,
@@ -94,9 +89,10 @@ class CustomListSyncJob(
 
                 else -> {
                     customListSyncService.toMangaDex(
+                        uuids!!.toList(),
+                        mangaIds!!.toList(),
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        null,
                     )
                 }
             }
@@ -125,7 +121,7 @@ class CustomListSyncJob(
     }
 
     private fun completeNotificationToDex(total: Int) {
-        completeNotification(R.string.sync_follows_complete)
+        completeNotification(R.string.sync_mdlist_complete)
         launchUI {
             applicationContext.toast(
                 applicationContext.getString(
@@ -138,12 +134,12 @@ class CustomListSyncJob(
     }
 
     private fun completeNotificationFromDex() {
-        completeNotification(R.string.sync_to_follows_complete)
+        completeNotification(R.string.sync_to_mdlist_complete)
     }
 
     private fun completeNotification(@StringRes title: Int) {
         val notification = progressNotification
-            .setContentTitle(context.getString(R.string.sync_follows_complete))
+            .setContentTitle(context.getString(R.string.sync_mdlist_complete))
             .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Status.Complete,
@@ -164,19 +160,33 @@ class CustomListSyncJob(
 
     companion object {
 
-        val TAG = "custom_list_sync_job"
+        val TAG = "mdlist_sync_job"
         private const val SYNC_TO_MANGADEX = "sync_to_mangadex"
         private const val SYNC_UUIDS = "sync_uuids"
+        private const val MANGA_IDS = "manga_ids"
 
-        const val entireLibraryToDex: String = "0"
-        const val entireFollowsFromDex = "1"
+        const val TO_DEX = 0
+        const val FROM_DEX = 1
 
-        fun doWorkNow(context: Context, syncToMangadex: String, uuidsToSync: List<String>) {
+        fun toMangaDex(context: Context, listUuids: List<String>, mangaIds: List<Long>) {
             WorkManager.getInstance(context).enqueue(
                 OneTimeWorkRequestBuilder<CustomListSyncJob>().apply {
                     addTag(TAG)
                     setInputData(
-                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).putStringArray(SYNC_UUIDS, uuidsToSync.toTypedArray())
+                        Data.Builder().putInt(SYNC_TO_MANGADEX, TO_DEX).putStringArray(SYNC_UUIDS, listUuids.toTypedArray())
+                            .putLongArray(MANGA_IDS, mangaIds.toLongArray())
+                            .build(),
+                    )
+                }.build(),
+            )
+        }
+
+        fun fromMangaDex(context: Context, listUuids: List<String>) {
+            WorkManager.getInstance(context).enqueue(
+                OneTimeWorkRequestBuilder<CustomListSyncJob>().apply {
+                    addTag(TAG)
+                    setInputData(
+                        Data.Builder().putInt(SYNC_TO_MANGADEX, FROM_DEX).putStringArray(SYNC_UUIDS, listUuids.toTypedArray())
                             .build(),
                     )
                 }.build(),

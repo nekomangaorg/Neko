@@ -25,8 +25,8 @@ import eu.kanade.tachiyomi.source.online.handlers.ListHandler
 import eu.kanade.tachiyomi.source.online.handlers.ListResults
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
+import eu.kanade.tachiyomi.source.online.handlers.RatingHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
-import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -56,7 +56,7 @@ open class MangaDex : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
 
-    private val followsHandler: SubscriptionHandler by injectLazy()
+    private val ratingHandler: RatingHandler by injectLazy()
 
     private val mangaHandler: MangaHandler by injectLazy()
 
@@ -243,7 +243,7 @@ open class MangaDex : HttpSource() {
     }
 
     open suspend fun updateRating(track: Track): Boolean {
-        return followsHandler.updateRating(track)
+        return ratingHandler.updateRating(track)
     }
 
     suspend fun fetchTrackingInfo(url: String): Track {

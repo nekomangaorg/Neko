@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
 import com.google.android.material.checkbox.MaterialCheckBox.STATE_CHECKED
-import com.skydoves.sandwich.getOrNull
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -16,7 +15,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.databinding.CreateCustomListDialogBinding
 import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
-import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -31,7 +29,6 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -190,12 +187,12 @@ class SettingsSiteController :
         }
 
         preferenceCategory {
-            titleRes = R.string.custom_lists
+            titleRes = R.string.mdlists_
 
             switchPreference {
                 key = PreferenceKeys.enableDefaultCustomLists
-                titleRes = R.string.enable_default_custom_lists
-                summaryRes = R.string.enable_default_custom_lists_summary
+                titleRes = R.string.enable_default_mdlists
+                summaryRes = R.string.enable_default_mdlists_summary
                 defaultValue = false
             }
 
@@ -204,7 +201,7 @@ class SettingsSiteController :
                     isVisible = it
                 }.launchIn(viewScope)
 
-                titleRes = R.string.default_custom_lists
+                titleRes = R.string.default_mdlists_
                 onClick {
                     val ctrl = ChooseCustomListDialog(preferences)
                     ctrl.targetController = this@SettingsSiteController
@@ -213,7 +210,7 @@ class SettingsSiteController :
             }
 
             preference {
-                titleRes = R.string.add_custom_list
+                titleRes = R.string.add_mdlist
                 onClick {
                     val ctrl = AddCustomListDialog(viewScope)
                     ctrl.targetController = this@SettingsSiteController
@@ -222,7 +219,7 @@ class SettingsSiteController :
             }
 
             preference {
-                titleRes = R.string.delete_custom_list
+                titleRes = R.string.delete_mdlist
                 onClick {
                     val ctrl = DeleteCustomListDialog(viewScope)
                     ctrl.targetController = this@SettingsSiteController
@@ -234,8 +231,8 @@ class SettingsSiteController :
 
 
         preference {
-            titleRes = R.string.sync_custom_list_to_library
-            summaryRes = R.string.sync_custom_list_to_library_summary
+            titleRes = R.string.sync_mdlist_to_library
+            summaryRes = R.string.sync_mdlist_to_library_summary
 
             onClick {
 
@@ -260,35 +257,46 @@ class SettingsSiteController :
                             }
                         }
                         if (uuidsSelected.size > 0) {
-                            CustomListSyncJob.doWorkNow(context, CustomListSyncJob.entireFollowsFromDex, uuidsSelected)
+                            CustomListSyncJob.fromMangaDex(context, uuidsSelected)
                         }
                     }
                     .show()
             }
         }
 
-        /*   preference {
-               titleRes = R.string.push_favorites_to_mangadex
-               summaryRes = R.string.push_favorites_to_mangadex_summary
-
-               onClick {
-                   StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
-               }
-           }*/
-
         preference {
-            title = "Test"
+            titleRes = R.string.push_favorites_to_mangadex
+            summaryRes = R.string.push_favorites_to_mangadex_summary
 
             onClick {
-                GlobalScope.launchIO {
-                    val listId = "6067f0ff-025e-4d5c-9522-e16375a236c8"
-                    val mangaID = "4a4786cf-c185-4ad3-89a9-294a1ec0bfc9"
-                    Injekt.get<NetworkServices>().authService.addToCustomList(mangaID, listId).getOrNull()
-                    Injekt.get<NetworkServices>().authService.customListsContainingManga("4a4786cf-c185-4ad3-89a9-294a1ec0bfc9").getOrNull()
-                }
+
+                val trackManager: TrackManager = Injekt.get()
+                val options = trackManager.mdList.viewLists()
+
+                activity!!.materialAlertDialog()
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setMultiChoiceItems(
+                        options.map { it.name }.toTypedArray(),
+                        options.map { false }.toBooleanArray(),
+                    ) { dialog, position, bool ->
+                        val listView = (dialog as AlertDialog).listView
+                        listView.setItemChecked(position, bool)
+                    }
+                    .setPositiveButton(android.R.string.ok) { dialog, t ->
+                        val listView = (dialog as AlertDialog).listView
+                        val uuidsSelected = mutableListOf<String>()
+                        for (i in 0 until listView.count) {
+                            if (listView.isItemChecked(i)) {
+                                uuidsSelected.add(options[i].id)
+                            }
+                        }
+                        if (uuidsSelected.size > 0) {
+                            CustomListSyncJob.toMangaDex(context, uuidsSelected, emptyList())
+                        }
+                    }
+                    .show()
             }
         }
-
 
 
         preference {
@@ -321,7 +329,7 @@ class SettingsSiteController :
             val sourceManager: SourceManager = Injekt.get()
 
             return activity!!.materialAlertDialog().apply {
-                setTitle(R.string.add_custom_list)
+                setTitle(R.string.add_mdlist)
                 binding = CreateCustomListDialogBinding.inflate(activity!!.layoutInflater)
                 setView(binding.root)
                 setNegativeButton(android.R.string.cancel, null)
@@ -406,7 +414,7 @@ class SettingsSiteController :
                 (List(options.size) { index -> initialIds.contains(index) }).toBooleanArray()
 
             return activity.materialAlertDialog()
-                .setTitle(R.string.default_custom_lists)
+                .setTitle(R.string.default_mdlists_)
                 .setMultiChoiceItems(
                     allLists,
                     enabledIds,

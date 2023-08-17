@@ -24,6 +24,7 @@ import android.view.ViewPropertyAnimator
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -2034,8 +2035,32 @@ class LibraryController(
             }
 
             R.id.action_sync_to_dex -> {
-                presenter.syncMangaToDex(selectedMangaSet.toList())
-                destroyActionModeIfNeeded()
+                val options = presenter.trackManager.mdList.viewLists()
+
+                activity!!.materialAlertDialog()
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setMultiChoiceItems(
+                        options.map { it.name }.toTypedArray(),
+                        options.map { false }.toBooleanArray(),
+                    ) { dialog, position, bool ->
+                        val listView = (dialog as AlertDialog).listView
+                        listView.setItemChecked(position, bool)
+                    }
+                    .setPositiveButton(android.R.string.ok) { dialog, t ->
+                        val listView = (dialog as AlertDialog).listView
+                        val uuidsSelected = mutableListOf<String>()
+                        for (i in 0 until listView.count) {
+                            if (listView.isItemChecked(i)) {
+                                uuidsSelected.add(options[i].id)
+                            }
+                        }
+                        if (uuidsSelected.size > 0) {
+                            presenter.syncMangaToDex(selectedMangaSet.toList(), uuidsSelected)
+                        }
+                        destroyActionModeIfNeeded()
+
+                    }
+                    .show()
             }
 
             else -> return false

@@ -23,7 +23,7 @@ object LibraryGroup {
             UNGROUPED -> R.string.ungrouped
             BY_CONTENT -> R.string.content_rating
             BY_LANGUAGE -> R.string.original_language
-            BY_LIST -> R.string.custom_lists
+            BY_LIST -> R.string.mdlists_
             else -> if (hasCategories) R.string.categories else R.string.ungrouped
         }
     }

@@ -178,7 +178,7 @@
     <string name="series">Series</string>
     <string name="group_library_by">Group library by…</string>
     <string name="content_rating">Content rating</string>
-    <string name="custom_lists">Custom lists</string>
+    <string name="mdlists_">MdLists</string>
     <string name="tracking_status">Tracking status</string>
     <string name="ungrouped">Ungrouped</string>
 
@@ -1293,21 +1293,20 @@
 
     <!-- Custom List -->
     <string name="status_channel">Manga status sync</string>
-    <string name="syncing_follows">Begin syncing follows</string>
-    <string name="sync_follows_complete">Syncing follows complete</string>
-    <string name="sync_to_follows_complete">Syncing Manga to Follows List complete</string>
+    <string name="begin_syncing_mdlist">Begin syncing MDLists</string>
+    <string name="sync_mdlist_complete">Syncing MDLists complete</string>
+    <string name="sync_to_mdlist_complete">Syncing Manga to MdLists complete</string>
     <string name="not_logged_into_mangadex_cannot_sync">Not logged into MangaDex cannot sync</string>
 
-    <string name="sync_follows_failed">Syncing follows failed</string>
-    <string name="my_lists">My lists</string>
-    <string name="add_to_follows">Add to MangaDex follows</string>
-    <string name="follows_unfollowed">Unfollowed</string>
-    <string name="follows_reading">Reading</string>
-    <string name="follows_completed">Completed</string>
-    <string name="follows_on_hold">On Hold</string>
-    <string name="follows_plan_to_read">Plan To Read</string>
-    <string name="follows_dropped">Dropped</string>
-    <string name="follows_re_reading">Re Reading</string>
+    <string name="my_lists">My MDLists</string>
+    <string name="add_to_mdlist">Add to MangaDex MdList</string>
+
+    <string name="global_tracker_status_reading">Reading</string>
+    <string name="global_tracker_status_completed">Completed</string>
+    <string name="global_tracker_status_on_hold">On Hold</string>
+    <string name="global_tracker_status_plan_to_read">Plan To Read</string>
+    <string name="global_tracker_status_dropped">Dropped</string>
+    <string name="global_tracker_status_re_reading">Re Reading</string>
 
     <!-- Similar -->
     <string name="similar_type">Similar</string>
@@ -1355,14 +1354,13 @@
     <string name="low_thumb">Low</string>
 
 
-    <string name="sync_custom_list_to_library">Sync MangaDex Custom List</string>
-    <string name="sync_custom_list_to_library_summary">Pulls Manga from your MangaDex Custom Lists into your Neko library if they are not already added.</string>
-    <string name="sync_custom_list_to_library_toast">Synced %d new manga from MangaDex</string>
-    <string name="push_favorites_to_mangadex">Sync Library Manga to Follows</string>
-    <string name="push_favorites_to_mangadex_summary">Syncs your entire library to your MangaDex Follows List with a Reading Status</string>
+    <string name="sync_mdlist_to_library">Sync MDLists to Neko</string>
+    <string name="sync_mdlist_to_library_summary">Pulls Manga from your MDLists into your Neko library if they are not already added.</string>
+    <string name="sync_mdlist_to_library_toast">Synced %d new manga from MangaDex</string>
+    <string name="push_favorites_to_mangadex">Sync Neko to MDLists</string>
+    <string name="push_favorites_to_mangadex_summary">Syncs your entire library to your MDLists</string>
     <string name="push_favorites_to_mangadex_toast">Pushed %d manga to MangaDex</string>
-    <string name="use_new_api_server">Use the new api cache server</string>
-    <string name="use_new_api_server_summary">enable this if MangaDex starts breaking (meaning they removed old api server)</string>
+
     <string name="low_quality_covers">Use low quality thumbnails</string>
     <string name="reading_sync">Auto sync read status</string>
     <string name="reading_sync_summary">Two way automatic sync of read/unread status of a chapter with MangaDex.  This only pulls read from MangaDex to prevent accidentally marking chapters unread</string>
@@ -1370,15 +1368,15 @@
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
 
-    <string name="enable_default_custom_lists">Add manga by default to custom lists</string>
-    <string name="enable_default_custom_lists_summary">When enabled, manga added to your library will  be added to the selected custom lists by default</string>
-    <string name="default_custom_lists">Choose default custom lists</string>
-    <string name="add_custom_list">Add a new custom list</string>
+    <string name="enable_default_mdlists">Add manga by default to MDLists</string>
+    <string name="enable_default_mdlists_summary">When enabled, manga added to your library will  be added to the selected MDList by default</string>
+    <string name="default_mdlists_">Choose default MDLists</string>
+    <string name="add_mdlist">Add a new MDList</string>
     <string name="list_name">List name</string>
     <string name="public_list">Public list</string>
-    <string name="failed_to_create_list">Failed to create custom list</string>
-    <string name="delete_custom_list">Delete custom list</string>
-    <string name="failed_to_delete_list">Failed to delete custom list</string>
+    <string name="failed_to_create_list">Failed to create MDList</string>
+    <string name="delete_mdlist">Delete MDList</string>
+    <string name="failed_to_delete_list">Failed to delete MDList</string>
 
 
     <!-- Backup Settings -->

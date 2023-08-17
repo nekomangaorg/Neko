@@ -35,16 +35,22 @@ class ListHandler {
 
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
-    suspend fun retrieveMangaFromList(listUUID: String, page: Int, privateList: Boolean): Result<ListResults, ResultError> {
+    suspend fun retrieveMangaFromList(listUUID: String, page: Int, privateList: Boolean, useDefaultContentRating: Boolean = true): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
 
             val currentService = when (privateList) {
                 true -> networkServices.authService
                 false -> networkServices.service
             }
+            val contentRatings = when (useDefaultContentRating) {
+                true -> {
+                    val enabledContentRatings = preferencesHelper.contentRatingSelections().get()
+                    MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
+                }
 
-            val enabledContentRatings = preferencesHelper.contentRatingSelections().get()
-            val contentRatings = MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
+                false -> MangaContentRating.getOrdered().map { it.key }
+
+            }
             val coverQuality = preferencesHelper.thumbnailQuality().get()
 
             val queryParameters =
@@ -88,7 +94,7 @@ class ListHandler {
         val list: MutableList<SourceManga> = mutableListOf()
         var resultError: ResultError? = null
         while (hasPages) {
-            retrieveMangaFromList(listUUID, page, privateList)
+            retrieveMangaFromList(listUUID, page, privateList, false)
                 .onFailure {
                     hasPages = false
                     resultError = it

@@ -31,7 +31,6 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -97,7 +96,7 @@ class LibraryPresenter(
     private val viewContext
         get() = view?.view?.context
 
-    private val trackManager by lazy { Injekt.get<TrackManager>() }
+    val trackManager by lazy { Injekt.get<TrackManager>() }
 
     private val loggedServices by lazy { trackManager.services.values.filter { it.isLogged() || it.isMdList() } }
 
@@ -438,19 +437,7 @@ class LibraryPresenter(
         if (filterTracked != STATE_IGNORE) {
             val tracks = db.getTracks(item.manga).executeAsBlocking()
 
-            val hasTrack = loggedServices.any { service ->
-                tracks.any {
-                    if (service.isMdList() && (
-                            loginHelper.isLoggedIn()
-                                .not() || it.status == FollowStatus.UNFOLLOWED.int
-                            )
-                    ) {
-                        false
-                    } else {
-                        it.sync_id == service.id
-                    }
-                }
-            }
+            val hasTrack = loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
             val service = if (filterTrackers.isNotEmpty()) {
                 loggedServices.find {
                     context.getString(it.nameRes()) == filterTrackers
@@ -1366,11 +1353,12 @@ class LibraryPresenter(
     }
 
     /** sync selected manga to mangadex follows */
-    fun syncMangaToDex(mangaList: List<Manga>) {
+    fun syncMangaToDex(mangaList: List<Manga>, listUuids: List<String>) {
         presenterScope.launch {
             withContext(Dispatchers.IO) {
-                val mangaIds = mangaList.map { it.id }.filterNotNull().joinToString()
-                CustomListSyncJob.doWorkNow(context, mangaIds, emptyList())
+                loggycat { "Number of manga to sync ${mangaList.size}" }
+                val mangaIds = mangaList.mapNotNull { it.id }
+                CustomListSyncJob.toMangaDex(context, listUuids, mangaIds)
             }
         }
     }

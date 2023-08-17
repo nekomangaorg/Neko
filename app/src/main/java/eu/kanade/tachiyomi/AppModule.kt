@@ -22,15 +22,16 @@ import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.ListHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
+import eu.kanade.tachiyomi.source.online.handlers.RatingHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
-import eu.kanade.tachiyomi.source.online.handlers.SubscriptionHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
+import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.ui.manga.TrackingCoordinator
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.ui.source.browse.BrowseRepository
@@ -87,7 +88,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { MangaMappings(app.applicationContext) }
 
-        addSingleton(SubscriptionHandler())
+        addSingleton(RatingHandler())
 
         addSingleton(ArtworkHandler())
 
@@ -129,6 +130,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(SimilarRepository())
 
+        addSingleton(MangaUpdateCoordinator())
 
         addSingleton(TrackingCoordinator())
 
