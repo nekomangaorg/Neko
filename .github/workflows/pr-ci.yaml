@@ -39,6 +39,6 @@ jobs:
           cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
 
       - name: Build app
-        uses: eskatos/gradle-command-action@v2.7.0
+        uses: eskatos/gradle-command-action@v2.8.0
         with:
           arguments: assembleDebug
