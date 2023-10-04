@@ -539,11 +539,11 @@ class MangaDetailPresenter(
      * Save Cover to directory, if given a url save that specific cover
      */
     private fun saveCover(directory: File, artwork: Artwork): File {
-        val cover = if (artwork.url.isBlank()) {
-            coverCache.getCustomCoverFile(currentManga()).takeIf { it.exists() } ?: coverCache.getCoverFile(currentManga().thumbnail_url, currentManga().favorite)
-        } else {
-            coverCache.getCoverFile(artwork.url)
+        val cover = when (artwork.url.isBlank() || currentManga().thumbnail_url == artwork.url) {
+            true -> coverCache.getCustomCoverFile(currentManga()).takeIf { it.exists() } ?: coverCache.getCoverFile(currentManga().thumbnail_url, currentManga().favorite)
+            false -> coverCache.getCoverFile(artwork.url)
         }
+
         val type = ImageUtil.findImageType(cover.inputStream())
             ?: throw Exception("Not an image")
 
