@@ -19,7 +19,7 @@ class LicensesController : BasicComposeController() {
         NekoScaffold(
             title = stringResource(id = R.string.open_source_licenses),
             type = NekoScaffoldType.Title,
-            onNavigationIconClicked = { activity?.onBackPressed() },
+            onNavigationIconClicked = router::handleBack,
         ) { contentPadding ->
             LibrariesContainer(
                 contentPadding = contentPadding,

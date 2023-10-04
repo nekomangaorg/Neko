@@ -154,7 +154,8 @@ class MangaDetailController(private val mangaId: Long) : BaseComposeController<M
                     context.openInBrowser(url)
                 },
             ),
-        ) { activity?.onBackPressed() }
+            onBackPressed = router::handleBack,
+        )
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {

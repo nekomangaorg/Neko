@@ -35,7 +35,7 @@ class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPrese
                 copyVersionInfo(context)
             },
             onClickLicenses = { router.pushController(LicensesController().withFadeTransaction()) },
-            onBackPressed = { activity?.onBackPressed() },
+            onBackPressed = router::handleBack,
         )
     }
 
