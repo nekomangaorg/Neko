@@ -573,8 +573,10 @@ class ReaderViewModel(
      * Called when reader chapter is changed in reader or when activity is paused.
      */
     private fun saveReadingProgress(readerChapter: ReaderChapter) {
-        saveChapterProgress(readerChapter)
-        saveChapterHistory(readerChapter)
+        db.inTransaction {
+            saveChapterProgress(readerChapter)
+            saveChapterHistory(readerChapter)
+        }
     }
 
     fun saveCurrentChapterReadingProgress() = getCurrentChapter()?.let { saveReadingProgress(it) }
