@@ -19,10 +19,9 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.openInFirefox
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.Injekt
@@ -128,42 +127,46 @@ class SettingsSiteController :
         }
 
         preference {
-            preferences.blockedScanlators().changes().onEach {
-                isVisible = it.isNotEmpty()
-            }.launchIn(viewScope)
 
             titleRes = R.string.currently_blocked_scanlators
+            summaryRes = R.string.currently_blocked_scanlators_description
+
             onClick {
-                activity!!.materialAlertDialog()
-                    .setTitle(R.string.unblock_scanlator)
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setMultiChoiceItems(
-                        preferences.blockedScanlators().get().toTypedArray().sortedArrayDescending(),
-                        preferences.blockedScanlators().get().map { false }.toBooleanArray(),
-                    ) { dialog, position, bool ->
-                        val listView = (dialog as AlertDialog).listView
-                        listView.setItemChecked(position, bool)
-                    }
-                    .setPositiveButton(R.string.remove) { dialog, t ->
-                        val listView = (dialog as AlertDialog).listView
-                        val blockedScanlators = preferences.blockedScanlators().get().toList().sortedDescending()
-                        val selectedToRemove = HashSet<String>()
-                        for (i in 0 until listView.count) {
-                            if (listView.isItemChecked(i)) {
-                                selectedToRemove.add(blockedScanlators[i])
+                when (preferences.blockedScanlators().get().isEmpty()) {
+                    true -> context.toast(R.string.no_blocked_scanlator)
+                    false -> {
+                        activity!!.materialAlertDialog()
+                            .setTitle(R.string.unblock_scanlator)
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .setMultiChoiceItems(
+                                preferences.blockedScanlators().get().toTypedArray().sortedArrayDescending(),
+                                preferences.blockedScanlators().get().map { false }.toBooleanArray(),
+                            ) { dialog, position, bool ->
+                                val listView = (dialog as AlertDialog).listView
+                                listView.setItemChecked(position, bool)
                             }
-                        }
-                        if (selectedToRemove.size > 0) {
-                            val newBlocks = blockedScanlators.filter { it !in selectedToRemove }.toSet()
-                            preferences.blockedScanlators().set(newBlocks)
-                            selectedToRemove.map {
-                                viewScope.launch {
-                                    db.deleteScanlator(it).executeOnIO()
+                            .setPositiveButton(R.string.remove) { dialog, t ->
+                                val listView = (dialog as AlertDialog).listView
+                                val blockedScanlators = preferences.blockedScanlators().get().toList().sortedDescending()
+                                val selectedToRemove = HashSet<String>()
+                                for (i in 0 until listView.count) {
+                                    if (listView.isItemChecked(i)) {
+                                        selectedToRemove.add(blockedScanlators[i])
+                                    }
+                                }
+                                if (selectedToRemove.size > 0) {
+                                    val newBlocks = blockedScanlators.filter { it !in selectedToRemove }.toSet()
+                                    preferences.blockedScanlators().set(newBlocks)
+                                    selectedToRemove.map {
+                                        viewScope.launch {
+                                            db.deleteScanlator(it).executeOnIO()
+                                        }
+                                    }
                                 }
                             }
-                        }
+                            .show()
                     }
-                    .show()
+                }
             }
         }
 
