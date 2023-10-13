@@ -2,7 +2,9 @@ package org.nekomanga.presentation.screens
 
 import ToolTipButton
 import android.content.Context
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,8 +30,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import compose.icons.SimpleIcons
 import compose.icons.simpleicons.Facebook
 import compose.icons.simpleicons.Github
@@ -174,7 +174,7 @@ fun AboutScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(Padding.medium),
-                    mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     val modifier = Modifier.size(24.dp)
                     LinkIcon(

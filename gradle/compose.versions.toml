@@ -6,7 +6,6 @@ compose_compiler_version = "1.4.7"
 
 [libraries]
 
-accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist_version" }
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist_version" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist_version" }
 accompanist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
@@ -40,6 +39,6 @@ date-field = "com.github.CarlosEsco:compose-date-text-field:3c64e08381"
 markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.8.0"
 
 [bundles]
-accompanist = ["accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
+accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
 compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown"]
 charting = ["charty"]

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,8 +46,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.model.markdownColor
 import com.mikepenz.markdown.model.markdownTypography
@@ -280,7 +279,7 @@ private fun FlowableAltTitles(
     resetClick: () -> Unit,
     onChipColor: Color,
 ) {
-    FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisSpacing = Padding.small) {
+    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Padding.small)) {
         if (isCustomTitle) {
             TextButton(onClick = resetClick) {
                 Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
@@ -402,9 +401,8 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, b
                 placeable.place(0, 0)
             }
         },
-        mainAxisAlignment = FlowMainAxisAlignment.Start,
-        mainAxisSpacing = 12.dp,
-        crossAxisSpacing = 12.dp,
+        horizontalArrangement = Arrangement.spacedBy(Padding.smedium, Alignment.Start),
+        verticalArrangement = Arrangement.spacedBy(Padding.smedium)
     ) {
         genres.forEach { genre ->
             var balloonWindow: BalloonWindow? by remember { mutableStateOf(null) }

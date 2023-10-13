@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,9 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.skydoves.balloon.compose.Balloon
 import com.skydoves.balloon.compose.BalloonWindow
@@ -55,6 +53,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Padding
 import toolTipBuilder
 
 @Composable
@@ -186,9 +185,8 @@ fun InformationBlock(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth(),
-            mainAxisAlignment = FlowMainAxisAlignment.Start,
-            crossAxisAlignment = FlowCrossAxisAlignment.Center,
-
+            horizontalArrangement = Arrangement.Start,
+            verticalArrangement = Arrangement.Center
             ) {
             if (langFlagProvider() != null) {
                 val flag = MdLang.fromIsoCode(langFlagProvider()!!.lowercase(Locale.US))?.iconResId
@@ -205,8 +203,8 @@ fun InformationBlock(
 
             if (isPornographicProvider()) {
                 Row {
-                    Gap(8.dp)
-                    Image(imageVector = Icons.Outlined._18UpRating, modifier = Modifier.size(32.dp), contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
+                    Gap(Padding.small)
+                    Image(imageVector = Icons.Outlined._18UpRating, modifier = Modifier.size(Padding.extraLarge), contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
                 }
             }
 

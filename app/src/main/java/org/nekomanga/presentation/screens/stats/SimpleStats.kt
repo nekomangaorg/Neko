@@ -4,6 +4,7 @@ import android.icu.text.NumberFormat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,12 +24,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import kotlinx.collections.immutable.toImmutableList
+import org.nekomanga.presentation.theme.Padding
 
 @Composable
 fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
@@ -82,11 +81,9 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                mainAxisAlignment = MainAxisAlignment.Center,
-                mainAxisSpacing = axisPadding,
-                crossAxisAlignment = FlowCrossAxisAlignment.Center,
-                crossAxisSpacing = axisPadding,
+                    .padding(Padding.medium),
+                horizontalArrangement = Arrangement.spacedBy(axisPadding, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(axisPadding, Alignment.CenterVertically)
             ) {
                 stats.forEach {
                     BasicStat(value = it.first, label = it.second, isTablet = isTablet)

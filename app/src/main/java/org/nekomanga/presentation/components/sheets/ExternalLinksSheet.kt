@@ -1,6 +1,8 @@
 package org.nekomanga.presentation.components.sheets
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,11 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Padding
 
 @Composable
 fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<ExternalLink>, onLinkClick: (String, String) -> Unit) {
@@ -32,10 +33,9 @@ fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<Ext
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                mainAxisAlignment = FlowMainAxisAlignment.Start,
-                crossAxisSpacing = 8.dp,
-                mainAxisSpacing = 8.dp,
+                    .padding(horizontal = Padding.small),
+                horizontalArrangement = Arrangement.spacedBy(Padding.small, Alignment.Start),
+                verticalArrangement = Arrangement.spacedBy(Padding.small),
             ) {
                 externalLinks.forEach {
                     LinkCard(externalLink = it, onLinkClick = onLinkClick)
