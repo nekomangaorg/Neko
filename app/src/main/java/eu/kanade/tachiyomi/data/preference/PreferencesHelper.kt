@@ -145,8 +145,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun downloadOnlyOverWifi() = this.preferenceStore.getBoolean(Keys.downloadOnlyOverWifi, true)
 
-    fun folderPerManga() = this.preferenceStore.getBoolean(Keys.folderPerManga, false)
-
     fun numberOfBackups() = this.preferenceStore.getInt(Keys.numberOfBackups, 2)
 
     fun backupInterval() = this.preferenceStore.getInt(Keys.backupInterval, 0)
