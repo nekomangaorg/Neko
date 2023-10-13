@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.source.latest
 import android.os.Bundle
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.core.os.BundleCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController

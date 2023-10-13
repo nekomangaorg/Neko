@@ -10,7 +10,7 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
     val logger: HttpLoggingInterceptor.Logger =
         HttpLoggingInterceptor.Logger { message ->
             try {
-                if (message.contains("grant_type=") || message.contains("access_token\":")) {
+                if (message.contains("grant_type=") || message.contains("""access_token:""")) {
                     loggycat(tag = "|") { "Not logging request because it contained sessionToken || refreshToken" }
                 } else {
                     val element = json.parseToJsonElement(message)

@@ -74,7 +74,7 @@ class DisplayPresenter(
         },
         onSuccess = { hasNextPage, items, newKey ->
             _displayScreenState.update {
-                val allDisplayManga = _displayScreenState.value.allDisplayManga + items
+                val allDisplayManga = (_displayScreenState.value.allDisplayManga + items).distinct()
                 it.copy(
                     isLoading = false,
                     page = newKey,
