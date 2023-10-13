@@ -165,7 +165,7 @@ dependencies {
     implementation("androidx.sqlite:sqlite:2.3.1")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.github.requery:sqlite-android:3.43.0")
+    implementation("com.github.requery:sqlite-android:3.39.2")
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)
@@ -228,6 +228,7 @@ tasks {
             "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
             "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
             "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
+            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "-opt-in=kotlin.time.ExperimentalTime",
             "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
