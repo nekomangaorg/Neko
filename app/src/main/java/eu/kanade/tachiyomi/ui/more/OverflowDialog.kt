@@ -118,6 +118,6 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
     }
 
     private companion object {
-        private const val URL_HELP = "https://tachiyomi.org/help/"
+        private const val URL_HELP = "https://tachiyomi.org/docs/guides/troubleshooting/"
     }
 }
