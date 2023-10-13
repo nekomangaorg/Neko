@@ -69,6 +69,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
@@ -111,6 +112,7 @@ fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, co
             Filter.None -> {
                 DetailedCardView(detailedStats.manga, contentPadding = contentPadding, viewType)
             }
+
             Filter.Type -> {
                 TypeView(sortType, detailedStats, context, colors, contentPadding, viewType, sortChipClick)
             }
@@ -647,7 +649,7 @@ private fun Pie(pieData: List<PieData>, chartWidth: Float, modifier: Modifier = 
 private fun Line(lineData: List<LineData>, chartWidth: Float, modifier: Modifier = Modifier, color: Color) {
     Box(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 0.dp)
+            .padding(horizontal = 16.dp, vertical = Size.none)
             .fillMaxWidth(chartWidth),
         contentAlignment = Alignment.Center,
     ) {

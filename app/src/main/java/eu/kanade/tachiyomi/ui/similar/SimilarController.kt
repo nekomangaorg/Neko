@@ -23,7 +23,7 @@ class SimilarController(mangaUUID: String) : BaseComposeController<SimilarPresen
         SimilarScreen(
             similarScreenState = presenter.similarScreenState.collectAsStateWithLifecycle(),
             switchDisplayClick = presenter::switchDisplayMode,
-            onBackPress = { activity?.onBackPressed() },
+            onBackPress = router::handleBack,
             mangaClick = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,

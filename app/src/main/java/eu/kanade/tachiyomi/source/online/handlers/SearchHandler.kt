@@ -151,8 +151,8 @@ class SearchHandler {
     suspend fun recentlyAdded(page: Int): Result<MangaListPage, ResultError> {
         return withContext(Dispatchers.IO) {
             val queryParameters = mutableMapOf<String, Any>()
-            queryParameters["limit"] = MdConstants.Limits.manga
-            queryParameters["offset"] = MdUtil.getMangaListOffset(page)
+            queryParameters[MdConstants.SearchParameters.limit] = MdConstants.Limits.manga
+            queryParameters[MdConstants.SearchParameters.offset] = MdUtil.getMangaListOffset(page)
             val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
             if (contentRatings.isNotEmpty()) {
                 queryParameters["contentRating[]"] = contentRatings
@@ -164,7 +164,7 @@ class SearchHandler {
                     val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 
                     Ok(
-                        MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()),
+                        MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaListDto.data.distinctBy { it.id }.map { it.toSourceManga(thumbQuality) }.toImmutableList()),
                     )
                 }
         }

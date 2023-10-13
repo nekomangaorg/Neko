@@ -680,7 +680,7 @@ class LibraryController(
                             updateLibrary(it)
                         }
                     }
-
+                    !presenter.showAllCategories -> updateCategory(0)
                     else -> updateLibrary()
                 }
             }

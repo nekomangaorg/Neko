@@ -31,6 +31,7 @@ import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateCheckboxRow
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FilterChapterSheet(
@@ -52,7 +53,7 @@ fun FilterChapterSheet(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredHeightIn(0.dp, maxLazyHeight.dp),
+                    .requiredHeightIn(Size.none, maxLazyHeight.dp),
             ) {
                 item {
                     Sort(themeColorState = themeColorState, sortFilter, changeSort) { setAsGlobal(MangaConstants.SetGlobal.Sort) }

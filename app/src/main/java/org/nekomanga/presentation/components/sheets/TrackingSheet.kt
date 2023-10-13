@@ -61,6 +61,7 @@ import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TrackingSheet(
@@ -246,7 +247,7 @@ private fun NoTrack(themeColor: ThemeColorState, service: TrackServiceItem, onLo
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .height(48.dp)
+            .height(Size.huge)
             .clickable { searchTrackerClick() },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,

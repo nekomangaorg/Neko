@@ -33,6 +33,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiIcon
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MainDropdownMenu(
@@ -61,7 +62,7 @@ fun MainDropdownMenu(
         CompositionLocalProvider(LocalRippleTheme provides (defaultThemeColorState().rippleTheme)) {
             CascadeDropdownMenu(
                 expanded = expanded,
-                offset = DpOffset(12.dp, 0.dp),
+                offset = DpOffset(12.dp, Size.none),
                 fixedWidth = 250.dp,
                 properties = PopupProperties(),
                 onDismissRequest = onDismiss,

@@ -1,7 +1,7 @@
 [versions]
 kotlin_version = "1.8.21"
 coroutines_version = "1.7.3"
-serialization_version = "1.5.1"
+serialization_version = "1.6.0"
 
 [libraries]
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin_version" }
@@ -17,7 +17,7 @@ serialization-gradle = { module = "org.jetbrains.kotlin:kotlin-serialization", v
 serialization-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "serialization_version" }
 
 
-immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.5"
+immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6"
 
 [bundles]
 

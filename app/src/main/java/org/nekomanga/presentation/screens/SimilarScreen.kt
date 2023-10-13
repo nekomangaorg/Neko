@@ -45,6 +45,7 @@ import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun SimilarScreen(
@@ -112,7 +113,7 @@ fun SimilarScreen(
             PullRefresh(
                 refreshing = similarScreenState.value.isRefreshing,
                 onRefresh = onRefresh,
-                indicatorOffset = (incomingPaddingValues.calculateTopPadding() + 48.dp),
+                indicatorOffset = (incomingPaddingValues.calculateTopPadding() + Size.huge),
             )
             {
                 val haptic = LocalHapticFeedback.current

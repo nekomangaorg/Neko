@@ -38,7 +38,7 @@ import org.nekomanga.presentation.components.InLibraryBadge
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.MangaGridSubtitle
 import org.nekomanga.presentation.components.MangaGridTitle
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -83,13 +83,13 @@ fun BrowseHomePage(
                     Icon(imageVector = Icons.Default.ArrowForward, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
-            Gap(4.dp)
+            Gap(Size.tiny)
             LazyRow(
                 modifier = Modifier
                     .requiredHeight(coverSize + 60.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                item { Gap(Padding.small) }
+                item { Gap(Size.small) }
 
                 items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
                     if (displayManga.isVisible) {
@@ -119,7 +119,7 @@ fun BrowseHomePage(
                         }
                     }
                 }
-                item { Gap(Padding.small) }
+                item { Gap(Size.small) }
             }
         }
         item {

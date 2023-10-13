@@ -12,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun CheckboxRow(
@@ -44,7 +44,7 @@ fun CheckboxRow(
                 checkmarkColor = MaterialTheme.colorScheme.surface,
             ),
         )
-        Gap(4.dp)
+        Gap(Size.tiny)
         Text(
             text = rowText,
             style = rowTextStyle,

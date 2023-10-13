@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -16,6 +15,7 @@ import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.runBlocking
 import org.nekomanga.core.util.withDefContext
 import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.injectLazy
@@ -147,17 +147,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
     }
 
     private fun performFilter() {
-        val s = getFilter(String::class.java)
-        if (s.isNullOrBlank()) {
-            if (mangaList.firstOrNull()?.filter?.isNotBlank() == true) {
-                mangaList.forEach { it.filter = "" }
-            }
-            updateDataSet(mangaList)
-        } else {
-            updateDataSet(mangaList.filter { it.filter(s) })
-        }
-        isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
-        setItemsPerCategoryMap()
+        runBlocking { performFilterAsync() }
     }
 
     suspend fun performFilterAsync() {
@@ -169,7 +159,13 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
             updateDataSet(mangaList)
         } else {
             val filteredManga = withDefContext { mangaList.filter { it.filter(s) } }
-            updateDataSet(filteredManga)
+            if (filteredManga.isEmpty() && controller?.presenter?.showAllCategories == false) {
+                val catId = mangaList.firstOrNull()?.let { it.header?.catId ?: it.manga.category }
+                val blankItem = catId?.let { controller.presenter.blankItem(it) }
+                updateDataSet(blankItem ?: emptyList())
+            } else {
+                updateDataSet(filteredManga)
+            }
         }
         isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
         setItemsPerCategoryMap()
@@ -181,13 +177,9 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
     }
 
     private fun getFirstChar(string: String): String {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val chars = string.codePoints().toArray().firstOrNull() ?: return ""
-            val char = Character.toChars(chars)
-            return String(char).uppercase(Locale.US)
-        } else {
-            return string.toCharArray().firstOrNull()?.toString()?.uppercase(Locale.US) ?: ""
-        }
+        val chars = string.codePoints().toArray().firstOrNull() ?: return ""
+        val char = Character.toChars(chars)
+        return String(char).uppercase(Locale.US)
     }
 
     override fun onCreateBubbleText(position: Int): String {

@@ -52,7 +52,8 @@ class DownloadQueue(
     }
 
     fun updateListeners() {
-        downloadListeners.forEach { it.updateDownloads() }
+        val listeners = downloadListeners.toList()
+        listeners.forEach { it.updateDownloads() }
     }
 
     fun remove(chapter: Chapter) {

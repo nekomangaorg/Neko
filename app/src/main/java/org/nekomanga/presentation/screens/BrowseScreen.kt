@@ -77,7 +77,7 @@ import org.nekomanga.presentation.screens.browse.BrowseBottomSheetScreen
 import org.nekomanga.presentation.screens.browse.BrowseFilterPage
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
 import org.nekomanga.presentation.screens.browse.BrowseOtherPage
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -230,9 +230,9 @@ fun BrowseScreen(
                     PaddingValues(
                         top = incomingContentPadding.calculateTopPadding(),
                         bottom = if (sideNav) {
-                            Padding.navBarSize
+                            Size.navBarSize
                         } else {
-                            Padding.navBarSize
+                            Size.navBarSize
                         } + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                     )
 

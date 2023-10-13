@@ -516,7 +516,6 @@
     <string name="actions">Actions</string>
     <string name="show_on_long_press">Show on long press</string>
     <string name="save_pages_separately">Save pages in separate folders</string>
-    <string name="create_folders_by_manga_title">Creates folders according to manga title</string>
     <string name="pref_hide_threshold">Sensitivity for hiding menu on scroll</string>
     <string name="pref_highest">Highest</string>
     <string name="pref_high">High</string>
@@ -1131,7 +1130,9 @@
     <string name="mark_previous_as">Mark Previous as</string>
     <string name="block_scanlator">Block scanlator</string>
     <string name="currently_blocked_scanlators">Currently blocked scanlators</string>
+    <string name="currently_blocked_scanlators_description">These are blocks in the app only, as the app does not use or sync with the MangaDex website setting.</string>
     <string name="unblock_scanlator">Unblock scanlator</string>
+    <string name="no_blocked_scanlator">No blocked scanlators</string>
     <string name="menu">menu</string>
     <string name="more">More</string>
     <string name="move_to_bottom">Move to bottom</string>

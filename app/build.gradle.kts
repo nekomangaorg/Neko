@@ -165,7 +165,7 @@ dependencies {
     implementation("androidx.sqlite:sqlite:2.3.1")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.github.requery:sqlite-android:3.42.0")
+    implementation("com.github.requery:sqlite-android:3.39.2")
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)
@@ -189,8 +189,8 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
-    implementation("me.saket.cascade:cascade:2.2.0")
-    implementation("me.saket.cascade:cascade-compose:2.2.0")
+    implementation("me.saket.cascade:cascade:2.3.0")
+    implementation("me.saket.cascade:cascade-compose:2.3.0")
 
     //Compose
     implementation(compose.bundles.compose)
@@ -199,7 +199,6 @@ dependencies {
     implementation(compose.number.picker)
 
     implementation(compose.bundles.charting)
-    implementation(compose.balloon)
 
 
     implementation(libs.pastelplaceholders)
@@ -228,6 +227,7 @@ tasks {
             "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
             "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
             "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
+            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "-opt-in=kotlin.time.ExperimentalTime",
             "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",

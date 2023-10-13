@@ -25,7 +25,7 @@ fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: 
     val background = Modifier.background(color = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 8.dp))
     CascadeDropdownMenu(
         expanded = expanded,
-        offset = DpOffset(8.dp, 0.dp),
+        offset = DpOffset(8.dp, 8.dp),
         fixedWidth = 225.dp,
         modifier = background,
         properties = PopupProperties(),

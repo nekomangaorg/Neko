@@ -73,6 +73,7 @@ import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ChapterRow(
@@ -298,7 +299,7 @@ private fun ChapterInfo(
                             .align(Alignment.CenterVertically),
                         tint = themeColorState.buttonColor,
                     )
-                    Gap(4.dp)
+                    Gap(Size.tiny)
                 }
                 Text(
                     text = titleText,
@@ -352,10 +353,10 @@ private fun ChapterInfo(
                                 painter = painter,
                                 modifier = Modifier
                                     .height(16.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
+                                    .clip(RoundedCornerShape(Size.tiny)),
                                 contentDescription = "flag",
                             )
-                            Gap(4.dp)
+                            Gap(Size.tiny)
                         }
                     }
                 }

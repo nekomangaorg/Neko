@@ -94,7 +94,7 @@ body:
           required: true
         - label: I have written a short but informative title.
           required: true
-        - label: I have tried the [troubleshooting guide](https://tachiyomi.org/help/guides/troubleshooting/).
+        - label: I have tried the [troubleshooting guide](https://tachiyomi.org/docs/guides/troubleshooting/).
           required: true
         - label: I have updated the app to the newest version **[Latest](https://github.com/CarlosEsco/Neko/releases/latest)**.
           required: true

@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.theme.Size
 
 /**
  * Column scoped header with a cancel button
@@ -42,6 +43,6 @@ fun ColumnScope.Header(text: String, cancelClick: () -> Unit) {
         )
     }
 
-    Gap(4.dp)
+    Gap(Size.tiny)
     Divider()
 }

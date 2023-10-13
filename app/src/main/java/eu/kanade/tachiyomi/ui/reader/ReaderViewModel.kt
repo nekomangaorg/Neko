@@ -573,8 +573,10 @@ class ReaderViewModel(
      * Called when reader chapter is changed in reader or when activity is paused.
      */
     private fun saveReadingProgress(readerChapter: ReaderChapter) {
-        saveChapterProgress(readerChapter)
-        saveChapterHistory(readerChapter)
+        db.inTransaction {
+            saveChapterProgress(readerChapter)
+            saveChapterHistory(readerChapter)
+        }
     }
 
     fun saveCurrentChapterReadingProgress() = getCurrentChapter()?.let { saveReadingProgress(it) }
@@ -848,11 +850,7 @@ class ReaderViewModel(
         val baseDir = Environment.getExternalStorageDirectory().absolutePath +
             File.separator + Environment.DIRECTORY_PICTURES +
             File.separator + context.getString(R.string.app_name_neko)
-        val destDir = if (preferences.folderPerManga().get()) {
-            File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
-        } else {
-            File(baseDir)
-        }
+        val destDir = File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
 
         // Copy file in background.
         viewModelScope.launchNonCancellable {
@@ -882,11 +880,7 @@ class ReaderViewModel(
             val baseDir = Environment.getExternalStorageDirectory().absolutePath +
                 File.separator + Environment.DIRECTORY_PICTURES +
                 File.separator + context.getString(R.string.app_name_neko)
-            val destDir = if (preferences.folderPerManga().get()) {
-                File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
-            } else {
-                File(baseDir)
-            }
+            val destDir = File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
 
             try {
                 val file = saveImages(firstPage, secondPage, isLTR, bg, destDir, manga)

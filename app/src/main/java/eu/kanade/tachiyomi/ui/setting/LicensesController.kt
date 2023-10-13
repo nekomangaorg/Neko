@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults.libraryColors
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults.libraryPadding
@@ -12,6 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.BasicComposeController
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.theme.Size
 
 class LicensesController : BasicComposeController() {
     @Composable
@@ -19,7 +19,7 @@ class LicensesController : BasicComposeController() {
         NekoScaffold(
             title = stringResource(id = R.string.open_source_licenses),
             type = NekoScaffoldType.Title,
-            onNavigationIconClicked = { activity?.onBackPressed() },
+            onNavigationIconClicked = router::handleBack,
         ) { contentPadding ->
             LibrariesContainer(
                 contentPadding = contentPadding,
@@ -29,7 +29,7 @@ class LicensesController : BasicComposeController() {
                     badgeBackgroundColor = MaterialTheme.colorScheme.primary,
                     badgeContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
-                padding = libraryPadding(badgeContentPadding = PaddingValues(4.dp)),
+                padding = libraryPadding(badgeContentPadding = PaddingValues(Size.tiny)),
             )
         }
     }
