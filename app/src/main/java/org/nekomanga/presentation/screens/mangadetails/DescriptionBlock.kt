@@ -62,7 +62,7 @@ import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 /**
  * Genre, alt titles, description
@@ -125,7 +125,7 @@ fun DescriptionBlock(
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .fillMaxWidth()
-                        .heightIn(0.dp, descriptionHeight)
+                        .heightIn(Size.none, descriptionHeight)
                         .then(clickable),
                 )
 
@@ -219,7 +219,7 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
                 color = buttonColor,
             ),
         )
-        Gap(4.dp)
+        Gap(Size.tiny)
         Icon(modifier = Modifier.align(Alignment.CenterVertically), imageVector = icon, contentDescription = null, tint = buttonColor)
     }
 }
@@ -280,7 +280,7 @@ private fun FlowableAltTitles(
     resetClick: () -> Unit,
     onChipColor: Color,
 ) {
-    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Padding.small)) {
+    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Size.small)) {
         if (isCustomTitle) {
             TextButton(onClick = resetClick) {
                 Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
@@ -306,7 +306,7 @@ private fun FlowableAltTitles(
                         text = title,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier
-                            .padding(0.dp),
+                            .padding(Size.none),
                     )
                 },
             )
@@ -331,15 +331,15 @@ private fun ScrollableAltTitles(
             .layout { measurable, constraints ->
                 val placeable = measurable.measure(
                     constraints.copy(
-                        minWidth = constraints.maxWidth + Padding.medium.roundToPx(),
-                        maxWidth = constraints.maxWidth + Padding.medium.roundToPx(),
+                        minWidth = constraints.maxWidth + Size.medium.roundToPx(),
+                        maxWidth = constraints.maxWidth + Size.medium.roundToPx(),
                     ),
                 )
                 layout(placeable.width, placeable.height) {
                     placeable.place(0, 0)
                 }
             },
-        horizontalArrangement = Arrangement.spacedBy(Padding.tiny),
+        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isCustomTitle) {
@@ -371,7 +371,7 @@ private fun ScrollableAltTitles(
                         text = title,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier
-                            .padding(0.dp),
+                            .padding(Size.none),
                     )
                 },
             )
@@ -402,8 +402,8 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, t
                 placeable.place(0, 0)
             }
         },
-        horizontalArrangement = Arrangement.spacedBy(Padding.smedium, Alignment.Start),
-        verticalArrangement = Arrangement.spacedBy(Padding.smedium),
+        horizontalArrangement = Arrangement.spacedBy(Size.smedium, Alignment.Start),
+        verticalArrangement = Arrangement.spacedBy(Size.smedium),
     ) {
         var genreExpanded by remember { mutableStateOf(false) }
         var genrePosition by remember { mutableIntStateOf(0) }

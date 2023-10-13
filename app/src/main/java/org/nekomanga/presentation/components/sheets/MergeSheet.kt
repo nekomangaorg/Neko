@@ -61,6 +61,7 @@ import org.nekomanga.domain.manga.MergeArtwork
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MergeSheet(
@@ -129,7 +130,7 @@ fun MergeSheet(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .requiredHeightIn(0.dp, maxLazyHeight.dp),
+                                .requiredHeightIn(Size.none, maxLazyHeight.dp),
                         ) {
                             if (mergeSearchResults is MergeSearchResult.Success) {
                                 SuccessResults(mergeMangaList = mergeSearchResults.mergeMangaList, mergeType = mergeType!!, mergeMangaClick = mergeMangaClick)
@@ -184,7 +185,7 @@ private fun SuccessResults(mergeMangaList: List<SourceMergeManga>, mergeType: Me
         columns = GridCells.Adaptive(minSize = 100.dp),
         modifier = Modifier
             .fillMaxWidth(),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 48.dp, start = 8.dp, end = 8.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = Size.huge, start = 8.dp, end = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

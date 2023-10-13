@@ -29,6 +29,7 @@ import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -48,7 +49,7 @@ fun ColumnScope.SearchFooter(
 
     if (showDivider) {
         Divider()
-        Gap(4.dp)
+        Gap(Size.tiny)
     }
 
     OutlinedTextField(

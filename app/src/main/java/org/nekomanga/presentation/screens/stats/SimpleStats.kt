@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import kotlinx.collections.immutable.toImmutableList
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
@@ -81,7 +81,7 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(Padding.medium),
+                    .padding(Size.medium),
                 horizontalArrangement = Arrangement.spacedBy(axisPadding, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(axisPadding, Alignment.CenterVertically)
             ) {

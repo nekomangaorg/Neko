@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TriStateCheckboxRow(
@@ -50,7 +51,7 @@ fun TriStateCheckboxRow(
                 checkmarkColor = MaterialTheme.colorScheme.surface,
             ),
         )
-        Gap(4.dp)
+        Gap(Size.tiny)
         Text(text = rowText, color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast), style = rowTextStyle)
     }
 }

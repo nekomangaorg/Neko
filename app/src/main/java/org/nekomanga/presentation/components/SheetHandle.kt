@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ColumnScope.sheetHandle() {
@@ -19,7 +20,7 @@ fun ColumnScope.sheetHandle() {
     Box(
         modifier = Modifier
             .width(50.dp)
-            .height(4.dp)
+            .height(Size.tiny)
             .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast), CircleShape)
             .align(Alignment.CenterHorizontally),
     )

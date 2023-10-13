@@ -63,7 +63,7 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun NekoScaffold(
@@ -221,7 +221,7 @@ private fun NoTitleSearchTopAppBar(
                 OutlinedTextField(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(top = Padding.small, bottom = Padding.small, start = Padding.extraLarge)
+                        .padding(top = Size.small, bottom = Size.small, start = Size.extraLarge)
                         .focusRequester(focusRequester),
                     value = searchText,
                     placeholder = { Text(text = stringResource(id = R.string.search_chapters)) },

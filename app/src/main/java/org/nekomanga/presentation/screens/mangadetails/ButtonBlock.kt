@@ -43,6 +43,7 @@ import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 /**
  * Block of buttons for the actions on the backdrop screen
@@ -77,8 +78,8 @@ fun ButtonBlock(
     val uncheckedBorderStroke = BorderStroke(1.dp, themeColorState.altContainerColor.copy(alpha = .8f))
     val gapBetweenButtons = 8.dp
     val (padding, iconicsPadding, buttonModifier) = when (hideButtonTextProvider()) {
-        true -> Triple(PaddingValues(0.dp), PaddingValues(0.dp), Modifier.size(48.dp))
-        false -> Triple(PaddingValues(horizontal = 12.dp, vertical = 8.dp), PaddingValues(horizontal = 12.dp, vertical = 4.dp), Modifier.height(48.dp))
+        true -> Triple(PaddingValues(Size.none), PaddingValues(Size.none), Modifier.size(Size.huge))
+        false -> Triple(PaddingValues(horizontal = 12.dp, vertical = 8.dp), PaddingValues(horizontal = 12.dp, vertical = 4.dp), Modifier.height(Size.huge))
     }
 
     Row(
@@ -95,11 +96,11 @@ fun ButtonBlock(
 
         OutlinedButton(
             colors = favConfig.buttonColors,
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(Size.huge),
             shape = shape,
             onClick = favoriteClick,
             border = favConfig.borderStroke,
-            contentPadding = PaddingValues(0.dp),
+            contentPadding = PaddingValues(Size.none),
         ) {
             Icon(imageVector = favConfig.icon!!, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColorState.buttonColor)
         }
@@ -114,6 +115,7 @@ fun ButtonBlock(
                     borderStroke = checkedBorderStroke,
                     text = stringResource(R.string._tracked, trackServiceCountProvider()),
                 )
+
                 else -> ButtonConfig(icon = Icons.Filled.Sync, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.tracking))
             }
 
@@ -185,6 +187,7 @@ fun ButtonBlock(
                 borderStroke = checkedBorderStroke,
                 text = stringResource(R.string.is_merged),
             )
+
             false -> ButtonConfig(
                 iIcon = CommunityMaterial.Icon3.cmd_source_merge,
                 buttonColors = uncheckedButtonColors,

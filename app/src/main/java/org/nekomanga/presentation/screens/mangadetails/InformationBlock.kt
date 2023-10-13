@@ -50,7 +50,7 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun InformationBlock(
@@ -100,7 +100,7 @@ fun InformationBlock(
                     }
                 }
 
-            Gap(4.dp)
+            Gap(Size.tiny)
 
             var creatorExpanded by remember { mutableStateOf(false) }
             NoRippleText(
@@ -134,7 +134,7 @@ fun InformationBlock(
         }
 
         if (statusProvider() != 0) {
-            Gap(4.dp)
+            Gap(Size.tiny)
             val statusRes = when (statusProvider()) {
                 SManga.ONGOING -> R.string.ongoing
                 SManga.COMPLETED -> R.string.completed
@@ -175,8 +175,8 @@ fun InformationBlock(
 
             if (isPornographicProvider()) {
                 Row {
-                    Gap(Padding.small)
-                    Image(imageVector = Icons.Outlined._18UpRating, modifier = Modifier.size(Padding.extraLarge), contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
+                    Gap(Size.small)
+                    Image(imageVector = Icons.Outlined._18UpRating, modifier = Modifier.size(Size.extraLarge), contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
                 }
             }
 
@@ -187,7 +187,7 @@ fun InformationBlock(
                     Row {
                         Gap(8.dp)
                         Image(imageVector = Icons.Filled.HotelClass, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
-                        Gap(4.dp)
+                        Gap(Size.tiny)
                         NoRippleText(
                             text = formattedRating,
                             style = MaterialTheme.typography.bodyLarge,
@@ -204,7 +204,7 @@ fun InformationBlock(
                     Row {
                         Gap(8.dp)
                         Image(imageVector = Icons.Filled.Bookmarks, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
-                        Gap(4.dp)
+                        Gap(Size.tiny)
                         NoRippleText(
                             text = numberOfUsers,
                             style = MaterialTheme.typography.bodyLarge,
@@ -222,7 +222,7 @@ fun InformationBlock(
                     Row {
                         Gap(8.dp)
                         Image(imageVector = Icons.Filled.Comment, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
-                        Gap(4.dp)
+                        Gap(Size.tiny)
                         NoRippleText(
                             text = numberOfComments,
                             style = MaterialTheme.typography.bodyLarge,
@@ -246,7 +246,7 @@ fun InformationBlock(
         var showEstimatedMissingChapters by remember { mutableStateOf(false) }
 
         missingChaptersProvider()?.let { numberOfMissingChapters ->
-            Gap(4.dp)
+            Gap(Size.tiny)
             NoRippleText(
                 text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters),
                 style = MaterialTheme.typography.bodyLarge,
@@ -258,7 +258,7 @@ fun InformationBlock(
         AnimatedVisibility(visible = showEstimatedMissingChapters) {
             estimatedMissingChapterProvider()?.let { estimates ->
                 Column {
-                    Gap(4.dp)
+                    Gap(Size.tiny)
                     NoRippleText(
                         text = estimates,
                         maxLines = 4,

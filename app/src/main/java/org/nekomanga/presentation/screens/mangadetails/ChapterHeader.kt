@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 /**
  * Header that is shown above chapter list
@@ -53,7 +54,7 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChaptersProvider: () -> I
                     style =
                     MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)),
                     modifier = Modifier
-                        .requiredWidthIn(0.dp, 200.dp)
+                        .requiredWidthIn(Size.none, 200.dp)
                         .align(Alignment.CenterVertically)
                         .padding(end = 8.dp),
                     textAlign = TextAlign.End,

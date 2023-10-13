@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<ExternalLink>, onLinkClick: (String, String) -> Unit) {
@@ -33,9 +33,9 @@ fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<Ext
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Padding.small),
-                horizontalArrangement = Arrangement.spacedBy(Padding.small, Alignment.Start),
-                verticalArrangement = Arrangement.spacedBy(Padding.small),
+                    .padding(horizontal = Size.small),
+                horizontalArrangement = Arrangement.spacedBy(Size.small, Alignment.Start),
+                verticalArrangement = Arrangement.spacedBy(Size.small),
             ) {
                 externalLinks.forEach {
                     LinkCard(externalLink = it, onLinkClick = onLinkClick)
@@ -49,7 +49,7 @@ fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<Ext
 private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -> Unit) {
     OutlinedCard(
         onClick = { onLinkClick(externalLink.getUrl(), externalLink.name) },
-        modifier = Modifier.height(48.dp),
+        modifier = Modifier.height(Size.huge),
         colors = CardDefaults.outlinedCardColors(containerColor = Color(externalLink.logoColor)),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxHeight()) {
@@ -61,7 +61,7 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -
                     contentDescription = null,
                     modifier = Modifier
                         .size(28.dp)
-                        .padding(top = 4.dp, bottom = 4.dp),
+                        .padding(top = Size.tiny, bottom = Size.tiny),
                 )
                 Gap(8.dp)
             } else {

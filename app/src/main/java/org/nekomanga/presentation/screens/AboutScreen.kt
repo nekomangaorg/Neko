@@ -49,7 +49,7 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.snackbar.snackbarHost
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun AboutScreen(
@@ -113,6 +113,7 @@ fun AboutScreen(
                         BuildConfig.DEBUG -> {
                             "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
                         }
+
                         else -> {
                             "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
                         }
@@ -173,7 +174,7 @@ fun AboutScreen(
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(Padding.medium),
+                        .padding(Size.medium),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     val modifier = Modifier.size(24.dp)
