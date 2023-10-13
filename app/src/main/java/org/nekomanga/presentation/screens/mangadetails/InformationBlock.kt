@@ -18,15 +18,11 @@ import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.HotelClass
 import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,8 +35,6 @@ import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.skydoves.balloon.compose.Balloon
-import com.skydoves.balloon.compose.BalloonWindow
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -48,13 +42,15 @@ import java.text.NumberFormat
 import java.util.Locale
 import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
+import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
-import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Padding
-import toolTipBuilder
 
 @Composable
 fun InformationBlock(
@@ -106,59 +102,35 @@ fun InformationBlock(
 
             Gap(4.dp)
 
-            var balloonWindow: BalloonWindow? by remember { mutableStateOf(null) }
-
-            Balloon(
-                builder = toolTipBuilder(backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 16.dp), dismissable = false, wrapHeight = true),
-                balloonContent = {
-                    val creators = creator.split(" • ").map { it.trim() }
-                    val result = when (creators.size > 5) {
-                        true -> listOf(creator)
-                        false -> creators
-                    }
-
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        result.forEach {
-                            Text(text = it, style = MaterialTheme.typography.labelLarge)
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceAround) {
-                                TextButton(
-                                    onClick = {
-                                        balloonWindow?.dismiss()
-                                        creatorCopyClick(it)
-                                    },
-                                ) {
-                                    Text(text = stringResource(id = R.string.copy), color = themeColorState.buttonColor)
-                                }
-                                TextButton(
-                                    onClick = {
-                                        balloonWindow?.dismiss()
-                                        creatorSearchClick(it)
-                                    },
-                                ) {
-                                    Text(text = stringResource(id = R.string.search), color = themeColorState.buttonColor)
-                                }
-                            }
-                            Gap(4.dp)
-                        }
-                    }
-                },
-
-                ) { window ->
-
-                LaunchedEffect(Unit) {
-                    balloonWindow = window
-                }
-
-                NoRippleText(
-                    text = creator,
-                    onClick = {
-                        window.showAsDropDown()
-                    },
-                    maxLines = if (isExpandedProvider()) 5 else 2,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = mediumAlpha,
-                )
-            }
+            var creatorExpanded by remember { mutableStateOf(false) }
+            NoRippleText(
+                text = creator,
+                onClick = { creatorExpanded = !creatorExpanded },
+                maxLines = if (isExpandedProvider()) 5 else 2,
+                style = MaterialTheme.typography.bodyLarge,
+                color = mediumAlpha,
+            )
+            val creators = creator.split(" • ").map { it.trim() }
+            SimpleDropdownMenu(
+                expanded = creatorExpanded, onDismiss = { creatorExpanded = false },
+                themeColorState = themeColorState,
+                dropDownItems =
+                creators.map { individualCreator ->
+                    SimpleDropDownItem.Parent(
+                        text = UiText.String(individualCreator),
+                        children = listOf(
+                            SimpleDropDownItem.Action(text = UiText.StringResource(R.string.copy)) {
+                                creatorExpanded = false
+                                creatorCopyClick(individualCreator)
+                            },
+                            SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
+                                creatorExpanded = false
+                                creatorSearchClick(individualCreator)
+                            },
+                        ),
+                    )
+                }.toPersistentList(),
+            )
         }
 
         if (statusProvider() != 0) {
@@ -186,8 +158,8 @@ fun InformationBlock(
             modifier = Modifier
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
-            verticalArrangement = Arrangement.Center
-            ) {
+            verticalArrangement = Arrangement.Center,
+        ) {
             if (langFlagProvider() != null) {
                 val flag = MdLang.fromIsoCode(langFlagProvider()!!.lowercase(Locale.US))?.iconResId
                 if (flag != null) {

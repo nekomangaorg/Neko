@@ -32,8 +32,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,19 +49,20 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.model.markdownColor
 import com.mikepenz.markdown.model.markdownTypography
-import com.skydoves.balloon.compose.Balloon
-import com.skydoves.balloon.compose.BalloonWindow
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Padding
-import toolTipBuilder
 
 /**
  * Genre, alt titles, description
@@ -155,7 +156,7 @@ fun DescriptionBlock(
                     shouldWrap = wrapAltTitles,
                 )
                 Gap(8.dp)
-                Genres(genresProvider(), tagColor, themeColorState.buttonColor, genreSearch, genreSearchLibrary)
+                Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
             }
             val text = descriptionProvider().trim()
@@ -182,7 +183,7 @@ fun DescriptionBlock(
                     resetClick = altTitleResetClick,
                 )
                 Gap(16.dp)
-                Genres(genresProvider(), tagColor, themeColorState.buttonColor, genreSearch, genreSearchLibrary)
+                Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
                 MoreLessButton(
                     buttonColor = themeColorState.buttonColor,
@@ -380,7 +381,7 @@ private fun ScrollableAltTitles(
 }
 
 @Composable
-private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, buttonColor: Color, genreSearch: (String) -> Unit, genreLibrarySearch: (String) -> Unit) {
+private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, themeColorState: ThemeColorState, genreSearch: (String) -> Unit, genreLibrarySearch: (String) -> Unit) {
     if (genres.isEmpty()) return
 
     Text(
@@ -402,59 +403,37 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, b
             }
         },
         horizontalArrangement = Arrangement.spacedBy(Padding.smedium, Alignment.Start),
-        verticalArrangement = Arrangement.spacedBy(Padding.smedium)
+        verticalArrangement = Arrangement.spacedBy(Padding.smedium),
     ) {
-        genres.forEach { genre ->
-            var balloonWindow: BalloonWindow? by remember { mutableStateOf(null) }
+        var genreExpanded by remember { mutableStateOf(false) }
+        var genrePosition by remember { mutableIntStateOf(0) }
 
-            Balloon(
-                builder = toolTipBuilder(backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(tagColor, 16.dp), dismissable = false),
-                balloonContent = {
-                    GenreBalloon(balloonWindow, genreSearch, genre, buttonColor, genreLibrarySearch)
+        genres.forEachIndexed { index, genre ->
+            Chip(
+                label = genre,
+                containerColor = tagColor,
+                modifier = Modifier.clickable {
+                    genrePosition = index
+                    genreExpanded = !genreExpanded
                 },
-            ) { window ->
+            )
+        }
+        SimpleDropdownMenu(
+            expanded = genreExpanded, onDismiss = { genreExpanded = false },
+            themeColorState = themeColorState,
+            dropDownItems =
+            listOf(
+                SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
+                    genreExpanded = false
+                    genreSearch(genres[genrePosition])
+                },
+                SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search_library)) {
+                    genreExpanded = false
+                    genreLibrarySearch(genres[genrePosition])
+                },
+            ).toPersistentList(),
+        )
 
-                LaunchedEffect(Unit) {
-                    balloonWindow = window
-                }
-                Chip(
-                    label = genre,
-                    containerColor = tagColor,
-                    modifier = Modifier.clickable {
-                        window.showAsDropDown()
-                    },
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun GenreBalloon(
-    balloonWindow: BalloonWindow?,
-    genreSearch: (String) -> Unit,
-    genre: String,
-    buttonColor: Color,
-    genreLibrarySearch: (String) -> Unit,
-) {
-    Row {
-        TextButton(
-            onClick = {
-                balloonWindow?.dismiss()
-                genreSearch(genre)
-            },
-        ) {
-            Text(text = stringResource(id = R.string.search), color = buttonColor)
-        }
-        Gap(4.dp)
-        TextButton(
-            onClick = {
-                balloonWindow?.dismiss()
-                genreLibrarySearch(genre)
-            },
-        ) {
-            Text(text = stringResource(id = R.string.search_library), color = buttonColor)
-        }
     }
 }
 
