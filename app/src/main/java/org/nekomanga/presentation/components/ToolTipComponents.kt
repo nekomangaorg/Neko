@@ -3,12 +3,14 @@
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.minimumInteractiveComponentSize
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.material3.toColor
@@ -25,15 +27,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
-import com.skydoves.balloon.ArrowPositionRules
-import com.skydoves.balloon.Balloon
-import com.skydoves.balloon.BalloonAnimation
-import com.skydoves.balloon.BalloonSizeSpec
-import com.skydoves.balloon.compose.Balloon
-import com.skydoves.balloon.compose.rememberBalloonBuilder
-import com.skydoves.balloon.compose.setBackgroundColor
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.theme.Size
 
 /**
  * This is a Tooltip Icon button, a wrapper around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip
@@ -52,25 +47,24 @@ fun ToolTipButton(
     require(icon != null || painter != null)
 
     val haptic = LocalHapticFeedback.current
-
-    Balloon(
-        builder = toolTipBuilder(),
-        balloonContent = {
-            Text(text = toolTipLabel, color = MaterialTheme.colorScheme.onSurface)
-        },
-    ) { window ->
+    PlainTooltipBox(
+        tooltip = { Text(modifier = Modifier.padding(Size.tiny), style = MaterialTheme.typography.bodyLarge, text = toolTipLabel) },
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
+    ) {
         CombinedClickableIconButton(
             enabled = isEnabled,
             enabledTint = enabledTint,
-            modifier = modifier.iconButtonCombinedClickable(
-                toolTipLabel = toolTipLabel,
-                onClick = buttonClicked,
-                isEnabled = isEnabled,
-                onLongClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    window.showAsDropDown()
-                },
-            ),
+            modifier = modifier
+                .tooltipAnchor()
+                .iconButtonCombinedClickable(
+                    toolTipLabel = toolTipLabel,
+                    onClick = buttonClicked,
+                    isEnabled = isEnabled,
+                    onLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                ),
         ) {
             if (icon != null) {
                 Icon(
@@ -143,32 +137,6 @@ fun Modifier.iconButtonCombinedClickable(
         )
     } else {
         this
-    }
-}
-
-@Composable
-fun toolTipBuilder(backgroundColor: Color = MaterialTheme.colorScheme.surfaceColorAtElevation(16.dp), dismissable: Boolean = true, wrapHeight: Boolean = true): Balloon.Builder {
-
-    return rememberBalloonBuilder {
-        setArrowSize(0)
-        setArrowPosition(0.5f)
-        setArrowPositionRules(ArrowPositionRules.ALIGN_ANCHOR)
-        setWidth(BalloonSizeSpec.WRAP)
-        when (wrapHeight) {
-            true -> setHeight(BalloonSizeSpec.WRAP)
-            false -> setHeight(200)
-        }
-        setPadding(12)
-        setMarginHorizontal(12)
-        setCornerRadius(16f)
-        setBackgroundColor(backgroundColor)
-        setBalloonAnimation(BalloonAnimation.FADE)
-        if (dismissable) {
-            setAutoDismissDuration(2000L)
-        }
-        setDismissWhenTouchOutside(true)
-        setDismissWhenClicked(true)
-        setDismissWhenOverlayClicked(true)
     }
 }
 

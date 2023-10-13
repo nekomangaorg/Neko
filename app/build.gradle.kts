@@ -199,7 +199,6 @@ dependencies {
     implementation(compose.number.picker)
 
     implementation(compose.bundles.charting)
-    implementation(compose.balloon)
 
 
     implementation(libs.pastelplaceholders)

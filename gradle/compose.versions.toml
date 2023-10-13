@@ -28,9 +28,6 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 
 charty = "com.himanshoe:charty:1.1.3-alpha05"
 
-balloon = "com.github.skydoves:balloon-compose:1.6.1"
-
-
 gap = "jp.wasabeef:gap:1.1.0"
 
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
