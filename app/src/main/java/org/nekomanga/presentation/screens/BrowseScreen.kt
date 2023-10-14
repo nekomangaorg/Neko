@@ -32,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,8 +79,8 @@ import org.nekomanga.presentation.screens.browse.BrowseFilterPage
 import org.nekomanga.presentation.screens.browse.BrowseFollowsPage
 import org.nekomanga.presentation.screens.browse.BrowseHomePage
 import org.nekomanga.presentation.screens.browse.BrowseOtherPage
-import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun BrowseScreen(
@@ -335,6 +336,9 @@ fun BrowseScreen(
                             screenType = browseScreenType,
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
+                                .conditional(!sideNav && windowSizeClass.heightSizeClass == WindowHeightSizeClass.Expanded) {
+                                    this.padding(bottom = Size.medium)
+                                }
                                 .conditional(sideNav) {
                                     this.navigationBarsPadding()
                                 },
