@@ -62,6 +62,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.Loading
@@ -135,8 +136,9 @@ fun BrowseScreen(
         scope.launch { sheetState.hide() }
     }
 
-    val sideNav = rememberSideBarVisible(windowSizeClass, browseScreenState.value.sideNavMode)
-    val navBarPadding = rememberNavBarPadding(sideNav || legacySideNav, browseScreenState.value.isDeepLink)
+    //val sideNav = rememberSideBarVisible(windowSizeClass, browseScreenState.value.sideNavMode)
+    val actualSideNav = legacySideNav
+    val navBarPadding = rememberNavBarPadding(actualSideNav, browseScreenState.value.isDeepLink)
 
     // set the current sheet to null when bottom sheet is closed
     LaunchedEffect(key1 = sheetState.isVisible) {
@@ -226,7 +228,7 @@ fun BrowseScreen(
                 val recyclerContentPadding =
                     PaddingValues(
                         top = incomingContentPadding.calculateTopPadding(),
-                        bottom = if (sideNav) {
+                        bottom = if (actualSideNav) {
                             Size.navBarSize
                         } else {
                             Size.navBarSize
@@ -330,18 +332,19 @@ fun BrowseScreen(
                             }
                         }
                     }
+
+                    TimberKt.d {"ESCO ${windowSizeClass.heightSizeClass}"}
+                    TimberKt.d {"ESCO ${windowSizeClass.widthSizeClass}"}
+                    TimberKt.d {"ESCO sideNav $actualSideNav"}
+
+
                     // hide these on initial load
                     if (!browseScreenState.value.hideFooterButton) {
                         ScreenTypeFooter(
                             screenType = browseScreenType,
                             modifier = Modifier
                                 .align(Alignment.BottomStart)
-                                .conditional(!sideNav && windowSizeClass.heightSizeClass == WindowHeightSizeClass.Expanded) {
-                                    this.padding(bottom = Size.medium)
-                                }
-                                .conditional(sideNav) {
-                                    this.navigationBarsPadding()
-                                },
+                                ,
                             isLoggedIn = browseScreenState.value.isLoggedIn,
                             screenTypeClick = { newScreenType: BrowseScreenType ->
                                 scope.launch { sheetState.hide() }
