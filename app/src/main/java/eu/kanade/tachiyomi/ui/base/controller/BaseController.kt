@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.util.view.removeQueryListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 
 abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     Controller(bundle) {
@@ -44,20 +44,20 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
                 override fun preCreateView(controller: Controller) {
                     viewScope = MainScope()
-                    loggycat { "Create view for ${controller.instance()}" }
+                    TimberKt.d { "Create view for ${controller.instance()}" }
                 }
 
                 override fun preAttach(controller: Controller, view: View) {
-                    loggycat { "Attach view for ${controller.instance()}" }
+                    TimberKt.d { "Attach view for ${controller.instance()}" }
                 }
 
                 override fun preDetach(controller: Controller, view: View) {
-                    loggycat { "Detach view for ${controller.instance()}" }
+                    TimberKt.d { "Detach view for ${controller.instance()}" }
                 }
 
                 override fun preDestroyView(controller: Controller, view: View) {
                     viewScope.cancel()
-                    loggycat { "Destroy view for ${controller.instance()}" }
+                    TimberKt.d { "Destroy view for ${controller.instance()}" }
                 }
             },
         )

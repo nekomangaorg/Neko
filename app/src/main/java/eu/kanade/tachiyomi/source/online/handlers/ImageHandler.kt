@@ -23,23 +23,22 @@ import java.util.Date
 import kotlin.collections.set
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
-import logcat.LogPriority
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 import org.nekomanga.core.network.GET
 import org.nekomanga.domain.network.message
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import tachiyomi.core.network.newCachelessCallWithProgress
 import uy.kohesive.injekt.injectLazy
 
 class ImageHandler {
     val network: NetworkHelper by injectLazy()
-    val NetworkServices: NetworkServices by injectLazy()
+    val networkServices: NetworkServices by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
     private val azukiHandler: AzukiHandler by injectLazy()
     private val mangaHotHandler: MangaHotHandler by injectLazy()
@@ -47,10 +46,10 @@ class ImageHandler {
     private val bilibiliHandler: BilibiliHandler by injectLazy()
     private val comikeyHandler: ComikeyHandler by injectLazy()
 
-    val tag = "||ImageHandler"
-
     // chapter id and last request time
     private val tokenTracker = hashMapOf<String, Long>()
+
+    private val tag = "||ImageHandler"
 
     suspend fun getImage(page: Page, isLogged: Boolean): Response {
         return withIOContext {
@@ -80,7 +79,7 @@ class ImageHandler {
         }
 
         if ((attempt.getError() != null || !attempt.get()!!.isSuccessful) && !request.url.toString().startsWith(MdConstants.cdnUrl)) {
-            loggycat(LogPriority.ERROR, attempt.getError(), tag) { "error getting image from at home node falling back to cdn" }
+            TimberKt.e(attempt.getError()) { "$tag error getting image from at home node falling back to cdn" }
 
             attempt = com.github.michaelbull.result.runCatching {
                 val newRequest = buildRequest(MdConstants.cdnUrl + page.imageUrl, network.headers)
@@ -91,14 +90,14 @@ class ImageHandler {
         attempt.onSuccess { response ->
             if (!response.isSuccessful) {
                 response.close()
-                loggycat(LogPriority.ERROR, tag = tag) { "response for image was not successful http status code ${response.code}" }
+                TimberKt.e(attempt.getError()) { "$tag response for image was not successful http status code ${response.code}" }
                 throw Exception("HTTP error ${response.code}")
             }
         }
 
         return attempt.getOrThrow { e ->
             if (e !is CancellationException) {
-                loggycat(LogPriority.ERROR, e, tag) { "error getting images" }
+                TimberKt.e(attempt.getError()) { "$tag error getting images" }
                 withNonCancellableContext {
                     reportFailedImage(request.url.toString())
                 }
@@ -127,23 +126,23 @@ class ImageHandler {
             cache,
             duration,
         )
-        loggycat(tag = tag) { atHomeImageReportDto.toString() }
+        TimberKt.d { "$tag  $atHomeImageReportDto" }
         sendReport(atHomeImageReportDto)
     }
 
     private suspend fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
-        loggycat(tag = tag) { "Image to report $atHomeImageReportDto" }
+        TimberKt.d { "$tag Image to report $atHomeImageReportDto" }
 
         if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
-            loggycat(tag = tag) { "image is at CDN don't report to md@home node" }
+            TimberKt.d { "$tag image is at CDN don't report to md@home node" }
             return
         }
-        NetworkServices.service.atHomeImageReport(atHomeImageReportDto).onFailure {
+        networkServices.service.atHomeImageReport(atHomeImageReportDto).onFailure {
             this.log("trying to post to dex@home")
         }
     }
 
-    suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
+    private suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
         val data = page.url.split(",")
         val currentTime = Date().time
 
@@ -151,10 +150,10 @@ class ImageHandler {
             when (tokenTracker[page.mangaDexChapterId] != null && (currentTime - tokenTracker[page.mangaDexChapterId]!!) < MdConstants.mdAtHomeTokenLifespan) {
                 true -> data[0]
                 false -> {
-                    loggycat(tag = tag) { "Time has expired get new at home url isLogged $isLogged" }
+                    TimberKt.d { "$tag Time has expired get new at home url isLogged $isLogged" }
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
 
-                    NetworkServices.atHomeService.getAtHomeServer(
+                    networkServices.atHomeService.getAtHomeServer(
                         page.mangaDexChapterId,
                         preferences.usePort443Only().get(),
                     )
@@ -163,8 +162,9 @@ class ImageHandler {
                         .baseUrl
                 }
             }
-        loggycat(tag = tag) {
+        TimberKt.d {
             """
+            $tag
             Image server is $mdAtHomeServerUrl
             page url is ${page.imageUrl}
             """

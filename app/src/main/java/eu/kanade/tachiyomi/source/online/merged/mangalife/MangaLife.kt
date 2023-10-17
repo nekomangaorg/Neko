@@ -14,17 +14,16 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.jsoup.nodes.Document
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
@@ -141,14 +140,14 @@ class MangaLife : ReducedHttpSource() {
                                 false -> dateFormat.parse("${chp.date} +0600")?.time!!
                             }
                         }.onFailure {
-                            loggycat(LogPriority.ERROR, it)
+                            TimberKt.e(it)
                         }.getOrElse { 0L }
 
                         scanlator = this@MangaLife.name
                     }
                 }
             }.mapError {
-                loggycat(LogPriority.ERROR, it)
+                TimberKt.e(it) { "Error merging with manga life" }
                 "Unknown Exception with merge".toResultError()
             }
         }

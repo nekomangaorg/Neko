@@ -61,7 +61,6 @@ import eu.kanade.tachiyomi.util.system.launchNonCancellable
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -72,9 +71,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -335,7 +333,7 @@ class LibraryPresenter(
             if (!showEmptyCategoriesWhileFiltering && item.manga.isHidden()) {
                 val subItems = sectionedLibraryItems[item.manga.category]?.takeUnless { it.size <= 1 }
                     ?: hiddenLibraryItems.filter { it.manga.category == item.manga.category }
-                if (subItems.isNullOrEmpty()) {
+                if (subItems.isEmpty()) {
                     return@f filtersOff
                 } else {
                     return@f subItems.any {
@@ -723,7 +721,7 @@ class LibraryPresenter(
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
                         if (headerItem != null) {
-                            loggycat("DynamicCategory", LogPriority.DEBUG) { "library grouped: size ${mangaToRemove.size}" }
+                            TimberKt.d { "Dynamic Category library grouped: size ${mangaToRemove.size}" }
                             items.add(
                                 LibraryItem(
                                     LibraryManga.createHide(
@@ -919,7 +917,7 @@ class LibraryPresenter(
                 sectionedLibraryItems[catId] = mangaToRemove
                 items.removeAll { it.header.catId == catId }
                 if (headerItem != null) {
-                    loggycat("DynamicCategory", LogPriority.DEBUG) { "getCustomMangaItem- cat[${catId}] size[${mangaToRemove.size}]" }
+                    TimberKt.d { "Dynamic Category getCustomMangaItem- cat[${catId}] size[${mangaToRemove.size}]" }
 
                     items.add(
                         LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
@@ -1016,7 +1014,7 @@ class LibraryPresenter(
     /**
      * Returns the common categories for the given list of manga.
      *
-     * @param mangas the list of manga.
+     * @param mangaList the list of manga.
      */
     fun getCommonCategories(mangaList: List<Manga>): Collection<Category> {
         if (mangaList.isEmpty()) return emptyList()
@@ -1356,7 +1354,7 @@ class LibraryPresenter(
     fun syncMangaToDex(mangaList: List<Manga>, listUuids: List<String>) {
         presenterScope.launch {
             withContext(Dispatchers.IO) {
-                loggycat { "Number of manga to sync ${mangaList.size}" }
+                TimberKt.d { "Number of manga to sync ${mangaList.size}" }
                 val mangaIds = mangaList.mapNotNull { it.id }
                 CustomListSyncJob.toMangaDex(context, listUuids, mangaIds)
             }
@@ -1370,7 +1368,6 @@ class LibraryPresenter(
     companion object {
         private var lastLibraryItems: List<LibraryItem>? = null
         private var lastCategories: List<Category>? = null
-        private const val sourceSplitter = "◘•◘"
         private const val dynamicCategorySplitter = "▄╪\t▄╪\t▄"
 
         private val randomTags = arrayOf(0, 1, 2)
@@ -1511,25 +1508,6 @@ class LibraryPresenter(
                 }
             }
             MangaCoverMetadata.savePrefs()
-        }
-
-        fun updateCustoms() {
-            val db: DatabaseHelper = Injekt.get()
-            val cc: CoverCache = Injekt.get()
-            db.inTransaction {
-                val libraryManga = db.getLibraryMangaList().executeAsBlocking()
-                libraryManga.forEach { manga ->
-                    if (manga.thumbnail_url?.startsWith("custom", ignoreCase = true) == true) {
-                        val file = cc.getCoverFile(manga.thumbnail_url, manga.favorite)
-                        if (file.exists()) {
-                            file.renameTo(cc.getCustomCoverFile(manga))
-                        }
-                        manga.thumbnail_url =
-                            manga.thumbnail_url!!.lowercase(Locale.ROOT).substringAfter("custom-")
-                        db.insertManga(manga).executeAsBlocking()
-                    }
-                }
-            }
         }
     }
 }

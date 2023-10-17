@@ -19,9 +19,8 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -129,7 +128,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
 
     override suspend fun bind(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
-            loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
+            TimberKt.i { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
@@ -141,7 +140,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
 
     override suspend fun refresh(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
-            loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
+            TimberKt.i { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)

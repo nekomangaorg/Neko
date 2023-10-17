@@ -25,7 +25,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
@@ -34,9 +33,9 @@ import okio.Path.Companion.toOkioPath
 import okio.Source
 import okio.buffer
 import okio.sink
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
@@ -152,7 +151,7 @@ class MangaCoverFetcher(
         } catch (e: Exception) {
             snapshot?.close()
             if (e !is CancellationException) {
-                loggycat(LogPriority.ERROR, e) { "error loading image" }
+                TimberKt.e(e) { "error loading image" }
             }
             throw e
         }
@@ -201,7 +200,7 @@ class MangaCoverFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e) { "Failed to write snapshot data to cover cache ${cacheFile.name}" }
+            TimberKt.e(e) { "Failed to write snapshot data to cover cache ${cacheFile.name}" }
             null
         }
     }
@@ -214,7 +213,7 @@ class MangaCoverFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e) { "Failed to write response data to cover cache ${cacheFile.name}" }
+            TimberKt.e(e) { "Failed to write response data to cover cache ${cacheFile.name}" }
             null
         }
     }
@@ -244,7 +243,7 @@ class MangaCoverFetcher(
             diskCacheLazy.value.fileSystem.write(editor.data) {
                 response.body!!.source().readAll(this)
             }
-            return editor.commitAndGet()
+            return editor.commitAndOpenSnapshot()
         } catch (e: Exception) {
             try {
                 editor.abort()

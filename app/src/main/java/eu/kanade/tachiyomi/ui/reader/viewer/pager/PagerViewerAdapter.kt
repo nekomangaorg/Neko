@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlin.math.max
 import kotlinx.coroutines.delay
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 
 /**
  * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
@@ -154,7 +154,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             if (position != -1) {
                 return position
             } else {
-                loggycat { "Position for ${view.item} not found" }
+                TimberKt.d { "Position for ${view.item} not found" }
             }
         }
         return POSITION_NONE
@@ -167,12 +167,12 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 (oldCurrent?.first as? ReaderPage)?.firstHalf == false
             } else {
                 oldCurrent?.second == current ||
-                    (current.index + 1) < (
+                    (current.index + 1) < ((
                     (
                         oldCurrent?.second
                             ?: oldCurrent?.first
                         ) as? ReaderPage
-                    )?.index ?: 0
+                    )?.index ?: 0)
             },
         )
 
@@ -180,9 +180,9 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         // This case usually happens when we load a new chapter and the first 2 pages need to split og
         viewer.scope.launchUI {
             delay(100)
-            loggycat { "about to on page change from splitDoublePages" }
+            TimberKt.d { "about to on page change from splitDoublePages" }
             viewer.onPageChange(viewer.pager.currentItem)
-            loggycat { "finished on page change from splitDoublePages" }
+            TimberKt.d { "finished on page change from splitDoublePages" }
         }
     }
 

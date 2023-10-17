@@ -18,15 +18,14 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
-import logcat.LogPriority
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.DELETE
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.core.network.PUT
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
@@ -214,7 +213,7 @@ class MangaUpdatesApi(
                     try {
                         json.decodeFromJsonElement<Context>(obj["context"]!!)
                     } catch (e: Exception) {
-                        loggycat(LogPriority.ERROR, e)
+                        TimberKt.e(e) { "Error authenticating with MU" }
                         null
                     }
 

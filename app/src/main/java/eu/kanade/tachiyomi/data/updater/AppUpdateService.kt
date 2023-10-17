@@ -28,12 +28,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import logcat.LogPriority
 import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
 import okhttp3.internal.http2.StreamResetException
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.GET
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.ProgressListener
 import tachiyomi.core.network.await
 import tachiyomi.core.network.newCachelessCallWithProgress
@@ -77,7 +76,7 @@ class AppUpdateService : Service() {
         instance = this
 
         val handler = CoroutineExceptionHandler { _, exception ->
-            loggycat(LogPriority.ERROR, exception)
+            TimberKt.e(exception)
             stopSelf(startId)
         }
 
@@ -163,7 +162,7 @@ class AppUpdateService : Service() {
                 notifier.onDownloadFinished(apkFile.getUriCompat(this))
             }
         } catch (error: Exception) {
-            loggycat(LogPriority.ERROR, error)
+            TimberKt.e(error)
             if (error is CancellationException ||
                 (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
             ) {

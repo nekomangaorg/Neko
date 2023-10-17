@@ -22,7 +22,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
@@ -196,16 +196,16 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         activity.onPageSelected(page, false)
 
         val pages = page.chapter.pages ?: return
-        loggycat { "onReaderPageSelected: ${page.number}/${pages.size}" }
+        TimberKt.d { "onReaderPageSelected: ${page.number}/${pages.size}" }
         // Preload next chapter once we're within the last 5 pages of the current chapter
         val inPreloadRange = pages.size - page.number < 5
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
-            loggycat { "Request preload next chapter because we're at page ${page.number} of ${pages.size}" }
+            TimberKt.d { "Request preload next chapter because we're at page ${page.number} of ${pages.size}" }
             val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
             val transitionChapter =
                 (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
             if (transitionChapter != null) {
-                loggycat { "Requesting to preload chapter ${transitionChapter.chapter.chapter_number}" }
+                TimberKt.d { "Requesting to preload chapter ${transitionChapter.chapter.chapter_number}" }
                 activity.requestPreloadChapter(transitionChapter)
             }
         }
@@ -216,10 +216,10 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
      * preload of the destination chapter of the transition.
      */
     private fun onTransitionSelected(transition: ChapterTransition) {
-        loggycat { "onTransitionSelected: $transition" }
+        TimberKt.d { "onTransitionSelected: $transition" }
         val toChapter = transition.to
         if (toChapter != null) {
-            loggycat { "Request preload destination chapter because we're on the transition" }
+            TimberKt.d { "Request preload destination chapter because we're on the transition" }
             activity.requestPreloadChapter(toChapter)
         }
     }
@@ -228,12 +228,12 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
      * Tells this viewer to set the given [chapters] as active.
      */
     override fun setChapters(chapters: ViewerChapters) {
-        loggycat { "setChapters" }
+        TimberKt.d { "setChapters" }
         val forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
         if (recycler.isGone) {
-            loggycat { "Recycler first layout" }
+            TimberKt.d { "Recycler first layout" }
             val pages = chapters.currChapter.pages ?: return
             moveToPage(pages[min(chapters.currChapter.requestedPage, pages.lastIndex)])
             recycler.isVisible = true
@@ -244,7 +244,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
      * Tells this viewer to move to the given [page].
      */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
-        loggycat { "moveToPage" }
+        TimberKt.d { "moveToPage" }
         val position = adapter.items.indexOf(page)
         if (position != -1) {
             recycler.scrollToPosition(position)
@@ -252,7 +252,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                 onScrolled(position)
             }
         } else {
-            loggycat { "Page $page not found in adapter" }
+            TimberKt.d { "Page $page not found in adapter" }
         }
     }
 
@@ -275,8 +275,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
     override fun moveToPrevious() {
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, -scrollDistance)
-        }
-        else {
+        } else {
             recycler.scrollBy(0, -scrollDistance)
         }
     }
@@ -287,8 +286,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
     override fun moveToNext() {
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, scrollDistance)
-        }
-        else {
+        } else {
             recycler.scrollBy(0, scrollDistance)
         }
     }

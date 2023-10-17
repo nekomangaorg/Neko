@@ -39,11 +39,10 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.FileOutputStream
 import kotlin.math.max
 import kotlinx.serialization.protobuf.ProtoBuf
-import logcat.LogPriority
 import okio.buffer
 import okio.gzip
 import okio.sink
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class BackupManager(val context: Context) {
@@ -121,7 +120,7 @@ class BackupManager(val context: Context) {
 
             return fileUri.toString()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "error creating backup file" }
             file?.delete()
             throw e
         }

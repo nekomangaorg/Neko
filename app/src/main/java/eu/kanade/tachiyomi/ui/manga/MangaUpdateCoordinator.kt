@@ -28,10 +28,10 @@ import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -66,7 +66,7 @@ class MangaUpdateCoordinator {
             return@channelFlow
         }
 
-        this@MangaUpdateCoordinator.loggycat { "Begin processing manga/chapter update for manga $mangaUUID" }
+        TimberKt.d { "Begin processing manga/chapter update for manga $mangaUUID" }
 
         val mangaJob = startMangaJob(scope, manga)
 

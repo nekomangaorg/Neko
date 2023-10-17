@@ -24,11 +24,10 @@ import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.serialization.encodeToString
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class SimilarHandler {
@@ -46,7 +45,7 @@ class SimilarHandler {
             val related = withIOContext {
                 networkServices.service.relatedManga(dexId)
                     .onFailure {
-                        loggycat(LogPriority.ERROR) { "trying to get related manga, $this" }
+                        TimberKt.e { "trying to get related manga, $this" }
                     }
                     .getOrNull()
             }
@@ -131,7 +130,7 @@ class SimilarHandler {
         if (forceRefresh) {
             val response = networkServices.similarService.getSimilarManga(dexId)
                 .onFailure {
-                    loggycat(LogPriority.ERROR) { "trying to get similar manga, $this" }
+                    TimberKt.e { "trying to get similar manga, $this" }
                 }.getOrNull()
 
             similarMangaParse(dexId, response)
@@ -407,7 +406,7 @@ class SimilarHandler {
         }.getOrThrow()
 
         if (strictMatch && responseBody.data.size != mangaIds.size) {
-            loggycat { "manga returned doesn't match number of manga expected" }
+            TimberKt.d { "manga returned doesn't match number of manga expected" }
             throw Exception("Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned")
         }
         return responseBody

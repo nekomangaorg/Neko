@@ -9,8 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackStatusService
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
@@ -195,7 +194,7 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
             saveCredentials(username.toString(), oauth.access_token)
             true
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error logging into Anilist" }
             logout()
             false
         }
@@ -207,7 +206,7 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
             scorePreference.set(scoreType)
             true to null
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error updating score for Anilist" }
             false to e
         }
     }
@@ -224,9 +223,13 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
 
     fun loadOAuth(): OAuth? {
         return try {
-            json.decodeFromString<OAuth>(preferences.trackToken(this).get())
+            val token = preferences.trackToken(this).get()
+            when (token.isBlank()) {
+                true -> null
+                false -> json.decodeFromString<OAuth>(token)
+            }
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error decoding oauth string" }
             null
         }
     }

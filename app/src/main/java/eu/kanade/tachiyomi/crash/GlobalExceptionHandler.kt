@@ -10,8 +10,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 
 class GlobalExceptionHandler private constructor(
     private val applicationContext: Context,
@@ -32,7 +31,7 @@ class GlobalExceptionHandler private constructor(
 
     override fun uncaughtException(thread: Thread, exception: Throwable) {
         try {
-            loggycat(priority = LogPriority.ERROR, throwable = exception) { "Uncaught Exception" }
+            TimberKt.e(exception) { "Uncaught Exception" }
             launchActivity(applicationContext, activityToBeLaunched, exception)
             exitProcess(0)
         } catch (_: Exception) {
@@ -72,7 +71,7 @@ class GlobalExceptionHandler private constructor(
             return try {
                 Json.decodeFromString(ThrowableSerializer, intent.getStringExtra(INTENT_EXTRA)!!)
             } catch (e: Exception) {
-                loggycat(LogPriority.ERROR, e) { "Wasn't able to retrive throwable from intent" }
+                TimberKt.e(e) { "Wasn't able to retrive throwable from intent" }
                 null
             }
         }

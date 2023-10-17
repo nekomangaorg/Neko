@@ -14,12 +14,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Request
 import okhttp3.Response
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 
 class MergeMangaCoverFetcher(
@@ -52,7 +51,7 @@ class MergeMangaCoverFetcher(
             }
         } catch (e: Exception) {
             if (e !is CancellationException) {
-                loggycat(LogPriority.ERROR, e) { "error loading image" }
+                TimberKt.e(e) { "error loading image" }
             }
             throw e
         }

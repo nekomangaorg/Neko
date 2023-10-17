@@ -8,12 +8,11 @@ import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.concurrent.TimeUnit
-import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.Headers
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.POST
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
@@ -29,10 +28,10 @@ class MangaDexLoginHelper {
 
     fun wasTokenRefreshedRecently(): Boolean {
         val lastRefreshTime = preferences.lastRefreshTime().get()
-        loggycat(LogPriority.INFO, tag = tag) { "last refresh time $lastRefreshTime current time ${System.currentTimeMillis()}" }
+        TimberKt.i { "$tag last refresh time $lastRefreshTime current time ${System.currentTimeMillis()}" }
 
         if ((lastRefreshTime + TimeUnit.MINUTES.toMillis(15)) > System.currentTimeMillis()) {
-            loggycat(LogPriority.INFO, tag = tag) { "Token was refreshed recently don't hit dex to check" }
+            TimberKt.i { "$tag Token was refreshed recently don't hit dex to check" }
             return true
         }
 
@@ -42,7 +41,7 @@ class MangaDexLoginHelper {
     suspend fun refreshSessionToken(): Boolean {
         val refreshToken = preferences.refreshToken().get()
         if (refreshToken.isEmpty()) {
-            loggycat(LogPriority.INFO, tag = tag) { "refresh token is null can't extend session" }
+            TimberKt.i { "$tag refresh token is null can't extend session" }
             invalidate()
             return false
         }
@@ -75,7 +74,7 @@ class MangaDexLoginHelper {
         return when (error == null) {
             true -> true
             false -> {
-                loggycat(LogPriority.ERROR, error) { "Error refreshing token" }
+                TimberKt.e(error) { "Error refreshing token" }
                 invalidate()
                 false
             }
@@ -122,7 +121,7 @@ class MangaDexLoginHelper {
         return when (error == null) {
             true -> true
             false -> {
-                loggycat(LogPriority.ERROR, error) { "Error logging in" }
+                TimberKt.e(error) { "Error logging in" }
                 invalidate()
                 false
             }
@@ -157,7 +156,7 @@ class MangaDexLoginHelper {
         return when (error == null) {
             true -> true
             false -> {
-                loggycat(LogPriority.ERROR, error) { "Error logging out" }
+                TimberKt.e(error) { "Error logging out" }
                 false
             }
         }

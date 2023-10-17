@@ -68,6 +68,14 @@ class SettingsAppearanceController : SettingsController() {
 
         preferenceCategory {
             titleRes = R.string.details_page
+
+            switchPreference {
+                key = mangaDetailsPreferences.forcePortrait().key()
+                titleRes = R.string.force_portrait_details
+                summaryRes = R.string.force_portrait_details_description
+                defaultValue = false
+            }
+
             switchPreference {
                 key = mangaDetailsPreferences.autoThemeByCover().key()
                 titleRes = R.string.theme_buttons_based_on_cover
@@ -91,6 +99,7 @@ class SettingsAppearanceController : SettingsController() {
                 titleRes = R.string.wrap_alt_titles
                 defaultValue = false
             }
+
         }
 
         preferenceCategory {

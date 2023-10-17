@@ -4,21 +4,18 @@ import android.app.Dialog
 import android.os.Bundle
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
-    val loginHelper: MangaDexLoginHelper by injectLazy()
+    private val loginHelper: MangaDexLoginHelper by injectLazy()
 
-    private lateinit var binding: PrefAccountLoginBinding
     val preferences: PreferencesHelper by injectLazy()
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
@@ -37,7 +34,7 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                         activity?.toast(R.string.successfully_logged_out)
                         (targetController as? Listener)?.siteLogoutDialogClosed()
                     }.onFailure { e ->
-                        loggycat(LogPriority.ERROR, e) { "Error logging out" }
+                        TimberKt.e(e) { "Error logging out" }
                         activity?.toast(R.string.could_not_log_in)
                     }
                 }

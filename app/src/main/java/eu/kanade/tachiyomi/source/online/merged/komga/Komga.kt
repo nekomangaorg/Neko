@@ -14,17 +14,16 @@ import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
 import okhttp3.Credentials
 import okhttp3.Dns
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
@@ -145,7 +144,7 @@ class Komga : ReducedHttpSource() {
                 }
                 return@runCatching r.sortedByDescending { it.chapter_number }
             }.mapError {
-                loggycat(LogPriority.ERROR, it)
+                TimberKt.e(it) { "Error fetching komga chapters" }
                 (it.localizedMessage ?: "Komga Error").toResultError()
             }
         }

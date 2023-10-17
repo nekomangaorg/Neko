@@ -46,9 +46,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -533,7 +532,7 @@ class PagerPageHolder(
                                 try {
                                     pageView?.background = setBG(bytesArray)
                                 } catch (e: Exception) {
-                                    loggycat(LogPriority.ERROR, e)
+                                    TimberKt.e(e) { "Error setting BG" }
                                     pageView?.background = ColorDrawable(Color.WHITE)
                                 } finally {
                                     page.bg = pageView?.background
@@ -560,12 +559,14 @@ class PagerPageHolder(
                 try {
                     openStream?.close()
                 } catch (e: Exception) {
+                    TimberKt.e(e) { "Error closing stream" }
                 }
             }
             .doOnError {
                 try {
                     openStream?.close()
                 } catch (e: Exception) {
+                    TimberKt.e(e) { "Error closing stream" }
                 }
             }
             .subscribe({}, {})
@@ -747,7 +748,7 @@ class PagerPageHolder(
                 BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             } catch (e: Exception) {
                 imageStream.close()
-                loggycat(LogPriority.ERROR, e) { "Cannot split page" }
+                TimberKt.e(e) { "Cannot split page" }
                 return imageBytes.inputStream()
             }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
@@ -770,7 +771,7 @@ class PagerPageHolder(
                     imageStream.close()
                     page.longPage = true
                     splitDoublePages()
-                    loggycat(LogPriority.ERROR, e) { "Cannot split page" }
+                    TimberKt.e(e) { "Cannot split page" }
                     return imageBytes.inputStream()
                 }
                 val height = imageBitmap.height
@@ -815,7 +816,7 @@ class PagerPageHolder(
             imageStream.close()
             page.fullPage = true
             splitDoublePages()
-            loggycat(LogPriority.ERROR, e) { "Cannot combine pages" }
+            TimberKt.e(e) { "Cannot combine pages" }
             return imageBytes.inputStream()
         }
         scope.launchUI { progressBar.setProgress(96) }
@@ -839,7 +840,7 @@ class PagerPageHolder(
             extraPage?.fullPage = true
             page.isolatedPage = true
             splitDoublePages()
-            loggycat(LogPriority.ERROR, e) { "Cannot combine pages" }
+            TimberKt.e(e) { "Cannot combine pages" }
             return imageBytes.inputStream()
         }
         scope.launchUI { progressBar.setProgress(97) }

@@ -12,9 +12,8 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.track.toTrackServiceItem
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -69,7 +68,7 @@ class TrackingSyncService {
                                             }
                                         } catch (e: Exception) {
                                             if (e !is CancellationException) {
-                                                loggycat(LogPriority.ERROR, e)
+                                                TimberKt.e(e)
                                             }
                                         }
                                     }
@@ -89,7 +88,7 @@ class TrackingSyncService {
                             db.insertTrack(newTrack).executeOnIO()
                         } catch (e: Exception) {
                             if (e !is CancellationException) {
-                                loggycat(LogPriority.ERROR, e)
+                                TimberKt.e(e)
                             }
                         }
                     }

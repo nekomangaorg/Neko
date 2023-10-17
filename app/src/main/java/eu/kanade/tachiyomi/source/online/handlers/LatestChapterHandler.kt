@@ -14,11 +14,12 @@ import eu.kanade.tachiyomi.util.getOrResultError
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class LatestChapterHandler {
@@ -96,7 +97,7 @@ class LatestChapterHandler {
                     Ok(MangaListPage(sourceManga = mangaList.toPersistentList(), hasNextPage = hasMoreResults))
                 }
         }.getOrElse {
-            loggycat(LogPriority.ERROR, it) { "Error parsing latest chapters" }
+            TimberKt.e(it) { "Error parsing latest chapters" }
             Err(ResultError.Generic(errorString = "Error parsing latest chapters response"))
         }
     }

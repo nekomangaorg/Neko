@@ -3,8 +3,7 @@ package eu.kanade.tachiyomi.data.track.mangaupdates
 import androidx.core.text.isDigitsOnly
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.manga.MangaMappings
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 object MangaUpdatesHelper {
@@ -17,7 +16,7 @@ object MangaUpdatesHelper {
                 true -> {
                     val newMuId = mappings.getMuNewForMuID(id)
                     if (newMuId == null) {
-                        loggycat(LogPriority.ERROR) { "Missing MU ID mapping for id: $id" }
+                        TimberKt.e { "Missing MU ID mapping for id: $id" }
                     }
                     newMuId
                 }

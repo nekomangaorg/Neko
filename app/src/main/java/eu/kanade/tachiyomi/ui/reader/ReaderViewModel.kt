@@ -72,13 +72,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -317,8 +316,8 @@ class ReaderViewModel(
             db.insertManga(tempManga).executeAsBlocking()
             val manga = db.getMangadexManga(tempManga.url).executeAsBlocking()!!
 
-            loggycat { "tempManga id ${tempManga.id}" }
-            loggycat { "Manga id ${manga.id}" }
+            TimberKt.d { "tempManga id ${tempManga.id}" }
+            TimberKt.d { "Manga id ${manga.id}" }
 
             if (chapters.isNotEmpty()) {
                 val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
@@ -341,7 +340,7 @@ class ReaderViewModel(
     private suspend fun loadNewChapter(chapter: ReaderChapter) {
         val loader = loader ?: return
 
-        loggycat { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
+        TimberKt.d { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
 
         withIOContext {
             try {
@@ -350,7 +349,7 @@ class ReaderViewModel(
                 if (e is CancellationException) {
                     throw e
                 }
-                loggycat(LogPriority.ERROR, e)
+                TimberKt.e(e) { "Error loading new chapter ${chapter.chapter.url}" }
             }
         }
     }
@@ -363,7 +362,7 @@ class ReaderViewModel(
         loader: ChapterLoader,
         chapter: ReaderChapter,
     ): ViewerChapters {
-        loggycat { "Loading ${chapter.chapter.url}" }
+        TimberKt.d { "Loading ${chapter.chapter.url}" }
 
         loader.loadChapter(chapter)
 
@@ -393,7 +392,7 @@ class ReaderViewModel(
     suspend fun loadChapter(chapter: ReaderChapter): Int? {
         val loader = loader ?: return -1
 
-        loggycat { "Loading adjacent ${chapter.chapter.url}" }
+        TimberKt.d { "Loading adjacent ${chapter.chapter.url}" }
         var lastPage: Int? = if (chapter.chapter.pages_left <= 1) 0 else chapter.chapter.last_page_read
         mutableState.update { it.copy(isLoadingAdjacentChapter = true) }
         try {
@@ -404,7 +403,7 @@ class ReaderViewModel(
             if (e is CancellationException) {
                 throw e
             }
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error Loading adjacent chapter ${chapter.chapter.url}" }
             lastPage = null
         } finally {
             mutableState.update { it.copy(isLoadingAdjacentChapter = false) }
@@ -434,7 +433,7 @@ class ReaderViewModel(
             return
         }
 
-        loggycat { "Preloading ${chapter.chapter.url} - ${chapter.chapter.name}" }
+        TimberKt.d { "Preloading ${chapter.chapter.url} - ${chapter.chapter.name}" }
 
         val loader = loader ?: return
         withIOContext {
@@ -489,7 +488,7 @@ class ReaderViewModel(
         }
 
         if (selectedChapter != currentChapters.currChapter) {
-            loggycat { "Setting ${selectedChapter.chapter.url} as active" }
+            TimberKt.d { "Setting ${selectedChapter.chapter.url} as active" }
             saveReadingProgress(currentChapters.currChapter)
             setReadStartTime()
             scope.launch { loadNewChapter(selectedChapter) }
@@ -708,7 +707,7 @@ class ReaderViewModel(
         this.manga?.orientationType = rotationType
         db.updateViewerFlags(manga).executeAsBlocking()
 
-        loggycat(LogPriority.INFO) { "Manga orientation is ${manga.orientationType}" }
+        TimberKt.i { "Manga orientation is ${manga.orientationType}" }
 
         viewModelScope.launchIO {
             db.updateViewerFlags(manga).executeAsBlocking()
@@ -1017,7 +1016,7 @@ class ReaderViewModel(
 
     suspend fun lookupComment(chapterId: String): String? {
         val threadId = sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
-            loggycat(LogPriority.ERROR) { it.message() }
+            TimberKt.e { it.message() }
 
         }.getOrElse {
             null
