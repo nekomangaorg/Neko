@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -37,7 +37,7 @@ fun syncChaptersWithSource(
     val sourceChapters = sortedChapters.mapIndexed { i, sChapter ->
         Chapter.create().apply {
             copyFrom(sChapter)
-            loggycat(tag = "ChapterSourceSync") { "${this.scanlator} ${this.chapter_txt} sourceOrder=${i}" }
+            TimberKt.d { "ChapterSourceSync ${this.scanlator} ${this.chapter_txt} sourceOrder=${i}" }
             manga_id = manga.id
             source_order = i
         }
@@ -108,8 +108,8 @@ fun syncChaptersWithSource(
         }
     }
 
-    val dupes = dbChapters.groupBy { it.url }.filter { it.value.size > 1 }.map {
-        it.value.firstOrNull { !it.read } ?: it.value.first()
+    val dupes = dbChapters.groupBy { it.url }.filter { entry -> entry.value.size > 1 }.map { entry ->
+        entry.value.firstOrNull { !it.read } ?: entry.value.first()
     }.toMutableList()
     if (dupes.isNotEmpty()) {
         dupes.addAll(toDelete)
@@ -210,8 +210,7 @@ fun syncChaptersWithSource(
         }
         db.updateLastUpdated(manga).executeAsBlocking()
     }
-
-    return Pair(toAdd.subtract(readded).toList(), toDelete - readded)
+    return Pair(toAdd.subtract(readded.toSet()).toList(), toDelete - readded.toSet())
 }
 
 // checks if the chapter in db needs updated

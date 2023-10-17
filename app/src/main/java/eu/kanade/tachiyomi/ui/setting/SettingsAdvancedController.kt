@@ -46,9 +46,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.logging.TimberKt
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -496,7 +495,7 @@ class SettingsAdvancedController : SettingsController() {
             activity?.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
             activity?.toast(R.string.webview_data_deleted)
         } catch (e: Throwable) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error clearing webview data" }
             activity?.toast(R.string.cache_delete_error)
         }
     }

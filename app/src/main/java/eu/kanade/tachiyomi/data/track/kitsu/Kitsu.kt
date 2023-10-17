@@ -12,8 +12,7 @@ import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import java.text.DecimalFormat
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class Kitsu(private val context: Context, id: Int) : TrackService(id) {
@@ -144,7 +143,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
             saveCredentials(username, userId)
             true
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error logging into Kitsu" }
             false
         }
     }

@@ -35,7 +35,7 @@ dependencies {
     api(kotlinx.serialization.okio)
     api(libs.bundles.ok)
     api(libs.tokenbucket)
-    api(libs.logcat)
+    implementation(libs.timber)
     api(libs.rx.java)
     api(libs.tachi.unifile)
     api(libs.firebase.crashlytics)

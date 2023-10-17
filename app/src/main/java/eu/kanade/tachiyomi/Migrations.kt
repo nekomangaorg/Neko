@@ -15,10 +15,10 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.toast
 import kotlin.math.max
 import kotlinx.coroutines.CoroutineScope
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.PREF_DOH_CLOUDFLARE
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -38,7 +38,7 @@ object Migrations {
             remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY)
         }
         val oldVersion = preferences.lastVersionCode().get()
-        loggycat { "last version $oldVersion" }
+        TimberKt.d { "last version $oldVersion" }
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 

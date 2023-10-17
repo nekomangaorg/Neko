@@ -16,9 +16,8 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -101,7 +100,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                     track.last_chapter_read = 0f
                 }
             } catch (e: Exception) {
-                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+                TimberKt.e(e) { "error updating MDList" }
             }
             db.insertTrack(track).executeAsBlocking()
             track
@@ -117,7 +116,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override suspend fun bind(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
-            loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
+            TimberKt.i { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
@@ -127,7 +126,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override suspend fun refresh(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
-            loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
+            TimberKt.i { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)

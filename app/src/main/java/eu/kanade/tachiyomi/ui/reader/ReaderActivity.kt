@@ -141,10 +141,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.preferences.toggle
+import org.nekomanga.logging.TimberKt
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
@@ -565,9 +564,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             config.shiftDoublePage = !config.shiftDoublePage
             viewModel.state.value.viewerChapters?.let {
                 (viewer as? PagerViewer)?.updateShifting()
-                loggycat { "about to shiftDoublePages" }
+                TimberKt.d { "about to shiftDoublePages" }
                 (viewer as? PagerViewer)?.setChaptersDoubleShift(it)
-                loggycat { "finished shiftDoublePages" }
+                TimberKt.d { "finished shiftDoublePages" }
                 invalidateOptionsMenu()
             }
         }
@@ -1221,9 +1220,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 ) % 2 != 0
         }
         viewModel.state.value.viewerChapters?.let {
-            loggycat { "about to reloadChapter call set chaptersDoubleShift" }
+            TimberKt.d { "about to reloadChapter call set chaptersDoubleShift" }
             pViewer.setChaptersDoubleShift(it)
-            loggycat { "finished reloadChapter call set chaptersDoubleShift" }
+            TimberKt.d { "finished reloadChapter call set chaptersDoubleShift" }
         }
         invalidateOptionsMenu()
     }
@@ -1287,7 +1286,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * this case the activity is closed and a toast is shown to the user.
      */
     fun setInitialChapterError(error: Throwable) {
-        loggycat(LogPriority.ERROR, error)
+        TimberKt.e(error) { "Error setting initial chapter" }
         finish()
         toast(error.message)
     }
@@ -1585,7 +1584,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             }
 
             is ReaderViewModel.SaveImageResult.Error -> {
-                loggycat(LogPriority.ERROR, result.error)
+                TimberKt.e(result.error) { "on save image result error" }
             }
         }
     }
@@ -1736,7 +1735,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private fun handleIntentAction(intent: Intent): Boolean {
         val pathSegments = intent.data?.pathSegments
         if (pathSegments != null && pathSegments.size > 1) {
-            loggycat(LogPriority.ERROR) { pathSegments[0] }
             val id = pathSegments[1]
             val secondary = pathSegments.getOrNull(2)
             if (secondary == "comments") {

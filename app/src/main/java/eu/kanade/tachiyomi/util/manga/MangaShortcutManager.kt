@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlin.math.min
 import kotlinx.coroutines.GlobalScope
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -53,7 +53,7 @@ class MangaShortcutManager(
                         .map { it.first }
                         .take(shortcutManager.maxShortcutCountPerActivity)
 
-                val shortcuts = recents.mapNotNull { item ->
+                val shortcuts = recents.map { item ->
                     val request = ImageRequest.Builder(context).data(item).build()
                     val bitmap = (
                         Coil.imageLoader(context)
@@ -89,13 +89,13 @@ class MangaShortcutManager(
                         .build()
                 }
 
-                this@MangaShortcutManager.loggycat { "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}" }
+                TimberKt.d { "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}" }
                 shortcutManager.dynamicShortcuts = shortcuts
             }
         }
     }
 
-    private fun Bitmap.toSquare(): Bitmap? {
+    private fun Bitmap.toSquare(): Bitmap {
         val side = min(width, height)
 
         val xOffset = (width - side) / 2

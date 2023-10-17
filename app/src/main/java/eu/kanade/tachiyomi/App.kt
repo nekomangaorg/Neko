@@ -35,12 +35,12 @@ import eu.kanade.tachiyomi.util.system.notification
 import java.security.Security
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import logcat.AndroidLogcatLogger
-import logcat.LogPriority
-import logcat.LogcatLogger
 import org.conscrypt.Conscrypt
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.logging.CrashReportingTree
+import org.nekomanga.logging.DebugReportingTree
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.injectLazy
 
@@ -78,9 +78,13 @@ open class App : Application(), DefaultLifecycleObserver {
         Injekt.importModule(PreferenceModule(this))
         Injekt.importModule(AppModule(this))
 
-        if (!LogcatLogger.isInstalled && (networkPreferences.verboseLogging().get())) {
-            LogcatLogger.install(AndroidLogcatLogger(LogPriority.VERBOSE))
+        if (!BuildConfig.DEBUG) {
+            TimberKt.plant(CrashReportingTree())
         }
+        if (networkPreferences.verboseLogging().get()) {
+            TimberKt.plant(DebugReportingTree())
+        }
+
 
         CoilSetup(this)
         setupNotificationChannels()

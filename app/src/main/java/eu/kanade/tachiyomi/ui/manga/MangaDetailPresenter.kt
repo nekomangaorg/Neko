@@ -78,9 +78,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
@@ -96,6 +94,7 @@ import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
 import org.nekomanga.domain.track.toTrackServiceItem
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -200,7 +199,7 @@ class MangaDetailPresenter(
                 updateChapterFlows()
                 updateFilterFlow()
             }.onFailure {
-                this@MangaDetailPresenter.loggycat(LogPriority.ERROR, it) { "Error trying to update manga in all flows" }
+                TimberKt.e(it) { "Error trying to update manga in all flows" }
             }
         }
         updateTrackingFlows(true)
@@ -352,7 +351,7 @@ class MangaDetailPresenter(
     private suspend fun handleTrackingUpdate(trackingUpdate: TrackingUpdate, updateTrackFlows: Boolean = true) {
         when (trackingUpdate) {
             is TrackingUpdate.Error -> {
-                loggycat(LogPriority.ERROR, trackingUpdate.exception)
+                TimberKt.e(trackingUpdate.exception) { "handle tracking update had error" }
                 _snackbarState.emit(SnackbarState(message = trackingUpdate.message))
             }
 
@@ -418,7 +417,7 @@ class MangaDetailPresenter(
                     async(Dispatchers.IO) {
                         kotlin.runCatching { service.refresh(trackItem.toDbTrack()) }.onFailure {
                             if (it !is CancellationException) {
-                                loggycat(LogPriority.ERROR, it) { "error refreshing tracker" }
+                                TimberKt.e(it) { "error refreshing tracker" }
                                 delay(3000)
                                 _snackbarState.emit(SnackbarState(message = it.message, fieldRes = service.nameRes(), messageRes = R.string.error_refreshing_))
                             }
@@ -447,7 +446,7 @@ class MangaDetailPresenter(
                     }
                 }
             }.onFailure {
-                loggycat(LogPriority.ERROR, it) { "Error trying to mark chapters read from MangaDex" }
+                TimberKt.e(it) { "Error trying to mark chapters read from MangaDex" }
                 presenterScope.launch {
                     delay(3000)
                     _snackbarState.emit(SnackbarState("Error trying to mark chapters read from MangaDex $it"))
@@ -501,7 +500,7 @@ class MangaDetailPresenter(
                 try {
                     saveCover(destDir, artwork)
                 } catch (e: java.lang.Exception) {
-                    loggycat(LogPriority.ERROR, e) { "warn" }
+                    TimberKt.e(e) { "share manga cover exception" }
                     null
                 }
             } else {
@@ -527,7 +526,7 @@ class MangaDetailPresenter(
                     view?.applicationContext?.toast(R.string.cover_saved)
                 }
             } catch (e: Exception) {
-                loggycat(LogPriority.ERROR, e) { "error saving cover" }
+                TimberKt.e(e) { "error saving cover" }
                 launchUI {
                     view?.applicationContext?.toast("Error saving cover")
                 }
@@ -662,7 +661,7 @@ class MangaDetailPresenter(
                     }
                 }
             }.getOrElse { error ->
-                loggycat(LogPriority.ERROR, error)
+                TimberKt.e(error) { "Error searching merged manga" }
                 _trackMergeState.update {
                     it.copy(mergeSearchResult = MergeSearchResult.Error(error.message ?: "Error looking up information"))
                 }
@@ -817,8 +816,8 @@ class MangaDetailPresenter(
             val categories = db.getCategories().executeAsBlocking()
             val mangaCategories = db.getCategoriesForManga(mangaId).executeAsBlocking()
 
-            _generalState.update {
-                it.copy(
+            _generalState.update { state ->
+                state.copy(
                     allCategories = categories.map { it.toCategoryItem() }.toImmutableList(),
                     currentCategories = mangaCategories.map { it.toCategoryItem() }.toImmutableList(),
                 )
@@ -852,7 +851,7 @@ class MangaDetailPresenter(
                         db.insertTrack(track).executeOnIO()
                         if (isOnline()) {
                             runCatching { mdList.bind(track) }.onFailure { exception ->
-                                loggycat(LogPriority.ERROR, exception) { "Error trying to bind tracking info for mangadex" }
+                                TimberKt.e(exception) { "Error trying to bind tracking info for mangadex" }
                             }
                         }
                         db.insertTrack(track).executeOnIO()
@@ -867,7 +866,7 @@ class MangaDetailPresenter(
                 if (autoAddTracker.size > 1 && currentManga().favorite) {
                     val validContentRatings = preferences.autoTrackContentRatingSelections().get()
                     val contentRating = currentManga().getContentRating()
-                    if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
+                    if ((contentRating == null) || validContentRatings.contains(contentRating.lowercase())) {
                         autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->
                             async {
                                 trackMergeState.value.loggedInTrackService
@@ -1211,7 +1210,6 @@ class MangaDetailPresenter(
                     manga.setFilterToGlobal()
                 }
 
-                else -> Unit
             }
             db.updateChapterFlags(manga).executeOnIO()
             updateMangaFlow()
@@ -1277,7 +1275,7 @@ class MangaDetailPresenter(
         )
     }
 
-    fun isMerged(manga: Manga): MergeConstants.IsMergedManga {
+    private fun isMerged(manga: Manga): MergeConstants.IsMergedManga {
         val mergeMangaList = db.getMergeMangaList(manga).executeAsBlocking()
         return when (mergeMangaList.isNotEmpty()) {
             true -> {
@@ -1523,7 +1521,7 @@ class MangaDetailPresenter(
                                 updateTrackingFlows()
                             }
                         }.onFailure {
-                            loggycat(LogPriority.ERROR, it) { "Failed to update track chapter marked as read" }
+                            TimberKt.e(it) { "Failed to update track chapter marked as read" }
                             presenterScope.launch {
                                 _snackbarState.emit(SnackbarState("Error trying to update tracked chapter marked as read ${it.message}"))
                             }
@@ -1665,7 +1663,7 @@ class MangaDetailPresenter(
                 false -> {
                     _isRefreshing.value = true
                     val threadId = sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
-                        loggycat(LogPriority.ERROR) { it.message() }
+                        TimberKt.e { it.message() }
 
                     }.getOrElse {
                         null

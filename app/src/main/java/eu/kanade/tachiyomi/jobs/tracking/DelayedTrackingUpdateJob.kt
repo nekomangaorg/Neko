@@ -15,8 +15,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -28,14 +27,14 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
     }
 
     override suspend fun doWork(): Result {
-        loggycat { "Starting Delayed Tracking Update Job" }
+        TimberKt.d { "Starting Delayed Tracking Update Job" }
         val preferences = Injekt.get<PreferencesHelper>()
         val db = Injekt.get<DatabaseHelper>()
         val trackManager = Injekt.get<TrackManager>()
         val trackings = preferences.trackingsToAddOnline().get().toMutableSet().mapNotNull {
             val items = it.split(":")
             if (items.size != 3) {
-                loggycat(LogPriority.ERROR) {
+                TimberKt.e {
                     "items size was not 3 after split for: $it"
                 }
                 null
@@ -61,7 +60,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                             db.insertTrack(track).executeAsBlocking()
                         } catch (e: Exception) {
                             trackingsToAdd.add(delayedTracking.print())
-                            loggycat(LogPriority.ERROR, e)
+                            TimberKt.e(e) { "Error inserting for delayed tracker" }
                         }
                     }
                 }

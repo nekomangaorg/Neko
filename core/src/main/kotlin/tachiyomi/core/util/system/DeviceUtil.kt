@@ -2,8 +2,7 @@ package tachiyomi.core.util.system
 
 import android.annotation.SuppressLint
 import android.os.Build
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 
 object DeviceUtil {
 
@@ -72,7 +71,7 @@ object DeviceUtil {
                 .getDeclaredMethod("get", String::class.java)
                 .invoke(null, key) as String
         } catch (e: Exception) {
-            loggycat(LogPriority.WARN, e) { "Unable to use SystemProperties.get()" }
+            TimberKt.w(e) { "Unable to use SystemProperties.get()" }
             null
         }
     }

@@ -13,8 +13,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -170,7 +169,6 @@ class DownloadManager(val context: Context) {
     /**
      * Builds the page list of a downloaded chapter.
      *
-     * @param source the source of the chapter.
      * @param manga the manga of the chapter.
      * @param chapter the downloaded chapter.
      * @return the list of pages from the chapter.
@@ -281,7 +279,7 @@ class DownloadManager(val context: Context) {
                 }
                 queue.updateListeners()
             } catch (e: Exception) {
-                loggycat(LogPriority.ERROR, e) { "error deleting chapters" }
+                TimberKt.e(e) { "error deleting chapters" }
             }
         }
     }
@@ -296,7 +294,7 @@ class DownloadManager(val context: Context) {
     /**
      * Deletes the directories of chapters that were read or have no match
      *
-     * @param chapters the list of chapters to delete.
+     * @param allChapters the list of chapters to delete.
      * @param manga the manga of the chapters.
      */
     fun cleanupChapters(
@@ -335,7 +333,7 @@ class DownloadManager(val context: Context) {
                 mangaFolder.delete()
                 cache.removeManga(manga)
             } else {
-                loggycat(LogPriority.ERROR) { "Cache and download folder doesn't match for ${manga.title}" }
+                TimberKt.e { "Cache and download folder doesn't match for ${manga.title}" }
             }
         }
         return cleaned
@@ -393,7 +391,7 @@ class DownloadManager(val context: Context) {
             cache.removeChapters(listOf(oldChapter), manga)
             cache.addChapter(newName, manga)
         } else {
-            loggycat(LogPriority.ERROR) { "Could not rename downloaded chapter: $oldName" }
+            TimberKt.e { "Could not rename downloaded chapter: $oldName" }
         }
     }
 

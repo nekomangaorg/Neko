@@ -18,8 +18,7 @@ import java.io.InputStream
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -145,7 +144,7 @@ class CoverCache(val context: Context) {
                         }
                     }
                 } catch (e: Exception) {
-                    loggycat(LogPriority.ERROR, e)
+                    TimberKt.e(e)
                 }
                 lastClean = System.currentTimeMillis()
             }
@@ -165,7 +164,7 @@ class CoverCache(val context: Context) {
     /**
      * Returns the custom cover from cache.
      *
-     * @param manga the manga.
+     * @param mangaId the manga id.
      * @return cover image.
      */
     fun getCustomCoverFile(mangaId: Long): File {
@@ -191,7 +190,6 @@ class CoverCache(val context: Context) {
      * Saves the  given url as the manga's custom cover to cache.
      *
      * @param manga the manga.
-     * @param inputStream the stream to copy.
      * @throws IOException if there's any error.
      */
     @Throws(IOException::class)
@@ -224,7 +222,7 @@ class CoverCache(val context: Context) {
     /**
      * Returns the cover from cache.
      *
-     * @param thumbnailUrl the thumbnail url.
+     * @param url the url.
      * @return cover image.
      */
     fun getCoverFile(url: String?, inLibrary: Boolean = false): File {
@@ -246,7 +244,7 @@ class CoverCache(val context: Context) {
     /**
      * Delete the cover file from the disk cache and optional from memory cache
      *
-     * @param thumbnailUrl the thumbnail url.
+     * @param manga the manga.
      * @return status of deletion.
      */
     fun deleteFromCache(

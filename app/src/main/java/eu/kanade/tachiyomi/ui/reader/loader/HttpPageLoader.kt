@@ -21,9 +21,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -213,7 +212,7 @@ class HttpPageLoader(
             page.status = Page.State.READY
         } catch (e: Throwable) {
             page.status = Page.State.ERROR
-            loggycat(LogPriority.ERROR, e) { "Error loading page" }
+            TimberKt.e(e) { "Error loading page" }
             if (e is CancellationException) {
                 throw e
             }

@@ -177,7 +177,7 @@ dependencies {
     implementation(libs.bundles.coil)
 
     // Logging
-    implementation(libs.logcat)
+    implementation(libs.timber)
 
     // UI
     implementation(libs.bundles.fastadapter)

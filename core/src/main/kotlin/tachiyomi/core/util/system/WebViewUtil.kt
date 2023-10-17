@@ -6,8 +6,7 @@ import android.content.pm.PackageManager
 import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 
 object WebViewUtil {
 
@@ -19,7 +18,7 @@ object WebViewUtil {
             // is not installed
             CookieManager.getInstance()
         } catch (e: Throwable) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error getting cookie manager" }
             return false
         }
 

@@ -11,8 +11,7 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 
 class RestoreHelper(val context: Context) {
 
@@ -210,7 +209,7 @@ class RestoreHelper(val context: Context) {
                 return destFile
             }
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error writing error file" }
         }
         return null
     }

@@ -13,8 +13,7 @@ import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -87,7 +86,7 @@ class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = 
                         errorResult()
                     }
                 } catch (error: Exception) {
-                    loggycat(LogPriority.ERROR, error) { "error logging in" }
+                    TimberKt.e(error) { "error logging in" }
                     errorResult()
                     error.message?.let { context.toast(it, Toast.LENGTH_LONG) }
                 }

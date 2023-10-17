@@ -9,12 +9,11 @@ import java.time.ZoneId
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackSearchItem
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -99,7 +98,7 @@ class TrackingCoordinator {
             db.insertTrack(track).executeOnIO()
             TrackingUpdate.Success
         }.getOrElse { exception ->
-            loggycat(LogPriority.ERROR, exception)
+            TimberKt.e(exception) { "Error registering tracker" }
             TrackingUpdate.Error("Error registering tracker", exception)
         }
     }
@@ -117,7 +116,7 @@ class TrackingCoordinator {
                     runCatching {
                         service.removeFromService(it)
                     }.onFailure {
-                        loggycat(LogPriority.ERROR, it) { "Unable to remove from service" }
+                        TimberKt.e(it) { "Unable to remove from service" }
                     }
                 }
             }
@@ -151,7 +150,7 @@ class TrackingCoordinator {
             },
         )
     }.catch {
-        loggycat(LogPriority.ERROR, it) { "error searching tracker" }
+        TimberKt.e(it) { "error searching tracker" }
         emit(TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker", service.nameRes))
     }
 
@@ -166,7 +165,7 @@ class TrackingCoordinator {
                 false -> TrackingConstants.TrackSearchResult.Success(results.map { it.toTrackSearchItem() }.toImmutableList())
             }
         }.getOrElse {
-            loggycat(LogPriority.ERROR, it) { "error searching tracker" }
+            TimberKt.e(it) { "error searching tracker" }
             TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker", service.nameRes)
         }
     }

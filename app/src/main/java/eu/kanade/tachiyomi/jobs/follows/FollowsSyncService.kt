@@ -18,8 +18,8 @@ import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -29,7 +29,7 @@ class FollowsSyncService {
     val db: DatabaseHelper = Injekt.get()
     val sourceManager: SourceManager = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
-    val followsHandler: FollowsHandler = Injekt.get()
+    private val followsHandler: FollowsHandler = Injekt.get()
 
     /**
      * Syncs follows list manga into library based off the preference
@@ -40,7 +40,7 @@ class FollowsSyncService {
         completeNotification: () -> Unit,
     ): Int {
         return withContext(Dispatchers.IO) {
-            loggycat { "Starting from MangaDex sync" }
+            TimberKt.d { "Starting from MangaDex sync" }
             val count = AtomicInteger(0)
             val countOfAdded = AtomicInteger(0)
 
@@ -53,7 +53,7 @@ class FollowsSyncService {
 
                 val listManga = unfilteredManga.groupBy { FollowStatus.fromStringRes(it.displayTextRes).int }.filter { it.key in syncFollowStatusInts }.values.flatten()
 
-                loggycat { "total number from mangadex is ${listManga.size}" }
+                TimberKt.d { "total number from mangadex is ${listManga.size}" }
 
                 val categories = db.getCategories().executeAsBlocking()
                 val defaultCategoryId = preferences.defaultCategory().get()
@@ -101,7 +101,7 @@ class FollowsSyncService {
         ids: String? = null,
     ) {
         withContext(Dispatchers.IO) {
-            loggycat { "Starting to MangaDex sync" }
+            TimberKt.d { "Starting to MangaDex sync" }
             val count = AtomicInteger(0)
             val countNew = AtomicInteger(0)
 

@@ -17,11 +17,10 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.Job
-import logcat.LogPriority
 import okio.buffer
 import okio.gzip
 import okio.source
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class BackupRestorer(val context: Context, val job: Job?) {
@@ -184,7 +183,7 @@ class BackupRestorer(val context: Context, val job: Job?) {
             backupManager.restoreHistoryForManga(history)
             backupManager.restoreTrackForManga(manga, tracks)
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e)
             errors.add("$title - ${e.message}")
         }
     }

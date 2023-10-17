@@ -29,11 +29,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -41,7 +40,7 @@ import uy.kohesive.injekt.injectLazy
 class FollowsHandler {
 
     val preferences: PreferencesHelper by injectLazy()
-    val statusHandler: StatusHandler by injectLazy()
+    private val statusHandler: StatusHandler by injectLazy()
     private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
 
     /**
@@ -66,7 +65,7 @@ class FollowsHandler {
                         Ok(allFollowsParser(allResults, readingFuture.await()))
                     }
             }.getOrElse {
-                loggycat(LogPriority.ERROR, it) { "Error fetching all follows" }
+                TimberKt.e(it) { "Error fetching all follows" }
                 Err(ResultError.Generic("Unknown error fetching all follows"))
             }
         }

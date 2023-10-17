@@ -19,8 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -68,11 +67,11 @@ class DownloadProvider(private val context: Context) {
         try {
             val mangaDirName = getMangaDirName(manga)
             val sourceDirName = getSourceDirName()
-            loggycat { "creating directory for $sourceDirName : $mangaDirName" }
+            TimberKt.d { "creating directory for $sourceDirName : $mangaDirName" }
             return downloadsDir.createDirectory(sourceDirName)
                 .createDirectory(mangaDirName)
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e) { "error getting download folder for ${manga.title}" }
+            TimberKt.e(e) { "error getting download folder for ${manga.title}" }
             throw Exception(context.getString(R.string.invalid_download_location))
         }
     }

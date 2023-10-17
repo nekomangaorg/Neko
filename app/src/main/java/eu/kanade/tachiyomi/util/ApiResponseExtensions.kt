@@ -8,10 +8,9 @@ import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import eu.kanade.tachiyomi.source.online.models.dto.ErrorResponse
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
 import org.jsoup.Jsoup
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 
 /**
  * Maps the ApiResponse Error to a Result Error, trying to decode the json response if its a mangadex api error
@@ -19,7 +18,7 @@ import org.nekomanga.domain.network.ResultError
 fun ApiResponse.Failure.Error<*>.toResultError(errorType: String): ResultError {
     val errorBody = this.errorBody?.string() ?: ""
 
-    loggycat(LogPriority.ERROR) {
+    TimberKt.e {
         """
             error $errorType
             error response code ${this.statusCode.code}
@@ -69,7 +68,7 @@ fun <T> ApiResponse<T>.getOrResultError(errorType: String): Result<T, ResultErro
  * Maps the ApiResponse Exception to a Result Error
  */
 fun ApiResponse.Failure.Exception<*>.toResultError(errorType: String): ResultError {
-    loggycat(LogPriority.ERROR, this.exception) { "Exception $errorType ${this.message}" }
+    TimberKt.e(this.exception) { "Exception $errorType ${this.message}" }
 
     return ResultError.Generic(errorString = "Unknown Error: '${this.message}'")
 }
@@ -77,11 +76,11 @@ fun ApiResponse.Failure.Exception<*>.toResultError(errorType: String): ResultErr
 fun ApiResponse<*>.log(type: String) {
     return when (this) {
         is ApiResponse.Failure.Exception -> {
-            loggycat(LogPriority.ERROR, this.exception) { "Exception $type ${this.message}" }
+            TimberKt.e(this.exception) { "Exception $type ${this.message}" }
         }
 
         is ApiResponse.Failure.Error -> {
-            loggycat(LogPriority.ERROR) {
+            TimberKt.e {
                 """
                     error $type
                     error response code ${this.statusCode.code}
@@ -91,7 +90,7 @@ fun ApiResponse<*>.log(type: String) {
         }
 
         else -> {
-            loggycat(LogPriority.ERROR) { "error $type" }
+            TimberKt.e { "error $type" }
         }
     }
 }

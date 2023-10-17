@@ -19,9 +19,8 @@ import eu.kanade.tachiyomi.util.log
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.network.message
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class PageHandler {
@@ -37,7 +36,7 @@ class PageHandler {
 
     suspend fun fetchPageList(chapter: SChapter): List<Page> {
         return withContext(Dispatchers.IO) {
-            loggycat { "fetching page list" }
+            TimberKt.d { "fetching page list" }
 
             try {
                 val chapterAttributesDto = networkServices.service.viewChapter(chapter.mangadex_chapter_id)
@@ -91,7 +90,7 @@ class PageHandler {
                     preferences.dataSaver().get(),
                 )
             } catch (e: Exception) {
-                loggycat(LogPriority.ERROR, e) { "error processing page list" }
+                TimberKt.e(e) { "error processing page list" }
                 throw (e)
             }
         }

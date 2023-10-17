@@ -35,10 +35,9 @@ import java.util.zip.CRC32
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlinx.coroutines.async
-import logcat.LogPriority
 import okhttp3.Response
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -231,7 +230,7 @@ class Downloader(
                 },
                 { error ->
                     DownloadService.stop(context)
-                    loggycat(LogPriority.ERROR, error)
+                    TimberKt.e(error)
                     notifier.onError(error.message)
                 },
             )
@@ -330,7 +329,7 @@ class Downloader(
 
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
-            runAsObservable(tag = "Downloader.downloadChapter") {
+            runAsObservable {
                 download.source.fetchPageList(download.chapter)
             }
                 .map { pages ->
@@ -369,7 +368,7 @@ class Downloader(
             .doOnNext { ensureSuccessfulDownload(download, mangaDir, tmpDir, chapterDirname) }
             // If the page list threw, it will resume here
             .onErrorReturn { error ->
-                loggycat(LogPriority.ERROR, error)
+                TimberKt.e(error)
                 download.status = Download.State.ERROR
                 notifier.onError(error.message, download.chapter.name, download.manga.title)
                 download
@@ -450,8 +449,8 @@ class Downloader(
     ): Observable<UniFile> {
         page.status = Page.State.DOWNLOAD_IMAGE
         page.progress = 0
-        return runAsObservable(tag = "Downloader.downloadImage") {
-            loggycat { "fetch image" }
+        return runAsObservable {
+            TimberKt.d { "fetch image" }
             source.fetchImage(page)
         }.map { response ->
             val file = tmpDir.createFile("$filename.tmp")
@@ -529,7 +528,7 @@ class Downloader(
         return try {
             ImageUtil.splitTallImage(imageFile, imageFilePath)
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error splitting tall image" }
             false
         }
     }

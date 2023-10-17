@@ -22,15 +22,14 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
-import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
@@ -295,7 +294,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 authClient.newCall(request).await()
                 true
             } catch (e: Exception) {
-                loggycat(LogPriority.WARN, e)
+                TimberKt.e(e) { "Error removing MAL track" }
                 false
             }
         }

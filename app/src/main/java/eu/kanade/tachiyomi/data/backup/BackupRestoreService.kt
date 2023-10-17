@@ -14,8 +14,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 
 /**
  * Restores backup.
@@ -78,7 +77,7 @@ class BackupRestoreService : Service() {
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
         val handler = CoroutineExceptionHandler { _, exception ->
-            loggycat(LogPriority.ERROR, exception)
+            TimberKt.e(exception)
             restoreHelper.showErrorNotification(exception.message!!)
             stopSelf(startId)
         }

@@ -17,11 +17,10 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.lang.toResultError
 import kotlin.math.floor
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class ApiMangaParser {
@@ -111,7 +110,7 @@ class ApiMangaParser {
 
             return Ok(manga)
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Unexpected manga parsing error" }
             return Err("Unexpected Manga parsing error".toResultError())
         }
     }
@@ -138,7 +137,7 @@ class ApiMangaParser {
             )
         }.getOrElse {
             val msg = "Exception parsing chapters"
-            loggycat(LogPriority.ERROR, it) { msg }
+            TimberKt.e(it) { msg }
             Err(msg.toResultError())
         }
     }

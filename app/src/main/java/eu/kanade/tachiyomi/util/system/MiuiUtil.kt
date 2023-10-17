@@ -1,8 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 
 object MiuiUtil {
 
@@ -32,7 +31,7 @@ object MiuiUtil {
                 .getDeclaredMethod("get", String::class.java)
                 .invoke(null, key) as String
         } catch (e: Exception) {
-            loggycat(LogPriority.WARN, e) { "Unable to use SystemProperties.get" }
+            TimberKt.w(e) { "Unable to use SystemProperties.get" }
             null
         }
     }

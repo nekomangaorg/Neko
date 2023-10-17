@@ -11,8 +11,7 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -42,7 +41,7 @@ fun syncChaptersWithTrackServiceTwoWay(db: DatabaseHelper, chapters: List<Chapte
             service.update(remoteTrack)
             db.insertTrack(remoteTrack).executeAsBlocking()
         } catch (e: Throwable) {
-            loggycat(LogPriority.WARN, e)
+            TimberKt.w(e) { "trying to update remote tracker" }
         }
     }
 }
@@ -101,7 +100,7 @@ suspend fun updateTrackChapterRead(
                     service.update(track, true)
                     db.insertTrack(track).executeAsBlocking()
                 } catch (e: Exception) {
-                    loggycat("updateTrackChapterRead", LogPriority.ERROR, e)
+                    TimberKt.w(e) { "Updating track chapter read" }
                     failures.add(service to e.localizedMessage)
                     if (retryWhenOnline) {
                         delayTrackingUpdate(preferences, mangaId, newChapterRead, track)

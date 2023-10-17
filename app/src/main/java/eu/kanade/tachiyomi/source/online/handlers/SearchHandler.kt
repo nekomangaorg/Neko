@@ -21,13 +21,12 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.SourceResult
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -139,9 +138,9 @@ class SearchHandler {
             service.search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Trying to search")
                 .andThen { response ->
-                    loggycat { "Page: $page" }
+                    TimberKt.d { "Page: $page" }
                     response.data.forEach {
-                        loggycat { "#mangaid: ${it.id}" }
+                        TimberKt.d { "#mangaid: ${it.id}" }
                     }
                     searchMangaParse(response)
                 }
@@ -207,7 +206,7 @@ class SearchHandler {
             val mangaList = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()
             MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)
         }.mapError {
-            loggycat(LogPriority.ERROR, it) { "Error parsing search manga" }
+            TimberKt.e(it) { "Error parsing search manga" }
             "error parsing search manga".toResultError()
         }
     }

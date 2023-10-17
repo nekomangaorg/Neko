@@ -34,8 +34,7 @@ import java.net.URLConnection
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
+import org.nekomanga.logging.TimberKt
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder
 
@@ -67,6 +66,7 @@ object ImageUtil {
                 else -> null
             }
         } catch (e: Exception) {
+            TimberKt.e(e) { "Error getting image type from stream" }
         }
         return null
     }
@@ -102,6 +102,7 @@ object ImageUtil {
                 else -> false
             }
         } catch (e: Exception) {
+            TimberKt.e(e) { "Error is animated image type" }
         }
         return false
     }
@@ -562,11 +563,11 @@ object ImageUtil {
         }
 
         if (bitmapRegionDecoder == null) {
-            loggycat { "Failed to create new instance of BitmapRegionDecoder" }
+            TimberKt.d { "Failed to create new instance of BitmapRegionDecoder" }
             return false
         }
 
-        loggycat {
+        TimberKt.d {
             "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split"
         }
 
@@ -581,7 +582,7 @@ object ImageUtil {
                     splitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                     splitBitmap.recycle()
                 }
-                loggycat {
+                TimberKt.d {
                     "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} height=${splitData.outputImageHeight} bottomOffset=${splitData.bottomOffset}"
                 }
             }
@@ -592,7 +593,7 @@ object ImageUtil {
             splitDataList
                 .map { splitImagePath(imageFilePath, it.index) }
                 .forEach { File(it).delete() }
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error splitting image" }
             return false
         } finally {
             bitmapRegionDecoder.recycle()
