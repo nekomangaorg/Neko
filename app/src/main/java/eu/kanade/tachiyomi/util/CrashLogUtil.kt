@@ -35,7 +35,7 @@ class CrashLogUtil(private val context: Context) {
                 file.appendText(getExceptionBlock(exception))
             }
 
-            Runtime.getRuntime().exec("logcat *:V -d -f ${file.absolutePath}")
+            Runtime.getRuntime().exec("logcat *:D -d -f ${file.absolutePath}").waitFor()
             showNotification(file.getUriCompat(context))
         } catch (e: IOException) {
             withUIContext { context.toast("Failed to get logs") }
