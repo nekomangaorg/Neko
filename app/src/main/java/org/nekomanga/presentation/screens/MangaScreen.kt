@@ -249,7 +249,7 @@ fun MangaScreen(
 
 
                 CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-                    if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
+                    if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded && !generalState.value.forcePortrait) {
                         SideBySideLayout(
                             mangaDetailContentPadding = mangaDetailContentPadding,
                             chapterContentPadding = chapterContentPadding,

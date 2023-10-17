@@ -162,6 +162,7 @@ class MangaDetailPresenter(
                 hasDefaultCategory = preferences.defaultCategory().get() != -1,
                 hideButtonText = mangaDetailsPreferences.hideButtonText().get(),
                 extraLargeBackdrop = mangaDetailsPreferences.extraLargeBackdrop().get(),
+                forcePortrait = mangaDetailsPreferences.forcePortrait().get(),
                 themeBasedOffCovers = mangaDetailsPreferences.autoThemeByCover().get(),
                 wrapAltTitles = mangaDetailsPreferences.wrapAltTitles().get(),
                 validMergeTypes = validMergeTypes,

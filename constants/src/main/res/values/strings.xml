@@ -752,6 +752,8 @@
     <string name="follow_system_theme">Follow system theme</string>
     <string name="pure_black_dark_mode">Pure black dark mode</string>
     <string name="details_page">Details page</string>
+    <string name="force_portrait_details">Single pane view</string>
+    <string name="force_portrait_details_description">On wide devices, force the view to be a single pane instead of double pane.</string>
     <string name="theme_buttons_based_on_cover">Theme buttons based on cover</string>
     <string name="wrap_alt_titles">Wrap the alternative titles, default is horizontal scrollable</string>
     <string name="expanded_toolbar">Expanded toolbar</string>
