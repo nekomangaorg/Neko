@@ -1,6 +1,6 @@
 [versions]
 accompanist_version = "0.32.0"
-compose_version = "1.5.3"
+compose_version = "1.5.4"
 compose_material3_version = "1.1.2"
 compose_compiler_version = "1.4.7"
 
