@@ -1131,6 +1131,9 @@
     <string name="currently_blocked_scanlators_description">These are blocks in the app only, as the app does not use or sync with the MangaDex website setting.</string>
     <string name="unblock_scanlator">Unblock scanlator</string>
     <string name="no_blocked_scanlator">No blocked scanlators</string>
+    <string name="delete_saved_filters">Delete saved filters</string>
+    <string name="delete_saved_filters_description">Use this if you get a parse exception clicking the search button in browse, or want to delete all your saved search filters.</string>
+
     <string name="menu">menu</string>
     <string name="more">More</string>
     <string name="move_to_bottom">Move to bottom</string>

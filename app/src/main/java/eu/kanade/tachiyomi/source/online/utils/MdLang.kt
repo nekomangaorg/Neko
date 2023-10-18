@@ -42,7 +42,7 @@ enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int)
     PORTUGUESE_BR("pt-br", "Portuguese (Br)", R.drawable.ic_flag_br),
     ROMANIAN("ro", "Romanian", R.drawable.ic_flag_ro),
     RUSSIAN("ru", "Russian", R.drawable.ic_flag_ru),
-    SERBIAN("sr", "Serbo-Croatian", R.drawable.ic_flag_sr),
+    SERBIAN("sr", "Serbian", R.drawable.ic_flag_sr),
     SLOVAK("sk", "Slovak", R.drawable.ic_flag_sk),
     SPANISH_ES("es", "Spanish (Es)", R.drawable.ic_flag_es),
     SPANISH_LATAM("es-la", "Spanish (LATAM)", R.drawable.ic_flag_mx),

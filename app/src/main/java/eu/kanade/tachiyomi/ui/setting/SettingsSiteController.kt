@@ -127,6 +127,22 @@ class SettingsSiteController :
         }
 
         preference {
+            titleRes = R.string.delete_saved_filters
+            summaryRes = R.string.delete_saved_filters_description
+            onClick {
+                activity!!.materialAlertDialog()
+                    .setTitle(R.string.delete_saved_filters)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.delete) { dialog, t ->
+                        viewScope.launch {
+                            db.deleteAllBrowseFilters().executeAsBlocking()
+                        }
+                    }
+                    .show()
+            }
+        }
+
+        preference {
 
             titleRes = R.string.currently_blocked_scanlators
             summaryRes = R.string.currently_blocked_scanlators_description
