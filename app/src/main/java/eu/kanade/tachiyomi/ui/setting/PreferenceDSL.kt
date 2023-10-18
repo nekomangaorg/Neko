@@ -205,6 +205,7 @@ fun SwitchPreferenceCompat.requireAuthentication(
     activity: FragmentActivity?,
     title: String,
     subtitle: String? = null,
+    confirmationRequired: Boolean = true,
 ) {
     onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
         newValue as Boolean
@@ -212,6 +213,7 @@ fun SwitchPreferenceCompat.requireAuthentication(
             activity.startAuthentication(
                 title,
                 subtitle,
+                confirmationRequired,
                 callback = object : AuthenticatorUtil.AuthenticationCallback() {
                     override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                         super.onAuthenticationSucceeded(result)
