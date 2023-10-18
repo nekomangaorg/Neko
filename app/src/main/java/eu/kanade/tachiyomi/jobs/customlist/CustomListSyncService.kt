@@ -17,9 +17,8 @@ import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.network.message
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -40,7 +39,7 @@ class CustomListSyncService {
         completeNotification: () -> Unit,
     ): Int {
         return withContext(Dispatchers.IO) {
-            loggycat { "Starting from MangaDex sync" }
+            TimberKt.d { "Starting from MangaDex sync" }
             val count = AtomicInteger(0)
             val countOfAdded = AtomicInteger(0)
 
@@ -52,7 +51,7 @@ class CustomListSyncService {
                 mangadex.fetchAllFromList(listUUID, true).onFailure {
                     val errorMessage = "Error getting from list $listUUID. ${it.message()}"
                     errorNotification(errorMessage)
-                    loggycat(LogPriority.ERROR) { errorMessage }
+                    TimberKt.e { errorMessage }
                 }.mapBoth(
                     { it },
                     {
@@ -60,7 +59,7 @@ class CustomListSyncService {
                     },
                 )
             }.flatten().distinct()
-            loggycat { "total number from mangadex is ${mangaToAdd.size}" }
+            TimberKt.d { "total number from mangadex is ${mangaToAdd.size}" }
 
             mangaToAdd.forEach { networkManga ->
                 updateNotification(networkManga.title, count.andIncrement, mangaToAdd.size)
@@ -104,18 +103,18 @@ class CustomListSyncService {
         completeNotification: (total: Int) -> Unit,
     ) {
         withContext(Dispatchers.IO) {
-            loggycat { "Starting to MangaDex sync" }
+            TimberKt.d { "Starting to MangaDex sync" }
             val count = AtomicInteger(0)
             val countNew = AtomicInteger(0)
 
-            loggycat { "Number of Manga ids to sync ${mangaIds.size}" }
+            TimberKt.d { "Number of Manga ids to sync ${mangaIds.size}" }
 
             val listManga = when (mangaIds.isEmpty()) {
                 true -> db.getLibraryMangaList().executeAsBlocking()
                 false -> mangaIds.mapNotNull { db.getManga(it).executeAsBlocking() }
             }.distinctBy { it.uuid() }
 
-            loggycat { "Number of Manga to Sync to MangaDex ${listManga.size}" }
+            TimberKt.d { "Number of Manga to Sync to MangaDex ${listManga.size}" }
 
             listManga.forEach { manga ->
                 updateNotification(manga.title, count.andIncrement, listManga.size)

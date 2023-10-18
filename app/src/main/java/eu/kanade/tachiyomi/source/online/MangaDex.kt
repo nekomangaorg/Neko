@@ -45,11 +45,11 @@ import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
 import org.nekomanga.constants.MdConstants
-import org.nekomanga.core.loggycat
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 open class MangaDex : HttpSource() {
@@ -253,7 +253,7 @@ open class MangaDex : HttpSource() {
         return withContext(Dispatchers.IO) {
             val mangaUUID = MdUtil.getMangaUUID(url)
             val ratingResponse = networkServices.authService.retrieveRating(mangaUUID)
-            loggycat { "mangaUUID $mangaUUID" }
+            TimberKt.d { "mangaUUID $mangaUUID" }
             val list = networkServices.authService.customListsContainingManga(mangaUUID).onFailure {
                 this.log("trying to fetch list status for $mangaUUID")
                 throw Exception("error trying to get tracking info")

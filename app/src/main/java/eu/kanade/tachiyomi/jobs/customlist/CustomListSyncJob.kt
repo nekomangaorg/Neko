@@ -64,7 +64,7 @@ class CustomListSyncJob(
         val uuids = inputData.getStringArray(SYNC_UUIDS)
         val mangaIds = inputData.getLongArray(MANGA_IDS)
 
-        loggycat { "Number of mangaIds ${mangaIds!!.size}" }
+        TimberKt.d { "Number of mangaIds ${mangaIds!!.size}" }
 
         try {
             when (type) {

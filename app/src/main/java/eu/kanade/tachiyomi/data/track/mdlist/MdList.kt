@@ -49,7 +49,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
                     track.listIds = (track.listIds + listOf(listId)).distinct()
                 }
             }.onFailure { e ->
-                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+                TimberKt.e(e) { "error updating MDList" }
             }
 
             track
@@ -63,7 +63,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
                     track.listIds = track.listIds.filterNot { it == listId }
                 }
             }.onFailure { e ->
-                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+                TimberKt.e(e) { "error updating MDList" }
             }
 
             track
@@ -79,7 +79,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
                     }
                 }
             }.onFailure { e ->
-                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+                TimberKt.e(e) { "error updating MDList" }
             }
 
             track
@@ -95,7 +95,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
                     }
                 }
             }.onFailure { e ->
-                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+                TimberKt.e(e) { "error updating MDList" }
             }
 
             track
