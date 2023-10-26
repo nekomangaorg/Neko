@@ -22,6 +22,14 @@ interface BrowseFilterQueries : DbProvider {
         )
         .prepare()
 
+    fun deleteAllBrowseFilters() = db.delete()
+        .byQuery(
+            DeleteQuery.builder()
+                .table(BrowseFilterTable.TABLE)
+                .build(),
+        )
+        .prepare()
+
     fun getBrowseFilters() = db.get()
         .listOfObjects(BrowseFilterImpl::class.java)
         .withQuery(

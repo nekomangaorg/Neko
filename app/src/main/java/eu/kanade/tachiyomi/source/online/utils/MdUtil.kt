@@ -61,7 +61,8 @@ class MdUtil {
         }
 
         fun getLangsToShow(preferences: PreferencesHelper) =
-            preferences.langsToShow().get().split(",")
+            //this prevents langauges that don't exist anymore from causing a parse exception
+            preferences.langsToShow().get().split(",").filter { MdLang.values().firstOrNull { mdLang -> it == mdLang.lang } != null }
 
         fun getTitle(
             titleMap: Map<String, String?>,

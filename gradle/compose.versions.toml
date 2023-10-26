@@ -1,6 +1,6 @@
 [versions]
 accompanist_version = "0.32.0"
-compose_version = "1.5.3"
+compose_version = "1.5.4"
 compose_material3_version = "1.1.2"
 compose_compiler_version = "1.4.7"
 
@@ -22,7 +22,7 @@ ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
 #Fix material swipe refresh bug
-material = { module = "androidx.compose.material:material", version = "1.5.3" }
+material = { module = "androidx.compose.material:material", version = "1.5.4" }
 material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose_version" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose_version" }
 

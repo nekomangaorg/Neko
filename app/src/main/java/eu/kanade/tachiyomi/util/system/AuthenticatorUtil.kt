@@ -27,6 +27,7 @@ object AuthenticatorUtil {
     fun FragmentActivity.startAuthentication(
         title: String,
         subtitle: String? = null,
+        confirmationRequired: Boolean = true,
         callback: AuthenticationCallback,
     ) {
         isAuthenticating = true
@@ -41,6 +42,7 @@ object AuthenticatorUtil {
             .setTitle(title)
             .setSubtitle(subtitle)
             .setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK)
+            .setConfirmationRequired(confirmationRequired)
             .build()
 
         biometricPrompt.authenticate(promptInfo)
