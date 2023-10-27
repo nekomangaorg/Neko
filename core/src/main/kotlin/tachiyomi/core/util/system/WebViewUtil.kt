@@ -10,7 +10,7 @@ import org.nekomanga.logging.TimberKt
 
 object WebViewUtil {
 
-    const val MINIMUM_WEBVIEW_VERSION = 109
+    const val MINIMUM_WEBVIEW_VERSION = 114
 
     fun supportsWebView(context: Context): Boolean {
         try {
