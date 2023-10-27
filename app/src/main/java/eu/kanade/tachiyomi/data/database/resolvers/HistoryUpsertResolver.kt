@@ -1,12 +1,10 @@
 package eu.kanade.tachiyomi.data.database.resolvers
 
-import androidx.annotation.NonNull
 import androidx.core.content.contentValuesOf
 import com.pushtorefresh.storio.sqlite.StorIOSQLite
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult
 import com.pushtorefresh.storio.sqlite.queries.Query
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
-import eu.kanade.tachiyomi.data.database.inTransactionReturn
 import eu.kanade.tachiyomi.data.database.mappers.HistoryPutResolver
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
@@ -16,7 +14,7 @@ class HistoryUpsertResolver : HistoryPutResolver() {
     /**
      * Updates last_read time of chapter
      */
-    override fun performPut(@NonNull db: StorIOSQLite, @NonNull history: History): PutResult = db.inTransactionReturn {
+    override fun performPut(db: StorIOSQLite, history: History): PutResult {
         val updateQuery = mapToUpdateQuery(history)
 
         val cursor = db.lowLevel().query(
@@ -27,7 +25,7 @@ class HistoryUpsertResolver : HistoryPutResolver() {
                 .build(),
         )
 
-        cursor.use { putCursor ->
+        return cursor.use { putCursor ->
             if (putCursor.count == 0) {
                 val insertQuery = mapToInsertQuery(history)
                 val insertedId = db.lowLevel().insert(insertQuery, mapToContentValues(history))
