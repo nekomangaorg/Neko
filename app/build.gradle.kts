@@ -207,7 +207,7 @@ dependencies {
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
     implementation(libs.bundles.kahelpers)
-    implementation(libs.bundles.sandwich)
+    implementation(libs.sandwich)
     implementation(libs.aboutLibraries.compose)
     debugImplementation(libs.leakcanary)
 

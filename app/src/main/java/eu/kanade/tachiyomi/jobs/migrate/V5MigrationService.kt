@@ -89,10 +89,10 @@ class V5MigrationService(
                         actualMigrated++
                     }
 
-                    is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception,
+                    is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*>,
                     -> {
                         responseDto.log(" trying to map legacy id")
-                        if (responseDto is ApiResponse.Failure.Exception) {
+                        if (responseDto is ApiResponse.Failure.Exception<*>) {
                             failedUpdatesMangaList[manga] = "error processing"
                             failedUpdatesErrors.add(manga.title + ": error processing")
                         } else {
@@ -140,7 +140,7 @@ class V5MigrationService(
                             }
                         }
 
-                        is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception,
+                        is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*>,
                         -> {
                             legacyIds.forEach {
                                 val failedChapter = chapterMap[it]!!
@@ -174,7 +174,7 @@ class V5MigrationService(
     private fun finishUpdates(
         context: Context,
         errorNotification: (List<String>, Uri?) -> Unit,
-        completeNotification: (Int) -> Unit,
+        completeNotificaton: (Int) -> Unit,
     ) {
         if (failedUpdatesMangaList.isNotEmpty() || failedUpdatesChapters.isNotEmpty()) {
             val errorFile = writeErrorFile(context, failedUpdatesErrors)
@@ -184,7 +184,7 @@ class V5MigrationService(
                 errorFile.getUriCompat(context),
             )
         }
-        completeNotification(actualMigrated)
+        completeNotificaton(actualMigrated)
     }
 
     /**

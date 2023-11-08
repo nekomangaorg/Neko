@@ -124,7 +124,7 @@ class FollowsHandler {
                 val response =
                     authService.updateReadingStatusForManga(mangaId, readingStatusDto)
             ) {
-                is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception -> {
+                is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*> -> {
                     response.log("trying to update reading status for manga $mangaId")
                     false
                 }
