@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.network.services
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.skydoves.sandwich.adapters.ApiResponseCallAdapterFactory
+import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
 import eu.kanade.tachiyomi.network.NetworkHelper
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
