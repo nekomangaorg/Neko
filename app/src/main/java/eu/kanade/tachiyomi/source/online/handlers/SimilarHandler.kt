@@ -290,9 +290,9 @@ class SimilarHandler {
         similarDto ?: return
 
         // Get our page of mangaList
-        val idPairs = similarDto.recommendations.associate {
-            val id = mappings.getMangadexID(it.mal_id.toString(), "mal")
-            val text = it.recommendation_count.toString() + " user votes"
+        val idPairs = similarDto.data.associate {
+            val id = mappings.getMangadexID(it.entry.mal_id.toString(), "mal")
+            val text = it.votes.toString() + " user votes"
             id to text
         }
         if (idPairs.isEmpty()) {

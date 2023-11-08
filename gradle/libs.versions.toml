@@ -108,6 +108,8 @@ tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }
 retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
+retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
+
 
 #test libs
 junit = "junit:junit:4.13.2"
@@ -130,6 +132,6 @@ ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 nucleus = ["nucleus", "nucleus-support"]
 tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-pager", "tachi-unifile"]
 tests = ["junit", "mockk", "kotest-assertions"]
-retrofit = ["retrofit-core", "retrofit-serialization"]
+retrofit = ["retrofit-core", "retrofit-serialization", "retrofit-scalars"]
 results = ["kotlin-result", "kotlin-result-coroutines"]
 rx = ["rx-android", "rx-java", "rx-relay", "rxbinding-kotlin", "rxbinding-appcompat-v7", "rxbinding-appcompat-v4", "rxbinding-recycler-v7"]
