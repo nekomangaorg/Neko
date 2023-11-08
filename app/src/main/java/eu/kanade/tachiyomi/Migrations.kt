@@ -146,12 +146,11 @@ object Migrations {
                 preferences.removeOldCredentials(MangaDex())
             }
 
-            if (oldVersion < 182) {
+            if (oldVersion < 193) {
                 LibraryPresenter.updateSavedFilters()
                 val updated = preferences.langsToShow().get().split(",").filter { it != "NULL" }
                 preferences.langsToShow().set(updated.joinToString(","))
             }
-
 
 
             return true
