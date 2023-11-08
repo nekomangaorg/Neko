@@ -1,5 +1,5 @@
 [versions]
-aboutlib_version = "10.9.1"
+aboutlib_version = "10.9.2"
 chucker_version = "3.5.2"
 coil_version = "2.5.0"
 fast_adapter_version = "5.7.0"
@@ -19,9 +19,9 @@ google-services-gradle = "com.google.gms:google-services:4.3.15"
 firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.9"
 
 material = "com.google.android.material:material:1.10.0"
-desugaring = "com.android.tools:desugar_jdk_libs:2.0.3"
+desugaring = "com.android.tools:desugar_jdk_libs:2.0.4"
 firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.5.0"
-firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.5.0"
+firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.5.1"
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"
 flex-box = "com.google.android.flexbox:flexbox:3.0.0"
 #needed for token bucket to work
@@ -118,7 +118,7 @@ retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
 #test libs
 junit = "junit:junit:4.13.2"
 mockk = "io.mockk:mockk:1.13.8"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.7.2"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.8.0"
 
 [plugins]
 kotlinter = { id = "org.jmailen.kotlinter", version = "4.0.0" }
