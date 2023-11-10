@@ -56,13 +56,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun NekoScaffold(
@@ -220,7 +221,7 @@ private fun NoTitleSearchTopAppBar(
                 OutlinedTextField(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(top = Padding.small, bottom = Padding.small, start = Padding.extraLarge)
+                        .padding(top = Size.small, bottom = Size.small, start = Size.extraLarge)
                         .focusRequester(focusRequester),
                     value = searchText,
                     placeholder = { Text(text = stringResource(id = R.string.search_chapters)) },
@@ -228,11 +229,13 @@ private fun NoTitleSearchTopAppBar(
                         searchText = it
                         onSearchText(it)
                     },
-                    colors = TextFieldDefaults.textFieldColors(
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        containerColor = Color.Transparent,
-                        cursorColor = LocalContentColor.current.copy(alpha = LocalContentAlpha.current),
                     ),
                     trailingIcon = {
                         AnimatedVisibility(visible = searchText.isNotBlank(), enter = fadeIn(), exit = fadeOut()) {
@@ -311,12 +314,7 @@ private fun TitleOnlyTopAppBar(
         ),
         modifier = Modifier.statusBarsPadding(),
         title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            AutoSizeText(text = title, style = MaterialTheme.typography.titleLarge.copy(letterSpacing = (-.6).sp))
         },
         navigationIcon = {
             if (incognitoMode) {

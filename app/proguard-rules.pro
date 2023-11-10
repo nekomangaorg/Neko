@@ -1,18 +1,26 @@
 -dontobfuscate
 
 -keep,allowoptimization class eu.kanade.tachiyomi.** { public protected *; }
+-keep,allowoptimization class tachiyomi.** { public protected *; }
+-keep,allowoptimization class org.nekomanga.** { public protected *; }
 -keep,allowoptimization class androidx.preference.** { *; }
 -keep,allowoptimization class kotlin.** { public protected *; }
 -keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
 -keep,allowoptimization class okhttp3.** { public protected *; }
 -keep,allowoptimization class okio.** { public protected *; }
+-keep,allowoptimization class logcat.** { public protected *; }
 -keep,allowoptimization class rx.** { public protected *; }
 -keep,allowoptimization class org.jsoup.** { public protected *; }
 -keep,allowoptimization class com.google.gson.** { public protected *; }
 -keep,allowoptimization class uy.kohesive.injekt.** { public protected *; }
 -keep,allowoptimization class eu.davidea.flexibleadapter.** { public protected *; }
+-keep class io.requery.android.database.** { public protected *; }
+-keep class androidx.window.** { *; }
+-dontwarn androidx.window.**
 -keep class com.crashlytics.** { *; }
 -dontwarn com.crashlytics.**
+-keep class com.google.firebase.installations.** {*; }
+-keep interface com.google.firebase.installations.** {*; }
 # Design library
 -dontwarn com.google.android.material.**
 -keep class com.google.android.material.** { *; }

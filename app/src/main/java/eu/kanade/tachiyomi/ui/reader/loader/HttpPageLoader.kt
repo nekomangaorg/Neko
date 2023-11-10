@@ -1,13 +1,11 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
 import eu.kanade.tachiyomi.data.cache.ChapterCache
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
@@ -23,7 +21,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
-import logcat.LogPriority
+import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -44,16 +43,14 @@ class HttpPageLoader(
      */
     private val queue = PriorityBlockingQueue<PriorityPage>()
 
-    private val preferences by injectLazy<PreferencesHelper>()
-    private var preloadSize = preferences.preloadSize().get()
+    private val readerPreferences by injectLazy<ReaderPreferences>()
+    private var preloadSize = readerPreferences.preloadPageAmount().get()
 
     init {
         // Adding flow since we can reach reader settings after this is created
-        preferences.preloadSize().asFlow()
-            .onEach {
-                preloadSize = it
-            }
-            .launchIn(scope)
+        readerPreferences.preloadPageAmount().changes().onEach {
+            preloadSize = it
+        }.launchIn(scope)
 
         scope.launchIO {
             flow {
@@ -215,7 +212,7 @@ class HttpPageLoader(
             page.status = Page.State.READY
         } catch (e: Throwable) {
             page.status = Page.State.ERROR
-            loggycat(LogPriority.ERROR, e) { "Error loading page" }
+            TimberKt.e(e) { "Error loading page" }
             if (e is CancellationException) {
                 throw e
             }

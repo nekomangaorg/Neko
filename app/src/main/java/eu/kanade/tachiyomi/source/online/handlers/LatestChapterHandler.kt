@@ -5,27 +5,26 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexService
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class LatestChapterHandler {
-    private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
+    private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
     private val uniqueManga = mutableSetOf<String>()
@@ -37,7 +36,7 @@ class LatestChapterHandler {
 
             val langs = MdUtil.getLangsToShow(preferencesHelper)
 
-            val contentRatings = preferencesHelper.contentRatingSelections().toList()
+            val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
 
             return@withContext service.latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
                 .getOrResultError("getting latest chapters")
@@ -79,7 +78,7 @@ class LatestChapterHandler {
 
                     val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
 
-                    val thumbQuality = preferencesHelper.thumbnailQuality()
+                    val thumbQuality = preferencesHelper.thumbnailQuality().get()
                     val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }
                         .sortedByDescending { result[it.id]!!.first().attributes.readableAt }
                         .map {
@@ -90,7 +89,7 @@ class LatestChapterHandler {
                     Ok(MangaListPage(sourceManga = mangaList.toPersistentList(), hasNextPage = hasMoreResults))
                 }
         }.getOrElse {
-            loggycat(LogPriority.ERROR, it) { "Error parsing latest chapters" }
+            TimberKt.e(it) { "Error parsing latest chapters" }
             Err(ResultError.Generic(errorString = "Error parsing latest chapters response"))
         }
     }

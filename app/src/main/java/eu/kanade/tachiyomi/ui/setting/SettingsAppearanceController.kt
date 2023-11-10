@@ -1,25 +1,30 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import kotlin.math.max
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.details.MangaDetailsPreferences
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class SettingsAppearanceController : SettingsController() {
 
     private var lastThemeXLight: Int? = null
     private var lastThemeXDark: Int? = null
     private var themePreference: ThemePreference? = null
+
+    val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get()
 
     @SuppressLint("NotifyDataSetChanged")
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
@@ -55,7 +60,7 @@ class SettingsAppearanceController : SettingsController() {
                     }
                     true
                 }
-                preferences.nightMode().asImmediateFlow { mode ->
+                preferences.nightMode().changes().onEach { mode ->
                     isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }.launchIn(viewScope)
             }
@@ -63,23 +68,38 @@ class SettingsAppearanceController : SettingsController() {
 
         preferenceCategory {
             titleRes = R.string.details_page
+
             switchPreference {
-                key = Keys.themeMangaDetails
+                key = mangaDetailsPreferences.forcePortrait().key()
+                titleRes = R.string.force_portrait_details
+                summaryRes = R.string.force_portrait_details_description
+                defaultValue = false
+            }
+
+            switchPreference {
+                key = mangaDetailsPreferences.autoThemeByCover().key()
                 titleRes = R.string.theme_buttons_based_on_cover
                 defaultValue = true
             }
 
             switchPreference {
-                key = Keys.hideMangaDetailButtonText
+                key = mangaDetailsPreferences.hideButtonText().key()
                 titleRes = R.string.hide_button_text
                 defaultValue = false
             }
 
             switchPreference {
-                key = Keys.extraLargeBackdrop
+                key = mangaDetailsPreferences.extraLargeBackdrop().key()
                 titleRes = R.string.extra_large_backdrop
                 defaultValue = false
             }
+
+            switchPreference {
+                key = mangaDetailsPreferences.wrapAltTitles().key()
+                titleRes = R.string.wrap_alt_titles
+                defaultValue = false
+            }
+
         }
 
         preferenceCategory {

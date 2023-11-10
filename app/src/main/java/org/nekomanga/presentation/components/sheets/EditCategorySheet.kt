@@ -38,6 +38,7 @@ import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun EditCategorySheet(
@@ -82,7 +83,7 @@ fun EditCategorySheet(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .requiredHeightIn(0.dp, maxLazyHeight.dp),
+                    .requiredHeightIn(Size.none, maxLazyHeight.dp),
             ) {
                 items(categories) { category: CategoryItem ->
                     var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
@@ -105,7 +106,7 @@ fun EditCategorySheet(
             }
 
             Divider()
-            Gap(4.dp)
+            Gap(Size.tiny)
             Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = cancelClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.cancel), style = MaterialTheme.typography.titleSmall)
@@ -155,6 +156,7 @@ private fun calculateText(context: Context, initialMangaCategories: List<Categor
                 difference.size,
                 difference.size,
             )
+
             else -> context.resources.getQuantityString(
                 R.plurals.category_plural,
                 initialIds.size - same.size,

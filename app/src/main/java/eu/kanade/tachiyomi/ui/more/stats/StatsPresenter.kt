@@ -6,9 +6,6 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.preference.MANGA_HAS_UNREAD
-import eu.kanade.tachiyomi.data.preference.MANGA_NON_COMPLETED
-import eu.kanade.tachiyomi.data.preference.MANGA_NON_READ
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -30,6 +27,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.nekomanga.core.preferences.MANGA_HAS_UNREAD
+import org.nekomanga.core.preferences.MANGA_NON_COMPLETED
+import org.nekomanga.core.preferences.MANGA_NON_READ
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
@@ -39,6 +40,7 @@ import uy.kohesive.injekt.api.get
 class StatsPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
+    private val libraryPreferences: LibraryPreferences = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
 ) : BaseCoroutinePresenter<StatsController>() {
@@ -64,7 +66,7 @@ class StatsPresenter(
                 )
             } else {
                 val tracks = getTracks(libraryList)
-                val lastUpdate = prefs.libraryUpdateLastTimestamp().get()
+                val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
                 _simpleState.value = StatsConstants.SimpleState(
                     screenState = StatsConstants.ScreenState.Simple,
                     mangaCount = libraryList.count(),
@@ -144,6 +146,7 @@ class StatsPresenter(
                 is StatsConstants.ScreenState.Simple -> {
                     StatsConstants.ScreenState.Detailed
                 }
+
                 else -> {
                     StatsConstants.ScreenState.Simple
                 }
@@ -178,9 +181,9 @@ class StatsPresenter(
     }
 
     private fun getGlobalUpdateManga(libraryManga: List<LibraryManga>): Map<Long?, List<LibraryManga>> {
-        val includedCategories = prefs.libraryUpdateCategories().get().map(String::toInt)
-        val excludedCategories = prefs.libraryUpdateCategoriesExclude().get().map(String::toInt)
-        val restrictions = prefs.libraryUpdateDeviceRestriction().get()
+        val includedCategories = libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
+        val excludedCategories = libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
+        val restrictions = libraryPreferences.updateRestrictions().get()
         return libraryManga.groupBy { it.id }
             .filterNot { it.value.any { manga -> manga.category in excludedCategories } }
             .filter { includedCategories.isEmpty() || it.value.any { manga -> manga.category in includedCategories } }

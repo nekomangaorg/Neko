@@ -33,6 +33,6 @@ fun Loading(modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-private fun Loading() {
+private fun LoadingPreview() {
     Loading()
 }

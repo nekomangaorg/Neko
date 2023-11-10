@@ -7,7 +7,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.suspendCancellableCoroutine
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import rx.Emitter
 import rx.Observable
 import rx.Subscriber
@@ -61,7 +61,6 @@ internal fun <T> CancellableContinuation<T>.unsubscribeOnCancellation(sub: Subsc
 fun <T> runAsObservable(
     scope: CoroutineScope = GlobalScope,
     backpressureMode: Emitter.BackpressureMode = Emitter.BackpressureMode.NONE,
-    tag: String = "",
     block: suspend () -> T,
 ): Observable<T> {
     return Observable.create(
@@ -73,10 +72,10 @@ fun <T> runAsObservable(
                 } catch (e: Throwable) {
                     // Ignore `CancellationException` as error, since it indicates "normal cancellation"
                     if (e !is CancellationException) {
-                        loggycat(LogPriority.ERROR, e, tag) { "Error in coroutine bridge" }
+                        TimberKt.e(e) { "Error in coroutine bridge" }
                         emitter.onError(e)
                     } else {
-                        loggycat(LogPriority.DEBUG) { "Coroutine cancelled" }
+                        TimberKt.d { "Coroutine cancelled" }
                         emitter.onCompleted()
                     }
                 }

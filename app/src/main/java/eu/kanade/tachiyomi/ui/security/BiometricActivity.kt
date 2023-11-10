@@ -37,7 +37,7 @@ class BiometricActivity : BaseThemedActivity() {
                     super.onAuthenticationSucceeded(result)
                     SecureActivityDelegate.locked = false
                     AuthenticatorUtil.isAuthenticating = false
-                    preferences.lastUnlock().set(Date().time)
+                    securityPreferences.lastUnlock().set(Date().time)
                     finish()
                 }
             },

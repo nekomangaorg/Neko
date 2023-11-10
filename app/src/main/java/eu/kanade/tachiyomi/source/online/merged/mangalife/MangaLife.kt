@@ -2,31 +2,29 @@ package eu.kanade.tachiyomi.source.online.merged.mangalife
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
-import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.jsoup.nodes.Document
+import org.nekomanga.core.network.GET
+import org.nekomanga.core.network.interceptor.rateLimit
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
+import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
 class MangaLife : ReducedHttpSource() {
@@ -142,14 +140,14 @@ class MangaLife : ReducedHttpSource() {
                                 false -> dateFormat.parse("${chp.date} +0600")?.time!!
                             }
                         }.onFailure {
-                            loggycat(LogPriority.ERROR, it)
+                            TimberKt.e(it)
                         }.getOrElse { 0L }
 
                         scanlator = this@MangaLife.name
                     }
                 }
             }.mapError {
-                loggycat(LogPriority.ERROR, it)
+                TimberKt.e(it) { "Error merging with manga life" }
                 "Unknown Exception with merge".toResultError()
             }
         }

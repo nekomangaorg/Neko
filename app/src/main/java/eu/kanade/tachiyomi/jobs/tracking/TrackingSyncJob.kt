@@ -12,14 +12,13 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -69,7 +68,7 @@ class TrackingSyncJob(
 
             return@coroutineScope Result.success()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e) { "error refreshing tracking metadata" }
+            TimberKt.e(e) { "error refreshing tracking metadata" }
             return@coroutineScope Result.failure()
         } finally {
             launchIO {

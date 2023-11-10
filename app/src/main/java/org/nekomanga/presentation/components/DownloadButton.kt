@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
+import org.nekomanga.presentation.theme.Size
 
 private const val size = 24
 private const val iconSize = 20
@@ -61,6 +62,7 @@ fun DownloadButton(buttonColor: Color, downloadState: Download.State, downloadPr
                     wasDownloading = false
                 }
             }
+
             else -> Unit
         }
     }
@@ -177,7 +179,7 @@ private fun Background(color: Color, borderStroke: BorderStroke? = null, modifie
     Box(
         modifier = Modifier
             .clip(CircleShape)
-            .size(48.dp)
+            .size(Size.huge)
             .then(modifier),
         contentAlignment = Alignment.Center,
     ) {

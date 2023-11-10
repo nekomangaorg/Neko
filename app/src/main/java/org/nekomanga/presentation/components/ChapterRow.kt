@@ -58,8 +58,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
-import eu.kanade.tachiyomi.util.system.launchDelayed
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
@@ -68,11 +66,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
-import logcat.LogPriority
+import org.nekomanga.core.util.launchDelayed
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ChapterRow(
@@ -298,7 +298,7 @@ private fun ChapterInfo(
                             .align(Alignment.CenterVertically),
                         tint = themeColorState.buttonColor,
                     )
-                    Gap(4.dp)
+                    Gap(Size.tiny)
                 }
                 Text(
                     text = titleText,
@@ -335,7 +335,7 @@ private fun ChapterInfo(
 
                     when (iconRes == null) {
                         true -> {
-                            loggycat(LogPriority.ERROR) { "Missing flag for $language" }
+                            TimberKt.e { "Missing flag for $language" }
                             Text(
                                 text = "$language • ",
                                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -352,10 +352,10 @@ private fun ChapterInfo(
                                 painter = painter,
                                 modifier = Modifier
                                     .height(16.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
+                                    .clip(RoundedCornerShape(Size.tiny)),
                                 contentDescription = "flag",
                             )
-                            Gap(4.dp)
+                            Gap(Size.tiny)
                         }
                     }
                 }

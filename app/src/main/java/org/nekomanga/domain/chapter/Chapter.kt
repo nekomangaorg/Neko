@@ -7,9 +7,8 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
-import eu.kanade.tachiyomi.util.lang.containsMergeSourceName
+import org.nekomanga.constants.MdConstants
 
 data class SimpleChapter(
     val id: Long,
@@ -35,7 +34,7 @@ data class SimpleChapter(
 ) {
     val isRecognizedNumber = chapterNumber >= 0f
 
-    fun isMergedChapter() = this.scanlator.containsMergeSourceName()
+    fun isMergedChapter() = MergeType.containsMergeSourceName(this.scanlator)
 
     fun isMergedChapterOfType(mergeType: MergeType) =
         MergeType.getMergeTypeName(mergeType) == this.scanlator
@@ -53,7 +52,7 @@ data class SimpleChapter(
     }
 
     fun commentUrl(threadId: String): String {
-        return MdUtil.forumUrl + threadId
+        return MdConstants.forumUrl + threadId
     }
 
     fun toSChapter(): SChapter {

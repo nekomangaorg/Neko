@@ -9,17 +9,15 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
-import eu.kanade.tachiyomi.util.system.loggycat
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     private val json: Json by injectLazy()
-    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword()) }
+    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword().get()) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
     @StringRes
@@ -136,7 +134,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
             saveCredentials(username, oauth.access_token)
             true
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error logging into MAL" }
             logout()
             false
         }

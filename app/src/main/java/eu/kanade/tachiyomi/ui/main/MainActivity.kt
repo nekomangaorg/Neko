@@ -64,7 +64,6 @@ import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
@@ -102,7 +101,6 @@ import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
@@ -122,10 +120,12 @@ import kotlin.math.min
 import kotlin.math.roundToLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import me.saket.cascade.CascadePopupMenu
 import me.saket.cascade.overrideAllPopupMenus
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -480,10 +480,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         if (savedInstanceState == null && this !is SearchActivity) {
             // Reset Incognito Mode on relaunch
-            preferences.incognitoMode().set(false)
+            securityPreferences.incognitoMode().set(false)
 
             // Show changelog if needed
-            if (Migrations.upgrade(preferences, lifecycleScope)) {
+            if (Migrations.upgrade(preferences, networkPreferences, libraryPreferences, readerPreferences, lifecycleScope)) {
                 if (!BuildConfig.DEBUG) {
                     content.post {
                         whatsNewSheet().show()
@@ -492,20 +492,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
         }
 
-        preferences.incognitoMode()
-            .asImmediateFlowIn(lifecycleScope) {
-                binding.toolbar.setIncognitoMode(it)
-                binding.searchToolbar.setIncognitoMode(it)
-                SecureActivityDelegate.setSecure(this)
-            }
+        securityPreferences.incognitoMode().changes().onEach {
+            binding.toolbar.setIncognitoMode(it)
+            binding.searchToolbar.setIncognitoMode(it)
+            SecureActivityDelegate.setSecure(this)
+        }.launchIn(lifecycleScope)
         preferences.sideNavIconAlignment()
-            .asImmediateFlowIn(lifecycleScope) {
+            .changes().onEach {
                 binding.sideNav?.menuGravity = when (it) {
                     1 -> Gravity.CENTER
                     2 -> Gravity.BOTTOM
                     else -> Gravity.TOP
                 }
-            }
+            }.launchIn(lifecycleScope)
         setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller), changeBG = false)
     }
 
@@ -758,7 +757,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         }
                     }
                 } catch (error: Exception) {
-                    loggycat(LogPriority.ERROR, error)
+                    TimberKt.e(error) { "Error checking for app update" }
                 }
             }
         }
@@ -1285,11 +1284,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         override fun onFling(
-            e1: MotionEvent,
+            e: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float,
         ): Boolean {
+            val e1 = e ?: return false
             var result = false
             val diffY = e2.y - e1.y
             val diffX = e2.x - e1.x

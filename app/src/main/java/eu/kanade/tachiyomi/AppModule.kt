@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.jobs.follows.FollowsSyncService
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationService
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncService
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
@@ -41,6 +42,13 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
+import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.domain.details.MangaDetailsPreferences
+import tachiyomi.core.preference.AndroidPreferenceStore
+import tachiyomi.core.preference.PreferenceStore
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
@@ -52,8 +60,6 @@ class AppModule(val app: Application) : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
         addSingleton(app)
 
-        addSingletonFactory { PreferencesHelper(app) }
-
         addSingletonFactory { DatabaseHelper(app) }
 
         addSingletonFactory { ChapterCache(app) }
@@ -61,6 +67,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { CoverCache(app) }
 
         addSingletonFactory { NetworkHelper(app) }
+
+        addSingletonFactory { NetworkServices() }
 
         addSingletonFactory { SourceManager() }
 
@@ -72,7 +80,12 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { ChapterItemFilter() }
 
-        addSingletonFactory { Json { ignoreUnknownKeys = true } }
+        addSingletonFactory {
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+        }
 
         addSingletonFactory { MangaMappings(app.applicationContext) }
 
@@ -136,7 +149,6 @@ class AppModule(val app: Application) : InjektModule {
 
         // Asynchronously init expensive components for a faster cold start
         ContextCompat.getMainExecutor(app).execute {
-            get<PreferencesHelper>()
 
             get<NetworkHelper>()
 
@@ -145,6 +157,41 @@ class AppModule(val app: Application) : InjektModule {
             get<DatabaseHelper>()
 
             get<DownloadManager>()
+        }
+    }
+}
+
+class PreferenceModule(val application: Application) : InjektModule {
+    override fun InjektRegistrar.registerInjectables() {
+        addSingletonFactory<PreferenceStore> {
+            AndroidPreferenceStore(application)
+        }
+
+        addSingletonFactory {
+            SecurityPreferences(get())
+        }
+
+        addSingletonFactory {
+            LibraryPreferences(get())
+        }
+
+        addSingletonFactory {
+            ReaderPreferences(get())
+        }
+
+        addSingletonFactory {
+            NetworkPreferences(get(), BuildConfig.DEBUG)
+        }
+
+        addSingletonFactory {
+            MangaDetailsPreferences(get())
+        }
+
+        addSingletonFactory {
+            PreferencesHelper(
+                context = application,
+                preferenceStore = get(),
+            )
         }
     }
 }

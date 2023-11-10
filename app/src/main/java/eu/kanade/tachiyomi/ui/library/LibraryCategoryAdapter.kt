@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -14,9 +13,11 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
-import eu.kanade.tachiyomi.util.system.withDefContext
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.runBlocking
+import org.nekomanga.core.util.withDefContext
+import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -29,11 +30,11 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
 
     val sourceManager by injectLazy<SourceManager>()
 
-    private val preferences: PreferencesHelper by injectLazy()
+    private val libraryPreferences: LibraryPreferences by injectLazy()
 
-    var showNumber = preferences.categoryNumberOfItems().get()
+    var showNumber = libraryPreferences.showCategoriesHeaderCount().get()
 
-    var showOutline = preferences.outlineOnCovers().get()
+    var showOutline = libraryPreferences.outlineOnCovers().get()
 
     private var lastCategory = ""
 
@@ -146,17 +147,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
     }
 
     private fun performFilter() {
-        val s = getFilter(String::class.java)
-        if (s.isNullOrBlank()) {
-            if (mangaList.firstOrNull()?.filter?.isNotBlank() == true) {
-                mangaList.forEach { it.filter = "" }
-            }
-            updateDataSet(mangaList)
-        } else {
-            updateDataSet(mangaList.filter { it.filter(s) })
-        }
-        isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
-        setItemsPerCategoryMap()
+        runBlocking { performFilterAsync() }
     }
 
     suspend fun performFilterAsync() {
@@ -168,7 +159,13 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
             updateDataSet(mangaList)
         } else {
             val filteredManga = withDefContext { mangaList.filter { it.filter(s) } }
-            updateDataSet(filteredManga)
+            if (filteredManga.isEmpty() && controller?.presenter?.showAllCategories == false) {
+                val catId = mangaList.firstOrNull()?.let { it.header?.catId ?: it.manga.category }
+                val blankItem = catId?.let { controller.presenter.blankItem(it) }
+                updateDataSet(blankItem ?: emptyList())
+            } else {
+                updateDataSet(filteredManga)
+            }
         }
         isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
         setItemsPerCategoryMap()
@@ -180,13 +177,9 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
     }
 
     private fun getFirstChar(string: String): String {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val chars = string.codePoints().toArray().firstOrNull() ?: return ""
-            val char = Character.toChars(chars)
-            return String(char).uppercase(Locale.US)
-        } else {
-            return string.toCharArray().firstOrNull()?.toString()?.uppercase(Locale.US) ?: ""
-        }
+        val chars = string.codePoints().toArray().firstOrNull() ?: return ""
+        val char = Character.toChars(chars)
+        return String(char).uppercase(Locale.US)
     }
 
     override fun onCreateBubbleText(position: Int): String {
@@ -199,6 +192,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                 vibrateOnCategoryChange(item.category.name)
                 item.category.name
             }
+
             is LibraryItem -> {
                 val text = if (item.manga.isBlank()) {
                     return item.header?.category?.name.orEmpty()
@@ -210,29 +204,33 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                                 category ?: context.getString(R.string.default_value)
                             } else {
                                 val title = item.manga.title
-                                if (preferences.removeArticles().get()) {
+                                if (libraryPreferences.removeArticles().get()) {
                                     title.removeArticles().chop(15)
                                 } else {
                                     title.take(10)
                                 }
                             }
                         }
+
                         LibrarySort.Rating -> {
                             item.manga.rating ?: return "N/A"
                             ((item.manga.rating!!.toDouble() * 100).roundToInt() / 100.0).toString()
                         }
+
                         LibrarySort.DateFetched -> {
                             val id = item.manga.id ?: return ""
                             val history = db.getChapters(id).executeAsBlocking()
                             val last = history.maxOfOrNull { it.date_fetch }
                             context.timeSpanFromNow(R.string.fetched_, last ?: 0)
                         }
+
                         LibrarySort.LastRead -> {
                             val id = item.manga.id ?: return ""
                             val history = db.getHistoryByMangaId(id).executeAsBlocking()
                             val last = history.maxOfOrNull { it.last_read }
                             context.timeSpanFromNow(R.string.read_, last ?: 0)
                         }
+
                         LibrarySort.Unread -> {
                             val unread = item.manga.unread
                             if (unread > 0) {
@@ -241,6 +239,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                                 context.getString(R.string.read)
                             }
                         }
+
                         LibrarySort.TotalChapters -> {
                             val total = item.manga.totalChapters
                             if (total > 0) {
@@ -253,14 +252,17 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                                 "N/A"
                             }
                         }
+
                         LibrarySort.LatestChapter -> {
                             context.timeSpanFromNow(R.string.updated_, item.manga.last_update)
                         }
+
                         LibrarySort.DateAdded -> {
                             context.timeSpanFromNow(R.string.added_, item.manga.date_added)
                         }
+
                         LibrarySort.Title -> {
-                            val title = if (preferences.removeArticles().get()) {
+                            val title = if (libraryPreferences.removeArticles().get()) {
                                 item.manga.title.removeArticles()
                             } else {
                                 item.manga.title
@@ -278,6 +280,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                     else -> item.header?.category?.name.orEmpty() + " - " + text
                 }
             }
+
             else -> ""
         }
     }

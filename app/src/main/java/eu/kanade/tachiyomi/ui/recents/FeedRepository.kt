@@ -5,7 +5,6 @@ import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.toDisplayManga
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -13,9 +12,9 @@ import java.util.Date
 import java.util.Locale
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
-import logcat.LogPriority
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -79,7 +78,7 @@ class FeedRepository(
                                 it.manga to (if (date <= 0L) "-1" else dateFormat.format(Date(date)))
                             }.mapNotNull { (manga, matches) ->
                                 val simpleChapters = matches.map {
-                                    loggycat { "esco: ${it.history.last_read}" }
+                                    TimberKt.d {  "esco: ${it.history.last_read}" }
                                     it.chapter.toSimpleChapter(it.history.last_read)!!
                                 }.toPersistentList()
                                 FeedManga(
@@ -161,7 +160,7 @@ class FeedRepository(
                 else -> throw Exception("Not valid")
             }
         }.mapError { err ->
-            this@FeedRepository.loggycat(LogPriority.ERROR, err)
+            TimberKt.e(err)
             ResultError.Generic("Error : ${err.message}")
         }
     }

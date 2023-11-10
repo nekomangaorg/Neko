@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
@@ -24,7 +23,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -88,6 +87,7 @@ class StatusSyncJob(
                         )
                     }
                 }
+
                 else -> {
                     followsSyncService.toMangaDex(
                         ::updateNotificationProgress,
@@ -99,7 +99,7 @@ class StatusSyncJob(
 
             return@coroutineScope Result.success()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e) { "error syncing follows" }
+            TimberKt.e(e) { "error syncing follows" }
             return@coroutineScope Result.failure()
         } finally {
             launchIO {

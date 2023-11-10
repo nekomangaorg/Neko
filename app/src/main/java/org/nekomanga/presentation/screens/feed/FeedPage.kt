@@ -60,18 +60,17 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.decimalFormat
 import org.nekomanga.presentation.screens.defaultThemeColorState
-import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedPage(
@@ -102,7 +101,7 @@ fun FeedPage(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(Padding.small)
+                    .padding(Size.small)
                     .animateContentSize(),
                 colors = CardDefaults.cardColors(containerColor = cardColor),
             ) {
@@ -112,13 +111,13 @@ fun FeedPage(
                     text = feedManga.mangaTitle, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis, color = titleColor,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = Padding.small, vertical = Padding.extraSmall),
+                        .padding(horizontal = Size.small, vertical = Size.tiny),
                     textAlign = TextAlign.Center,
                 )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = Padding.small),
+                        .padding(start = Size.small),
                 ) {
                     Box(
                         modifier = Modifier
@@ -133,7 +132,7 @@ fun FeedPage(
                                 .size(80.dp),
                         )
                     }
-                    Gap(Padding.small)
+                    Gap(Size.small)
 
                     Column(Modifier.fillMaxWidth()) {
                         val firstChapter = feedManga.chapters.first()
@@ -225,11 +224,11 @@ fun FeedPage(
                 if (expanded) {
                     feedManga.chapters.forEachIndexed { index, simpleChapter ->
                         if (index > 0) {
-                            Divider(Modifier.padding(Padding.small))
+                            Divider(Modifier.padding(Size.small))
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start = Padding.small),
+                                    .padding(start = Size.small),
                             ) {
                                 Column(
                                     modifier = Modifier
@@ -275,7 +274,7 @@ fun FeedPage(
                             }
                         }
                     }
-                    Gap(Padding.small)
+                    Gap(Size.small)
                 }
             }
 
@@ -341,7 +340,7 @@ private fun LastReadLine(lastRead: Long, scanlator: String, language: String, st
 
             when (iconRes == null) {
                 true -> {
-                    loggycat(LogPriority.ERROR) { "Missing flag for $language" }
+                    TimberKt.e { "Missing flag for $language" }
                     Text(
                         text = "$language • ",
                         style = MaterialTheme.typography.bodyMedium.copy(

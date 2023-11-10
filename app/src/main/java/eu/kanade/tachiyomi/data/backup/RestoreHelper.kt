@@ -9,10 +9,9 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 
 class RestoreHelper(val context: Context) {
 
@@ -31,7 +30,7 @@ class RestoreHelper(val context: Context) {
      */
     val progressNotification by lazy {
         NotificationCompat.Builder(context, Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS)
-            .setContentTitle(context.getString(R.string.app_name))
+            .setContentTitle(context.getString(R.string.app_name_neko))
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -210,7 +209,7 @@ class RestoreHelper(val context: Context) {
                 return destFile
             }
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error writing error file" }
         }
         return null
     }

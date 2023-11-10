@@ -27,7 +27,7 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
                 return@coroutineScope Result.failure()
             }
             val preferences = Injekt.get<PreferencesHelper>()
-            if (preferences.appShouldAutoUpdate() == ONLY_ON_UNMETERED && !context.isConnectedToWifi()) {
+            if (preferences.appShouldAutoUpdate().get() == ONLY_ON_UNMETERED && !context.isConnectedToWifi()) {
                 return@coroutineScope Result.failure()
             }
             val result = AppUpdateChecker().checkForUpdate(context, true, doExtrasAfterNewUpdate = false)

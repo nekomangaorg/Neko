@@ -28,6 +28,7 @@ import java.util.Objects
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import org.nekomanga.domain.manga.DisplayManga
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaList(
@@ -110,12 +111,12 @@ private fun MangaRow(
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier.padding(4.dp)) {
+    Row(modifier = modifier.padding(Size.tiny)) {
         MangaListCover(displayManga, shouldOutlineCover)
 
         Column(
             modifier = Modifier
-                .padding(4.dp)
+                .padding(Size.tiny)
                 .align(alignment = Alignment.CenterVertically),
         ) {
             val titleLineCount = when (displayManga.displayText.isBlank()) {
@@ -164,8 +165,8 @@ private fun RowScope.MangaListCover(displayManga: DisplayManga, shouldOutlineCov
             artwork = displayManga.currentArtwork,
             shouldOutlineCover = shouldOutlineCover,
             modifier = Modifier
-                .size(48.dp)
-                .padding(4.dp),
+                .size(Size.huge)
+                .padding(Size.tiny),
         )
 
         if (displayManga.inLibrary) {

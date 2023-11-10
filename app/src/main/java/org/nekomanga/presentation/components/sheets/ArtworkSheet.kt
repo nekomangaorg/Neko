@@ -56,6 +56,7 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ArtworkSheet(
@@ -108,8 +109,8 @@ fun ArtworkSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(4.dp),
-                    Arrangement.spacedBy(4.dp),
+                        .padding(Size.tiny),
+                    Arrangement.spacedBy(Size.tiny),
                 ) {
                     ArtworkButton(text = stringResource(id = R.string.save), color = themeColorState.buttonColor, modifier = Modifier.weight(1f)) {
                         saveClick(currentImage)
@@ -131,8 +132,8 @@ fun ArtworkSheet(
                 }
                 Gap(height = 8.dp)
                 if (alternativeArtwork.size > 1) {
-                    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Bottom)) {
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(Size.tiny, Alignment.Bottom)) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
                             items(alternativeArtwork) { artwork ->
                                 Box {
                                     Thumbnail(
@@ -212,7 +213,7 @@ private fun BoxScope.VolumeSection(thumbnailSize: Dp, gradientHeight: Dp, artwor
         textAlign = TextAlign.Center,
         modifier = Modifier
             .align(Alignment.BottomCenter)
-            .padding(bottom = 4.dp)
+            .padding(bottom = Size.tiny)
             .fillMaxWidth(),
         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.surface,
@@ -223,10 +224,10 @@ private fun BoxScope.VolumeSection(thumbnailSize: Dp, gradientHeight: Dp, artwor
 private fun ActiveIndicator(themeColorState: ThemeColorState) {
     Box(
         modifier = Modifier
-            .padding(4.dp)
+            .padding(Size.tiny)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surface),
     ) {
-        Icon(imageVector = Icons.Filled.Star, modifier = Modifier.padding(4.dp), contentDescription = null, tint = themeColorState.buttonColor)
+        Icon(imageVector = Icons.Filled.Star, modifier = Modifier.padding(Size.tiny), contentDescription = null, tint = themeColorState.buttonColor)
     }
 }

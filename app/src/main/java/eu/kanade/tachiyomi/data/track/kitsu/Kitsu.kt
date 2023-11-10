@@ -9,12 +9,10 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.text.DecimalFormat
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class Kitsu(private val context: Context, id: Int) : TrackService(id) {
@@ -145,7 +143,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
             saveCredentials(username, userId)
             true
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error logging into Kitsu" }
             false
         }
     }
@@ -156,7 +154,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     }
 
     private fun getUserId(): String {
-        return getPassword()
+        return getPassword().get()
     }
 
     fun saveToken(oauth: OAuth?) {

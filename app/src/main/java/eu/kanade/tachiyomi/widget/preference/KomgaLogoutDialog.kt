@@ -9,11 +9,10 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.launchNow
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -46,7 +45,7 @@ class KomgaLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                              activity?.toast(loggedOut.error)
                          }*/
                     }.onFailure { e ->
-                        loggycat(LogPriority.ERROR, e) { "error logging out" }
+                        TimberKt.e(e) { "error logging out" }
                         activity?.toast(R.string.could_not_log_in)
                     }
                 }

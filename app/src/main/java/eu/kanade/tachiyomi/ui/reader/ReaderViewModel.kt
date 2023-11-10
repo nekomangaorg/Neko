@@ -33,7 +33,6 @@ import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
@@ -49,11 +48,9 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemSort
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.io.File
@@ -75,9 +72,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
+import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -92,6 +93,8 @@ class ReaderViewModel(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val readerPreferences: ReaderPreferences = Injekt.get(),
+    private val securityPreferences: SecurityPreferences = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
     private val chapterItemFilter: ChapterItemFilter = Injekt.get(),
 
@@ -282,7 +285,7 @@ class ReaderViewModel(
     }
 
     suspend fun loadChapterURL(urlChapterId: String) {
-        val dbChapter = db.getChapter(MdUtil.chapterSuffix + urlChapterId).executeAsBlocking()
+        val dbChapter = db.getChapter(MdConstants.chapterSuffix + urlChapterId).executeAsBlocking()
         if (dbChapter?.manga_id != null) {
             val dbManga = db.getManga(dbChapter.manga_id!!).executeAsBlocking()
             if (dbManga != null) {
@@ -313,12 +316,12 @@ class ReaderViewModel(
             db.insertManga(tempManga).executeAsBlocking()
             val manga = db.getMangadexManga(tempManga.url).executeAsBlocking()!!
 
-            loggycat { "tempManga id ${tempManga.id}" }
-            loggycat { "Manga id ${manga.id}" }
+            TimberKt.d { "tempManga id ${tempManga.id}" }
+            TimberKt.d { "Manga id ${manga.id}" }
 
             if (chapters.isNotEmpty()) {
                 val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
-                val currentChapter = newChapters.find { it.url == MdUtil.chapterSuffix + urlChapterId }
+                val currentChapter = newChapters.find { it.url == MdConstants.chapterSuffix + urlChapterId }
                 if (currentChapter?.id != null) {
                     withContext(Dispatchers.Main) {
                         init(manga.id!!, currentChapter.id!!)
@@ -337,7 +340,7 @@ class ReaderViewModel(
     private suspend fun loadNewChapter(chapter: ReaderChapter) {
         val loader = loader ?: return
 
-        loggycat { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
+        TimberKt.d { "loadNewChapter Loading ${chapter.chapter.url} - ${chapter.chapter.name}" }
 
         withIOContext {
             try {
@@ -346,7 +349,7 @@ class ReaderViewModel(
                 if (e is CancellationException) {
                     throw e
                 }
-                loggycat(LogPriority.ERROR, e)
+                TimberKt.e(e) { "Error loading new chapter ${chapter.chapter.url}" }
             }
         }
     }
@@ -359,7 +362,7 @@ class ReaderViewModel(
         loader: ChapterLoader,
         chapter: ReaderChapter,
     ): ViewerChapters {
-        loggycat { "Loading ${chapter.chapter.url}" }
+        TimberKt.d { "Loading ${chapter.chapter.url}" }
 
         loader.loadChapter(chapter)
 
@@ -389,7 +392,7 @@ class ReaderViewModel(
     suspend fun loadChapter(chapter: ReaderChapter): Int? {
         val loader = loader ?: return -1
 
-        loggycat { "Loading adjacent ${chapter.chapter.url}" }
+        TimberKt.d { "Loading adjacent ${chapter.chapter.url}" }
         var lastPage: Int? = if (chapter.chapter.pages_left <= 1) 0 else chapter.chapter.last_page_read
         mutableState.update { it.copy(isLoadingAdjacentChapter = true) }
         try {
@@ -400,7 +403,7 @@ class ReaderViewModel(
             if (e is CancellationException) {
                 throw e
             }
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error Loading adjacent chapter ${chapter.chapter.url}" }
             lastPage = null
         } finally {
             mutableState.update { it.copy(isLoadingAdjacentChapter = false) }
@@ -430,7 +433,7 @@ class ReaderViewModel(
             return
         }
 
-        loggycat { "Preloading ${chapter.chapter.url} - ${chapter.chapter.name}" }
+        TimberKt.d { "Preloading ${chapter.chapter.url} - ${chapter.chapter.name}" }
 
         val loader = loader ?: return
         withIOContext {
@@ -462,13 +465,13 @@ class ReaderViewModel(
         val selectedChapter = page.chapter
 
         // Save last page read and mark as read if needed
-        if (!preferences.incognitoMode().get()) {
+        if (!securityPreferences.incognitoMode().get()) {
             selectedChapter.chapter.last_page_read = page.index
             selectedChapter.chapter.pages_left =
                 (selectedChapter.pages?.size ?: page.index) - page.index
         }
         val shouldTrack =
-            !preferences.incognitoMode().get() || hasTrackers || preferences.readingSync()
+            !securityPreferences.incognitoMode().get() || hasTrackers || preferences.readingSync().get()
         if (shouldTrack &&
             // For double pages, check if the second to last page is doubled up
             (
@@ -476,7 +479,7 @@ class ReaderViewModel(
                     (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index)
                 )
         ) {
-            if (!preferences.incognitoMode().get()) {
+            if (!securityPreferences.incognitoMode().get()) {
                 selectedChapter.chapter.read = true
                 updateTrackChapterAfterReading(selectedChapter)
                 updateReadingStatus(selectedChapter)
@@ -485,7 +488,7 @@ class ReaderViewModel(
         }
 
         if (selectedChapter != currentChapters.currChapter) {
-            loggycat { "Setting ${selectedChapter.chapter.url} as active" }
+            TimberKt.d { "Setting ${selectedChapter.chapter.url} as active" }
             saveReadingProgress(currentChapters.currChapter)
             setReadStartTime()
             scope.launch { loadNewChapter(selectedChapter) }
@@ -551,7 +554,7 @@ class ReaderViewModel(
     private fun deleteChapterIfNeeded(currentChapter: ReaderChapter) {
         // Determine which chapter should be deleted and enqueue
         val currentChapterPosition = chapterList.indexOf(currentChapter)
-        val removeAfterReadSlots = preferences.removeAfterReadSlots()
+        val removeAfterReadSlots = preferences.removeAfterReadSlots().get()
         val chapterToDelete = chapterList.getOrNull(currentChapterPosition - removeAfterReadSlots)
 
         if (removeAfterReadSlots != 0 && chapterToDownload != null) {
@@ -569,8 +572,10 @@ class ReaderViewModel(
      * Called when reader chapter is changed in reader or when activity is paused.
      */
     private fun saveReadingProgress(readerChapter: ReaderChapter) {
-        saveChapterProgress(readerChapter)
-        saveChapterHistory(readerChapter)
+        db.inTransaction {
+            saveChapterProgress(readerChapter)
+            saveChapterHistory(readerChapter)
+        }
     }
 
     fun saveCurrentChapterReadingProgress() = getCurrentChapter()?.let { saveReadingProgress(it) }
@@ -584,7 +589,7 @@ class ReaderViewModel(
         db.getChapter(readerChapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
             readerChapter.chapter.bookmark = dbChapter.bookmark
         }
-        if (!preferences.incognitoMode().get() || hasTrackers) {
+        if (!securityPreferences.incognitoMode().get() || hasTrackers) {
             db.updateChapterProgress(readerChapter.chapter).executeAsBlocking()
         }
     }
@@ -593,7 +598,7 @@ class ReaderViewModel(
      * Saves this [readerChapter] last read history.
      */
     private fun saveChapterHistory(readerChapter: ReaderChapter) {
-        if (!preferences.incognitoMode().get()) {
+        if (!securityPreferences.incognitoMode().get()) {
             val readAt = Date().time
             val sessionReadDuration = chapterReadStartTime?.let { readAt - it } ?: 0
             val oldTimeRead = db.getHistoryByChapterUrl(readerChapter.chapter.url).executeAsBlocking()?.time_read ?: 0
@@ -634,13 +639,10 @@ class ReaderViewModel(
      * Returns the viewer position used by this manga or the default one.
      */
     fun getMangaReadingMode(): Int {
-        val default = preferences.defaultReadingMode()
+        val default = readerPreferences.defaultReadingMode().get()
         val manga = manga ?: return default
         val readerType = manga.defaultReaderType()
-        if (manga.viewer_flags == -1 ||
-            // Force webtoon mode
-            (manga.isLongStrip() && readerType != manga.readingModeType)
-        ) {
+        if (manga.viewer_flags == -1) {
             val cantSwitchToLTR =
                 (
                     readerType == ReadingModeType.LEFT_TO_RIGHT.flagValue &&
@@ -690,7 +692,7 @@ class ReaderViewModel(
      * Returns the orientation type used by this manga or the default one.
      */
     fun getMangaOrientationType(): Int {
-        val default = preferences.defaultOrientationType().get()
+        val default = readerPreferences.defaultOrientationType().get()
         return when (manga?.orientationType) {
             OrientationType.DEFAULT.flagValue -> default
             else -> manga?.orientationType ?: default
@@ -705,7 +707,7 @@ class ReaderViewModel(
         this.manga?.orientationType = rotationType
         db.updateViewerFlags(manga).executeAsBlocking()
 
-        loggycat(LogPriority.INFO) { "Manga orientation is ${manga.orientationType}" }
+        TimberKt.i { "Manga orientation is ${manga.orientationType}" }
 
         viewModelScope.launchIO {
             db.updateViewerFlags(manga).executeAsBlocking()
@@ -740,7 +742,7 @@ class ReaderViewModel(
         val chapter = page.chapter.chapter
 
         // create chapter name so its always sorted correctly  max character is 75
-        val pageName = parseChapterName(chapter.name, page.number.toString(), chapter.scanlator)
+        val pageName = parseChapterName(chapter.name, page.number.toString())
         // take only 150 characters so this file maxes at 225
         val trimmedTitle = (prefix + manga.title).take(150)
 
@@ -760,7 +762,6 @@ class ReaderViewModel(
     private fun parseChapterName(
         chapterName: String,
         pageNumber: String,
-        scanlator: String?,
     ): String {
         val builder = StringBuilder()
         var title = ""
@@ -847,8 +848,8 @@ class ReaderViewModel(
         // Pictures directory.
         val baseDir = Environment.getExternalStorageDirectory().absolutePath +
             File.separator + Environment.DIRECTORY_PICTURES +
-            File.separator + context.getString(R.string.app_name)
-        val destDir = if (preferences.folderPerManga()) {
+            File.separator + context.getString(R.string.app_name_neko)
+        val destDir = if (preferences.folderPerManga().get()) {
             File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
         } else {
             File(baseDir)
@@ -881,8 +882,8 @@ class ReaderViewModel(
             // Pictures directory.
             val baseDir = Environment.getExternalStorageDirectory().absolutePath +
                 File.separator + Environment.DIRECTORY_PICTURES +
-                File.separator + context.getString(R.string.app_name)
-            val destDir = if (preferences.folderPerManga()) {
+                File.separator + context.getString(R.string.app_name_neko)
+            val destDir = if (preferences.folderPerManga().get()) {
                 File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
             } else {
                 File(baseDir)
@@ -978,7 +979,7 @@ class ReaderViewModel(
     private fun updateReadingStatus(readerChapter: ReaderChapter) {
         manga ?: return
 
-        if (!preferences.readingSync() && !readerChapter.chapter.isMergedChapter()) return
+        if (!preferences.readingSync().get() && !readerChapter.chapter.isMergedChapter()) return
         scope.launchIO {
             statusHandler.marksChaptersStatus(manga!!.uuid(), listOf(readerChapter.chapter.mangadex_chapter_id))
         }
@@ -989,7 +990,7 @@ class ReaderViewModel(
      * will run in a background thread and errors are ignored.
      */
     private fun updateTrackChapterAfterReading(readerChapter: ReaderChapter) {
-        if (!preferences.autoUpdateTrack()) return
+        if (!preferences.autoUpdateTrack().get()) return
         viewModelScope.launchNonCancellable {
             val newChapterRead = readerChapter.chapter.chapter_number
             val errors = updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
@@ -1023,7 +1024,7 @@ class ReaderViewModel(
 
     suspend fun lookupComment(chapterId: String): String? {
         val threadId = sourceManager.mangaDex.getChapterCommentId(chapterId).onFailure {
-            loggycat(LogPriority.ERROR) { it.message() }
+            TimberKt.e { it.message() }
 
         }.getOrElse {
             null

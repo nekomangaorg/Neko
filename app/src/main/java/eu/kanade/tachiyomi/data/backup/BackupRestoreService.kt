@@ -10,12 +10,11 @@ import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 
 /**
  * Restores backup.
@@ -78,7 +77,7 @@ class BackupRestoreService : Service() {
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
         val handler = CoroutineExceptionHandler { _, exception ->
-            loggycat(LogPriority.ERROR, exception)
+            TimberKt.e(exception)
             restoreHelper.showErrorNotification(exception.message!!)
             stopSelf(startId)
         }

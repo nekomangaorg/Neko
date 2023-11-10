@@ -10,10 +10,7 @@ import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.network.CACHE_CONTROL_NO_STORE
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.net.HttpURLConnection.HTTP_NOT_MODIFIED
 import java.util.Date
@@ -22,7 +19,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import logcat.LogPriority
 import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
@@ -31,7 +27,10 @@ import okio.Path.Companion.toOkioPath
 import okio.Source
 import okio.buffer
 import okio.sink
+import org.nekomanga.core.network.CACHE_CONTROL_NO_STORE
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.logging.TimberKt
+import tachiyomi.core.network.await
 
 class AlternativeMangaCoverFetcher(
     private val url: String,
@@ -53,6 +52,7 @@ class AlternativeMangaCoverFetcher(
             Type.File -> {
                 fileLoader(File(url.substringAfter("file://")))
             }
+
             null -> error("Invalid image")
         }
     }
@@ -120,7 +120,7 @@ class AlternativeMangaCoverFetcher(
         } catch (e: Exception) {
             snapshot?.close()
             if (e !is CancellationException) {
-                loggycat(LogPriority.ERROR, e) { "error loading image" }
+                TimberKt.e(e) { "error loading image" }
             }
             throw e
         }
@@ -149,6 +149,7 @@ class AlternativeMangaCoverFetcher(
                 // don't take up okhttp cache
                 request.cacheControl(CACHE_CONTROL_NO_STORE)
             }
+
             else -> {
                 // This causes the request to fail with a 504 Unsatisfiable Request.
                 request.cacheControl(CACHE_CONTROL_NO_NETWORK_NO_CACHE)
@@ -169,7 +170,7 @@ class AlternativeMangaCoverFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e) { "Failed to write snapshot data to cover cache ${cacheFile.name}" }
+            TimberKt.e(e) { "Failed to write snapshot data to cover cache ${cacheFile.name}" }
             null
         }
     }
@@ -182,7 +183,7 @@ class AlternativeMangaCoverFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e) { "Failed to write response data to cover cache ${cacheFile.name}" }
+            TimberKt.e(e) { "Failed to write response data to cover cache ${cacheFile.name}" }
             null
         }
     }
@@ -201,18 +202,18 @@ class AlternativeMangaCoverFetcher(
     }
 
     private fun readFromDiskCache(): DiskCache.Snapshot? {
-        return if (options.diskCachePolicy.readEnabled) diskCacheLazy.value[diskCacheKey!!] else null
+        return if (options.diskCachePolicy.readEnabled) diskCacheLazy.value.openSnapshot(diskCacheKey!!) else null
     }
 
     private fun writeToDiskCache(
         response: Response,
     ): DiskCache.Snapshot? {
-        val editor = diskCacheLazy.value.edit(diskCacheKey!!) ?: return null
+        val editor = diskCacheLazy.value.openEditor(diskCacheKey!!) ?: return null
         try {
             diskCacheLazy.value.fileSystem.write(editor.data) {
-                response.body!!.source().readAll(this)
+                response.body.source().readAll(this)
             }
-            return editor.commitAndGet()
+            return editor.commitAndOpenSnapshot()
         } catch (e: Exception) {
             try {
                 editor.abort()

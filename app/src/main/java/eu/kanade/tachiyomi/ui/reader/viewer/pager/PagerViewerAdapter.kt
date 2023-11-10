@@ -9,10 +9,10 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlin.math.max
 import kotlinx.coroutines.delay
+import org.nekomanga.logging.TimberKt
 
 /**
  * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
@@ -154,7 +154,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             if (position != -1) {
                 return position
             } else {
-                loggycat { "Position for ${view.item} not found" }
+                TimberKt.d { "Position for ${view.item} not found" }
             }
         }
         return POSITION_NONE
@@ -167,12 +167,12 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 (oldCurrent?.first as? ReaderPage)?.firstHalf == false
             } else {
                 oldCurrent?.second == current ||
-                    (current.index + 1) < (
+                    (current.index + 1) < ((
                     (
                         oldCurrent?.second
                             ?: oldCurrent?.first
                         ) as? ReaderPage
-                    )?.index ?: 0
+                    )?.index ?: 0)
             },
         )
 
@@ -180,9 +180,9 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         // This case usually happens when we load a new chapter and the first 2 pages need to split og
         viewer.scope.launchUI {
             delay(100)
-            loggycat { "about to on page change from splitDoublePages" }
+            TimberKt.d { "about to on page change from splitDoublePages" }
             viewer.onPageChange(viewer.pager.currentItem)
-            loggycat { "finished on page change from splitDoublePages" }
+            TimberKt.d { "finished on page change from splitDoublePages" }
         }
     }
 
@@ -321,12 +321,12 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 otherItems.getOrNull(pagedIndex)?.let {
                     val lastPage = subJoinedItems.lastOrNull()?.first as? ReaderPage
                     if (lastPage == null || (
-                        if (it is ChapterTransition.Next) {
-                            it.from.chapter.id == lastPage.chapter.chapter.id
-                        } else {
-                            true
-                        }
-                        )
+                            if (it is ChapterTransition.Next) {
+                                it.from.chapter.id == lastPage.chapter.chapter.id
+                            } else {
+                                true
+                            }
+                            )
                     ) {
                         subJoinedItems.add(Pair(it, null))
                         pagedIndex++
@@ -350,6 +350,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             when {
                 (oldCurrent?.first as? ReaderPage)?.chapter != currentChapter &&
                     (oldCurrent?.first as? ChapterTransition)?.from != currentChapter -> subItems.find { (it as? ReaderPage)?.chapter == currentChapter }
+
                 useSecondPage && oldCurrent?.second is ReaderPage -> (oldCurrent.second ?: oldCurrent.first)
                 else -> oldCurrent?.first ?: return
             }

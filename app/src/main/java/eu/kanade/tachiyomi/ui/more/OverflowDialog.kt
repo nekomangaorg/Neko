@@ -11,19 +11,21 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.TachiOverflowLayoutBinding
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import org.nekomanga.core.preferences.toggle
+import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 
 class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.OverflowDialogTheme) {
 
     val binding = TachiOverflowLayoutBinding.inflate(activity.layoutInflater, null, false)
     val preferences: PreferencesHelper by injectLazy()
+    val securityPreferences: SecurityPreferences by injectLazy()
 
     init {
         setContentView(binding.root)
@@ -41,7 +43,7 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
         val incogText = context.getString(R.string.incognito_mode)
         with(binding.incognitoModeItem) {
             val titleText = context.getString(
-                if (preferences.incognitoMode().get()) {
+                if (securityPreferences.incognitoMode().get()) {
                     R.string.turn_off_
                 } else {
                     R.string.turn_on_
@@ -51,15 +53,15 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
             val subtitleText = context.getString(R.string.pauses_reading_history)
             text = titleText.withSubtitle(context, subtitleText)
             setIcon(
-                if (preferences.incognitoMode().get()) {
+                if (securityPreferences.incognitoMode().get()) {
                     R.drawable.ic_incognito_24dp
                 } else {
                     R.drawable.ic_glasses_24dp
                 },
             )
             setOnClickListener {
-                preferences.incognitoMode().toggle()
-                val incog = preferences.incognitoMode().get()
+                securityPreferences.incognitoMode().toggle()
+                val incog = securityPreferences.incognitoMode().get()
                 val newTitle = context.getString(
                     if (incog) {
                         R.string.turn_off_
@@ -116,6 +118,6 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
     }
 
     private companion object {
-        private const val URL_HELP = "https://tachiyomi.org/help/"
+        private const val URL_HELP = "https://tachiyomi.org/docs/guides/troubleshooting/"
     }
 }

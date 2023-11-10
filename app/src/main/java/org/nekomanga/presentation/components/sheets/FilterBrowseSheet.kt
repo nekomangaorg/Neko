@@ -13,6 +13,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -55,8 +56,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.source.online.utils.MdSort
@@ -67,7 +66,6 @@ import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
@@ -82,6 +80,7 @@ import org.nekomanga.presentation.components.dialog.SaveFilterDialog
 import org.nekomanga.presentation.components.sheetHandle
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
@@ -173,7 +172,10 @@ fun FilterBrowseSheet(
                 }
 
 
-                FlowRow(Modifier.fillMaxWidth(), mainAxisAlignment = MainAxisAlignment.Center, mainAxisSpacing = 8.dp) {
+                FlowRow(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Size.small),
+                ) {
                     FilterChipWrapper(
                         filters.queryMode == QueryType.Title,
                         {
@@ -322,7 +324,7 @@ fun FilterBrowseSheet(
                 )
             }
 
-            Gap(4.dp)
+            Gap(Size.tiny)
 
             SavedFilters(
                 visible = savedFilters.isNotEmpty(),
@@ -349,7 +351,7 @@ fun FilterBrowseSheet(
                     colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Icon(imageVector = Icons.Default.RestartAlt, contentDescription = null, tint = themeColorState.buttonColor)
-                    Gap(4.dp)
+                    Gap(Size.tiny)
                     Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
                 }
 
@@ -360,7 +362,7 @@ fun FilterBrowseSheet(
                         colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                     ) {
                         Icon(imageVector = Icons.Default.Save, contentDescription = null, tint = themeColorState.buttonColor)
-                        Gap(4.dp)
+                        Gap(Size.tiny)
                         Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
                     }
                 }
@@ -371,7 +373,7 @@ fun FilterBrowseSheet(
                     colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
                 ) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.surface)
-                    Gap(4.dp)
+                    Gap(Size.tiny)
                     Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                 }
             }
@@ -415,9 +417,8 @@ private fun <T> FilterRow(
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                mainAxisSpacing = 8.dp,
-                mainAxisAlignment = MainAxisAlignment.Start,
+                    .padding(horizontal = Size.small),
+                horizontalArrangement = Arrangement.spacedBy(Size.small, Alignment.Start),
             ) {
                 items.forEach { item ->
                     val itemName = when {
@@ -466,9 +467,8 @@ private fun <T> FilterTriStateRow(
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                mainAxisSpacing = 8.dp,
-                mainAxisAlignment = MainAxisAlignment.Start,
+                    .padding(horizontal = Size.small),
+                horizontalArrangement = Arrangement.spacedBy(Size.small, Alignment.Start),
             ) {
                 items.forEach { item ->
                     val itemName = when {
@@ -567,7 +567,7 @@ fun OtherRow(
                     textChanged = { text: String -> filterChanged(Filter.GroupId(text)) },
                     search = { filterClick() },
                 )
-                Gap(4.dp)
+                Gap(Size.tiny)
 
                 val isError = remember(filters.authorId.uuid) {
                     if (filters.authorId.uuid.isBlank()) {
@@ -640,9 +640,9 @@ fun SavedFilters(
                             ToolTipButton(toolTipLabel = stringResource(textRes), icon = icon, buttonClicked = { filterDefaultClick(nameOfEnabledFilter, makeDefault) })
                         }
                     }
-                    Gap(4.dp)
+                    Gap(Size.tiny)
                 }
-                item { Gap(4.dp) }
+                item { Gap(Size.tiny) }
             }
         }
     }

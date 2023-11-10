@@ -9,6 +9,16 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.getBestColor
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.firstOrNull
+import kotlin.collections.get
+import kotlin.collections.getOrNull
+import kotlin.collections.lastOrNull
+import kotlin.collections.map
+import kotlin.collections.mapNotNull
+import kotlin.collections.set
+import kotlin.collections.toMap
+import kotlin.collections.toSet
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.injectLazy
 
 /** Object that holds info about a covers size ratio + dominant colors */
@@ -18,10 +28,11 @@ object MangaCoverMetadata {
     private var coverVibrantColorMap = ConcurrentHashMap<Long, Int>()
 
     private val preferences by injectLazy<PreferencesHelper>()
+    private val mangaDetailsPreferences by injectLazy<MangaDetailsPreferences>()
     private val coverCache by injectLazy<CoverCache>()
 
     fun load() {
-        val ratios = preferences.coverRatios().get()
+        val ratios = mangaDetailsPreferences.coverRatios().get()
         coverRatioMap = ConcurrentHashMap(
             ratios.mapNotNull {
                 val splits = it.split("|")
@@ -34,7 +45,7 @@ object MangaCoverMetadata {
                 }
             }.toMap(),
         )
-        val colors = preferences.coverColors().get()
+        val colors = mangaDetailsPreferences.coverColors().get()
         coverColorMap = ConcurrentHashMap(
             colors.mapNotNull {
                 val splits = it.split("|")
@@ -49,7 +60,7 @@ object MangaCoverMetadata {
             }.toMap(),
         )
 
-        val vibrantColors = preferences.coverVibrantColors().get()
+        val vibrantColors = mangaDetailsPreferences.coverVibrantColors().get()
         coverVibrantColorMap = ConcurrentHashMap(
             vibrantColors.mapNotNull {
                 val splits = it.split("|")
@@ -149,10 +160,10 @@ object MangaCoverMetadata {
 
     fun savePrefs() {
         val mapCopy = coverRatioMap.toMap()
-        preferences.coverRatios().set(mapCopy.map { "${it.key}|${it.value}" }.toSet())
+        mangaDetailsPreferences.coverRatios().set(mapCopy.map { "${it.key}|${it.value}" }.toSet())
         val mapColorCopy = coverColorMap.toMap()
-        preferences.coverColors().set(mapColorCopy.map { "${it.key}|${it.value.first}|${it.value.second}" }.toSet())
+        mangaDetailsPreferences.coverColors().set(mapColorCopy.map { "${it.key}|${it.value.first}|${it.value.second}" }.toSet())
         val vibrantColorCopy = coverVibrantColorMap.toMap()
-        preferences.coverVibrantColors().set(vibrantColorCopy.map { "${it.key}|${it.value}" }.toSet())
+        mangaDetailsPreferences.coverVibrantColors().set(vibrantColorCopy.map { "${it.key}|${it.value}" }.toSet())
     }
 }

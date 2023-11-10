@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun InLibraryIcon(offset: Dp, outline: Boolean) {
@@ -58,7 +59,7 @@ internal fun InLibraryBadge(outline: Boolean, offset: Dp = (-2).dp) {
         AutoSizeText(
             text = stringResource(id = R.string.in_library),
             style = MaterialTheme.typography.labelLarge.copy(color = MaterialTheme.colorScheme.onSecondary),
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+            modifier = Modifier.padding(horizontal = Size.tiny, vertical = 2.dp),
         )
     }
 }

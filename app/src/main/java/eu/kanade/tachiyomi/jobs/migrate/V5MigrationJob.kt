@@ -13,12 +13,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.lang.chop
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.coroutineScope
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class V5MigrationJob(private val context: Context, workerParams: WorkerParameters) :
@@ -58,7 +57,7 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
             )
             return@coroutineScope Result.success()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e) { "error with v5 migration follows" }
+            TimberKt.e(e) { "error with v5 migration follows" }
             return@coroutineScope Result.failure()
         }
     }

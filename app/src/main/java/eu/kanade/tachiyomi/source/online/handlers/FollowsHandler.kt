@@ -12,28 +12,27 @@ import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthorizedUserService
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaUUID
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -41,8 +40,8 @@ import uy.kohesive.injekt.injectLazy
 class FollowsHandler {
 
     val preferences: PreferencesHelper by injectLazy()
-    val statusHandler: StatusHandler by injectLazy()
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkHelper>().authService }
+    private val statusHandler: StatusHandler by injectLazy()
+    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
 
     /**
      * fetch all follows
@@ -66,7 +65,7 @@ class FollowsHandler {
                         Ok(allFollowsParser(allResults, readingFuture.await()))
                     }
             }.getOrElse {
-                loggycat(LogPriority.ERROR, it) { "Error fetching all follows" }
+                TimberKt.e(it) { "Error fetching all follows" }
                 Err(ResultError.Generic("Unknown error fetching all follows"))
             }
         }
@@ -89,7 +88,7 @@ class FollowsHandler {
     }
 
     private fun allFollowsParser(mangaDataDtoList: List<MangaDataDto>, readingStatusMap: Map<String, String?>): List<SourceManga> {
-        val coverQuality = preferences.thumbnailQuality()
+        val coverQuality = preferences.thumbnailQuality().get()
         return mangaDataDtoList.asSequence().map {
             val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
             it.toSourceManga(coverQuality, displayTextRes = followStatus.stringRes)
@@ -125,10 +124,11 @@ class FollowsHandler {
                 val response =
                     authService.updateReadingStatusForManga(mangaId, readingStatusDto)
             ) {
-                is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*> -> {
+                is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception -> {
                     response.log("trying to update reading status for manga $mangaId")
                     false
                 }
+
                 else -> true
             }
         }
@@ -192,7 +192,7 @@ class FollowsHandler {
                 ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaUUID]
             val track = Track.create(TrackManager.MDLIST).apply {
                 status = followStatus.int
-                tracking_url = "$baseUrl/title/$mangaUUID"
+                tracking_url = "${MdConstants.baseUrl}/title/$mangaUUID"
                 score = rating?.rating?.toFloat() ?: 0f
             }
             return@withContext track

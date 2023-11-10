@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.category.toCategoryItem
 import org.nekomanga.domain.category.toDbCategory
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
@@ -29,6 +30,7 @@ class DisplayPresenter(
     displayScreenType: DisplayScreenType,
     private val displayRepository: DisplayRepository = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val libraryPreferences: LibraryPreferences = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
 ) : BaseCoroutinePresenter<DisplayController>() {
 
@@ -38,9 +40,9 @@ class DisplayPresenter(
             title = (displayScreenType as? DisplayScreenType.List)?.title ?: "",
             titleRes = (displayScreenType as? DisplayScreenType.LatestChapters)?.titleRes ?: (displayScreenType as? DisplayScreenType.RecentlyAdded)?.titleRes
             ?: (displayScreenType as? DisplayScreenType.PopularNewTitles)?.titleRes,
-            outlineCovers = preferences.outlineOnCovers().get(),
-            isComfortableGrid = preferences.libraryLayout().get() == 2,
-            rawColumnCount = preferences.gridSize().get(),
+            outlineCovers = libraryPreferences.outlineOnCovers().get(),
+            isComfortableGrid = libraryPreferences.layout().get() == 2,
+            rawColumnCount = libraryPreferences.gridSize().get(),
             showLibraryEntries = preferences.browseShowLibrary().get(),
         ),
     )
@@ -72,7 +74,7 @@ class DisplayPresenter(
         },
         onSuccess = { hasNextPage, items, newKey ->
             _displayScreenState.update {
-                val allDisplayManga = _displayScreenState.value.allDisplayManga + items
+                val allDisplayManga = (_displayScreenState.value.allDisplayManga + items).distinct()
                 it.copy(
                     isLoading = false,
                     page = newKey,
@@ -100,18 +102,16 @@ class DisplayPresenter(
         }
 
         presenterScope.launch {
-            preferences.browseAsList().asFlow().collectLatest {
+            preferences.browseAsList().changes().collectLatest {
                 _displayScreenState.update { state ->
                     state.copy(isList = it)
                 }
             }
         }
         presenterScope.launch {
-            preferences.browseShowLibrary().asFlow().collectLatest { show ->
-                presenterScope.launch {
-                    _displayScreenState.update {
-                        it.copy(showLibraryEntries = show, filteredDisplayManga = it.allDisplayManga.filterVisibility(preferences).toImmutableList())
-                    }
+            preferences.browseShowLibrary().changes().collectLatest { show ->
+                _displayScreenState.update {
+                    it.copy(showLibraryEntries = show, filteredDisplayManga = it.allDisplayManga.filterVisibility(preferences).toImmutableList())
                 }
             }
         }
@@ -138,7 +138,7 @@ class DisplayPresenter(
             updateDisplayManga(mangaId, editManga.favorite)
 
             if (editManga.favorite) {
-                val defaultCategory = preferences.defaultCategory()
+                val defaultCategory = preferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
                     _displayScreenState.value.categories.firstOrNull {

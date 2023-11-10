@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.databinding.ReaderGeneralLayoutBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
@@ -41,17 +39,11 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             } ?: 0,
         )
 
-        binding.backgroundColor.bindToPreference(preferences.readerTheme(), 0)
-        binding.showPageNumber.bindToPreference(preferences.showPageNumber())
-        binding.fullscreen.bindToPreference(preferences.fullscreen())
-        binding.keepscreen.bindToPreference(preferences.keepScreenOn())
-        binding.alwaysShowChapterTransition.bindToPreference(preferences.alwaysShowChapterTransition())
-    }
-
-    fun checkIfShouldDisableReadingMode() {
-        if (activity.viewModel.manga?.isLongStrip() == true) {
-            binding.viewerSeries.setDisabledState(R.string.webtoon_cannot_change)
-        }
+        binding.backgroundColor.bindToPreference(readerPreferences.readerTheme(), 0)
+        binding.showPageNumber.bindToPreference(readerPreferences.showPageNumber())
+        binding.fullscreen.bindToPreference(readerPreferences.fullscreen())
+        binding.keepscreen.bindToPreference(readerPreferences.keepScreenOn())
+        binding.alwaysShowChapterTransition.bindToPreference(readerPreferences.alwaysShowChapterTransition())
     }
 
     /**

@@ -36,14 +36,13 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isLegacyMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.FileOutputStream
 import kotlin.math.max
 import kotlinx.serialization.protobuf.ProtoBuf
-import logcat.LogPriority
 import okio.buffer
 import okio.gzip
 import okio.sink
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class BackupManager(val context: Context) {
@@ -87,8 +86,7 @@ class BackupManager(val context: Context) {
 
                     // Delete older backups
                     val numberOfBackups = preferences.numberOfBackups().get()
-                    val backupRegex = Regex("""neko_\d+-\d+-\d+_\d+-\d+.proto.gz""")
-                    dir.listFiles { _, filename -> backupRegex.matches(filename) }
+                    dir.listFiles { _, filename -> Backup.filenameRegex.matches(filename) }
                         .orEmpty()
                         .sortedByDescending { it.name }
                         .drop(numberOfBackups - 1)
@@ -122,7 +120,7 @@ class BackupManager(val context: Context) {
 
             return fileUri.toString()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "error creating backup file" }
             file?.delete()
             throw e
         }

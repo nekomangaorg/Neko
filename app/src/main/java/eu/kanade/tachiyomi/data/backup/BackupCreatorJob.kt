@@ -15,10 +15,9 @@ import androidx.work.workDataOf
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.concurrent.TimeUnit
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -39,7 +38,7 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
             if (!isAutoBackup) notifier.showBackupComplete(UniFile.fromUri(context, location.toUri()))
             Result.success()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e)
             if (!isAutoBackup) notifier.showBackupError(e.message)
             Result.failure()
         } finally {

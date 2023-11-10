@@ -5,24 +5,23 @@ import android.content.Intent
 import android.view.Window
 import android.view.WindowManager
 import androidx.biometric.BiometricManager
-import eu.kanade.tachiyomi.data.preference.PreferenceValues
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import java.util.Date
+import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 
 object SecureActivityDelegate {
 
-    private val preferences by injectLazy<PreferencesHelper>()
+    private val securityPreferences by injectLazy<SecurityPreferences>()
 
     var locked: Boolean = true
 
     fun setSecure(activity: Activity?) {
-        val incognitoMode = preferences.incognitoMode().get()
-        val enabled = when (preferences.secureScreen().get()) {
-            PreferenceValues.SecureScreenMode.ALWAYS -> true
-            PreferenceValues.SecureScreenMode.INCOGNITO -> incognitoMode
+        val incognitoMode = securityPreferences.incognitoMode().get()
+        val enabled = when (securityPreferences.secureScreen().get()) {
+            SecurityPreferences.SecureScreenMode.ALWAYS -> true
+            SecurityPreferences.SecureScreenMode.INCOGNITO -> incognitoMode
             else -> false
         }
         activity?.window?.setSecureScreen(enabled)
@@ -38,8 +37,10 @@ object SecureActivityDelegate {
 
     fun promptLockIfNeeded(activity: Activity?, requireSuccess: Boolean = false) {
         if (activity == null || AuthenticatorUtil.isAuthenticating) return
-        val lockApp = preferences.useBiometrics().get()
-        if (lockApp && BiometricManager.from(activity).canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS) {
+        val lockApp = securityPreferences.useBiometrics().get()
+        if (lockApp && BiometricManager.from(activity)
+                .canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS
+        ) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
                 intent.putExtra("fromSearch", (activity is SearchActivity) && !requireSuccess)
@@ -47,12 +48,12 @@ object SecureActivityDelegate {
                 activity.overridePendingTransition(0, 0)
             }
         } else if (lockApp) {
-            preferences.useBiometrics().set(false)
+            securityPreferences.useBiometrics().set(false)
         }
     }
 
     fun shouldBeLocked(): Boolean {
-        val lockApp = preferences.useBiometrics().get()
+        val lockApp = securityPreferences.useBiometrics().get()
         if (lockApp && isAppLocked()) return true
         return false
     }
@@ -60,8 +61,8 @@ object SecureActivityDelegate {
     private fun isAppLocked(): Boolean {
         return locked &&
             (
-                preferences.lockAfter().get() <= 0 ||
-                    Date().time >= preferences.lastUnlock().get() + 60 * 1000 * preferences
+                securityPreferences.lockAfter().get() <= 0 ||
+                    Date().time >= securityPreferences.lastUnlock().get() + 60 * 1000 * securityPreferences
                     .lockAfter().get()
                 )
     }

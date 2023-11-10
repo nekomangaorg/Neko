@@ -8,18 +8,12 @@ buildscript {
 }
 
 plugins {
-    alias(androidx.plugins.application) apply false
-    alias(androidx.plugins.library) apply false
-    alias(kotlinx.plugins.android) apply false
+    id(androidx.plugins.application.get().pluginId) apply false
+    id(androidx.plugins.library.get().pluginId) apply false
+    id(kotlinx.plugins.android.get().pluginId) apply false
     alias(libs.plugins.kotlinter)
 }
 
-
-subprojects {
-    apply<org.jmailen.gradle.kotlinter.KotlinterPlugin>()
-}
-
-
 tasks.register("clean", Delete::class) {
-    delete(rootProject.buildDir)
+    delete(rootProject.layout.buildDirectory)
 }

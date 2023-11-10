@@ -56,8 +56,8 @@ import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
 import org.nekomanga.presentation.screens.feed.FeedPage
-import org.nekomanga.presentation.theme.Padding
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedScreen(
@@ -155,9 +155,9 @@ fun FeedScreen(
                     PaddingValues(
                         top = incomingContentPadding.calculateTopPadding(),
                         bottom = if (sideNav) {
-                            Padding.navBarSize
+                            Size.navBarSize
                         } else {
-                            Padding.navBarSize
+                            Size.navBarSize
                         } + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
                     )
 

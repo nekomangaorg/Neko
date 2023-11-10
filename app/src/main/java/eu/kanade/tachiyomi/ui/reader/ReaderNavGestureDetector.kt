@@ -19,11 +19,12 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
     }
 
     override fun onScroll(
-        e1: MotionEvent,
+        e: MotionEvent?,
         e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
+        val e1 = e ?: return false
         val newDistanceX = e1.rawX - e2.rawX
         val newDistanceY = e1.rawY - e2.rawY
         if ((!hasScrollHorizontal || lockVertical)) {
@@ -36,11 +37,12 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
     }
 
     override fun onFling(
-        e1: MotionEvent,
+        e: MotionEvent?,
         e2: MotionEvent,
         velocityX: Float,
         velocityY: Float,
     ): Boolean {
+        val e1 = e ?: return false
         var result = false
         val diffY = e2.y - e1.y
         val diffX = e2.x - e1.x

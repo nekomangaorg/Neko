@@ -23,7 +23,7 @@ class RecentsGeneralView @JvmOverloads constructor(context: Context, attrs: Attr
         binding.showRemoveHistory.bindToPreference(preferences.showRecentsRemHistory())
         binding.showReadInAll.bindToPreference(preferences.showReadInAllRecents())
         binding.showTitleFirst.bindToPreference(preferences.showTitleFirstInRecents())
-        binding.uniformCovers.bindToPreference(preferences.uniformGrid())
-        binding.outlineOnCovers.bindToPreference(preferences.outlineOnCovers())
+        binding.uniformCovers.bindToPreference(libraryPreferences.uniformGrid())
+        binding.outlineOnCovers.bindToPreference(libraryPreferences.outlineOnCovers())
     }
 }

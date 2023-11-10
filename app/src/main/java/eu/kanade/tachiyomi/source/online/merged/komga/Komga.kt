@@ -3,30 +3,28 @@ package eu.kanade.tachiyomi.source.online.merged.komga
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.ReducedHttpSource
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
 import okhttp3.Credentials
 import okhttp3.Dns
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
+import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
+import tachiyomi.core.network.await
 import uy.kohesive.injekt.injectLazy
 
 class Komga : ReducedHttpSource() {
@@ -38,7 +36,7 @@ class Komga : ReducedHttpSource() {
     private val json: Json by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
 
-    fun hostUrl() = preferences.sourceUrl(this) ?: ""
+    fun hostUrl() = preferences.sourceUrl(this).get()
 
     suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
@@ -49,16 +47,16 @@ class Komga : ReducedHttpSource() {
     }
 
     fun hasCredentials(): Boolean {
-        val username = preferences.sourceUsername(this@Komga) ?: ""
-        val password = preferences.sourcePassword(this@Komga) ?: ""
+        val username = preferences.sourceUsername(this@Komga).get()
+        val password = preferences.sourcePassword(this@Komga).get()
         val url = hostUrl()
         return listOf(username, password, url).none { it.isBlank() }
     }
 
     suspend fun isLoggedIn(): Boolean {
         return withIOContext {
-            val username = preferences.sourceUsername(this@Komga) ?: ""
-            val password = preferences.sourcePassword(this@Komga) ?: ""
+            val username = preferences.sourceUsername(this@Komga).get()
+            val password = preferences.sourcePassword(this@Komga).get()
             val url = hostUrl()
             if (listOf(username, password, url).any { it.isBlank() }) {
                 return@withIOContext false
@@ -93,7 +91,7 @@ class Komga : ReducedHttpSource() {
             .build()
     }
 
-    fun customClient() = createClient(preferences.sourceUsername(this)!!, preferences.sourcePassword(this)!!)
+    fun customClient() = createClient(preferences.sourceUsername(this).get(), preferences.sourcePassword(this).get())
 
     override suspend fun searchManga(query: String): List<SManga> {
         if (hostUrl().isBlank()) {
@@ -146,7 +144,7 @@ class Komga : ReducedHttpSource() {
                 }
                 return@runCatching r.sortedByDescending { it.chapter_number }
             }.mapError {
-                loggycat(LogPriority.ERROR, it)
+                TimberKt.e(it) { "Error fetching komga chapters" }
                 (it.localizedMessage ?: "Komga Error").toResultError()
             }
         }

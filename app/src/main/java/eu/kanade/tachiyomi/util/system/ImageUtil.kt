@@ -18,6 +18,7 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.webkit.MimeTypeMap
 import androidx.annotation.ColorInt
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
@@ -34,9 +35,11 @@ import java.net.URLConnection
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-import logcat.LogPriority
+import kotlin.math.roundToInt
+import org.nekomanga.logging.TimberKt
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder
+import timber.log.Timber
 
 object ImageUtil {
 
@@ -54,8 +57,8 @@ object ImageUtil {
     }
 
     fun findImageType(stream: InputStream): ImageType? {
-        try {
-            return when (getImageType(stream)?.format) {
+        return try {
+            when (getImageType(stream)?.format) {
                 Format.Avif -> ImageType.AVIF
                 Format.Gif -> ImageType.GIF
                 Format.Heif -> ImageType.HEIF
@@ -66,8 +69,9 @@ object ImageUtil {
                 else -> null
             }
         } catch (e: Exception) {
+            TimberKt.e(e) { "Error getting image type from stream" }
+            null
         }
-        return null
     }
 
     fun resizeBitMapDrawable(drawable: Drawable, resources: Resources?, size: Int): Drawable? {
@@ -101,6 +105,7 @@ object ImageUtil {
                 else -> false
             }
         } catch (e: Exception) {
+            TimberKt.e(e) { "Error is animated image type" }
         }
         return false
     }
@@ -524,35 +529,6 @@ object ImageUtil {
             return true
         }
 
-        val options = extractImageOptions(imageFile.openInputStream(), resetAfterExtraction = false).apply { inJustDecodeBounds = false }
-        // Values are stored as they get modified during split loop
-        val imageHeight = options.outHeight
-        val imageWidth = options.outWidth
-
-        val splitHeight = (displayMaxHeightInPx * 1.5).toInt()
-        // -1 so it doesn't try to split when imageHeight = getDisplayHeightInPx
-        val partCount = (imageHeight - 1) / splitHeight + 1
-
-        val optimalSplitHeight = imageHeight / partCount
-
-        val splitDataList = (0 until partCount).fold(mutableListOf<SplitData>()) { list, index ->
-            list.apply {
-                // Only continue if the list is empty or there is image remaining
-                if (isEmpty() || imageHeight > last().bottomOffset) {
-                    val topOffset = index * optimalSplitHeight
-                    var outputImageHeight = min(optimalSplitHeight, imageHeight - topOffset)
-
-                    val remainingHeight = imageHeight - (topOffset + outputImageHeight)
-                    // If remaining height is smaller or equal to 1/3th of
-                    // optimal split height then include it in current page
-                    if (remainingHeight <= (optimalSplitHeight / 3)) {
-                        outputImageHeight += remainingHeight
-                    }
-                    add(SplitData(index, topOffset, outputImageHeight))
-                }
-            }
-        }
-
         val bitmapRegionDecoder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             BitmapRegionDecoder.newInstance(imageFile.openInputStream())
         } else {
@@ -561,27 +537,28 @@ object ImageUtil {
         }
 
         if (bitmapRegionDecoder == null) {
-            loggycat { "Failed to create new instance of BitmapRegionDecoder" }
+            TimberKt.d { "Failed to create new instance of BitmapRegionDecoder" }
             return false
         }
 
-        loggycat {
-            "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split"
+        val options = extractImageOptions(imageFile.openInputStream(), resetAfterExtraction = false).apply {
+            inJustDecodeBounds = false
         }
+        val splitDataList = options.splitData
 
         return try {
             splitDataList.forEach { splitData ->
                 val splitPath = splitImagePath(imageFilePath, splitData.index)
 
-                val region = Rect(0, splitData.topOffset, imageWidth, splitData.bottomOffset)
+                val region = Rect(0, splitData.topOffset, splitData.splitWidth, splitData.bottomOffset)
 
                 FileOutputStream(splitPath).use { outputStream ->
                     val splitBitmap = bitmapRegionDecoder.decodeRegion(region, options)
                     splitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                     splitBitmap.recycle()
                 }
-                loggycat {
-                    "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} height=${splitData.outputImageHeight} bottomOffset=${splitData.bottomOffset}"
+                TimberKt.d {
+                    "Success: Split #${splitData.index + 1} with topOffset=${splitData.topOffset} height=${splitData.splitHeight} bottomOffset=${splitData.bottomOffset}"
                 }
             }
             imageFile.delete()
@@ -591,8 +568,8 @@ object ImageUtil {
             splitDataList
                 .map { splitImagePath(imageFilePath, it.index) }
                 .forEach { File(it).delete() }
-            loggycat(LogPriority.ERROR, e)
-            return false
+            TimberKt.e(e) { "Error splitting image" }
+            false
         } finally {
             bitmapRegionDecoder.recycle()
         }
@@ -601,12 +578,47 @@ object ImageUtil {
     private fun splitImagePath(imageFilePath: String, index: Int) =
         imageFilePath.substringBeforeLast(".") + "__${"%03d".format(index + 1)}.jpg"
 
+    private val BitmapFactory.Options.splitData
+        get(): List<SplitData> {
+            val imageHeight = outHeight
+            val imageWidth = outWidth
+
+            val optimalImageHeight = displayMaxHeightInPx * 2
+
+            // -1 so it doesn't try to split when imageHeight = optimalImageHeight
+            val partCount = (imageHeight - 1) / optimalImageHeight + 1
+            val optimalSplitHeight = imageHeight / partCount
+
+            Timber.d(
+                "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split",
+            )
+
+            return mutableListOf<SplitData>().apply {
+                val range = 0 until partCount
+                for (index in range) {
+                    // Only continue if the list is empty or there is image remaining
+                    if (isNotEmpty() && imageHeight <= last().bottomOffset) break
+
+                    val topOffset = index * optimalSplitHeight
+                    var splitHeight = min(optimalSplitHeight, imageHeight - topOffset)
+
+                    if (index == range.last) {
+                        val remainingHeight = imageHeight - (topOffset + splitHeight)
+                        splitHeight += remainingHeight
+                    }
+
+                    add(SplitData(index, topOffset, splitHeight, imageWidth))
+                }
+            }
+        }
+
     data class SplitData(
         val index: Int,
         val topOffset: Int,
-        val outputImageHeight: Int,
+        val splitHeight: Int,
+        val splitWidth: Int,
     ) {
-        val bottomOffset = topOffset + outputImageHeight
+        val bottomOffset = topOffset + splitHeight
     }
 
     private val Bitmap.rect: Rect
@@ -618,11 +630,107 @@ object ImageUtil {
             abs(color1.blue - color2.blue) < 30
     }
 
+    /**
+     * Returns if this bitmap matches what would be (if rightSide param is true)
+     * the single left side page, or the second page to read in an RTL book, first in an LTR book.
+     *
+     * @return An int based on confidence, 0 meaning not padded, 1 meaning barely padded,
+     * 2 meaning likely padded, 3 meaining definitely padded
+     * @param rightSide: When true, check if it's a single left side page, else right side
+     */
+    fun Bitmap.isPagePadded(rightSide: Boolean): Int {
+        val booleans = listOf(true, false)
+        return when {
+            booleans.any { isSidePadded(!rightSide, checkWhite = it) > 1 } -> 0
+            booleans.any {
+                when (isSidePadded(rightSide, checkWhite = it)) {
+                    2 -> true
+                    1 -> isSideLonger(rightSide, checkWhite = it)
+                    else -> false
+                }
+            } -> 3
+
+            booleans.any { isSideLonger(rightSide, checkWhite = it) } -> 2
+            booleans.any { isOneSideMorePadded(rightSide, checkWhite = it) } -> 1
+            else -> 0
+        }
+    }
+
+    /**
+     * Returns if one side has a vertical padding and the other side does not,
+     * 2 for def, 1 for maybe, 0 if not at all
+     */
+    private fun Bitmap.isSidePadded(rightSide: Boolean, checkWhite: Boolean, halfCheck: Boolean = false): Int {
+        val left = (width * 0.0275).toInt()
+        val right = width - left
+        val paddedSide = if (rightSide) right else left
+        val unPaddedSide = if (!rightSide) right else left
+        val paddedCount = (1 until 50).count {
+            // if all of a side is padded (the left page usually has a white padding on the right when scanned)
+            getPixel(paddedSide, (height * (it / 50f)).roundToInt()).isWhiteOrDark(checkWhite)
+        }
+        val isNotFullyUnPadded = !(1 until 50).all {
+            // and if all of the other side isn't padded
+            getPixel(unPaddedSide, (height * (it / 50f)).roundToInt()).isWhiteOrDark(checkWhite)
+        }
+        return if (isNotFullyUnPadded) {
+            if (paddedCount == 49) 2 else if (paddedCount >= (if (halfCheck) 25 else 47)) 1 else 0
+        } else {
+            0
+        }
+    }
+
+    /** Returns if one side has a longer streak (of white or black) than the other */
+    private fun Bitmap.isSideLonger(rightSide: Boolean, checkWhite: Boolean): Boolean {
+        if (isSidePadded(rightSide, checkWhite, true) == 0) return false
+        val left = (width * 0.0275).toInt()
+        val right = width - left
+        val step = 70
+        val list = listOf((1 until step), (1 until step).reversed())
+        val streakFunc: (Int) -> Int = { side ->
+            list.maxOf { range ->
+                var count = 0
+                for (it in range) {
+                    val pixel = getPixel(side, (height * (it / step.toFloat())).roundToInt())
+                    if (pixel.isWhiteOrDark(checkWhite)) ++count else return@maxOf count
+                }
+                count
+            }
+        }
+        val paddedSide = if (rightSide) right else left
+        val unPaddedSide = if (!rightSide) right else left
+        return streakFunc(paddedSide) > streakFunc(unPaddedSide)
+    }
+
+    /** Returns if one side is more horizontally padded than the other */
+    private fun Bitmap.isOneSideMorePadded(rightSide: Boolean, checkWhite: Boolean): Boolean {
+        val middle = (height * 0.475).roundToInt()
+        val middle2 = (height * 0.525).roundToInt()
+        val widthFactor = max(1, (width / 400f).roundToInt())
+        val paddedSide: (Int) -> Int = { if (!rightSide) width - it * widthFactor else it * widthFactor }
+        val unPaddedSide: (Int) -> Int = { if (rightSide) width - it * widthFactor else it * widthFactor }
+        return run stop@{
+            (1 until 37).any {
+                if (!getPixel(paddedSide(it), middle).isWhiteOrDark(checkWhite)) return@stop false
+                if (!getPixel(paddedSide(it), middle2).isWhiteOrDark(checkWhite)) return@stop false
+                !getPixel(unPaddedSide(it), middle).isWhiteOrDark(checkWhite) ||
+                    !getPixel(unPaddedSide(it), middle2).isWhiteOrDark(checkWhite)
+            }
+        }
+    }
+
+    private fun Int.isWhiteOrDark(checkWhite: Boolean): Boolean =
+        if (checkWhite) isWhite else isDark
+
     private val Int.isWhite: Boolean
         get() = red + blue + green > 740
 
     private val Int.isDark: Boolean
-        get() = red < 40 && blue < 40 && green < 40 && alpha > 200
+        get() {
+            val bgArray = FloatArray(3)
+            ColorUtils.colorToHSL(this, bgArray)
+            return red < 40 && blue < 40 && green < 40 && alpha > 200 && bgArray[1] <= 0.2f
+        }
 
     fun getPercentOfColor(
         @ColorInt color: Int,

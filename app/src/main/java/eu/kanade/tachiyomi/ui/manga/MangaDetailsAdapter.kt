@@ -6,11 +6,14 @@ import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.injectLazy
 
 class MangaDetailsAdapter : BaseChapterAdapter<IFlexible<*>>(null) {
 
     val preferences: PreferencesHelper by injectLazy()
+
+    val mangaDetailsPreferences: MangaDetailsPreferences by injectLazy()
 
     val hasShownSwipeTut
         get() = preferences.shownChapterSwipeTutorial()

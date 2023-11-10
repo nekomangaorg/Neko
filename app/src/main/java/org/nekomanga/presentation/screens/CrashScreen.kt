@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import kotlinx.coroutines.launch
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun CrashScreen(
@@ -54,8 +54,8 @@ fun CrashScreen(
                             strokeWidth.value,
                         )
                     }
-                    .padding(horizontal = Padding.medium, vertical = Padding.small),
-                verticalArrangement = Arrangement.spacedBy(Padding.small),
+                    .padding(horizontal = Size.medium, vertical = Size.small),
+                verticalArrangement = Arrangement.spacedBy(Size.small),
             ) {
                 Button(
                     onClick = {
@@ -79,7 +79,7 @@ fun CrashScreen(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(horizontal = Padding.medium)
+                .padding(horizontal = Size.medium)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -94,12 +94,12 @@ fun CrashScreen(
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(
-                text = stringResource(R.string.crash_screen_description, stringResource(id = R.string.app_name)),
-                modifier = Modifier.padding(horizontal = Padding.medium),
+                text = stringResource(R.string.crash_screen_description, stringResource(id = R.string.app_name_neko)),
+                modifier = Modifier.padding(horizontal = Size.medium),
             )
             Box(
                 modifier = Modifier
-                    .padding(vertical = Padding.small)
+                    .padding(vertical = Size.small)
                     .clip(MaterialTheme.shapes.small)
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -107,7 +107,7 @@ fun CrashScreen(
                 Text(
                     text = exception.toString(),
                     fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    modifier = Modifier.padding(all = Padding.small),
+                    modifier = Modifier.padding(all = Size.small),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

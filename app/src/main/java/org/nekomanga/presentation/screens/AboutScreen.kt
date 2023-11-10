@@ -2,7 +2,9 @@ package org.nekomanga.presentation.screens
 
 import ToolTipButton
 import android.content.Context
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,8 +30,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import compose.icons.SimpleIcons
 import compose.icons.simpleicons.Facebook
 import compose.icons.simpleicons.Github
@@ -49,7 +49,7 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.dialog.AppUpdateDialog
 import org.nekomanga.presentation.components.snackbar.snackbarHost
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun AboutScreen(
@@ -113,6 +113,7 @@ fun AboutScreen(
                         BuildConfig.DEBUG -> {
                             "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
                         }
+
                         else -> {
                             "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
                         }
@@ -173,8 +174,8 @@ fun AboutScreen(
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(Padding.medium),
-                    mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
+                        .padding(Size.medium),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     val modifier = Modifier.size(24.dp)
                     LinkIcon(

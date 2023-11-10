@@ -9,13 +9,14 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import java.io.File
+import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -25,7 +26,7 @@ import uy.kohesive.injekt.api.get
 class V5MigrationService(
     private val db: DatabaseHelper = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
-    private val networkHelper: NetworkHelper = Injekt.get(),
+    private val networkServices: NetworkServices = Injekt.get(),
 ) {
 
     // List containing failed updates
@@ -66,7 +67,7 @@ class V5MigrationService(
             // We skip mangaList which have already been converted (non-numeric ids)
             var mangaErroredOut = false
             if (isNumericId) {
-                val responseDto = networkHelper.service.legacyMapping(
+                val responseDto = networkServices.service.legacyMapping(
                     LegacyIdDto(
                         type = "manga",
                         listOf(oldMangaId.toInt()),
@@ -82,15 +83,16 @@ class V5MigrationService(
                         db.insertManga(manga).executeAsBlocking()
                         val tracks = db.getTracks(manga).executeAsBlocking()
                         tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
-                            it.tracking_url = MdUtil.baseUrl + manga.url
+                            it.tracking_url = MdConstants.baseUrl + manga.url
                             db.insertTrack(it).executeAsBlocking()
                         }
                         actualMigrated++
                     }
-                    is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*>,
+
+                    is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception,
                     -> {
                         responseDto.log(" trying to map legacy id")
-                        if (responseDto is ApiResponse.Failure.Exception<*>) {
+                        if (responseDto is ApiResponse.Failure.Exception) {
                             failedUpdatesMangaList[manga] = "error processing"
                             failedUpdatesErrors.add(manga.title + ": error processing")
                         } else {
@@ -118,7 +120,7 @@ class V5MigrationService(
 
                 chapterChunks.asSequence().forEach { legacyIds ->
                     val responseDto =
-                        networkHelper.service.legacyMapping(
+                        networkServices.service.legacyMapping(
                             LegacyIdDto(
                                 "chapter",
                                 legacyIds,
@@ -132,12 +134,13 @@ class V5MigrationService(
                                 val newId = dataDto.attributes.newId
                                 val chapter = chapterMap[oldId]!!
                                 chapter.mangadex_chapter_id = newId
-                                chapter.url = MdUtil.chapterSuffix + newId
+                                chapter.url = MdConstants.chapterSuffix + newId
                                 chapter.old_mangadex_id = oldId.toString()
                                 db.insertChapter(chapter).executeAsBlocking()
                             }
                         }
-                        is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*>,
+
+                        is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception,
                         -> {
                             legacyIds.forEach {
                                 val failedChapter = chapterMap[it]!!
@@ -171,7 +174,7 @@ class V5MigrationService(
     private fun finishUpdates(
         context: Context,
         errorNotification: (List<String>, Uri?) -> Unit,
-        completeNotificaton: (Int) -> Unit,
+        completeNotification: (Int) -> Unit,
     ) {
         if (failedUpdatesMangaList.isNotEmpty() || failedUpdatesChapters.isNotEmpty()) {
             val errorFile = writeErrorFile(context, failedUpdatesErrors)
@@ -181,7 +184,7 @@ class V5MigrationService(
                 errorFile.getUriCompat(context),
             )
         }
-        completeNotificaton(actualMigrated)
+        completeNotification(actualMigrated)
     }
 
     /**

@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -36,18 +35,20 @@ import eu.kanade.tachiyomi.util.system.notification
 import java.security.Security
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import logcat.AndroidLogcatLogger
-import logcat.LogPriority
-import logcat.LogcatLogger
 import org.conscrypt.Conscrypt
+import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.logging.CrashReportingTree
+import org.nekomanga.logging.DebugReportingTree
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.injectLazy
-import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 open class App : Application(), DefaultLifecycleObserver {
 
     val preferences: PreferencesHelper by injectLazy()
+    val networkPreferences: NetworkPreferences by injectLazy()
+    val securityPreferences: SecurityPreferences by injectLazy()
 
     private val disableIncognitoReceiver = DisableIncognitoReceiver()
 
@@ -74,12 +75,16 @@ open class App : Application(), DefaultLifecycleObserver {
             if (packageName != process) kotlin.runCatching { WebView.setDataDirectorySuffix(process) }
         }
 
-        Injekt = InjektScope(DefaultRegistrar())
+        Injekt.importModule(PreferenceModule(this))
         Injekt.importModule(AppModule(this))
 
-        if (!LogcatLogger.isInstalled && (preferences.verboseLogging())) {
-            LogcatLogger.install(AndroidLogcatLogger(LogPriority.VERBOSE))
+        if (!BuildConfig.DEBUG) {
+            TimberKt.plant(CrashReportingTree())
         }
+        if (networkPreferences.verboseLogging().get()) {
+            TimberKt.plant(DebugReportingTree())
+        }
+
 
         CoilSetup(this)
         setupNotificationChannels()
@@ -90,12 +95,12 @@ open class App : Application(), DefaultLifecycleObserver {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         MangaCoverMetadata.load()
-        preferences.nightMode()
-            .asImmediateFlow { AppCompatDelegate.setDefaultNightMode(it) }
-            .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
+        preferences.nightMode().changes().onEach {
+            AppCompatDelegate.setDefaultNightMode(it)
+        }.launchIn((ProcessLifecycleOwner.get().lifecycleScope))
 
         // Show notification to disable Incognito Mode when it's enabled
-        preferences.incognitoMode().asFlow()
+        securityPreferences.incognitoMode().changes()
             .onEach { enabled ->
                 val notificationManager = NotificationManagerCompat.from(this)
                 if (enabled) {
@@ -125,7 +130,7 @@ open class App : Application(), DefaultLifecycleObserver {
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        if (!AuthenticatorUtil.isAuthenticating && preferences.lockAfter().get() >= 0) {
+        if (!AuthenticatorUtil.isAuthenticating && securityPreferences.lockAfter().get() >= 0) {
             SecureActivityDelegate.locked = true
         }
     }
@@ -149,7 +154,7 @@ open class App : Application(), DefaultLifecycleObserver {
         private var registered = false
 
         override fun onReceive(context: Context, intent: Intent) {
-            preferences.incognitoMode().set(false)
+            securityPreferences.incognitoMode().set(false)
         }
 
         fun register() {

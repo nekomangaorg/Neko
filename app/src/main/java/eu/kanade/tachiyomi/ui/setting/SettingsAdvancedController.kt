@@ -25,17 +25,8 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.PREF_DOH_360
-import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
-import eu.kanade.tachiyomi.network.PREF_DOH_ALIDNS
-import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
-import eu.kanade.tachiyomi.network.PREF_DOH_DNSPOD
-import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
-import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
-import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -45,10 +36,8 @@ import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
-import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import java.io.File
@@ -57,10 +46,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import logcat.LogPriority
+import org.nekomanga.core.network.NetworkPreferences
+import org.nekomanga.logging.TimberKt
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import tachiyomi.core.network.PREF_DOH_360
+import tachiyomi.core.network.PREF_DOH_ADGUARD
+import tachiyomi.core.network.PREF_DOH_ALIDNS
+import tachiyomi.core.network.PREF_DOH_CLOUDFLARE
+import tachiyomi.core.network.PREF_DOH_CONTROLD
+import tachiyomi.core.network.PREF_DOH_DNSPOD
+import tachiyomi.core.network.PREF_DOH_GOOGLE
+import tachiyomi.core.network.PREF_DOH_MULLVAD
+import tachiyomi.core.network.PREF_DOH_NJALLA
+import tachiyomi.core.network.PREF_DOH_QUAD101
+import tachiyomi.core.network.PREF_DOH_QUAD9
+import tachiyomi.core.network.PREF_DOH_SHECAN
+import tachiyomi.core.util.system.setDefaultSettings
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -68,6 +71,7 @@ import uy.kohesive.injekt.injectLazy
 class SettingsAdvancedController : SettingsController() {
 
     private val network: NetworkHelper by injectLazy()
+    private val networkPreferences: NetworkPreferences by injectLazy()
 
     private val chapterCache: ChapterCache by injectLazy()
 
@@ -104,7 +108,7 @@ class SettingsAdvancedController : SettingsController() {
         }
 
         switchPreference {
-            key = PreferenceKeys.verboseLogging
+            key = networkPreferences.verboseLogging().key()
             titleRes = R.string.verbose_logging
             summaryRes = R.string.verbose_logging_summary
             defaultValue = BuildConfig.DEBUG
@@ -239,7 +243,7 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
             intListPreference(activity) {
-                key = PreferenceKeys.dohProvider
+                key = networkPreferences.dohProvider().key()
                 titleRes = R.string.doh
                 entriesRes = arrayOf(
                     R.string.disabled,
@@ -251,6 +255,10 @@ class SettingsAdvancedController : SettingsController() {
                     R.string.dnsPod,
                     R.string.dns_360,
                     R.string.quad_101,
+                    R.string.mullvad,
+                    R.string.control_d,
+                    R.string.njalla,
+                    R.string.shecan,
                 )
                 entryValues = listOf(
                     -1,
@@ -262,6 +270,10 @@ class SettingsAdvancedController : SettingsController() {
                     PREF_DOH_DNSPOD,
                     PREF_DOH_360,
                     PREF_DOH_QUAD101,
+                    PREF_DOH_MULLVAD,
+                    PREF_DOH_CONTROLD,
+                    PREF_DOH_NJALLA,
+                    PREF_DOH_SHECAN,
                 )
 
                 defaultValue = -1
@@ -483,7 +495,7 @@ class SettingsAdvancedController : SettingsController() {
             activity?.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
             activity?.toast(R.string.webview_data_deleted)
         } catch (e: Throwable) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error clearing webview data" }
             activity?.toast(R.string.cache_delete_error)
         }
     }

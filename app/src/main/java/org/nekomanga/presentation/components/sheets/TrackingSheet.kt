@@ -59,6 +59,7 @@ import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TrackingSheet(
@@ -227,7 +228,7 @@ private fun NoTrack(themeColor: ThemeColorState, service: TrackServiceItem, onLo
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .height(48.dp)
+            .height(Size.huge)
             .clickable { searchTrackerClick() },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -318,15 +319,18 @@ private fun TrackRowTwo(track: TrackItem, service: TrackServiceItem, statusClick
                     track.totalChapters > 0 && track.lastChapterRead.toInt() == track.totalChapters -> stringResource(
                         R.string.all_chapters_read,
                     )
+
                     track.totalChapters > 0 -> stringResource(
                         R.string.chapter_x_of_y,
                         track.lastChapterRead.toInt(),
                         track.totalChapters,
                     )
+
                     track.lastChapterRead > 0 -> stringResource(
                         R.string.chapter_,
                         track.lastChapterRead.toInt().toString(),
                     )
+
                     else -> stringResource(R.string.not_started)
                 }
 
@@ -352,6 +356,7 @@ private fun TrackRowTwo(track: TrackItem, service: TrackServiceItem, statusClick
                         )
                     }
                 }
+
                 else -> Text(service.displayScore(track), color = MaterialTheme.colorScheme.onSurface)
             }
         }

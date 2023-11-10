@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,8 +32,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,24 +46,23 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.mikepenz.markdown.Markdown
-import com.mikepenz.markdown.MarkdownColors
-import com.mikepenz.markdown.MarkdownDefaults
-import com.skydoves.balloon.compose.Balloon
-import com.skydoves.balloon.compose.BalloonWindow
+import com.mikepenz.markdown.compose.Markdown
+import com.mikepenz.markdown.model.markdownColor
+import com.mikepenz.markdown.model.markdownTypography
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
+import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
-import org.nekomanga.presentation.theme.Padding
-import toolTipBuilder
+import org.nekomanga.presentation.theme.Size
 
 /**
  * Genre, alt titles, description
@@ -76,6 +76,7 @@ fun DescriptionBlock(
     altTitlesProvider: () -> ImmutableList<String>,
     genresProvider: () -> ImmutableList<String>,
     themeColorState: ThemeColorState,
+    wrapAltTitles: Boolean,
     isExpanded: Boolean,
     expandCollapseClick: () -> Unit = {},
     genreSearch: (String) -> Unit = {},
@@ -118,13 +119,13 @@ fun DescriptionBlock(
 
                 Markdown(
                     content = text,
-                    colors = markdownColors(),
-                    typography = markdownTypography(),
+                    colors = nekoMarkdownColors(),
+                    typography = nekoMarkdownTypography(),
                     flavour = CommonMarkFlavourDescriptor(),
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .fillMaxWidth()
-                        .heightIn(0.dp, descriptionHeight)
+                        .heightIn(Size.none, descriptionHeight)
                         .then(clickable),
                 )
 
@@ -152,10 +153,10 @@ fun DescriptionBlock(
                     themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
                     resetClick = altTitleResetClick,
-                    shouldWrap = true,
+                    shouldWrap = wrapAltTitles,
                 )
                 Gap(8.dp)
-                Genres(genresProvider(), tagColor, themeColorState.buttonColor, genreSearch, genreSearchLibrary)
+                Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
             }
             val text = descriptionProvider().trim()
@@ -163,8 +164,8 @@ fun DescriptionBlock(
             SelectionContainer {
                 Markdown(
                     content = text,
-                    colors = markdownColors(),
-                    typography = markdownTypography(),
+                    colors = nekoMarkdownColors(),
+                    typography = nekoMarkdownTypography(),
                     flavour = CommonMarkFlavourDescriptor(),
                     modifier = clickable,
                 )
@@ -175,14 +176,14 @@ fun DescriptionBlock(
                 AltTitles(
                     altTitles = altTitlesProvider(),
                     currentTitle = titleProvider(),
-                    shouldWrap = false,
+                    shouldWrap = wrapAltTitles,
                     tagColor = tagColor,
                     themeColorState = themeColorState,
                     altTitleClick = altTitleClick,
                     resetClick = altTitleResetClick,
                 )
                 Gap(16.dp)
-                Genres(genresProvider(), tagColor, themeColorState.buttonColor, genreSearch, genreSearchLibrary)
+                Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
                 MoreLessButton(
                     buttonColor = themeColorState.buttonColor,
@@ -218,7 +219,7 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
                 color = buttonColor,
             ),
         )
-        Gap(4.dp)
+        Gap(Size.tiny)
         Icon(modifier = Modifier.align(Alignment.CenterVertically), imageVector = icon, contentDescription = null, tint = buttonColor)
     }
 }
@@ -243,7 +244,7 @@ private fun AltTitles(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
         if (shouldWrap) {
-            flowableAltTitles(
+            FlowableAltTitles(
                 altTitles = altTitles,
                 currentTitle = currentTitle,
                 isCustomTitle = isCustomTitle,
@@ -254,7 +255,7 @@ private fun AltTitles(
                 onChipColor = onChipColor,
             )
         } else {
-            scrollableAltTitles(
+            ScrollableAltTitles(
                 altTitles = altTitles,
                 currentTitle = currentTitle,
                 isCustomTitle = isCustomTitle,
@@ -269,7 +270,7 @@ private fun AltTitles(
 }
 
 @Composable
-private fun flowableAltTitles(
+private fun FlowableAltTitles(
     altTitles: ImmutableList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
@@ -279,7 +280,7 @@ private fun flowableAltTitles(
     resetClick: () -> Unit,
     onChipColor: Color,
 ) {
-    FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisSpacing = Padding.small) {
+    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Size.small)) {
         if (isCustomTitle) {
             TextButton(onClick = resetClick) {
                 Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
@@ -305,7 +306,7 @@ private fun flowableAltTitles(
                         text = title,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier
-                            .padding(0.dp),
+                            .padding(Size.none),
                     )
                 },
             )
@@ -314,7 +315,7 @@ private fun flowableAltTitles(
 }
 
 @Composable
-private fun scrollableAltTitles(
+private fun ScrollableAltTitles(
     altTitles: ImmutableList<String>,
     currentTitle: String,
     isCustomTitle: Boolean,
@@ -330,15 +331,15 @@ private fun scrollableAltTitles(
             .layout { measurable, constraints ->
                 val placeable = measurable.measure(
                     constraints.copy(
-                        minWidth = constraints.maxWidth + Padding.medium.roundToPx(),
-                        maxWidth = constraints.maxWidth + Padding.medium.roundToPx(),
+                        minWidth = constraints.maxWidth + Size.medium.roundToPx(),
+                        maxWidth = constraints.maxWidth + Size.medium.roundToPx(),
                     ),
                 )
                 layout(placeable.width, placeable.height) {
                     placeable.place(0, 0)
                 }
             },
-        horizontalArrangement = Arrangement.spacedBy(Padding.extraSmall),
+        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isCustomTitle) {
@@ -370,7 +371,7 @@ private fun scrollableAltTitles(
                         text = title,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier
-                            .padding(0.dp),
+                            .padding(Size.none),
                     )
                 },
             )
@@ -380,7 +381,7 @@ private fun scrollableAltTitles(
 }
 
 @Composable
-private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, buttonColor: Color, genreSearch: (String) -> Unit, genreLibrarySearch: (String) -> Unit) {
+private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, themeColorState: ThemeColorState, genreSearch: (String) -> Unit, genreLibrarySearch: (String) -> Unit) {
     if (genres.isEmpty()) return
 
     Text(
@@ -401,84 +402,59 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, b
                 placeable.place(0, 0)
             }
         },
-        mainAxisAlignment = FlowMainAxisAlignment.Start,
-        mainAxisSpacing = 12.dp,
-        crossAxisSpacing = 12.dp,
+        horizontalArrangement = Arrangement.spacedBy(Size.smedium, Alignment.Start),
+        verticalArrangement = Arrangement.spacedBy(Size.smedium),
     ) {
-        genres.forEach { genre ->
-            var balloonWindow: BalloonWindow? by remember { mutableStateOf(null) }
+        var genreExpanded by remember { mutableStateOf(false) }
+        var genrePosition by remember { mutableIntStateOf(0) }
 
-            Balloon(
-                builder = toolTipBuilder(backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(tagColor, 16.dp), dismissable = false),
-                balloonContent = {
-                    genreBalloon(balloonWindow, genreSearch, genre, buttonColor, genreLibrarySearch)
+        genres.forEachIndexed { index, genre ->
+            Chip(
+                label = genre,
+                containerColor = tagColor,
+                modifier = Modifier.clickable {
+                    genrePosition = index
+                    genreExpanded = !genreExpanded
                 },
-            ) { window ->
-
-                LaunchedEffect(Unit) {
-                    balloonWindow = window
-                }
-                Chip(
-                    label = genre,
-                    containerColor = tagColor,
-                    modifier = Modifier.clickable {
-                        window.showAsDropDown()
-                    },
-                )
-            }
+            )
         }
+        SimpleDropdownMenu(
+            expanded = genreExpanded, onDismiss = { genreExpanded = false },
+            themeColorState = themeColorState,
+            dropDownItems =
+            listOf(
+                SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
+                    genreExpanded = false
+                    genreSearch(genres[genrePosition])
+                },
+                SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search_library)) {
+                    genreExpanded = false
+                    genreLibrarySearch(genres[genrePosition])
+                },
+            ).toPersistentList(),
+        )
+
     }
 }
 
 @Composable
-private fun genreBalloon(
-    balloonWindow: BalloonWindow?,
-    genreSearch: (String) -> Unit,
-    genre: String,
-    buttonColor: Color,
-    genreLibrarySearch: (String) -> Unit,
-) {
-    Row {
-        TextButton(
-            onClick = {
-                balloonWindow?.dismiss()
-                genreSearch(genre)
-            },
-        ) {
-            Text(text = stringResource(id = R.string.search), color = buttonColor)
-        }
-        Gap(4.dp)
-        TextButton(
-            onClick = {
-                balloonWindow?.dismiss()
-                genreLibrarySearch(genre)
-            },
-        ) {
-            Text(text = stringResource(id = R.string.search_library), color = buttonColor)
-        }
-    }
-}
+private fun nekoMarkdownColors() = markdownColor(
+    text = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+    codeText = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+    codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+)
 
 @Composable
-private fun markdownColors(): MarkdownColors {
-    return MarkdownDefaults.markdownColors(
-        textColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-        backgroundColor = MaterialTheme.colorScheme.surface,
-    )
-}
-
-@Composable
-private fun markdownTypography() =
-    MarkdownDefaults.markdownTypography(
-        h1 = MaterialTheme.typography.headlineMedium,
-        h2 = MaterialTheme.typography.headlineSmall,
-        h3 = MaterialTheme.typography.titleLarge,
-        h4 = MaterialTheme.typography.titleMedium,
-        h5 = MaterialTheme.typography.titleSmall,
-        h6 = MaterialTheme.typography.bodyLarge,
-        body1 = MaterialTheme.typography.bodyLarge,
-        body2 = MaterialTheme.typography.bodySmall,
-    )
+private fun nekoMarkdownTypography() = markdownTypography(
+    h1 = MaterialTheme.typography.headlineMedium,
+    h2 = MaterialTheme.typography.headlineSmall,
+    h3 = MaterialTheme.typography.titleLarge,
+    h4 = MaterialTheme.typography.titleMedium,
+    h5 = MaterialTheme.typography.titleSmall,
+    h6 = MaterialTheme.typography.bodyLarge,
+    paragraph = MaterialTheme.typography.bodyLarge,
+    text = MaterialTheme.typography.bodySmall,
+)
 
 fun TimeInterpolator.toEasing() = Easing { x ->
     getInterpolation(x)

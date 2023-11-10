@@ -2,7 +2,7 @@ package org.nekomanga.domain.manga
 
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import org.nekomanga.constants.MdConstants
 
 enum class MangaStatus(val status: Int, @StringRes val statusRes: Int, val key: String = "") {
     Unknown(0, R.string.unknown),

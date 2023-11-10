@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -24,8 +25,9 @@ class PagerConfig(
     scope: CoroutineScope,
     private val viewer: PagerViewer,
     preferences: PreferencesHelper = Injekt.get(),
+    readerPreferences: ReaderPreferences = Injekt.get(),
 ) :
-    ViewerConfig(preferences, scope) {
+    ViewerConfig(preferences, readerPreferences, scope) {
 
     var usePageTransitions = false
         private set
@@ -56,7 +58,7 @@ class PagerConfig(
 
     var shiftDoublePage = false
 
-    var doublePages = preferences.pageLayout().get() == PageLayout.DOUBLE_PAGES.value
+    var doublePages = readerPreferences.pageLayout().get() == PageLayout.DOUBLE_PAGES.value
         set(value) {
             field = value
             if (!value) {
@@ -68,23 +70,23 @@ class PagerConfig(
 
     var doublePageGap = 0
 
-    var autoDoublePages = preferences.pageLayout().get() == PageLayout.AUTOMATIC.value
+    var autoDoublePages = readerPreferences.pageLayout().get() == PageLayout.AUTOMATIC.value
 
-    var splitPages = preferences.pageLayout().get() == PageLayout.SPLIT_PAGES.value
-    var autoSplitPages = preferences.automaticSplitsPage().get()
+    var splitPages = readerPreferences.pageLayout().get() == PageLayout.SPLIT_PAGES.value
+    var autoSplitPages = readerPreferences.automaticSplitsPage().get()
 
     init {
-        preferences.pageTransitions().register({ usePageTransitions = it })
+        readerPreferences.animatedPageTransitions().register({ usePageTransitions = it })
 
-        preferences.fullscreen().register({ isFullscreen = it })
+        readerPreferences.fullscreen().register({ isFullscreen = it })
 
-        preferences.imageScaleType()
+        readerPreferences.imageScaleType()
             .register({ imageScaleType = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.navigationModePager()
+        readerPreferences.navigationModePager()
             .register({ navigationMode = it }, { updateNavigation(navigationMode) })
 
-        preferences.pagerNavInverted()
+        readerPreferences.pagerNavInverted()
             .register(
                 { tappingInverted = it },
                 {
@@ -92,55 +94,55 @@ class PagerConfig(
                 },
             )
 
-        preferences.pagerNavInverted().asFlow()
+        readerPreferences.pagerNavInverted().changes()
             .drop(1)
             .onEach {
                 navigationModeInvertedListener?.invoke()
             }
             .launchIn(scope)
 
-        preferences.pagerCutoutBehavior()
+        readerPreferences.pagerCutoutBehavior()
             .register({ cutoutBehavior = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.zoomStart()
+        readerPreferences.zoomStart()
             .register({ zoomTypeFromPreference(it) }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.cropBorders()
+        readerPreferences.cropBorders()
             .register({ imageCropBorders = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.navigateToPan()
+        readerPreferences.navigateToPan()
             .register({ navigateToPan = it })
 
-        preferences.landscapeZoom()
+        readerPreferences.landscapeZoom()
             .register({ landscapeZoom = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.readerTheme()
+        readerPreferences.readerTheme()
             .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.invertDoublePages()
+        readerPreferences.invertDoublePages()
             .register({ invertDoublePages = it }, { imagePropertyChangedListener?.invoke() })
 
-        preferences.doublePageGap().register(
+        readerPreferences.doublePageGap().register(
             { doublePageGap = it },
             {
                 imagePropertyChangedListener?.invoke()
             },
         )
 
-        preferences.doublePageRotate()
+        readerPreferences.doublePageRotate()
             .register(
                 { doublePageRotate = it },
                 { imagePropertyChangedListener?.invoke() },
             )
 
-        preferences.doublePageRotateReverse()
+        readerPreferences.doublePageRotateReverse()
             .register(
                 { doublePageRotateReverse = it },
                 { imagePropertyChangedListener?.invoke() },
             )
 
-        preferences.pageLayout()
-            .asFlow()
+        readerPreferences.pageLayout()
+            .changes()
             .drop(1)
             .onEach {
                 autoDoublePages = it == PageLayout.AUTOMATIC.value
@@ -151,7 +153,7 @@ class PagerConfig(
                 reloadChapterListener?.invoke(doublePages)
             }
             .launchIn(scope)
-        preferences.pageLayout()
+        readerPreferences.pageLayout()
             .register(
                 {
                     autoDoublePages = it == PageLayout.AUTOMATIC.value
@@ -162,7 +164,7 @@ class PagerConfig(
                 },
             )
 
-        preferences.automaticSplitsPage()
+        readerPreferences.automaticSplitsPage()
             .register({ autoSplitPages = it })
         navigationOverlayForNewUser = preferences.showNavigationOverlayNewUser().get()
         if (navigationOverlayForNewUser) {

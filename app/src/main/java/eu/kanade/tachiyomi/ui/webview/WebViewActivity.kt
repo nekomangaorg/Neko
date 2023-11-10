@@ -10,22 +10,25 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.setThemeByPref
 import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.presentation.screens.WebViewScreen
 import org.nekomanga.presentation.theme.NekoTheme
+import tachiyomi.core.util.system.WebViewUtil
 import uy.kohesive.injekt.injectLazy
 
 open class WebViewActivity : AppCompatActivity() {
 
     private val sourceManager by injectLazy<SourceManager>()
     private val preferences: PreferencesHelper by injectLazy()
+    private val securityPreferences: SecurityPreferences by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,15 +36,15 @@ open class WebViewActivity : AppCompatActivity() {
         setThemeByPref(preferences)
 
         if (!WebViewUtil.supportsWebView(this)) {
-            toast(R.string.webview_is_required, Toast.LENGTH_LONG)
+            toast(R.string.information_webview_required, Toast.LENGTH_LONG)
             finish()
             return
         }
 
-        preferences.incognitoMode()
-            .asImmediateFlowIn(lifecycleScope) {
+        securityPreferences.incognitoMode()
+            .changes().onEach {
                 SecureActivityDelegate.setSecure(this)
-            }
+            }.launchIn(lifecycleScope)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 

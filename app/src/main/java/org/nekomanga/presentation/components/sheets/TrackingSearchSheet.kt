@@ -53,6 +53,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.components.dialog.TrackingSwitchDialog
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TrackingSearchSheet(
@@ -82,7 +83,7 @@ fun TrackingSearchSheet(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .requiredHeightIn(0.dp, maxLazyHeight.dp),
+                            .requiredHeightIn(Size.none, maxLazyHeight.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         item {
@@ -225,7 +226,7 @@ private fun TrackSearchItem(
                                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
-                            Gap(4.dp)
+                            Gap(Size.tiny)
                             Text(
                                 text = trackSearch.publishingType,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast),
@@ -237,7 +238,7 @@ private fun TrackSearchItem(
                     if (trackSearch.startDate.isNotEmpty()) {
                         Row {
                             Text(text = stringResource(id = R.string.started), style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium))
-                            Gap(4.dp)
+                            Gap(Size.tiny)
                             Text(
                                 text = trackSearch.startDate,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast),

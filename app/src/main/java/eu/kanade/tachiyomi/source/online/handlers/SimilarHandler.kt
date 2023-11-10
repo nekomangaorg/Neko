@@ -5,11 +5,11 @@ import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.retrofit.statusCode
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.models.dto.AnilistMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.models.dto.MUMangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MalMangaRecommendationsDto
@@ -18,26 +18,27 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelatedMangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDatabaseDto
 import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.manga.MangaMappings
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import logcat.LogPriority
+import kotlinx.serialization.json.Json
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class SimilarHandler {
 
-    private val network: NetworkHelper by injectLazy()
+    private val networkServices: NetworkServices by injectLazy()
     private val db: DatabaseHelper by injectLazy()
     private val mappings: MangaMappings by injectLazy()
     private val preferencesHelper: PreferencesHelper by injectLazy()
+    private val json: Json by injectLazy()
 
     suspend fun fetchRelated(
         dexId: String,
@@ -45,9 +46,9 @@ class SimilarHandler {
     ): List<SourceManga> {
         if (forceRefresh) {
             val related = withIOContext {
-                network.service.relatedManga(dexId)
+                networkServices.service.relatedManga(dexId)
                     .onFailure {
-                        loggycat(LogPriority.ERROR) { "trying to get related manga, $this" }
+                        TimberKt.e { "trying to get related manga, $this" }
                     }
                     .getOrNull()
             }
@@ -60,7 +61,7 @@ class SimilarHandler {
 
             val mangaList = similarGetMangadexMangaList(mangaIdMap.keys.toList(), false)
 
-            val thumbQuality = preferencesHelper.thumbnailQuality()
+            val thumbQuality = preferencesHelper.thumbnailQuality().get()
             val relatedMangaList = mangaList.data.map {
                 it.toRelatedMangaDto(thumbQuality, mangaIdMap[it.id] ?: "")
             }
@@ -130,12 +131,26 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): List<SourceManga> {
         if (forceRefresh) {
-            val response = network.similarService.getSimilarManga(dexId)
-                .onFailure {
-                    loggycat(LogPriority.ERROR) { "trying to get similar manga, $this" }
-                }.getOrNull()
+             val dto = networkServices.similarService.getSimilarManga(dexId)
+                 .onFailure {
+                     TimberKt.e { "trying to get similar manga, $this" }
+                 }.getOrNull()
 
-            similarMangaParse(dexId, response)
+          /*  val response2 = networkServices.similarServiceUpdated.getSimilarMangaString(dexId.substring(0, 2), dexId.substring(0, 3)).onFailure {
+                TimberKt.e { "trying to get similar manga, $this" }
+            }.getOrNull()
+
+            val dto = response2?.split("\n")?.mapNotNull { line ->
+                val splitLine = line.split(":::||@!@||:::")
+                if (splitLine.isNotEmpty() && splitLine.size == 2 && splitLine[0] == dexId) {
+                    json.decodeFromString<SimilarMangaDto>(splitLine[1])
+                } else {
+                    null
+                }
+            }?.firstOrNull()
+*/
+
+            similarMangaParse(dexId, dto)
         }
 
         val mangaDb = db.getSimilar(dexId).executeAsBlocking()
@@ -162,6 +177,7 @@ class SimilarHandler {
                     val text = String.format("%.2f", 100.0 * it.score) + "% match"
                     id to text
                 }
+
                 false -> null
             }
         }.toMap()
@@ -173,7 +189,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality()
+        val thumbQuality = preferencesHelper.thumbnailQuality().get()
         val mangaList = mangaListDto.data.map {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }
@@ -200,7 +216,7 @@ class SimilarHandler {
             // Main network request
             val graphql =
                 """{ Media(id: $anilistId, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
-            val response = network.similarService.getAniListGraphql(graphql).onFailure {
+            val response = networkServices.similarService.getAniListGraphql(graphql).onFailure {
                 val type = "trying to get Anilist recommendations"
                 this.log(type)
                 if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
@@ -240,7 +256,7 @@ class SimilarHandler {
 
         val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.key }, false)
 
-        val thumbQuality = preferencesHelper.thumbnailQuality()
+        val thumbQuality = preferencesHelper.thumbnailQuality().get()
         val mangaList = mangaListDto.data.map {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }
@@ -265,7 +281,7 @@ class SimilarHandler {
             ?: return emptyList()
 
         if (forceRefresh) {
-            val response = network.similarService.getSimilarMalManga(malId).onFailure {
+            val response = networkServices.similarService.getSimilarMalManga(malId).onFailure {
                 val type = "trying to get MAL similar manga"
                 this.log(type)
                 if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
@@ -291,9 +307,9 @@ class SimilarHandler {
         similarDto ?: return
 
         // Get our page of mangaList
-        val idPairs = similarDto.recommendations.associate {
-            val id = mappings.getMangadexID(it.mal_id.toString(), "mal")
-            val text = it.recommendation_count.toString() + " user votes"
+        val idPairs = similarDto.data.associate {
+            val id = mappings.getMangadexID(it.entry.mal_id.toString(), "mal")
+            val text = it.votes.toString() + " user votes"
             id to text
         }
         if (idPairs.isEmpty()) {
@@ -304,7 +320,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality()
+        val thumbQuality = preferencesHelper.thumbnailQuality().get()
         val mangaList = mangaListDto.data.map {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }
@@ -329,7 +345,7 @@ class SimilarHandler {
             ?: return emptyList()
 
         if (forceRefresh) {
-            val response = network.similarService.getSimilarMUManga(muId).onFailure {
+            val response = networkServices.similarService.getSimilarMUManga(muId).onFailure {
                 val type = "trying to get MU similar manga"
                 this.log(type)
                 if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
@@ -375,7 +391,7 @@ class SimilarHandler {
 
         // Convert to lookup array
         // TODO: Also filter out manga here that are already presented
-        val thumbQuality = preferencesHelper.thumbnailQuality()
+        val thumbQuality = preferencesHelper.thumbnailQuality().get()
         val mangaList = mangaListDto.data.map {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }
@@ -400,14 +416,14 @@ class SimilarHandler {
             "ids[]" to mangaIds,
             "contentRating[]" to listOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic),
         )
-        val responseBody = network.service.search(ProxyRetrofitQueryMap(queryMap)).onError {
+        val responseBody = networkServices.service.search(ProxyRetrofitQueryMap(queryMap)).onError {
             val type = "searching for manga in similar handler"
             this.log(type)
             this.throws(type)
         }.getOrThrow()
 
         if (strictMatch && responseBody.data.size != mangaIds.size) {
-            loggycat { "manga returned doesn't match number of manga expected" }
+            TimberKt.d { "manga returned doesn't match number of manga expected" }
             throw Exception("Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned")
         }
         return responseBody

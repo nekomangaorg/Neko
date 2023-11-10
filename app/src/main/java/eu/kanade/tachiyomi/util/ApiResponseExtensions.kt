@@ -6,21 +6,21 @@ import com.github.michaelbull.result.Result
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
+import com.skydoves.sandwich.retrofit.errorBody
+import com.skydoves.sandwich.retrofit.statusCode
 import eu.kanade.tachiyomi.source.online.models.dto.ErrorResponse
-import eu.kanade.tachiyomi.util.system.loggycat
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
 import org.jsoup.Jsoup
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 
 /**
  * Maps the ApiResponse Error to a Result Error, trying to decode the json response if its a mangadex api error
  */
-fun ApiResponse.Failure.Error<*>.toResultError(errorType: String): ResultError {
+fun ApiResponse.Failure.Error.toResultError(errorType: String): ResultError {
     val errorBody = this.errorBody?.string() ?: ""
 
-    loggycat(LogPriority.ERROR) {
+    TimberKt.e {
         """
             error $errorType
             error response code ${this.statusCode.code}
@@ -49,7 +49,7 @@ fun ApiResponse.Failure.Error<*>.toResultError(errorType: String): ResultError {
     return ResultError.HttpError(this.statusCode.code, error)
 }
 
-fun ApiResponse.Failure<*>.toResultError(errorType: String): ResultError {
+fun <T> ApiResponse.Failure<T>.toResultError(errorType: String): ResultError {
     return when (this) {
         is ApiResponse.Failure.Error -> this.toResultError(errorType)
         is ApiResponse.Failure.Exception -> this.toResultError(errorType)
@@ -69,8 +69,8 @@ fun <T> ApiResponse<T>.getOrResultError(errorType: String): Result<T, ResultErro
 /**
  * Maps the ApiResponse Exception to a Result Error
  */
-fun ApiResponse.Failure.Exception<*>.toResultError(errorType: String): ResultError {
-    loggycat(LogPriority.ERROR, this.exception) { "Exception $errorType ${this.message}" }
+fun ApiResponse.Failure.Exception.toResultError(errorType: String): ResultError {
+    TimberKt.e(this.throwable) { "Exception $errorType ${this.message}" }
 
     return ResultError.Generic(errorString = "Unknown Error: '${this.message}'")
 }
@@ -78,10 +78,11 @@ fun ApiResponse.Failure.Exception<*>.toResultError(errorType: String): ResultErr
 fun ApiResponse<*>.log(type: String) {
     return when (this) {
         is ApiResponse.Failure.Exception -> {
-            loggycat(LogPriority.ERROR, this.exception) { "Exception $type ${this.message}" }
+            TimberKt.e(this.throwable) { "Exception $type ${this.message}" }
         }
+
         is ApiResponse.Failure.Error -> {
-            loggycat(LogPriority.ERROR) {
+            TimberKt.e {
                 """
                     error $type
                     error response code ${this.statusCode.code}
@@ -89,8 +90,9 @@ fun ApiResponse<*>.log(type: String) {
                 """.trimIndent()
             }
         }
+
         else -> {
-            loggycat(LogPriority.ERROR) { "error $type" }
+            TimberKt.e { "error $type" }
         }
     }
 }
@@ -100,9 +102,11 @@ fun ApiResponse<*>.throws(type: String) {
         is ApiResponse.Failure.Error -> {
             throw Exception("Error $type http code: ${this.statusCode.code}")
         }
+
         is ApiResponse.Failure.Exception -> {
-            throw Exception("Error $type ${this.message} ${this.exception}")
+            throw Exception("Error $type ${this.message} ${this.throwable}")
         }
+
         else -> {
             throw Exception("Error $type ")
         }

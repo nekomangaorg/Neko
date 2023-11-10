@@ -12,12 +12,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nekomanga.core.preferences.toggle
+import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class FeedPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
+    val libraryPreferences: LibraryPreferences = Injekt.get(),
+    val securityPreferences: SecurityPreferences = Injekt.get(),
+    val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     private val feedRepository: FeedRepository = Injekt.get(),
 
     ) : BaseCoroutinePresenter<FeedController>() {
@@ -25,11 +32,11 @@ class FeedPresenter(
     private val _feedScreenState = MutableStateFlow(
         FeedScreenState(
             feedScreenType = preferences.feedViewType().get(),
-            outlineCovers = preferences.outlineOnCovers().get(),
-            incognitoMode = preferences.incognitoMode().get(),
+            outlineCovers = libraryPreferences.outlineOnCovers().get(),
+            incognitoMode = securityPreferences.incognitoMode().get(),
             groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
             historyGrouping = preferences.historyChapterGrouping().get(),
-            hideChapterTitles = preferences.hideChapterTitlesByDefault().get(),
+            hideChapterTitles = mangaDetailsPreferences.hideChapterTitlesByDefault().get(),
         ),
     )
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
@@ -76,14 +83,14 @@ class FeedPresenter(
 
 
         presenterScope.launch {
-            preferences.incognitoMode().asFlow().collectLatest {
+            securityPreferences.incognitoMode().changes().collectLatest {
                 _feedScreenState.update { state ->
                     state.copy(incognitoMode = it)
                 }
             }
         }
         presenterScope.launch {
-            preferences.groupChaptersUpdates().asFlow().collectLatest {
+            preferences.groupChaptersUpdates().changes().collectLatest {
                 _feedScreenState.update { state ->
                     state.copy(groupChaptersUpdates = it)
                 }
@@ -91,7 +98,7 @@ class FeedPresenter(
         }
 
         presenterScope.launch {
-            preferences.historyChapterGrouping().asFlow().collectLatest {
+            preferences.historyChapterGrouping().changes().collectLatest {
                 _feedScreenState.update { state ->
                     state.copy(historyGrouping = it, offset = 0, allFeedManga = persistentListOf())
                 }
@@ -101,7 +108,7 @@ class FeedPresenter(
         }
 
         presenterScope.launch {
-            preferences.feedViewType().asFlow().collectLatest {
+            preferences.feedViewType().changes().collectLatest {
                 _feedScreenState.update { state ->
                     state.copy(feedScreenType = it, offset = 0, allFeedManga = persistentListOf())
                 }
@@ -132,7 +139,7 @@ class FeedPresenter(
 
     fun toggleIncognitoMode() {
         presenterScope.launch {
-            preferences.incognitoMode().set(!preferences.incognitoMode().get())
+            securityPreferences.incognitoMode().toggle()
         }
     }
 

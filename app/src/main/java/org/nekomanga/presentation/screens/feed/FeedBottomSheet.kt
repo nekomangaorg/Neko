@@ -34,7 +34,7 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.sheets.BaseSheet
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
-import org.nekomanga.presentation.theme.Padding
+import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -64,7 +64,7 @@ fun FeedBottomSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = Padding.small),
+                        .padding(horizontal = Size.small),
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(text = stringResource(id = R.string.group_chapters_together), style = MaterialTheme.typography.bodySmall)
@@ -77,7 +77,7 @@ fun FeedBottomSheet(
                     }
                     ExposedDropdownMenuBox(
                         expanded = expanded,
-                        modifier = Modifier.padding(start = Padding.small, top = Padding.small, bottom = Padding.small, end = Padding.none),
+                        modifier = Modifier.padding(start = Size.small, top = Size.small, bottom = Size.small, end = Size.none),
                         onExpandedChange = { expanded = !expanded },
                     ) {
                         TextField(

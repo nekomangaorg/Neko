@@ -18,7 +18,6 @@ import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.fredporciuncula.flow.preferences.Preference as FlowPreference
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
@@ -163,19 +162,19 @@ inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
     setOnPreferenceChangeListener { _, newValue -> block(newValue) }
 }
 
-fun <T> Preference.bindTo(preference: FlowPreference<T>) {
-    key = preference.key
-    defaultValue = preference.defaultValue
+fun <T> Preference.bindTo(preference: tachiyomi.core.preference.Preference<T>) {
+    key = preference.key()
+    defaultValue = preference.defaultValue()
 }
 
-fun <T> ListPreference.bindTo(preference: FlowPreference<T>) {
-    key = preference.key
-    defaultValue = preference.defaultValue.toString()
+fun <T> ListPreference.bindTo(preference: tachiyomi.core.preference.Preference<T>) {
+    key = preference.key()
+    defaultValue = preference.defaultValue()
 }
 
-fun <T> ListMatPreference.bindTo(preference: FlowPreference<T>) {
-    key = preference.key
-    val defValue = preference.defaultValue
+fun <T> ListMatPreference.bindTo(preference: tachiyomi.core.preference.Preference<T>) {
+    key = preference.key()
+    val defValue = preference.defaultValue()
     defaultValue = if (defValue is Set<*>) defValue else defValue.toString()
 }
 
@@ -184,26 +183,29 @@ fun <T> ListMatPreference.bindTo(preference: FlowPreference<T>) {
     ReplaceWith("bindTo(preference, excludePreference = )"),
     DeprecationLevel.ERROR,
 )
-fun <T> TriStateListPreference.bindTo(preference: FlowPreference<T>) { key = preference.key }
-
-fun TriStateListPreference.bindTo(
-    includePreference: FlowPreference<Set<String>>,
-    excludePreference: FlowPreference<Set<String>>,
-) {
-    key = includePreference.key
-    excludeKey = excludePreference.key
-    defaultValue = includePreference.defaultValue to excludePreference.defaultValue
+fun <T> TriStateListPreference.bindTo(preference: tachiyomi.core.preference.Preference<T>) {
+    key = preference.key()
 }
 
-fun <T> IntListMatPreference.bindTo(preference: FlowPreference<T>) {
-    key = preference.key
-    defaultValue = preference.defaultValue
+fun TriStateListPreference.bindTo(
+    includePreference: tachiyomi.core.preference.Preference<Set<String>>,
+    excludePreference: tachiyomi.core.preference.Preference<Set<String>>,
+) {
+    key = includePreference.key()
+    excludeKey = excludePreference.key()
+    defaultValue = includePreference.defaultValue() to excludePreference.defaultValue()
+}
+
+fun <T> IntListMatPreference.bindTo(preference: tachiyomi.core.preference.Preference<T>) {
+    key = preference.key()
+    defaultValue = preference.defaultValue()
 }
 
 fun SwitchPreferenceCompat.requireAuthentication(
     activity: FragmentActivity?,
     title: String,
     subtitle: String? = null,
+    confirmationRequired: Boolean = true,
 ) {
     onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
         newValue as Boolean
@@ -211,6 +213,7 @@ fun SwitchPreferenceCompat.requireAuthentication(
             activity.startAuthentication(
                 title,
                 subtitle,
+                confirmationRequired,
                 callback = object : AuthenticatorUtil.AuthenticationCallback() {
                     override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                         super.onAuthenticationSucceeded(result)

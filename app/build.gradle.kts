@@ -1,60 +1,3 @@
-import java.io.ByteArrayOutputStream
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-
-object Configs {
-    const val applicationId = "tachiyomi.mangadex"
-    const val compileSdkVersion = 33
-    const val minSdkVersion = 24
-    const val targetSdkVersion = 30
-    const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 187
-    const val versionName = "2.13.1"
-}
-
-fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
-fun getCommitCount() = providers.of(GitCommitCount::class) {}.get()
-fun getGitSha() = providers.of(GitSha::class) {}.get()
-
-// runCommand("git rev-list --count HEAD")
-//fun getGitSha() = runCommand("git rev-parse --short HEAD")
-
-abstract class GitSha : ValueSource<String, ValueSourceParameters.None> {
-    @get:Inject
-    abstract val execOperations: ExecOperations
-    override fun obtain(): String {
-        val byteOut = ByteArrayOutputStream()
-        execOperations.exec {
-            commandLine("git", "rev-parse", "--short", "HEAD")
-            standardOutput = byteOut
-        }
-        return String(byteOut.toByteArray()).trim()
-    }
-}
-
-abstract class GitCommitCount : ValueSource<String, ValueSourceParameters.None> {
-    @get:Inject
-    abstract val execOperations: ExecOperations
-    override fun obtain(): String {
-        val byteOut = ByteArrayOutputStream()
-        execOperations.exec {
-            commandLine("git", "rev-list", "--count", "HEAD")
-            standardOutput = byteOut
-        }
-        return String(byteOut.toByteArray()).trim()
-    }
-}
-
-fun runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
-    }
-    return String(byteOut.toByteArray()).trim()
-}
-
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -76,15 +19,16 @@ val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 
 android {
-    compileSdk = Configs.compileSdkVersion
+    compileSdk = AndroidConfig.compileSdkVersion
+    namespace = "eu.kanade.tachiyomi"
 
     defaultConfig {
-        minSdk = Configs.minSdkVersion
-        targetSdk = Configs.targetSdkVersion
-        applicationId = Configs.applicationId
-        versionCode = Configs.versionCode
-        versionName = Configs.versionName
-        testInstrumentationRunner = Configs.testInstrumentationRunner
+        minSdk = AndroidConfig.minSdkVersion
+        targetSdk = AndroidConfig.targetSdkVersion
+        applicationId = "tachiyomi.mangadex"
+        versionCode = 193
+        versionName = "2.14.1"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
@@ -104,11 +48,12 @@ android {
                 ),
             )
         }
-        externalNativeBuild {
-            cmake {
-                this.arguments("-DHAVE_LIBJXL=FALSE")
-            }
-        }
+
+        /* externalNativeBuild {
+             cmake {
+                 this.arguments("-DHAVE_LIBJXL=FALSE")
+             }
+         }*/
     }
 
     splits {
@@ -124,6 +69,7 @@ android {
         getByName("debug") {
             applicationIdSuffix = ".debug"
             manifestPlaceholders["mangadexAuthRedirectUri"] = "mangadex-auth-debug"
+            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
         getByName("release") {
             isShrinkResources = true
@@ -172,11 +118,11 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
-    namespace = "eu.kanade.tachiyomi"
 }
 
 dependencies {
-
+    implementation(project(":constants"))
+    implementation(project(":core"))
     implementation(kotlinx.bundles.kotlin)
 
     coreLibraryDesugaring(libs.desugaring)
@@ -192,7 +138,6 @@ dependencies {
     implementation(libs.bundles.google)
     implementation(libs.bundles.firebase)
     implementation(libs.bundles.rx)
-    implementation(libs.flowprefs)
     implementation(libs.bundles.ok)
 
     // TLS 1.3 support for Android < 10
@@ -222,7 +167,7 @@ dependencies {
     implementation("androidx.sqlite:sqlite:2.3.1")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.github.requery:sqlite-android:3.41.1")
+    implementation("com.github.requery:sqlite-android:3.39.2")
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)
@@ -234,7 +179,7 @@ dependencies {
     implementation(libs.bundles.coil)
 
     // Logging
-    implementation(libs.logcat)
+    implementation(libs.timber)
 
     // UI
     implementation(libs.bundles.fastadapter)
@@ -246,8 +191,8 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
-    implementation("me.saket.cascade:cascade-compose:2.0.0-rc02")
-    implementation("me.saket.cascade:cascade:2.0.0-rc02")
+    implementation("me.saket.cascade:cascade:2.3.0")
+    implementation("me.saket.cascade:cascade-compose:2.3.0")
 
     //Compose
     implementation(compose.bundles.compose)
@@ -256,7 +201,6 @@ dependencies {
     implementation(compose.number.picker)
 
     implementation(compose.bundles.charting)
-    implementation(compose.balloon)
 
 
     implementation(libs.pastelplaceholders)
@@ -265,7 +209,7 @@ dependencies {
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
     implementation(libs.bundles.kahelpers)
-    implementation(libs.sandwich)
+    implementation(libs.bundles.sandwich)
     implementation(libs.aboutLibraries.compose)
     debugImplementation(libs.leakcanary)
 
@@ -278,12 +222,14 @@ dependencies {
 tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.freeCompilerArgs += listOf(
+            "-Xcontext-receivers",
             "-opt-in=kotlin.Experimental",
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
             "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
             "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
+            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
             "-opt-in=kotlin.time.ExperimentalTime",
             "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",

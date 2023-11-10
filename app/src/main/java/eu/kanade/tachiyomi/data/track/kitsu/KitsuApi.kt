@@ -4,10 +4,6 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.parseAs
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -18,10 +14,11 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonObject
-import logcat.LogPriority
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import org.nekomanga.core.network.POST
+import org.nekomanga.logging.TimberKt
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.Body
@@ -35,6 +32,8 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import tachiyomi.core.network.await
+import tachiyomi.core.network.parseAs
 
 class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
 
@@ -145,7 +144,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             rest.deleteLibManga(track.media_id)
             return true
         } catch (e: Exception) {
-            loggycat(LogPriority.WARN, e)
+            TimberKt.e(e) { "Error trying to remove from kitsu" }
         }
         return false
     }
@@ -156,14 +155,16 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         if (!wasPreviouslyTracked && !manga.kitsu_id.isNullOrBlank()) {
-            authClient.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!)))
-                .await().parseAs<JsonObject>().let {
-                    val id = it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive
-                    val map =
-                        it["data"]!!.jsonArray[0].jsonObject["attributes"]!!.jsonObject.toMutableMap()
-                    map["id"] = id
-                    return listOf(KitsuSearchManga(JsonObject(map), true).toTrack())
-                }
+            with(json) {
+                authClient.newCall(org.nekomanga.core.network.GET(apiMangaUrl(manga.kitsu_id!!)))
+                    .await().parseAs<JsonObject>().let {
+                        val id = it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive
+                        val map =
+                            it["data"]!!.jsonArray[0].jsonObject["attributes"]!!.jsonObject.toMutableMap()
+                        map["id"] = id
+                        return listOf(KitsuSearchManga(JsonObject(map), true).toTrack())
+                    }
+            }
         } else {
             searchRest.getKey().let {
                 val key = it["media"]!!.jsonObject["key"]!!.jsonPrimitive.content

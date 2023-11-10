@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.injectLazy
 
 abstract class BaseTabbedScrollView<VB : ViewBinding> @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -16,10 +18,14 @@ abstract class BaseTabbedScrollView<VB : ViewBinding> @JvmOverloads constructor(
 
     lateinit var binding: VB
         private set
+
     init {
         clipToPadding = false
     }
+
     internal val preferences by injectLazy<PreferencesHelper>()
+    internal val libraryPreferences by injectLazy<LibraryPreferences>()
+    internal val readerPreferences by injectLazy<ReaderPreferences>()
 
     abstract fun initGeneralPreferences()
     abstract fun inflateBinding(): VB

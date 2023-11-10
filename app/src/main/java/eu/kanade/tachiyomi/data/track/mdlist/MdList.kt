@@ -14,10 +14,10 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -100,7 +100,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                     track.last_chapter_read = 0f
                 }
             } catch (e: Exception) {
-                loggycat(LogPriority.ERROR, e) { "error updating MDList" }
+                TimberKt.e(e) { "error updating MDList" }
             }
             db.insertTrack(track).executeAsBlocking()
             track
@@ -116,7 +116,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override suspend fun bind(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
-            loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
+            TimberKt.i { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
@@ -126,7 +126,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override suspend fun refresh(track: Track): Track {
         if (MdUtil.getMangaUUID(track.tracking_url).isDigitsOnly()) {
-            loggycat(LogPriority.INFO) { "v3 tracking ${track.tracking_url} skipping bind" }
+            TimberKt.i { "v3 tracking ${track.tracking_url} skipping bind" }
             return track
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
@@ -139,7 +139,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         val track = Track.create(TrackManager.MDLIST)
         track.manga_id = manga.id!!
         track.status = FollowStatus.UNFOLLOWED.int
-        track.tracking_url = MdUtil.baseUrl + manga.url
+        track.tracking_url = MdConstants.baseUrl + manga.url
         track.title = manga.title
         return track
     }
@@ -152,7 +152,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         val track = TrackSearch.create(TrackManager.MDLIST).apply {
             this.manga_id = manga.id!!
             this.status = FollowStatus.UNFOLLOWED.int
-            this.tracking_url = MdUtil.baseUrl + manga.url
+            this.tracking_url = MdConstants.baseUrl + manga.url
             this.title = manga.title
         }
 

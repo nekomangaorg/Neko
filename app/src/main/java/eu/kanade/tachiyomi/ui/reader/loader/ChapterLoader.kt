@@ -8,8 +8,8 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.withIOContext
+import org.nekomanga.logging.TimberKt
 
 /**
  * Loader used to retrieve the [PageLoader] for a given chapter.
@@ -33,7 +33,7 @@ class ChapterLoader(
 
         chapter.state = ReaderChapter.State.Loading
         withIOContext {
-            loggycat { "Loading pages for ${chapter.chapter.name}" }
+            TimberKt.d { "Loading pages for ${chapter.chapter.name}" }
             try {
                 val loader = getPageLoader(chapter)
                 chapter.pageLoader = loader

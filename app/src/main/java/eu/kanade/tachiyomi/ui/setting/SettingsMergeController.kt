@@ -27,7 +27,7 @@ class SettingsMergeController :
             val sourcePreference = KomgaLoginPreference(context, komga).apply {
                 title = "${komga.name} Login"
 
-                this.komgaUrl = preferences.sourceUrl(komga) ?: ""
+                this.komgaUrl = preferences.sourceUrl(komga).get()
 
                 key = getSourceKey(source.id)
                 setOnLoginClickListener {

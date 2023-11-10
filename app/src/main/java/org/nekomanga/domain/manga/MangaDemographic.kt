@@ -1,7 +1,7 @@
 package org.nekomanga.domain.manga
 
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import org.nekomanga.constants.MdConstants
 
 enum class MangaDemographic(val key: String, val nameRes: Int) {
     None(MdConstants.Demographic.none, R.string.none),

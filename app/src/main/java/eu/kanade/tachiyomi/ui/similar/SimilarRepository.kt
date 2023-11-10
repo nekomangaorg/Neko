@@ -7,14 +7,13 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.system.logTimeTaken
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import logcat.LogPriority
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -44,7 +43,7 @@ class SimilarRepository {
                             similarHandler.fetchRelated(dexId, actualRefresh),
                         )
                     }
-                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get related" } }
+                }.onFailure { TimberKt.e(it) { "Failed to get related" } }
                     .getOrNull()
             }
 
@@ -56,7 +55,7 @@ class SimilarRepository {
                             similarHandler.fetchSimilar(dexId, actualRefresh),
                         )
                     }
-                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get similar" } }
+                }.onFailure { TimberKt.e(it) { "Failed to get similar" } }
                     .getOrNull()
             }
 
@@ -71,7 +70,7 @@ class SimilarRepository {
                             ),
                         )
                     }
-                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get MU recs" } }
+                }.onFailure { TimberKt.e(it) { "Failed to get MU recs" } }
                     .getOrNull()
             }
 
@@ -86,7 +85,7 @@ class SimilarRepository {
                             ),
                         )
                     }
-                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get anilist recs" } }
+                }.onFailure { TimberKt.e(it) { "Failed to get anilist recs" } }
                     .getOrNull()
             }
 
@@ -101,7 +100,7 @@ class SimilarRepository {
                             ),
                         )
                     }
-                }.onFailure { loggycat(LogPriority.ERROR, it) { "Failed to get mal recs" } }
+                }.onFailure { TimberKt.e(it) { "Failed to get mal recs" } }
                     .getOrNull()
             }
 

@@ -18,7 +18,7 @@ class StatsController : BaseComposeController<StatsPresenter>() {
             statsState = presenter.simpleState.collectAsStateWithLifecycle(),
             detailedState = presenter.detailState.collectAsStateWithLifecycle(),
             windowSizeClass = windowSizeClass,
-            onBackPressed = { activity?.onBackPressed() },
+            onBackPressed = router::handleBack,
             onSwitchClick = presenter::switchState,
         )
     }

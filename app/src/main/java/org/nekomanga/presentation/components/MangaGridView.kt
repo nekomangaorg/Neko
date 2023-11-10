@@ -34,6 +34,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaGridWithHeader(
@@ -47,7 +48,7 @@ fun MangaGridWithHeader(
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(Size.tiny),
         modifier = modifier,
         contentPadding = contentPadding,
     ) {
@@ -97,12 +98,12 @@ fun MangaGrid(
         state = scrollState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(4.dp),
+            .padding(Size.tiny),
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(Size.tiny),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        itemsIndexed(mangaList, key = { _, display -> display.hashCode() }) { index, displayManga ->
+        itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
 
             LaunchedEffect(scrollState) {
                 if (!lastPage && index >= mangaList.size - 1) {
@@ -250,8 +251,8 @@ fun MangaGridTitle(
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.padding(
-            top = 4.dp,
-            bottom = if (hasSubtitle) 0.dp else 4.dp,
+            top = Size.tiny,
+            bottom = if (hasSubtitle) Size.none else Size.tiny,
             start = 6.dp,
             end = 6.dp,
         ),
@@ -270,8 +271,8 @@ fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .padding(
-                    top = 0.dp,
-                    bottom = 4.dp,
+                    top = Size.none,
+                    bottom = Size.tiny,
                     start = 6.dp,
                     end = 6.dp,
                 ),

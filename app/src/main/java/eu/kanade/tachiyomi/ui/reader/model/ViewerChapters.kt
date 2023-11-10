@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-import eu.kanade.tachiyomi.util.system.loggycat
+import org.nekomanga.logging.TimberKt
 
 data class ViewerChapters(
     val currChapter: ReaderChapter,
@@ -9,14 +9,14 @@ data class ViewerChapters(
 ) {
 
     fun ref() {
-        loggycat { "ref viewer chapters" }
+        TimberKt.d { "ref viewer chapters" }
         currChapter.ref()
         prevChapter?.ref()
         nextChapter?.ref()
     }
 
     fun unref() {
-        loggycat { "unref viewer chapters" }
+        TimberKt.d { "unref viewer chapters" }
         currChapter.unref()
         prevChapter?.unref()
         nextChapter?.unref()

@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.widget
 
 import android.app.Activity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -36,10 +35,6 @@ abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
             val wic = WindowInsetsControllerCompat(window, binding.root)
             window.navigationBarColor = activity.window.navigationBarColor
             wic.isAppearanceLightNavigationBars = isLight
-        }
-        (contentView.parent as View).background = null
-        contentView.post {
-            (contentView.parent as View).background = null
         }
         contentView.requestLayout()
     }

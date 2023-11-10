@@ -102,7 +102,7 @@ class RecentsPresenter(
             preferences.groupChaptersUpdates(),
             preferences.sortFetchedTime(),
         ).forEach {
-            it.asFlow()
+            it.changes()
                 .drop(1)
                 .onEach {
                     resetOffsets()
@@ -491,7 +491,7 @@ class RecentsPresenter(
                     pages_left = pagesLeft ?: 0
                 }
             }
-            if (preferences.readingSync() && !chapter.isMergedChapter()) {
+            if (preferences.readingSync().get() && !chapter.isMergedChapter()) {
                 statusHandler.marksChaptersStatus(manga.uuid(), listOf(chapter.mangadex_chapter_id), read)
             }
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()

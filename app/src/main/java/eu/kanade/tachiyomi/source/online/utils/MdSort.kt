@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
+import org.nekomanga.constants.MdConstants
 
 enum class MdSort(val displayName: String, val key: String, val state: MangaConstants.SortState) {
     Best("Best Match", MdConstants.Sort.relevance, MangaConstants.SortState.Descending),

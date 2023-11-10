@@ -15,10 +15,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withOriginalWidth
 import java.io.File
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -37,10 +38,10 @@ class SettingsDownloadController : SettingsController() {
                 DownloadDirectoriesDialog(this@SettingsDownloadController).show()
             }
 
-            preferences.downloadsDirectory().asImmediateFlowIn(viewScope) { path ->
+            preferences.downloadsDirectory().changes().onEach { path ->
                 val dir = UniFile.fromUri(context, path.toUri())
                 summary = dir.filePath ?: path
-            }
+            }.launchIn(viewScope)
         }
         switchPreference {
             key = Keys.downloadOnlyOverWifi
@@ -53,7 +54,7 @@ class SettingsDownloadController : SettingsController() {
             defaultValue = true
         }
         switchPreference {
-            bindTo(preferences.splitTallImages())
+            bindTo(readerPreferences.splitTallImages())
             titleRes = R.string.split_tall_images
             summaryRes = R.string.split_tall_images_summary
         }
@@ -101,7 +102,7 @@ class SettingsDownloadController : SettingsController() {
                 entryValues = categories.map { it.id.toString() }
                 allSelectionRes = R.string.all
 
-                preferences.downloadNewChapters().asImmediateFlowIn(viewScope) { isVisible = it }
+                preferences.downloadNewChapters().changes().onEach { isVisible = it }.launchIn(viewScope)
             }
         }
 
@@ -201,7 +202,7 @@ class SettingsDownloadController : SettingsController() {
 
         private fun getExternalDirs(): List<File> {
             val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
-                File.separator + activity.resources?.getString(R.string.app_name) +
+                File.separator + activity.resources?.getString(R.string.app_name_neko) +
                 File.separator + "downloads"
 
             return mutableListOf(File(defaultDir)) +

@@ -11,17 +11,16 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.lang.toResultError
-import eu.kanade.tachiyomi.util.system.loggycat
 import kotlin.math.floor
-import logcat.LogPriority
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class ApiMangaParser {
@@ -34,7 +33,7 @@ class ApiMangaParser {
     fun mangaDetailsParse(mangaDto: MangaDataDto, stats: Stats, simpleChapters: List<String>): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
-            val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality())
+            val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality().get())
 
             manga.rating = stats.rating
             manga.users = stats.follows
@@ -111,7 +110,7 @@ class ApiMangaParser {
 
             return Ok(manga)
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Unexpected manga parsing error" }
             return Err("Unexpected Manga parsing error".toResultError())
         }
     }
@@ -138,7 +137,7 @@ class ApiMangaParser {
             )
         }.getOrElse {
             val msg = "Exception parsing chapters"
-            loggycat(LogPriority.ERROR, it) { msg }
+            TimberKt.e(it) { msg }
             Err(msg.toResultError())
         }
     }
@@ -150,7 +149,7 @@ class ApiMangaParser {
     ): SChapter {
         val chapter = SChapter.create()
         val attributes = networkChapter.attributes
-        chapter.url = MdUtil.chapterSuffix + networkChapter.id
+        chapter.url = MdConstants.chapterSuffix + networkChapter.id
 
         chapter.name = networkChapter.buildChapterName(chapter, lastChapterNumber)
         // Convert from unix time

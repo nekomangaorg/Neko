@@ -1,12 +1,11 @@
 package eu.kanade.tachiyomi.source.online
 
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
@@ -14,6 +13,8 @@ import java.util.Locale
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
@@ -28,6 +29,8 @@ abstract class HttpSource : Source {
      */
     protected val network: NetworkHelper by injectLazy()
 
+    protected val networkServices: NetworkServices by injectLazy()
+
 //    /**
 //     * Preferences that a source may need.
 //     */
@@ -38,7 +41,7 @@ abstract class HttpSource : Source {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    open val baseUrl = MdUtil.baseUrl
+    open val baseUrl = MdConstants.baseUrl
 
     override val name = "MangaDex"
 
@@ -69,8 +72,6 @@ abstract class HttpSource : Source {
      * Default network client for doing requests.
      */
     open val client: OkHttpClient = network.client
-
-    val nonRateLimitedClient = network.nonRateLimitedClient
 
     /**
      * Visible name of the source.

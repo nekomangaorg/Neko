@@ -16,38 +16,38 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     override fun inflateBinding() = LibraryCategoryLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
         with(binding) {
-            showAll.bindToPreference(preferences.showAllCategories()) {
+            showAll.bindToPreference(libraryPreferences.showAllCategories()) {
                 controller?.presenter?.getLibrary()
                 binding.categoryShow.isEnabled = it
             }
             categoryShow.isEnabled = showAll.isChecked
-            categoryShow.bindToPreference(preferences.showCategoryInTitle()) {
+            categoryShow.bindToPreference(libraryPreferences.showCategoryInTitle()) {
                 controller?.showMiniBar()
             }
             dynamicToBottom.text = context.getString(R.string.move_dynamic_to_bottom)
                 .withSubtitle(context, R.string.when_grouping_by_sources_tags)
-            dynamicToBottom.bindToPreference(preferences.collapsedDynamicAtBottom()) {
+            dynamicToBottom.bindToPreference(libraryPreferences.collapsedDynamicAtBottom()) {
                 controller?.presenter?.getLibrary()
             }
-            showEmptyCatsFiltering.bindToPreference(preferences.showEmptyCategoriesWhileFiltering()) {
+            showEmptyCatsFiltering.bindToPreference(libraryPreferences.showEmptyCategoriesWhileFiltering()) {
                 controller?.presenter?.requestFilterUpdate()
             }
             val hideHopper = min(
                 2,
-                preferences.hideHopper().get().toInt() * 2 + preferences.autohideHopper().get()
+                libraryPreferences.hideHopper().get().toInt() * 2 + libraryPreferences.autoHideHopper().get()
                     .toInt(),
             )
             hideHopperSpinner.setSelection(hideHopper)
             hideHopperSpinner.onItemSelectedListener = {
-                preferences.hideHopper().set(it == 2)
-                preferences.autohideHopper().set(it == 1)
+                libraryPreferences.hideHopper().set(it == 2)
+                libraryPreferences.autoHideHopper().set(it == 1)
                 controller?.hideHopper(it == 2)
                 controller?.resetHopperY()
             }
             addCategoriesButton.setOnClickListener {
                 controller?.showCategoriesController()
             }
-            hopperLongPress.bindToPreference(preferences.hopperLongPressAction())
+            hopperLongPress.bindToPreference(libraryPreferences.hopperLongPressAction())
         }
     }
 }

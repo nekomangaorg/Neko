@@ -1,8 +1,8 @@
 package org.nekomanga.domain.manga
 
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
+import org.nekomanga.constants.MdConstants
 
 enum class MangaContentRating(val key: String, val nameRes: Int) {
     Safe(MdConstants.ContentRating.safe, R.string.safe),

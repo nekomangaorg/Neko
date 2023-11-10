@@ -18,13 +18,13 @@ import eu.kanade.tachiyomi.data.external.Kitsu
 import eu.kanade.tachiyomi.data.external.Mal
 import eu.kanade.tachiyomi.data.external.MangaUpdatesLink
 import eu.kanade.tachiyomi.data.external.Raw
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import java.util.Locale
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import tachiyomi.source.model.MangaInfo
 
 interface Manga : SManga {
@@ -88,23 +88,23 @@ interface Manga : SManga {
     val usesLocalFilter: Boolean
         get() = chapter_flags and CHAPTER_FILTER_LOCAL_MASK == CHAPTER_FILTER_LOCAL
 
-    fun sortDescending(preferences: PreferencesHelper): Boolean =
-        if (usesLocalSort) sortDescending else preferences.chaptersDescAsDefault().get()
+    fun sortDescending(mangaDetailsPreferences: MangaDetailsPreferences): Boolean =
+        if (usesLocalSort) sortDescending else mangaDetailsPreferences.chaptersDescAsDefault().get()
 
-    fun chapterOrder(preferences: PreferencesHelper): Int =
-        if (usesLocalSort) sorting else preferences.sortChapterOrder().get()
+    fun chapterOrder(mangaDetailsPreferences: MangaDetailsPreferences): Int =
+        if (usesLocalSort) sorting else mangaDetailsPreferences.sortChapterOrder().get()
 
-    fun readFilter(preferences: PreferencesHelper): Int =
-        if (usesLocalFilter) readFilter else preferences.filterChapterByRead().get()
+    fun readFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
+        if (usesLocalFilter) readFilter else mangaDetailsPreferences.filterChapterByRead().get()
 
-    fun downloadedFilter(preferences: PreferencesHelper): Int =
-        if (usesLocalFilter) downloadedFilter else preferences.filterChapterByDownloaded().get()
+    fun downloadedFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
+        if (usesLocalFilter) downloadedFilter else mangaDetailsPreferences.filterChapterByDownloaded().get()
 
-    fun bookmarkedFilter(preferences: PreferencesHelper): Int =
-        if (usesLocalFilter) bookmarkedFilter else preferences.filterChapterByBookmarked().get()
+    fun bookmarkedFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
+        if (usesLocalFilter) bookmarkedFilter else mangaDetailsPreferences.filterChapterByBookmarked().get()
 
-    fun hideChapterTitle(preferences: PreferencesHelper): Boolean =
-        if (usesLocalFilter) hideChapterTitles else preferences.hideChapterTitlesByDefault().get()
+    fun hideChapterTitle(mangaDetailsPreferences: MangaDetailsPreferences): Boolean =
+        if (usesLocalFilter) hideChapterTitles else mangaDetailsPreferences.hideChapterTitlesByDefault().get()
 
     fun showChapterTitle(defaultShow: Boolean): Boolean =
         chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
@@ -157,12 +157,17 @@ interface Manga : SManga {
     fun defaultReaderType(): Int {
         val currentTags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
         return when {
+            isLongStrip() -> {
+                ReadingModeType.WEBTOON.flagValue
+            }
+
             currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
             } == true -> {
                 ReadingModeType.WEBTOON.flagValue
             }
+
             currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
@@ -170,6 +175,7 @@ interface Manga : SManga {
             } == true -> {
                 ReadingModeType.LEFT_TO_RIGHT.flagValue
             }
+
             else -> 0
         }
     }

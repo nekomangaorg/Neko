@@ -19,7 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import org.nekomanga.presentation.theme.Padding.medium
+import org.nekomanga.presentation.theme.Size
+import org.nekomanga.presentation.theme.Size.medium
 
 @Composable
 fun Divider(modifier: Modifier = Modifier) {
@@ -87,7 +88,7 @@ fun PreferenceRow(
             )
             if (subtitle != null) {
                 Text(
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.padding(top = Size.tiny),
                     text = subtitle,
                     style = subtitleTextStyle,
                 )

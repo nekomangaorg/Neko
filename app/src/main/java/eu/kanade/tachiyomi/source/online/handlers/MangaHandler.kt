@@ -10,8 +10,8 @@ import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexService
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.MangaDetailChapterInformation
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -20,31 +20,31 @@ import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.getOrResultError
 import eu.kanade.tachiyomi.util.log
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class MangaHandler {
     private val artworkHandler: ArtworkHandler by injectLazy()
-    val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
-    val preferencesHelper: PreferencesHelper by injectLazy()
+    val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
+    private val preferencesHelper: PreferencesHelper by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga, fetchArtwork: Boolean): Result<MangaDetailChapterInformation, ResultError> {
-        loggycat { "fetch manga and chapter details" }
+        TimberKt.d { "fetch manga and chapter details" }
 
         return withContext(Dispatchers.IO) {
             val detailsManga = withContext(Dispatchers.Default) { fetchMangaDetails(manga.uuid(), fetchArtwork) }
@@ -190,7 +190,6 @@ class MangaHandler {
         return results.map { chapter -> chapter.relationships }
             .flatten()
             .filter { it.type == MdConstants.Types.scanlator }
-            .map { it.id to it.attributes!!.name!! }
-            .toMap()
+            .associate { it.id to it.attributes!!.name!! }
     }
 }

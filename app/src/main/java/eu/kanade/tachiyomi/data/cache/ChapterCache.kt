@@ -4,11 +4,8 @@ import android.content.Context
 import android.text.format.Formatter
 import com.jakewharton.disklrucache.DiskLruCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
-import eu.kanade.tachiyomi.util.system.loggycat
 import java.io.File
 import java.io.IOException
 import kotlin.math.pow
@@ -19,13 +16,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import logcat.LogPriority
 import okhttp3.Response
 import okio.buffer
 import okio.sink
+import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.logging.TimberKt
+import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -53,15 +51,14 @@ class ChapterCache(private val context: Context) {
         const val PARAMETER_CACHE_SIZE = 50L * 1024 * 1024
     }
 
-    /** Google Json class used for parsing JSON files.  */
     private val json: Json by injectLazy()
 
-    private val preferences: PreferencesHelper by injectLazy()
+    private val readerPreferences: ReaderPreferences by injectLazy()
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     /** Cache class used for cache management.  */
-    private var diskCache = setupDiskCache(preferences.preloadSize().get())
+    private var diskCache = setupDiskCache(readerPreferences.preloadPageAmount().get())
 
     /**
      * Returns directory of cache.
@@ -82,15 +79,14 @@ class ChapterCache(private val context: Context) {
         get() = Formatter.formatFileSize(context, realSize)
 
     init {
-        preferences.preloadSize().asFlow()
+        readerPreferences.preloadPageAmount().changes()
             .drop(1)
             .onEach {
                 // Save old cache for destruction later
                 val oldCache = diskCache
                 diskCache = setupDiskCache(it)
                 oldCache.close()
-            }
-            .launchIn(scope)
+            }.launchIn(scope)
     }
 
     private fun setupDiskCache(cacheSize: Int): DiskLruCache {
@@ -110,7 +106,7 @@ class ChapterCache(private val context: Context) {
      * @return status of deletion for the file.
      */
     fun removeFileFromCache(file: String): Boolean {
-        loggycat { "remove file from cache" }
+        TimberKt.d { "remove file from cache" }
         // Make sure we don't delete the journal file (keeps track of cache).
         if (file == "journal" || file.startsWith("journal.")) {
             return false
@@ -122,10 +118,10 @@ class ChapterCache(private val context: Context) {
             // Remove file from cache.
             diskCache.remove(key)
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error removing from from cache" }
             false
         } finally {
-            loggycat { "finished removing file from cache" }
+            TimberKt.d { "finished removing file from cache" }
         }
     }
 
@@ -137,7 +133,7 @@ class ChapterCache(private val context: Context) {
      */
     fun getPageListFromCache(chapter: Chapter): List<Page> {
         // Get the key for the chapter.
-        loggycat { "get image pageList from cache" }
+        TimberKt.d { "get image pageList from cache" }
 
         val key = DiskUtil.hashKeyForDisk(getKey(chapter))
 
@@ -156,7 +152,7 @@ class ChapterCache(private val context: Context) {
     fun putPageListToCache(chapter: Chapter, pages: List<Page>) {
         // Convert list of pages to json string.
         val cachedValue = json.encodeToString(pages)
-        loggycat { "put page list to cache $cachedValue" }
+        TimberKt.d { "put page list to cache $cachedValue" }
 
         // Initialize the editor (edits the values for an entry).
         var editor: DiskLruCache.Editor? = null
@@ -176,10 +172,10 @@ class ChapterCache(private val context: Context) {
             editor.commit()
             editor.abortUnlessCommitted()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error putting page list to cache" }
             // Ignore.
         } finally {
-            loggycat { "finishing putting pagelist to cache" }
+            TimberKt.d { "finishing putting pagelist to cache" }
             editor?.abortUnlessCommitted()
         }
     }
@@ -192,10 +188,10 @@ class ChapterCache(private val context: Context) {
      */
     fun isImageInCache(imageUrl: String): Boolean {
         return try {
-            loggycat { "is image in cache $imageUrl" }
+            TimberKt.d { "is image in cache $imageUrl" }
             diskCache.get(DiskUtil.hashKeyForDisk(imageUrl)).use { it != null }
         } catch (e: IOException) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error checking if image in cache" }
             false
         }
     }
@@ -208,7 +204,7 @@ class ChapterCache(private val context: Context) {
      */
     fun getImageFile(imageUrl: String): File {
         // Get file from md5 key.
-        loggycat { "get image file $imageUrl" }
+        TimberKt.d { "get image file $imageUrl" }
         val imageName = DiskUtil.hashKeyForDisk(imageUrl) + ".0"
         return File(diskCache.directory, imageName)
     }
@@ -223,7 +219,7 @@ class ChapterCache(private val context: Context) {
     fun putImageToCache(imageUrl: String, response: Response) {
         // Initialize editor (edits the values for an entry).
         var editor: DiskLruCache.Editor? = null
-        loggycat { "put image to cache $imageUrl" }
+        TimberKt.d { "put image to cache $imageUrl" }
         try {
             // Get editor from md5 key.
             val key = DiskUtil.hashKeyForDisk(imageUrl)
@@ -235,16 +231,16 @@ class ChapterCache(private val context: Context) {
             diskCache.flush()
             editor.commit()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "Error puting image to Cache" }
         } finally {
             response.body.close()
             editor?.abortUnlessCommitted()
-            loggycat { "finished image to cache $imageUrl" }
+            TimberKt.d { "finished image to cache $imageUrl" }
         }
     }
 
     private fun getKey(chapter: Chapter): String {
-        loggycat { "get key" }
+        TimberKt.d { "get key" }
         return "${chapter.manga_id}${chapter.url}"
     }
 }

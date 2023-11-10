@@ -14,16 +14,11 @@ import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.ProgressListener
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.launchNow
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
@@ -33,10 +28,14 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import logcat.LogPriority
 import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
 import okhttp3.internal.http2.StreamResetException
+import org.nekomanga.core.network.GET
+import org.nekomanga.logging.TimberKt
+import tachiyomi.core.network.ProgressListener
+import tachiyomi.core.network.await
+import tachiyomi.core.network.newCachelessCallWithProgress
 import uy.kohesive.injekt.injectLazy
 
 class AppUpdateService : Service() {
@@ -60,7 +59,7 @@ class AppUpdateService : Service() {
 
         startForeground(
             Notifications.ID_UPDATER,
-            notifier.onDownloadStarted(getString(R.string.app_name)).build(),
+            notifier.onDownloadStarted(getString(R.string.app_name_neko)).build(),
         )
 
         wakeLock = acquireWakeLock(javaClass.name)
@@ -77,12 +76,12 @@ class AppUpdateService : Service() {
         instance = this
 
         val handler = CoroutineExceptionHandler { _, exception ->
-            loggycat(LogPriority.ERROR, exception)
+            TimberKt.e(exception)
             stopSelf(startId)
         }
 
         val url = intent.getStringExtra(EXTRA_DOWNLOAD_URL) ?: return START_NOT_STICKY
-        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.app_name)
+        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.app_name_neko)
         val notifyOnInstall = intent.getBooleanExtra(EXTRA_NOTIFY_ON_INSTALL, false)
 
         runningJob = GlobalScope.launch(handler) {
@@ -163,7 +162,7 @@ class AppUpdateService : Service() {
                 notifier.onDownloadFinished(apkFile.getUriCompat(this))
             }
         } catch (error: Exception) {
-            loggycat(LogPriority.ERROR, error)
+            TimberKt.e(error)
             if (error is CancellationException ||
                 (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
             ) {
@@ -260,7 +259,7 @@ class AppUpdateService : Service() {
          */
         fun start(context: Context, url: String, notifyOnInstall: Boolean) {
             if (!isRunning()) {
-                val title = context.getString(R.string.app_name)
+                val title = context.getString(R.string.app_name_neko)
                 val intent = Intent(context, AppUpdateService::class.java).apply {
                     putExtra(EXTRA_DOWNLOAD_TITLE, title)
                     putExtra(EXTRA_DOWNLOAD_URL, url)

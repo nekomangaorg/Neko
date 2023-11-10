@@ -6,7 +6,6 @@ import android.content.DialogInterface
 import android.os.Bundle
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import com.fredporciuncula.flow.preferences.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -19,6 +18,8 @@ import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import org.nekomanga.domain.library.LibraryPreferences
+import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.injectLazy
 
 class ManageCategoryDialog(bundle: Bundle? = null) :
@@ -32,7 +33,9 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     private var updateLibrary: ((Int?) -> Unit)? = null
     private var category: Category? = null
 
+    private val libraryPreferences by injectLazy<LibraryPreferences>()
     private val preferences by injectLazy<PreferencesHelper>()
+
     private val db by injectLazy<DatabaseHelper>()
     lateinit var binding: MangaCategoryDialogBinding
 
@@ -112,14 +115,14 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             false -> preferences.downloadNewChapters().set(false)
             else -> Unit
         }
-        if (preferences.libraryUpdateInterval().get() > 0 &&
+        if (libraryPreferences.updateInterval().get() > 0 &&
             updatePref(
-                    preferences.libraryUpdateCategories(),
-                    preferences.libraryUpdateCategoriesExclude(),
-                    binding.includeGlobal,
-                ) == false
+                libraryPreferences.whichCategoriesToUpdate(),
+                libraryPreferences.whichCategoriesToExclude(),
+                binding.includeGlobal,
+            ) == false
         ) {
-            preferences.libraryUpdateInterval().set(0)
+            libraryPreferences.updateInterval().set(0)
             LibraryUpdateJob.setupTask(preferences.context, 0)
         }
         updateLibrary?.invoke(category.id)
@@ -136,7 +139,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     }
 
     fun onViewCreated() {
-        if (category?.id ?: 0 <= 0 && category != null) {
+        if ((category?.id ?: 0) <= 0 && category != null) {
             binding.categoryTextLayout.isVisible = false
         }
         binding.editCategories.isVisible = category != null
@@ -167,9 +170,9 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         }
         setCheckbox(
             binding.includeGlobal,
-            preferences.libraryUpdateCategories(),
-            preferences.libraryUpdateCategoriesExclude(),
-            preferences.libraryUpdateInterval().get() > 0,
+            libraryPreferences.whichCategoriesToUpdate(),
+            libraryPreferences.whichCategoriesToExclude(),
+            libraryPreferences.updateInterval().get() > 0,
         )
     }
 
@@ -188,10 +191,12 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
                 updateCategories.add(categoryId.toString())
                 excludeUpdateCategories.remove(categoryId.toString())
             }
+
             TriStateCheckBox.State.IGNORE -> {
                 updateCategories.remove(categoryId.toString())
                 excludeUpdateCategories.add(categoryId.toString())
             }
+
             TriStateCheckBox.State.UNCHECKED -> {
                 updateCategories.remove(categoryId.toString())
                 excludeUpdateCategories.remove(categoryId.toString())

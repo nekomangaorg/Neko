@@ -125,22 +125,20 @@ class SettingsBackupController : SettingsController() {
                     }
                 }
 
-                visibleIf(preferences.backupInterval()) { it > 0 }
+                preferences.backupInterval().changes().onEach { isVisible = it > 0 }.launchIn(viewScope)
 
-                preferences.backupsDirectory().asFlow()
+                preferences.backupsDirectory().changes()
                     .onEach { path ->
                         val dir = UniFile.fromUri(context, path.toUri())
                         summary = dir.filePath + "/automatic"
-                    }
-                    .launchIn(viewScope)
+                    }.launchIn(viewScope)
             }
             intListPreference(activity) {
                 bindTo(preferences.numberOfBackups())
                 titleRes = R.string.max_auto_backups
                 entries = (1..5).map(Int::toString)
                 entryRange = 1..5
-
-                visibleIf(preferences.backupInterval()) { it > 0 }
+                preferences.backupInterval().changes().onEach { isVisible = it > 0 }.launchIn(viewScope)
             }
         }
 
@@ -177,6 +175,7 @@ class SettingsBackupController : SettingsController() {
                     activity.contentResolver.takePersistableUriPermission(uri, flags)
                     preferences.backupsDirectory().set(uri.toString())
                 }
+
                 CODE_BACKUP_CREATE -> {
                     val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -185,6 +184,7 @@ class SettingsBackupController : SettingsController() {
                     activity.toast(R.string.creating_backup)
                     BackupCreatorJob.startNow(activity, uri, backupFlags)
                 }
+
                 CODE_BACKUP_RESTORE -> {
                     RestoreBackupDialog(uri).showDialog(router)
                 }
@@ -275,7 +275,7 @@ class SettingsBackupController : SettingsController() {
 
                 if (results.missingTrackers.isNotEmpty()) {
                     message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${
-                    results.missingTrackers.joinToString("\n") { "- $it" }
+                        results.missingTrackers.joinToString("\n") { "- $it" }
                     }"
                 }
 
@@ -306,4 +306,4 @@ private const val CODE_BACKUP_DIR = 503
 private const val CODE_BACKUP_CREATE = 504
 private const val CODE_BACKUP_RESTORE = 505
 
-private const val HELP_URL = "https://tachiyomi.org/help/guides/backups/"
+private const val HELP_URL = "https://tachiyomi.org/docs/guides/backups"

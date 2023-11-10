@@ -254,7 +254,7 @@ class RecentsController(bundle: Bundle? = null) :
         if (presenter.recentItems.isNotEmpty()) {
             adapter.updateDataSet(presenter.recentItems)
         } else {
-            binding.frameLayout.alpha = 0f
+            binding.recentsFrameLayout.alpha = 0f
         }
 
         binding.downloadBottomSheet.dlBottomSheet.onCreate(this)
@@ -488,7 +488,9 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onDestroy() {
         super.onDestroy()
-        binding.downloadBottomSheet.root.onDestroy()
+        if (isBindingInitialized) {
+            binding.downloadBottomSheet.root.onDestroy()
+        }
         snack?.dismiss()
         snack = null
     }
@@ -508,7 +510,7 @@ class RecentsController(bundle: Bundle? = null) :
     ) {
         if (view == null) return
         binding.progress.isVisible = false
-        binding.frameLayout.alpha = 1f
+        binding.recentsFrameLayout.alpha = 1f
         binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
         adapter.removeAllScrollableHeaders()
         adapter.updateItems(recents)
@@ -710,7 +712,7 @@ class RecentsController(bundle: Bundle? = null) :
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
                         if (!undoing && !wasRead) {
-                            if (preferences.removeAfterMarkedAsRead()) {
+                            if (preferences.removeAfterMarkedAsRead().get()) {
                                 lastChapterId = chapter.id
                                 presenter.deleteChapter(chapter, manga)
                             }

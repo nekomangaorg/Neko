@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun PullRefresh(
     refreshing: Boolean,
     onRefresh: () -> Unit,
-    indicatorOffset: Dp = 0.dp,
+    indicatorOffset: Dp = Size.none,
     backgroundColor: Color = MaterialTheme.colorScheme.secondary,
     contentColor: Color = MaterialTheme.colorScheme.onSecondary,
     content: @Composable () -> Unit,

@@ -12,11 +12,10 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.util.system.loggycat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.coroutineScope
-import logcat.LogPriority
+import org.nekomanga.logging.TimberKt
 
 class AppUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
@@ -26,7 +25,7 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
             AppUpdateChecker().checkForUpdate(context)
             Result.success()
         } catch (e: Exception) {
-            loggycat(LogPriority.ERROR, e)
+            TimberKt.e(e) { "error checking for app update" }
             Result.failure()
         }
     }

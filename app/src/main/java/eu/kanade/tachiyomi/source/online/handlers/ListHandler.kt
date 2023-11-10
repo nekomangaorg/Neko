@@ -4,10 +4,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexService
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -16,6 +14,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.constants.MdConstants
+import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
@@ -24,7 +24,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class ListHandler {
-    private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
+    private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
     suspend fun retrieveList(listUUID: String): Result<ListResults, ResultError> {
@@ -36,7 +36,7 @@ class ListHandler {
                     when (mangaIds.isEmpty()) {
                         true -> Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
                         false -> {
-                            val enabledContentRatings = preferencesHelper.contentRatingSelections()
+                            val enabledContentRatings = preferencesHelper.contentRatingSelections().get()
                             val contentRatings = MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
 
                             val queryParameters =
@@ -45,7 +45,7 @@ class ListHandler {
                                     "limit" to mangaIds.size,
                                     "contentRating[]" to contentRatings,
                                 )
-                            val coverQuality = preferencesHelper.thumbnailQuality()
+                            val coverQuality = preferencesHelper.thumbnailQuality().get()
                             service.search(ProxyRetrofitQueryMap(queryParameters))
                                 .getOrResultError("Error trying to load manga list")
                                 .andThen { mangaListDto ->
