@@ -48,11 +48,12 @@ android {
                 ),
             )
         }
-        externalNativeBuild {
-            cmake {
-                this.arguments("-DHAVE_LIBJXL=FALSE")
-            }
-        }
+
+        /* externalNativeBuild {
+             cmake {
+                 this.arguments("-DHAVE_LIBJXL=FALSE")
+             }
+         }*/
     }
 
     splits {
