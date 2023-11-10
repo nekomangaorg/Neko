@@ -26,7 +26,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
         FeedScreen(
             feedScreenState = presenter.feedScreenState.collectAsState(),
             loadNextPage = presenter::loadNextPage,
-            onBackPress = { activity?.finish() },
+            onBackPress = router::handleBack,
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,
             mangaClick = ::openManga,
