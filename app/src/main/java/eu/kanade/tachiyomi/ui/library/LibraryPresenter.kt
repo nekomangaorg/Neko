@@ -1488,12 +1488,17 @@ class LibraryPresenter(
             }
         }
 
-        /** Remove any saved filters that had OTHER language
+        /** Remove any saved filters that have invalid languages
          */
         fun updateSavedFilters() {
             val db: DatabaseHelper = Injekt.get()
             val updatedFilters = db.getBrowseFilters().executeAsBlocking().map { filter ->
-                filter.copy(dexFilters = filter.dexFilters.replace(""",{"language":"OTHER","state":true}""", "").replace(""",{"language":"OTHER","state":false}""", ""))
+                filter.copy(
+                    dexFilters = filter.dexFilters.replace(""",{"language":"OTHER","state":true}""", "")
+                        .replace(""",{"language":"OTHER","state":false}""", "")
+                        .replace(""",{"language":"SERBO_CROATIAN","state":false}""", "")
+                        .replace(""",{"language":"SERBO_CROATIAN","state":true}""", ""),
+                )
             }
             db.insertBrowseFilters(updatedFilters).executeAsBlocking()
         }

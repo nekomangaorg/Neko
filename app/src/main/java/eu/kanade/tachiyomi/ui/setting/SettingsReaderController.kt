@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
@@ -428,6 +429,12 @@ class SettingsReaderController : SettingsController() {
                 key = readerPreferences.readWithLongTap().key()
                 titleRes = R.string.show_on_long_press
                 defaultValue = true
+            }
+            switchPreference {
+                key = Keys.folderPerManga
+                titleRes = R.string.save_pages_separately
+                summaryRes = R.string.create_folders_by_manga_title
+                defaultValue = false
             }
         }
     }

@@ -5,6 +5,7 @@ import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.retrofit.statusCode
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -24,6 +25,7 @@ import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.SourceManga
@@ -36,6 +38,7 @@ class SimilarHandler {
     private val db: DatabaseHelper by injectLazy()
     private val mappings: MangaMappings by injectLazy()
     private val preferencesHelper: PreferencesHelper by injectLazy()
+    private val json: Json by injectLazy()
 
     suspend fun fetchRelated(
         dexId: String,
@@ -128,12 +131,26 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): List<SourceManga> {
         if (forceRefresh) {
-            val response = networkServices.similarService.getSimilarManga(dexId)
-                .onFailure {
-                    TimberKt.e { "trying to get similar manga, $this" }
-                }.getOrNull()
+             val dto = networkServices.similarService.getSimilarManga(dexId)
+                 .onFailure {
+                     TimberKt.e { "trying to get similar manga, $this" }
+                 }.getOrNull()
 
-            similarMangaParse(dexId, response)
+          /*  val response2 = networkServices.similarServiceUpdated.getSimilarMangaString(dexId.substring(0, 2), dexId.substring(0, 3)).onFailure {
+                TimberKt.e { "trying to get similar manga, $this" }
+            }.getOrNull()
+
+            val dto = response2?.split("\n")?.mapNotNull { line ->
+                val splitLine = line.split(":::||@!@||:::")
+                if (splitLine.isNotEmpty() && splitLine.size == 2 && splitLine[0] == dexId) {
+                    json.decodeFromString<SimilarMangaDto>(splitLine[1])
+                } else {
+                    null
+                }
+            }?.firstOrNull()
+*/
+
+            similarMangaParse(dexId, dto)
         }
 
         val mangaDb = db.getSimilar(dexId).executeAsBlocking()
@@ -290,9 +307,9 @@ class SimilarHandler {
         similarDto ?: return
 
         // Get our page of mangaList
-        val idPairs = similarDto.recommendations.associate {
-            val id = mappings.getMangadexID(it.mal_id.toString(), "mal")
-            val text = it.recommendation_count.toString() + " user votes"
+        val idPairs = similarDto.data.associate {
+            val id = mappings.getMangadexID(it.entry.mal_id.toString(), "mal")
+            val text = it.votes.toString() + " user votes"
             id to text
         }
         if (idPairs.isEmpty()) {

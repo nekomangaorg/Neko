@@ -102,20 +102,35 @@ data class AnilistMangaSimilarMediaRecommend(
 
 @Serializable
 data class MalMangaRecommendationsDto(
-    val request_hash: String,
-    val request_cached: Boolean,
-    val request_cache_expiry: Long,
-    val recommendations: List<MalMangaRecommendationDto>,
+    val data: List<MalMangaRecommendationDto>,
 )
 
 @Serializable
 data class MalMangaRecommendationDto(
+    val entry: MalMangaDto,
+    val url: String,
+    val votes: Int,
+)
+
+@Serializable
+data class MalMangaDto(
     val mal_id: Long,
     val url: String,
-    val image_url: String,
-    val recommendation_url: String,
+    val images: MalMangaImagesDto,
     val title: String,
-    val recommendation_count: Int,
+)
+
+@Serializable
+data class MalMangaImagesDto(
+    val jpg: MalMangaImageTypeDto,
+    val webp: MalMangaImageTypeDto,
+)
+
+@Serializable
+data class MalMangaImageTypeDto(
+    val image_url: String,
+    val small_image_url: String,
+    val large_image_url: String,
 )
 
 @Serializable

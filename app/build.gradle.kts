@@ -26,8 +26,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "tachiyomi.mangadex"
-        versionCode = 192
-        versionName = "2.14.0"
+        versionCode = 193
+        versionName = "2.14.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -68,6 +68,9 @@ android {
         getByName("debug") {
             applicationIdSuffix = ".debug"
             manifestPlaceholders["mangadexAuthRedirectUri"] = "mangadex-auth-debug"
+            isShrinkResources = true
+            isMinifyEnabled = true
+            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
         getByName("release") {
             isShrinkResources = true
@@ -207,7 +210,7 @@ dependencies {
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
     implementation(libs.bundles.kahelpers)
-    implementation(libs.sandwich)
+    implementation(libs.bundles.sandwich)
     implementation(libs.aboutLibraries.compose)
     debugImplementation(libs.leakcanary)
 
