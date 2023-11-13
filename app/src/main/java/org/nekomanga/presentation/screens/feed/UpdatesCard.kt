@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.util.system.timeSpanFromNow
+import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.DownloadButton
@@ -41,10 +43,10 @@ private fun UpdatesRow(firstChapter: SimpleChapter, buttonColor: Color, mangaTit
         modifier = Modifier
             .fillMaxWidth()
             .clickable { mangaClick() }
-            .padding(vertical = Size.tiny),
+            .padding(vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-
+        Gap(Size.small)
         FeedCover(artwork = artwork, outlined = outlineCovers, coverSize = Size.extraHuge, onClick = mangaClick)
         Column(
             modifier = Modifier
@@ -60,6 +62,13 @@ private fun UpdatesRow(firstChapter: SimpleChapter, buttonColor: Color, mangaTit
                 title = firstChapter.name,
                 style = MaterialTheme.typography.bodyLarge,
                 textColor = titleColor,
+            )
+            Text(
+                text = "Updated ${firstChapter.dateUpload.timeSpanFromNow}",
+                style = MaterialTheme.typography.labelSmall,
+                color = updatedColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
             Text(
                 text = mangaTitle,

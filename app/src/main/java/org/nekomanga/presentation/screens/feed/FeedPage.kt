@@ -89,6 +89,8 @@ fun FeedPage(
             FeedScreenType.Updates -> {
                 feedMangaList.forEach { feedManga ->
                     feedManga.chapters.forEach { chapter ->
+                        chapter.dateUpload
+
                         item {
                             UpdatesCard(
                                 chapter,
