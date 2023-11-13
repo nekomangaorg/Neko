@@ -38,7 +38,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,10 +62,15 @@ fun HistoryCard(feedManga: FeedManga, buttonColor: Color, outlineCovers: Boolean
     var expanded by rememberSaveable { mutableStateOf(false) }
     val cardColor: Color by animateColorAsState(if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp) else MaterialTheme.colorScheme.surface)
     val lowContrastColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
-
+    val canExpand = feedManga.chapters.size > 1
 
     ElevatedCard(
-        onClick = { expanded = !expanded },
+        enabled = canExpand,
+        onClick = {
+            if (canExpand) {
+                expanded = !expanded
+            }
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(Size.small)
@@ -84,20 +88,18 @@ fun HistoryCard(feedManga: FeedManga, buttonColor: Color, outlineCovers: Boolean
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Size.small, vertical = Size.tiny),
-            textAlign = TextAlign.Center,
         )
 
-        UpdatesRow(
+        HistoryRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = Size.small),
             artwork = feedManga.artwork,
-            mangaTitle = feedManga.mangaTitle,
             firstChapter = feedManga.chapters.first(),
             buttonColor = buttonColor,
             outlineCovers = outlineCovers,
             hideChapterTitles = hideChapterTitles,
-            canExpand = feedManga.chapters.size > 1,
+            canExpand = canExpand,
             isExpanded = expanded,
             mangaClick = mangaClick,
         )
@@ -162,10 +164,9 @@ fun HistoryCard(feedManga: FeedManga, buttonColor: Color, outlineCovers: Boolean
 }
 
 @Composable
-private fun UpdatesRow(
+private fun HistoryRow(
     modifier: Modifier = Modifier,
     artwork: Artwork,
-    mangaTitle: String,
     firstChapter: SimpleChapter,
     buttonColor: Color,
     outlineCovers: Boolean,
@@ -179,14 +180,16 @@ private fun UpdatesRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
 
-            FeedCover(artwork = artwork, outlined = outlineCovers, coverSize = Size.squareCover, modifier = Modifier.align(Alignment.CenterVertically), onClick = mangaClick)
+            FeedCover(artwork = artwork, outlined = outlineCovers, coverSize = Size.squareCover, onClick = mangaClick)
             Gap(Size.small)
             ChapterInfo(
                 modifier = Modifier
-                    .fillMaxWidth(.8f)
-                    .padding(Size.tiny),
+                    .padding(horizontal = Size.small, vertical = Size.small)
+                    .align(Alignment.Top)
+                    .weight(3f),
                 firstChapter = firstChapter,
                 hideChapterTitles = hideChapterTitles,
                 updatedColor = mediumAlphaColor,
@@ -194,7 +197,7 @@ private fun UpdatesRow(
                 isExpanded = isExpanded,
             )
             Gap(Size.small)
-            Buttons(modifier = Modifier.weight(1f), buttonColor = buttonColor)
+            Buttons(buttonColor = buttonColor)
         }
 
     }
@@ -209,7 +212,7 @@ private fun ChapterInfo(
     canExpand: Boolean,
     isExpanded: Boolean,
 ) {
-    Column(modifier.height(Size.squareCover)) {
+    Column(modifier = modifier) {
         val textColor = getReadTextColor(isRead = firstChapter.read)
 
         FeedChapterTitleLine(
