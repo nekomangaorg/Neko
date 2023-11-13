@@ -1,10 +1,12 @@
 package org.nekomanga.presentation.screens.feed
 
+import android.text.format.DateUtils
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,6 +38,8 @@ import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
+import eu.kanade.tachiyomi.util.system.timeSpanFromNow
+import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.manga.Artwork
@@ -44,6 +48,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.decimalFormat
 import org.nekomanga.presentation.screens.defaultThemeColorState
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FeedPage(
@@ -61,6 +66,11 @@ fun FeedPage(
     var chapterDropdown by remember { mutableStateOf(false) }
 
     val themeColorState = defaultThemeColorState()
+
+    val now = Date().time
+
+    var timeSpan by remember { mutableStateOf("") }
+
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -87,10 +97,17 @@ fun FeedPage(
             }
 
             FeedScreenType.Updates -> {
+
                 feedMangaList.forEach { feedManga ->
                     feedManga.chapters.forEach { chapter ->
-                        chapter.dateUpload
-
+                        chapter.dateFetch.timeSpanFromNow
+                        val dateString = DateUtils.getRelativeTimeSpanString(chapter.dateFetch, now, DateUtils.DAY_IN_MILLIS).toString()
+                        if (timeSpan != dateString) {
+                            timeSpan = dateString
+                            item {
+                                Text(text = dateString, style = MaterialTheme.typography.labelLarge.copy(color = themeColorState.buttonColor), modifier = Modifier.padding(start = Size.small))
+                            }
+                        }
                         item {
                             UpdatesCard(
                                 chapter,
