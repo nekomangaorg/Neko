@@ -164,7 +164,7 @@ dependencies {
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
 
     // Database
-    implementation("androidx.sqlite:sqlite:2.3.1")
+    implementation("androidx.sqlite:sqlite:2.4.0")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
     implementation("com.github.requery:sqlite-android:3.39.2")
