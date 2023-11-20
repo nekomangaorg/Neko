@@ -9,15 +9,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.getBestColor
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.firstOrNull
-import kotlin.collections.get
-import kotlin.collections.getOrNull
-import kotlin.collections.lastOrNull
-import kotlin.collections.map
-import kotlin.collections.mapNotNull
 import kotlin.collections.set
-import kotlin.collections.toMap
-import kotlin.collections.toSet
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.injectLazy
 
@@ -76,14 +68,14 @@ object MangaCoverMetadata {
     }
 
     fun setRatioAndColors(mangaId: Long, originalThumbnailUrl: String?, inLibrary: Boolean, ogFile: File? = null, force: Boolean = false) {
-        if (inLibrary.not()) {
+        if (!inLibrary) {
             remove(mangaId)
         }
 
         val vibrantColor = getVibrantColor(mangaId)
         val dominantColors = getColors(mangaId)
 
-        if (vibrantColor != null && inLibrary.not()) return
+        if (vibrantColor != null && !inLibrary) return
 
         val file = ogFile ?: coverCache.getCustomCoverFile(mangaId).takeIf { it.exists() } ?: coverCache.getCoverFile(originalThumbnailUrl, inLibrary)
         // if the file exists and the there was still an error then the file is corrupted

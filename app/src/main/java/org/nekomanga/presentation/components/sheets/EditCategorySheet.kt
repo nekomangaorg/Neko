@@ -149,8 +149,8 @@ private fun calculateText(context: Context, initialMangaCategories: List<Categor
             difference.isEmpty() && initialIds.isNotEmpty() && initialIds.size == same.size -> quantity(same.size)
             difference.isEmpty() && same.isEmpty() && initialIds.isNotEmpty() -> quantity(initialIds.size)
             same.isEmpty() && difference.isEmpty() -> context.getString(R.string.default_category).lowercase(Locale.ROOT)
-            difference.size == 1 && nothingChanged.not() -> difference.first().name
-            same.size == 1 && nothingChanged.not() && same.size == initialIds.size -> same.first().name
+            difference.size == 1 && !nothingChanged -> difference.first().name
+            same.size == 1 && !nothingChanged && same.size == initialIds.size -> same.first().name
             difference.size > 1 -> context.resources.getQuantityString(
                 R.plurals.category_plural,
                 difference.size,

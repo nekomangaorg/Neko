@@ -330,7 +330,7 @@ private fun ChapterInfo(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (language.isNotNullOrEmpty() && language.equals("en", true).not()) {
+                if (language.isNotNullOrEmpty() && !language.equals("en", true)) {
                     val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
 
                     when (iconRes == null) {

@@ -431,8 +431,7 @@ class LibraryPresenter(
             val hasTrack = loggedServices.any { service ->
                 tracks.any {
                     if (service.isMdList() && (
-                            loginHelper.isLoggedIn()
-                                .not() || it.status == FollowStatus.UNFOLLOWED.int
+                            !loginHelper.isLoggedIn() || it.status == FollowStatus.UNFOLLOWED.int
                             )
                     ) {
                         false
@@ -462,7 +461,7 @@ class LibraryPresenter(
                 if (filterTrackers.isNotEmpty()) {
                     if (service != null) {
                         val hasServiceTrack = tracks.any {
-                            if (service.isMdList().not()) {
+                            if (!service.isMdList()) {
                                 it.sync_id == service.id
                             } else {
                                 FollowStatus.UNFOLLOWED != FollowStatus.fromInt(it.status)
@@ -1263,7 +1262,7 @@ class LibraryPresenter(
                 mangaList.forEach { manga ->
                     val scanlatorsToIgnore = ChapterUtil.getScanlators(manga.filtered_scanlators)
                     val chapters = db.getChapters(manga).executeAsBlocking().filter { chapter ->
-                        chapter.read.not() && chapter.scanlatorList().any { scanlator -> scanlator in scanlatorsToIgnore }.not()
+                        !chapter.read && chapter.scanlatorList().none { scanlator -> scanlator in scanlatorsToIgnore }
                     }
                     downloadManager.downloadChapters(manga, chapters)
                 }

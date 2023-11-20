@@ -917,7 +917,7 @@ class MangaDetailPresenter(
                     // or track matches and MDlist is anything but Unfollowed
                     trackService.matchingTrack(track) &&
                         (
-                            trackService.isMdList().not() ||
+                            !trackService.isMdList() ||
                                 (trackService.isMdList() && !FollowStatus.isUnfollowed(track.status))
                             )
                 }

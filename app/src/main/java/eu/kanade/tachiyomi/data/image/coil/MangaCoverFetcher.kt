@@ -91,7 +91,7 @@ class MangaCoverFetcher(
         }
         val coverFile = coverCache.getCoverFile(originalThumbnailUrl, inLibrary)
         if (!shouldFetchRemotely && coverFile.exists() && options.diskCachePolicy.readEnabled) {
-            if (inLibrary.not()) {
+            if (!inLibrary) {
                 coverFile.setLastModified(Date().time)
             }
             setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = coverFile)
