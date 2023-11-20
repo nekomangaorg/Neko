@@ -128,11 +128,25 @@ open class MangaDex : HttpSource() {
         return listHandler.retrieveList(listId)
     }
 
-    suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>): Result<List<ListResults>, ResultError> {
+    suspend fun fetchHomePageInfo(blockedScanlatorUUIDs: List<String>): Result<List<ListResults>, ResultError> {
         return withIOContext {
             binding {
                 val seasonal = async {
-                    fetchList(listId).andThen { listResults ->
+                    fetchList(MdConstants.currentSeasonalId).andThen { listResults ->
+                        Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
+                    }
+                        .bind()
+                }
+
+                val staffPick = async {
+                    fetchList(MdConstants.staffPicksId).andThen { listResults ->
+                        Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
+                    }
+                        .bind()
+                }
+
+                val nekoDevPicks = async {
+                    fetchList(MdConstants.nekoDevPicksId).andThen { listResults ->
                         Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
                     }
                         .bind()
@@ -158,7 +172,7 @@ open class MangaDex : HttpSource() {
                     }.bind()
                 }
 
-                listOf(popularNewTitles.await(), latestChapter.await(), seasonal.await(), recentlyAdded.await())
+                listOf(popularNewTitles.await(), latestChapter.await(), seasonal.await(), staffPick.await(), nekoDevPicks.await(), recentlyAdded.await())
             }
         }
     }

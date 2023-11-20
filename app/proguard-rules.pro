@@ -118,6 +118,7 @@
 -keepclassmembers class kotlinx.serialization.** {
     <methods>;
 }
-
+# Sandwich r8
+-keep,allowobfuscation,allowshrinking interface com.skydoves.sandwich.ApiResponse
 
 ##---------------End: proguard configuration for kotlinx.serialization  ----------
