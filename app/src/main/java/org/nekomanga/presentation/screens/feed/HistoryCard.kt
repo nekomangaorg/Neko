@@ -187,8 +187,9 @@ private fun HistoryRow(
             Gap(Size.small)
             ChapterInfo(
                 modifier = Modifier
-                    .padding(horizontal = Size.small, vertical = Size.small)
+                    .padding(vertical = Size.small)
                     .align(Alignment.Top)
+                    .height(Size.squareCover)
                     .weight(3f),
                 firstChapter = firstChapter,
                 hideChapterTitles = hideChapterTitles,
