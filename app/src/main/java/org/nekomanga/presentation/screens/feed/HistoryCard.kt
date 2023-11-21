@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -69,6 +70,7 @@ fun HistoryCard(feedManga: FeedManga, themeColorState: ThemeColorState, outlineC
     val lowContrastColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
     val canExpand = feedManga.chapters.size > 1
     var showRemoveHistoryDialog by remember { mutableIntStateOf(-1) }
+    var showRemoveAllHistoryDialog by remember { mutableStateOf(false) }
 
     ElevatedCard(
         enabled = canExpand,
@@ -108,15 +110,28 @@ fun HistoryCard(feedManga: FeedManga, themeColorState: ThemeColorState, outlineC
             canExpand = canExpand,
             isExpanded = expanded,
             mangaClick = mangaClick,
+            deleteAllClick = { showRemoveAllHistoryDialog = true },
             deleteClick = { showRemoveHistoryDialog = 0 },
         )
         if (showRemoveHistoryDialog >= 0) {
             DeleteHistoryDialog(
                 themeColorState = themeColorState,
                 onDismiss = { showRemoveHistoryDialog = -1 },
-                simpleChapter = feedManga.chapters[showRemoveHistoryDialog],
-                onConfirm = { removeAll: Boolean ->
-                    //feedmanga and chapter
+                name = feedManga.chapters[showRemoveHistoryDialog].name,
+                title = R.string.remove_history_question,
+                description = R.string.this_will_remove_the_read_date,
+                onConfirm = { //feedmanga and chapter
+                },
+            )
+        }
+        if (showRemoveAllHistoryDialog) {
+            DeleteHistoryDialog(
+                themeColorState = themeColorState,
+                onDismiss = { showRemoveAllHistoryDialog = false },
+                name = feedManga.mangaTitle,
+                title = R.string.remove_all_history_question,
+                description = R.string.this_will_remove_the_read_date_for_all,
+                onConfirm = { //feedmanga and chapter
                 },
             )
         }
@@ -156,8 +171,10 @@ fun HistoryCard(feedManga: FeedManga, themeColorState: ThemeColorState, outlineC
 
                         Box(modifier = Modifier.align(Alignment.CenterEnd), contentAlignment = Alignment.Center) {
                             Row() {
-                                Buttons(buttonColor = themeColorState.buttonColor) { showRemoveHistoryDialog = index }
-
+                                Buttons(
+                                    buttonColor = themeColorState.buttonColor,
+                                    deleteClick = { showRemoveHistoryDialog = index },
+                                )
                             }
                         }
                     }
@@ -179,6 +196,7 @@ private fun HistoryRow(
     canExpand: Boolean,
     isExpanded: Boolean,
     mangaClick: () -> Unit,
+    deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
 ) {
     val mediumAlphaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
@@ -203,6 +221,7 @@ private fun HistoryRow(
                 buttonColor = buttonColor,
                 canExpand = canExpand,
                 isExpanded = isExpanded,
+                deleteAllClick = deleteAllClick,
                 deleteClick = deleteClick,
             )
 
@@ -220,6 +239,7 @@ private fun ChapterInfo(
     buttonColor: Color,
     canExpand: Boolean,
     isExpanded: Boolean,
+    deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
 ) {
     Column(modifier = modifier) {
@@ -265,14 +285,26 @@ private fun ChapterInfo(
                 )
             }
             Spacer(modifier.weight(1f))
-            Buttons(buttonColor = buttonColor, deleteClick = deleteClick)
+            Buttons(
+                buttonColor = buttonColor, deleteAll = true,
+                deleteAllClick = deleteAllClick, deleteClick = deleteClick,
+            )
 
         }
     }
 }
 
 @Composable
-private fun RowScope.Buttons(buttonColor: Color, deleteClick: () -> Unit) {
+private fun RowScope.Buttons(buttonColor: Color, deleteAll: Boolean = false, deleteClick: () -> Unit, deleteAllClick: () -> Unit = {}) {
+    if (deleteAll) {
+        IconButton(onClick = deleteAllClick) {
+            Icon(
+                imageVector = Icons.Outlined.DeleteSweep,
+                contentDescription = null,
+                tint = buttonColor.copy(alpha = .8f),
+            )
+        }
+    }
     IconButton(onClick = deleteClick) {
         Icon(
             imageVector = Icons.Outlined.Delete,
