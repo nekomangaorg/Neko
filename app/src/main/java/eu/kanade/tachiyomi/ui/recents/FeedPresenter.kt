@@ -14,8 +14,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.util.paging.DefaultPaginator
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -133,7 +135,6 @@ class FeedPresenter(
     fun toggleGroupHistoryType(historyGrouping: FeedHistoryGroup) {
         presenterScope.launch {
             preferences.historyChapterGrouping().set(historyGrouping)
-
         }
     }
 
@@ -143,12 +144,39 @@ class FeedPresenter(
         }
     }
 
-    fun deleteAllHistoryClick() {
+    fun deleteAllHistoryClick(feedManga: FeedManga) {
+        presenterScope.launch {
+            TimberKt.d { "Delete all history click" }
+            feedRepository.deleteAllHistoryForManga(feedManga.mangaId)
+            _feedScreenState.update {
+                it.copy(
+                    allFeedManga = it.allFeedManga.filter { fm -> fm.mangaId != feedManga.mangaId }.toImmutableList(),
+                )
+            }
+        }
     }
 
-    fun deleteHistoryClick() {
-    }
+    fun deleteHistoryClick(feedManga: FeedManga, simpleChapter: SimpleChapter) {
+        presenterScope.launch {
+            if (feedManga.chapters.size == 1) {
+                deleteAllHistoryClick(feedManga)
+            } else {
 
+                feedRepository.deleteHistoryForChapter(simpleChapter.url)
+
+                val index = _feedScreenState.value.allFeedManga.indexOfFirst { it.mangaId == feedManga.mangaId }
+                val mutableFeedManga = _feedScreenState.value.allFeedManga.toMutableList()
+                val newFeedManga = _feedScreenState.value.allFeedManga[index]
+                mutableFeedManga[index] = newFeedManga.copy(chapters = newFeedManga.chapters.filter { it.url != simpleChapter.url }.toImmutableList())
+
+                _feedScreenState.update {
+                    it.copy(
+                        allFeedManga = mutableFeedManga.toImmutableList(),
+                    )
+                }
+            }
+        }
+    }
 
     companion object {
         const val ENDLESS_LIMIT = 50

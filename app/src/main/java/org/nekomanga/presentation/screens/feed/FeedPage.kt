@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors
@@ -57,8 +58,8 @@ fun FeedPage(
     hasMoreResults: Boolean,
     hideChapterTitles: Boolean,
     mangaClick: (Long) -> Unit,
-    deleteAllHistoryClick: () -> Unit,
-    deleteHistoryClick: () -> Unit,
+    deleteAllHistoryClick: (FeedManga) -> Unit,
+    deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,
     loadNextPage: () -> Unit,
     feedScreenType: FeedScreenType,
 ) {
@@ -86,8 +87,8 @@ fun FeedPage(
                         hideChapterTitles = hideChapterTitles,
                         downloadClick = {},
                         mangaClick = { mangaClick(feedManga.mangaId) },
-                        deleteAllHistoryClick = deleteAllHistoryClick,
-                        deleteHistoryClick = deleteHistoryClick,
+                        deleteAllHistoryClick = { deleteAllHistoryClick(feedManga) },
+                        deleteHistoryClick = { chp -> deleteHistoryClick(feedManga, chp) },
                     )
                     LaunchedEffect(scrollState) {
                         if (hasMoreResults && feedMangaList.indexOf(feedManga) >= feedMangaList.size - 4) {

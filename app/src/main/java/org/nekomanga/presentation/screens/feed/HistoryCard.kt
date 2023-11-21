@@ -72,7 +72,7 @@ fun HistoryCard(
     downloadClick: (Long) -> Unit,
     mangaClick: () -> Unit,
     deleteAllHistoryClick: () -> Unit,
-    deleteHistoryClick: () -> Unit,
+    deleteHistoryClick: (SimpleChapter) -> Unit,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val cardColor: Color by animateColorAsState(if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp) else MaterialTheme.colorScheme.surface)
@@ -129,8 +129,7 @@ fun HistoryCard(
                 name = feedManga.chapters[showRemoveHistoryDialog].name,
                 title = R.string.remove_history_question,
                 description = R.string.this_will_remove_the_read_date,
-                onConfirm = { //feedmanga and chapter
-                },
+                onConfirm = { deleteHistoryClick(feedManga.chapters[showRemoveHistoryDialog]) },
             )
         }
         if (showRemoveAllHistoryDialog) {
@@ -140,8 +139,7 @@ fun HistoryCard(
                 name = feedManga.mangaTitle,
                 title = R.string.remove_all_history_question,
                 description = R.string.this_will_remove_the_read_date_for_all,
-                onConfirm = { //feedmanga and chapter
-                },
+                onConfirm = deleteAllHistoryClick,
             )
         }
 

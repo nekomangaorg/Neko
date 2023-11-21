@@ -40,8 +40,8 @@ data class FeedSettingActions(
 data class FeedScreenActions(
     val mangaClick: (Long) -> Unit,
     val switchViewType: (FeedScreenType) -> Unit,
-    val deleteHistoryClick: () -> Unit,
-    val deleteAllHistoryClick: () -> Unit,
+    val deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,
+    val deleteAllHistoryClick: (FeedManga) -> Unit,
 )
 
 data class FeedManga(

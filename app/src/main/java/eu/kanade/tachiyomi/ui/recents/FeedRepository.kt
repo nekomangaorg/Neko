@@ -164,4 +164,21 @@ class FeedRepository(
             ResultError.Generic("Error : ${err.message}")
         }
     }
+
+    fun deleteAllHistoryForManga(mangaId: Long) {
+        val history = db.getHistoryByMangaId(mangaId).executeAsBlocking()
+        history.forEach {
+            it.last_read = 0L
+            it.time_read = 0L
+        }
+        db.upsertHistoryLastRead(history).executeAsBlocking()
+    }
+
+    fun deleteHistoryForChapter(chapterUrl: String) {
+        val history = db.getHistoryByChapterUrl(chapterUrl).executeAsBlocking()
+        history ?: return
+        history.last_read = 0L
+        history.time_read = 0L
+        db.upsertHistoryLastRead(history).executeAsBlocking()
+    }
 }
