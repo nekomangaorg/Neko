@@ -64,7 +64,16 @@ import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun HistoryCard(feedManga: FeedManga, themeColorState: ThemeColorState, outlineCovers: Boolean, hideChapterTitles: Boolean, downloadClick: (Long) -> Unit, mangaClick: () -> Unit) {
+fun HistoryCard(
+    feedManga: FeedManga,
+    themeColorState: ThemeColorState,
+    outlineCovers: Boolean,
+    hideChapterTitles: Boolean,
+    downloadClick: (Long) -> Unit,
+    mangaClick: () -> Unit,
+    deleteAllHistoryClick: () -> Unit,
+    deleteHistoryClick: () -> Unit,
+) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val cardColor: Color by animateColorAsState(if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp) else MaterialTheme.colorScheme.surface)
     val lowContrastColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)

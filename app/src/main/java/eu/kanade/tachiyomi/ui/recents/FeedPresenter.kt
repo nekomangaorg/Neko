@@ -143,6 +143,13 @@ class FeedPresenter(
         }
     }
 
+    fun deleteAllHistoryClick() {
+    }
+
+    fun deleteHistoryClick() {
+    }
+
+
     companion object {
         const val ENDLESS_LIMIT = 50
     }

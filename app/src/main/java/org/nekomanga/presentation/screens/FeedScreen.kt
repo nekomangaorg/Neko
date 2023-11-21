@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedScreenState
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
 import eu.kanade.tachiyomi.ui.recents.FeedSettingActions
@@ -65,8 +66,7 @@ fun FeedScreen(
     windowSizeClass: WindowSizeClass,
     loadNextPage: () -> Unit,
     feedSettingActions: FeedSettingActions,
-    viewTypeClick: (FeedScreenType) -> Unit,
-    mangaClick: (Long) -> Unit,
+    feedScreenActions: FeedScreenActions,
     onBackPress: () -> Unit,
     incognitoClick: () -> Unit,
     settingsClick: () -> Unit,
@@ -178,10 +178,12 @@ fun FeedScreen(
                         feedMangaList = feedScreenState.value.allFeedManga,
                         hasMoreResults = feedScreenState.value.hasMoreResults,
                         feedScreenType = feedScreenState.value.feedScreenType,
-                        mangaClick = mangaClick,
+                        mangaClick = feedScreenActions.mangaClick,
                         outlineCovers = feedScreenState.value.outlineCovers,
                         hideChapterTitles = feedScreenState.value.hideChapterTitles,
                         loadNextPage = loadNextPage,
+                        deleteAllHistoryClick = feedScreenActions.deleteAllHistoryClick,
+                        deleteHistoryClick = feedScreenActions.deleteHistoryClick,
                     )
 
 
@@ -195,7 +197,7 @@ fun FeedScreen(
                         screenTypeClick = { newScreenType: FeedScreenType ->
                             scope.launch { sheetState.hide() }
                             if (feedScreenType != newScreenType) {
-                                viewTypeClick(newScreenType)
+                                feedScreenActions.switchViewType(newScreenType)
                             }
                         },
                     )

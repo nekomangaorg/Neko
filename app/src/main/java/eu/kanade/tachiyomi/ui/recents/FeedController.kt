@@ -29,10 +29,14 @@ class FeedController : BaseComposeController<FeedPresenter>() {
             onBackPress = router::handleBack,
             windowSizeClass = windowSizeClass,
             incognitoClick = presenter::toggleIncognitoMode,
-            mangaClick = ::openManga,
-            viewTypeClick = presenter::switchViewType,
             feedSettingActions = FeedSettingActions(
                 groupHistoryClick = presenter::toggleGroupHistoryType,
+            ),
+            feedScreenActions = FeedScreenActions(
+                mangaClick = ::openManga,
+                switchViewType = presenter::switchViewType,
+                deleteAllHistoryClick = presenter::deleteAllHistoryClick,
+                deleteHistoryClick = presenter::deleteHistoryClick,
             ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },
@@ -41,7 +45,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
         )
     }
 
-    fun openManga(mangaId: Long) {
+    private fun openManga(mangaId: Long) {
         viewScope.launchUI {
             router.pushController(MangaDetailController(mangaId).withFadeTransaction())
         }

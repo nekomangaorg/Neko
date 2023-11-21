@@ -37,6 +37,13 @@ data class FeedSettingActions(
     val groupHistoryClick: (FeedHistoryGroup) -> Unit,
 )
 
+data class FeedScreenActions(
+    val mangaClick: (Long) -> Unit,
+    val switchViewType: (FeedScreenType) -> Unit,
+    val deleteHistoryClick: () -> Unit,
+    val deleteAllHistoryClick: () -> Unit,
+)
+
 data class FeedManga(
     val mangaTitle: String,
     val date: Long,

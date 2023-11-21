@@ -57,6 +57,8 @@ fun FeedPage(
     hasMoreResults: Boolean,
     hideChapterTitles: Boolean,
     mangaClick: (Long) -> Unit,
+    deleteAllHistoryClick: () -> Unit,
+    deleteHistoryClick: () -> Unit,
     loadNextPage: () -> Unit,
     feedScreenType: FeedScreenType,
 ) {
@@ -84,6 +86,8 @@ fun FeedPage(
                         hideChapterTitles = hideChapterTitles,
                         downloadClick = {},
                         mangaClick = { mangaClick(feedManga.mangaId) },
+                        deleteAllHistoryClick = deleteAllHistoryClick,
+                        deleteHistoryClick = deleteHistoryClick,
                     )
                     LaunchedEffect(scrollState) {
                         if (hasMoreResults && feedMangaList.indexOf(feedManga) >= feedMangaList.size - 4) {
