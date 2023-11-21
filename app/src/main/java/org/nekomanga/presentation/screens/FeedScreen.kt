@@ -28,6 +28,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -67,7 +68,6 @@ fun FeedScreen(
     loadNextPage: () -> Unit,
     feedSettingActions: FeedSettingActions,
     feedScreenActions: FeedScreenActions,
-    onBackPress: () -> Unit,
     incognitoClick: () -> Unit,
     settingsClick: () -> Unit,
     statsClick: () -> Unit,
@@ -87,6 +87,18 @@ fun FeedScreen(
     }
 
     val feedScreenType = feedScreenState.value.feedScreenType
+
+    val searchHint by remember(feedScreenType) {
+        when (feedScreenType) {
+            FeedScreenType.History -> {
+                mutableIntStateOf(R.string.search_history)
+            }
+
+            FeedScreenType.Updates -> {
+                mutableIntStateOf(R.string.search_updates)
+            }
+        }
+    }
 
     /**
      * Close the bottom sheet on back if its open
@@ -122,11 +134,10 @@ fun FeedScreen(
             },
         ) {
             NekoScaffold(
-                type = NekoScaffoldType.Search,
+                type = NekoScaffoldType.SearchOutline,
                 incognitoMode = feedScreenState.value.incognitoMode,
+                searchPlaceHolder = stringResource(id = searchHint),
                 isRoot = true,
-                title = "",
-                onNavigationIconClicked = onBackPress,
                 actions = {
                     AppBarActions(
                         actions =
