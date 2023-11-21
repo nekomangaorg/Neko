@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,7 +24,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,7 +52,6 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.FooterFilterChip
@@ -64,7 +61,6 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.listGridAppBarAction
 import org.nekomanga.presentation.components.rememberNavBarPadding
-import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.components.showLibraryEntriesAction
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.screens.browse.BrowseBottomSheet
@@ -326,18 +322,12 @@ fun BrowseScreen(
                         }
                     }
 
-                    TimberKt.d {"ESCO ${windowSizeClass.heightSizeClass}"}
-                    TimberKt.d {"ESCO ${windowSizeClass.widthSizeClass}"}
-                    TimberKt.d {"ESCO sideNav $actualSideNav"}
-
-
                     // hide these on initial load
                     if (!browseScreenState.value.hideFooterButton) {
                         ScreenTypeFooter(
                             screenType = browseScreenType,
                             modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                ,
+                                .align(Alignment.BottomStart),
                             isLoggedIn = browseScreenState.value.isLoggedIn,
                             screenTypeClick = { newScreenType: BrowseScreenType ->
                                 scope.launch { sheetState.hide() }

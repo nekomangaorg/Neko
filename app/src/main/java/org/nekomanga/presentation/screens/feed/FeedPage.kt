@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,8 +62,6 @@ fun FeedPage(
 ) {
     val scrollState = rememberLazyListState()
 
-    var chapterDropdown by remember { mutableStateOf(false) }
-
     val themeColorState = defaultThemeColorState()
 
     val now = Date().time
@@ -82,7 +79,7 @@ fun FeedPage(
                 items(feedMangaList) { feedManga ->
                     HistoryCard(
                         feedManga = feedManga,
-                        buttonColor = themeColorState.buttonColor,
+                        themeColorState = themeColorState,
                         outlineCovers = outlineCovers,
                         hideChapterTitles = hideChapterTitles,
                         downloadClick = {},
@@ -130,9 +127,9 @@ fun FeedPage(
 }
 
 @Composable
-fun getReadTextColor(isRead: Boolean, defaultColor: Color = LocalContentColor.current): Color {
+fun getReadTextColor(isRead: Boolean, defaultColor: Color = MaterialTheme.colorScheme.onSurface): Color {
     return when (isRead) {
-        true -> LocalContentColor.current.copy(alpha = NekoColors.disabledAlphaLowContrast)
+        true -> MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)
         false -> defaultColor
     }
 }

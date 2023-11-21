@@ -47,7 +47,7 @@ class FeedRepository(
                 }
 
                 FeedScreenType.History -> {
-
+                    //TODO this is broken on most scenarios
                     val chapters = when (group) {
                         FeedHistoryGroup.Series -> {
                             db.getRecentMangaLimit(offset = offset, isResuming = false).executeOnIO()
@@ -55,6 +55,7 @@ class FeedRepository(
                                     it.manga.id ?: return@mapNotNull null
                                     it.chapter.id ?: return@mapNotNull null
                                     val simpleChapter = it.chapter.toSimpleChapter(it.history.last_read)!!
+
                                     FeedManga(
                                         mangaId = it.manga.id!!,
                                         mangaTitle = it.manga.title,
@@ -78,7 +79,6 @@ class FeedRepository(
                                 it.manga to (if (date <= 0L) "-1" else dateFormat.format(Date(date)))
                             }.mapNotNull { (manga, matches) ->
                                 val simpleChapters = matches.map {
-                                    TimberKt.d {  "esco: ${it.history.last_read}" }
                                     it.chapter.toSimpleChapter(it.history.last_read)!!
                                 }.toPersistentList()
                                 FeedManga(
