@@ -130,23 +130,29 @@ fun FeedScreen(
                 actions = {
                     AppBarActions(
                         actions =
-
-                        listOf(
-                            AppBar.Action(
-                                title = UiText.StringResource(R.string.settings),
-                                icon = Icons.Outlined.Tune,
-                                onClick = { scope.launch { sheetState.show() } },
+                        if (feedScreenType == FeedScreenType.History) {
+                            listOf(
+                                AppBar.Action(
+                                    title = UiText.StringResource(R.string.settings),
+                                    icon = Icons.Outlined.Tune,
+                                    onClick = { scope.launch { sheetState.show() } },
+                                ),
+                            )
+                        } else {
+                            listOf()
+                        }
+                            +
+                            listOf(
+                                AppBar.MainDropdown(
+                                    incognitoMode = feedScreenState.value.incognitoMode,
+                                    incognitoModeClick = incognitoClick,
+                                    settingsClick = settingsClick,
+                                    statsClick = statsClick,
+                                    aboutClick = aboutClick,
+                                    helpClick = helpClick,
+                                    menuShowing = { visible -> mainDropdownShowing = visible },
+                                ),
                             ),
-                            AppBar.MainDropdown(
-                                incognitoMode = feedScreenState.value.incognitoMode,
-                                incognitoModeClick = incognitoClick,
-                                settingsClick = settingsClick,
-                                statsClick = statsClick,
-                                aboutClick = aboutClick,
-                                helpClick = helpClick,
-                                menuShowing = { visible -> mainDropdownShowing = visible },
-                            ),
-                        ),
                     )
                 },
             ) { incomingContentPadding ->
