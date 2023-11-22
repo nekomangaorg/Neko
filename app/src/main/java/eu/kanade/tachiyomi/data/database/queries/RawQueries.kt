@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable as Chapter
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable as History
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable as MangaCategory
 import eu.kanade.tachiyomi.data.database.tables.MangaTable as Manga
-import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 
 /**
@@ -92,6 +91,28 @@ fun getRecentHistoryUngrouped(
     AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY ${History.TABLE}.${History.COL_LAST_READ} DESC
     ${limitAndOffset(true, isResuming, offset)}
+"""
+
+/**
+ * Query to get the recently read chapters of manga from the library up to a date.
+ * The max_last_read table contains the most recent chapters grouped by manga
+ * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
+ * and are read after the given time period
+ */
+fun getAllChapterHistoryByMangaId(
+    mangaId: Long,
+) =
+    """
+    SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, ${History.TABLE}.*
+    FROM ${Manga.TABLE}
+    JOIN ${Chapter.TABLE}
+    ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
+    JOIN ${History.TABLE}
+    ON ${Chapter.TABLE}.${Chapter.COL_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
+    AND ${History.TABLE}.${History.COL_LAST_READ} > 0
+    WHERE ${Manga.TABLE}.${Manga.COL_ID} = ${mangaId}
+    ORDER BY ${History.TABLE}.${History.COL_LAST_READ} DESC
+    LIMIT 25
 """
 
 /**
@@ -306,16 +327,6 @@ fun getCategoriesForMangaQuery() =
     ${MangaCategory.TABLE}.${MangaCategory.COL_CATEGORY_ID}
     WHERE ${MangaCategory.COL_MANGA_ID} = ?
     """
-
-fun searchCachedMangaQuery(query: String, page: Int, limit: Int): String {
-    val regex = Regex("[^A-Za-z0-9 ]")
-    val queryCleaned = regex.replace(query, "")
-    return """
-      SELECT * FROM ${CachedMangaTable.TABLE_FTS}
-      WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH '$queryCleaned'
-      LIMIT ${limit + 1} OFFSET ${page * limit}
-    """
-}
 
 /**
  * Query to get manga that are not in library, but have read chapters

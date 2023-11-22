@@ -127,6 +127,17 @@ interface HistoryQueries : DbProvider {
         )
         .prepare()
 
+    fun getChapterHistoryByMangaId(mangaId: Long) = db.get()
+        .listOfObjects(MangaChapterHistory::class.java)
+        .withQuery(
+            RawQuery.builder()
+                .query(getAllChapterHistoryByMangaId(mangaId))
+                .observesTables(HistoryTable.TABLE)
+                .build(),
+        )
+        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+        .prepare()
+
     fun getTotalReadDuration(): Long {
         val cursor = db.lowLevel()
             .rawQuery(

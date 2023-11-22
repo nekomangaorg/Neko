@@ -25,6 +25,8 @@ class FeedRepository(
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
+    private val bySeriesSet = mutableSetOf<Long>()
+
     suspend fun getPage(searchQuery: String = "", offset: Int, limit: Int, type: FeedScreenType, group: FeedHistoryGroup): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
         return com.github.michaelbull.result.runCatching {
             when (type) {
@@ -45,21 +47,32 @@ class FeedRepository(
                 }
 
                 FeedScreenType.History -> {
-                    //TODO this is broken on most scenarios
                     val chapters = when (group) {
                         FeedHistoryGroup.Series -> {
+                            if (offset == 0) {
+                                bySeriesSet.clear()
+                            }
                             db.getRecentMangaLimit(search = searchQuery, offset = offset, isResuming = false).executeOnIO()
-                                .mapNotNull {
-                                    it.manga.id ?: return@mapNotNull null
-                                    it.chapter.id ?: return@mapNotNull null
-                                    val simpleChapter = it.chapter.toSimpleChapter(it.history.last_read)!!
+                                .mapNotNull { history ->
+                                    history.manga.id ?: return@mapNotNull null
+                                    history.chapter.id ?: return@mapNotNull null
+                                    if (bySeriesSet.contains(history.manga.id)) {
+                                        return@mapNotNull null
+                                    }
+
+                                    val chapterHistories = db.getChapterHistoryByMangaId(history.manga.id!!).executeOnIO()
+                                    val simpleChapters = chapterHistories.mapNotNull { chpHistory ->
+                                        chpHistory.chapter.toSimpleChapter(chpHistory.history.last_read)!!
+                                    }.toPersistentList()
+
+                                    bySeriesSet.add(history.manga.id!!)
 
                                     FeedManga(
-                                        mangaId = it.manga.id!!,
-                                        mangaTitle = it.manga.title,
-                                        date = it.history.last_read,
-                                        artwork = it.manga.toDisplayManga().currentArtwork,
-                                        chapters = persistentListOf(simpleChapter),
+                                        mangaId = history.manga.id!!,
+                                        mangaTitle = history.manga.title,
+                                        date = history.history.last_read,
+                                        artwork = history.manga.toDisplayManga().currentArtwork,
+                                        chapters = simpleChapters,
                                     )
                                 }
                         }
@@ -105,52 +118,6 @@ class FeedRepository(
                             }
                         }
                     }
-
-                    /*val dbChapters = when (group) {
-                        FeedHistoryGroup.Never -> db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO()
-                        FeedHistoryGroup.Series -> db.getRecentChapters(offset = offset, isResuming = false).executeOnIO()
-                        else -> {
-                            dateFormat.applyPattern(
-                                when (group == FeedHistoryGroup.Week) {
-                                    true -> "yyyy-w"
-                                    false -> "yyyy-MM-dd"
-                                },
-                            )
-                            val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) % 7 + 1
-                            dateFormat.calendar.firstDayOfWeek = dayOfWeek
-                            db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO().groupBy {
-                                val date = it.history.last_read
-                                it.manga.id to if (date <= 0L) "-1" else dateFormat.format(Date(date))
-                            }.mapNotNull { (key, mchs) ->
-                                val manga = mchs.first().manga
-                                val chapters = mchs.map { mch ->
-                                    ChapterHistory(mch.chapter, mch.history)
-                                }.filterChaptersByScanlators(manga)
-                                extraCount += mchs.size - chapters.size
-                                if (chapters.isEmpty()) return@mapNotNull null
-                                val lastAmount = if (groupChaptersHistory == GroupType.ByDay) {
-                                    ENDLESS_LIMIT
-                                } else {
-                                    recentItems.size
-                                }
-                                val existingItem = recentItems.takeLast(lastAmount).find {
-                                    val date = Date(it.mch.history.last_read)
-                                    key == it.manga_id to dateFormat.format(date)
-                                }?.takeIf { updatePageCount }
-                                val sort = Comparator<ChapterHistory> { c1, c2 ->
-                                    c2.history!!.last_read.compareTo(c1.history!!.last_read)
-                                }
-                                val (sortedChapters, firstChapter, subCount) =
-                                    setupExtraChapters(existingItem, chapters, sort)
-                                extraCount += subCount
-                                if (firstChapter == null) return@mapNotNull null
-                                mchs.find { firstChapter.id == it.chapter.id }?.also {
-                                    it.extraChapters = sortedChapters
-                                }
-                            }
-                        }
-
-                    }*/
 
                     Pair(chapters.isNotEmpty(), chapters)
                 }

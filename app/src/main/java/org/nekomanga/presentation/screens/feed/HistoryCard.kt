@@ -40,8 +40,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +71,7 @@ fun HistoryCard(
     themeColorState: ThemeColorState,
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
+    groupedBySeries: Boolean,
     downloadClick: (Long) -> Unit,
     mangaClick: () -> Unit,
     deleteAllHistoryClick: () -> Unit,
@@ -144,9 +147,21 @@ fun HistoryCard(
         }
 
         if (expanded) {
+            if (groupedBySeries) {
+                Text(
+                    modifier = Modifier
+                        .padding(start = Size.small, top = Size.medium)
+                        .fillMaxWidth(),
+                    text = stringResource(id = R.string.showing_x_most_recent),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)),
+                )
+            }
             feedManga.chapters.forEachIndexed { index, simpleChapter ->
                 if (index > 0) {
-                    Divider(Modifier.padding(Size.small))
+                    Gap(Size.smedium)
+                    Divider(Modifier.padding(horizontal = Size.small))
+                    Gap(Size.smedium)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -155,7 +170,7 @@ fun HistoryCard(
                         Column(
                             modifier = Modifier
                                 .align(Alignment.CenterStart)
-                                .fillMaxWidth(.8f),
+                                .fillMaxWidth(.75f),
                         ) {
 
                             FeedChapterTitleLine(
@@ -186,7 +201,7 @@ fun HistoryCard(
                         }
                     }
                 }
-                Gap(Size.small)
+
             }
         }
     }

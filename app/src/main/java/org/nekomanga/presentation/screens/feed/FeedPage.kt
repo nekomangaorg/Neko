@@ -36,12 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.recents.FeedManga
+import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
-import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors
@@ -57,9 +57,8 @@ fun FeedPage(
     outlineCovers: Boolean,
     hasMoreResults: Boolean,
     hideChapterTitles: Boolean,
-    mangaClick: (Long) -> Unit,
-    deleteAllHistoryClick: (FeedManga) -> Unit,
-    deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,
+    groupedBySeries: Boolean,
+    feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
     feedScreenType: FeedScreenType,
 ) {
@@ -85,10 +84,11 @@ fun FeedPage(
                         themeColorState = themeColorState,
                         outlineCovers = outlineCovers,
                         hideChapterTitles = hideChapterTitles,
+                        groupedBySeries = groupedBySeries,
                         downloadClick = {},
-                        mangaClick = { mangaClick(feedManga.mangaId) },
-                        deleteAllHistoryClick = { deleteAllHistoryClick(feedManga) },
-                        deleteHistoryClick = { chp -> deleteHistoryClick(feedManga, chp) },
+                        mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                        deleteAllHistoryClick = { feedScreenActions.deleteAllHistoryClick(feedManga) },
+                        deleteHistoryClick = { chp -> feedScreenActions.deleteHistoryClick(feedManga, chp) },
                     )
                     LaunchedEffect(scrollState) {
                         if (hasMoreResults && feedMangaList.indexOf(feedManga) >= feedMangaList.size - 4) {
@@ -118,7 +118,7 @@ fun FeedPage(
                                 artwork = feedManga.artwork,
                                 outlineCovers = outlineCovers,
                                 hideChapterTitles = hideChapterTitles,
-                                mangaClick = { mangaClick(feedManga.mangaId) },
+                                mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
                             )
                         }
                     }
