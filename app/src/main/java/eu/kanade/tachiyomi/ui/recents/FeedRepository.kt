@@ -48,7 +48,7 @@ class FeedRepository(
                     //TODO this is broken on most scenarios
                     val chapters = when (group) {
                         FeedHistoryGroup.Series -> {
-                            db.getRecentMangaLimit(offset = offset, isResuming = false).executeOnIO()
+                            db.getRecentMangaLimit(search = searchQuery, offset = offset, isResuming = false).executeOnIO()
                                 .mapNotNull {
                                     it.manga.id ?: return@mapNotNull null
                                     it.chapter.id ?: return@mapNotNull null
@@ -72,7 +72,7 @@ class FeedRepository(
                             val dateFormat = SimpleDateFormat(pattern, Locale.getDefault())
                             val dayOfWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) % 7 + 1
                             dateFormat.calendar.firstDayOfWeek = dayOfWeek
-                            db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO().groupBy {
+                            db.getHistoryUngrouped(search = searchQuery, offset = offset, isResuming = false).executeOnIO().groupBy {
                                 val date = it.history.last_read
                                 it.manga to (if (date <= 0L) "-1" else dateFormat.format(Date(date)))
                             }.mapNotNull { (manga, matches) ->
@@ -90,7 +90,7 @@ class FeedRepository(
                         }
 
                         else -> {
-                            db.getHistoryUngrouped(offset = offset, isResuming = false).executeOnIO().mapNotNull {
+                            db.getHistoryUngrouped(search = searchQuery, offset = offset, isResuming = false).executeOnIO().mapNotNull {
                                 it.manga.id ?: return@mapNotNull null
                                 it.chapter.id ?: return@mapNotNull null
                                 val simpleChapter = it.chapter.toSimpleChapter(it.history.last_read)!!
