@@ -238,8 +238,9 @@ fun SearchOutlineTopAppBar(
                             toolTipLabel = stringResource(id = R.string.cancel_search),
                             icon = Icons.Filled.SearchOff,
                             buttonClicked = {
-                                searchEnabled = false
+                                onSearchText("")
                                 searchText = ""
+                                searchEnabled = false
                                 focusManager.clearFocus()
                             },
                         )
