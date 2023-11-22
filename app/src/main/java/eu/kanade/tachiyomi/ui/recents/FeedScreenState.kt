@@ -18,8 +18,9 @@ data class FeedScreenState(
     val historyGrouping: FeedHistoryGroup,
     val incognitoMode: Boolean = false,
     val allFeedManga: ImmutableList<FeedManga> = persistentListOf(),
-
-    )
+    val searchFeedManga: ImmutableList<FeedManga> = persistentListOf(),
+    val searchQuery: String = "",
+)
 
 enum class FeedScreenType {
     History,
@@ -42,6 +43,7 @@ data class FeedScreenActions(
     val switchViewType: (FeedScreenType) -> Unit,
     val deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,
     val deleteAllHistoryClick: (FeedManga) -> Unit,
+    val search: (String?) -> Unit,
 )
 
 data class FeedManga(

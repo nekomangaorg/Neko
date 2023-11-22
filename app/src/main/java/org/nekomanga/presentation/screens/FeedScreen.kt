@@ -138,6 +138,7 @@ fun FeedScreen(
                 incognitoMode = feedScreenState.value.incognitoMode,
                 searchPlaceHolder = stringResource(id = searchHint),
                 isRoot = true,
+                onSearch = feedScreenActions.search,
                 actions = {
                     AppBarActions(
                         actions =
@@ -183,11 +184,16 @@ fun FeedScreen(
                         .padding(bottom = navBarPadding.calculateBottomPadding())
                         .fillMaxSize(),
                 ) {
+                    val (feedManga, hasMoreResults) = if (feedScreenState.value.searchFeedManga.isNotEmpty()) {
+                        feedScreenState.value.searchFeedManga to false
+                    } else {
+                        feedScreenState.value.allFeedManga to feedScreenState.value.hasMoreResults
+                    }
 
                     FeedPage(
                         contentPadding = recyclerContentPadding,
-                        feedMangaList = feedScreenState.value.allFeedManga,
-                        hasMoreResults = feedScreenState.value.hasMoreResults,
+                        feedMangaList = feedManga,
+                        hasMoreResults = hasMoreResults,
                         feedScreenType = feedScreenState.value.feedScreenType,
                         mangaClick = feedScreenActions.mangaClick,
                         outlineCovers = feedScreenState.value.outlineCovers,

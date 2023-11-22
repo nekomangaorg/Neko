@@ -36,6 +36,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                 switchViewType = presenter::switchViewType,
                 deleteAllHistoryClick = presenter::deleteAllHistoryClick,
                 deleteHistoryClick = presenter::deleteHistoryClick,
+                search = presenter::search,
             ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },

@@ -180,6 +180,7 @@ class RecentsPresenter(
                 db.getRecentChapters(
                     query,
                     if (isCustom) ENDLESS_LIMIT else pageOffset,
+                    limit = ENDLESS_LIMIT,
                     !updatePageCount && !isOnFirstPage,
                 )
                     .executeOnIO()

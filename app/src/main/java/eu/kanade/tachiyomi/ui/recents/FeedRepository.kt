@@ -25,18 +25,16 @@ class FeedRepository(
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-    suspend fun getPage(offset: Int, type: FeedScreenType, group: FeedHistoryGroup): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
+    suspend fun getPage(searchQuery: String = "", offset: Int, limit: Int, type: FeedScreenType, group: FeedHistoryGroup): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
         return com.github.michaelbull.result.runCatching {
             when (type) {
                 FeedScreenType.Updates -> {
-                    //TODO this isnt done
-                    val chapters = db.getRecentChapters(offset = offset, isResuming = false).executeAsBlocking()
+                    val chapters = db.getRecentChapters(search = searchQuery, offset = offset, limit = limit, isResuming = false).executeAsBlocking()
                         .mapNotNull {
-                            it.manga.id ?: return@mapNotNull null
-                            it.chapter.id ?: return@mapNotNull null
-                            val simpleChapter = it.chapter.toSimpleChapter()!!
+                            val simpleChapter = it.chapter.toSimpleChapter()
+                            simpleChapter ?: return@mapNotNull null
                             FeedManga(
-                                mangaId = it.manga.id!!,
+                                mangaId = simpleChapter.mangaId,
                                 mangaTitle = it.manga.title,
                                 date = simpleChapter.dateFetch,
                                 artwork = it.manga.toDisplayManga().currentArtwork,

@@ -1,11 +1,15 @@
 package eu.kanade.tachiyomi.ui.recents
 
+import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,11 +47,13 @@ class FeedPresenter(
     )
     val feedScreenState: StateFlow<FeedScreenState> = _feedScreenState.asStateFlow()
 
+    private var searchJob: Job? = null
+
     private val paginator = DefaultPaginator(
         initialKey = _feedScreenState.value.offset,
         onLoadUpdated = { },
         onRequest = {
-            feedRepository.getPage(_feedScreenState.value.offset, _feedScreenState.value.feedScreenType, _feedScreenState.value.historyGrouping)
+            feedRepository.getPage(offset = _feedScreenState.value.offset, limit = ENDLESS_LIMIT, type = _feedScreenState.value.feedScreenType, group = _feedScreenState.value.historyGrouping)
         },
         getNextKey = {
             _feedScreenState.value.offset + ENDLESS_LIMIT
@@ -178,7 +184,27 @@ class FeedPresenter(
         }
     }
 
+    fun search(searchQuery: String?) {
+        searchJob?.cancel()
+        searchJob = presenterScope.launch {
+            delay(1.seconds)
+            _feedScreenState.update { it.copy(searchQuery = "") }
+            if (searchQuery.isNullOrBlank()) {
+                _feedScreenState.update { it.copy(searchFeedManga = persistentListOf()) }
+            } else {
+                feedRepository.getPage(searchQuery, 0, 100, _feedScreenState.value.feedScreenType, _feedScreenState.value.historyGrouping)
+                    .onSuccess { results ->
+                        _feedScreenState.update { state ->
+                            state.copy(
+                                searchFeedManga = (results.second).toImmutableList(),
+                            )
+                        }
+                    }
+            }
+        }
+    }
+
     companion object {
-        const val ENDLESS_LIMIT = 50
+        const val ENDLESS_LIMIT = 20
     }
 }
