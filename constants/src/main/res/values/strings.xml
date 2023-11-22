@@ -313,6 +313,8 @@
     <string name="unread_or_downloaded">Unread or downloaded</string>
     <string name="clear_history">Clear history</string>
     <string name="clear_history_completed">History deleted</string>
+    <string name="clear_history_confirmation_1">Are you sure?</string>
+    <string name="clear_history_confirmation_2">All history will be lost.</string>
     <string name="clear_history_confirmation">Are you sure? All history will be lost.</string>
 
 
@@ -323,7 +325,7 @@
     <string name="a_while_ago">A while ago</string>
     <string name="show_updated_time">Show updated time</string>
     <string name="sort_fetched_time">Sort by fetched time</string>
-    <string name="group_chapters_together">Group chapters together</string>
+    <string name="group_chapters_together">Group chapters</string>
     <string name="group_never">Never</string>
     <string name="group_by_series">By series</string>
     <string name="group_by_day">By day</string>

@@ -54,6 +54,7 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.components.UiText
+import org.nekomanga.presentation.components.dialog.DeleteAllHistoryDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
@@ -111,6 +112,8 @@ fun FeedScreen(
     val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
     val navBarPadding = rememberNavBarPadding(sideNav)
 
+    var showClearHistoryDialog by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -120,6 +123,7 @@ fun FeedScreen(
                     .clickable(enabled = false) { }
             },
     ) {
+
         ModalBottomSheetLayout(
             sheetState = sheetState,
             sheetShape = RoundedCornerShape(Shapes.sheetRadius),
@@ -129,6 +133,7 @@ fun FeedScreen(
                         feedScreenState = feedScreenState,
                         contentPadding = navBarPadding,
                         closeSheet = { scope.launch { sheetState.hide() } },
+                        clearHistoryClick = { showClearHistoryDialog = true },
                         feedActions = feedSettingActions,
                     )
                 }
@@ -229,6 +234,9 @@ fun FeedScreen(
                     .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast)),
             )
         }
+    }
+    if (showClearHistoryDialog) {
+        DeleteAllHistoryDialog(defaultThemeColorState(), onDismiss = { showClearHistoryDialog = false }, onConfirm = {})
     }
 }
 

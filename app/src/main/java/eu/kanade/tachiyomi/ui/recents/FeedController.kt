@@ -34,8 +34,8 @@ class FeedController : BaseComposeController<FeedPresenter>() {
             feedScreenActions = FeedScreenActions(
                 mangaClick = ::openManga,
                 switchViewType = presenter::switchViewType,
-                deleteAllHistoryClick = presenter::deleteAllHistoryClick,
-                deleteHistoryClick = presenter::deleteHistoryClick,
+                deleteAllHistoryClick = presenter::deleteAllHistory,
+                deleteHistoryClick = presenter::deleteHistory,
                 search = presenter::search,
             ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },

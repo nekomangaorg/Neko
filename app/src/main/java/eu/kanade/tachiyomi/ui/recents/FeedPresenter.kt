@@ -148,7 +148,10 @@ class FeedPresenter(
         }
     }
 
-    fun deleteAllHistoryClick(feedManga: FeedManga) {
+    fun deleteAllHistoryForAllManga() {
+    }
+
+    fun deleteAllHistory(feedManga: FeedManga) {
         presenterScope.launch {
             TimberKt.d { "Delete all history click" }
             feedRepository.deleteAllHistoryForManga(feedManga.mangaId)
@@ -160,10 +163,10 @@ class FeedPresenter(
         }
     }
 
-    fun deleteHistoryClick(feedManga: FeedManga, simpleChapter: SimpleChapter) {
+    fun deleteHistory(feedManga: FeedManga, simpleChapter: SimpleChapter) {
         presenterScope.launch {
             if (feedManga.chapters.size == 1) {
-                deleteAllHistoryClick(feedManga)
+                deleteAllHistory(feedManga)
             } else {
 
                 feedRepository.deleteHistoryForChapter(simpleChapter.url)
