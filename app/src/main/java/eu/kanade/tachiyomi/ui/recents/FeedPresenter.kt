@@ -5,11 +5,9 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -187,7 +185,6 @@ class FeedPresenter(
     fun search(searchQuery: String?) {
         searchJob?.cancel()
         searchJob = presenterScope.launch {
-            delay(1.seconds)
             _feedScreenState.update { it.copy(searchQuery = "") }
             if (searchQuery.isNullOrBlank()) {
                 _feedScreenState.update { it.copy(searchFeedManga = persistentListOf()) }
