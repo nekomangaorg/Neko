@@ -167,12 +167,18 @@ class FeedPresenter(
             } else {
 
                 feedRepository.deleteHistoryForChapter(simpleChapter.url)
-
                 val index = _feedScreenState.value.allFeedManga.indexOfFirst { it.mangaId == feedManga.mangaId }
                 val mutableFeedManga = _feedScreenState.value.allFeedManga.toMutableList()
-                val newFeedManga = _feedScreenState.value.allFeedManga[index]
-                mutableFeedManga[index] = newFeedManga.copy(chapters = newFeedManga.chapters.filter { it.url != simpleChapter.url }.toImmutableList())
 
+
+
+                if (_feedScreenState.value.historyGrouping == FeedHistoryGroup.Series) {
+                    val newFeedManga = feedRepository.getUpdatedFeedMangaForHistoryBySeries(feedManga)
+                    mutableFeedManga[index] = newFeedManga
+                } else {
+                    val newFeedManga = _feedScreenState.value.allFeedManga[index]
+                    mutableFeedManga[index] = newFeedManga.copy(chapters = newFeedManga.chapters.filter { it.url != simpleChapter.url }.toImmutableList())
+                }
                 _feedScreenState.update {
                     it.copy(
                         allFeedManga = mutableFeedManga.toImmutableList(),

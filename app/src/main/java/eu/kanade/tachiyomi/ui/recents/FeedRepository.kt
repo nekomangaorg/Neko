@@ -27,6 +27,17 @@ class FeedRepository(
 
     private val bySeriesSet = mutableSetOf<Long>()
 
+    suspend fun getUpdatedFeedMangaForHistoryBySeries(feedManga: FeedManga): FeedManga {
+        val chapterHistories = db.getChapterHistoryByMangaId(feedManga.mangaId).executeOnIO()
+        val simpleChapters = chapterHistories.mapNotNull { chpHistory ->
+            chpHistory.chapter.toSimpleChapter(chpHistory.history.last_read)!!
+        }.toPersistentList()
+
+        return feedManga.copy(
+            chapters = simpleChapters,
+        )
+    }
+
     suspend fun getPage(searchQuery: String = "", offset: Int, limit: Int, type: FeedScreenType, group: FeedHistoryGroup): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
         return com.github.michaelbull.result.runCatching {
             when (type) {
