@@ -178,7 +178,7 @@ fun HistoryCard(
                                 isBookmarked = simpleChapter.bookmark,
                                 chapterNumber = simpleChapter.chapterNumber,
                                 title = simpleChapter.name,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodyLarge,
                                 textColor = getReadTextColor(isRead = simpleChapter.read),
                             )
 
@@ -230,10 +230,9 @@ private fun HistoryRow(
         ) {
 
             FeedCover(artwork = artwork, outlined = outlineCovers, coverSize = Size.squareCover, onClick = mangaClick)
-            Gap(Size.small)
             ChapterInfo(
                 modifier = Modifier
-                    .padding(vertical = Size.small)
+                    .padding(vertical = Size.small, horizontal = Size.small)
                     .align(Alignment.Top)
                     .height(Size.squareCover)
                     .weight(3f),

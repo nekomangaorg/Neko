@@ -109,10 +109,7 @@ fun FeedBottomSheet(
             item {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                     TextButton(
-                        onClick = {
-                            closeSheet()
-                            clearHistoryClick()
-                        },
+                        onClick = clearHistoryClick,
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(imageVector = Icons.Outlined.DeleteForever, contentDescription = null)
