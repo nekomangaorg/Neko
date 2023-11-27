@@ -4,7 +4,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,8 +50,8 @@ import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
@@ -73,7 +72,7 @@ fun HistoryCard(
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
     groupedBySeries: Boolean,
-    downloadClick: (ChapterItem) -> Unit,
+    downloadClick: (ChapterItem, MangaConstants.DownloadAction) -> Unit,
     mangaClick: () -> Unit,
     deleteAllHistoryClick: () -> Unit,
     deleteHistoryClick: (SimpleChapter) -> Unit,
@@ -117,7 +116,7 @@ fun HistoryCard(
                 .padding(start = Size.small),
             artwork = feedManga.artwork,
             chapterItem = feedManga.chapters.first(),
-            buttonColor = themeColorState.buttonColor,
+            themeColorState = themeColorState,
             outlineCovers = outlineCovers,
             hideChapterTitles = hideChapterTitles,
             canExpand = canExpand,
@@ -125,7 +124,7 @@ fun HistoryCard(
             mangaClick = mangaClick,
             deleteAllClick = { showRemoveAllHistoryDialog = true },
             deleteClick = { showRemoveHistoryDialog = 0 },
-            downloadClick = { downloadClick(feedManga.chapters.first()) },
+            downloadClick = { action -> downloadClick(feedManga.chapters.first(), action) },
         )
         if (showRemoveHistoryDialog >= 0) {
             DeleteHistoryDialog(
@@ -196,10 +195,10 @@ fun HistoryCard(
                         Box(modifier = Modifier.align(Alignment.CenterEnd), contentAlignment = Alignment.Center) {
                             Row() {
                                 Buttons(
-                                    buttonColor = themeColorState.buttonColor,
+                                    themeColorState = themeColorState,
                                     chapterItem = chapterItem,
                                     deleteClick = { showRemoveHistoryDialog = index },
-                                    downloadClick = { downloadClick(chapterItem) },
+                                    downloadClick = { action -> downloadClick(chapterItem, action) },
                                 )
                             }
                         }
@@ -216,7 +215,7 @@ private fun HistoryRow(
     modifier: Modifier = Modifier,
     artwork: Artwork,
     chapterItem: ChapterItem,
-    buttonColor: Color,
+    themeColorState: ThemeColorState,
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
     canExpand: Boolean,
@@ -224,7 +223,7 @@ private fun HistoryRow(
     mangaClick: () -> Unit,
     deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
-    downloadClick: () -> Unit,
+    downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     val mediumAlphaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Size.tiny)) {
@@ -244,7 +243,7 @@ private fun HistoryRow(
                 chapterItem = chapterItem,
                 hideChapterTitles = hideChapterTitles,
                 updatedColor = mediumAlphaColor,
-                buttonColor = buttonColor,
+                themeColorState = themeColorState,
                 canExpand = canExpand,
                 isExpanded = isExpanded,
                 deleteAllClick = deleteAllClick,
@@ -263,12 +262,12 @@ private fun ChapterInfo(
     chapterItem: ChapterItem,
     hideChapterTitles: Boolean,
     updatedColor: Color,
-    buttonColor: Color,
+    themeColorState: ThemeColorState,
     canExpand: Boolean,
     isExpanded: Boolean,
     deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
-    downloadClick: () -> Unit,
+    downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     Column(modifier = modifier) {
         val textColor = getReadTextColor(isRead = chapterItem.chapter.read)
@@ -314,7 +313,7 @@ private fun ChapterInfo(
             }
             Spacer(modifier.weight(1f))
             Buttons(
-                buttonColor = buttonColor,
+                themeColorState = themeColorState,
                 chapterItem = chapterItem,
                 deleteAll = true,
                 deleteAllClick = deleteAllClick,
@@ -327,13 +326,20 @@ private fun ChapterInfo(
 }
 
 @Composable
-private fun RowScope.Buttons(buttonColor: Color, chapterItem: ChapterItem, deleteAll: Boolean = false, deleteClick: () -> Unit, deleteAllClick: () -> Unit = {}, downloadClick: () -> Unit) {
+private fun RowScope.Buttons(
+    themeColorState: ThemeColorState,
+    chapterItem: ChapterItem,
+    deleteAll: Boolean = false,
+    deleteClick: () -> Unit,
+    deleteAllClick: () -> Unit = {},
+    downloadClick: (MangaConstants.DownloadAction) -> Unit,
+) {
     if (deleteAll) {
         IconButton(onClick = deleteAllClick) {
             Icon(
                 imageVector = Icons.Outlined.DeleteSweep,
                 contentDescription = null,
-                tint = buttonColor.copy(alpha = .8f),
+                tint = themeColorState.buttonColor.copy(alpha = .8f),
             )
         }
     }
@@ -341,21 +347,14 @@ private fun RowScope.Buttons(buttonColor: Color, chapterItem: ChapterItem, delet
         Icon(
             imageVector = Icons.Outlined.Delete,
             contentDescription = null,
-            tint = buttonColor.copy(alpha = .8f),
+            tint = themeColorState.buttonColor.copy(alpha = .8f),
         )
     }
     DownloadButton(
-        buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
-        Modifier
-            .combinedClickable(
-                onClick = {
-                    when (Download.State.NOT_DOWNLOADED) {
-                        Download.State.NOT_DOWNLOADED -> downloadClick()
-                        else -> Unit //downloadClick(simpleChapter.id)
-                    }
-                },
-                onLongClick = {},
-            ),
+        themeColorState = themeColorState,
+        downloadState = chapterItem.downloadState,
+        downloadProgress = chapterItem.downloadProgress,
+        onDownload = downloadClick,
     )
 }
 

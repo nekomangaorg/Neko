@@ -14,28 +14,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun UpdatesCard(
     chapterItem: ChapterItem,
-    buttonColor: Color,
+    themeColorState: ThemeColorState,
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
     mangaClick: () -> Unit,
-    downloadClick: () -> Unit,
+    downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     UpdatesRow(
         chapterItem = chapterItem,
-        buttonColor = buttonColor,
+        themeColorState = themeColorState,
         mangaTitle = mangaTitle,
         artwork = artwork,
         outlineCovers = outlineCovers,
@@ -48,13 +50,13 @@ fun UpdatesCard(
 @Composable
 private fun UpdatesRow(
     chapterItem: ChapterItem,
-    buttonColor: Color,
+    themeColorState: ThemeColorState,
     mangaTitle: String,
     artwork: Artwork,
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
     mangaClick: () -> Unit,
-    downloadClick: () -> Unit,
+    downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     val mediumAlphaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
@@ -98,17 +100,10 @@ private fun UpdatesRow(
             )
         }
         DownloadButton(
-            buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
-            Modifier
-                .combinedClickable(
-                    onClick = {
-                        when (Download.State.NOT_DOWNLOADED) {
-                            Download.State.NOT_DOWNLOADED -> downloadClick()
-                            else -> Unit //downloadClick(simpleChapter.id)
-                        }
-                    },
-                    onLongClick = {},
-                ),
+            themeColorState = themeColorState,
+            downloadState = chapterItem.downloadState,
+            downloadProgress = chapterItem.downloadProgress,
+            onDownload = downloadClick
         )
 
     }

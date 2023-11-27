@@ -538,7 +538,7 @@ class LibraryUpdateService(
                             }
                     }
                     if (removedChapters.isNotEmpty()) {
-                        downloadManager.deleteChapters(removedChapters, manga)
+                        downloadManager.deleteChapters(manga, removedChapters)
                     }
                 }
                 if (newChapters.first.size + newChapters.second.size > 0) {

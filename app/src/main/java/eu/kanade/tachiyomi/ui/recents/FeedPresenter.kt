@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.collections.immutable.persistentListOf
@@ -218,11 +219,9 @@ class FeedPresenter(
         }
     }
 
-    fun downloadChapter(chapterItem: ChapterItem, feedManga: FeedManga) {
+    fun downloadChapter(chapterItem: ChapterItem, feedManga: FeedManga, downloadAction: MangaConstants.DownloadAction) {
         presenterScope.launchIO {
-            if (chapterItem.isNotDownloaded) {
-                feedRepository.downloadChapter(feedManga, chapterItem)
-            }
+            feedRepository.downloadChapter(feedManga, chapterItem, downloadAction)
         }
     }
 

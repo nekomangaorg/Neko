@@ -637,7 +637,7 @@ class MangaDetailPresenter(
             val mergedChapters =
                 db.getChapters(currentManga()).executeOnIO().filter { it.isMergedChapterOfType(mergeType) }
 
-            downloadManager.deleteChapters(mergedChapters, currentManga())
+            downloadManager.deleteChapters(currentManga(), mergedChapters)
             db.deleteChapters(mergedChapters).executeOnIO()
             updateAllFlows()
         }
@@ -1363,7 +1363,7 @@ class MangaDetailPresenter(
                     if (isEverything) {
                         downloadManager.deleteManga(currentManga())
                     } else {
-                        downloadManager.deleteChapters(chapterItems.map { it.chapter.toDbChapter() }, currentManga())
+                        downloadManager.deleteChapters(currentManga(), chapterItems.map { it.chapter.toDbChapter() })
                     }
                 }
                 if (canUndo) {

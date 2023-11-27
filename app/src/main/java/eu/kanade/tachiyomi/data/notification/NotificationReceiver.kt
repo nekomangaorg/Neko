@@ -272,7 +272,7 @@ class NotificationReceiver : BroadcastReceiver() {
         }
         if (preferences.removeAfterMarkedAsRead().get()) {
             val manga = db.getManga(mangaId).executeAsBlocking() ?: return
-            downloadManager.deleteChapters(dbChapters, manga)
+            downloadManager.deleteChapters(manga, dbChapters)
         }
 
         if (preferences.readingSync().get()) {

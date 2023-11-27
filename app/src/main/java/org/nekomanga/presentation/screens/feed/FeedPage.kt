@@ -85,7 +85,7 @@ fun FeedPage(
                         outlineCovers = outlineCovers,
                         hideChapterTitles = hideChapterTitles,
                         groupedBySeries = groupedBySeries,
-                        downloadClick = { chp -> feedScreenActions.downloadClick(chp, feedManga) },
+                        downloadClick = { chp, action -> feedScreenActions.downloadClick(chp, feedManga, action) },
                         mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
                         deleteAllHistoryClick = { feedScreenActions.deleteAllHistoryClick(feedManga) },
                         deleteHistoryClick = { chp -> feedScreenActions.deleteHistoryClick(feedManga, chp) },
@@ -113,13 +113,13 @@ fun FeedPage(
                         item {
                             UpdatesCard(
                                 chapterItem,
-                                buttonColor = themeColorState.buttonColor,
+                                themeColorState = themeColorState,
                                 mangaTitle = feedManga.mangaTitle,
                                 artwork = feedManga.artwork,
                                 outlineCovers = outlineCovers,
                                 hideChapterTitles = hideChapterTitles,
                                 mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                                downloadClick = { feedScreenActions.downloadClick(chapterItem, feedManga) },
+                                downloadClick = { action -> feedScreenActions.downloadClick(chapterItem, feedManga, action) },
                             )
                         }
                     }

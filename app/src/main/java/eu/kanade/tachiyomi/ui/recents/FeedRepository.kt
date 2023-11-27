@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
 import java.text.SimpleDateFormat
@@ -189,8 +190,16 @@ class FeedRepository(
         )
     }
 
-    suspend fun downloadChapter(feedManga: FeedManga, chapterItem: ChapterItem) {
+    suspend fun downloadChapter(feedManga: FeedManga, chapterItem: ChapterItem, downloadAction: MangaConstants.DownloadAction) {
         val dbManga = db.getManga(feedManga.mangaId).executeOnIO()!!
-        downloadManager.downloadChapters(dbManga, listOf(chapterItem.chapter.toDbChapter()))
+        val dbChapter = chapterItem.chapter.toDbChapter()
+
+        when (downloadAction) {
+            is MangaConstants.DownloadAction.ImmediateDownload -> downloadManager.startDownloadNow(dbChapter)
+            is MangaConstants.DownloadAction.Download -> downloadManager.downloadChapters(dbManga, listOf(dbChapter))
+            is MangaConstants.DownloadAction.Remove -> downloadManager.deleteChapters(dbManga, listOf(dbChapter))
+            is MangaConstants.DownloadAction.Cancel -> downloadManager.deleteChapters(dbManga, listOf(dbChapter))
+            else -> Unit
+        }
     }
 }

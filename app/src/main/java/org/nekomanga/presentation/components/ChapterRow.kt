@@ -223,7 +223,6 @@ private fun ChapterInfo(
     blockScanlator: (String) -> Unit,
 ) {
     var dropdown by remember { mutableStateOf(false) }
-    var chapterDropdown by remember { mutableStateOf(false) }
 
     val downloadState = remember(downloadStateProvider()) { downloadStateProvider() }
     val downloadProgress = remember(downloadProgressProvider()) { downloadProgressProvider() }
@@ -372,66 +371,13 @@ private fun ChapterInfo(
 
             }
         }
-        Box(modifier = Modifier.align(Alignment.CenterVertically), contentAlignment = Alignment.Center) {
             DownloadButton(
-                themeColorState.buttonColor,
-                downloadState,
-                downloadProgress,
-                Modifier
-                    .combinedClickable(
-                        onClick = {
-                            when (downloadState) {
-                                Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
-                                else -> chapterDropdown = true
-                            }
-                        },
-                        onLongClick = {},
-                    ),
-            )
-
-            val scope = rememberCoroutineScope()
-            SimpleDropdownMenu(
-                expanded = chapterDropdown,
+                modifier = Modifier.align(Alignment.CenterVertically),
                 themeColorState = themeColorState,
-                onDismiss = { chapterDropdown = false },
-                dropDownItems =
-                when (downloadState) {
-                    Download.State.DOWNLOADED -> {
-                        persistentListOf(
-                            SimpleDropDownItem.Action(
-                                text = UiText.StringResource(R.string.remove),
-                                onClick = {
-                                    scope.launchDelayed {
-                                        onDownload(DownloadAction.Remove)
-                                    }
-                                },
-                            ),
-                        )
-                    }
-
-                    else -> {
-                        persistentListOf(
-                            SimpleDropDownItem.Action(
-                                text = UiText.StringResource(R.string.start_downloading_now),
-                                onClick = {
-                                    scope.launchDelayed {
-                                        onDownload(DownloadAction.ImmediateDownload)
-                                    }
-                                },
-                            ),
-                            SimpleDropDownItem.Action(
-                                text = UiText.StringResource(R.string.cancel),
-                                onClick = {
-                                    scope.launchDelayed {
-                                        onDownload(DownloadAction.Cancel)
-                                    }
-                                },
-                            ),
-                        )
-                    }
-                },
+                downloadState = downloadState,
+                downloadProgress = downloadProgress,
+                onDownload = onDownload
             )
-        }
     }
 }
 

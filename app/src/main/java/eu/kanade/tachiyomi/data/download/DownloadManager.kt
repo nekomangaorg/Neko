@@ -232,7 +232,7 @@ class DownloadManager(val context: Context) {
         downloadsByManga.map { entry ->
             val manga = entry.value.first().manga
             val source = entry.value.first().source
-            deleteChapters(entry.value.map { it.chapter }, manga)
+            deleteChapters(manga, entry.value.map { it.chapter })
         }
     }
 
@@ -243,7 +243,7 @@ class DownloadManager(val context: Context) {
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
      */
-    fun deleteChapters(chapters: List<Chapter>, manga: Manga) {
+    fun deleteChapters(manga: Manga, chapters: List<Chapter>) {
         GlobalScope.launch(Dispatchers.IO) {
             try {
                 val wasPaused = isPaused()
@@ -370,7 +370,7 @@ class DownloadManager(val context: Context) {
         val pendingChapters = pendingDeleter.getPendingChapters()
         for ((manga, chapters) in pendingChapters) {
             val source = sourceManager.get(manga.source) ?: continue
-            deleteChapters(chapters, manga)
+            deleteChapters(manga, chapters)
         }
     }
 

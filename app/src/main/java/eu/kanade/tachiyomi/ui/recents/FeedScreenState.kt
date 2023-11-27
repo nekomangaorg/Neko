@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.recents
 
+import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -45,7 +46,7 @@ data class FeedScreenActions(
     val deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,
     val deleteAllHistoryClick: (FeedManga) -> Unit,
     val search: (String?) -> Unit,
-    val downloadClick: (ChapterItem, FeedManga) -> Unit,
+    val downloadClick: (ChapterItem, FeedManga, MangaConstants.DownloadAction) -> Unit,
 )
 
 data class FeedManga(
