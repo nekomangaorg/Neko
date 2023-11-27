@@ -85,7 +85,7 @@ fun FeedPage(
                         outlineCovers = outlineCovers,
                         hideChapterTitles = hideChapterTitles,
                         groupedBySeries = groupedBySeries,
-                        downloadClick = {},
+                        downloadClick = { chp -> feedScreenActions.downloadClick(chp, feedManga) },
                         mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
                         deleteAllHistoryClick = { feedScreenActions.deleteAllHistoryClick(feedManga) },
                         deleteHistoryClick = { chp -> feedScreenActions.deleteHistoryClick(feedManga, chp) },
@@ -101,9 +101,9 @@ fun FeedPage(
             FeedScreenType.Updates -> {
 
                 feedMangaList.forEach { feedManga ->
-                    feedManga.chapters.forEach { chapter ->
-                        chapter.dateFetch.timeSpanFromNow
-                        val dateString = DateUtils.getRelativeTimeSpanString(chapter.dateFetch, now, DateUtils.DAY_IN_MILLIS).toString()
+                    feedManga.chapters.forEach { chapterItem ->
+                        chapterItem.chapter.dateFetch.timeSpanFromNow
+                        val dateString = DateUtils.getRelativeTimeSpanString(chapterItem.chapter.dateFetch, now, DateUtils.DAY_IN_MILLIS).toString()
                         if (timeSpan != dateString) {
                             timeSpan = dateString
                             item {
@@ -112,13 +112,14 @@ fun FeedPage(
                         }
                         item {
                             UpdatesCard(
-                                chapter,
+                                chapterItem,
                                 buttonColor = themeColorState.buttonColor,
                                 mangaTitle = feedManga.mangaTitle,
                                 artwork = feedManga.artwork,
                                 outlineCovers = outlineCovers,
                                 hideChapterTitles = hideChapterTitles,
                                 mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                                downloadClick = { feedScreenActions.downloadClick(chapterItem, feedManga) },
                             )
                         }
                     }

@@ -16,27 +16,46 @@ import androidx.compose.ui.text.style.TextOverflow
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
-import org.nekomanga.domain.chapter.SimpleChapter
+import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.DownloadButton
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun UpdatesCard(firstChapter: SimpleChapter, buttonColor: Color, mangaTitle: String, artwork: Artwork, outlineCovers: Boolean, hideChapterTitles: Boolean, mangaClick: () -> Unit) {
+fun UpdatesCard(
+    chapterItem: ChapterItem,
+    buttonColor: Color,
+    mangaTitle: String,
+    artwork: Artwork,
+    outlineCovers: Boolean,
+    hideChapterTitles: Boolean,
+    mangaClick: () -> Unit,
+    downloadClick: () -> Unit,
+) {
     UpdatesRow(
-        firstChapter = firstChapter,
+        chapterItem = chapterItem,
         buttonColor = buttonColor,
         mangaTitle = mangaTitle,
         artwork = artwork,
         outlineCovers = outlineCovers,
         hideChapterTitles = hideChapterTitles,
         mangaClick = mangaClick,
+        downloadClick = downloadClick,
     )
 }
 
 @Composable
-private fun UpdatesRow(firstChapter: SimpleChapter, buttonColor: Color, mangaTitle: String, artwork: Artwork, outlineCovers: Boolean, hideChapterTitles: Boolean, mangaClick: () -> Unit) {
+private fun UpdatesRow(
+    chapterItem: ChapterItem,
+    buttonColor: Color,
+    mangaTitle: String,
+    artwork: Artwork,
+    outlineCovers: Boolean,
+    hideChapterTitles: Boolean,
+    mangaClick: () -> Unit,
+    downloadClick: () -> Unit,
+) {
     val mediumAlphaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
     Row(
@@ -53,18 +72,18 @@ private fun UpdatesRow(firstChapter: SimpleChapter, buttonColor: Color, mangaTit
                 .padding(horizontal = Size.small)
                 .weight(3f),
         ) {
-            val titleColor = getReadTextColor(isRead = firstChapter.read)
-            val updatedColor = getReadTextColor(isRead = firstChapter.read, mediumAlphaColor)
+            val titleColor = getReadTextColor(isRead = chapterItem.chapter.read)
+            val updatedColor = getReadTextColor(isRead = chapterItem.chapter.read, mediumAlphaColor)
             FeedChapterTitleLine(
                 hideChapterTitles = hideChapterTitles,
-                isBookmarked = firstChapter.bookmark,
-                chapterNumber = firstChapter.chapterNumber,
-                title = firstChapter.name,
+                isBookmarked = chapterItem.chapter.bookmark,
+                chapterNumber = chapterItem.chapter.chapterNumber,
+                title = chapterItem.chapter.name,
                 style = MaterialTheme.typography.bodyLarge,
                 textColor = titleColor,
             )
             Text(
-                text = "Updated ${firstChapter.dateUpload.timeSpanFromNow}",
+                text = "Updated ${chapterItem.chapter.dateUpload.timeSpanFromNow}",
                 style = MaterialTheme.typography.labelSmall,
                 color = updatedColor,
                 maxLines = 1,
@@ -79,19 +98,18 @@ private fun UpdatesRow(firstChapter: SimpleChapter, buttonColor: Color, mangaTit
             )
         }
         DownloadButton(
-            buttonColor,
-            Download.State.NOT_DOWNLOADED,
-            0f,
+            buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
             Modifier
                 .combinedClickable(
                     onClick = {
                         when (Download.State.NOT_DOWNLOADED) {
-                            Download.State.NOT_DOWNLOADED -> Unit //onDownload(MangaConstants.DownloadAction.Download)
-                            else -> Unit // chapterDropdown = true
+                            Download.State.NOT_DOWNLOADED -> downloadClick()
+                            else -> Unit //downloadClick(simpleChapter.id)
                         }
                     },
                     onLongClick = {},
                 ),
         )
+
     }
 }

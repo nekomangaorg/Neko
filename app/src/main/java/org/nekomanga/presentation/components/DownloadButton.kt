@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.theme.Size
 
 private const val size = 24
@@ -49,7 +50,9 @@ fun DownloadButton(buttonColor: Color, downloadState: Download.State, downloadPr
     var downloadComplete by remember { mutableStateOf(false) }
     var wasDownloading by remember { mutableStateOf(false) }
 
+
     LaunchedEffect(downloadState) {
+        TimberKt.d { "download state download state: $downloadState" }
         when (downloadState) {
             // this reset download complete in case you remove the chapter and want to redownload it
             Download.State.NOT_DOWNLOADED -> downloadComplete = false

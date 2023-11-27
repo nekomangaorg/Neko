@@ -3,6 +3,9 @@ package eu.kanade.tachiyomi.ui.recents
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.mapError
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
@@ -10,8 +13,12 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.domain.chapter.ChapterItem
+import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
@@ -20,6 +27,7 @@ import uy.kohesive.injekt.api.get
 
 class FeedRepository(
     private val db: DatabaseHelper = Injekt.get(),
+    private val downloadManager: DownloadManager = Injekt.get(),
     private val preferenceHelper: PreferencesHelper = Injekt.get(),
 ) {
 
@@ -30,7 +38,7 @@ class FeedRepository(
     suspend fun getUpdatedFeedMangaForHistoryBySeries(feedManga: FeedManga): FeedManga {
         val chapterHistories = db.getChapterHistoryByMangaId(feedManga.mangaId).executeOnIO()
         val simpleChapters = chapterHistories.mapNotNull { chpHistory ->
-            chpHistory.chapter.toSimpleChapter(chpHistory.history.last_read)!!
+            chpHistory.chapter.toSimpleChapter(chpHistory.history.last_read)!!.toChapterItem()
         }.toPersistentList()
 
         return feedManga.copy(
@@ -44,14 +52,13 @@ class FeedRepository(
                 FeedScreenType.Updates -> {
                     val chapters = db.getRecentChapters(search = searchQuery, offset = offset, limit = limit, isResuming = false).executeAsBlocking()
                         .mapNotNull {
-                            val simpleChapter = it.chapter.toSimpleChapter()
-                            simpleChapter ?: return@mapNotNull null
+                            val chapterItem = getChapterItem(it.manga, it.chapter.toSimpleChapter()!!)
                             FeedManga(
-                                mangaId = simpleChapter.mangaId,
+                                mangaId = chapterItem.chapter.mangaId,
                                 mangaTitle = it.manga.title,
-                                date = simpleChapter.dateFetch,
+                                date = chapterItem.chapter.dateFetch,
                                 artwork = it.manga.toDisplayManga().currentArtwork,
-                                chapters = persistentListOf(simpleChapter),
+                                chapters = persistentListOf(chapterItem),
                             )
                         }
                     Pair(chapters.isNotEmpty(), chapters)
@@ -72,8 +79,8 @@ class FeedRepository(
                                     }
 
                                     val chapterHistories = db.getChapterHistoryByMangaId(history.manga.id!!).executeOnIO()
-                                    val simpleChapters = chapterHistories.mapNotNull { chpHistory ->
-                                        chpHistory.chapter.toSimpleChapter(chpHistory.history.last_read)!!
+                                    val chapterItems = chapterHistories.mapNotNull { chpHistory ->
+                                        getChapterItem(chpHistory.manga, chpHistory.chapter.toSimpleChapter(chpHistory.history.last_read)!!)
                                     }.toPersistentList()
 
                                     bySeriesSet.add(history.manga.id!!)
@@ -83,7 +90,7 @@ class FeedRepository(
                                         mangaTitle = history.manga.title,
                                         date = history.history.last_read,
                                         artwork = history.manga.toDisplayManga().currentArtwork,
-                                        chapters = simpleChapters,
+                                        chapters = chapterItems,
                                     )
                                 }
                         }
@@ -100,15 +107,15 @@ class FeedRepository(
                                 val date = it.history.last_read
                                 it.manga to (if (date <= 0L) "-1" else dateFormat.format(Date(date)))
                             }.mapNotNull { (manga, matches) ->
-                                val simpleChapters = matches.map {
-                                    it.chapter.toSimpleChapter(it.history.last_read)!!
+                                val chapterItems = matches.map {
+                                    getChapterItem(it.manga, it.chapter.toSimpleChapter(it.history.last_read)!!)
                                 }.toPersistentList()
                                 FeedManga(
                                     mangaId = manga.first.id!!,
                                     mangaTitle = manga.first.title,
                                     date = 0L,
                                     artwork = manga.first.toDisplayManga().currentArtwork,
-                                    chapters = simpleChapters,
+                                    chapters = chapterItems,
                                 )
                             }
                         }
@@ -117,14 +124,14 @@ class FeedRepository(
                             db.getHistoryUngrouped(search = searchQuery, offset = offset, isResuming = false).executeOnIO().mapNotNull {
                                 it.manga.id ?: return@mapNotNull null
                                 it.chapter.id ?: return@mapNotNull null
-                                val simpleChapter = it.chapter.toSimpleChapter(it.history.last_read)!!
+                                val chapterItem = getChapterItem(it.manga, it.chapter.toSimpleChapter(it.history.last_read)!!)
                                 it.history.last_read
                                 FeedManga(
                                     mangaId = it.manga.id!!,
                                     mangaTitle = it.manga.title,
                                     date = it.history.last_read,
                                     artwork = it.manga.toDisplayManga().currentArtwork,
-                                    chapters = persistentListOf(simpleChapter),
+                                    chapters = persistentListOf(chapterItem),
                                 )
                             }
                         }
@@ -141,7 +148,7 @@ class FeedRepository(
         }
     }
 
-    fun deleteAllHistoryForManga(mangaId: Long) {
+    suspend fun deleteAllHistoryForManga(mangaId: Long) {
         val history = db.getHistoryByMangaId(mangaId).executeAsBlocking()
         history.forEach {
             it.last_read = 0L
@@ -150,11 +157,40 @@ class FeedRepository(
         db.upsertHistoryLastRead(history).executeAsBlocking()
     }
 
-    fun deleteHistoryForChapter(chapterUrl: String) {
+    suspend fun deleteHistoryForChapter(chapterUrl: String) {
         val history = db.getHistoryByChapterUrl(chapterUrl).executeAsBlocking()
         history ?: return
         history.last_read = 0L
         history.time_read = 0L
         db.upsertHistoryLastRead(history).executeAsBlocking()
+    }
+
+    suspend fun getUpdateChapters(feedManga: FeedManga): ImmutableList<ChapterItem> {
+        val dbManga = db.getManga(feedManga.mangaId).executeOnIO()!!
+        return feedManga.chapters.map { chapterItem ->
+            getChapterItem(dbManga, chapterItem.chapter)
+        }.toImmutableList()
+    }
+
+    fun getChapterItem(manga: Manga, chapter: SimpleChapter): ChapterItem {
+        val downloadState = when {
+            downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga) -> Download.State.DOWNLOADED
+            downloadManager.hasQueue() -> downloadManager.queue.find { chapter.id == it.chapter.id }?.status ?: Download.State.default
+            else -> Download.State.default
+        }
+
+        return ChapterItem(
+            chapter = chapter,
+            downloadState = downloadState,
+            downloadProgress = when (downloadState == Download.State.DOWNLOADING) {
+                true -> downloadManager.queue.find { it.chapter.id == chapter.id }!!.progressFloat
+                false -> 0f
+            },
+        )
+    }
+
+    suspend fun downloadChapter(feedManga: FeedManga, chapterItem: ChapterItem) {
+        val dbManga = db.getManga(feedManga.mangaId).executeOnIO()!!
+        downloadManager.downloadChapters(dbManga, listOf(chapterItem.chapter.toDbChapter()))
     }
 }

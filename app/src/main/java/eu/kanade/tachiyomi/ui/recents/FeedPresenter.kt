@@ -1,6 +1,12 @@
 package eu.kanade.tachiyomi.ui.recents
 
 import com.github.michaelbull.result.onSuccess
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.download.model.DownloadQueue
+import eu.kanade.tachiyomi.data.library.LibraryServiceListener
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.SideNavMode
@@ -16,6 +22,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.core.preferences.toggle
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
@@ -30,8 +37,9 @@ class FeedPresenter(
     val securityPreferences: SecurityPreferences = Injekt.get(),
     val mangaDetailsPreferences: MangaDetailsPreferences = Injekt.get(),
     private val feedRepository: FeedRepository = Injekt.get(),
+    private val downloadManager: DownloadManager = Injekt.get(),
 
-    ) : BaseCoroutinePresenter<FeedController>() {
+    ) : BaseCoroutinePresenter<FeedController>(), DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private val _feedScreenState = MutableStateFlow(
         FeedScreenState(
@@ -73,6 +81,8 @@ class FeedPresenter(
 
     override fun onCreate() {
         super.onCreate()
+        downloadManager.addListener(this)
+        LibraryUpdateService.setListener(this)
 
         if (_feedScreenState.value.initialLoad) {
             _feedScreenState.update { state ->
@@ -152,7 +162,7 @@ class FeedPresenter(
     }
 
     fun deleteAllHistory(feedManga: FeedManga) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             TimberKt.d { "Delete all history click" }
             feedRepository.deleteAllHistoryForManga(feedManga.mangaId)
             _feedScreenState.update {
@@ -164,7 +174,7 @@ class FeedPresenter(
     }
 
     fun deleteHistory(feedManga: FeedManga, simpleChapter: SimpleChapter) {
-        presenterScope.launch {
+        presenterScope.launchIO {
             if (feedManga.chapters.size == 1) {
                 deleteAllHistory(feedManga)
             } else {
@@ -173,14 +183,12 @@ class FeedPresenter(
                 val index = _feedScreenState.value.allFeedManga.indexOfFirst { it.mangaId == feedManga.mangaId }
                 val mutableFeedManga = _feedScreenState.value.allFeedManga.toMutableList()
 
-
-
                 if (_feedScreenState.value.historyGrouping == FeedHistoryGroup.Series) {
                     val newFeedManga = feedRepository.getUpdatedFeedMangaForHistoryBySeries(feedManga)
                     mutableFeedManga[index] = newFeedManga
                 } else {
                     val newFeedManga = _feedScreenState.value.allFeedManga[index]
-                    mutableFeedManga[index] = newFeedManga.copy(chapters = newFeedManga.chapters.filter { it.url != simpleChapter.url }.toImmutableList())
+                    mutableFeedManga[index] = newFeedManga.copy(chapters = newFeedManga.chapters.filter { it.chapter.url != simpleChapter.url }.toImmutableList())
                 }
                 _feedScreenState.update {
                     it.copy(
@@ -193,7 +201,7 @@ class FeedPresenter(
 
     fun search(searchQuery: String?) {
         searchJob?.cancel()
-        searchJob = presenterScope.launch {
+        searchJob = presenterScope.launchIO {
             _feedScreenState.update { it.copy(searchQuery = "") }
             if (searchQuery.isNullOrBlank()) {
                 _feedScreenState.update { it.copy(searchFeedManga = persistentListOf()) }
@@ -208,6 +216,83 @@ class FeedPresenter(
                     }
             }
         }
+    }
+
+    fun downloadChapter(chapterItem: ChapterItem, feedManga: FeedManga) {
+        presenterScope.launchIO {
+            if (chapterItem.isNotDownloaded) {
+                feedRepository.downloadChapter(feedManga, chapterItem)
+            }
+        }
+    }
+
+    override fun updateDownload(download: Download) {
+        presenterScope.launchIO {
+            TimberKt.d { "Updating download downloadState: ${download.status}" }
+            launch {
+                val (searchFeedUpdated, searchFeedMangaList) = updateChapterDownloadForManga(download, _feedScreenState.value.searchFeedManga.toMutableList())
+                if (searchFeedUpdated) {
+                    _feedScreenState.update {
+                        it.copy(searchFeedManga = searchFeedMangaList.toImmutableList())
+                    }
+                }
+            }
+            launch {
+                val (feedUpdated, feedMangaList) = updateChapterDownloadForManga(download, _feedScreenState.value.allFeedManga.toMutableList())
+                if (feedUpdated) {
+                    _feedScreenState.update {
+                        it.copy(allFeedManga = feedMangaList.toImmutableList())
+                    }
+                }
+            }
+
+        }
+    }
+
+    /**
+     * Finds the manga in the given list, finds the matching chapters and updates the chapter and the list.  Returning the updated list or false if the chapter didnt exist
+     */
+    private fun updateChapterDownloadForManga(download: Download, feedManga: List<FeedManga>): Pair<Boolean, List<FeedManga>> {
+        val mutableFeedManga = feedManga.toMutableList()
+        val indexOfFeedManga = mutableFeedManga.indexOfFirst { it.mangaId == download.manga.id }
+        if (indexOfFeedManga >= 0) {
+            val mutableChapters = mutableFeedManga[indexOfFeedManga].chapters.toMutableList()
+            val indexOfChapter = mutableChapters.indexOfFirst { it.chapter.id == download.chapter.id }
+            if (indexOfChapter >= 0) {
+                mutableChapters[indexOfChapter] = mutableChapters[indexOfChapter].copy(downloadState = download.status, downloadProgress = download.progressFloat)
+                mutableFeedManga[indexOfFeedManga] = mutableFeedManga[indexOfFeedManga].copy(chapters = mutableChapters.toImmutableList())
+                return true to mutableFeedManga
+            }
+        }
+        return false to emptyList()
+    }
+
+    override fun updateDownloads() {
+        presenterScope.launchIO {
+            val allFeedManga = _feedScreenState.value.allFeedManga
+            allFeedManga.forEach { feedManga ->
+
+                val updatedChapters = feedRepository.getUpdateChapters(feedManga)
+
+                val mutableFeedManga = _feedScreenState.value.allFeedManga.toMutableList()
+                val index = mutableFeedManga.indexOfFirst { it.mangaId == feedManga.mangaId }
+                if (index >= 0) {
+                    mutableFeedManga[index] = feedManga.copy(chapters = updatedChapters)
+                    _feedScreenState.update { it.copy(allFeedManga = mutableFeedManga.toImmutableList()) }
+                }
+
+            }
+        }
+    }
+
+    override fun onUpdateManga(manga: Manga?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        downloadManager.removeListener(this)
+        LibraryUpdateService.removeListener(this)
     }
 
     companion object {

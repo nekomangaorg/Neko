@@ -37,6 +37,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                 deleteAllHistoryClick = presenter::deleteAllHistory,
                 deleteHistoryClick = presenter::deleteHistory,
                 search = presenter::search,
+                downloadClick = presenter::downloadChapter,
             ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },

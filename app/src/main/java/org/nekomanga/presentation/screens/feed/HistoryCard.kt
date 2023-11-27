@@ -56,6 +56,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
+import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.logging.TimberKt
@@ -72,7 +73,7 @@ fun HistoryCard(
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
     groupedBySeries: Boolean,
-    downloadClick: (Long) -> Unit,
+    downloadClick: (ChapterItem) -> Unit,
     mangaClick: () -> Unit,
     deleteAllHistoryClick: () -> Unit,
     deleteHistoryClick: (SimpleChapter) -> Unit,
@@ -97,7 +98,7 @@ fun HistoryCard(
             .animateContentSize(),
         colors = CardDefaults.cardColors(containerColor = cardColor),
     ) {
-        val titleColor = getReadTextColor(isRead = feedManga.chapters.all { it.read }, themeColorState.buttonColor)
+        val titleColor = getReadTextColor(isRead = feedManga.chapters.all { it.chapter.read }, themeColorState.buttonColor)
 
         Text(
             text = feedManga.mangaTitle,
@@ -115,7 +116,7 @@ fun HistoryCard(
                 .fillMaxWidth()
                 .padding(start = Size.small),
             artwork = feedManga.artwork,
-            firstChapter = feedManga.chapters.first(),
+            chapterItem = feedManga.chapters.first(),
             buttonColor = themeColorState.buttonColor,
             outlineCovers = outlineCovers,
             hideChapterTitles = hideChapterTitles,
@@ -124,15 +125,16 @@ fun HistoryCard(
             mangaClick = mangaClick,
             deleteAllClick = { showRemoveAllHistoryDialog = true },
             deleteClick = { showRemoveHistoryDialog = 0 },
+            downloadClick = { downloadClick(feedManga.chapters.first()) },
         )
         if (showRemoveHistoryDialog >= 0) {
             DeleteHistoryDialog(
                 themeColorState = themeColorState,
                 onDismiss = { showRemoveHistoryDialog = -1 },
-                name = feedManga.chapters[showRemoveHistoryDialog].name,
+                name = feedManga.chapters[showRemoveHistoryDialog].chapter.name,
                 title = R.string.remove_history_question,
                 description = R.string.this_will_remove_the_read_date,
-                onConfirm = { deleteHistoryClick(feedManga.chapters[showRemoveHistoryDialog]) },
+                onConfirm = { deleteHistoryClick(feedManga.chapters[showRemoveHistoryDialog].chapter) },
             )
         }
         if (showRemoveAllHistoryDialog) {
@@ -157,7 +159,7 @@ fun HistoryCard(
                     style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)),
                 )
             }
-            feedManga.chapters.forEachIndexed { index, simpleChapter ->
+            feedManga.chapters.forEachIndexed { index, chapterItem ->
                 if (index > 0) {
                     Gap(Size.smedium)
                     Divider(Modifier.padding(horizontal = Size.small))
@@ -175,19 +177,19 @@ fun HistoryCard(
 
                             FeedChapterTitleLine(
                                 hideChapterTitles = hideChapterTitles,
-                                isBookmarked = simpleChapter.bookmark,
-                                chapterNumber = simpleChapter.chapterNumber,
-                                title = simpleChapter.name,
+                                isBookmarked = chapterItem.chapter.bookmark,
+                                chapterNumber = chapterItem.chapter.chapterNumber,
+                                title = chapterItem.chapter.name,
                                 style = MaterialTheme.typography.bodyLarge,
-                                textColor = getReadTextColor(isRead = simpleChapter.read),
+                                textColor = getReadTextColor(isRead = chapterItem.chapter.read),
                             )
 
                             LastReadLine(
-                                lastRead = simpleChapter.lastRead,
-                                scanlator = simpleChapter.scanlator,
-                                language = simpleChapter.language,
+                                lastRead = chapterItem.chapter.lastRead,
+                                scanlator = chapterItem.chapter.scanlator,
+                                language = chapterItem.chapter.language,
                                 style = MaterialTheme.typography.bodyMedium,
-                                textColor = getReadTextColor(isRead = simpleChapter.read, lowContrastColor),
+                                textColor = getReadTextColor(isRead = chapterItem.chapter.read, lowContrastColor),
                             )
                         }
 
@@ -195,7 +197,9 @@ fun HistoryCard(
                             Row() {
                                 Buttons(
                                     buttonColor = themeColorState.buttonColor,
+                                    chapterItem = chapterItem,
                                     deleteClick = { showRemoveHistoryDialog = index },
+                                    downloadClick = { downloadClick(chapterItem) },
                                 )
                             }
                         }
@@ -211,7 +215,7 @@ fun HistoryCard(
 private fun HistoryRow(
     modifier: Modifier = Modifier,
     artwork: Artwork,
-    firstChapter: SimpleChapter,
+    chapterItem: ChapterItem,
     buttonColor: Color,
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
@@ -220,6 +224,7 @@ private fun HistoryRow(
     mangaClick: () -> Unit,
     deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
+    downloadClick: () -> Unit,
 ) {
     val mediumAlphaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Size.tiny)) {
@@ -236,7 +241,7 @@ private fun HistoryRow(
                     .align(Alignment.Top)
                     .height(Size.squareCover)
                     .weight(3f),
-                firstChapter = firstChapter,
+                chapterItem = chapterItem,
                 hideChapterTitles = hideChapterTitles,
                 updatedColor = mediumAlphaColor,
                 buttonColor = buttonColor,
@@ -244,6 +249,7 @@ private fun HistoryRow(
                 isExpanded = isExpanded,
                 deleteAllClick = deleteAllClick,
                 deleteClick = deleteClick,
+                downloadClick = downloadClick,
             )
 
         }
@@ -254,7 +260,7 @@ private fun HistoryRow(
 @Composable
 private fun ChapterInfo(
     modifier: Modifier = Modifier,
-    firstChapter: SimpleChapter,
+    chapterItem: ChapterItem,
     hideChapterTitles: Boolean,
     updatedColor: Color,
     buttonColor: Color,
@@ -262,31 +268,32 @@ private fun ChapterInfo(
     isExpanded: Boolean,
     deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
+    downloadClick: () -> Unit,
 ) {
     Column(modifier = modifier) {
-        val textColor = getReadTextColor(isRead = firstChapter.read)
+        val textColor = getReadTextColor(isRead = chapterItem.chapter.read)
 
         FeedChapterTitleLine(
             hideChapterTitles = hideChapterTitles,
-            isBookmarked = firstChapter.bookmark,
-            chapterNumber = firstChapter.chapterNumber,
-            title = firstChapter.name,
+            isBookmarked = chapterItem.chapter.bookmark,
+            chapterNumber = chapterItem.chapter.chapterNumber,
+            title = chapterItem.chapter.name,
             style = MaterialTheme.typography.bodyLarge,
             textColor = textColor,
         )
 
-        val readColor = getReadTextColor(isRead = firstChapter.read, updatedColor)
+        val readColor = getReadTextColor(isRead = chapterItem.chapter.read, updatedColor)
         LastReadLine(
-            lastRead = firstChapter.lastRead,
-            scanlator = firstChapter.scanlator,
-            language = firstChapter.language,
+            lastRead = chapterItem.chapter.lastRead,
+            scanlator = chapterItem.chapter.scanlator,
+            language = chapterItem.chapter.language,
             style = MaterialTheme.typography.bodyMedium,
             textColor = readColor,
         )
-        if (!firstChapter.read && firstChapter.pagesLeft > 0) {
+        if (!chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0) {
             Text(
                 modifier = Modifier.weight(1f),
-                text = pluralStringResource(id = R.plurals.pages_left, count = 1, firstChapter.pagesLeft),
+                text = pluralStringResource(id = R.plurals.pages_left, count = 1, chapterItem.chapter.pagesLeft),
                 style = MaterialTheme.typography.bodyMedium,
                 color = readColor,
                 maxLines = 1,
@@ -307,8 +314,12 @@ private fun ChapterInfo(
             }
             Spacer(modifier.weight(1f))
             Buttons(
-                buttonColor = buttonColor, deleteAll = true,
-                deleteAllClick = deleteAllClick, deleteClick = deleteClick,
+                buttonColor = buttonColor,
+                chapterItem = chapterItem,
+                deleteAll = true,
+                deleteAllClick = deleteAllClick,
+                deleteClick = deleteClick,
+                downloadClick = downloadClick,
             )
 
         }
@@ -316,7 +327,7 @@ private fun ChapterInfo(
 }
 
 @Composable
-private fun RowScope.Buttons(buttonColor: Color, deleteAll: Boolean = false, deleteClick: () -> Unit, deleteAllClick: () -> Unit = {}) {
+private fun RowScope.Buttons(buttonColor: Color, chapterItem: ChapterItem, deleteAll: Boolean = false, deleteClick: () -> Unit, deleteAllClick: () -> Unit = {}, downloadClick: () -> Unit) {
     if (deleteAll) {
         IconButton(onClick = deleteAllClick) {
             Icon(
@@ -334,14 +345,12 @@ private fun RowScope.Buttons(buttonColor: Color, deleteAll: Boolean = false, del
         )
     }
     DownloadButton(
-        buttonColor,
-        Download.State.NOT_DOWNLOADED,
-        0f,
+        buttonColor, chapterItem.downloadState, chapterItem.downloadProgress,
         Modifier
             .combinedClickable(
                 onClick = {
                     when (Download.State.NOT_DOWNLOADED) {
-                        Download.State.NOT_DOWNLOADED -> Unit //onDownload(MangaConstants.DownloadAction.Download)
+                        Download.State.NOT_DOWNLOADED -> downloadClick()
                         else -> Unit //downloadClick(simpleChapter.id)
                     }
                 },

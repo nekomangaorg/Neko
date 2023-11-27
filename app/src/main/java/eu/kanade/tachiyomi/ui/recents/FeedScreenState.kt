@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.recents
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 
@@ -44,6 +45,7 @@ data class FeedScreenActions(
     val deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,
     val deleteAllHistoryClick: (FeedManga) -> Unit,
     val search: (String?) -> Unit,
+    val downloadClick: (ChapterItem, FeedManga) -> Unit,
 )
 
 data class FeedManga(
@@ -51,7 +53,7 @@ data class FeedManga(
     val date: Long,
     val mangaId: Long,
     val artwork: Artwork,
-    val chapters: ImmutableList<SimpleChapter>,
+    val chapters: ImmutableList<ChapterItem>,
 )
 
 
