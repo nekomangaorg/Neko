@@ -13,5 +13,5 @@ jobs:
       - name: weekly-issue-closure
         uses: bdougie/close-issues-based-on-label@master
         env:
-          LABEL: Fixed in future release
+          LABEL: staged for next release
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
