@@ -97,6 +97,7 @@ fun MergeSheet(
                 Gap(8.dp)
             }
         }
+
         is IsMergedManga.No -> {
             var mergeType: MergeType? by remember { mutableStateOf(null) }
             BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
@@ -118,6 +119,7 @@ fun MergeSheet(
                             }
                         }
                     }
+
                     false -> {
                         LaunchedEffect(key1 = mergeType) {
                             search(title, mergeType!!)
@@ -185,7 +187,7 @@ private fun SuccessResults(mergeMangaList: List<SourceMergeManga>, mergeType: Me
         columns = GridCells.Adaptive(minSize = 100.dp),
         modifier = Modifier
             .fillMaxWidth(),
-        contentPadding = PaddingValues(top = 16.dp, bottom = Size.huge, start = 8.dp, end = 8.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = Size.huge * 2, start = 8.dp, end = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -251,19 +253,25 @@ private fun BoxScope.NonSuccessResultsAndChips(themeColorState: ThemeColorState,
         }
         Gap(16.dp)
         if (altTitles.isNotEmpty()) {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                contentPadding = PaddingValues(horizontal = 8.dp),
-            ) {
-                val allTitles = listOf(title) + altTitles
-                items(allTitles) { item ->
-                    ElevatedSuggestionChip(
-                        onClick = { chipClick(item) },
-                        label = { Text(text = item, color = MaterialTheme.colorScheme.surface) },
-                        colors = SuggestionChipDefaults.elevatedSuggestionChipColors(containerColor = themeColorState.buttonColor),
-                    )
+            val allTitles = listOf(title) + altTitles.sorted()
+            val partitioned = allTitles.partition { title ->
+                allTitles.indexOf(title).mod(2) != 0
+            }.toList()
+
+            partitioned.forEach { chunk ->
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                ) {
+                    items(chunk){ item ->
+                        ElevatedSuggestionChip(
+                            onClick = { chipClick(item) },
+                            label = { Text(text = item, color = MaterialTheme.colorScheme.surface) },
+                            colors = SuggestionChipDefaults.elevatedSuggestionChipColors(containerColor = themeColorState.buttonColor),
+                        )
+                    }
                 }
             }
         }
