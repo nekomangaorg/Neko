@@ -103,7 +103,7 @@ class BrowseRepository(
                         listResults.map { listResult ->
                             HomePageManga(
                                 displayScreenType = listResult.displayScreenType,
-                                displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList(),
+                                displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.distinctBy { it.url }.toPersistentList(),
                             )
                         },
                     )
