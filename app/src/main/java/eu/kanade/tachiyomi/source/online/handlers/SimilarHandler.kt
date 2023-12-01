@@ -240,7 +240,7 @@ class SimilarHandler {
             if (it.node.mediaRecommendation.format != "MANGA") {
                 return@map null
             }
-            val id = mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
+            val id = mappings.getMangadexUUID(it.node.mediaRecommendation.id.toString(), "al")
             val text = it.node.rating.toString() + " user votes"
             id to text
         }.filterNotNull().toMap()
@@ -302,7 +302,7 @@ class SimilarHandler {
 
         // Get our page of mangaList
         val idPairs = similarDto.data.associate {
-            val id = mappings.getMangadexID(it.entry.mal_id.toString(), "mal")
+            val id = mappings.getMangadexUUID(it.entry.mal_id.toString(), "mal")
             val text = it.votes.toString() + " user votes"
             id to text
         }
@@ -368,12 +368,12 @@ class SimilarHandler {
 
         // Get our page of mangaList
         val idPairs = similarDto.recommendations.associate {
-            val id = mappings.getMangadexID(it.series_id.toString(), "mu_new")
+            val id = mappings.getMangadexUUID(it.series_id.toString(), "mu_new")
             val text = it.weight.toString() + " user votes"
             id to text
         }.toMutableMap()
         idPairs += similarDto.category_recommendations.associate {
-            val id = mappings.getMangadexID(it.series_id.toString(), "mu_new")
+            val id = mappings.getMangadexUUID(it.series_id.toString(), "mu_new")
             val text = "Similar"
             id to text
         }
