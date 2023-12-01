@@ -131,24 +131,18 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): List<SourceManga> {
         if (forceRefresh) {
-             val dto = networkServices.similarService.getSimilarManga(dexId)
-                 .onFailure {
-                     TimberKt.e { "trying to get similar manga, $this" }
-                 }.getOrNull()
-
-          /*  val response2 = networkServices.similarServiceUpdated.getSimilarMangaString(dexId.substring(0, 2), dexId.substring(0, 3)).onFailure {
+            val response = networkServices.similarService.getSimilarMangaString(dexId.substring(0, 2), dexId.substring(0, 3)).onFailure {
                 TimberKt.e { "trying to get similar manga, $this" }
             }.getOrNull()
 
-            val dto = response2?.split("\n")?.mapNotNull { line ->
+            val dto = response?.split("\n")?.firstNotNullOfOrNull { line ->
                 val splitLine = line.split(":::||@!@||:::")
                 if (splitLine.isNotEmpty() && splitLine.size == 2 && splitLine[0] == dexId) {
                     json.decodeFromString<SimilarMangaDto>(splitLine[1])
                 } else {
                     null
                 }
-            }?.firstOrNull()
-*/
+            }
 
             similarMangaParse(dexId, dto)
         }
@@ -216,7 +210,7 @@ class SimilarHandler {
             // Main network request
             val graphql =
                 """{ Media(id: $anilistId, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
-            val response = networkServices.similarService.getAniListGraphql(graphql).onFailure {
+            val response = networkServices.thirdPartySimilarService.getAniListGraphql(graphql).onFailure {
                 val type = "trying to get Anilist recommendations"
                 this.log(type)
                 if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
@@ -281,7 +275,7 @@ class SimilarHandler {
             ?: return emptyList()
 
         if (forceRefresh) {
-            val response = networkServices.similarService.getSimilarMalManga(malId).onFailure {
+            val response = networkServices.thirdPartySimilarService.getSimilarMalManga(malId).onFailure {
                 val type = "trying to get MAL similar manga"
                 this.log(type)
                 if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
@@ -345,7 +339,7 @@ class SimilarHandler {
             ?: return emptyList()
 
         if (forceRefresh) {
-            val response = networkServices.similarService.getSimilarMUManga(muId).onFailure {
+            val response = networkServices.thirdPartySimilarService.getSimilarMUManga(muId).onFailure {
                 val type = "trying to get MU similar manga"
                 this.log(type)
                 if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
