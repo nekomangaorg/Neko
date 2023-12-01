@@ -4,7 +4,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import eu.kanade.tachiyomi.data.database.tables.ArtworkTable
 import eu.kanade.tachiyomi.data.database.tables.BrowseFilterTable
-import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
@@ -104,16 +103,12 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         if (oldVersion < 23) {
             db.execSQL(MangaTable.addMergeMangaImageCol)
         }
-        if (oldVersion < 24) {
-            db.execSQL(CachedMangaTable.createVirtualTableQuery)
-        }
+
         if (oldVersion < 26) {
             db.execSQL(ChapterTable.addOldMangaDexChapterId)
             db.execSQL(SimilarTable.dropTableQuery)
             db.execSQL(SimilarTable.createTableQuery)
             db.execSQL(SimilarTable.createMangaIdIndexQuery)
-            db.execSQL(CachedMangaTable.dropVirtualTableQuery)
-            db.execSQL(CachedMangaTable.createVirtualTableQuery)
         }
         if (oldVersion < 27) {
             db.execSQL(TrackTable.addStartDate)
@@ -126,7 +121,6 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
 
         if (oldVersion < 29) {
-            db.execSQL(CachedMangaTable.dropVirtualTableQuery)
             db.execSQL(SimilarTable.dropTableQuery)
             db.execSQL(SimilarTable.createTableQuery)
         }

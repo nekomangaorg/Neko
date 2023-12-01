@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.database.queries
 
-import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable as Category
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable as Chapter
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable as History
@@ -18,14 +17,14 @@ val libraryQuery =
         SELECT ${Manga.TABLE}.*, COALESCE(C.unread, '') AS ${Manga.COL_UNREAD}, COALESCE(R.hasread, '') AS ${Manga.COL_HAS_READ}, COALESCE(B.bookmarkCount, 0) AS ${Manga.COL_BOOKMARK_COUNT}
         FROM ${Manga.TABLE}
         LEFT JOIN (
-            SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, "N/A"), " [.] ") AS unread
+            SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A'), ' [.] ') AS unread
             FROM ${Chapter.TABLE}
             WHERE ${Chapter.COL_READ} = 0
             GROUP BY ${Chapter.COL_MANGA_ID}
         ) AS C
         ON ${Manga.COL_ID} = C.${Chapter.COL_MANGA_ID}
         LEFT JOIN (
-            SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, "N/A"), " [.] ") AS hasread
+            SELECT ${Chapter.COL_MANGA_ID}, GROUP_CONCAT(IFNULL(${Chapter.TABLE}.${Chapter.COL_SCANLATOR}, 'N/A'), ' [.] ') AS hasread
             FROM ${Chapter.TABLE}
             WHERE ${Chapter.COL_READ} = 1
             GROUP BY ${Chapter.COL_MANGA_ID}
@@ -91,7 +90,7 @@ fun getRecentsQueryDistinct(search: String, offset: Int = 0, isResuming: Boolean
     JOIN ${Chapter.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
     JOIN (
-        SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID},${Chapter.TABLE}.${Chapter.COL_ID},MAX(${Chapter.TABLE}.${Chapter.COL_DATE_FETCH}) 
+        SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID},${Chapter.TABLE}.${Chapter.COL_ID},MAX(${Chapter.TABLE}.${Chapter.COL_DATE_FETCH})
         FROM ${Chapter.TABLE} JOIN ${Manga.TABLE}
         ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
         GROUP BY ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}) AS newest_chapter
@@ -225,16 +224,16 @@ fun getAllRecentsType(
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%')
     UNION
     SELECT * FROM
-    (SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, 
-        Null as history_id, 
-        Null as history_chapter_id, 
-        chapters.date_fetch as history_last_read, 
+    (SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*,
+        Null as history_id,
+        Null as history_chapter_id,
+        chapters.date_fetch as history_last_read,
         Null as history_time_read
     FROM ${Manga.TABLE}
     JOIN ${Chapter.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
     JOIN (
-        SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID},${Chapter.TABLE}.${Chapter.COL_ID} as ${History.COL_CHAPTER_ID},MAX(${Chapter.TABLE}.${Chapter.COL_DATE_UPLOAD}) 
+        SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID},${Chapter.TABLE}.${Chapter.COL_ID} as ${History.COL_CHAPTER_ID},MAX(${Chapter.TABLE}.${Chapter.COL_DATE_UPLOAD})
         FROM ${Chapter.TABLE} JOIN ${Manga.TABLE}
         ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
         WHERE ${Chapter.COL_READ} = 0
@@ -246,7 +245,7 @@ fun getAllRecentsType(
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%')
     UNION
     SELECT * FROM
-    (SELECT mangas.url as mangaUrl, 
+    (SELECT mangas.url as mangaUrl,
         mangas.*,
         Null as _id,
         Null as manga_id,
@@ -267,9 +266,9 @@ fun getAllRecentsType(
         Null as mangadex_chapter_id,
         Null as old_mangadex_chapter_id,
         Null as language,
-        Null as history_id, 
-        Null as history_chapter_id, 
-        ${Manga.TABLE}.${Manga.COL_DATE_ADDED} as history_last_read, 
+        Null as history_id,
+        Null as history_chapter_id,
+        ${Manga.TABLE}.${Manga.COL_DATE_ADDED} as history_last_read,
         Null as history_time_read
         FROM mangas
     WHERE ${Manga.COL_FAVORITE} = 1
@@ -341,23 +340,13 @@ fun getCategoriesForMangaQuery() =
     WHERE ${MangaCategory.COL_MANGA_ID} = ?
     """
 
-fun searchCachedMangaQuery(query: String, page: Int, limit: Int): String {
-    val regex = Regex("[^A-Za-z0-9 ]")
-    val queryCleaned = regex.replace(query, "")
-    return """
-      SELECT * FROM ${CachedMangaTable.TABLE_FTS}
-      WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH '$queryCleaned'
-      LIMIT ${limit + 1} OFFSET ${page * limit}
-    """
-}
-
 /**
  * Query to get manga that are not in library, but have read chapters
  */
 fun getReadMangaNotInLibraryQuery() =
     """
-    SELECT ${Manga.TABLE}.* 
-    FROM ${Manga.TABLE} 
+    SELECT ${Manga.TABLE}.*
+    FROM ${Manga.TABLE}
     WHERE ${Manga.COL_FAVORITE} = 0 AND ${Manga.COL_ID} IN(
         SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID} FROM ${Chapter.TABLE} WHERE ${Chapter.COL_READ} = 1 OR ${Chapter.COL_LAST_PAGE_READ} != 0
     )
