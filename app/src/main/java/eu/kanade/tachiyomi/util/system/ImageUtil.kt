@@ -63,7 +63,7 @@ object ImageUtil {
                 Format.Gif -> ImageType.GIF
                 Format.Heif -> ImageType.HEIF
                 Format.Jpeg -> ImageType.JPEG
-                /*  Format.Jxl -> ImageType.JXL*/
+                Format.Jxl -> ImageType.JXL
                 Format.Png -> ImageType.PNG
                 Format.Webp -> ImageType.WEBP
                 else -> null
