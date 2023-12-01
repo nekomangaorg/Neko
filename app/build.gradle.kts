@@ -26,8 +26,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "tachiyomi.mangadex"
-        versionCode = 193
-        versionName = "2.14.1"
+        versionCode = 194
+        versionName = "2.14.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -39,21 +39,6 @@ android {
         ndk {
             abiFilters += supportedAbis
         }
-        packaging {
-            jniLibs.excludes.addAll(
-                listOf(
-                    "**/libjxl.so",
-                    "**/libjxl_dec.so",
-                    "**/libjxl_threads.so",
-                ),
-            )
-        }
-
-        /* externalNativeBuild {
-             cmake {
-                 this.arguments("-DHAVE_LIBJXL=FALSE")
-             }
-         }*/
     }
 
     splits {
@@ -99,7 +84,6 @@ android {
             buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
         }
         create("dev") {
-
             resourceConfigurations.add("en")
         }
     }

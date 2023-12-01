@@ -115,8 +115,7 @@ object ImageUtil {
         GIF("image/gif", "gif"),
         HEIF("image/heif", "heif"),
         JPEG("image/jpeg", "jpg"),
-
-        // JXL("image/jxl", "jxl"),
+        JXL("image/jxl", "jxl"),
         PNG("image/png", "png"),
         WEBP("image/webp", "webp"),
     }
