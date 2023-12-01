@@ -6,7 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
@@ -69,6 +68,7 @@ private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem,
                 },
             )
         }
+
         is SimpleDropDownItem.Action -> {
             Item(modifier = modifier, text = item.text.asString(), style = style, onClick = item.onClick, onDismiss = onDismiss)
         }
