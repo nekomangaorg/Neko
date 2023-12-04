@@ -151,7 +151,7 @@ class SearchActivity : MainActivity() {
 
                         val query = when {
                             host.contains("anilist", true) -> {
-                                val dexId = mappings.getMangadexID(id, "al")
+                                val dexId = mappings.getMangadexUUID(id, "al")
                                 when (dexId == null) {
                                     true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for AniList ID"
                                     false -> MdConstants.DeepLinkPrefix.manga + dexId
@@ -159,7 +159,7 @@ class SearchActivity : MainActivity() {
                             }
 
                             host.contains("myanimelist", true) -> {
-                                val dexId = mappings.getMangadexID(id, "mal")
+                                val dexId = mappings.getMangadexUUID(id, "mal")
                                 when (dexId == null) {
                                     true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for MyAnimeList ID"
                                     false -> MdConstants.DeepLinkPrefix.manga + dexId
@@ -169,7 +169,7 @@ class SearchActivity : MainActivity() {
                             host.contains("mangaupdates", true) -> {
                                 val base = BigInteger(id, 36)
                                 val muID = base.toString(10)
-                                val dexId = mappings.getMangadexID(muID, "mu_new")
+                                val dexId = mappings.getMangadexUUID(muID, "mu_new")
                                 when (dexId == null) {
                                     true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for MangaUpdates ID"
                                     false -> MdConstants.DeepLinkPrefix.manga + dexId

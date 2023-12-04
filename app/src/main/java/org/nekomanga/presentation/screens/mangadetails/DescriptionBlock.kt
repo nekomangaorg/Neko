@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.compose.Markdown
@@ -453,7 +454,11 @@ private fun nekoMarkdownTypography() = markdownTypography(
     h5 = MaterialTheme.typography.titleSmall,
     h6 = MaterialTheme.typography.bodyLarge,
     paragraph = MaterialTheme.typography.bodyLarge,
-    text = MaterialTheme.typography.bodySmall,
+    text = MaterialTheme.typography.bodyLarge,
+    ordered = MaterialTheme.typography.bodyLarge,
+    bullet = MaterialTheme.typography.bodyLarge,
+    quote = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+    list = MaterialTheme.typography.bodyLarge,
 )
 
 fun TimeInterpolator.toEasing() = Easing { x ->

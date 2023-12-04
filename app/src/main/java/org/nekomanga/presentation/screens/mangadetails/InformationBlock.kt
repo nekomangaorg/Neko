@@ -6,11 +6,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmarks
@@ -163,37 +162,36 @@ fun InformationBlock(
             if (langFlagProvider() != null) {
                 val flag = MdLang.fromIsoCode(langFlagProvider()!!.lowercase(Locale.US))?.iconResId
                 if (flag != null) {
-                    val drawable = AppCompatResources.getDrawable(LocalContext.current, flag)
                     Image(
-                        painter = rememberDrawablePainter(drawable = drawable),
+                        painter = rememberDrawablePainter(drawable = AppCompatResources.getDrawable(LocalContext.current, flag)),
                         modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp)),
+                            .height(Size.large)
+                            .clip(RoundedCornerShape(Size.tiny)),
                         contentDescription = "flag",
                     )
                 }
             }
 
             if (isPornographicProvider()) {
-                Row {
-                    Gap(Size.small)
-                    Image(imageVector = Icons.Outlined._18UpRating, modifier = Modifier.size(Size.extraLarge), contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
-                }
+                Gap(Size.small)
+                Image(
+                    imageVector = Icons.Outlined._18UpRating,
+                    contentDescription = null, colorFilter = ColorFilter.tint(Color.Red),
+                )
             }
 
             statsProvider()?.let { stats ->
                 stats.rating?.let { rating ->
                     val formattedRating = ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
 
-                    Row {
-                        Gap(8.dp)
-                        Image(imageVector = Icons.Filled.HotelClass, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
-                        Gap(Size.tiny)
-                        NoRippleText(
-                            text = formattedRating,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = mediumAlpha,
-                        )
-                    }
+                    Gap(8.dp)
+                    Image(imageVector = Icons.Filled.HotelClass, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                    Gap(Size.tiny)
+                    NoRippleText(
+                        text = formattedRating,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = mediumAlpha,
+                    )
                 }
 
                 stats.follows?.let { unformattedNumberOfUsers ->
@@ -201,16 +199,14 @@ fun InformationBlock(
                         NumberFormat.getNumberInstance(Locale.US).format(unformattedNumberOfUsers.toInt())
                     }.getOrDefault(0).toString()
 
-                    Row {
-                        Gap(8.dp)
-                        Image(imageVector = Icons.Filled.Bookmarks, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
-                        Gap(Size.tiny)
-                        NoRippleText(
-                            text = numberOfUsers,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = mediumAlpha,
-                        )
-                    }
+                    Gap(8.dp)
+                    Image(imageVector = Icons.Filled.Bookmarks, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                    Gap(Size.tiny)
+                    NoRippleText(
+                        text = numberOfUsers,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = mediumAlpha,
+                    )
                 }
 
                 if (stats.threadId != null) {
@@ -219,16 +215,14 @@ fun InformationBlock(
                         NumberFormat.getNumberInstance(Locale.US).format(stats.repliesCount?.toInt())
                     }.getOrDefault(0).toString()
 
-                    Row {
-                        Gap(8.dp)
-                        Image(imageVector = Icons.Filled.Comment, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
-                        Gap(Size.tiny)
-                        NoRippleText(
-                            text = numberOfComments,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = mediumAlpha,
-                        )
-                    }
+                    Gap(8.dp)
+                    Image(imageVector = Icons.Filled.Comment, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                    Gap(Size.tiny)
+                    NoRippleText(
+                        text = numberOfComments,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = mediumAlpha,
+                    )
                 }
 
             }
@@ -236,10 +230,8 @@ fun InformationBlock(
 
 
             if (showMergedIconProvider()) {
-                Row {
-                    Gap(8.dp)
-                    com.mikepenz.iconics.compose.Image(asset = CommunityMaterial.Icon.cmd_check_decagram, colorFilter = ColorFilter.tint(mediumAlpha))
-                }
+                Gap(8.dp)
+                com.mikepenz.iconics.compose.Image(asset = CommunityMaterial.Icon.cmd_check_decagram, colorFilter = ColorFilter.tint(mediumAlpha))
             }
         }
 

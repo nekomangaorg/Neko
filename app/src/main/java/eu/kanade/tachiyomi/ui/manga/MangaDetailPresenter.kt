@@ -522,9 +522,12 @@ class MangaDetailPresenter(
                         File.separator + Environment.DIRECTORY_PICTURES +
                         File.separator + preferences.context.getString(R.string.app_name_neko),
                 )
-                saveCover(directory, artwork)
+                val destinationFile = saveCover(directory, artwork)
                 launchUI {
-                    view?.applicationContext?.toast(R.string.cover_saved)
+                    view?.applicationContext?.let { context ->
+                        DiskUtil.scanMedia(context, destinationFile)
+                        view?.applicationContext?.toast(R.string.cover_saved)
+                    }
                 }
             } catch (e: Exception) {
                 TimberKt.e(e) { "error saving cover" }
