@@ -85,9 +85,9 @@ class FeedPresenter(
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
 
-        if (_feedScreenState.value.initialLoad) {
+        if (_feedScreenState.value.firstLoad) {
             _feedScreenState.update { state ->
-                state.copy(initialLoad = false)
+                state.copy(firstLoad = false)
             }
             presenterScope.launchIO { loadNextPage() }
         }
@@ -138,6 +138,7 @@ class FeedPresenter(
     fun loadNextPage() {
         presenterScope.launchIO {
             paginator.loadNextItems()
+
         }
     }
 
@@ -227,7 +228,6 @@ class FeedPresenter(
 
     override fun updateDownload(download: Download) {
         presenterScope.launchIO {
-            TimberKt.d { "Updating download downloadState: ${download.status}" }
             launch {
                 val (searchFeedUpdated, searchFeedMangaList) = updateChapterDownloadForManga(download, _feedScreenState.value.searchFeedManga.toMutableList())
                 if (searchFeedUpdated) {
@@ -286,6 +286,44 @@ class FeedPresenter(
 
     override fun onUpdateManga(manga: Manga?) {
         TODO("Not yet implemented")
+    }
+
+    fun updateMangaForChanges() {
+        TimberKt.d { "cesco update manga for changes processing=${!_feedScreenState.value.firstLoad && (_feedScreenState.value.allFeedManga.isNotEmpty() || _feedScreenState.value.searchFeedManga.isNotEmpty())}" }
+        if (!_feedScreenState.value.firstLoad && (_feedScreenState.value.allFeedManga.isNotEmpty() || _feedScreenState.value.searchFeedManga.isNotEmpty())) {
+            presenterScope.launchIO {
+
+                launch {
+                    if (_feedScreenState.value.searchFeedManga.isNotEmpty()) {
+                        feedRepository.getPage(_feedScreenState.value.searchQuery, 0, 100, _feedScreenState.value.feedScreenType, _feedScreenState.value.historyGrouping)
+                            .onSuccess { results ->
+                                _feedScreenState.update { state ->
+                                    state.copy(
+                                        searchFeedManga = (results.second).toImmutableList(),
+                                    )
+                                }
+                            }
+                    }
+                }
+
+                launch {
+                    val currentOffset = _feedScreenState.value.offset
+                    var mutableFeedManga = mutableListOf<FeedManga>()
+                    for (i in 0..currentOffset step ENDLESS_LIMIT) {
+                        feedRepository.getPage(offset = i, limit = ENDLESS_LIMIT, type = _feedScreenState.value.feedScreenType, group = _feedScreenState.value.historyGrouping)
+                            .onSuccess { results ->
+                                mutableFeedManga = (mutableFeedManga + results.second).toMutableList()
+                            }
+                    }
+                    _feedScreenState.update { state ->
+                        state.copy(
+                            allFeedManga = mutableFeedManga.toImmutableList(),
+                        )
+                    }
+                }
+
+            }
+        }
     }
 
     override fun onDestroy() {

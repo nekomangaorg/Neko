@@ -9,7 +9,7 @@ import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
 
 data class FeedScreenState(
-    val initialLoad: Boolean = true,
+    val firstLoad: Boolean = true,
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean,
@@ -42,6 +42,7 @@ data class FeedSettingActions(
 
 data class FeedScreenActions(
     val mangaClick: (Long) -> Unit,
+    val chapterClick: (Long, Long) -> Unit,
     val switchViewType: (FeedScreenType) -> Unit,
     val deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,
     val deleteAllHistoryClick: (FeedManga) -> Unit,

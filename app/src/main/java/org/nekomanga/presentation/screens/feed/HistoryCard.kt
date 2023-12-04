@@ -4,6 +4,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +21,13 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -74,6 +77,7 @@ fun HistoryCard(
     groupedBySeries: Boolean,
     downloadClick: (ChapterItem, MangaConstants.DownloadAction) -> Unit,
     mangaClick: () -> Unit,
+    chapterClick: (Long) -> Unit,
     deleteAllHistoryClick: () -> Unit,
     deleteHistoryClick: (SimpleChapter) -> Unit,
 ) {
@@ -86,11 +90,7 @@ fun HistoryCard(
 
     ElevatedCard(
         enabled = canExpand,
-        onClick = {
-            if (canExpand) {
-                expanded = !expanded
-            }
-        },
+        onClick = { mangaClick() },
         modifier = Modifier
             .fillMaxWidth()
             .padding(Size.small)
@@ -113,6 +113,7 @@ fun HistoryCard(
         HistoryRow(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { chapterClick(feedManga.chapters.first().chapter.id) }
                 .padding(start = Size.small),
             artwork = feedManga.artwork,
             chapterItem = feedManga.chapters.first(),
@@ -122,6 +123,7 @@ fun HistoryCard(
             canExpand = canExpand,
             isExpanded = expanded,
             mangaClick = mangaClick,
+            expandClick = {expanded = !expanded},
             deleteAllClick = { showRemoveAllHistoryDialog = true },
             deleteClick = { showRemoveHistoryDialog = 0 },
             downloadClick = { action -> downloadClick(feedManga.chapters.first(), action) },
@@ -159,53 +161,57 @@ fun HistoryCard(
                 )
             }
             feedManga.chapters.forEachIndexed { index, chapterItem ->
-                if (index > 0) {
+                if(index == 0) {
                     Gap(Size.smedium)
+                }else{
                     Divider(Modifier.padding(horizontal = Size.small))
-                    Gap(Size.smedium)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = Size.small),
-                    ) {
-                        Column(
+                    Column(modifier = Modifier.fillMaxWidth().clickable { chapterClick(chapterItem.chapter.id) }) {
+                        Gap(Size.smedium)
+                        Box(
                             modifier = Modifier
-                                .align(Alignment.CenterStart)
-                                .fillMaxWidth(.75f),
+                                .fillMaxWidth()
+                                .padding(horizontal = Size.medium),
                         ) {
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .fillMaxWidth(.75f),
+                            ) {
 
-                            FeedChapterTitleLine(
-                                hideChapterTitles = hideChapterTitles,
-                                isBookmarked = chapterItem.chapter.bookmark,
-                                chapterNumber = chapterItem.chapter.chapterNumber,
-                                title = chapterItem.chapter.name,
-                                style = MaterialTheme.typography.bodyLarge,
-                                textColor = getReadTextColor(isRead = chapterItem.chapter.read),
-                            )
+                                FeedChapterTitleLine(
+                                    hideChapterTitles = hideChapterTitles,
+                                    isBookmarked = chapterItem.chapter.bookmark,
+                                    chapterNumber = chapterItem.chapter.chapterNumber,
+                                    title = chapterItem.chapter.name,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textColor = getReadTextColor(isRead = chapterItem.chapter.read),
+                                )
 
-                            LastReadLine(
-                                lastRead = chapterItem.chapter.lastRead,
-                                scanlator = chapterItem.chapter.scanlator,
-                                language = chapterItem.chapter.language,
-                                style = MaterialTheme.typography.bodyMedium,
-                                textColor = getReadTextColor(isRead = chapterItem.chapter.read, lowContrastColor),
-                            )
-                        }
-
-                        Box(modifier = Modifier.align(Alignment.CenterEnd), contentAlignment = Alignment.Center) {
-                            Row() {
-                                Buttons(
-                                    themeColorState = themeColorState,
-                                    chapterItem = chapterItem,
-                                    deleteClick = { showRemoveHistoryDialog = index },
-                                    downloadClick = { action -> downloadClick(chapterItem, action) },
+                                LastReadLine(
+                                    lastRead = chapterItem.chapter.lastRead,
+                                    scanlator = chapterItem.chapter.scanlator,
+                                    language = chapterItem.chapter.language,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textColor = getReadTextColor(isRead = chapterItem.chapter.read, lowContrastColor),
                                 )
                             }
-                        }
-                    }
-                }
 
+                            Box(modifier = Modifier.align(Alignment.CenterEnd), contentAlignment = Alignment.Center) {
+                                Row() {
+                                    Buttons(
+                                        themeColorState = themeColorState,
+                                        chapterItem = chapterItem,
+                                        deleteClick = { showRemoveHistoryDialog = index },
+                                        downloadClick = { action -> downloadClick(chapterItem, action) },
+                                    )
+                                }
+                            }
+                        }
+                        Gap(Size.smedium)
+                    }
+                    }
             }
+            Gap(Size.medium)
         }
     }
 }
@@ -220,6 +226,7 @@ private fun HistoryRow(
     hideChapterTitles: Boolean,
     canExpand: Boolean,
     isExpanded: Boolean,
+    expandClick: () -> Unit,
     mangaClick: () -> Unit,
     deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
@@ -246,6 +253,7 @@ private fun HistoryRow(
                 themeColorState = themeColorState,
                 canExpand = canExpand,
                 isExpanded = isExpanded,
+                expandClick = expandClick,
                 deleteAllClick = deleteAllClick,
                 deleteClick = deleteClick,
                 downloadClick = downloadClick,
@@ -265,6 +273,7 @@ private fun ChapterInfo(
     themeColorState: ThemeColorState,
     canExpand: Boolean,
     isExpanded: Boolean,
+    expandClick: () -> Unit,
     deleteAllClick: () -> Unit,
     deleteClick: () -> Unit,
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
@@ -304,12 +313,15 @@ private fun ChapterInfo(
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             if (canExpand) {
                 Spacer(modifier.weight(1f))
-                Icon(
-                    modifier = Modifier.align(Alignment.CenterVertically),
-                    imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f),
-                )
+                TextButton(onClick = expandClick) {
+                    Icon(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        imageVector = if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f),
+                    )
+                }
+
             }
             Spacer(modifier.weight(1f))
             Buttons(

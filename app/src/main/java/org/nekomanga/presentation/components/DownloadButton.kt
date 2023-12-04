@@ -43,7 +43,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.core.util.launchDelayed
-import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
@@ -54,7 +53,7 @@ private const val iconSize = 20
 private const val borderSize = 2.5
 
 @Composable
-fun DownloadButton(modifier : Modifier = Modifier, themeColorState: ThemeColorState, downloadState: Download.State, downloadProgress: Float,  onDownload: (MangaConstants.DownloadAction) -> Unit) {
+fun DownloadButton(modifier: Modifier = Modifier, themeColorState: ThemeColorState, downloadState: Download.State, downloadProgress: Float, onDownload: (MangaConstants.DownloadAction) -> Unit) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
 
         var showChapterDropdown by remember { mutableStateOf(false) }
@@ -114,7 +113,7 @@ fun DownloadButton(modifier : Modifier = Modifier, themeColorState: ThemeColorSt
                         ),
                     )
                 }
-            }
+            },
         )
     }
 }
@@ -126,7 +125,6 @@ private fun DlButton(buttonColor: Color, downloadState: Download.State, download
 
 
     LaunchedEffect(downloadState) {
-        TimberKt.d { "download state download state: $downloadState" }
         when (downloadState) {
             // this reset download complete in case you remove the chapter and want to redownload it
             Download.State.NOT_DOWNLOADED -> downloadComplete = false

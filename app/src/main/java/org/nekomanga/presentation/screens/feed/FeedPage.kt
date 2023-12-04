@@ -87,6 +87,7 @@ fun FeedPage(
                         groupedBySeries = groupedBySeries,
                         downloadClick = { chp, action -> feedScreenActions.downloadClick(chp, feedManga, action) },
                         mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                        chapterClick = { chapterId -> feedScreenActions.chapterClick(feedManga.mangaId,chapterId)},
                         deleteAllHistoryClick = { feedScreenActions.deleteAllHistoryClick(feedManga) },
                         deleteHistoryClick = { chp -> feedScreenActions.deleteHistoryClick(feedManga, chp) },
                     )

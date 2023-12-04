@@ -1,12 +1,17 @@
 package eu.kanade.tachiyomi.ui.recents
 
+import android.app.Activity
+import android.content.Context
+import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -18,6 +23,8 @@ class FeedController : BaseComposeController<FeedPresenter>() {
     @Composable
     override fun ScreenContent() {
         val windowSizeClass = calculateWindowSizeClass(this.activity!!)
+
+        val context = LocalContext.current
 
         BackHandler((this.activity as? MainActivity)?.shouldGoToStartingTab() == true) {
             (this.activity as? MainActivity)?.backCallback?.invoke()
@@ -33,6 +40,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
             ),
             feedScreenActions = FeedScreenActions(
                 mangaClick = ::openManga,
+                chapterClick = { mangaId, chapterId -> openChapter(context, mangaId, chapterId) },
                 switchViewType = presenter::switchViewType,
                 deleteAllHistoryClick = presenter::deleteAllHistory,
                 deleteHistoryClick = presenter::deleteHistory,
@@ -50,5 +58,19 @@ class FeedController : BaseComposeController<FeedPresenter>() {
         viewScope.launchUI {
             router.pushController(MangaDetailController(mangaId).withFadeTransaction())
         }
+    }
+
+    private fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
+        startActivity(ReaderActivity.newIntent(context, mangaId, chapterId))
+    }
+
+    override fun onViewCreated(view: View) {
+        super.onViewCreated(view)
+        presenter.updateMangaForChanges()
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        presenter.updateMangaForChanges()
     }
 }
