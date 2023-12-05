@@ -120,6 +120,7 @@ fun FeedPage(
                                 outlineCovers = outlineCovers,
                                 hideChapterTitles = hideChapterTitles,
                                 mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
+                                chapterClick = {chapterId ->feedScreenActions.chapterClick(feedManga.mangaId, chapterId)},
                                 downloadClick = { action -> feedScreenActions.downloadClick(chapterItem, feedManga, action) },
                             )
                         }

@@ -33,6 +33,7 @@ fun UpdatesCard(
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
     mangaClick: () -> Unit,
+    chapterClick: (Long) -> Unit,
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     UpdatesRow(
@@ -43,6 +44,7 @@ fun UpdatesCard(
         outlineCovers = outlineCovers,
         hideChapterTitles = hideChapterTitles,
         mangaClick = mangaClick,
+        chapterClick = chapterClick,
         downloadClick = downloadClick,
     )
 }
@@ -56,6 +58,7 @@ private fun UpdatesRow(
     outlineCovers: Boolean,
     hideChapterTitles: Boolean,
     mangaClick: () -> Unit,
+    chapterClick: (Long) -> Unit,
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
     val mediumAlphaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
@@ -63,7 +66,7 @@ private fun UpdatesRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { mangaClick() }
+            .clickable { chapterClick(chapterItem.chapter.id) }
             .padding(vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
