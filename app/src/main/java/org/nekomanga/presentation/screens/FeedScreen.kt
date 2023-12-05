@@ -130,11 +130,13 @@ fun FeedScreen(
             sheetContent = {
                 Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                     FeedBottomSheet(
-                        feedScreenState = feedScreenState,
                         contentPadding = navBarPadding,
-                        closeSheet = { scope.launch { sheetState.hide() } },
+                        feedScreenType = feedScreenState.value.feedScreenType,
+                        historyGrouping = feedScreenState.value.historyGrouping,
+                        sortByFetched = feedScreenState.value.updatesSortedByFetch,
+                        groupHistoryClick = { feedHistoryGroup -> feedSettingActions.groupHistoryClick(feedHistoryGroup) },
                         clearHistoryClick = { showClearHistoryDialog = true },
-                        feedActions = feedSettingActions,
+                        sortClick = { feedSettingActions.switchUploadsSortOrder() },
                     )
                 }
             },
@@ -148,29 +150,22 @@ fun FeedScreen(
                 actions = {
                     AppBarActions(
                         actions =
-                        if (feedScreenType == FeedScreenType.History) {
-                            listOf(
-                                AppBar.Action(
-                                    title = UiText.StringResource(R.string.settings),
-                                    icon = Icons.Outlined.Tune,
-                                    onClick = { scope.launch { sheetState.show() } },
-                                ),
-                            )
-                        } else {
-                            listOf()
-                        }
-                            +
-                            listOf(
-                                AppBar.MainDropdown(
-                                    incognitoMode = feedScreenState.value.incognitoMode,
-                                    incognitoModeClick = incognitoClick,
-                                    settingsClick = settingsClick,
-                                    statsClick = statsClick,
-                                    aboutClick = aboutClick,
-                                    helpClick = helpClick,
-                                    menuShowing = { visible -> mainDropdownShowing = visible },
-                                ),
+                        listOf(
+                            AppBar.Action(
+                                title = UiText.StringResource(R.string.settings),
+                                icon = Icons.Outlined.Tune,
+                                onClick = { scope.launch { sheetState.show() } },
                             ),
+                            AppBar.MainDropdown(
+                                incognitoMode = feedScreenState.value.incognitoMode,
+                                incognitoModeClick = incognitoClick,
+                                settingsClick = settingsClick,
+                                statsClick = statsClick,
+                                aboutClick = aboutClick,
+                                helpClick = helpClick,
+                                menuShowing = { visible -> mainDropdownShowing = visible },
+                            ),
+                        ),
                     )
                 },
             ) { incomingContentPadding ->
@@ -204,6 +199,7 @@ fun FeedScreen(
                         feedScreenType = feedScreenState.value.feedScreenType,
                         outlineCovers = feedScreenState.value.outlineCovers,
                         hideChapterTitles = feedScreenState.value.hideChapterTitles,
+                        updatesFetchSort = feedScreenState.value.updatesSortedByFetch,
                         feedScreenActions = feedScreenActions,
                         loadNextPage = loadNextPage,
                     )
@@ -236,7 +232,7 @@ fun FeedScreen(
         }
     }
     if (showClearHistoryDialog) {
-        DeleteAllHistoryDialog(defaultThemeColorState(), onDismiss = { showClearHistoryDialog = false }, onConfirm = {})
+        DeleteAllHistoryDialog(defaultThemeColorState(), onDismiss = { showClearHistoryDialog = false }, onConfirm = { feedSettingActions.clearHistoryClick })
     }
 }
 

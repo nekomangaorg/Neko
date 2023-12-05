@@ -11,6 +11,7 @@ import org.nekomanga.domain.manga.Artwork
 data class FeedScreenState(
     val firstLoad: Boolean = true,
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
+    val updatesSortedByFetch: Boolean = true,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean,
     val hideChapterTitles: Boolean,
@@ -38,6 +39,8 @@ enum class FeedHistoryGroup {
 
 data class FeedSettingActions(
     val groupHistoryClick: (FeedHistoryGroup) -> Unit,
+    val clearHistoryClick: () -> Unit,
+    val switchUploadsSortOrder: () -> Unit,
 )
 
 data class FeedScreenActions(

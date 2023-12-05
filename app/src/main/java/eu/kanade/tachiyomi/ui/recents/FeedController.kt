@@ -37,6 +37,8 @@ class FeedController : BaseComposeController<FeedPresenter>() {
             incognitoClick = presenter::toggleIncognitoMode,
             feedSettingActions = FeedSettingActions(
                 groupHistoryClick = presenter::toggleGroupHistoryType,
+                clearHistoryClick = presenter::deleteAllHistoryForAllManga,
+                switchUploadsSortOrder = presenter::toggleUploadsSortOrder,
             ),
             feedScreenActions = FeedScreenActions(
                 mangaClick = ::openManga,

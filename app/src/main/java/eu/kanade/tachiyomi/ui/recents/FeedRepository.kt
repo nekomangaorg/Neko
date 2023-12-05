@@ -47,17 +47,29 @@ class FeedRepository(
         )
     }
 
-    suspend fun getPage(searchQuery: String = "", offset: Int, limit: Int, type: FeedScreenType, group: FeedHistoryGroup): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
+    suspend fun getPage(
+        searchQuery: String = "",
+        offset: Int,
+        limit: Int,
+        type: FeedScreenType,
+        uploadsFetchSort: Boolean,
+        group: FeedHistoryGroup,
+    ): Result<Pair<Boolean, List<FeedManga>>, ResultError.Generic> {
         return com.github.michaelbull.result.runCatching {
             when (type) {
                 FeedScreenType.Updates -> {
-                    val chapters = db.getRecentChapters(search = searchQuery, offset = offset, limit = limit, isResuming = false).executeAsBlocking()
+                    val chapters = db.getRecentChapters(search = searchQuery, offset = offset, limit = limit, sortByFetched = uploadsFetchSort).executeAsBlocking()
                         .mapNotNull {
                             val chapterItem = getChapterItem(it.manga, it.chapter.toSimpleChapter()!!)
+                            val date = when (uploadsFetchSort) {
+                                true -> it.chapter.date_fetch
+                                false -> it.chapter.date_upload
+                            }
+
                             FeedManga(
                                 mangaId = chapterItem.chapter.mangaId,
                                 mangaTitle = it.manga.title,
-                                date = chapterItem.chapter.dateFetch,
+                                date = date,
                                 artwork = it.manga.toDisplayManga().currentArtwork,
                                 chapters = persistentListOf(chapterItem),
                             )
@@ -147,6 +159,10 @@ class FeedRepository(
             TimberKt.e(err)
             ResultError.Generic("Error : ${err.message}")
         }
+    }
+
+    suspend fun deleteAllHistory() {
+        db.deleteHistory().executeAsBlocking()
     }
 
     suspend fun deleteAllHistoryForManga(mangaId: Long) {

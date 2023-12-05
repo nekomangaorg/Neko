@@ -38,7 +38,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
-import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
@@ -58,6 +57,7 @@ fun FeedPage(
     hasMoreResults: Boolean,
     hideChapterTitles: Boolean,
     groupedBySeries: Boolean,
+    updatesFetchSort: Boolean,
     feedScreenActions: FeedScreenActions,
     loadNextPage: () -> Unit,
     feedScreenType: FeedScreenType,
@@ -87,7 +87,7 @@ fun FeedPage(
                         groupedBySeries = groupedBySeries,
                         downloadClick = { chp, action -> feedScreenActions.downloadClick(chp, feedManga, action) },
                         mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                        chapterClick = { chapterId -> feedScreenActions.chapterClick(feedManga.mangaId,chapterId)},
+                        chapterClick = { chapterId -> feedScreenActions.chapterClick(feedManga.mangaId, chapterId) },
                         deleteAllHistoryClick = { feedScreenActions.deleteAllHistoryClick(feedManga) },
                         deleteHistoryClick = { chp -> feedScreenActions.deleteHistoryClick(feedManga, chp) },
                     )
@@ -102,13 +102,23 @@ fun FeedPage(
             FeedScreenType.Updates -> {
 
                 feedMangaList.forEach { feedManga ->
+                    val dateString = DateUtils.getRelativeTimeSpanString(feedManga.date, now, DateUtils.DAY_IN_MILLIS).toString()
+                    //there should only ever be 1
                     feedManga.chapters.forEach { chapterItem ->
-                        chapterItem.chapter.dateFetch.timeSpanFromNow
-                        val dateString = DateUtils.getRelativeTimeSpanString(chapterItem.chapter.dateFetch, now, DateUtils.DAY_IN_MILLIS).toString()
                         if (timeSpan != dateString) {
                             timeSpan = dateString
+
+                            val prefix = when (updatesFetchSort) {
+                                true -> R.string.fetched_
+                                false -> R.string.updated_
+                            }
+
                             item {
-                                Text(text = dateString, style = MaterialTheme.typography.labelLarge.copy(color = themeColorState.buttonColor), modifier = Modifier.padding(start = Size.small))
+                                Text(
+                                    text = stringResource(id = prefix, dateString),
+                                    style = MaterialTheme.typography.labelLarge.copy(color = themeColorState.buttonColor),
+                                    modifier = Modifier.padding(start = Size.small, top = Size.small, end = Size.small),
+                                )
                             }
                         }
                         item {
@@ -120,7 +130,7 @@ fun FeedPage(
                                 outlineCovers = outlineCovers,
                                 hideChapterTitles = hideChapterTitles,
                                 mangaClick = { feedScreenActions.mangaClick(feedManga.mangaId) },
-                                chapterClick = {chapterId ->feedScreenActions.chapterClick(feedManga.mangaId, chapterId)},
+                                chapterClick = { chapterId -> feedScreenActions.chapterClick(feedManga.mangaId, chapterId) },
                                 downloadClick = { action -> feedScreenActions.downloadClick(chapterItem, feedManga, action) },
                             )
                         }

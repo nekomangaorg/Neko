@@ -60,7 +60,13 @@ class FeedPresenter(
         initialKey = _feedScreenState.value.offset,
         onLoadUpdated = { },
         onRequest = {
-            feedRepository.getPage(offset = _feedScreenState.value.offset, limit = ENDLESS_LIMIT, type = _feedScreenState.value.feedScreenType, group = _feedScreenState.value.historyGrouping)
+            feedRepository.getPage(
+                offset = _feedScreenState.value.offset,
+                limit = ENDLESS_LIMIT,
+                type = _feedScreenState.value.feedScreenType,
+                uploadsFetchSort = _feedScreenState.value.updatesSortedByFetch,
+                group = _feedScreenState.value.historyGrouping,
+            )
         },
         getNextKey = {
             _feedScreenState.value.offset + ENDLESS_LIMIT
@@ -133,6 +139,16 @@ class FeedPresenter(
                 loadNextPage()
             }
         }
+
+        presenterScope.launch {
+            preferences.sortFetchedTime().changes().collectLatest {
+                _feedScreenState.update { state ->
+                    state.copy(updatesSortedByFetch = it, offset = 0, allFeedManga = persistentListOf())
+                }
+                paginator.reset()
+                loadNextPage()
+            }
+        }
     }
 
     fun loadNextPage() {
@@ -160,7 +176,18 @@ class FeedPresenter(
         }
     }
 
+    fun toggleUploadsSortOrder() {
+        presenterScope.launchIO {
+            preferences.sortFetchedTime().toggle()
+        }
+    }
+
     fun deleteAllHistoryForAllManga() {
+        presenterScope.launchIO {
+            feedRepository.deleteAllHistory()
+            paginator.reset()
+            paginator.loadNextItems()
+        }
     }
 
     fun deleteAllHistory(feedManga: FeedManga) {
@@ -208,7 +235,7 @@ class FeedPresenter(
             if (searchQuery.isNullOrBlank()) {
                 _feedScreenState.update { it.copy(searchFeedManga = persistentListOf()) }
             } else {
-                feedRepository.getPage(searchQuery, 0, 100, _feedScreenState.value.feedScreenType, _feedScreenState.value.historyGrouping)
+                feedRepository.getPage(searchQuery, 0, 100, _feedScreenState.value.feedScreenType, _feedScreenState.value.updatesSortedByFetch, _feedScreenState.value.historyGrouping)
                     .onSuccess { results ->
                         _feedScreenState.update { state ->
                             state.copy(
@@ -295,7 +322,14 @@ class FeedPresenter(
 
                 launch {
                     if (_feedScreenState.value.searchFeedManga.isNotEmpty()) {
-                        feedRepository.getPage(_feedScreenState.value.searchQuery, 0, 100, _feedScreenState.value.feedScreenType, _feedScreenState.value.historyGrouping)
+                        feedRepository.getPage(
+                            searchQuery = _feedScreenState.value.searchQuery,
+                            offset = 0,
+                            limit = 100,
+                            type = _feedScreenState.value.feedScreenType,
+                            uploadsFetchSort = _feedScreenState.value.updatesSortedByFetch,
+                            group = _feedScreenState.value.historyGrouping,
+                        )
                             .onSuccess { results ->
                                 _feedScreenState.update { state ->
                                     state.copy(
@@ -310,7 +344,13 @@ class FeedPresenter(
                     val currentOffset = _feedScreenState.value.offset
                     var mutableFeedManga = mutableListOf<FeedManga>()
                     for (i in 0..currentOffset step ENDLESS_LIMIT) {
-                        feedRepository.getPage(offset = i, limit = ENDLESS_LIMIT, type = _feedScreenState.value.feedScreenType, group = _feedScreenState.value.historyGrouping)
+                        feedRepository.getPage(
+                            offset = i,
+                            limit = ENDLESS_LIMIT,
+                            type = _feedScreenState.value.feedScreenType,
+                            uploadsFetchSort = _feedScreenState.value.updatesSortedByFetch,
+                            group = _feedScreenState.value.historyGrouping,
+                        )
                             .onSuccess { results ->
                                 mutableFeedManga = (mutableFeedManga + results.second).toMutableList()
                             }

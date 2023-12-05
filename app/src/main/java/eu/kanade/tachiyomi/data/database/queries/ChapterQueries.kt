@@ -29,11 +29,11 @@ interface ChapterQueries : DbProvider {
         )
         .prepare()
 
-    fun getRecentChapters(search: String = "", offset: Int, limit: Int, isResuming: Boolean) = db.get()
+    fun getRecentChapters(search: String = "", offset: Int, limit: Int, sortByFetched: Boolean) = db.get()
         .listOfObjects(MangaChapter::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentsQuery(search.sqLite, offset, limit, isResuming))
+                .query(getRecentsQuery(search.sqLite, offset, limit, sortByFetched))
                 .observesTables(ChapterTable.TABLE)
                 .build(),
         )
