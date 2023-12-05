@@ -8,6 +8,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
@@ -48,6 +49,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                 deleteHistoryClick = presenter::deleteHistory,
                 search = presenter::search,
                 downloadClick = presenter::downloadChapter,
+                updateLibrary = { start -> updateLibrary(start, context) },
             ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },
@@ -64,6 +66,16 @@ class FeedController : BaseComposeController<FeedPresenter>() {
 
     private fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
         startActivity(ReaderActivity.newIntent(context, mangaId, chapterId))
+    }
+
+    fun updateLibrary(start: Boolean, context: Context) {
+        if (LibraryUpdateService.isRunning() && !start) {
+            presenter.refreshing(false)
+            LibraryUpdateService.stop(context)
+        } else if (!LibraryUpdateService.isRunning() && start) {
+            presenter.refreshing(true)
+            LibraryUpdateService.start(context)
+        }
     }
 
     override fun onViewCreated(view: View) {

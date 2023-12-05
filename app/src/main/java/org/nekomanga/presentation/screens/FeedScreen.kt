@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetLayout
@@ -53,6 +54,7 @@ import org.nekomanga.presentation.components.FooterFilterChip
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
+import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dialog.DeleteAllHistoryDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
@@ -170,55 +172,63 @@ fun FeedScreen(
                 },
             ) { incomingContentPadding ->
 
-                val recyclerContentPadding =
-                    PaddingValues(
-                        top = incomingContentPadding.calculateTopPadding(),
-                        bottom = if (sideNav) {
-                            Size.navBarSize
-                        } else {
-                            Size.navBarSize
-                        } + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
-                    )
-
-                Box(
-                    modifier = Modifier
-                        .padding(bottom = navBarPadding.calculateBottomPadding())
-                        .fillMaxSize(),
+                PullRefresh(
+                    refreshing = feedScreenState.value.isRefreshing,
+                    onRefresh = { feedScreenActions.updateLibrary(true) },
+                    indicatorOffset = incomingContentPadding.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
                 ) {
-                    val (feedManga, hasMoreResults) = if (feedScreenState.value.searchFeedManga.isNotEmpty()) {
-                        feedScreenState.value.searchFeedManga to false
-                    } else {
-                        feedScreenState.value.allFeedManga to feedScreenState.value.hasMoreResults
-                    }
 
-                    FeedPage(
-                        contentPadding = recyclerContentPadding,
-                        feedMangaList = feedManga,
-                        hasMoreResults = hasMoreResults,
-                        groupedBySeries = feedScreenState.value.historyGrouping == FeedHistoryGroup.Series,
-                        feedScreenType = feedScreenState.value.feedScreenType,
-                        outlineCovers = feedScreenState.value.outlineCovers,
-                        hideChapterTitles = feedScreenState.value.hideChapterTitles,
-                        updatesFetchSort = feedScreenState.value.updatesSortedByFetch,
-                        feedScreenActions = feedScreenActions,
-                        loadNextPage = loadNextPage,
-                    )
+                    val recyclerContentPadding =
+                        PaddingValues(
+                            top = incomingContentPadding.calculateTopPadding(),
+                            bottom = if (sideNav) {
+                                Size.navBarSize
+                            } else {
+                                Size.navBarSize
+                            } + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                        )
 
-
-                    ScreenTypeFooter(
-                        screenType = feedScreenType,
+                    Box(
                         modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .conditional(sideNav) {
-                                this.navigationBarsPadding()
-                            },
-                        screenTypeClick = { newScreenType: FeedScreenType ->
-                            scope.launch { sheetState.hide() }
-                            if (feedScreenType != newScreenType) {
-                                feedScreenActions.switchViewType(newScreenType)
-                            }
-                        },
-                    )
+                            .padding(bottom = navBarPadding.calculateBottomPadding())
+                            .fillMaxSize(),
+                    ) {
+                        val (feedManga, hasMoreResults) = if (feedScreenState.value.searchFeedManga.isNotEmpty()) {
+                            feedScreenState.value.searchFeedManga to false
+                        } else {
+                            feedScreenState.value.allFeedManga to feedScreenState.value.hasMoreResults
+                        }
+
+                        FeedPage(
+                            contentPadding = recyclerContentPadding,
+                            feedMangaList = feedManga,
+                            hasMoreResults = hasMoreResults,
+                            groupedBySeries = feedScreenState.value.historyGrouping == FeedHistoryGroup.Series,
+                            feedScreenType = feedScreenState.value.feedScreenType,
+                            outlineCovers = feedScreenState.value.outlineCovers,
+                            hideChapterTitles = feedScreenState.value.hideChapterTitles,
+                            updatesFetchSort = feedScreenState.value.updatesSortedByFetch,
+                            feedScreenActions = feedScreenActions,
+                            loadNextPage = loadNextPage,
+                        )
+
+                        if (!feedScreenState.value.firstLoad) {
+                            ScreenTypeFooter(
+                                screenType = feedScreenType,
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .conditional(sideNav) {
+                                        this.navigationBarsPadding()
+                                    },
+                                screenTypeClick = { newScreenType: FeedScreenType ->
+                                    scope.launch { sheetState.hide() }
+                                    if (feedScreenType != newScreenType) {
+                                        feedScreenActions.switchViewType(newScreenType)
+                                    }
+                                },
+                            )
+                        }
+                    }
                 }
             }
         }

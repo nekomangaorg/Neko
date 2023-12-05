@@ -91,6 +91,7 @@ class FeedPresenter(
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
 
+
         if (_feedScreenState.value.firstLoad) {
             _feedScreenState.update { state ->
                 state.copy(firstLoad = false)
@@ -149,12 +150,17 @@ class FeedPresenter(
                 loadNextPage()
             }
         }
+
+        if (LibraryUpdateService.isRunning()) {
+            presenterScope.launchIO {
+                _feedScreenState.update { it.copy(isRefreshing = true) }
+            }
+        }
     }
 
     fun loadNextPage() {
         presenterScope.launchIO {
             paginator.loadNextItems()
-
         }
     }
 
@@ -184,6 +190,13 @@ class FeedPresenter(
 
     fun deleteAllHistoryForAllManga() {
         presenterScope.launchIO {
+            _feedScreenState.update {
+                it.copy(
+                    allFeedManga = persistentListOf(),
+                    searchFeedManga = persistentListOf(),
+                    searchQuery = "",
+                )
+            }
             feedRepository.deleteAllHistory()
             paginator.reset()
             paginator.loadNextItems()
@@ -312,7 +325,22 @@ class FeedPresenter(
     }
 
     override fun onUpdateManga(manga: Manga?) {
-        TODO("Not yet implemented")
+        presenterScope.launchIO {
+            when {
+                manga == null -> {
+                    _feedScreenState.update { it.copy(isRefreshing = false) }
+                }
+
+                manga.source == LibraryUpdateService.STARTING_UPDATE_SOURCE -> {
+                    _feedScreenState.update { it.copy(isRefreshing = true) }
+                }
+
+                else -> {
+                    paginator.reset()
+                    paginator.loadNextItems()
+                }
+            }
+        }
     }
 
     fun updateMangaForChanges() {
@@ -370,6 +398,14 @@ class FeedPresenter(
         super.onDestroy()
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
+    }
+
+    fun refreshing(start: Boolean) {
+        presenterScope.launchIO {
+            _feedScreenState.update {
+                it.copy(isRefreshing = start)
+            }
+        }
     }
 
     companion object {

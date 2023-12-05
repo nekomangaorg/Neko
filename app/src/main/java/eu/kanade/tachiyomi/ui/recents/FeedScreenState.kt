@@ -10,6 +10,7 @@ import org.nekomanga.domain.manga.Artwork
 
 data class FeedScreenState(
     val firstLoad: Boolean = true,
+    val isRefreshing: Boolean = false,
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
     val updatesSortedByFetch: Boolean = true,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
@@ -51,6 +52,7 @@ data class FeedScreenActions(
     val deleteAllHistoryClick: (FeedManga) -> Unit,
     val search: (String?) -> Unit,
     val downloadClick: (ChapterItem, FeedManga, MangaConstants.DownloadAction) -> Unit,
+    val updateLibrary: (Boolean) -> Unit,
 )
 
 data class FeedManga(
