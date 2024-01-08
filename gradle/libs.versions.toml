@@ -105,7 +105,7 @@ timber = "com.jakewharton.timber:timber:5.0.1"
 aboutLibraries-gradle = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlib_version" }
 aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutlib_version" }
 
-leakcanary = "com.squareup.leakcanary:leakcanary-android:2.12"
+leakcanary = "com.squareup.leakcanary:leakcanary-android:2.13"
 pastelplaceholders = "com.github.zedlabs:pastelPlaceholders:1.0.4"
 fuzzysearch = "me.xdrop:fuzzywuzzy:1.4.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
