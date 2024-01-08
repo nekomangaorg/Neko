@@ -17,7 +17,7 @@ serialization-gradle = { module = "org.jetbrains.kotlin:kotlin-serialization", v
 serialization-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "serialization_version" }
 
 
-immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6"
+immutables = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7"
 
 [bundles]
 
