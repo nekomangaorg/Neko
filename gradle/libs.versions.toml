@@ -117,7 +117,7 @@ retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
 
 #test libs
 junit = "junit:junit:4.13.2"
-mockk = "io.mockk:mockk:1.13.8"
+mockk = "io.mockk:mockk:1.13.9"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.8.0"
 
 [plugins]
