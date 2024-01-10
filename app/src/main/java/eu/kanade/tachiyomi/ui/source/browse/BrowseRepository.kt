@@ -104,7 +104,7 @@ class BrowseRepository(
             Err(blockedScanlatorUUIDs.getAllErrors().first())
         } else {
             val uuids = blockedScanlatorUUIDs.getAll().map { it.uuid }
-            mangaDex.fetchHomePageInfo(MdConstants.oldSeasonalId, uuids, isLoggedIn())
+            mangaDex.fetchHomePageInfo(uuids, isLoggedIn())
                 .andThen { listResults ->
                     Ok(
                         listResults.mapNotNull { listResult ->
@@ -113,7 +113,7 @@ class BrowseRepository(
                             } else {
                                 HomePageManga(
                                     displayScreenType = listResult.displayScreenType,
-                                    displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.toPersistentList(),
+                                displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.distinctBy { it.url }.toPersistentList(),
                                 )
                             }
                         },

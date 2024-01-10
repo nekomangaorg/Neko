@@ -119,5 +119,4 @@
     <methods>;
 }
 
-
 ##---------------End: proguard configuration for kotlinx.serialization  ----------

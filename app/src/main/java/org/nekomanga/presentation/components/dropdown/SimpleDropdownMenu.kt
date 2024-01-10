@@ -68,6 +68,7 @@ private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem,
                 },
             )
         }
+
         is SimpleDropDownItem.Action -> {
             Item(modifier = modifier, text = item.text.asString(), style = style, onClick = item.onClick, onDismiss = onDismiss)
         }

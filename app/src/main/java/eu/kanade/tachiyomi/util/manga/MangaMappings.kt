@@ -14,7 +14,7 @@ import java.io.OutputStream
  */
 class MangaMappings(context: Context) {
 
-    val dbMappings: SQLiteDatabase by lazy { openDatabase(context, "20231020_mappings.db") }
+    private val dbMappings: SQLiteDatabase by lazy { openDatabase(context, "2023-12-01_neko_mapping.db") }
 
     private fun openDatabase(context: Context, dbPath: String): SQLiteDatabase {
         val dbFile: File = context.getDatabasePath(dbPath)
@@ -41,45 +41,34 @@ class MangaMappings(context: Context) {
         `is`.close()
     }
 
-    fun getMangadexID(id: String, service: String): String? {
-        if (!dbMappings.isOpen) {
-            return null
-        }
+    fun getMangadexUUID(id: String, service: String): String? {
         val queryString = "SELECT mdex FROM mappings WHERE ${service.lowercase()} = ? LIMIT 1"
         val whereArgs = arrayOf(id)
-        val cursor = dbMappings.rawQuery(queryString, whereArgs) ?: return ""
-        if (cursor.moveToFirst()) {
-            return cursor.getString(0)
-        }
-        cursor.close()
-        return null
+        return getResult(queryString, whereArgs)
     }
 
     fun getExternalID(id: String, service: String): String? {
-        if (!dbMappings.isOpen) {
-            return null
-        }
         val queryString = "SELECT ${service.lowercase()} FROM mappings WHERE mdex = ? LIMIT 1"
         val whereArgs = arrayOf(id)
-        val cursor = dbMappings.rawQuery(queryString, whereArgs) ?: return ""
-        if (cursor.moveToFirst()) {
-            return cursor.getString(0)
-        }
-        cursor.close()
-        return null
+        return getResult(queryString, whereArgs)
     }
 
     fun getMuNewForMuID(id: String): String? {
+        val queryString = "SELECT mu_new FROM mappings WHERE mu = ? AND mu_new IS NOT NULL LIMIT 1"
+        val whereArgs = arrayOf(id)
+        return getResult(queryString, whereArgs)
+    }
+
+    private fun getResult(queryString: String, whereArgs: Array<String>): String? {
         if (!dbMappings.isOpen) {
             return null
         }
-        val queryString = "SELECT mu_new FROM mappings WHERE mu = ? AND mu_new IS NOT NULL LIMIT 1"
-        val whereArgs = arrayOf(id)
-        val cursor = dbMappings.rawQuery(queryString, whereArgs) ?: return ""
+        val cursor = dbMappings.rawQuery(queryString, whereArgs) ?: return null
+        var result: String? = null
         if (cursor.moveToFirst()) {
-            return cursor.getString(0)
+            result = cursor.getString(0)?.ifBlank { null }
         }
         cursor.close()
-        return null
+        return result
     }
 }

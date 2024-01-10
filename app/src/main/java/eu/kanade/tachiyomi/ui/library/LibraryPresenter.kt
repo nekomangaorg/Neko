@@ -1276,7 +1276,7 @@ class LibraryPresenter(
                 mangaList.forEach { manga ->
                     val scanlatorsToIgnore = ChapterUtil.getScanlators(manga.filtered_scanlators)
                     val chapters = db.getChapters(manga).executeAsBlocking().filter { chapter ->
-                        chapter.read.not() && chapter.scanlatorList().any { scanlator -> scanlator in scanlatorsToIgnore }.not()
+                        !chapter.read && chapter.scanlatorList().none { scanlator -> scanlator in scanlatorsToIgnore }
                     }
                     downloadManager.downloadChapters(manga, chapters)
                 }

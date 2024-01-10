@@ -2,7 +2,7 @@
 accompanist_version = "0.32.0"
 compose_version = "1.5.4"
 compose_material3_version = "1.1.2"
-compose_compiler_version = "1.4.7"
+compose_compiler_version = "1.5.4"
 
 [libraries]
 
@@ -14,7 +14,7 @@ accompanist-themeadapter = { module = "com.google.accompanist:accompanist-themea
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
 material3-windowsize = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "compose_material3_version" }
 
-activity = "androidx.activity:activity-compose:1.8.0"
+activity = "androidx.activity:activity-compose:1.8.2"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
 
 lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.6.2"
@@ -33,7 +33,7 @@ gap = "jp.wasabeef:gap:1.1.0"
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
 date-field = "com.github.CarlosEsco:compose-date-text-field:3c64e08381"
-markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.9.0"
+markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.10.0"
 
 [bundles]
 accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]

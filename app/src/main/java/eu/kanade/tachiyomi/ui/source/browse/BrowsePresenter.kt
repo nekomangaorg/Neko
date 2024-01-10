@@ -114,7 +114,7 @@ class BrowsePresenter(
         },
         onSuccess = { hasNextPage, items, nextKey ->
             _browseScreenState.update { state ->
-                val allDisplayManga = (state.displayMangaHolder.allDisplayManga + items).distinct()
+                val allDisplayManga = (state.displayMangaHolder.allDisplayManga + items).distinctBy { it.url }
                 state.copy(
                     screenType = BrowseScreenType.Filter,
                     displayMangaHolder = DisplayMangaHolder(
@@ -301,8 +301,8 @@ class BrowsePresenter(
                                             screenType = BrowseScreenType.Filter,
                                             displayMangaHolder = DisplayMangaHolder(
                                                 BrowseScreenType.Filter,
-                                                allDisplayManga.toImmutableList(),
-                                                allDisplayManga.filterVisibility(preferences).toImmutableList(),
+                                                allDisplayManga.distinctBy { it.url }.toImmutableList(),
+                                                allDisplayManga.distinctBy { it.url }.filterVisibility(preferences).toImmutableList(),
                                             ),
                                             initialLoading = false,
                                             pageLoading = false,

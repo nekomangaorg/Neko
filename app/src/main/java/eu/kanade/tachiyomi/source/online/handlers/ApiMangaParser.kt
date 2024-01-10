@@ -184,13 +184,13 @@ fun ChapterDataDto.buildChapterName(chapter: SChapter? = null, lastChapterNumber
         chapter?.vol = attributes.volume.toString()
     }
 
-    if (attributes.chapter.isNullOrBlank().not()) {
+    if (!attributes.chapter.isNullOrBlank()) {
         val chp = "Ch.${attributes.chapter}"
         chapterName.add(chp)
         chapter?.chapter_txt = chp
     }
 
-    if (attributes.title.isNullOrBlank().not()) {
+    if (!attributes.title.isNullOrBlank()) {
         if (chapterName.isNotEmpty()) {
             chapterName.add("-")
         }

@@ -160,11 +160,25 @@ open class MangaDex : HttpSource() {
         return listHandler.retrieveAllMangaFromList(listId, privateList)
     }
 
-    suspend fun fetchHomePageInfo(listId: String, blockedScanlatorUUIDs: List<String>, showSubscriptionFeed: Boolean): Result<List<ListResults>, ResultError> {
+    suspend fun fetchHomePageInfo(blockedScanlatorUUIDs: List<String>, showSubscriptionFeed: Boolean): Result<List<ListResults>, ResultError> {
         return withIOContext {
             binding {
                 val seasonal = async {
-                    fetchList(listId, 1, false).andThen { listResults ->
+                    fetchList(MdConstants.oldSeasonalId, 1, false).andThen { listResults ->
+                        Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
+                    }
+                        .bind()
+                }
+
+                val staffPick = async {
+                    fetchList(MdConstants.staffPicksId, 1, false).andThen { listResults ->
+                        Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
+                    }
+                        .bind()
+                }
+
+                val nekoDevPicks = async {
+                    fetchList(MdConstants.nekoDevPicksId, 1, false).andThen { listResults ->
                         Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
                     }
                         .bind()
@@ -201,7 +215,7 @@ open class MangaDex : HttpSource() {
                     }.bind()
                 }
 
-                listOfNotNull(subscriptionFeed.await(), popularNewTitles.await(), latestChapter.await(), seasonal.await(), recentlyAdded.await())
+                listOfNotNull(subscriptionFeed.await(), popularNewTitles.await(), latestChapter.await(), seasonal.await(), staffPick.await(), nekoDevPicks.await(), recentlyAdded.await())
             }
         }
     }

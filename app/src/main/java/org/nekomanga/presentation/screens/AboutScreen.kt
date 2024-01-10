@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -31,10 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.SimpleIcons
-import compose.icons.simpleicons.Facebook
 import compose.icons.simpleicons.Github
-import compose.icons.simpleicons.Reddit
-import compose.icons.simpleicons.Twitter
 import eu.kanade.presentation.components.PreferenceRow
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
@@ -144,7 +139,7 @@ fun AboutScreen(
                     title = stringResource(R.string.whats_new),
                     onClick = {
                         val url = if (BuildConfig.DEBUG) {
-                            "https://github.com/CarlosEsco/Neko/commits/master"
+                            "https://github.com/nekomangaorg/Neko/commits/master"
                         } else {
                             RELEASE_URL
                         }
@@ -163,7 +158,7 @@ fun AboutScreen(
             item {
                 PreferenceRow(
                     title = stringResource(R.string.privacy_policy),
-                    onClick = { uriHandler.openUri("https://tachiyomi.org/privacy") },
+                    onClick = { uriHandler.openUri("https://github.com/nekomangaorg/privacy_policy") },
                 )
             }
             item {
@@ -175,45 +170,13 @@ fun AboutScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(Size.medium),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     val modifier = Modifier.size(24.dp)
                     LinkIcon(
-                        label = stringResource(R.string.website),
-                        icon = Icons.Outlined.Public,
-                        url = "https://tachiyomi.org",
-                    )
-                    LinkIcon(
-                        label = "Discord",
-                        modifier = modifier,
-                        painter = painterResource(R.drawable.ic_discord_24dp),
-                        url = "https://discord.gg/tachiyomi",
-                    )
-                    LinkIcon(
-                        label = "Twitter",
-                        icon = SimpleIcons.Twitter,
-                        url = "https://twitter.com/tachiyomiorg",
-                    )
-                    LinkIcon(
-                        label = "Facebook",
-                        icon = SimpleIcons.Facebook,
-                        url = "https://facebook.com/tachiyomiorg",
-                    )
-                    LinkIcon(
-                        label = "Reddit",
-                        icon = SimpleIcons.Reddit,
-                        url = "https://www.reddit.com/r/Tachiyomi",
-                    )
-                    LinkIcon(
                         label = "GitHub",
                         icon = SimpleIcons.Github,
-                        url = "https://github.com/CarlosEsco/neko",
-                    )
-                    LinkIcon(
-                        label = "Tachiyomi",
-                        modifier = modifier,
-                        painter = painterResource(R.drawable.ic_tachi),
-                        url = "https://github.com/tachiyomiorg",
+                        url = "https://nekomanga.org/",
                     )
                 }
             }

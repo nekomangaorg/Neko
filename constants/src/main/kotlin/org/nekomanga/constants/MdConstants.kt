@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit
 
 object MdConstants {
     const val currentSeasonalId = "907b6e91-b511-4095-927f-30227ccadfdc"
+    const val staffPicksId = "805ba886-dd99-4aa4-b460-4bd7c7b71352"
+    const val nekoDevPicksId = "9650e839-1266-4456-860d-c7eee164b451"
     const val oldSeasonalId = "a153b4e6-1fcc-4f45-a990-f37f989c0d74"
 
 
@@ -15,9 +17,6 @@ object MdConstants {
     const val forumUrl = "https://forums.mangadex.org/threads/"
     const val atHomeReportUrl = "https://api.mangadex.network/report"
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
-    const val imageUrlCacheNotFound =
-        "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
-
     const val chapterSuffix = "/chapter/"
 
     object Api {

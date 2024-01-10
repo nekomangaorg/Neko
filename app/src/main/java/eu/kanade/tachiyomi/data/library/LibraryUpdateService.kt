@@ -559,7 +559,7 @@ class LibraryUpdateService(
                                 val markRead =
                                     dbChapters.asSequence().filter { !it.isMergedChapter() }
                                         .filter { chapterIds.contains(it.mangadex_chapter_id) }
-                                        .filter { it.read.not() }
+                                        .filter { !it.read }
                                         .map {
                                             it.read = true
                                             it.last_page_read = 0

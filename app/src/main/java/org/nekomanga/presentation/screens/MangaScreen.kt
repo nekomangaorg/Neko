@@ -440,7 +440,7 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
         false -> luminance * .3f
     }
 
-    return when ((isNightMode && luminance <= 0.6) || (isNightMode.not() && luminance > 0.4)) {
+    return when ((isNightMode && luminance <= 0.6) || (!isNightMode && luminance > 0.4)) {
         true -> Color(ColorUtils.blendARGB(color1, color2, ratio))
         false -> buttonColor
     }
