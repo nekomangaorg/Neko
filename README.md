@@ -10,10 +10,9 @@
 <p align="center">A Free, Open source unofficial manga reader for MangaDex</p>
 
  <p align="center">
-    <a href="https://github.com/nekomangaorg/Neko/releases/latest"><img src="https://img.shields.io/github/release/nekomangaorg/Neko.svg?maxAge=3600&style=for-the-badge&label=download"/></a>
+    <a href="https://github.com/nekomangaorg/Neko/releases/latest"><img src="https://img.shields.io/github/v/release/nekomangaorg/Neko.svg?maxAge=3600&style=for-the-badge&label=download"/></a>
     <a href="https://github.com/nekomangaorg/Neko/actions/workflows/ci-draft-release.yml?query=workflow%3A%22Release+app%22"><img src="https://img.shields.io/github/actions/workflow/status/nekomangaorg/neko/ci-draft-release.yml?branch=main&style=for-the-badge" /></a>
     <img src="https://img.shields.io/github/stars/nekomangaorg/Neko.svg?style=for-the-badge" />
-
  </p>
 
 ---
