@@ -93,10 +93,7 @@ body:
         - label: I have searched the existing issues and this is a new ticket, **NOT** a duplicate or related to another open issue.
           required: true
         - label: I have written a short but informative title.
-          required: true
-        - label: I have tried the [troubleshooting guide](https://tachiyomi.org/docs/guides/troubleshooting/).
-          required: true
-        - label: I have updated the app to the newest version **[Latest](https://github.com/CarlosEsco/Neko/releases/latest)**.
+        - label: I have updated the app to the newest version **[Latest](https://github.com/nekomangaorg/Neko/releases/latest)**.
           required: true
         - label: I have filled out all of the requested information in this form.
           required: true

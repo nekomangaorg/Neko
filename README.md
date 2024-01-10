@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://github.com/CarlosEsco/Neko"><img src="./.github/readme-images/logo.png" alt="Neko" width="200"></a>
+  <a href="https://github.com/nekomangaorg/Neko"><img src="./.github/readme-images/logo.png" alt="Neko" width="200"></a>
   <br>
   Neko
   <br>
@@ -10,9 +10,9 @@
 <p align="center">A Free, Open source unofficial manga reader for MangaDex</p>
 
  <p align="center">
-    <a href="https://github.com/CarlosEsco/Neko/releases/latest"><img src="https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download"/></a>
-    <a href="https://github.com/CarlosEsco/Neko/actions/workflows/ci-draft-release.yml?query=workflow%3A%22Release+app%22"><img src="https://img.shields.io/github/actions/workflow/status/carlosesco/neko/ci-draft-release.yml?branch=main&style=for-the-badge" /></a>
-    <img src="https://img.shields.io/github/stars/CarlosEsco/Neko.svg?style=for-the-badge" />
+    <a href="https://github.com/nekomangaorg/Neko/releases/latest"><img src="https://img.shields.io/github/release/nekomangaorg/Neko.svg?maxAge=3600&style=for-the-badge&label=download"/></a>
+    <a href="https://github.com/nekomangaorg/Neko/actions/workflows/ci-draft-release.yml?query=workflow%3A%22Release+app%22"><img src="https://img.shields.io/github/actions/workflow/status/nekomangaorg/neko/ci-draft-release.yml?branch=main&style=for-the-badge" /></a>
+    <img src="https://img.shields.io/github/stars/nekomangaorg/Neko.svg?style=for-the-badge" />
 
  </p>
 
@@ -35,13 +35,7 @@ This is a <a href="https://mangadex.org/">MangaDex</a> manga reader for Android 
 
 
 ## Download
-Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
-
-## Thanks
-- <a href="https://github.com/inorichi">Inorichi</a> 
-- <a href="https://github.com/arkon">Arkon</a>
-- <a href="https://github.com/Jays2Kings">Jays2Kings</a>
-- <a href="https://github.com/goldbattle">GoldBattle</a>
+Get the app from our [releases page](https://github.com/nekomangaorg/Neko/releases).
 
 ## License
 
@@ -59,7 +53,7 @@ Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases
     See the License for the specific language governing permissions and
     limitations under the License.
     
-    Modifications copyright (C) 2019 Carlos Escobedo
+    Modifications copyright (C) 2019 NekoMangaOrg
 
 ## Disclaimer
 

@@ -91,7 +91,7 @@ jobs:
           prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
           echo "PREV_RELEASE_SHA=$prev_release_sha"
           echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
-          echo "Url to compare: https://api.github.com/repos/carlosesco/neko/compare/$prev_release_sha...$current_sha"
+          echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"
 
           echo "COMMIT_LOGS<<{delimiter}
           $(curl -H "Accept: application/vnd.github.v3+json" \

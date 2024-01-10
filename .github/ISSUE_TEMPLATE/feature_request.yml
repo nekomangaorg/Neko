@@ -31,7 +31,7 @@ body:
           required: true
         - label: I have written a short but informative title.
           required: true
-        - label: I have updated the app to the newest version **[Latest](https://github.com/CarlosEsco/Neko/releases/latest)**.
+        - label: I have updated the app to the newest version **[Latest](https://github.com/nekomangaorg/Neko/releases/latest)**.
           required: true
         - label: I have checked through the app settings for my feature.
           required: true

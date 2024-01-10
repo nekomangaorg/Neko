@@ -14,9 +14,6 @@ object MdConstants {
     const val forumUrl = "https://forums.mangadex.org/threads/"
     const val atHomeReportUrl = "https://api.mangadex.network/report"
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
-    const val imageUrlCacheNotFound =
-        "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
-
     const val chapterSuffix = "/chapter/"
 
     object Api {

@@ -139,7 +139,7 @@ fun AboutScreen(
                     title = stringResource(R.string.whats_new),
                     onClick = {
                         val url = if (BuildConfig.DEBUG) {
-                            "https://github.com/CarlosEsco/Neko/commits/master"
+                            "https://github.com/nekomangaorg/Neko/commits/master"
                         } else {
                             RELEASE_URL
                         }
