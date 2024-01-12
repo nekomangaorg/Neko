@@ -26,6 +26,10 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+      - name: install sdk 29.0.3
+        run: |
+          sudo apt -y install android-sdk-build-tools=29.0.3
+
       - name: Clone repo
         uses: actions/checkout@v4
         with:
