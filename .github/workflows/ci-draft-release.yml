@@ -28,9 +28,7 @@ jobs:
 
       - name: Setup Android SDK
         run: |
-          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
-          --sdk_root=$ANDROID_SDK_ROOT \
-          --install "cmdline-tools;29.0.3"
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager  "build-tools;29.0.3"
 
       - name: Clone repo
         uses: actions/checkout@v4
