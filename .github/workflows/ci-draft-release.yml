@@ -28,8 +28,8 @@ jobs:
 
       - name: install sdk 29.0.3
         run: |
-          sudo apt-get update
-          sudo apt -y install android-sdk-build-tools=29.0.3
+          sudo apt update
+          sudo apt -y install android-sdk-build-tools
 
       - name: Clone repo
         uses: actions/checkout@v4
