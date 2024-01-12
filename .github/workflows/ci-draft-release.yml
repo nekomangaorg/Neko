@@ -28,6 +28,7 @@ jobs:
 
       - name: install sdk 29.0.3
         run: |
+          ./tools/android list sdk --all
           sudo apt update
           sudo apt -y install android-sdk-build-tools
 
