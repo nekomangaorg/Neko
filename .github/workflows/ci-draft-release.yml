@@ -27,9 +27,8 @@ jobs:
           access_token: ${{ github.token }}
 
       - name: Setup Android SDK
-        uses: amyu/setup-android@v4
-        with:
-          build-tools-version: 29.0.3
+        run: |
+          android_sdk/cmdline-tools/latest/bin/sdkmanager --install "cmdline-tools;29.0.3"
 
       - name: Clone repo
         uses: actions/checkout@v4
