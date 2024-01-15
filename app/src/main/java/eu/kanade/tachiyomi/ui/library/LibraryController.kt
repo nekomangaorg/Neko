@@ -1213,6 +1213,11 @@ class LibraryController(
                 },
             ),
         )
+        binding.roundedCategoryHopper.categoryButton.setImageDrawable(
+            context.contextCompatDrawable(
+                LibraryGroup.groupTypeDrawableRes(presenter.groupType),
+            ),
+        )
     }
 
     private fun showSlideAnimation() {
