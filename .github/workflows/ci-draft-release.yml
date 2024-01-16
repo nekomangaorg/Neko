@@ -26,6 +26,10 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+      - name: Setup Android SDK
+        run: |
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager  "build-tools;29.0.3"
+
       - name: Clone repo
         uses: actions/checkout@v4
         with:

@@ -56,6 +56,7 @@
         android:networkSecurityConfig="@xml/network_security_config">
         <activity
             android:name=".ui.main.MainActivity"
+            android:exported="true"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Splash">
             <intent-filter>
@@ -68,6 +69,7 @@
         </activity>
         <activity
             android:name=".ui.reader.ReaderActivity"
+            android:exported="true"
             android:theme="@style/Theme.Splash">
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -91,9 +93,12 @@
         </activity>
         <activity
             android:name=".ui.webview.WebViewActivity"
+            android:exported="true"
             android:configChanges="uiMode|orientation|screenSize" />
 
-        <activity android:name=".ui.security.BiometricActivity" />
+        <activity
+            android:name=".ui.security.BiometricActivity"
+            android:exported="true" />
         <activity
             android:name=".ui.setting.logins.MyAnimeListLoginActivity"
             android:label="MyAnimeList"
