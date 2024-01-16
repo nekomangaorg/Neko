@@ -35,36 +35,20 @@ class AppUpdateChecker {
 
         return withIOContext {
             val result = with(json) {
-                try {
-                    networkService.client.newCall(GET(LATEST_RELEASE_URL_NEW))
-                        .await()
-                        .parseAs<GithubRelease>()
-                        .let {
-                            preferences.lastAppCheck().set(Date().time)
+                networkService.client
+                    .newCall(GET(LATEST_RELEASE_URL))
+                    .await()
+                    .parseAs<GithubRelease>()
+                    .let {
+                        preferences.lastAppCheck().set(Date().time)
 
-                            // Check if latest version is different from current version
-                            if (Version(it.version).isHigherThan(BuildConfig.VERSION_NAME)) {
-                                AppUpdateResult.NewUpdate(it)
-                            } else {
-                                AppUpdateResult.NoNewUpdate
-                            }
+                        // Check if latest version is different from current version
+                        if (Version(it.version).isHigherThan(BuildConfig.VERSION_NAME)) {
+                            AppUpdateResult.NewUpdate(it)
+                        } else {
+                            AppUpdateResult.NoNewUpdate
                         }
-                } catch (e: Exception) {
-                    networkService.client
-                        .newCall(GET(LATEST_RELEASE_URL))
-                        .await()
-                        .parseAs<GithubRelease>()
-                        .let {
-                            preferences.lastAppCheck().set(Date().time)
-
-                            // Check if latest version is different from current version
-                            if (Version(it.version).isHigherThan(BuildConfig.VERSION_NAME)) {
-                                AppUpdateResult.NewUpdate(it)
-                            } else {
-                                AppUpdateResult.NoNewUpdate
-                            }
-                        }
-                }
+                    }
             }
             if (doExtrasAfterNewUpdate && result is AppUpdateResult.NewUpdate) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
@@ -85,9 +69,5 @@ class AppUpdateChecker {
 }
 
 const val GITHUB_REPO_NEW: String = "nekomangaorg/neko"
-const val LATEST_RELEASE_URL_NEW = "https://api.github.com/repos/$GITHUB_REPO_NEW/releases/latest"
-const val RELEASE_URL_NEW = "https://github.com/$GITHUB_REPO_NEW/releases/tag/${BuildConfig.VERSION_NAME}"
-
-const val GITHUB_REPO: String = "CarlosEsco/Neko"
-const val LATEST_RELEASE_URL = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
-const val RELEASE_URL = "https://github.com/$GITHUB_REPO/releases/tag/${BuildConfig.VERSION_NAME}"
+const val LATEST_RELEASE_URL = "https://api.github.com/repos/$GITHUB_REPO_NEW/releases/latest"
+const val RELEASE_URL = "https://github.com/$GITHUB_REPO_NEW/releases/tag/${BuildConfig.VERSION_NAME}"

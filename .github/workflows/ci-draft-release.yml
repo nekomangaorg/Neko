@@ -21,33 +21,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set Swap Space
-        if: runner.os == 'Linux'
-        # v1.0 -> 49819abfb41bd9b44fb781159c033dba90353a7c
-        uses: pierotofy/set-swap-space@49819abfb41bd9b44fb781159c033dba90353a7c
-        with:
-          swap-size-gb: 7
-
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.12.0
         with:
           access_token: ${{ github.token }}
+
+      - name: Setup Android SDK
+        run: |
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager  "build-tools;29.0.3"
 
       - name: Clone repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: adopt
           java-version: 17
-
-      - name: Copy ci gradle.properties
-        run: |
-          mkdir -p ~/.gradle
-          cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
 
       - name: Write google-services.json
         uses: DamianReeves/write-file-action@v1.2
@@ -60,9 +52,6 @@ jobs:
         uses: eskatos/gradle-command-action@v2
         with:
           arguments: assembleStandardRelease
-          wrapper-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
 
       - name: Sign APK
         id: sign_app
@@ -91,11 +80,11 @@ jobs:
           prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
           echo "PREV_RELEASE_SHA=$prev_release_sha"
           echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
-          echo "Url to compare: https://api.github.com/repos/carlosesco/neko/compare/$prev_release_sha...$current_sha"
+          echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"
 
           echo "COMMIT_LOGS<<{delimiter}
           $(curl -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/carlosesco/neko/compare/$prev_release_sha...$current_sha" \
+            "https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha" \
             | jq '[.commits[]|{message:(.commit.message | split("\n")), username:.author.login}]' \
             | jq -r '.[]|"- \(.message | first) (@\(.username))"')
           {delimiter}" >> $GITHUB_ENV
