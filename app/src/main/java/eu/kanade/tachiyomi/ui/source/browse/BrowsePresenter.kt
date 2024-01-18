@@ -134,10 +134,12 @@ class BrowsePresenter(
     override fun onCreate() {
         super.onCreate()
 
-        if (browseScreenState.value.filters.query.text.isNotBlank()) {
-            getSearchPage()
-        } else {
-            getHomepage()
+        if (_browseScreenState.value.firstLoad) {
+            if (browseScreenState.value.filters.query.text.isNotBlank()) {
+                getSearchPage()
+            } else {
+                getHomepage()
+            }
         }
 
         updateBrowseFilters(_browseScreenState.value.firstLoad)
