@@ -173,7 +173,7 @@ dependencies {
     implementation(libs.bundles.flexibleadapter)
 
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
-    implementation("com.github.nonproto:ViewTooltip:f79a8955ef")
+    implementation("com.github.nonproto:ViewTooltip:1.0.4")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
     implementation("me.saket.cascade:cascade:2.3.0")
     implementation("me.saket.cascade:cascade-compose:2.3.0")
