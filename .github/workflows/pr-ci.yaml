@@ -26,11 +26,6 @@ jobs:
           distribution: adopt
           java-version: 17
 
-      - name: Copy ci gradle.properties
-        run: |
-          mkdir -p ~/.gradle
-          cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
-
       - name: Build app
         uses: eskatos/gradle-command-action@v2.11.1
         with:
