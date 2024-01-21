@@ -28,6 +28,19 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         const val DATABASE_VERSION = 36
     }
 
+    override fun onOpen(db: SupportSQLiteDatabase) {
+        super.onOpen(db)
+        setPragma(db, "foreign_keys = ON")
+        setPragma(db, "journal_mode = WAL")
+        setPragma(db, "synchronous = NORMAL")
+    }
+
+    private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
+        val cursor = db.query("PRAGMA $pragma")
+        cursor.moveToFirst()
+        cursor.close()
+    }
+
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
         execSQL(MangaTable.createTableQuery)
         execSQL(ChapterTable.createTableQuery)
@@ -156,18 +169,8 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(MangaTable.addThreadId)
             db.execSQL(MangaTable.addRepliesCount)
         }
-    }
-
-    override fun onConfigure(db: SupportSQLiteDatabase) {
-        db.setForeignKeyConstraintsEnabled(true)
-        setPragma(db, "foreign_keys = ON")
-        setPragma(db, "journal_mode = WAL")
-        setPragma(db, "synchronous = NORMAL")
-    }
-
-    private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
-        val cursor = db.query("PRAGMA $pragma")
-        cursor.moveToFirst()
-        cursor.close()
+        if (oldVersion < 37) {
+            db.execSQL(TrackTable.updateMangaUpdatesScore)
+        }
     }
 }

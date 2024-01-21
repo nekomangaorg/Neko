@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.data.database.tables
 
+import eu.kanade.tachiyomi.data.track.TrackManager
+
 object TrackTable {
 
     const val TABLE = "manga_sync"
@@ -78,4 +80,12 @@ object TrackTable {
 
     val dropTempTable: String
         get() = "DROP TABLE ${TABLE}_tmp"
+
+    val updateMangaUpdatesScore: String
+        get() =
+            """
+                UPDATE $TABLE
+                SET $COL_SCORE = max($COL_SCORE, 0)
+                WHERE $COL_SYNC_ID = ${TrackManager.MANGA_UPDATES};
+            """.trimIndent()
 }
