@@ -12,10 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TrackingSwitchDialog(themeColorState: ThemeColorState, name: String, oldName: String, newName: String, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
@@ -34,7 +34,7 @@ fun TrackingSwitchDialog(themeColorState: ThemeColorState, name: String, oldName
                         Text(text = stringResource(id = R.string.remove_x_from_service_and_add_y, oldName, name, newName))
                     }
 
-                    Gap(8.dp)
+                    Gap(Size.small)
                     TextButton(
                         onClick = { onConfirm(false) },
                         modifier = Modifier

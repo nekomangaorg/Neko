@@ -103,7 +103,7 @@ fun ArtworkSheet(
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .height(imageHeight.dp)
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = Size.small),
                 )
 
                 Row(
@@ -128,9 +128,14 @@ fun ArtworkSheet(
                     }
                 }
                 if (currentImage.description.isNotBlank()) {
-                    Text(text = currentImage.description, modifier = Modifier.padding(horizontal = 8.dp), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        text = currentImage.description,
+                        modifier = Modifier.padding(horizontal = Size.small),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
                 }
-                Gap(height = 8.dp)
+                Gap(Size.small)
                 if (alternativeArtwork.size > 1) {
                     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(Size.tiny, Alignment.Bottom)) {
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
@@ -152,7 +157,7 @@ fun ArtworkSheet(
                             }
                         }
                     }
-                    Gap(8.dp)
+                    Gap(Size.small)
                 }
             }
         }

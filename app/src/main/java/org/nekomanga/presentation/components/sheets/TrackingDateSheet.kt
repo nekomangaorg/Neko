@@ -48,6 +48,7 @@ import java.time.format.FormatStyle
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -103,18 +104,18 @@ fun TrackingDateSheet(
             )
         }
 
-        Gap(8.dp)
+        Gap(Size.tiny)
         Divider()
 
         if (currentDateExists) {
-            Gap(8.dp)
+            Gap(Size.tiny)
             Text(
                 text = stringResource(id = R.string.current_date_, trackingDate.dateFormat.format(trackingDate.currentDate)),
                 style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast)),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Gap(8.dp)
+            Gap(Size.tiny)
             TextButton(onClick = { trackDateChanged(RemoveTrackingDate(trackingDate.readingDate, trackAndService)) }) {
                 Text(
                     text = stringResource(id = R.string.remove),
@@ -136,7 +137,7 @@ fun TrackingDateSheet(
             val currentDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(trackingDate.currentDate), ZoneId.systemDefault()).toLocalDate()
 
             if ((suggestedDate.atStartOfDay() != currentDate.atStartOfDay())) {
-                Gap(8.dp)
+                Gap(Size.tiny)
                 TextButton(onClick = { trackDateChanged(EditTrackingDate(trackingDate.readingDate, suggestedDate, trackAndService)) }) {
                     Text(
                         text = stringResource(id = R.string.use_suggested_date_of_, suggestedDate.format(dateTimeFormatter)),
@@ -148,7 +149,7 @@ fun TrackingDateSheet(
         }
 
         if (!showDateField && currentDateExists) {
-            Gap(8.dp)
+            Gap(Size.tiny)
             TextButton(onClick = { showDateField = !showDateField }) {
                 Text(
                     text = stringResource(id = R.string.edit),
@@ -159,7 +160,7 @@ fun TrackingDateSheet(
         }
 
         if (showDateField) {
-            Gap(8.dp)
+            Gap(Size.tiny)
             val format = when {
                 dateTimePattern.startsWith("MM", true) -> Format.MMDDYYYY
                 dateTimePattern.startsWith("YY", true) -> Format.YYYYMMDD
@@ -170,7 +171,7 @@ fun TrackingDateSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = Size.small),
                 Arrangement.SpaceBetween,
             ) {
                 DateTextField(

@@ -167,7 +167,7 @@ fun BrowseScreen(
             sheetState = sheetState,
             sheetShape = RoundedCornerShape(Shapes.sheetRadius),
             sheetContent = {
-                Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
+                Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                     currentBottomSheet?.let { currentSheet ->
                         BrowseBottomSheet(
                             currentScreen = currentSheet,
@@ -266,7 +266,7 @@ fun BrowseScreen(
                         Loading(
                             Modifier
                                 .zIndex(1f)
-                                .padding(8.dp)
+                                .padding(Size.small)
                                 .padding(recyclerContentPadding)
                                 .align(Alignment.TopCenter),
                         )
@@ -333,18 +333,16 @@ fun BrowseScreen(
                         }
                     }
 
-                    TimberKt.d {"ESCO ${windowSizeClass.heightSizeClass}"}
-                    TimberKt.d {"ESCO ${windowSizeClass.widthSizeClass}"}
-                    TimberKt.d {"ESCO sideNav $actualSideNav"}
-
+                    TimberKt.d { "ESCO ${windowSizeClass.heightSizeClass}" }
+                    TimberKt.d { "ESCO ${windowSizeClass.widthSizeClass}" }
+                    TimberKt.d { "ESCO sideNav $actualSideNav" }
 
                     // hide these on initial load
                     if (!browseScreenState.value.hideFooterButton) {
                         ScreenTypeFooter(
                             screenType = browseScreenType,
                             modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                ,
+                                .align(Alignment.BottomStart),
                             isLoggedIn = browseScreenState.value.isLoggedIn,
                             screenTypeClick = { newScreenType: BrowseScreenType ->
                                 scope.launch { sheetState.hide() }
@@ -382,11 +380,11 @@ private fun ScreenTypeFooter(screenType: BrowseScreenType, modifier: Modifier = 
     LazyRow(
         modifier = modifier
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         item {
-            Gap(8.dp)
+            Gap(Size.tiny)
         }
         item {
             FooterFilterChip(
@@ -431,7 +429,7 @@ private fun FooterFilterChip(
         shape = RoundedCornerShape(100),
         label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
             labelColor = MaterialTheme.colorScheme.secondary,
             selectedContainerColor = MaterialTheme.colorScheme.secondary,
             selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
@@ -440,7 +438,7 @@ private fun FooterFilterChip(
         border = FilterChipDefaults.filterChipBorder(
             borderColor = MaterialTheme.colorScheme.secondary,
             selectedBorderColor = Color.Transparent,
-            borderWidth = 2.dp,
+            borderWidth = Size.extraTiny,
         ),
     )
 }

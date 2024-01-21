@@ -24,13 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, service: TrackServiceItem, onDismiss: () -> Unit, trackStatusChange: (Int) -> Unit) {
@@ -72,7 +72,7 @@ fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, s
                                 },
                                 colors = RadioButtonDefaults.colors(selectedColor = themeColorState.buttonColor),
                             )
-                            Gap(width = 8.dp)
+                            Gap(Size.small)
                             Text(text = service.status(status), style = MaterialTheme.typography.titleMedium)
                         }
                     }

@@ -59,7 +59,7 @@ internal fun InLibraryBadge(outline: Boolean, offset: Dp = (-2).dp) {
         AutoSizeText(
             text = stringResource(id = R.string.in_library),
             style = MaterialTheme.typography.labelLarge.copy(color = MaterialTheme.colorScheme.onSecondary),
-            modifier = Modifier.padding(horizontal = Size.tiny, vertical = 2.dp),
+            modifier = Modifier.padding(horizontal = Size.tiny, vertical = Size.extraTiny),
         )
     }
 }

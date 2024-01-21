@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun HeaderCard(text: String) {
@@ -22,10 +23,10 @@ fun HeaderCard(text: String) {
         shape = RoundedCornerShape(Shapes.coverRadius),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(Size.small),
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondary),
 
-    ) {
+        ) {
         Text(
             text = text,
             style = MaterialTheme.typography.titleMedium,

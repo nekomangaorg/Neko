@@ -74,7 +74,7 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = verticalArrangement) {
         val axisPadding = when (isTablet) {
             true -> 16.dp
-            false -> 8.dp
+            false -> Size.small
         }
 
         item {

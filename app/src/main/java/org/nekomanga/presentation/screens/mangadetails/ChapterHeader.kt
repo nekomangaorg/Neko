@@ -34,7 +34,7 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChaptersProvider: () -> I
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 12.dp),
+            .padding(horizontal = Size.small, vertical = 12.dp),
     ) {
         ChapterText(
             numberOfChaptersProvider(),
@@ -56,7 +56,7 @@ fun ChapterHeader(themeColor: ThemeColorState, numberOfChaptersProvider: () -> I
                     modifier = Modifier
                         .requiredWidthIn(Size.none, 200.dp)
                         .align(Alignment.CenterVertically)
-                        .padding(end = 8.dp),
+                        .padding(end = Size.small),
                     textAlign = TextAlign.End,
                 )
             }

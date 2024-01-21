@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.nekomanga.presentation.components.Loading
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun LoadingScreen(contentPadding: PaddingValues = PaddingValues()) {
@@ -17,7 +18,7 @@ fun LoadingScreen(contentPadding: PaddingValues = PaddingValues()) {
         Loading(
             Modifier
                 .zIndex(1f)
-                .padding(8.dp)
+                .padding(Size.small)
                 .padding(top = contentPadding.calculateTopPadding())
                 .align(Alignment.TopCenter),
         )

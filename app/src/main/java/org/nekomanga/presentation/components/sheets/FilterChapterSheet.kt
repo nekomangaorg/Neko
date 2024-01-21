@@ -82,7 +82,7 @@ private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.So
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = Size.small),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -96,7 +96,7 @@ private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.So
                 }
             }
         }
-        Gap(8.dp)
+        Gap(Size.small)
         SortLine(themeColorState, SortOption(sortFilter.sourceOrderSort, SourceOrder), stringResource(id = R.string.by_source_order), changeSort)
         SortLine(themeColorState, SortOption(sortFilter.chapterNumberSort, ChapterNumber), stringResource(id = R.string.by_chapter_number), changeSort)
         SortLine(themeColorState, SortOption(sortFilter.uploadDateSort, UploadDate), stringResource(id = R.string.by_update_date), changeSort)
@@ -128,7 +128,7 @@ private fun Filter(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = Size.small),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -217,7 +217,7 @@ private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaCo
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = Size.small),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -263,7 +263,7 @@ private fun Language(themeColorState: ThemeColorState, languageFilter: MangaCons
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal =Size.small),
     ) {
         Row(
             modifier = Modifier

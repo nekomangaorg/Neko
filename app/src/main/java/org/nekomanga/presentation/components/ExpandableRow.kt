@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ExpandableRow(rowText: String, isExpanded: Boolean, disabled: Boolean, textColor: Color = MaterialTheme.colorScheme.onSurface, onClick: () -> Unit) {
@@ -29,7 +30,7 @@ fun ExpandableRow(rowText: String, isExpanded: Boolean, disabled: Boolean, textC
                     onClick()
                 }
             }
-            .padding(8.dp, 12.dp),
+            .padding(Size.small, 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(

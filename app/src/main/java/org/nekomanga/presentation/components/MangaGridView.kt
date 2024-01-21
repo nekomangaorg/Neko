@@ -60,8 +60,8 @@ fun MangaGridWithHeader(
                 items = allGrids,
                 columns = columns,
                 modifier = Modifier
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(horizontal = Size.small),
+                horizontalArrangement = Arrangement.spacedBy(Size.small),
             ) { displayManga ->
                 MangaGridItem(
                     displayManga = displayManga,
@@ -137,7 +137,7 @@ fun MangaGridItem(
                     onClick = onClick,
                     onLongClick = onLongClick,
                 )
-                .padding(2.dp),
+                .padding(Size.extraTiny),
         ) {
             val subtitleText = when (displayManga.displayTextRes) {
                 null -> displayManga.displayText

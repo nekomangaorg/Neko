@@ -19,13 +19,14 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: ImmutableList<SimpleDropDownItem>, themeColorState: ThemeColorState = defaultThemeColorState()) {
     val background = Modifier.background(color = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 8.dp))
     CascadeDropdownMenu(
         expanded = expanded,
-        offset = DpOffset(8.dp, 8.dp),
+        offset = DpOffset(Size.small,Size.small),
         fixedWidth = 225.dp,
         modifier = background,
         properties = PopupProperties(),

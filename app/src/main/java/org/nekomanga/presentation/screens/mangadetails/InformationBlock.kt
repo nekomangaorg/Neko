@@ -77,7 +77,7 @@ fun InformationBlock(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = Size.small),
     ) {
         if (titleProvider().isNotNullOrEmpty()) {
             NoRippleText(
@@ -151,7 +151,7 @@ fun InformationBlock(
             )
         }
         if (statsProvider() != null || langFlagProvider() != null) {
-            Gap(8.dp)
+            Gap( Size.tiny )
         }
         FlowRow(
             modifier = Modifier
@@ -184,7 +184,7 @@ fun InformationBlock(
                 stats.rating?.let { rating ->
                     val formattedRating = ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
 
-                    Gap(8.dp)
+                    Gap( Size.tiny )
                     Image(imageVector = Icons.Filled.HotelClass, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
                     Gap(Size.tiny)
                     NoRippleText(
@@ -199,7 +199,7 @@ fun InformationBlock(
                         NumberFormat.getNumberInstance(Locale.US).format(unformattedNumberOfUsers.toInt())
                     }.getOrDefault(0).toString()
 
-                    Gap(8.dp)
+                    Gap( Size.tiny )
                     Image(imageVector = Icons.Filled.Bookmarks, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
                     Gap(Size.tiny)
                     NoRippleText(
@@ -215,7 +215,7 @@ fun InformationBlock(
                         NumberFormat.getNumberInstance(Locale.US).format(stats.repliesCount?.toInt())
                     }.getOrDefault(0).toString()
 
-                    Gap(8.dp)
+                    Gap( Size.tiny )
                     Image(imageVector = Icons.Filled.Comment, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
                     Gap(Size.tiny)
                     NoRippleText(
@@ -230,7 +230,7 @@ fun InformationBlock(
 
 
             if (showMergedIconProvider()) {
-                Gap(8.dp)
+                Gap( Size.tiny )
                 com.mikepenz.iconics.compose.Image(asset = CommunityMaterial.Icon.cmd_check_decagram, colorFilter = ColorFilter.tint(mediumAlpha))
             }
         }

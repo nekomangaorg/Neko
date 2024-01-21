@@ -19,11 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 /**
  * Simple Dialog to save a filter
@@ -66,9 +66,9 @@ fun SaveFilterDialog(themeColorState: ThemeColorState, currentSavedFilters: List
                             focusedLabelColor = themeColorState.buttonColor,
                             focusedBorderColor = themeColorState.buttonColor,
 
-                        ),
+                            ),
                     )
-                    Gap(2.dp)
+                    Gap(Size.extraTiny)
                     Text(text = errorMessage, style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.error))
                 }
             },

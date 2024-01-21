@@ -38,8 +38,8 @@ import org.nekomanga.presentation.components.InLibraryBadge
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.MangaGridSubtitle
 import org.nekomanga.presentation.components.MangaGridTitle
-import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun BrowseHomePage(
@@ -78,7 +78,7 @@ fun BrowseHomePage(
                         text = headerText,
                         style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                     )
-                    Gap(8.dp)
+                    Gap(Size.tiny)
                     Icon(imageVector = Icons.Default.ArrowForward, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
@@ -86,7 +86,7 @@ fun BrowseHomePage(
             LazyRow(
                 modifier = Modifier
                     .requiredHeight(coverSize + 60.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Size.small),
             ) {
                 item { Gap(Size.small) }
 
@@ -135,7 +135,7 @@ fun BrowseHomePage(
                         text = stringResource(id = R.string.random_manga),
                         style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
                     )
-                    Gap(8.dp)
+                    Gap(Size.tiny)
                     Icon(imageVector = Icons.Default.ArrowForward, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
                 }
             }

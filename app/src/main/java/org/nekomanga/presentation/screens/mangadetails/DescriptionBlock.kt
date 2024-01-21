@@ -109,7 +109,7 @@ fun DescriptionBlock(
             val text = descriptionProvider().split("\n").take(2).joinToString("\n")
 
             val lineHeight = with(LocalDensity.current) {
-                MaterialTheme.typography.bodyLarge.fontSize.toDp() + 8.dp
+                MaterialTheme.typography.bodyLarge.fontSize.toDp() + Size.small
             }
 
             val descriptionHeight = with(LocalDensity.current) {
@@ -156,7 +156,7 @@ fun DescriptionBlock(
                     resetClick = altTitleResetClick,
                     shouldWrap = wrapAltTitles,
                 )
-                Gap(8.dp)
+                Gap( Size.tiny )
                 Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
             }
@@ -173,7 +173,7 @@ fun DescriptionBlock(
             }
 
             if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
-                Gap(8.dp)
+                Gap( Size.tiny )
                 AltTitles(
                     altTitles = altTitlesProvider(),
                     currentTitle = titleProvider(),
@@ -213,7 +213,7 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
         Text(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(start = 8.dp),
+                .padding(start = Size.small),
             text = stringResource(text),
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Medium,
@@ -377,7 +377,7 @@ private fun ScrollableAltTitles(
                 },
             )
         }
-        item { Gap(8.dp) }
+        item { Gap( Size.tiny ) }
     }
 }
 
@@ -390,7 +390,7 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, t
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
     )
-    Gap(8.dp)
+    Gap( Size.tiny )
     FlowRow(
         modifier = Modifier.layout { measurable, constraints ->
             val placeable = measurable.measure(

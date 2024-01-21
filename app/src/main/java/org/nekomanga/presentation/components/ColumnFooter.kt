@@ -24,7 +24,6 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
@@ -63,7 +62,7 @@ fun ColumnScope.SearchFooter(
                     }
                 }
             }
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = Size.small),
         value = title,
         enabled = enabled,
         singleLine = true,

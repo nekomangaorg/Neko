@@ -275,7 +275,7 @@ private fun ChapterInfo(
                     dropdown = !dropdown
                 },
             )
-            .padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
+            .padding(start = Size.small, top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(

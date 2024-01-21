@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.theme.Size
 
 /**
  * custom chip so you can pass combinedClickable
@@ -24,10 +25,10 @@ fun Chip(
 ) {
     Surface(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(Size.small))
             .then(modifier),
-        tonalElevation = 8.dp,
-        shape = RoundedCornerShape(8.dp),
+        tonalElevation = Size.small,
+        shape = RoundedCornerShape(Size.small),
         color = containerColor,
     ) {
         Text(

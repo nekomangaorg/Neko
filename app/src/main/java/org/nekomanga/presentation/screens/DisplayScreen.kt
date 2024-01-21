@@ -52,6 +52,7 @@ import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.showLibraryEntriesAction
 import org.nekomanga.presentation.functions.numberOfColumns
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun DisplayScreen(
@@ -85,7 +86,7 @@ fun DisplayScreen(
         sheetState = sheetState,
         sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
-            Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
+            Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                 EditCategorySheet(
                     addingToLibrary = true,
                     categories = displayScreenState.value.categories,
@@ -146,7 +147,7 @@ fun DisplayScreen(
                     Loading(
                         Modifier
                             .zIndex(1f)
-                            .padding(8.dp)
+                            .padding(Size.small)
                             .padding(top = contentPadding.calculateTopPadding())
                             .align(Alignment.TopCenter),
                     )
@@ -187,7 +188,7 @@ fun DisplayScreen(
                     Box(Modifier.fillMaxSize()) {
                         LinearProgressIndicator(
                             modifier = Modifier
-                                .padding(bottom = contentPadding.calculateBottomPadding() + 8.dp)
+                                .padding(bottom = contentPadding.calculateBottomPadding() + Size.small)
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth(),
                         )

@@ -82,7 +82,7 @@ private val recomposeModifier =
                         // color in blue.
                         1L -> Color.Blue to 1f
                         // 2 compositions is _probably_ okay.
-                        2L -> Color.Green to 2.dp.toPx()
+                        2L -> Color.Green to org.nekomanga.presentation.theme.Size.extraTiny.toPx()
                         // 3 or more compositions before timeout may indicate an issue. lerp the
                         // color from yellow to red, and continually increase the border size.
                         else -> {

@@ -53,6 +53,7 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaDetailsHeader(
@@ -185,7 +186,7 @@ fun MangaDetailsHeader(
                 if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                     QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
                 }
-                Gap(8.dp)
+                Gap( Size.tiny )
                 DescriptionBlock(
                     windowSizeClass = windowSizeClass,
                     titleProvider = { mangaState.value.currentTitle },
@@ -206,7 +207,7 @@ fun MangaDetailsHeader(
                 )
                 if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
                     QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
-                    Gap(8.dp)
+                    Gap( Size.tiny )
                 }
             }
         }
@@ -221,14 +222,14 @@ private fun ColumnScope.QuickReadButton(
     quickReadClick: () -> Unit,
 ) {
     if (quickReadTextProvider().text.isNotEmpty() && quickReadTextProvider().id != null) {
-        Gap(8.dp)
+        Gap( Size.tiny )
         CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)) {
             ElevatedButton(
                 onClick = quickReadClick,
                 shape = RoundedCornerShape(35),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(Size.small),
                 colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
             ) {
                 Text(text = stringResource(id = quickReadTextProvider().id!!, quickReadTextProvider().text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)

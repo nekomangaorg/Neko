@@ -142,9 +142,9 @@ fun DetailedStats(detailedStats: DetailedState, colors: ImmutableList<Color>, co
 
 @Composable
 private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> Unit) {
-    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    LazyRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
         item {
-            Gap(8.dp)
+            Gap(Size.tiny)
         }
         CustomChip(
             isSelected = filterState == Filter.Type,
@@ -438,7 +438,7 @@ private fun DefaultView(
                 graph(chartWidth = chartWidth, modifier = Modifier.fillMaxWidth())
             }
             item {
-                Gap(padding = 8.dp)
+                Gap(Size.small)
             }
             items(sortedSeries, key = { it.key }) { entry ->
                 StatCard(
@@ -567,7 +567,7 @@ private fun LazyListScope.CustomChip(isSelected: Boolean, onClick: () -> Unit, @
             onClick = onClick,
             label = { Text(text = stringResource(id = label)) },
             colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
                 selectedLabelColor = MaterialTheme.colorScheme.primary,
             ),
         )
@@ -577,12 +577,12 @@ private fun LazyListScope.CustomChip(isSelected: Boolean, onClick: () -> Unit, @
 @Composable
 private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modifier) {
     ElevatedCard(
-        modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = modifier.padding(horizontal = 16.dp, vertical = Size.small),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = Size.small, vertical = Size.tiny),
         ) {
             Text(text = manga.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
             Row(
@@ -611,7 +611,7 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
 
 @Composable
 private fun Line(label: String, value: String) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Size.small), verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = "$label:",
             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast)),
@@ -663,7 +663,7 @@ private fun Line(lineData: List<LineData>, chartWidth: Float, modifier: Modifier
                     .fillMaxWidth()
                     .height(height.dp)
                     .padding(16.dp),
-                chartDimens = ChartDimens(8.dp),
+                chartDimens = ChartDimens(Size.small),
                 axisConfig = AxisConfig(
                     showAxis = true,
                     isAxisDashed = false,
@@ -692,13 +692,13 @@ private fun StatCard(header: String, headerColor: Color, count: Int, totalCount:
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = Size.small),
     ) {
         val labelStyle = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast))
         val valueStyle = MaterialTheme.typography.bodyMedium
         val headerStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = headerColor)
 
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = Size.small)) {
             Text(text = header, style = headerStyle, modifier = Modifier.fillMaxWidth())
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

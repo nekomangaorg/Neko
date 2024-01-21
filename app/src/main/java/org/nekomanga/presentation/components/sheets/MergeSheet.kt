@@ -82,19 +82,19 @@ fun MergeSheet(
             BaseSheet(themeColor = themeColorState) {
                 val text = MergeType.getMergeTypeName(isMergedManga.mergeType)
 
-                Gap(8.dp)
+                Gap(Size.small)
                 Text(text = stringResource(id = R.string.merge_source_, text), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
 
-                Gap(8.dp)
+                Gap(Size.tiny)
 
                 TextButton(onClick = { openMergeSource(isMergedManga.url, isMergedManga.title) }, modifier = Modifier.fillMaxWidth()) {
                     Text(text = stringResource(id = R.string.open_merged_in_webview), color = themeColorState.buttonColor)
                 }
-                Gap(8.dp)
+                Gap(Size.tiny)
                 TextButton(onClick = { removeMergeSource(isMergedManga.mergeType) }, modifier = Modifier.fillMaxWidth()) {
                     Text(text = stringResource(id = R.string.remove_merged_source), color = themeColorState.buttonColor)
                 }
-                Gap(8.dp)
+                Gap(Size.tiny)
             }
         }
 
@@ -169,7 +169,7 @@ private fun MergeLogo(@DrawableRes id: Int, onClick: () -> Unit) {
         modifier = Modifier
             .clip(RoundedCornerShape(Shapes.coverRadius))
             .clickable(onClick = onClick)
-            .padding(8.dp)
+            .padding(Size.small)
             .clip(RoundedCornerShape(Shapes.coverRadius)),
     ) {
         Image(
@@ -187,9 +187,9 @@ private fun SuccessResults(mergeMangaList: List<SourceMergeManga>, mergeType: Me
         columns = GridCells.Adaptive(minSize = 100.dp),
         modifier = Modifier
             .fillMaxWidth(),
-        contentPadding = PaddingValues(top = 16.dp, bottom = Size.huge * 2, start = 8.dp, end = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(top = 16.dp, bottom = Size.huge * 2, start = Size.small, end = Size.small),
+        verticalArrangement = Arrangement.spacedBy(Size.small),
+        horizontalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         items(mergeMangaList, key = { item -> item.hashCode() }) { item ->
             Box(
@@ -224,7 +224,7 @@ private fun SuccessResults(mergeMangaList: List<SourceMergeManga>, mergeType: Me
                 ) {
                     Text(
                         text = item.title,
-                        modifier = Modifier.padding(4.dp),
+                        modifier = Modifier.padding(Size.tiny),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         color = Color.White,
@@ -262,10 +262,10 @@ private fun BoxScope.NonSuccessResultsAndChips(themeColorState: ThemeColorState,
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(Size.tiny),
                     contentPadding = PaddingValues(horizontal = 8.dp),
                 ) {
-                    items(chunk){ item ->
+                    items(chunk) { item ->
                         ElevatedSuggestionChip(
                             onClick = { chipClick(item) },
                             label = { Text(text = item, color = MaterialTheme.colorScheme.surface) },

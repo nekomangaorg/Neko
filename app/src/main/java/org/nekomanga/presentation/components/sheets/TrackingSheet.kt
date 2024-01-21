@@ -134,7 +134,7 @@ fun TrackingSheet(
             trackingFinishDateClick(trackAndService, TrackingDate(readingDate = ReadingDate.Finish, trackAndService.track.finishedReadingDate, dateFormat = dateFormat))
         }
 
-        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Size.small)) {
             items(servicesProvider()) { service ->
                 val track = tracksProvider().firstOrNull { it.trackServiceId == service.id }
 
@@ -197,7 +197,7 @@ private fun TrackingServiceItem(
     OutlinedCard(
         shape = RoundedCornerShape(Shapes.sheetRadius),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)),
-        modifier = Modifier.padding(horizontal = 8.dp),
+        modifier = Modifier.padding(horizontal = Size.small),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (trackAndService == null) {
@@ -266,7 +266,7 @@ private fun TrackRowOne(
                 textAlign = TextAlign.Start,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = Size.small),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -275,7 +275,7 @@ private fun TrackRowOne(
                 text = track.title,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(Size.small)
                     .fillMaxWidth(.85f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -285,7 +285,7 @@ private fun TrackRowOne(
                     imageVector = Icons.Default.Cancel,
                     contentDescription = null,
                     modifier = Modifier
-                        .padding(end = 8.dp)
+                        .padding(end = Size.small)
                         .size(24.dp),
                     tint = themeColor.buttonColor,
                 )
@@ -416,7 +416,7 @@ private fun RowScope.TrackingBox(clickable: () -> Unit, content: @Composable () 
         Modifier
             .weight(1f)
             .clickable { clickable() }
-            .padding(horizontal = 8.dp, vertical = 16.dp),
+            .padding(horizontal = Size.small, vertical = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
         content()

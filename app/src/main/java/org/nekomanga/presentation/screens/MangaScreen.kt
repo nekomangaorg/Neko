@@ -48,7 +48,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
 import eu.kanade.presentation.components.VerticalDivider
@@ -86,6 +85,7 @@ import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheetScreen
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.screens.mangadetails.OverflowOptions
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaScreen(
@@ -190,7 +190,7 @@ fun MangaScreen(
         sheetState = sheetState,
         sheetShape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd = Shapes.sheetRadius),
         sheetContent = {
-            Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
+            Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                 currentBottomSheet?.let { currentSheet ->
                     DetailsBottomSheet(
                         currentScreen = currentSheet,

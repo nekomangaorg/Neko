@@ -54,7 +54,7 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxHeight()) {
             if (externalLink.showLogo) {
-                Gap(8.dp)
+                Gap(Size.small)
                 Color.White
                 Image(
                     painter = painterResource(id = externalLink.logo),
@@ -63,7 +63,7 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -
                         .size(28.dp)
                         .padding(top = Size.tiny, bottom = Size.tiny),
                 )
-                Gap(8.dp)
+                Gap(Size.small)
             } else {
                 Gap(12.dp)
             }

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun snackbarHost(snackbarHostState: SnackbarHostState, actionColor: Color? = null): @Composable () -> Unit {
@@ -36,7 +37,7 @@ fun snackbarHost(snackbarHostState: SnackbarHostState, actionColor: Color? = nul
                     }
                 },
                 dismissActionContentColor = MaterialTheme.colorScheme.onSurface,
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
                 Text(

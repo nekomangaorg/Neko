@@ -82,13 +82,13 @@ fun TriStateFilterChip(
         label = { Text(text = name, style = labelTextStyle) },
         colors = FilterChipDefaults.filterChipColors(
             containerColor = MaterialTheme.colorScheme.surface,
-            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
             selectedLabelColor = MaterialTheme.colorScheme.primary,
             selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
         ),
         border = FilterChipDefaults.filterChipBorder(
             borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
-            selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+            selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
         ),
     )
 }

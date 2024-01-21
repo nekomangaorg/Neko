@@ -87,7 +87,7 @@ fun TrackingSearchSheet(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         item {
-                            Gap(8.dp)
+                            Gap(Size.tiny)
                         }
                         if (alreadySelectedTrack == null && trackSearchResult.trackSearchResult.size == 1) {
                             trackSearchItemClick(trackSearchResult.trackSearchResult.first())
@@ -125,10 +125,11 @@ fun TrackingSearchSheet(
                         }
 
                         item {
-                            Gap(8.dp)
+                            Gap(Size.tiny)
                         }
                     }
                 }
+
                 else -> CenteredBox(themeColorState = themeColorState, trackSearchResult = trackSearchResult)
             }
             var searchText by remember { mutableStateOf(title) }
@@ -171,7 +172,7 @@ private fun TrackSearchItem(
     }
 
     OutlinedCard(
-        modifier = Modifier.padding(horizontal = 8.dp),
+        modifier = Modifier.padding(horizontal = Size.small),
         border = CardDefaults.outlinedCardBorder(true).copy(brush = SolidColor(outlineColor)),
         onClick = { trackSearchItemClick(trackSearch) },
     ) {
@@ -196,7 +197,7 @@ private fun TrackSearchItem(
                 IconButton(
                     onClick = { openInBrowser(trackSearch.trackItem.trackingUrl, trackSearch.trackItem.title) },
                     modifier = Modifier
-                        .padding(horizontal = 4.dp)
+                        .padding(horizontal = Size.tiny)
                         .align(Alignment.TopEnd),
                 ) {
                     Icon(
@@ -209,7 +210,7 @@ private fun TrackSearchItem(
 
                 Column(
                     modifier = Modifier
-                        .padding(8.dp),
+                        .padding(Size.small),
                 ) {
                     Text(
                         text = trackSearch.trackItem.title,
@@ -266,7 +267,7 @@ private fun TrackSearchItem(
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(8.dp)
+                        .padding(Size.small)
                         .size(24.dp)
                         .clip(CircleShape)
                         .background(color = outlineColor),

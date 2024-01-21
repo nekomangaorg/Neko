@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun Loading(modifier: Modifier = Modifier) {
@@ -23,10 +24,10 @@ fun Loading(modifier: Modifier = Modifier) {
         CircularProgressIndicator(
             modifier = Modifier
                 .size(28.dp)
-                .padding(2.dp)
+                .padding(Size.extraTiny)
                 .align(Alignment.Center),
             color = MaterialTheme.colorScheme.onSecondary,
-            strokeWidth = 2.dp,
+            strokeWidth = Size.extraTiny,
         )
     }
 }

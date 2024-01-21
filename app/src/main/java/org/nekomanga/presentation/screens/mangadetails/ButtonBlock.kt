@@ -72,21 +72,21 @@ fun ButtonBlock(
     val shape = RoundedCornerShape(35)
 
     val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = themeColorState.altContainerColor)
-    val checkedBorderStroke = BorderStroke(1.dp, Color.Transparent)
+    val checkedBorderStroke = BorderStroke(Size.extraExtraTiny, Color.Transparent)
 
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
-    val uncheckedBorderStroke = BorderStroke(1.dp, themeColorState.altContainerColor.copy(alpha = .8f))
-    val gapBetweenButtons = 8.dp
+    val uncheckedBorderStroke = BorderStroke(Size.extraExtraTiny, themeColorState.altContainerColor.copy(alpha = .8f))
+    val gapBetweenButtons = Size.small
     val (padding, iconicsPadding, buttonModifier) = when (hideButtonTextProvider()) {
         true -> Triple(PaddingValues(Size.none), PaddingValues(Size.none), Modifier.size(Size.huge))
-        false -> Triple(PaddingValues(horizontal = 12.dp, vertical = 8.dp), PaddingValues(horizontal = 12.dp, vertical = 4.dp), Modifier.height(Size.huge))
+        false -> Triple(PaddingValues(horizontal = 12.dp, vertical = Size.small), PaddingValues(horizontal = 12.dp, vertical = Size.tiny), Modifier.height(Size.huge))
     }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val favConfig = when (inLibraryProvider()) {
@@ -263,7 +263,7 @@ private fun RowScope.ButtonContent(
 @Composable
 private fun RowScope.ButtonText(text: String, color: Color) {
     if (text.isNotEmpty()) {
-        Gap(8.dp)
+        Gap(Size.tiny)
         Text(text = text, style = MaterialTheme.typography.bodyLarge.copy(color = color.copy(alpha = .8f), letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium))
     }
 }

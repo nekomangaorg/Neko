@@ -80,8 +80,8 @@ import org.nekomanga.presentation.components.dialog.SaveFilterDialog
 import org.nekomanga.presentation.components.sheetHandle
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
-import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FilterBrowseSheet(
@@ -99,7 +99,7 @@ fun FilterBrowseSheet(
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
-        val paddingModifier = Modifier.padding(horizontal = 8.dp)
+        val paddingModifier = Modifier.padding(horizontal = Size.small)
 
         var originalLanguageExpanded by remember { mutableStateOf(false) }
         var contentRatingExpanded by remember { mutableStateOf(false) }
@@ -335,7 +335,7 @@ fun FilterBrowseSheet(
                 filterDefaultClick = filterDefaultClick,
             )
 
-            Gap(8.dp)
+            Gap(Size.small)
 
             Row(
                 modifier = paddingModifier
@@ -378,7 +378,7 @@ fun FilterBrowseSheet(
                 }
             }
 
-            Gap(bottomContentPadding + 8.dp)
+            Gap(bottomContentPadding + Size.small)
         }
     }
 }
@@ -520,7 +520,7 @@ fun OtherRow(
                 )
 
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = stringResource(id = R.string.tag_inclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                    Text(text = stringResource(id = R.string.tag_inclusion_mode), modifier = Modifier.padding(start = Size.small), style = MaterialTheme.typography.labelMedium)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = filters.tagInclusionMode.mode == TagMode.And,
@@ -536,7 +536,7 @@ fun OtherRow(
                 }
 
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = stringResource(id = R.string.tag_exclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                    Text(text = stringResource(id = R.string.tag_exclusion_mode), modifier = Modifier.padding(start = Size.small), style = MaterialTheme.typography.labelMedium)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = filters.tagExclusionMode.mode == TagMode.And,
@@ -585,7 +585,7 @@ fun OtherRow(
                     textChanged = { text: String -> filterChanged(Filter.AuthorId(text)) },
                     search = { filterClick() },
                 )
-                Gap(8.dp)
+                Gap(Size.tiny)
             }
         }
     }
@@ -615,7 +615,7 @@ fun SavedFilters(
             val listState: LazyListState = rememberLazyListState()
             val scope = rememberCoroutineScope()
             LazyRow(verticalAlignment = Alignment.CenterVertically, state = listState) {
-                item { Gap(8.dp) }
+                item { Gap(Size.tiny) }
 
                 items(sortedFilters) { filter ->
                     val isEnabled = nameOfEnabledFilter.equals(filter.name, true)

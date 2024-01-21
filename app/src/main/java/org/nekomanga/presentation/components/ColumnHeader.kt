@@ -23,7 +23,7 @@ import org.nekomanga.presentation.theme.Size
  */
 @Composable
 fun ColumnScope.Header(text: String, cancelClick: () -> Unit) {
-    Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+    Box(modifier = Modifier.padding(horizontal = Size.small)) {
         IconButton(onClick = { cancelClick() }) {
             Icon(
                 imageVector = Icons.Default.Close,

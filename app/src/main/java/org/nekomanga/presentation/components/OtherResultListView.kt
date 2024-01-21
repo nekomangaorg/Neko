@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.DisplayResult
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ResultList(
@@ -29,10 +30,10 @@ fun ResultList(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = Size.small),
         state = scrollState,
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         items(results) { displayResult ->
             ResultRow(
