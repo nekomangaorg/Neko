@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -27,10 +28,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.nekomanga.core.preferences.MANGA_HAS_UNREAD
-import org.nekomanga.core.preferences.MANGA_NON_COMPLETED
-import org.nekomanga.core.preferences.MANGA_NON_READ
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_STARTED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_COMPLETED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_UNFOLLOWED
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
@@ -180,18 +186,38 @@ class StatsPresenter(
         return trackManager.services.values.filter { it.isLogged() }
     }
 
+    private fun hasTrackWithGivenStatus(manga: Manga, globalStatusId: Int): Boolean {
+        val tracks = db.getTracks(manga).executeAsBlocking()
+        return tracks.any { track ->
+            val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
+            return@any status != null && globalStatusId != trackManager.getGlobalStatusResId(status)
+        }
+    }
+
     private fun getGlobalUpdateManga(libraryManga: List<LibraryManga>): Map<Long?, List<LibraryManga>> {
         val includedCategories = libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
         val excludedCategories = libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
-        val restrictions = libraryPreferences.updateRestrictions().get()
+        val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
         return libraryManga.groupBy { it.id }
             .filterNot { it.value.any { manga -> manga.category in excludedCategories } }
             .filter { includedCategories.isEmpty() || it.value.any { manga -> manga.category in includedCategories } }
-            .filterNot {
+            .filter {
                 val manga = it.value.first()
-                (MANGA_NON_COMPLETED in restrictions && manga.status == SManga.COMPLETED) ||
-                    (MANGA_HAS_UNREAD in restrictions && manga.unread != 0) ||
-                    (MANGA_NON_READ in restrictions && manga.totalChapters > 0 && !manga.hasRead)
+                when {
+                    MANGA_HAS_UNREAD in restrictions && manga.unread != 0 -> true
+                    MANGA_NOT_STARTED in restrictions && manga.totalChapters > 0 && !manga.hasStarted -> true
+                    MANGA_NOT_COMPLETED in restrictions && manga.status == SManga.COMPLETED -> true
+                    MANGA_TRACKING_UNFOLLOWED in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_unfollowed) -> false
+                    MANGA_TRACKING_PLAN_TO_READ in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_plan_to_read) -> false
+
+                    MANGA_TRACKING_DROPPED in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_dropped) -> false
+
+                    MANGA_TRACKING_ON_HOLD in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_on_hold) -> false
+
+                    MANGA_TRACKING_COMPLETED in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_completed) -> false
+                    else -> true
+
+                }
             }
     }
 

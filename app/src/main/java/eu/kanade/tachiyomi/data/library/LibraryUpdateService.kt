@@ -61,6 +61,14 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_STARTED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_COMPLETED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_UNFOLLOWED
 import org.nekomanga.domain.network.message
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
@@ -307,32 +315,66 @@ class LibraryUpdateService(
         job?.invokeOnCompletion { stopSelf(startId) }
     }
 
+    private fun hasTrackWithGivenStatus(libraryManga: LibraryManga, globalStatus: String): Boolean {
+        val tracks = db.getTracks(libraryManga).executeAsBlocking()
+        return tracks.any { track ->
+            val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
+            return@any status != null && status != globalStatus
+        }
+    }
+
     private suspend fun updateChaptersJob(tempMangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
 
         libraryPreferences.lastUpdateTimestamp().set(Date().time)
 
-        val skipCompleted = libraryPreferences.updateOnlyNonCompleted().get()
-        val skipBasedOnTracking = libraryPreferences.updateOnlyWhenTrackingIsNotFinished().get()
+        val restrictions = libraryPreferences.autoUpdateMangaRestrictions().get()
 
         val mangaToAdd = tempMangaToAdd.filter { libraryManga ->
 
-            if (skipCompleted && libraryManga.status == SManga.COMPLETED) {
-                skippedUpdates[libraryManga] = getString(R.string.skipped_reason_completed)
-                return@filter false
-            }
-            if (skipBasedOnTracking) {
-                val tracks = db.getTracks(libraryManga).executeAsBlocking()
-                val foundNonReadingEntry = tracks.any { track ->
-                    val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
-                    return@any status != null && status != getString(R.string.follows_reading) && status != getString(R.string.follows_re_reading) && status != getString(R.string.follows_unfollowed)
+            when {
+                MANGA_HAS_UNREAD in restrictions && libraryManga.unread != 0 -> {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_has_unread)
+                    false
                 }
-                if (foundNonReadingEntry) {
-                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_track_status)
+
+                MANGA_NOT_STARTED in restrictions && libraryManga.totalChapters > 0 && !libraryManga.hasStarted -> {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_not_started)
+                    false
+                }
+
+                MANGA_NOT_COMPLETED in restrictions && libraryManga.status == SManga.COMPLETED -> {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_completed)
+                    false
+                }
+
+                MANGA_TRACKING_UNFOLLOWED in restrictions && hasTrackWithGivenStatus(libraryManga, getString(R.string.follows_unfollowed)) -> {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_tracking_unfollowed)
                     return@filter false
                 }
+
+                MANGA_TRACKING_PLAN_TO_READ in restrictions && hasTrackWithGivenStatus(libraryManga, getString(R.string.follows_plan_to_read)) -> {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_tracking_plan_to_read)
+                    return@filter false
+                }
+
+                MANGA_TRACKING_DROPPED in restrictions && hasTrackWithGivenStatus(libraryManga, getString(R.string.follows_dropped)) -> {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_tracking_dropped)
+                    return@filter false
+                }
+
+                MANGA_TRACKING_ON_HOLD in restrictions && hasTrackWithGivenStatus(libraryManga, getString(R.string.follows_on_hold)) -> {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_tracking_on_hold)
+                    return@filter false
+                }
+
+                MANGA_TRACKING_COMPLETED in restrictions && hasTrackWithGivenStatus(libraryManga, getString(R.string.follows_completed)) -> {
+                    skippedUpdates[libraryManga] = getString(R.string.skipped_reason_tracking_completed)
+                    return@filter false
+                }
+
+                else -> true
             }
-            return@filter true
         }
 
 

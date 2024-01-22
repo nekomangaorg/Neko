@@ -234,8 +234,14 @@
     </plurals>
     <string name="notification_update_error">%1$d update(s) failed</string>
     <string name="notification_update_skipped">%1$d update(s) skipped</string>
+    <string name="skipped_reason_has_unread">Skipped because series has unread chapters</string>
+    <string name="skipped_reason_not_started">Skipped because series is not started</string>
     <string name="skipped_reason_completed">Skipped because series is complete</string>
-    <string name="skipped_reason_track_status">Skipped because at least one tracker was not in a reading status</string>
+    <string name="skipped_reason_tracking_unfollowed">Skipped because at least one tracker has status of "Unfollowed"</string>
+    <string name="skipped_reason_tracking_plan_to_read">Skipped because at least one tracker has status of "Plan to read"</string>
+    <string name="skipped_reason_tracking_dropped">Skipped because at least one tracker has status of "Dropped"</string>
+    <string name="skipped_reason_tracking_on_hold">Skipped because at least one tracker has status of "On hold"</string>
+    <string name="skipped_reason_tracking_completed">Skipped because at least one tracker has status of "Completed"</string>
 
     <plurals name="notification_update_failed">
         <item quantity="one">1 update failed</item>
@@ -249,11 +255,20 @@
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
     <string name="library_update_order">Library update order</string>
-    <string name="library_update_restriction">Library update restrictions</string>
-    <string name="library_update_restriction_summary">Update only when the conditions are met</string>
+    <string name="library_update_device_restriction">Library device update restrictions</string>
+    <string name="library_update__device_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
-    <string name="only_update_ongoing">Only update ongoing manga</string>
-    <string name="only_update_based_on_tracking">Only update manga with tracking status\'s of Reading, Re Reading, Unfollowed</string>
+    <string name="smart_library_update_restrictions">Smart library update restrictions</string>
+    <string name="smart_library_has_unread">Skip manga with unread chapter(s)</string>
+    <string name="smart_library_has_not_started">Skip unstarted manga</string>
+    <string name="smart_library_status_is_completed">Skip manga with "Completed" status</string>
+    <string name="smart_library_tracking_is_unfollowed">Skip manga with tracking status "Unfollowed"</string>
+    <string name="smart_library_tracking_is_on_hold">Skip manga with tracking status "On hold"</string>
+    <string name="smart_library_tracking_is_completed">Skip manga with tracking status "Completed"</string>
+    <string name="smart_library_tracking_is_dropped">Skip manga with tracking status "Dropped"</string>
+    <string name="smart_library_tracking_is_plan_to_read">Skip manga with tracking status "Plan to read"</string>
+
+
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring

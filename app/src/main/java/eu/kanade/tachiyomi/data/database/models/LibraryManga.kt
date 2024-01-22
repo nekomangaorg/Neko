@@ -12,7 +12,7 @@ class LibraryManga : MangaImpl() {
     val totalChapters
         get() = read + unread
 
-    val hasRead
+    val hasStarted
         get() = read > 0
 
     companion object {

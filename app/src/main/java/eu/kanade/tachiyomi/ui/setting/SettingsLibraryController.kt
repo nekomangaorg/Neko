@@ -15,10 +15,18 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.nekomanga.core.preferences.DEVICE_BATTERY_NOT_LOW
-import org.nekomanga.core.preferences.DEVICE_CHARGING
-import org.nekomanga.core.preferences.DEVICE_ONLY_ON_WIFI
 import org.nekomanga.domain.library.LibraryPreferences
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
+import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_STARTED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_COMPLETED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
+import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_UNFOLLOWED
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -140,8 +148,8 @@ class SettingsLibraryController : SettingsController() {
                 }
             }
             multiSelectListPreferenceMat(activity) {
-                key = libraryPreferences.updateRestrictions().key()
-                titleRes = R.string.library_update_restriction
+                key = libraryPreferences.autoUpdateDeviceRestrictions().key()
+                titleRes = R.string.library_update_device_restriction
                 entriesRes = arrayOf(R.string.wifi, R.string.charging, R.string.battery_not_low)
                 entryValues = listOf(DEVICE_ONLY_ON_WIFI, DEVICE_CHARGING, DEVICE_BATTERY_NOT_LOW)
                 preSummaryRes = R.string.restrictions_
@@ -157,17 +165,48 @@ class SettingsLibraryController : SettingsController() {
                     true
                 }
             }
-            switchPreference {
-                key = libraryPreferences.updateOnlyNonCompleted().key()
-                titleRes = R.string.only_update_ongoing
-                defaultValue = false
+
+            multiSelectListPreferenceMat(activity) {
+                key = libraryPreferences.autoUpdateMangaRestrictions().key()
+                titleRes = R.string.smart_library_update_restrictions
+                entriesRes = arrayOf(
+                    R.string.smart_library_has_unread,
+                    R.string.smart_library_has_not_started,
+                    R.string.smart_library_status_is_completed,
+                    R.string.smart_library_tracking_is_unfollowed,
+                    R.string.smart_library_tracking_is_plan_to_read,
+                    R.string.smart_library_tracking_is_dropped,
+                    R.string.smart_library_tracking_is_on_hold,
+                    R.string.smart_library_tracking_is_completed,
+                )
+                entryValues = listOf(
+                    MANGA_HAS_UNREAD,
+                    MANGA_NOT_STARTED,
+                    MANGA_NOT_COMPLETED,
+                    MANGA_TRACKING_UNFOLLOWED,
+                    MANGA_TRACKING_PLAN_TO_READ,
+                    MANGA_TRACKING_DROPPED,
+                    MANGA_TRACKING_ON_HOLD,
+                    MANGA_TRACKING_COMPLETED,
+                )
+
+                defValue = setOf(
+                    MANGA_HAS_UNREAD,
+                    MANGA_NOT_STARTED,
+                    MANGA_NOT_COMPLETED,
+                    MANGA_TRACKING_UNFOLLOWED,
+                    MANGA_TRACKING_PLAN_TO_READ,
+                    MANGA_TRACKING_DROPPED,
+                    MANGA_TRACKING_ON_HOLD,
+                    MANGA_TRACKING_COMPLETED,
+                )
+
+                preSummaryRes = R.string.restrictions_
+                noSelectionRes = R.string.none
+
             }
 
-            switchPreference {
-                key = libraryPreferences.updateOnlyWhenTrackingIsNotFinished().key()
-                titleRes = R.string.only_update_based_on_tracking
-                defaultValue = false
-            }
+
 
             switchPreference {
                 key = libraryPreferences.updateFaster().key()

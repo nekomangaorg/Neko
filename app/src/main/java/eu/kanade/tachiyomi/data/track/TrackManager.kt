@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.track
 
 import android.content.Context
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.data.track.kitsu.Kitsu
@@ -11,7 +12,7 @@ import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import org.nekomanga.domain.track.TrackServiceItem
 
-class TrackManager(context: Context) {
+class TrackManager(private val context: Context) {
 
     companion object {
         const val MDLIST = 0
@@ -48,6 +49,19 @@ class TrackManager(context: Context) {
             ANILIST -> manga.anilist_id
             KITSU -> manga.kitsu_id
             MANGA_UPDATES -> getMangaUpdatesApiId(manga)
+            else -> null
+        }
+    }
+
+    fun getGlobalStatusResId(globalStatus: String): Int? {
+        return when {
+            globalStatus == context.getString(R.string.follows_unfollowed) -> R.string.follows_unfollowed
+            globalStatus == context.getString(R.string.follows_reading) -> R.string.follows_reading
+            globalStatus == context.getString(R.string.follows_completed) -> R.string.follows_completed
+            globalStatus == context.getString(R.string.follows_on_hold) -> R.string.follows_on_hold
+            globalStatus == context.getString(R.string.follows_plan_to_read) -> R.string.follows_plan_to_read
+            globalStatus == context.getString(R.string.follows_dropped) -> R.string.follows_dropped
+            globalStatus == context.getString(R.string.follows_re_reading) -> R.string.follows_re_reading
             else -> null
         }
     }

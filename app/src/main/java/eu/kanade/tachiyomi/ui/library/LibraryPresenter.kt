@@ -394,8 +394,8 @@ class LibraryPresenter(
         if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return false
 
         // Filter for unread chapters
-        if (filterUnread == 3 && !(item.manga.unread > 0 && !item.manga.hasRead)) return false
-        if (filterUnread == 4 && !(item.manga.unread > 0 && item.manga.hasRead)) return false
+        if (filterUnread == 3 && !(item.manga.unread > 0 && !item.manga.hasStarted)) return false
+        if (filterUnread == 4 && !(item.manga.unread > 0 && item.manga.hasStarted)) return false
 
         if (filterBookmarked == STATE_INCLUDE && item.manga.bookmarkCount == 0) return false
         if (filterBookmarked == STATE_EXCLUDE && item.manga.bookmarkCount > 0) return false
