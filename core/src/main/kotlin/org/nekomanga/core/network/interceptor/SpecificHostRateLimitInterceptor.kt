@@ -13,12 +13,14 @@ import okhttp3.Response
  *
  * Examples:
  *
- * httpUrl = "api.manga.com".toHttpUrlOrNull(), permits = 5, period = 1, unit = seconds  =>  5 requests per second to api.manga.com
- * httpUrl = "imagecdn.manga.com".toHttpUrlOrNull(), permits = 10, period = 2, unit = minutes  =>  10 requests per 2 minutes to imagecdn.manga.com
+ * httpUrl = "api.manga.com".toHttpUrlOrNull(), permits = 5, period = 1, unit = seconds => 5
+ * requests per second to api.manga.com httpUrl = "imagecdn.manga.com".toHttpUrlOrNull(), permits =
+ * 10, period = 2, unit = minutes => 10 requests per 2 minutes to imagecdn.manga.com
  *
- * @param httpUrl {HttpUrl} The url host that this interceptor should handle. Will get url's host by using HttpUrl.host()
- * @param permits {Int}   Number of requests allowed within a period of units.
- * @param period {Long}   The limiting duration. Defaults to 1.
+ * @param httpUrl {HttpUrl} The url host that this interceptor should handle. Will get url's host by
+ *   using HttpUrl.host()
+ * @param permits {Int} Number of requests allowed within a period of units.
+ * @param period {Long} The limiting duration. Defaults to 1.
  * @param unit {TimeUnit} The unit of time for the period. Defaults to seconds.
  */
 fun OkHttpClient.Builder.rateLimitHost(
@@ -49,18 +51,19 @@ class SpecificHostRateLimitInterceptor(
 
         synchronized(requestQueue) {
             val now = SystemClock.elapsedRealtime()
-            val waitTime = if (requestQueue.size < permits) {
-                0
-            } else {
-                val oldestReq = requestQueue[0]
-                val newestReq = requestQueue[permits - 1]
-
-                if (newestReq - oldestReq > rateLimitMillis) {
+            val waitTime =
+                if (requestQueue.size < permits) {
                     0
                 } else {
-                    oldestReq + rateLimitMillis - now // Remaining time
+                    val oldestReq = requestQueue[0]
+                    val newestReq = requestQueue[permits - 1]
+
+                    if (newestReq - oldestReq > rateLimitMillis) {
+                        0
+                    } else {
+                        oldestReq + rateLimitMillis - now // Remaining time
+                    }
                 }
-            }
 
             // Final check
             if (chain.call().isCanceled()) {

@@ -13,5 +13,5 @@ fun CoroutineScope.launchDelayed(timeMillis: Long = 150L, block: () -> Unit) {
     }
 }
 
-suspend fun <T> withDefContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.Default, block)
-
+suspend fun <T> withDefContext(block: suspend CoroutineScope.() -> T) =
+    withContext(Dispatchers.Default, block)

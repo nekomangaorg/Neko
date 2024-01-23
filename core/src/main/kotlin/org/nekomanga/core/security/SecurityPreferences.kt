@@ -16,7 +16,8 @@ class SecurityPreferences(private val preferenceStore: PreferenceStore) {
 
     fun lastUnlock() = this.preferenceStore.getLong("last_unlock")
 
-    fun secureScreen() = this.preferenceStore.getEnum("secure_screen_v2", SecureScreenMode.INCOGNITO)
+    fun secureScreen() =
+        this.preferenceStore.getEnum("secure_screen_v2", SecureScreenMode.INCOGNITO)
 
     enum class SecureScreenMode(val titleResId: Int) {
         ALWAYS(R.string.always),

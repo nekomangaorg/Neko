@@ -7,13 +7,16 @@ import okhttp3.Response
 
 class HeadersInterceptor(private val referer: String) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request().newBuilder()
-            .removeHeader(HttpHeaders.USER_AGENT)
-            .header(HttpHeaders.USER_AGENT, "Neko " + System.getProperty("http.agent"))
-            .header(HttpHeaders.REFERER, referer)
-            .header(HttpHeaders.CONTENT_TYPE, "application/json")
-            .header("x-request-id", "Neko-" + UUID.randomUUID())
-            .build()
+        val request =
+            chain
+                .request()
+                .newBuilder()
+                .removeHeader(HttpHeaders.USER_AGENT)
+                .header(HttpHeaders.USER_AGENT, "Neko " + System.getProperty("http.agent"))
+                .header(HttpHeaders.REFERER, referer)
+                .header(HttpHeaders.CONTENT_TYPE, "application/json")
+                .header("x-request-id", "Neko-" + UUID.randomUUID())
+                .build()
 
         return chain.proceed(request)
     }

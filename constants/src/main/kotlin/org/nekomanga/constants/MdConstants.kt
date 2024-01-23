@@ -39,7 +39,8 @@ object MdConstants {
     }
 
     object Login {
-        val redirectUri = if (BuildConfig.DEBUG) "neko://mangadex-auth-debug" else "neko://mangadex-auth"
+        val redirectUri =
+            if (BuildConfig.DEBUG) "neko://mangadex-auth-debug" else "neko://mangadex-auth"
         const val clientId = "neko"
         const val authorizationCode = "authorization_code"
         const val refreshToken = "refresh_token"
@@ -52,13 +53,17 @@ object MdConstants {
             val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
             val codeChallenge = Base64.encodeToString(digest, encoding)
 
-            return Api.baseAuthUrl + Api.login.toUri().buildUpon()
-                .appendQueryParameter("client_id", clientId)
-                .appendQueryParameter("response_type", "code")
-                .appendQueryParameter("redirect_uri", redirectUri)
-                .appendQueryParameter("code_challenge", codeChallenge)
-                .appendQueryParameter("code_challenge_method", "S256")
-                .build().toString()
+            return Api.baseAuthUrl +
+                Api.login
+                    .toUri()
+                    .buildUpon()
+                    .appendQueryParameter("client_id", clientId)
+                    .appendQueryParameter("response_type", "code")
+                    .appendQueryParameter("redirect_uri", redirectUri)
+                    .appendQueryParameter("code_challenge", codeChallenge)
+                    .appendQueryParameter("code_challenge_method", "S256")
+                    .build()
+                    .toString()
         }
     }
 
@@ -135,7 +140,9 @@ object MdConstants {
         const val authorOrArtist = "authorOrArtist"
         const val group = "group"
         const val includedTagsParam = "includedTags[]"
+
         fun sortParam(sort: String) = "order[$sort]"
+
         const val excludedTagsParam = "excludedTags[]"
         const val includedTagModeParam = "includedTagsMode"
         const val excludedTagModeParam = "excludedTagsMode"
