@@ -87,8 +87,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":constants"))
-    implementation(project(":core"))
+    implementation(projects.constants)
+    implementation(projects.core)
 
     implementation(androidx.core.kts)
     implementation(kotlinx.bundles.kotlin)

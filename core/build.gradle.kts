@@ -10,7 +10,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":constants"))
+    implementation(projects.constants)
     implementation(androidx.preferencektx)
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.serialization.json)
