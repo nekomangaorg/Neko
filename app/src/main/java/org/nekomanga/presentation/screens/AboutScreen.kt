@@ -170,9 +170,9 @@ fun AboutScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(Size.medium),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Center,
                 ) {
-                    val modifier = Modifier.size(24.dp)
+                    val modifier = Modifier.size(Size.extraLarge)
                     LinkIcon(
                         label = "GitHub",
                         icon = SimpleIcons.Github,
@@ -193,7 +193,7 @@ private fun LogoHeader() {
                 .padding(top = 30.dp),
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_neko_notification),
+                painter = painterResource(id = R.drawable.ic_neko_yokai),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(200.dp),
                 contentDescription = null,

@@ -1,5 +1,5 @@
 <div align="center">
-<a href="https://github.com/nekomangaorg/Neko"><img src="./.github/readme-images/logo.png" alt="Neko" width="200"></a>
+<a href="https://github.com/nekomangaorg/Neko"><img src="./.github/assets/logo.png" alt="Neko" width="200"></a>
 
 # Neko
 
