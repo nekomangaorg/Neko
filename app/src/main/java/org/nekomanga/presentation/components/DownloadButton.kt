@@ -45,7 +45,12 @@ private const val iconSize = 20
 private const val borderSize = 2.5
 
 @Composable
-fun DownloadButton(buttonColor: Color, downloadState: Download.State, downloadProgress: Float, modifier: Modifier = Modifier) {
+fun DownloadButton(
+    buttonColor: Color,
+    downloadState: Download.State,
+    downloadProgress: Float,
+    modifier: Modifier = Modifier
+) {
     var downloadComplete by remember { mutableStateOf(false) }
     var wasDownloading by remember { mutableStateOf(false) }
 
@@ -62,7 +67,6 @@ fun DownloadButton(buttonColor: Color, downloadState: Download.State, downloadPr
                     wasDownloading = false
                 }
             }
-
             else -> Unit
         }
     }
@@ -79,8 +83,15 @@ fun DownloadButton(buttonColor: Color, downloadState: Download.State, downloadPr
 
 @Composable
 private fun NotDownloaded(buttonColor: Color, modifier: Modifier) {
-    Background(color = Color.Transparent, borderStroke = BorderStroke(borderSize.dp, buttonColor), modifier = modifier) {
-        DownloadIcon(color = buttonColor, icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward))
+    Background(
+        color = Color.Transparent,
+        borderStroke = BorderStroke(borderSize.dp, buttonColor),
+        modifier = modifier
+    ) {
+        DownloadIcon(
+            color = buttonColor,
+            icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
+        )
     }
 }
 
@@ -88,15 +99,18 @@ private fun NotDownloaded(buttonColor: Color, modifier: Modifier) {
 private fun Downloaded(buttonColor: Color, downloadComplete: Boolean, modifier: Modifier) {
     val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
 
-    val animatedPainter = rememberAnimatedVectorPainter(
-        animatedImageVector = AnimatedImageVector.animatedVectorResource(R.drawable.anim_dl_to_check_to_dl),
-        atEnd = !downloadComplete,
-    )
+    val animatedPainter =
+        rememberAnimatedVectorPainter(
+            animatedImageVector =
+                AnimatedImageVector.animatedVectorResource(R.drawable.anim_dl_to_check_to_dl),
+            atEnd = !downloadComplete,
+        )
 
-    val painter = when (downloadComplete) {
-        true -> animatedPainter
-        false -> iconPainter
-    }
+    val painter =
+        when (downloadComplete) {
+            true -> animatedPainter
+            false -> iconPainter
+        }
 
     Background(color = buttonColor, modifier = modifier) {
         DownloadIcon(color = MaterialTheme.colorScheme.surface, icon = painter)
@@ -105,57 +119,81 @@ private fun Downloaded(buttonColor: Color, downloadComplete: Boolean, modifier: 
 
 @Composable
 private fun Queued(modifier: Modifier) {
-    val disabledColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
+    val disabledColor =
+        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
     val infinitePulse = rememberInfiniteTransition()
     val (initialState, finalState) = 0f to NekoColors.disabledAlphaLowContrast
 
-    val alpha = infinitePulse.animateFloat(
-        initialValue = initialState,
-        targetValue = finalState,
-        animationSpec = infiniteRepeatable(tween(1000, easing = EaseInOutCirc), repeatMode = RepeatMode.Reverse),
-    )
+    val alpha =
+        infinitePulse.animateFloat(
+            initialValue = initialState,
+            targetValue = finalState,
+            animationSpec =
+                infiniteRepeatable(
+                    tween(1000, easing = EaseInOutCirc),
+                    repeatMode = RepeatMode.Reverse
+                ),
+        )
 
     Background(color = Color.Transparent, modifier = modifier) {
         CircularProgressIndicator(
-            modifier = Modifier
-                .size(size.dp),
+            modifier = Modifier.size(size.dp),
             color = disabledColor,
             strokeWidth = borderSize.dp,
         )
-        DownloadIcon(color = disabledColor, icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward), alpha = alpha.value)
+        DownloadIcon(
+            color = disabledColor,
+            icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward),
+            alpha = alpha.value
+        )
     }
 }
 
 @Composable
 private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress: Float) {
-    val (bgColor, iconColor, progressColor) = when {
-        downloadProgress >= 1f -> Triple(buttonColor, MaterialTheme.colorScheme.surface, Color.Transparent)
-        else -> Triple(Color.Transparent, MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast), buttonColor)
-    }
+    val (bgColor, iconColor, progressColor) =
+        when {
+            downloadProgress >= 1f ->
+                Triple(buttonColor, MaterialTheme.colorScheme.surface, Color.Transparent)
+            else ->
+                Triple(
+                    Color.Transparent,
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = NekoColors.disabledAlphaHighContrast
+                    ),
+                    buttonColor
+                )
+        }
 
     val backgroundColor by animateColorAsState(targetValue = bgColor)
 
-    val animatedProgress = animateFloatAsState(
-        targetValue = downloadProgress,
-        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-    ).value
+    val animatedProgress =
+        animateFloatAsState(
+                targetValue = downloadProgress,
+                animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+            )
+            .value
 
     val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
 
     val infinitePulse = rememberInfiniteTransition()
     val (initialState, finalState) = 0f to NekoColors.disabledAlphaLowContrast
 
-    val alpha = infinitePulse.animateFloat(
-        initialValue = initialState,
-        targetValue = finalState,
-        animationSpec = infiniteRepeatable(tween(1000, easing = EaseInOutCirc), repeatMode = RepeatMode.Reverse),
-    )
+    val alpha =
+        infinitePulse.animateFloat(
+            initialValue = initialState,
+            targetValue = finalState,
+            animationSpec =
+                infiniteRepeatable(
+                    tween(1000, easing = EaseInOutCirc),
+                    repeatMode = RepeatMode.Reverse
+                ),
+        )
 
     Background(color = backgroundColor, modifier = modifier) {
         CircularProgressIndicator(
             progress = animatedProgress,
-            modifier = Modifier
-                .size(size.dp),
+            modifier = Modifier.size(size.dp),
             color = progressColor,
             strokeWidth = borderSize.dp,
         )
@@ -168,24 +206,24 @@ private fun DownloadIcon(color: Color, icon: Painter, alpha: Float = 1f) {
     Icon(
         painter = icon,
         contentDescription = null,
-        modifier = Modifier
-            .requiredSize(iconSize.dp),
+        modifier = Modifier.requiredSize(iconSize.dp),
         tint = color.copy(alpha = alpha),
     )
 }
 
 @Composable
-private fun Background(color: Color, borderStroke: BorderStroke? = null, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun Background(
+    color: Color,
+    borderStroke: BorderStroke? = null,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
     Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .size(Size.huge)
-            .then(modifier),
+        modifier = Modifier.clip(CircleShape).size(Size.huge).then(modifier),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            modifier = Modifier
-                .size(size.dp),
+            modifier = Modifier.size(size.dp),
             shape = CircleShape,
             border = borderStroke,
             color = color,

@@ -26,53 +26,35 @@ import org.nekomanga.logging.TimberKt
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
-/**
- * Implementation of a [BaseViewer] to display pages with a [RecyclerView].
- */
+/** Implementation of a [BaseViewer] to display pages with a [RecyclerView]. */
 class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = false) : BaseViewer {
 
     val downloadManager: DownloadManager by injectLazy()
 
     private val scope = MainScope()
 
-    /**
-     * Recycler view used by this viewer.
-     */
+    /** Recycler view used by this viewer. */
     val recycler = WebtoonRecyclerView(activity)
 
-    /**
-     * Frame containing the recycler view.
-     */
+    /** Frame containing the recycler view. */
     private val frame = WebtoonFrame(activity)
 
-    /**
-     * Layout manager of the recycler view.
-     */
+    /** Layout manager of the recycler view. */
     private val layoutManager = WebtoonLayoutManager(activity)
 
-    /**
-     * Adapter of the recycler view.
-     */
+    /** Adapter of the recycler view. */
     private val adapter = WebtoonAdapter(this)
 
-    /**
-     * Distance to scroll when the user taps on one side of the recycler view.
-     */
+    /** Distance to scroll when the user taps on one side of the recycler view. */
     private var scrollDistance = activity.resources.displayMetrics.heightPixels * 3 / 4
 
-    /**
-     * Currently active item. It can be a chapter page or a chapter transition.
-     */
+    /** Currently active item. It can be a chapter page or a chapter transition. */
     private var currentPage: Any? = null
 
-    /**
-     * Configuration used by this viewer, like allow taps, or crop image borders.
-     */
+    /** Configuration used by this viewer, like allow taps, or crop image borders. */
     val config = WebtoonConfig(scope)
 
-    /**
-     * Subscriptions to keep while this viewer is used.
-     */
+    /** Subscriptions to keep while this viewer is used. */
     val subscriptions = CompositeSubscription()
 
     init {
@@ -108,44 +90,45 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                 }
             },
         )
-        recycler.tapListener = f@{ event ->
-            val pos = PointF(event.rawX / recycler.width, event.rawY / recycler.height)
-            val navigator = config.navigator
-            when (navigator.getAction(pos)) {
-                ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
-                ViewerNavigation.NavigationRegion.NEXT, ViewerNavigation.NavigationRegion.RIGHT -> moveToNext()
-                ViewerNavigation.NavigationRegion.PREV, ViewerNavigation.NavigationRegion.LEFT -> moveToPrevious()
-            }
-        }
-        recycler.longTapListener = f@{ event ->
-            if (activity.menuVisible || config.longTapEnabled) {
-                val child = recycler.findChildViewUnder(event.x, event.y)
-                if (child != null) {
-                    val position = recycler.getChildAdapterPosition(child)
-                    val item = adapter.items.getOrNull(position)
-                    if (item is ReaderPage) {
-                        activity.onPageLongTap(item)
-                        return@f true
-                    }
+        recycler.tapListener =
+            f@{ event ->
+                val pos = PointF(event.rawX / recycler.width, event.rawY / recycler.height)
+                val navigator = config.navigator
+                when (navigator.getAction(pos)) {
+                    ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
+                    ViewerNavigation.NavigationRegion.NEXT,
+                    ViewerNavigation.NavigationRegion.RIGHT -> moveToNext()
+                    ViewerNavigation.NavigationRegion.PREV,
+                    ViewerNavigation.NavigationRegion.LEFT -> moveToPrevious()
                 }
             }
-            false
-        }
+        recycler.longTapListener =
+            f@{ event ->
+                if (activity.menuVisible || config.longTapEnabled) {
+                    val child = recycler.findChildViewUnder(event.x, event.y)
+                    if (child != null) {
+                        val position = recycler.getChildAdapterPosition(child)
+                        val item = adapter.items.getOrNull(position)
+                        if (item is ReaderPage) {
+                            activity.onPageLongTap(item)
+                            return@f true
+                        }
+                    }
+                }
+                false
+            }
 
-        config.imagePropertyChangedListener = {
-            refreshAdapter()
-        }
+        config.imagePropertyChangedListener = { refreshAdapter() }
 
-        config.zoomPropertyChangedListener = {
-            frame.enableZoomOut = it
-        }
+        config.zoomPropertyChangedListener = { frame.enableZoomOut = it }
 
         config.navigationModeChangedListener = {
             val showOnStart = config.navigationOverlayForNewUser
             activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
         }
-        config.navigationModeInvertedListener =
-            { activity.binding.navigationOverlay.showNavigationAgain() }
+        config.navigationModeInvertedListener = {
+            activity.binding.navigationOverlay.showNavigationAgain()
+        }
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)
@@ -172,16 +155,12 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         }
     }
 
-    /**
-     * Returns the view this viewer uses.
-     */
+    /** Returns the view this viewer uses. */
     override fun getView(): View {
         return frame
     }
 
-    /**
-     * Destroys this viewer. Called when leaving the reader or swapping viewers.
-     */
+    /** Destroys this viewer. Called when leaving the reader or swapping viewers. */
     override fun destroy() {
         super.destroy()
         scope.cancel()
@@ -200,12 +179,16 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         // Preload next chapter once we're within the last 5 pages of the current chapter
         val inPreloadRange = pages.size - page.number < 5
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
-            TimberKt.d { "Request preload next chapter because we're at page ${page.number} of ${pages.size}" }
+            TimberKt.d {
+                "Request preload next chapter because we're at page ${page.number} of ${pages.size}"
+            }
             val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
             val transitionChapter =
                 (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
             if (transitionChapter != null) {
-                TimberKt.d { "Requesting to preload chapter ${transitionChapter.chapter.chapter_number}" }
+                TimberKt.d {
+                    "Requesting to preload chapter ${transitionChapter.chapter.chapter_number}"
+                }
                 activity.requestPreloadChapter(transitionChapter)
             }
         }
@@ -224,9 +207,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         }
     }
 
-    /**
-     * Tells this viewer to set the given [chapters] as active.
-     */
+    /** Tells this viewer to set the given [chapters] as active. */
     override fun setChapters(chapters: ViewerChapters) {
         TimberKt.d { "setChapters" }
         val forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
@@ -240,9 +221,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         }
     }
 
-    /**
-     * Tells this viewer to move to the given [page].
-     */
+    /** Tells this viewer to move to the given [page]. */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
         TimberKt.d { "moveToPage" }
         val position = adapter.items.indexOf(page)
@@ -269,9 +248,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         }
     }
 
-    /**
-     * Scrolls up by [scrollDistance].
-     */
+    /** Scrolls up by [scrollDistance]. */
     override fun moveToPrevious() {
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, -scrollDistance)
@@ -280,9 +257,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         }
     }
 
-    /**
-     * Scrolls down by [scrollDistance].
-     */
+    /** Scrolls down by [scrollDistance]. */
     override fun moveToNext() {
         if (config.usePageTransitions) {
             recycler.smoothScrollBy(0, scrollDistance)
@@ -292,8 +267,8 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
     }
 
     /**
-     * Called from the containing activity when a key [event] is received. It should return true
-     * if the event was handled, false otherwise.
+     * Called from the containing activity when a key [event] is received. It should return true if
+     * the event was handled, false otherwise.
      */
     override fun handleKeyEvent(event: KeyEvent): Boolean {
         val isUp = event.action == KeyEvent.ACTION_UP
@@ -306,7 +281,6 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                     if (!config.volumeKeysInverted) moveToNext() else moveToPrevious()
                 }
             }
-
             KeyEvent.KEYCODE_VOLUME_UP -> {
                 if (!config.volumeKeysEnabled || activity.menuVisible) {
                     return false
@@ -314,19 +288,13 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                     if (!config.volumeKeysInverted) moveToPrevious() else moveToNext()
                 }
             }
-
             KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
-
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_PAGE_UP,
-            -> if (isUp) moveToPrevious()
-
+            KeyEvent.KEYCODE_PAGE_UP, -> if (isUp) moveToPrevious()
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_PAGE_DOWN,
-            -> if (isUp) moveToNext()
-
+            KeyEvent.KEYCODE_PAGE_DOWN, -> if (isUp) moveToNext()
             else -> return false
         }
         return true

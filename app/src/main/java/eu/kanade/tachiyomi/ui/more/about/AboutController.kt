@@ -39,9 +39,7 @@ class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPrese
         )
     }
 
-    /**
-     * Copy the Device and App info to clipboard
-     */
+    /** Copy the Device and App info to clipboard */
     private fun copyVersionInfo(context: Context) {
         val deviceInfo = CrashLogUtil(context).getDebugInfo()
         val clipboard = context.getSystemService<ClipboardManager>()!!
@@ -49,9 +47,7 @@ class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPrese
         clipboard.setPrimaryClip(ClipData.newPlainText(appInfo, deviceInfo))
     }
 
-    /**
-     * Start the process to download the update
-     */
+    /** Start the process to download the update */
     private fun downloadApp(url: String) {
         applicationContext ?: return
         AppUpdateService.start(applicationContext!!, url, true)

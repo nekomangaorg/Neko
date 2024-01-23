@@ -10,6 +10,7 @@ class RecentsHistoryView @JvmOverloads constructor(context: Context, attrs: Attr
     BaseRecentsDisplayView<RecentsHistoryViewBinding>(context, attrs) {
 
     override fun inflateBinding() = RecentsHistoryViewBinding.bind(this)
+
     override fun initGeneralPreferences() {
         binding.groupChapters.bindToPreference(preferences.groupChaptersHistory())
     }

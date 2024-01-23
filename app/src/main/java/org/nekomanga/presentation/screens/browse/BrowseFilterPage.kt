@@ -60,8 +60,7 @@ fun BrowseFilterPage(
             Column(Modifier.fillMaxSize()) {
                 Spacer(modifier = Modifier.fillMaxHeight(.92f))
                 LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }

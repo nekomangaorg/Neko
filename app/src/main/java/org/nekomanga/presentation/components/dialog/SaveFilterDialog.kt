@@ -25,17 +25,23 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
-/**
- * Simple Dialog to save a filter
- */
+/** Simple Dialog to save a filter */
 @Composable
-fun SaveFilterDialog(themeColorState: ThemeColorState, currentSavedFilters: List<BrowseFilterImpl>, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun SaveFilterDialog(
+    themeColorState: ThemeColorState,
+    currentSavedFilters: List<BrowseFilterImpl>,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
     val context = LocalContext.current
     var saveFilterText by remember { mutableStateOf("") }
     var saveEnabled by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+    CompositionLocalProvider(
+        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors
+    ) {
         LaunchedEffect(saveFilterText, currentSavedFilters) {
             if (saveFilterText.isEmpty()) {
                 saveEnabled = false
@@ -50,9 +56,7 @@ fun SaveFilterDialog(themeColorState: ThemeColorState, currentSavedFilters: List
         }
 
         AlertDialog(
-            title = {
-                Text(text = stringResource(id = R.string.save_filter))
-            },
+            title = { Text(text = stringResource(id = R.string.save_filter)) },
             text = {
                 Column {
                     OutlinedTextField(
@@ -61,15 +65,21 @@ fun SaveFilterDialog(themeColorState: ThemeColorState, currentSavedFilters: List
                         label = { Text(text = stringResource(id = R.string.name)) },
                         singleLine = true,
                         maxLines = 1,
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            cursorColor = themeColorState.buttonColor,
-                            focusedLabelColor = themeColorState.buttonColor,
-                            focusedBorderColor = themeColorState.buttonColor,
-
+                        colors =
+                            TextFieldDefaults.outlinedTextFieldColors(
+                                cursorColor = themeColorState.buttonColor,
+                                focusedLabelColor = themeColorState.buttonColor,
+                                focusedBorderColor = themeColorState.buttonColor,
                             ),
                     )
                     Gap(Size.extraTiny)
-                    Text(text = errorMessage, style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.error))
+                    Text(
+                        text = errorMessage,
+                        style =
+                            MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.error
+                            )
+                    )
                 }
             },
             onDismissRequest = onDismiss,
@@ -80,13 +90,18 @@ fun SaveFilterDialog(themeColorState: ThemeColorState, currentSavedFilters: List
                         onDismiss()
                     },
                     enabled = saveEnabled,
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = R.string.save))
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                TextButton(
+                    onClick = onDismiss,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },

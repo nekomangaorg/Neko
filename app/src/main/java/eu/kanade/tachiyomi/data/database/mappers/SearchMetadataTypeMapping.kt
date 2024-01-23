@@ -17,49 +17,44 @@ import eu.kanade.tachiyomi.data.database.tables.SearchMetadataTable.COL_MANGA_ID
 import eu.kanade.tachiyomi.data.database.tables.SearchMetadataTable.COL_UPLOADER
 import eu.kanade.tachiyomi.data.database.tables.SearchMetadataTable.TABLE
 
-class SearchMetadataTypeMapping : SQLiteTypeMapping<SearchMetadata>(
-    SearchMetadataPutResolver(),
-    SearchMetadataGetResolver(),
-    SearchMetadataDeleteResolver(),
-)
+class SearchMetadataTypeMapping :
+    SQLiteTypeMapping<SearchMetadata>(
+        SearchMetadataPutResolver(),
+        SearchMetadataGetResolver(),
+        SearchMetadataDeleteResolver(),
+    )
 
 class SearchMetadataPutResolver : DefaultPutResolver<SearchMetadata>() {
 
-    override fun mapToInsertQuery(obj: SearchMetadata) = InsertQuery.builder()
-        .table(TABLE)
-        .build()
+    override fun mapToInsertQuery(obj: SearchMetadata) = InsertQuery.builder().table(TABLE).build()
 
-    override fun mapToUpdateQuery(obj: SearchMetadata) = UpdateQuery.builder()
-        .table(TABLE)
-        .where("$COL_MANGA_ID = ?")
-        .whereArgs(obj.mangaId)
-        .build()
+    override fun mapToUpdateQuery(obj: SearchMetadata) =
+        UpdateQuery.builder().table(TABLE).where("$COL_MANGA_ID = ?").whereArgs(obj.mangaId).build()
 
-    override fun mapToContentValues(obj: SearchMetadata) = ContentValues(5).apply {
-        put(COL_MANGA_ID, obj.mangaId)
-        put(COL_UPLOADER, obj.uploader)
-        put(COL_EXTRA, obj.extra)
-        put(COL_INDEXED_EXTRA, obj.indexedExtra)
-        put(COL_EXTRA_VERSION, obj.extraVersion)
-    }
+    override fun mapToContentValues(obj: SearchMetadata) =
+        ContentValues(5).apply {
+            put(COL_MANGA_ID, obj.mangaId)
+            put(COL_UPLOADER, obj.uploader)
+            put(COL_EXTRA, obj.extra)
+            put(COL_INDEXED_EXTRA, obj.indexedExtra)
+            put(COL_EXTRA_VERSION, obj.extraVersion)
+        }
 }
 
 class SearchMetadataGetResolver : DefaultGetResolver<SearchMetadata>() {
 
-    override fun mapFromCursor(cursor: Cursor): SearchMetadata = SearchMetadata(
-        mangaId = cursor.getLong(cursor.getColumnIndex(COL_MANGA_ID)),
-        uploader = cursor.getString(cursor.getColumnIndex(COL_UPLOADER)),
-        extra = cursor.getString(cursor.getColumnIndex(COL_EXTRA)),
-        indexedExtra = cursor.getString(cursor.getColumnIndex(COL_INDEXED_EXTRA)),
-        extraVersion = cursor.getInt(cursor.getColumnIndex(COL_EXTRA_VERSION)),
-    )
+    override fun mapFromCursor(cursor: Cursor): SearchMetadata =
+        SearchMetadata(
+            mangaId = cursor.getLong(cursor.getColumnIndex(COL_MANGA_ID)),
+            uploader = cursor.getString(cursor.getColumnIndex(COL_UPLOADER)),
+            extra = cursor.getString(cursor.getColumnIndex(COL_EXTRA)),
+            indexedExtra = cursor.getString(cursor.getColumnIndex(COL_INDEXED_EXTRA)),
+            extraVersion = cursor.getInt(cursor.getColumnIndex(COL_EXTRA_VERSION)),
+        )
 }
 
 class SearchMetadataDeleteResolver : DefaultDeleteResolver<SearchMetadata>() {
 
-    override fun mapToDeleteQuery(obj: SearchMetadata) = DeleteQuery.builder()
-        .table(TABLE)
-        .where("$COL_MANGA_ID = ?")
-        .whereArgs(obj.mangaId)
-        .build()
+    override fun mapToDeleteQuery(obj: SearchMetadata) =
+        DeleteQuery.builder().table(TABLE).where("$COL_MANGA_ID = ?").whereArgs(obj.mangaId).build()
 }

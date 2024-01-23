@@ -43,8 +43,10 @@ private suspend fun <T> Observable<T>.awaitOne(): T = suspendCancellableCoroutin
 
                 override fun onError(e: Throwable) {
                     // Rx1 observable throws NoSuchElementException if cancellation happened before
-                    // element emission. To mitigate this we try to atomically resume continuation with exception:
-                    // if resume failed, then we know that continuation successfully cancelled itself
+                    // element emission. To mitigate this we try to atomically resume continuation
+                    // with exception:
+                    // if resume failed, then we know that continuation successfully cancelled
+                    // itself
                     val token = cont.tryResumeWithException(e)
                     if (token != null) {
                         cont.completeResume(token)
@@ -56,7 +58,9 @@ private suspend fun <T> Observable<T>.awaitOne(): T = suspendCancellableCoroutin
 }
 
 internal fun <T> CancellableContinuation<T>.unsubscribeOnCancellation(sub: Subscription) =
-    invokeOnCancellation { sub.unsubscribe() }
+    invokeOnCancellation {
+        sub.unsubscribe()
+    }
 
 fun <T> runAsObservable(
     scope: CoroutineScope = GlobalScope,
@@ -65,21 +69,23 @@ fun <T> runAsObservable(
 ): Observable<T> {
     return Observable.create(
         { emitter ->
-            val job = scope.launchIO {
-                try {
-                    emitter.onNext(block())
-                    emitter.onCompleted()
-                } catch (e: Throwable) {
-                    // Ignore `CancellationException` as error, since it indicates "normal cancellation"
-                    if (e !is CancellationException) {
-                        TimberKt.e(e) { "Error in coroutine bridge" }
-                        emitter.onError(e)
-                    } else {
-                        TimberKt.d { "Coroutine cancelled" }
+            val job =
+                scope.launchIO {
+                    try {
+                        emitter.onNext(block())
                         emitter.onCompleted()
+                    } catch (e: Throwable) {
+                        // Ignore `CancellationException` as error, since it indicates "normal
+                        // cancellation"
+                        if (e !is CancellationException) {
+                            TimberKt.e(e) { "Error in coroutine bridge" }
+                            emitter.onError(e)
+                        } else {
+                            TimberKt.d { "Coroutine cancelled" }
+                            emitter.onCompleted()
+                        }
                     }
                 }
-            }
             emitter.setCancellation { job.cancel() }
         },
         backpressureMode,

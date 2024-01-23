@@ -22,15 +22,19 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
         try {
             if (
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                !context.packageManager.canRequestPackageInstalls()
+                    !context.packageManager.canRequestPackageInstalls()
             ) {
                 return@coroutineScope Result.failure()
             }
             val preferences = Injekt.get<PreferencesHelper>()
-            if (preferences.appShouldAutoUpdate().get() == ONLY_ON_UNMETERED && !context.isConnectedToWifi()) {
+            if (
+                preferences.appShouldAutoUpdate().get() == ONLY_ON_UNMETERED &&
+                    !context.isConnectedToWifi()
+            ) {
                 return@coroutineScope Result.failure()
             }
-            val result = AppUpdateChecker().checkForUpdate(context, true, doExtrasAfterNewUpdate = false)
+            val result =
+                AppUpdateChecker().checkForUpdate(context, true, doExtrasAfterNewUpdate = false)
             if (result is AppUpdateResult.NewUpdate && !AppUpdateService.isRunning()) {
                 AppUpdateNotifier(context).cancel()
                 AppUpdateNotifier.releasePageUrl = result.release.releaseLink
@@ -49,15 +53,17 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
         const val NEVER = 2
 
         fun setupTask(context: Context) {
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresDeviceIdle(true)
-                .build()
+            val constraints =
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresDeviceIdle(true)
+                    .build()
 
-            val request = OneTimeWorkRequestBuilder<AutoAppUpdaterJob>()
-                .addTag(TAG)
-                .setConstraints(constraints)
-                .build()
+            val request =
+                OneTimeWorkRequestBuilder<AutoAppUpdaterJob>()
+                    .addTag(TAG)
+                    .setConstraints(constraints)
+                    .build()
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)

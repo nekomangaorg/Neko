@@ -36,7 +36,14 @@ class TrackManager(private val context: Context) {
 
     val mangaUpdates = MangaUpdates(context, MANGA_UPDATES)
 
-    val services = hashMapOf(mdList.id to mdList, myAnimeList.id to myAnimeList, aniList.id to aniList, kitsu.id to kitsu, mangaUpdates.id to mangaUpdates)
+    val services =
+        hashMapOf(
+            mdList.id to mdList,
+            myAnimeList.id to myAnimeList,
+            aniList.id to aniList,
+            kitsu.id to kitsu,
+            mangaUpdates.id to mangaUpdates
+        )
 
     fun getService(id: Int) = services[id]
 
@@ -55,13 +62,17 @@ class TrackManager(private val context: Context) {
 
     fun getGlobalStatusResId(globalStatus: String): Int? {
         return when {
-            globalStatus == context.getString(R.string.follows_unfollowed) -> R.string.follows_unfollowed
+            globalStatus == context.getString(R.string.follows_unfollowed) ->
+                R.string.follows_unfollowed
             globalStatus == context.getString(R.string.follows_reading) -> R.string.follows_reading
-            globalStatus == context.getString(R.string.follows_completed) -> R.string.follows_completed
+            globalStatus == context.getString(R.string.follows_completed) ->
+                R.string.follows_completed
             globalStatus == context.getString(R.string.follows_on_hold) -> R.string.follows_on_hold
-            globalStatus == context.getString(R.string.follows_plan_to_read) -> R.string.follows_plan_to_read
+            globalStatus == context.getString(R.string.follows_plan_to_read) ->
+                R.string.follows_plan_to_read
             globalStatus == context.getString(R.string.follows_dropped) -> R.string.follows_dropped
-            globalStatus == context.getString(R.string.follows_re_reading) -> R.string.follows_re_reading
+            globalStatus == context.getString(R.string.follows_re_reading) ->
+                R.string.follows_re_reading
             else -> null
         }
     }

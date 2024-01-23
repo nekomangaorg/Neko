@@ -22,9 +22,7 @@ inline fun <reified T> SharedPreferences.getItem(key: String, default: T): T {
     }
 }
 
-/**
- * Binds a checkbox or switch view with a boolean preference.
- */
+/** Binds a checkbox or switch view with a boolean preference. */
 fun CompoundButton.bindToPreference(pref: Preference<Boolean>, block: ((Boolean) -> Unit)? = null) {
     setOnCheckedChangeListener { _, _ -> }
     isChecked = pref.get()
@@ -34,9 +32,7 @@ fun CompoundButton.bindToPreference(pref: Preference<Boolean>, block: ((Boolean)
     }
 }
 
-/**
- * Binds a radio group with a int preference.
- */
+/** Binds a radio group with a int preference. */
 fun RadioGroup.bindToPreference(pref: Preference<Int>, block: (() -> Unit)? = null) {
     (getChildAt(pref.get()) as? RadioButton)?.isChecked = true
     setOnCheckedChangeListener { _, checkedId ->
@@ -46,15 +42,11 @@ fun RadioGroup.bindToPreference(pref: Preference<Int>, block: (() -> Unit)? = nu
     }
 }
 
-/**
- * Binds a spinner to an int preference with an optional offset for the value.
- */
+/** Binds a spinner to an int preference with an optional offset for the value. */
 fun Spinner.bindToPreference(
     pref: Preference<Int>,
     offset: Int = 0,
 ) {
-    onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
-        pref.set(position + offset)
-    }
+    onItemSelectedListener = IgnoreFirstSpinnerListener { position -> pref.set(position + offset) }
     setSelection(pref.get() - offset, false)
 }

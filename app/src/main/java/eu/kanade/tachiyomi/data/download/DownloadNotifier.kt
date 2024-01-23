@@ -27,9 +27,7 @@ internal class DownloadNotifier(private val context: Context) {
 
     private val securityPreferences: SecurityPreferences by injectLazy()
 
-    /**
-     * Notification builder.
-     */
+    /** Notification builder. */
     private val progressNotificationBuilder by lazy {
         context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_PROGRESS) {
             setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
@@ -43,24 +41,16 @@ internal class DownloadNotifier(private val context: Context) {
     }
 
     private val errorNotificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_ERROR) {
-            setAutoCancel(false)
-        }
+        context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_ERROR) { setAutoCancel(false) }
     }
 
-    /**
-     * Status of download. Used for correct notification icon.
-     */
+    /** Status of download. Used for correct notification icon. */
     private var isDownloading = false
 
-    /**
-     * Updated when error is thrown
-     */
+    /** Updated when error is thrown */
     var errorThrown = false
 
-    /**
-     * Updated when paused
-     */
+    /** Updated when paused */
     var paused = false
 
     /**
@@ -81,9 +71,7 @@ internal class DownloadNotifier(private val context: Context) {
         context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
     }
 
-    /**
-     *  This function shows a notification to inform download tasks are done.
-     */
+    /** This function shows a notification to inform download tasks are done. */
     fun downloadFinished() {
         // Create notification
         with(completeNotificationBuilder) {
@@ -128,7 +116,8 @@ internal class DownloadNotifier(private val context: Context) {
             }
 
             val downloadingProgressText =
-                context.getString(R.string.downloading_progress)
+                context
+                    .getString(R.string.downloading_progress)
                     .format(download.downloadedImages, download.pages!!.size)
 
             if (securityPreferences.hideNotificationContent().get()) {
@@ -136,10 +125,11 @@ internal class DownloadNotifier(private val context: Context) {
             } else {
                 val title = download.manga.title.chop(15)
                 val quotedTitle = Pattern.quote(title)
-                val chapter = download.chapter.name.replaceFirst(
-                    "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
-                    "",
-                )
+                val chapter =
+                    download.chapter.name.replaceFirst(
+                        "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
+                        "",
+                    )
                 setContentTitle("$title - $chapter".chop(30))
                 setContentText(downloadingProgressText)
             }
@@ -149,9 +139,7 @@ internal class DownloadNotifier(private val context: Context) {
         }
     }
 
-    /**
-     * Show notification when download is paused.
-     */
+    /** Show notification when download is paused. */
     fun onDownloadPaused() {
         with(progressNotificationBuilder) {
             setContentTitle(context.getString(R.string.paused))
@@ -224,9 +212,10 @@ internal class DownloadNotifier(private val context: Context) {
             )
             setContentText(error ?: context.getString(R.string.could_not_download_unexpected_error))
             setStyle(
-                NotificationCompat.BigTextStyle().bigText(
-                    error ?: context.getString(R.string.could_not_download_unexpected_error),
-                ),
+                NotificationCompat.BigTextStyle()
+                    .bigText(
+                        error ?: context.getString(R.string.could_not_download_unexpected_error),
+                    ),
             )
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setCategory(NotificationCompat.CATEGORY_ERROR)

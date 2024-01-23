@@ -50,9 +50,7 @@ class DownloadCache(
      */
     private val renewInterval = TimeUnit.HOURS.toMillis(1)
 
-    /**
-     * The last time the cache was refreshed.
-     */
+    /** The last time the cache was refreshed. */
     private var lastRenew = 0L
 
     private var mangaFiles: MutableMap<Long, Pair<MutableSet<String>, MutableSet<String>>> =
@@ -61,15 +59,15 @@ class DownloadCache(
     val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     init {
-        preferences.downloadsDirectory().changes()
+        preferences
+            .downloadsDirectory()
+            .changes()
             .drop(1)
             .onEach { lastRenew = 0L } // invalidate cache
             .launchIn(scope)
     }
 
-    /**
-     * Returns the downloads directory from the user's preferences.
-     */
+    /** Returns the downloads directory from the user's preferences. */
     private fun getDirectoryFromPreference(): UniFile {
         val dir = preferences.downloadsDirectory().get()
         return UniFile.fromUri(context, dir.toUri())
@@ -82,7 +80,6 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      * @param skipCache whether to skip the directory cache and check in the filesystem.
      */
-
     fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
         if (skipCache) {
             return provider.findChapterDir(chapter, manga) != null
@@ -93,17 +90,23 @@ class DownloadCache(
         val fileNames = mangaFiles[manga.id]?.first ?: return false
         val mangadexIds = mangaFiles[manga.id]?.second ?: return false
 
-        if (!chapter.isMergedChapter() && chapter.mangadex_chapter_id.isNotEmpty() && chapter.mangadex_chapter_id in mangadexIds) {
+        if (
+            !chapter.isMergedChapter() &&
+                chapter.mangadex_chapter_id.isNotEmpty() &&
+                chapter.mangadex_chapter_id in mangadexIds
+        ) {
             return true
         }
-        if (!chapter.isMergedChapter() && chapter.old_mangadex_id != null && chapter.old_mangadex_id in mangadexIds) {
+        if (
+            !chapter.isMergedChapter() &&
+                chapter.old_mangadex_id != null &&
+                chapter.old_mangadex_id in mangadexIds
+        ) {
             return true
         }
 
         val validChapterDirNames = provider.getValidChapterDirNames(chapter)
-        return validChapterDirNames.any {
-            it in fileNames || "$it.cbz" in fileNames
-        }
+        return validChapterDirNames.any { it in fileNames || "$it.cbz" in fileNames }
     }
 
     /**
@@ -119,7 +122,9 @@ class DownloadCache(
 
             if (mangaDir != null) {
                 val listFiles =
-                    mangaDir.listFiles { dir, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
+                    mangaDir.listFiles { dir, filename ->
+                        !filename.endsWith(Downloader.TMP_DIR_SUFFIX)
+                    }
                 if (!listFiles.isNullOrEmpty()) {
                     return listFiles.size
                 }
@@ -134,9 +139,12 @@ class DownloadCache(
             files.forEach {
                 if (!MergeType.containsMergeSourceName(it)) {
                     val mangadexId = it.substringAfterLast("- ")
-                    if (mangadexId.isNotBlank() && mangadexId.isDigitsOnly() && !ids.contains(
-                            mangadexId,
-                        )
+                    if (
+                        mangadexId.isNotBlank() &&
+                            mangadexId.isDigitsOnly() &&
+                            !ids.contains(
+                                mangadexId,
+                            )
                     ) {
                         count++
                     }
@@ -146,9 +154,7 @@ class DownloadCache(
         }
     }
 
-    /**
-     * Checks if the cache needs a renewal and performs it if needed.
-     */
+    /** Checks if the cache needs a renewal and performs it if needed. */
     @Synchronized
     private fun checkRenew() {
         if (lastRenew + renewInterval < System.currentTimeMillis()) {
@@ -162,16 +168,18 @@ class DownloadCache(
         lastRenew = System.currentTimeMillis()
     }
 
-    /**
-     * Renews the downloads cache.
-     */
+    /** Renews the downloads cache. */
     private fun renew() {
         val onlineSources = listOf(sourceManager.mangaDex)
 
-        val sourceDirs = getDirectoryFromPreference().listFiles().orEmpty()
-            .associate { it.name to SourceDirectory(it) }.mapNotNullKeys { entry ->
-                onlineSources.find { provider.getSourceDirName() == entry.key }?.id
-            }
+        val sourceDirs =
+            getDirectoryFromPreference()
+                .listFiles()
+                .orEmpty()
+                .associate { it.name to SourceDirectory(it) }
+                .mapNotNullKeys { entry ->
+                    onlineSources.find { provider.getSourceDirName() == entry.key }?.id
+                }
 
         val db: DatabaseHelper by injectLazy()
         val mangaGroupedBySource = db.getMangaList().executeAsBlocking().groupBy { it.source }
@@ -183,40 +191,55 @@ class DownloadCache(
 
             val sourceDir = sourceValue.value
 
-            val mangaDirs = sourceDir.dir.listFiles().orEmpty().mapNotNull { mangaDir ->
-                val name = mangaDir.name ?: return@mapNotNull null
-                val chapterDirs = mangaDir.listFiles().orEmpty().mapNotNull { chapterFile -> chapterFile.name?.substringBeforeLast(".cbz") }.toHashSet()
-                name to MangaDirectory(mangaDir, chapterDirs)
-            }.toMap()
+            val mangaDirs =
+                sourceDir.dir
+                    .listFiles()
+                    .orEmpty()
+                    .mapNotNull { mangaDir ->
+                        val name = mangaDir.name ?: return@mapNotNull null
+                        val chapterDirs =
+                            mangaDir
+                                .listFiles()
+                                .orEmpty()
+                                .mapNotNull { chapterFile ->
+                                    chapterFile.name?.substringBeforeLast(".cbz")
+                                }
+                                .toHashSet()
+                        name to MangaDirectory(mangaDir, chapterDirs)
+                    }
+                    .toMap()
 
-            val trueMangaDirs = mangaDirs.mapNotNull { mangaDir ->
-                val manga =
-                    findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key) ?: findManga(
-                        sourceMangaPair.second,
-                        mangaDir.key,
-                        sourceValue.key,
-                    )
-                val id = manga?.id ?: return@mapNotNull null
+            val trueMangaDirs =
+                mangaDirs
+                    .mapNotNull { mangaDir ->
+                        val manga =
+                            findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key)
+                                ?: findManga(
+                                    sourceMangaPair.second,
+                                    mangaDir.key,
+                                    sourceValue.key,
+                                )
+                        val id = manga?.id ?: return@mapNotNull null
 
-                val mangadexIds = mangaDir.value.files.map { it.takeLast(36) }
-                    .filter {
-                        it.isUUID()
-                    }.toMutableSet()
+                        val mangadexIds =
+                            mangaDir.value.files
+                                .map { it.takeLast(36) }
+                                .filter { it.isUUID() }
+                                .toMutableSet()
 
-                id to Pair(mangaDir.value.files, mangadexIds)
-            }.toMap()
+                        id to Pair(mangaDir.value.files, mangadexIds)
+                    }
+                    .toMap()
 
             mangaFiles.putAll(trueMangaDirs)
         }
     }
 
-    /**
-     * Searches a manga list and matches the given mangakey and source key
-     */
+    /** Searches a manga list and matches the given mangakey and source key */
     private fun findManga(mangaList: List<Manga>, mangaKey: String, sourceKey: Long): Manga? {
         return mangaList.find {
-            DiskUtil.buildValidFilename(it.title)
-                .lowercase(Locale.US) == mangaKey.lowercase(Locale.US) && it.source == sourceKey
+            DiskUtil.buildValidFilename(it.title).lowercase(Locale.US) ==
+                mangaKey.lowercase(Locale.US) && it.source == sourceKey
         }
     }
 
@@ -233,10 +256,11 @@ class DownloadCache(
         val files = mangaFiles[id]
         val mangadexId = chapterDirName.substringAfterLast("- ")
 
-        val set = when (MergeType.containsMergeSourceName(chapterDirName)) {
-            true -> mutableSetOf()
-            false -> mutableSetOf(mangadexId)
-        }
+        val set =
+            when (MergeType.containsMergeSourceName(chapterDirName)) {
+                true -> mutableSetOf()
+                false -> mutableSetOf(mangadexId)
+            }
 
         if (files == null) {
             mangaFiles[id] = Pair(mutableSetOf(chapterDirName), set)
@@ -296,34 +320,28 @@ class DownloadCache(
         mangaFiles.remove(manga.id)
     }
 
-    /**
-     * Class to store the files under the root downloads directory.
-     */
+    /** Class to store the files under the root downloads directory. */
     private class RootDirectory(
         val dir: UniFile,
         var files: Map<Long, SourceDirectory> = hashMapOf(),
     )
 
-    /**
-     * Class to store the files under a source directory.
-     */
+    /** Class to store the files under a source directory. */
     private class SourceDirectory(
         val dir: UniFile,
         var files: Map<Long, MutableSet<String>> = hashMapOf(),
     )
 
-    /**
-     * Class to store the files under a manga directory.
-     */
+    /** Class to store the files under a manga directory. */
     private class MangaDirectory(
         val dir: UniFile,
         var files: MutableSet<String> = hashSetOf(),
     )
 
-    /**
-     * Returns a new map containing only the key entries of [transform] that are not null.
-     */
-    private inline fun <K, V, R> Map<out K, V>.mapNotNullKeys(transform: (Map.Entry<K?, V>) -> R?): Map<R, V> {
+    /** Returns a new map containing only the key entries of [transform] that are not null. */
+    private inline fun <K, V, R> Map<out K, V>.mapNotNullKeys(
+        transform: (Map.Entry<K?, V>) -> R?
+    ): Map<R, V> {
         val mutableMap = ConcurrentHashMap<R, V>()
         forEach { element -> transform(element)?.let { mutableMap[it] = element.value } }
         return mutableMap

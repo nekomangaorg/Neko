@@ -28,27 +28,31 @@ fun CheckboxRow(
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     Row(
-        modifier = modifier.clickable {
-            if (!disabled) {
-                checkedChange(!checkedState)
-            }
-        },
+        modifier =
+            modifier.clickable {
+                if (!disabled) {
+                    checkedChange(!checkedState)
+                }
+            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Checkbox(
             checked = checkedState,
             onCheckedChange = checkedChange,
             enabled = !disabled,
-            colors = CheckboxDefaults.colors(
-                checkedColor = themeColorState.buttonColor,
-                checkmarkColor = MaterialTheme.colorScheme.surface,
-            ),
+            colors =
+                CheckboxDefaults.colors(
+                    checkedColor = themeColorState.buttonColor,
+                    checkmarkColor = MaterialTheme.colorScheme.surface,
+                ),
         )
         Gap(Size.tiny)
         Text(
             text = rowText,
             style = rowTextStyle,
-            color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
+            color =
+                if (!disabled) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
         )
     }
 }
@@ -60,7 +64,8 @@ fun FilterChipWrapper(
     name: String,
     modifier: Modifier = Modifier,
     hideIcons: Boolean = false,
-    labelStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+    labelStyle: TextStyle =
+        MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
 ) {
     TriStateFilterChip(
         modifier = modifier,

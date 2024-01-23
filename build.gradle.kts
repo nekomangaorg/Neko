@@ -53,7 +53,10 @@ subprojects {
     }
     plugins.withType<BasePlugin> {
         plugins.apply(libs.plugins.ktfmt.get().pluginId)
-        ktfmt { kotlinLangStyle() }
+        ktfmt {
+            kotlinLangStyle()
+            removeUnusedImports = true
+        }
 
         configure<BaseExtension> {
             compileSdkVersion(AndroidConfig.compileSdkVersion)

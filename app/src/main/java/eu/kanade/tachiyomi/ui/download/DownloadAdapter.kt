@@ -9,23 +9,22 @@ import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
  *
  * @param context the context of the fragment containing this adapter.
  */
-class DownloadAdapter(controller: DownloadItemListener) : FlexibleAdapter<AbstractFlexibleItem<*>>(
-    null,
-    controller,
-    true,
-) {
+class DownloadAdapter(controller: DownloadItemListener) :
+    FlexibleAdapter<AbstractFlexibleItem<*>>(
+        null,
+        controller,
+        true,
+    ) {
 
-    /**
-     * Listener called when an item of the list is released.
-     */
+    /** Listener called when an item of the list is released. */
     val downloadItemListener: DownloadItemListener = controller
 
     interface DownloadItemListener {
-        /**
-         * Called when an item of the list is released.
-         */
+        /** Called when an item of the list is released. */
         fun onItemReleased(position: Int)
+
         fun onItemRemoved(position: Int)
+
         fun onMenuItemClick(position: Int, menuItem: MenuItem)
     }
 

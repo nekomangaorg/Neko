@@ -32,11 +32,12 @@ data class BackupTracking(
     fun getTrackingImpl(): TrackImpl {
         return TrackImpl().apply {
             sync_id = this@BackupTracking.syncId
-            media_id = if (this@BackupTracking.mediaIdInt != 0) {
-                this@BackupTracking.mediaIdInt.toLong()
-            } else {
-                this@BackupTracking.mediaId
-            }
+            media_id =
+                if (this@BackupTracking.mediaIdInt != 0) {
+                    this@BackupTracking.mediaIdInt.toLong()
+                } else {
+                    this@BackupTracking.mediaId
+                }
             library_id = this@BackupTracking.libraryId
             title = this@BackupTracking.title
             // convert from float to int because of 1.x types

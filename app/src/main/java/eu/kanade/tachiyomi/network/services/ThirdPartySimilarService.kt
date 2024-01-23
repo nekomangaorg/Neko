@@ -14,10 +14,14 @@ interface ThirdPartySimilarService {
 
     @Headers("Content-Type: application/json")
     @POST("https://graphql.anilist.co/")
-    suspend fun getAniListGraphql(@Query("query") query: String): ApiResponse<AnilistMangaRecommendationsDto>
+    suspend fun getAniListGraphql(
+        @Query("query") query: String
+    ): ApiResponse<AnilistMangaRecommendationsDto>
 
     @GET("https://api.jikan.moe/v4/manga/{id}/recommendations")
-    suspend fun getSimilarMalManga(@Path("id") mangaId: String): ApiResponse<MalMangaRecommendationsDto>
+    suspend fun getSimilarMalManga(
+        @Path("id") mangaId: String
+    ): ApiResponse<MalMangaRecommendationsDto>
 
     @GET("https://api.mangaupdates.com/v1/series/{id}")
     suspend fun getSimilarMUManga(@Path("id") mangaId: String): ApiResponse<MUMangaDto>

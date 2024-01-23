@@ -39,27 +39,26 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
         private const val TAG = "UpdateChecker"
 
         fun doWorkNow(context: Context) {
-            val request = OneTimeWorkRequestBuilder<AppUpdateJob>()
-                .build()
+            val request = OneTimeWorkRequestBuilder<AppUpdateJob>().build()
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)
         }
 
         fun setupTask(context: Context) {
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
+            val constraints =
+                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
 
-            val request = PeriodicWorkRequestBuilder<AppUpdateJob>(
-                2,
-                TimeUnit.DAYS,
-                3,
-                TimeUnit.HOURS,
-            )
-                .addTag(TAG)
-                .setConstraints(constraints)
-                .build()
+            val request =
+                PeriodicWorkRequestBuilder<AppUpdateJob>(
+                        2,
+                        TimeUnit.DAYS,
+                        3,
+                        TimeUnit.HOURS,
+                    )
+                    .addTag(TAG)
+                    .setConstraints(constraints)
+                    .build()
 
             WorkManager.getInstance(context)
                 .enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)

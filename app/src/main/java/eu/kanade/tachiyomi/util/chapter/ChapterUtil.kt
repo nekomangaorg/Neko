@@ -47,11 +47,12 @@ class ChapterUtil {
         private fun setBookmark(textView: TextView, chapter: Chapter) {
             if (chapter.bookmark) {
                 val context = textView.context
-                val drawable = VectorDrawableCompat.create(
-                    textView.resources,
-                    R.drawable.ic_bookmark_24dp,
-                    context.theme,
-                )
+                val drawable =
+                    VectorDrawableCompat.create(
+                        textView.resources,
+                        R.drawable.ic_bookmark_24dp,
+                        context.theme,
+                    )
                 drawable?.setBounds(0, 0, textView.textSize.toInt(), textView.textSize.toInt())
                 textView.setCompoundDrawablesRelative(
                     drawable,

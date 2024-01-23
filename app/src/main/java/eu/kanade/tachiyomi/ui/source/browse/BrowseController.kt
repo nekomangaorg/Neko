@@ -37,15 +37,16 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
             legacySideNav = isSideNav,
             homeScreenTitleClick = ::openDisplayScreen,
             openManga = ::openManga,
-            filterActions = FilterActions(
-                filterClick = presenter::getSearchPage,
-                filterChanged = presenter::filterChanged,
-                resetClick = presenter::resetFilter,
-                saveFilterClick = presenter::saveFilter,
-                deleteFilterClick = presenter::deleteFilter,
-                filterDefaultClick = presenter::markFilterAsDefault,
-                loadFilter = presenter::loadFilter,
-            ),
+            filterActions =
+                FilterActions(
+                    filterClick = presenter::getSearchPage,
+                    filterChanged = presenter::filterChanged,
+                    resetClick = presenter::resetFilter,
+                    saveFilterClick = presenter::saveFilter,
+                    deleteFilterClick = presenter::deleteFilter,
+                    filterDefaultClick = presenter::markFilterAsDefault,
+                    loadFilter = presenter::loadFilter,
+                ),
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
             loadNextPage = presenter::loadNextItems,
@@ -57,7 +58,11 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },
             aboutClick = { (this.activity as? MainActivity)?.showAbout() },
-            helpClick = { (this.activity as? MainActivity)?.openInBrowser("https://tachiyomi.org/docs/guides/troubleshooting/") },
+            helpClick = {
+                (this.activity as? MainActivity)?.openInBrowser(
+                    "https://tachiyomi.org/docs/guides/troubleshooting/"
+                )
+            },
         )
     }
 

@@ -31,16 +31,14 @@ fun InLibraryIcon(offset: Dp, outline: Boolean) {
                 imageVector = Icons.Outlined.Favorite,
                 contentDescription = null,
                 tint = Outline.color,
-                modifier = Modifier
-                    .size(21.5.dp),
+                modifier = Modifier.size(21.5.dp),
             )
         }
         Icon(
             imageVector = Icons.Default.Favorite,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .size(20.dp),
+            modifier = Modifier.size(20.dp),
         )
     }
 }
@@ -48,17 +46,37 @@ fun InLibraryIcon(offset: Dp, outline: Boolean) {
 @Composable
 internal fun InLibraryBadge(outline: Boolean, offset: Dp = (-2).dp) {
     Box(
-        modifier = Modifier
-            .offset(x = offset, y = offset)
-            .clip(RoundedCornerShape(topStartPercent = 50, 25, bottomStartPercent = 25, bottomEndPercent = 50))
-            .background(color = MaterialTheme.colorScheme.secondary)
-            .conditional(outline) {
-                this.border(width = Outline.thickness, color = Outline.color, shape = RoundedCornerShape(topStartPercent = 50, 25, bottomStartPercent = 25, bottomEndPercent = 50))
-            },
+        modifier =
+            Modifier.offset(x = offset, y = offset)
+                .clip(
+                    RoundedCornerShape(
+                        topStartPercent = 50,
+                        25,
+                        bottomStartPercent = 25,
+                        bottomEndPercent = 50
+                    )
+                )
+                .background(color = MaterialTheme.colorScheme.secondary)
+                .conditional(outline) {
+                    this.border(
+                        width = Outline.thickness,
+                        color = Outline.color,
+                        shape =
+                            RoundedCornerShape(
+                                topStartPercent = 50,
+                                25,
+                                bottomStartPercent = 25,
+                                bottomEndPercent = 50
+                            )
+                    )
+                },
     ) {
         AutoSizeText(
             text = stringResource(id = R.string.in_library),
-            style = MaterialTheme.typography.labelLarge.copy(color = MaterialTheme.colorScheme.onSecondary),
+            style =
+                MaterialTheme.typography.labelLarge.copy(
+                    color = MaterialTheme.colorScheme.onSecondary
+                ),
             modifier = Modifier.padding(horizontal = Size.tiny, vertical = Size.extraTiny),
         )
     }

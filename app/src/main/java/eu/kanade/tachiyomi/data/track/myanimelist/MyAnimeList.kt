@@ -20,8 +20,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword().get()) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
-    @StringRes
-    override fun nameRes() = R.string.myanimelist
+    @StringRes override fun nameRes() = R.string.myanimelist
 
     override val supportsReadingDates: Boolean = true
 
@@ -29,27 +28,29 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getLogoColor() = Color.rgb(46, 81, 162)
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.reading)
-            COMPLETED -> getString(R.string.completed)
-            ON_HOLD -> getString(R.string.on_hold)
-            DROPPED -> getString(R.string.dropped)
-            PLAN_TO_READ -> getString(R.string.plan_to_read)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.reading)
+                COMPLETED -> getString(R.string.completed)
+                ON_HOLD -> getString(R.string.on_hold)
+                DROPPED -> getString(R.string.dropped)
+                PLAN_TO_READ -> getString(R.string.plan_to_read)
+                else -> ""
+            }
         }
-    }
 
-    override fun getGlobalStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.follows_reading)
-            PLAN_TO_READ -> getString(R.string.follows_plan_to_read)
-            COMPLETED -> getString(R.string.follows_completed)
-            ON_HOLD -> getString(R.string.follows_on_hold)
-            DROPPED -> getString(R.string.follows_dropped)
-            else -> ""
+    override fun getGlobalStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.follows_reading)
+                PLAN_TO_READ -> getString(R.string.follows_plan_to_read)
+                COMPLETED -> getString(R.string.follows_completed)
+                ON_HOLD -> getString(R.string.follows_on_hold)
+                DROPPED -> getString(R.string.follows_dropped)
+                else -> ""
+            }
         }
-    }
 
     override fun getStatusList(): List<Int> {
         return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
@@ -58,7 +59,9 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
     override fun completedStatus(): Int = COMPLETED
+
     override fun readingStatus() = READING
+
     override fun planningStatus() = PLAN_TO_READ
 
     override fun getScoreList(): List<String> {

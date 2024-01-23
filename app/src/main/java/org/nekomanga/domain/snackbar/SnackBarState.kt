@@ -16,19 +16,25 @@ data class SnackbarState(
     val dismissAction: (() -> Unit)? = null,
 ) {
     fun getFormattedMessage(context: Context): String {
-        val prefix = when (prefixRes == null) {
-            true -> ""
-            false -> context.getString(prefixRes)
-        }
+        val prefix =
+            when (prefixRes == null) {
+                true -> ""
+                false -> context.getString(prefixRes)
+            }
 
-        val message = when {
-            this.message != null && this.messageRes != null && this.fieldRes != null -> context.getString(this.messageRes, context.getString(this.fieldRes)) + this.message
-            this.message != null && this.messageRes != null -> context.getString(this.messageRes, this.message)
-            this.messageRes != null && this.fieldRes != null -> context.getString(this.messageRes, context.getString(this.fieldRes))
-            this.message != null -> this.message
-            this.messageRes != null -> context.getString(this.messageRes)
-            else -> ""
-        }
+        val message =
+            when {
+                this.message != null && this.messageRes != null && this.fieldRes != null ->
+                    context.getString(this.messageRes, context.getString(this.fieldRes)) +
+                        this.message
+                this.message != null && this.messageRes != null ->
+                    context.getString(this.messageRes, this.message)
+                this.messageRes != null && this.fieldRes != null ->
+                    context.getString(this.messageRes, context.getString(this.fieldRes))
+                this.message != null -> this.message
+                this.messageRes != null -> context.getString(this.messageRes)
+                else -> ""
+            }
 
         return prefix + message
     }

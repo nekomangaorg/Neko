@@ -16,13 +16,15 @@ import eu.kanade.tachiyomi.util.system.isLTR
 import kotlin.math.abs
 
 @Suppress("LeakingThis")
-open class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    FastScroller(context, attrs) {
+open class MaterialFastScroll
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) : FastScroller(context, attrs) {
 
     var canScroll = false
     var startY = -1f
     var scrollOffset = 0
     var controller: BaseController<*>? = null
+
     init {
         setViewsToUse(
             R.layout.material_fastscroll,
@@ -39,8 +41,10 @@ open class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs:
 
     // Overriding to force a distance moved before scrolling
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (controller?.isDragging == true ||
-            recyclerView.computeVerticalScrollRange() <= recyclerView.computeVerticalScrollExtent()
+        if (
+            controller?.isDragging == true ||
+                recyclerView.computeVerticalScrollRange() <=
+                    recyclerView.computeVerticalScrollExtent()
         ) {
             return if (startY > -1f || controller?.isDragging == true) {
                 dispatchTouchToRecycler(event)
@@ -91,7 +95,8 @@ open class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs:
                 }
                 return true
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
                 startY = -1f
                 if (!canScroll) {
                     dispatchTouchToRecycler(event)
@@ -102,7 +107,10 @@ open class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs:
         return super.onTouchEvent(event)
     }
 
-    private fun dispatchTouchToRecycler(event: MotionEvent, block: (MotionEvent.() -> Unit)? = null) {
+    private fun dispatchTouchToRecycler(
+        event: MotionEvent,
+        block: (MotionEvent.() -> Unit)? = null
+    ) {
         val ev2 = MotionEvent.obtain(event)
         ev2.offsetLocation(this.x, this.y)
         block?.invoke(ev2)
@@ -137,20 +145,26 @@ open class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs:
     }
 
     private fun updateScrollListener() {
-        onScrollListener = object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (!isEnabled || bubble == null || handle.isSelected) return
-                val verticalScrollOffset = recyclerView.computeVerticalScrollOffset()
-                val verticalScrollRange = recyclerView.computeVerticalScrollRange() - marginTop
-                val proportion =
-                    verticalScrollOffset.toFloat() / (verticalScrollRange - height).toFloat()
-                setBubbleAndHandlePosition(height * proportion)
-                // If scroll amount is small, don't show it
-                if (minimumScrollThreshold == 0 || dy == 0 || abs(dy) > minimumScrollThreshold || scrollbarAnimator.isAnimating) {
-                    showScrollbar()
-                    if (autoHideEnabled) hideScrollbar()
+        onScrollListener =
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (!isEnabled || bubble == null || handle.isSelected) return
+                    val verticalScrollOffset = recyclerView.computeVerticalScrollOffset()
+                    val verticalScrollRange = recyclerView.computeVerticalScrollRange() - marginTop
+                    val proportion =
+                        verticalScrollOffset.toFloat() / (verticalScrollRange - height).toFloat()
+                    setBubbleAndHandlePosition(height * proportion)
+                    // If scroll amount is small, don't show it
+                    if (
+                        minimumScrollThreshold == 0 ||
+                            dy == 0 ||
+                            abs(dy) > minimumScrollThreshold ||
+                            scrollbarAnimator.isAnimating
+                    ) {
+                        showScrollbar()
+                        if (autoHideEnabled) hideScrollbar()
+                    }
                 }
             }
-        }
     }
 }

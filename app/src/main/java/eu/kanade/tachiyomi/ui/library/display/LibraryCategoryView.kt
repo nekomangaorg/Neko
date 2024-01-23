@@ -14,6 +14,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     BaseLibraryDisplayView<LibraryCategoryLayoutBinding>(context, attrs) {
 
     override fun inflateBinding() = LibraryCategoryLayoutBinding.bind(this)
+
     override fun initGeneralPreferences() {
         with(binding) {
             showAll.bindToPreference(libraryPreferences.showAllCategories()) {
@@ -24,19 +25,24 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             categoryShow.bindToPreference(libraryPreferences.showCategoryInTitle()) {
                 controller?.showMiniBar()
             }
-            dynamicToBottom.text = context.getString(R.string.move_dynamic_to_bottom)
-                .withSubtitle(context, R.string.when_grouping_by_sources_tags)
+            dynamicToBottom.text =
+                context
+                    .getString(R.string.move_dynamic_to_bottom)
+                    .withSubtitle(context, R.string.when_grouping_by_sources_tags)
             dynamicToBottom.bindToPreference(libraryPreferences.collapsedDynamicAtBottom()) {
                 controller?.presenter?.getLibrary()
             }
-            showEmptyCatsFiltering.bindToPreference(libraryPreferences.showEmptyCategoriesWhileFiltering()) {
+            showEmptyCatsFiltering.bindToPreference(
+                libraryPreferences.showEmptyCategoriesWhileFiltering()
+            ) {
                 controller?.presenter?.requestFilterUpdate()
             }
-            val hideHopper = min(
-                2,
-                libraryPreferences.hideHopper().get().toInt() * 2 + libraryPreferences.autoHideHopper().get()
-                    .toInt(),
-            )
+            val hideHopper =
+                min(
+                    2,
+                    libraryPreferences.hideHopper().get().toInt() * 2 +
+                        libraryPreferences.autoHideHopper().get().toInt(),
+                )
             hideHopperSpinner.setSelection(hideHopper)
             hideHopperSpinner.onItemSelectedListener = {
                 libraryPreferences.hideHopper().set(it == 2)
@@ -44,9 +50,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 controller?.hideHopper(it == 2)
                 controller?.resetHopperY()
             }
-            addCategoriesButton.setOnClickListener {
-                controller?.showCategoriesController()
-            }
+            addCategoriesButton.setOnClickListener { controller?.showCategoriesController() }
             hopperLongPress.bindToPreference(libraryPreferences.hopperLongPressAction())
         }
     }

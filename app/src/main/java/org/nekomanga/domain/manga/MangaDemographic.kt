@@ -9,7 +9,6 @@ enum class MangaDemographic(val key: String, val nameRes: Int) {
     Shoujo(MdConstants.Demographic.shoujo, R.string.shoujo),
     Seinen(MdConstants.Demographic.seinen, R.string.seinen),
     Josei(MdConstants.Demographic.josei, R.string.josei),
-
     ;
 
     companion object {

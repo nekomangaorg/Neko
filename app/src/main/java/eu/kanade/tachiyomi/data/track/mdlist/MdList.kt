@@ -57,16 +57,16 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     suspend fun updateScore(track: Track) {
-        withContext(Dispatchers.IO) {
-            mdex.updateRating(track)
-        }
+        withContext(Dispatchers.IO) { mdex.updateRating(track) }
     }
 
     override suspend fun update(track: Track, setToRead: Boolean): Track {
         return withContext(Dispatchers.IO) {
             try {
-                val manga = db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
-                    .executeAsBlocking() ?: return@withContext track
+                val manga =
+                    db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
+                        .executeAsBlocking()
+                        ?: return@withContext track
                 val followStatus = FollowStatus.fromInt(track.status)
 
                 // allow follow status to update
@@ -74,10 +74,14 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 manga.follow_status = followStatus
                 db.insertManga(manga).executeAsBlocking()
 
-                // mangadex wont update chapters if manga is not follows this prevents unneeded network call
+                // mangadex wont update chapters if manga is not follows this prevents unneeded
+                // network call
 
                 if (followStatus != FollowStatus.UNFOLLOWED) {
-                    if (track.total_chapters != 0 && track.last_chapter_read.toInt() == track.total_chapters) {
+                    if (
+                        track.total_chapters != 0 &&
+                            track.last_chapter_read.toInt() == track.total_chapters
+                    ) {
                         track.status = FollowStatus.COMPLETED.int
                         mdex.updateFollowStatus(
                             MdUtil.getMangaUUID(track.tracking_url),
@@ -96,7 +100,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                     }
                     mdex.updateReadingProgress(track)
                 } else if (track.last_chapter_read.toInt() != 0) {
-                    // When followStatus has been changed to unfollowed 0 out read chapters since dex does
+                    // When followStatus has been changed to unfollowed 0 out read chapters since
+                    // dex does
                     track.last_chapter_read = 0f
                 }
             } catch (e: Exception) {
@@ -111,7 +116,9 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         getStatusList()[index] == FollowStatus.COMPLETED.int
 
     override fun completedStatus() = FollowStatus.COMPLETED.int
+
     override fun readingStatus() = FollowStatus.READING.int
+
     override fun planningStatus() = FollowStatus.PLAN_TO_READ.int
 
     override suspend fun bind(track: Track): Track {
@@ -149,12 +156,13 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         manga: Manga,
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
-        val track = TrackSearch.create(TrackManager.MDLIST).apply {
-            this.manga_id = manga.id!!
-            this.status = FollowStatus.UNFOLLOWED.int
-            this.tracking_url = MdConstants.baseUrl + manga.url
-            this.title = manga.title
-        }
+        val track =
+            TrackSearch.create(TrackManager.MDLIST).apply {
+                this.manga_id = manga.id!!
+                this.status = FollowStatus.UNFOLLOWED.int
+                this.tracking_url = MdConstants.baseUrl + manga.url
+                this.title = manga.title
+            }
 
         return listOf(track)
     }
@@ -162,8 +170,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun login(username: String, password: String): Boolean =
         throw Exception("not used")
 
-    @SuppressLint("MissingSuperCall")
-    override fun logout() = throw Exception("not used")
+    @SuppressLint("MissingSuperCall") override fun logout() = throw Exception("not used")
 
     override fun isLogged() = mangaDexLoginHelper.isLoggedIn()
 

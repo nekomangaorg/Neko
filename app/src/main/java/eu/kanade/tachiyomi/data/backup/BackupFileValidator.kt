@@ -18,37 +18,38 @@ class BackupFileValidator(
     /**
      * Checks for critical backup file data.
      *
-     * @throws Exception if manga cannot be found.
      * @return List of missing sources or missing trackers.
+     * @throws Exception if manga cannot be found.
      */
     fun validate(context: Context, uri: Uri): Results {
         val backupManager = BackupManager(context)
 
-        val backup = try {
-            val backupString =
-                context.contentResolver.openInputStream(uri)!!.source().gzip().buffer()
-                    .use { it.readByteArray() }
-            backupManager.parser.decodeFromByteArray(BackupSerializer, backupString)
-        } catch (e: Exception) {
-            throw IllegalStateException(e)
-        }
+        val backup =
+            try {
+                val backupString =
+                    context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use {
+                        it.readByteArray()
+                    }
+                backupManager.parser.decodeFromByteArray(BackupSerializer, backupString)
+            } catch (e: Exception) {
+                throw IllegalStateException(e)
+            }
 
         if (backup.backupManga.isEmpty()) {
             throw IllegalStateException(context.getString(R.string.backup_has_no_manga))
         }
 
-        val trackers = backup.backupManga
-            .flatMap { it.tracking }
-            .map { it.syncId }
-            .distinct()
+        val trackers = backup.backupManga.flatMap { it.tracking }.map { it.syncId }.distinct()
 
-        val hasDexEntries = backup.backupManga.any { backupManager.sourceManager.isMangadex(it.source) }
+        val hasDexEntries =
+            backup.backupManga.any { backupManager.sourceManager.isMangadex(it.source) }
 
-        val missingTrackers = trackers
-            .mapNotNull { trackManager.getService(it) }
-            .filter { !it.isLogged() }
-            .map { context.getString(it.nameRes()) }
-            .sorted()
+        val missingTrackers =
+            trackers
+                .mapNotNull { trackManager.getService(it) }
+                .filter { !it.isLogged() }
+                .map { context.getString(it.nameRes()) }
+                .sorted()
 
         return Results(missingTrackers, !hasDexEntries)
     }

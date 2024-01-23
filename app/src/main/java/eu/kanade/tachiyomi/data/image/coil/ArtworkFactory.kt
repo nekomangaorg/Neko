@@ -20,26 +20,28 @@ class ArtworkFactory(
 
     override fun create(data: Artwork, options: Options, imageLoader: ImageLoader): Fetcher {
         return when (data.url.isBlank()) {
-            true -> MangaCoverFetcher(
-                altUrl = data.url,
-                inLibrary = data.inLibrary,
-                mangaId = data.mangaId,
-                originalThumbnailUrl = data.originalArtwork,
-                sourceLazy = lazy { sourceManager.mangaDex },
-                options = options,
-                coverCache = coverCache,
-                callFactoryLazy = callFactoryLazy,
-                diskCacheLazy = diskCacheLazy,
-            )
-            false -> AlternativeMangaCoverFetcher(
-                url = data.url,
-                mangaId = data.mangaId,
-                sourceLazy = lazy { sourceManager.mangaDex },
-                options = options,
-                coverCache = coverCache,
-                callFactoryLazy = callFactoryLazy,
-                diskCacheLazy = diskCacheLazy,
-            )
+            true ->
+                MangaCoverFetcher(
+                    altUrl = data.url,
+                    inLibrary = data.inLibrary,
+                    mangaId = data.mangaId,
+                    originalThumbnailUrl = data.originalArtwork,
+                    sourceLazy = lazy { sourceManager.mangaDex },
+                    options = options,
+                    coverCache = coverCache,
+                    callFactoryLazy = callFactoryLazy,
+                    diskCacheLazy = diskCacheLazy,
+                )
+            false ->
+                AlternativeMangaCoverFetcher(
+                    url = data.url,
+                    mangaId = data.mangaId,
+                    sourceLazy = lazy { sourceManager.mangaDex },
+                    options = options,
+                    coverCache = coverCache,
+                    callFactoryLazy = callFactoryLazy,
+                    diskCacheLazy = diskCacheLazy,
+                )
         }
     }
 }

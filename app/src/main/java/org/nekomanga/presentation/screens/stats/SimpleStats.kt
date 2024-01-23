@@ -30,7 +30,11 @@ import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingValues, windowSizeClass: WindowSizeClass) {
+fun SimpleStats(
+    statsState: StatsConstants.SimpleState,
+    contentPadding: PaddingValues,
+    windowSizeClass: WindowSizeClass
+) {
     val na = stringResource(id = R.string.n_a)
 
     val context = LocalContext.current
@@ -38,51 +42,68 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
     val numberFormat = NumberFormat.getInstance(NumberFormat.NUMBERSTYLE)
 
     val stats = remember {
-        val userScore = when (statsState.averageUserRating == 0.0) {
-            true -> na
-            false -> statsState.averageUserRating.toString()
-        }
-        val libUpdates = when (statsState.lastLibraryUpdate.isEmpty()) {
-            true -> na
-            false -> statsState.lastLibraryUpdate
-        }
+        val userScore =
+            when (statsState.averageUserRating == 0.0) {
+                true -> na
+                false -> statsState.averageUserRating.toString()
+            }
+        val libUpdates =
+            when (statsState.lastLibraryUpdate.isEmpty()) {
+                true -> na
+                false -> statsState.lastLibraryUpdate
+            }
 
         listOf(
-            numberFormat.format(statsState.mangaCount).toString() to context.getString(R.string.total_manga),
-            numberFormat.format(statsState.chapterCount).toString() to context.getString(R.string.total_chapters),
-            numberFormat.format(statsState.readCount).toString() to context.getString(R.string.chapters_read),
-            numberFormat.format(statsState.bookmarkCount).toString() to context.getString(R.string.chapters_bookmarked),
-            statsState.readDuration to context.getString(R.string.read_duration),
-            libUpdates to context.getString(R.string.last_library_update),
-            numberFormat.format(statsState.globalUpdateCount).toString() to context.getString(R.string.global_update_manga),
-            statsState.averageMangaRating.toString() to context.getString(R.string.average_score),
-            userScore to context.getString(R.string.mean_score),
-            statsState.trackerCount.toString() to context.getString(R.string.trackers),
-            numberFormat.format(statsState.trackedCount).toString() to context.getString(R.string.manga_tracked),
-            numberFormat.format(statsState.tagCount).toString() to context.getString(R.string.total_tags),
-            numberFormat.format(statsState.mergeCount).toString() to context.getString(R.string.merged),
-        ).toImmutableList()
+                numberFormat.format(statsState.mangaCount).toString() to
+                    context.getString(R.string.total_manga),
+                numberFormat.format(statsState.chapterCount).toString() to
+                    context.getString(R.string.total_chapters),
+                numberFormat.format(statsState.readCount).toString() to
+                    context.getString(R.string.chapters_read),
+                numberFormat.format(statsState.bookmarkCount).toString() to
+                    context.getString(R.string.chapters_bookmarked),
+                statsState.readDuration to context.getString(R.string.read_duration),
+                libUpdates to context.getString(R.string.last_library_update),
+                numberFormat.format(statsState.globalUpdateCount).toString() to
+                    context.getString(R.string.global_update_manga),
+                statsState.averageMangaRating.toString() to
+                    context.getString(R.string.average_score),
+                userScore to context.getString(R.string.mean_score),
+                statsState.trackerCount.toString() to context.getString(R.string.trackers),
+                numberFormat.format(statsState.trackedCount).toString() to
+                    context.getString(R.string.manga_tracked),
+                numberFormat.format(statsState.tagCount).toString() to
+                    context.getString(R.string.total_tags),
+                numberFormat.format(statsState.mergeCount).toString() to
+                    context.getString(R.string.merged),
+            )
+            .toImmutableList()
     }
 
     val isTablet = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
-    val verticalArrangement = when (isTablet) {
-        true -> Arrangement.Center
-        false -> Arrangement.Top
-    }
-
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = verticalArrangement) {
-        val axisPadding = when (isTablet) {
-            true -> 16.dp
-            false -> Size.small
+    val verticalArrangement =
+        when (isTablet) {
+            true -> Arrangement.Center
+            false -> Arrangement.Top
         }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = contentPadding,
+        verticalArrangement = verticalArrangement
+    ) {
+        val axisPadding =
+            when (isTablet) {
+                true -> 16.dp
+                false -> Size.small
+            }
 
         item {
             FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(Size.medium),
-                horizontalArrangement = Arrangement.spacedBy(axisPadding, Alignment.CenterHorizontally),
+                modifier = Modifier.fillMaxWidth().padding(Size.medium),
+                horizontalArrangement =
+                    Arrangement.spacedBy(axisPadding, Alignment.CenterHorizontally),
                 verticalArrangement = Arrangement.spacedBy(axisPadding, Alignment.CenterVertically)
             ) {
                 stats.forEach {
@@ -95,17 +116,32 @@ fun SimpleStats(statsState: StatsConstants.SimpleState, contentPadding: PaddingV
 
 @Composable
 private fun BasicStat(value: String, label: String, isTablet: Boolean) {
-    val (titleTypography, labelTypography, padding) = when (isTablet) {
-        true -> Triple(MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.SemiBold), MaterialTheme.typography.titleMedium, 20.dp)
-        false -> Triple(MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), MaterialTheme.typography.labelMedium, 12.dp)
-    }
+    val (titleTypography, labelTypography, padding) =
+        when (isTablet) {
+            true ->
+                Triple(
+                    MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.SemiBold),
+                    MaterialTheme.typography.titleMedium,
+                    20.dp
+                )
+            false ->
+                Triple(
+                    MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                    MaterialTheme.typography.labelMedium,
+                    12.dp
+                )
+        }
 
     ElevatedCard(
         shape = RoundedCornerShape(25),
     ) {
         Box(modifier = Modifier.padding(padding)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = value, style = titleTypography, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    text = value,
+                    style = titleTypography,
+                    color = MaterialTheme.colorScheme.primary
+                )
                 Text(text = label, style = labelTypography)
             }
         }

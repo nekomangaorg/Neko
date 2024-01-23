@@ -28,8 +28,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         const val DEFAULT_SCORE = 0f
     }
 
-    @StringRes
-    override fun nameRes() = R.string.kitsu
+    @StringRes override fun nameRes() = R.string.kitsu
 
     override val supportsReadingDates: Boolean = true
 
@@ -50,30 +49,34 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
     override fun completedStatus(): Int = COMPLETED
+
     override fun readingStatus() = READING
+
     override fun planningStatus() = PLAN_TO_READ
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.currently_reading)
-            PLAN_TO_READ -> getString(R.string.want_to_read)
-            COMPLETED -> getString(R.string.completed)
-            ON_HOLD -> getString(R.string.on_hold)
-            DROPPED -> getString(R.string.dropped)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.currently_reading)
+                PLAN_TO_READ -> getString(R.string.want_to_read)
+                COMPLETED -> getString(R.string.completed)
+                ON_HOLD -> getString(R.string.on_hold)
+                DROPPED -> getString(R.string.dropped)
+                else -> ""
+            }
         }
-    }
 
-    override fun getGlobalStatus(status: Int): String = with(context) {
-        return when (status) {
-            READING -> getString(R.string.follows_reading)
-            PLAN_TO_READ -> getString(R.string.follows_plan_to_read)
-            COMPLETED -> getString(R.string.follows_completed)
-            ON_HOLD -> getString(R.string.follows_on_hold)
-            DROPPED -> getString(R.string.follows_dropped)
-            else -> ""
+    override fun getGlobalStatus(status: Int): String =
+        with(context) {
+            return when (status) {
+                READING -> getString(R.string.follows_reading)
+                PLAN_TO_READ -> getString(R.string.follows_plan_to_read)
+                COMPLETED -> getString(R.string.follows_completed)
+                ON_HOLD -> getString(R.string.follows_on_hold)
+                DROPPED -> getString(R.string.follows_dropped)
+                else -> ""
+            }
         }
-    }
 
     override fun getScoreList(): List<String> {
         val df = DecimalFormat("0.#")

@@ -20,7 +20,6 @@ object MangaUpdatesHelper {
                     }
                     newMuId
                 }
-
                 false -> id.toLong(36).toString()
             }
             return if (id.isDigitsOnly() && id.toLong() <= 200591) {

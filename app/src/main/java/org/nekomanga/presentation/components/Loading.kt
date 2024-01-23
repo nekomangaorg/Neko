@@ -17,15 +17,13 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun Loading(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .size(40.dp)
-            .background(color = MaterialTheme.colorScheme.secondary, shape = CircleShape),
+        modifier =
+            modifier
+                .size(40.dp)
+                .background(color = MaterialTheme.colorScheme.secondary, shape = CircleShape),
     ) {
         CircularProgressIndicator(
-            modifier = Modifier
-                .size(28.dp)
-                .padding(Size.extraTiny)
-                .align(Alignment.Center),
+            modifier = Modifier.size(28.dp).padding(Size.extraTiny).align(Alignment.Center),
             color = MaterialTheme.colorScheme.onSecondary,
             strokeWidth = Size.extraTiny,
         )

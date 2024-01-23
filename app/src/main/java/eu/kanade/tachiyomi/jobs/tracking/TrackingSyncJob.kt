@@ -21,9 +21,7 @@ import kotlinx.coroutines.delay
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
-/**
- * WorkManager job that syncs tracking from trackers to Neko
- */
+/** WorkManager job that syncs tracking from trackers to Neko */
 class TrackingSyncJob(
     val context: Context,
     params: WorkerParameters,
@@ -79,10 +77,8 @@ class TrackingSyncJob(
     }
 
     private fun updateNotificationProgress(title: String, progress: Int, total: Int) {
-        val notification = progressNotification
-            .setContentText(title)
-            .setProgress(total, progress, false)
-            .build()
+        val notification =
+            progressNotification.setContentText(title).setProgress(total, progress, false).build()
         applicationContext.notificationManager.notify(
             Notifications.Id.Tracking.Progress,
             notification,
@@ -90,8 +86,7 @@ class TrackingSyncJob(
     }
 
     private fun completeNotification() {
-        val notification = completeNotification
-            .build()
+        val notification = completeNotification.build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Tracking.Complete,
             notification,
@@ -107,9 +102,7 @@ class TrackingSyncJob(
         val TAG = "tracking_sync_job"
 
         fun doWorkNow(context: Context) {
-            val request = OneTimeWorkRequestBuilder<TrackingSyncJob>()
-                .addTag(TAG)
-                .build()
+            val request = OneTimeWorkRequestBuilder<TrackingSyncJob>().addTag(TAG).build()
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)

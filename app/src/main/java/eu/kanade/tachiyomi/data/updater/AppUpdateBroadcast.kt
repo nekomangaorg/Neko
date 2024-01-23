@@ -19,13 +19,11 @@ class AppUpdateBroadcast : BroadcastReceiver() {
                     val confirmIntent = extras[Intent.EXTRA_INTENT] as? Intent
                     context.startActivity(confirmIntent?.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 }
-
                 PackageInstaller.STATUS_SUCCESS -> {
                     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-                    prefs.edit {
-                        remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY)
-                    }
-                    val notifyOnInstall = extras.getBoolean(AppUpdateService.EXTRA_NOTIFY_ON_INSTALL, false)
+                    prefs.edit { remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY) }
+                    val notifyOnInstall =
+                        extras.getBoolean(AppUpdateService.EXTRA_NOTIFY_ON_INSTALL, false)
                     try {
                         if (notifyOnInstall) {
                             AppUpdateNotifier(context).onInstallFinished()
@@ -34,8 +32,13 @@ class AppUpdateBroadcast : BroadcastReceiver() {
                         AppUpdateService.stop(context)
                     }
                 }
-
-                PackageInstaller.STATUS_FAILURE, PackageInstaller.STATUS_FAILURE_ABORTED, PackageInstaller.STATUS_FAILURE_BLOCKED, PackageInstaller.STATUS_FAILURE_CONFLICT, PackageInstaller.STATUS_FAILURE_INCOMPATIBLE, PackageInstaller.STATUS_FAILURE_INVALID, PackageInstaller.STATUS_FAILURE_STORAGE -> {
+                PackageInstaller.STATUS_FAILURE,
+                PackageInstaller.STATUS_FAILURE_ABORTED,
+                PackageInstaller.STATUS_FAILURE_BLOCKED,
+                PackageInstaller.STATUS_FAILURE_CONFLICT,
+                PackageInstaller.STATUS_FAILURE_INCOMPATIBLE,
+                PackageInstaller.STATUS_FAILURE_INVALID,
+                PackageInstaller.STATUS_FAILURE_STORAGE -> {
                     if (status != PackageInstaller.STATUS_FAILURE_ABORTED) {
                         context.toast(R.string.could_not_install_update)
                         val uri = intent.getStringExtra(AppUpdateService.EXTRA_FILE_URI) ?: return
@@ -48,9 +51,7 @@ class AppUpdateBroadcast : BroadcastReceiver() {
         } else if (intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val notifyOnInstall = prefs.getBoolean(AppUpdateService.NOTIFY_ON_INSTALL_KEY, false)
-            prefs.edit {
-                remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY)
-            }
+            prefs.edit { remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY) }
             if (notifyOnInstall) {
                 AppUpdateNotifier(context).onInstallFinished()
             }

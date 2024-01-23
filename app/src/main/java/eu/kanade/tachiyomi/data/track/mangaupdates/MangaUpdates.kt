@@ -21,8 +21,7 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 
     private val api by lazy { MangaUpdatesApi(interceptor, client) }
 
-    @StringRes
-    override fun nameRes(): Int = R.string.manga_updates
+    @StringRes override fun nameRes(): Int = R.string.manga_updates
 
     override fun getLogo(): Int = R.drawable.ic_tracker_manga_updates_logo
 
@@ -44,16 +43,17 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
             else -> ""
         }
 
-    override fun getGlobalStatus(status: Int) = with(context) {
-        when (status) {
-            READING_LIST -> getString(R.string.follows_reading)
-            COMPLETE_LIST -> getString(R.string.follows_completed)
-            ON_HOLD_LIST -> getString(R.string.follows_on_hold)
-            UNFINISHED_LIST -> getString(R.string.follows_dropped)
-            WISH_LIST -> getString(R.string.follows_plan_to_read)
-            else -> ""
+    override fun getGlobalStatus(status: Int) =
+        with(context) {
+            when (status) {
+                READING_LIST -> getString(R.string.follows_reading)
+                COMPLETE_LIST -> getString(R.string.follows_completed)
+                ON_HOLD_LIST -> getString(R.string.follows_on_hold)
+                UNFINISHED_LIST -> getString(R.string.follows_dropped)
+                WISH_LIST -> getString(R.string.follows_plan_to_read)
+                else -> ""
+            }
         }
-    }
 
     override fun readingStatus(): Int = READING_LIST
 
@@ -61,21 +61,21 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 
     override fun completedStatus(): Int = COMPLETE_LIST
 
-    private val _scoreList = (0..10)
-        .flatMap { decimal ->
-            when (decimal) {
-                0 -> listOf("-")
-                10 -> listOf("10.0")
-                else -> (0..9).map { fraction ->
-                    "$decimal.$fraction"
+    private val _scoreList =
+        (0..10)
+            .flatMap { decimal ->
+                when (decimal) {
+                    0 -> listOf("-")
+                    10 -> listOf("10.0")
+                    else -> (0..9).map { fraction -> "$decimal.$fraction" }
                 }
             }
-        }
-        .toImmutableList()
+            .toImmutableList()
 
     override fun getScoreList(): List<String> = _scoreList
 
-    override fun indexToScore(index: Int): Float = if (index == 0) 0f else _scoreList[index].toFloat()
+    override fun indexToScore(index: Int): Float =
+        if (index == 0) 0f else _scoreList[index].toFloat()
 
     override fun displayScore(track: Track): String = track.score.toString()
 
@@ -104,11 +104,12 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
-        return api.search(query, manga, wasPreviouslyTracked)
-            .map {
-                it.toTrackSearch(id)
-            }
+    override suspend fun search(
+        query: String,
+        manga: Manga,
+        wasPreviouslyTracked: Boolean
+    ): List<TrackSearch> {
+        return api.search(query, manga, wasPreviouslyTracked).map { it.toTrackSearch(id) }
     }
 
     override suspend fun refresh(track: Track): Track {
@@ -131,7 +132,8 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun login(username: String, password: String): Boolean {
-        val authenticated = api.authenticate(username, password) ?: throw Throwable("Unable to login")
+        val authenticated =
+            api.authenticate(username, password) ?: throw Throwable("Unable to login")
         saveCredentials(authenticated.uid.toString(), authenticated.sessionToken)
         interceptor.newAuth(authenticated.sessionToken)
         return true

@@ -56,37 +56,64 @@ fun EditCategorySheet(
         val context = LocalContext.current
 
         val enabledCategories = remember { mangaCategories.associateBy { it.id }.toMutableMap() }
-        val acceptText = remember { mutableStateOf(calculateText(context, mangaCategories, enabledCategories, addingToLibrary)) }
+        val acceptText = remember {
+            mutableStateOf(
+                calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
+            )
+        }
 
         var showAddCategoryDialog by remember { mutableStateOf(false) }
 
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .4
 
-        BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f, bottomPaddingAroundContent = bottomContentPadding) {
+        BaseSheet(
+            themeColor = themeColorState,
+            maxSheetHeightPercentage = .9f,
+            bottomPaddingAroundContent = bottomContentPadding
+        ) {
             if (showAddCategoryDialog) {
-                AddCategoryDialog(themeColorState = themeColorState, currentCategories = categories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
+                AddCategoryDialog(
+                    themeColorState = themeColorState,
+                    currentCategories = categories,
+                    onDismiss = { showAddCategoryDialog = false },
+                    onConfirm = { addNewCategory(it) }
+                )
             }
 
             val paddingModifier = Modifier.padding(horizontal = Size.small)
 
             Gap(16.dp)
-            Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = paddingModifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
-                Text(modifier = paddingModifier, text = stringResource(id = prefix, stringResource(id = R.string.manga)), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    modifier = paddingModifier,
+                    text = stringResource(id = prefix, stringResource(id = R.string.manga)),
+                    style = MaterialTheme.typography.titleLarge
+                )
                 TextButton(modifier = paddingModifier, onClick = { showAddCategoryDialog = true }) {
-                    Text(text = stringResource(id = R.string.plus_new_category), style = MaterialTheme.typography.titleSmall.copy(color = themeColorState.buttonColor))
+                    Text(
+                        text = stringResource(id = R.string.plus_new_category),
+                        style =
+                            MaterialTheme.typography.titleSmall.copy(
+                                color = themeColorState.buttonColor
+                            )
+                    )
                 }
             }
             Gap(16.dp)
             Divider()
 
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeightIn(Size.none, maxLazyHeight.dp),
+                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
             ) {
                 items(categories) { category: CategoryItem ->
-                    var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
+                    var state by remember {
+                        mutableStateOf(enabledCategories.contains(category.id))
+                    }
                     CheckboxRow(
                         modifier = Modifier.fillMaxWidth(),
                         checkedState = state,
@@ -97,7 +124,13 @@ fun EditCategorySheet(
                             } else {
                                 enabledCategories.remove(category.id)
                             }
-                            acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
+                            acceptText.value =
+                                calculateText(
+                                    context,
+                                    mangaCategories,
+                                    enabledCategories,
+                                    addingToLibrary
+                                )
                         },
                         rowText = category.name,
                         themeColorState = themeColorState,
@@ -107,9 +140,19 @@ fun EditCategorySheet(
 
             Divider()
             Gap(Size.tiny)
-            Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(onClick = cancelClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                    Text(text = stringResource(id = R.string.cancel), style = MaterialTheme.typography.titleSmall)
+            Row(
+                modifier = paddingModifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextButton(
+                    onClick = cancelClick,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.cancel),
+                        style = MaterialTheme.typography.titleSmall
+                    )
                 }
                 ElevatedButton(
                     onClick = {
@@ -117,25 +160,42 @@ fun EditCategorySheet(
                         addToLibraryClick()
                         cancelClick()
                     },
-                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                    colors =
+                        ButtonDefaults.elevatedButtonColors(
+                            containerColor = themeColorState.buttonColor
+                        ),
                 ) {
-                    Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                    Text(
+                        text = acceptText.value,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.surface
+                    )
                 }
             }
         }
     }
 }
 
-private fun calculateText(context: Context, initialMangaCategories: List<CategoryItem>, currentlySelectedCategories: Map<Int, CategoryItem>, addingToLibrary: Boolean): String {
+private fun calculateText(
+    context: Context,
+    initialMangaCategories: List<CategoryItem>,
+    currentlySelectedCategories: Map<Int, CategoryItem>,
+    addingToLibrary: Boolean
+): String {
     val initialIds = initialMangaCategories.map { it.id }.toSet()
     val same = currentlySelectedCategories.filter { initialIds.contains(it.key) }.values.toList()
-    val difference = currentlySelectedCategories.filterNot { initialIds.contains(it.key) }.values.toList()
+    val difference =
+        currentlySelectedCategories.filterNot { initialIds.contains(it.key) }.values.toList()
 
-    val addingMore = initialMangaCategories.isNotEmpty() && difference.isNotEmpty() && same.size == initialMangaCategories.size
+    val addingMore =
+        initialMangaCategories.isNotEmpty() &&
+            difference.isNotEmpty() &&
+            same.size == initialMangaCategories.size
     val nothingChanged = difference.isEmpty() && same.size == initialIds.size
     val removing = same.size < initialIds.size && difference.isEmpty()
 
-    fun quantity(size: Int) = context.resources.getQuantityString(R.plurals.category_plural, size, size)
+    fun quantity(size: Int) =
+        context.resources.getQuantityString(R.plurals.category_plural, size, size)
 
     return context.getString(
         when {
@@ -146,22 +206,26 @@ private fun calculateText(context: Context, initialMangaCategories: List<Categor
         },
         when {
             same.size == 1 && nothingChanged -> same.first().name
-            difference.isEmpty() && initialIds.isNotEmpty() && initialIds.size == same.size -> quantity(same.size)
-            difference.isEmpty() && same.isEmpty() && initialIds.isNotEmpty() -> quantity(initialIds.size)
-            same.isEmpty() && difference.isEmpty() -> context.getString(R.string.default_category).lowercase(Locale.ROOT)
+            difference.isEmpty() && initialIds.isNotEmpty() && initialIds.size == same.size ->
+                quantity(same.size)
+            difference.isEmpty() && same.isEmpty() && initialIds.isNotEmpty() ->
+                quantity(initialIds.size)
+            same.isEmpty() && difference.isEmpty() ->
+                context.getString(R.string.default_category).lowercase(Locale.ROOT)
             difference.size == 1 && !nothingChanged -> difference.first().name
             same.size == 1 && !nothingChanged && same.size == initialIds.size -> same.first().name
-            difference.size > 1 -> context.resources.getQuantityString(
-                R.plurals.category_plural,
-                difference.size,
-                difference.size,
-            )
-
-            else -> context.resources.getQuantityString(
-                R.plurals.category_plural,
-                initialIds.size - same.size,
-                initialIds.size - same.size,
-            )
+            difference.size > 1 ->
+                context.resources.getQuantityString(
+                    R.plurals.category_plural,
+                    difference.size,
+                    difference.size,
+                )
+            else ->
+                context.resources.getQuantityString(
+                    R.plurals.category_plural,
+                    initialIds.size - same.size,
+                    initialIds.size - same.size,
+                )
         },
     )
 }

@@ -43,9 +43,9 @@ import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.domain.details.MangaDetailsPreferences
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
 import uy.kohesive.injekt.api.InjektModule
@@ -146,7 +146,6 @@ class AppModule(val app: Application) : InjektModule {
 
         // Asynchronously init expensive components for a faster cold start
         ContextCompat.getMainExecutor(app).execute {
-
             get<NetworkHelper>()
 
             get<SourceManager>()
@@ -160,29 +159,17 @@ class AppModule(val app: Application) : InjektModule {
 
 class PreferenceModule(val application: Application) : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
-        addSingletonFactory<PreferenceStore> {
-            AndroidPreferenceStore(application)
-        }
+        addSingletonFactory<PreferenceStore> { AndroidPreferenceStore(application) }
 
-        addSingletonFactory {
-            SecurityPreferences(get())
-        }
+        addSingletonFactory { SecurityPreferences(get()) }
 
-        addSingletonFactory {
-            LibraryPreferences(get())
-        }
+        addSingletonFactory { LibraryPreferences(get()) }
 
-        addSingletonFactory {
-            ReaderPreferences(get())
-        }
+        addSingletonFactory { ReaderPreferences(get()) }
 
-        addSingletonFactory {
-            NetworkPreferences(get(), BuildConfig.DEBUG)
-        }
+        addSingletonFactory { NetworkPreferences(get(), BuildConfig.DEBUG) }
 
-        addSingletonFactory {
-            MangaDetailsPreferences(get())
-        }
+        addSingletonFactory { MangaDetailsPreferences(get()) }
 
         addSingletonFactory {
             PreferencesHelper(

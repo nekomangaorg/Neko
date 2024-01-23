@@ -35,7 +35,5 @@ fun IIcon.createWithColorRes(
 }
 
 fun IIcon.actionBar(context: Context): IconicsDrawable {
-    return create(context, 24f, R.attr.colorOnPrimarySurface).apply {
-        padding = IconicsSize.dp(2f)
-    }
+    return create(context, 24f, R.attr.colorOnPrimarySurface).apply { padding = IconicsSize.dp(2f) }
 }

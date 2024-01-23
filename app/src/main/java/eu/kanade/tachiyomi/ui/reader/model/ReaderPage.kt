@@ -17,7 +17,9 @@ open class ReaderPage(
     /** Value to check if this page is used to as if it was too wide */
     var shiftedPage: Boolean = false
 
-    /** Value to check if a page is can be doubled up, but can't because the next page is too wide */
+    /**
+     * Value to check if a page is can be doubled up, but can't because the next page is too wide
+     */
     var isolatedPage: Boolean = false
     var firstHalf: Boolean? = null
     var longPage: Boolean? = null
@@ -33,9 +35,14 @@ open class ReaderPage(
             if (value == true) shiftedPage = false
         }
 
-    val alonePage: Boolean get() = fullPage == true || isolatedPage
-    val isEndPage get() = endPageConfidence?.let { it > 0 && it > (startPageConfidence ?: 0) }
-    val isStartPage get() = startPageConfidence?.let { it > 0 && it > (endPageConfidence ?: 0) }
+    val alonePage: Boolean
+        get() = fullPage == true || isolatedPage
+
+    val isEndPage
+        get() = endPageConfidence?.let { it > 0 && it > (startPageConfidence ?: 0) }
+
+    val isStartPage
+        get() = startPageConfidence?.let { it > 0 && it > (endPageConfidence ?: 0) }
 
     fun isFromSamePage(page: ReaderPage): Boolean =
         index == page.index && chapter.chapter.id == page.chapter.chapter.id

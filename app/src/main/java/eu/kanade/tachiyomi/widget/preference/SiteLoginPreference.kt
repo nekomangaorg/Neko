@@ -13,7 +13,9 @@ import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.system.createWithColorRes
 
-class SiteLoginPreference @JvmOverloads constructor(
+class SiteLoginPreference
+@JvmOverloads
+constructor(
     context: Context,
     val mangaDexLoginHelper: MangaDexLoginHelper,
     attrs: AttributeSet? = null,
@@ -29,18 +31,17 @@ class SiteLoginPreference @JvmOverloads constructor(
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
-        holder.itemView.setOnClickListener {
-            onLoginClick()
-        }
+        holder.itemView.setOnClickListener { onLoginClick() }
 
         (holder.findViewById(R.id.image_view) as? ImageView)?.setImageDrawable(
             when (mangaDexLoginHelper.isLoggedIn()) {
                 true -> CommunityMaterial.Icon.cmd_account_circle.create(context, 24f)
-                false -> CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(
-                    context,
-                    24f,
-                    R.color.material_on_surface_disabled,
-                )
+                false ->
+                    CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(
+                        context,
+                        24f,
+                        R.color.material_on_surface_disabled,
+                    )
             },
         )
         val summary = (holder.findViewById(android.R.id.summary) as? TextView)

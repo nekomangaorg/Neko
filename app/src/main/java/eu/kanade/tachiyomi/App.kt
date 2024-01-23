@@ -58,11 +58,16 @@ open class App : Application(), DefaultLifecycleObserver {
 
         GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
 
-        kotlin.runCatching {
-            CookieManager.getInstance()
-        }.onFailure {
-            Toast.makeText(applicationContext, "Error! App requires WebView to be installed", Toast.LENGTH_LONG).show()
-        }
+        kotlin
+            .runCatching { CookieManager.getInstance() }
+            .onFailure {
+                Toast.makeText(
+                        applicationContext,
+                        "Error! App requires WebView to be installed",
+                        Toast.LENGTH_LONG
+                    )
+                    .show()
+            }
 
         // TLS 1.3 support for Android < 10
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -72,7 +77,8 @@ open class App : Application(), DefaultLifecycleObserver {
         // Avoid potential crashes
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             val process = getProcessName()
-            if (packageName != process) kotlin.runCatching { WebView.setDataDirectorySuffix(process) }
+            if (packageName != process)
+                kotlin.runCatching { WebView.setDataDirectorySuffix(process) }
         }
 
         Injekt.importModule(PreferenceModule(this))
@@ -85,7 +91,6 @@ open class App : Application(), DefaultLifecycleObserver {
             TimberKt.plant(DebugReportingTree())
         }
 
-
         CoilSetup(this)
         setupNotificationChannels()
 
@@ -95,31 +100,37 @@ open class App : Application(), DefaultLifecycleObserver {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         MangaCoverMetadata.load()
-        preferences.nightMode().changes().onEach {
-            AppCompatDelegate.setDefaultNightMode(it)
-        }.launchIn((ProcessLifecycleOwner.get().lifecycleScope))
+        preferences
+            .nightMode()
+            .changes()
+            .onEach { AppCompatDelegate.setDefaultNightMode(it) }
+            .launchIn((ProcessLifecycleOwner.get().lifecycleScope))
 
         // Show notification to disable Incognito Mode when it's enabled
-        securityPreferences.incognitoMode().changes()
+        securityPreferences
+            .incognitoMode()
+            .changes()
             .onEach { enabled ->
                 val notificationManager = NotificationManagerCompat.from(this)
                 if (enabled) {
                     disableIncognitoReceiver.register()
-                    val notification = notification(Notifications.CHANNEL_INCOGNITO_MODE) {
-                        val incogText = getString(R.string.incognito_mode)
-                        setContentTitle(incogText)
-                        setContentText(getString(R.string.turn_off_, incogText))
-                        setSmallIcon(R.drawable.ic_incognito_24dp)
-                        setOngoing(true)
+                    val notification =
+                        notification(Notifications.CHANNEL_INCOGNITO_MODE) {
+                            val incogText = getString(R.string.incognito_mode)
+                            setContentTitle(incogText)
+                            setContentText(getString(R.string.turn_off_, incogText))
+                            setSmallIcon(R.drawable.ic_incognito_24dp)
+                            setOngoing(true)
 
-                        val pendingIntent = PendingIntent.getBroadcast(
-                            this@App,
-                            0,
-                            Intent(ACTION_DISABLE_INCOGNITO_MODE),
-                            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
-                        )
-                        setContentIntent(pendingIntent)
-                    }
+                            val pendingIntent =
+                                PendingIntent.getBroadcast(
+                                    this@App,
+                                    0,
+                                    Intent(ACTION_DISABLE_INCOGNITO_MODE),
+                                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
+                                )
+                            setContentIntent(pendingIntent)
+                        }
                     notificationManager.notify(Notifications.ID_INCOGNITO_MODE, notification)
                 } else {
                     disableIncognitoReceiver.unregister()

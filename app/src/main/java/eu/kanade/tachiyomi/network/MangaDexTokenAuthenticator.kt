@@ -10,11 +10,8 @@ import okhttp3.Response
 import okhttp3.Route
 import org.nekomanga.logging.TimberKt
 
-/**
- * Authenticator that intercepts 401 requests and tries to reauth the user
- */
-class MangaDexTokenAuthenticator(private val loginHelper: MangaDexLoginHelper) :
-    Authenticator {
+/** Authenticator that intercepts 401 requests and tries to reauth the user */
+class MangaDexTokenAuthenticator(private val loginHelper: MangaDexLoginHelper) : Authenticator {
 
     private val mutext = Mutex()
     private val tag = "||Neko-TokenAuthenticator"
@@ -32,7 +29,6 @@ class MangaDexTokenAuthenticator(private val loginHelper: MangaDexLoginHelper) :
     private fun refreshSessionToken(loginHelper: MangaDexLoginHelper): String {
         return runBlocking {
             mutext.withLock {
-
                 var validated = loginHelper.wasTokenRefreshedRecently()
                 if (validated) {
                     TimberKt.i { "$tag Token is valid, other thread must have refreshed it" }

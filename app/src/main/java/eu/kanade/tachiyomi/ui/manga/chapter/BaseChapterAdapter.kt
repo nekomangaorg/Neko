@@ -11,6 +11,7 @@ open class BaseChapterAdapter<T : IFlexible<*>>(
 
     interface DownloadInterface {
         fun downloadChapter(position: Int)
+
         fun startDownloadNow(position: Int)
     }
 }

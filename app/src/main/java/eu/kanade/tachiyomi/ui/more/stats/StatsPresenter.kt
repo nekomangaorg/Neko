@@ -67,29 +67,41 @@ class StatsPresenter(
         presenterScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isEmpty()) {
-                _simpleState.value = StatsConstants.SimpleState(
-                    screenState = StatsConstants.ScreenState.NoResults,
-                )
+                _simpleState.value =
+                    StatsConstants.SimpleState(
+                        screenState = StatsConstants.ScreenState.NoResults,
+                    )
             } else {
                 val tracks = getTracks(libraryList)
                 val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
-                _simpleState.value = StatsConstants.SimpleState(
-                    screenState = StatsConstants.ScreenState.Simple,
-                    mangaCount = libraryList.count(),
-                    chapterCount = libraryList.sumOf { it.totalChapters },
-                    readCount = libraryList.sumOf { it.read },
-                    bookmarkCount = libraryList.sumOf { it.bookmarkCount },
-                    trackedCount = getMangaByTrackCount(libraryList, tracks),
-                    mergeCount = db.getAllMergeManga().executeAsBlocking().distinctBy { it.mangaId }.count(),
-                    globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
-                    downloadCount = libraryList.sumOf { getDownloadCount(it) },
-                    tagCount = libraryList.mapNotNull { it.getGenres() }.flatten().distinct().count { !it.contains("content rating:", true) },
-                    trackerCount = getLoggedTrackers().count(),
-                    readDuration = getReadDuration(),
-                    averageMangaRating = getAverageMangaRating(libraryList),
-                    averageUserRating = getUserScore(tracks),
-                    lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
-                )
+                _simpleState.value =
+                    StatsConstants.SimpleState(
+                        screenState = StatsConstants.ScreenState.Simple,
+                        mangaCount = libraryList.count(),
+                        chapterCount = libraryList.sumOf { it.totalChapters },
+                        readCount = libraryList.sumOf { it.read },
+                        bookmarkCount = libraryList.sumOf { it.bookmarkCount },
+                        trackedCount = getMangaByTrackCount(libraryList, tracks),
+                        mergeCount =
+                            db.getAllMergeManga()
+                                .executeAsBlocking()
+                                .distinctBy { it.mangaId }
+                                .count(),
+                        globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
+                        downloadCount = libraryList.sumOf { getDownloadCount(it) },
+                        tagCount =
+                            libraryList
+                                .mapNotNull { it.getGenres() }
+                                .flatten()
+                                .distinct()
+                                .count { !it.contains("content rating:", true) },
+                        trackerCount = getLoggedTrackers().count(),
+                        readDuration = getReadDuration(),
+                        averageMangaRating = getAverageMangaRating(libraryList),
+                        averageUserRating = getUserScore(tracks),
+                        lastLibraryUpdate =
+                            if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
+                    )
             }
         }
     }
@@ -98,48 +110,89 @@ class StatsPresenter(
         presenterScope.launchIO {
             val libraryList = getLibrary()
             if (libraryList.isNotEmpty()) {
-                val detailedStatMangaList = libraryList.map {
-                    async {
-                        val history = db.getHistoryByMangaId(it.id!!).executeAsBlocking()
-                        val tracks = getTracks(it)
+                val detailedStatMangaList =
+                    libraryList
+                        .map {
+                            async {
+                                val history = db.getHistoryByMangaId(it.id!!).executeAsBlocking()
+                                val tracks = getTracks(it)
 
-                        DetailedStatManga(
-                            id = it.id!!,
-                            title = it.title,
-                            type = MangaType.fromLangFlag(it.lang_flag),
-                            status = MangaStatus.fromStatus(it.status),
-                            contentRating = MangaContentRating.getContentRating(it.getContentRating()),
-                            totalChapters = it.totalChapters,
-                            readChapters = it.read,
-                            bookmarkedChapters = it.bookmarkCount,
-                            readDuration = getReadDurationFromHistory(history),
-                            startYear = getStartYear(history),
-                            rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
-                            tags = (it.getGenres() ?: emptyList()).toImmutableList(),
-                            userScore = getUserScore(tracks),
-                            trackers = tracks.mapNotNull { trackManager.getService(it.sync_id) }.map { prefs.context.getString(it.nameRes()) }.toImmutableList(),
-                            categories = (
-                                db.getCategoriesForManga(it).executeAsBlocking().map { category -> category.name }.takeUnless { it.isEmpty() }
-                                    ?: listOf(prefs.context.getString(R.string.default_value))
-                                ).sorted().toImmutableList(),
-                        )
-                    }
-                }.awaitAll().sortedBy { it.title }
-                _detailState.value = DetailedState(
-                    isLoading = false,
-                    manga = detailedStatMangaList.toImmutableList(),
-                    categories = (db.getCategories().executeAsBlocking().map { it.name } + listOf(prefs.context.getString(R.string.default_value))).toPersistentList(),
-                    tags = detailedStatMangaList.asSequence().map { it.tags }.flatten().distinct().filter { !it.contains("content rating:", true) }.sortedBy { it }.toImmutableList(),
-                )
+                                DetailedStatManga(
+                                    id = it.id!!,
+                                    title = it.title,
+                                    type = MangaType.fromLangFlag(it.lang_flag),
+                                    status = MangaStatus.fromStatus(it.status),
+                                    contentRating =
+                                        MangaContentRating.getContentRating(it.getContentRating()),
+                                    totalChapters = it.totalChapters,
+                                    readChapters = it.read,
+                                    bookmarkedChapters = it.bookmarkCount,
+                                    readDuration = getReadDurationFromHistory(history),
+                                    startYear = getStartYear(history),
+                                    rating = it.rating?.toDoubleOrNull()?.roundToTwoDecimal(),
+                                    tags = (it.getGenres() ?: emptyList()).toImmutableList(),
+                                    userScore = getUserScore(tracks),
+                                    trackers =
+                                        tracks
+                                            .mapNotNull { trackManager.getService(it.sync_id) }
+                                            .map { prefs.context.getString(it.nameRes()) }
+                                            .toImmutableList(),
+                                    categories =
+                                        (db.getCategoriesForManga(it)
+                                                .executeAsBlocking()
+                                                .map { category -> category.name }
+                                                .takeUnless { it.isEmpty() }
+                                                ?: listOf(
+                                                    prefs.context.getString(R.string.default_value)
+                                                ))
+                                            .sorted()
+                                            .toImmutableList(),
+                                )
+                            }
+                        }
+                        .awaitAll()
+                        .sortedBy { it.title }
+                _detailState.value =
+                    DetailedState(
+                        isLoading = false,
+                        manga = detailedStatMangaList.toImmutableList(),
+                        categories =
+                            (db.getCategories().executeAsBlocking().map { it.name } +
+                                    listOf(prefs.context.getString(R.string.default_value)))
+                                .toPersistentList(),
+                        tags =
+                            detailedStatMangaList
+                                .asSequence()
+                                .map { it.tags }
+                                .flatten()
+                                .distinct()
+                                .filter { !it.contains("content rating:", true) }
+                                .sortedBy { it }
+                                .toImmutableList(),
+                    )
 
                 val sortedSeries =
-                    _detailState.value.tags.map { tag -> tag to _detailState.value.manga.filter { it.tags.contains(tag) }.toImmutableList() }.sortedByDescending { it.second.count() }.toImmutableList()
+                    _detailState.value.tags
+                        .map { tag ->
+                            tag to
+                                _detailState.value.manga
+                                    .filter { it.tags.contains(tag) }
+                                    .toImmutableList()
+                        }
+                        .sortedByDescending { it.second.count() }
+                        .toImmutableList()
                 val totalCount = sortedSeries.sumOf { it.second.size }
-                val totalDuration = sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
+                val totalDuration =
+                    sortedSeries.sumOf { pair -> pair.second.sumOf { it.readDuration } }
 
                 _detailState.update {
                     it.copy(
-                        detailTagState = StatsConstants.DetailedTagState(totalReadDuration = totalDuration, totalChapters = totalCount, sortedTagPairs = sortedSeries),
+                        detailTagState =
+                            StatsConstants.DetailedTagState(
+                                totalReadDuration = totalDuration,
+                                totalChapters = totalCount,
+                                sortedTagPairs = sortedSeries
+                            ),
                     )
                 }
             }
@@ -148,15 +201,15 @@ class StatsPresenter(
 
     fun switchState() {
         presenterScope.launchIO {
-            val newState = when (simpleState.value.screenState) {
-                is StatsConstants.ScreenState.Simple -> {
-                    StatsConstants.ScreenState.Detailed
+            val newState =
+                when (simpleState.value.screenState) {
+                    is StatsConstants.ScreenState.Simple -> {
+                        StatsConstants.ScreenState.Detailed
+                    }
+                    else -> {
+                        StatsConstants.ScreenState.Simple
+                    }
                 }
-
-                else -> {
-                    StatsConstants.ScreenState.Simple
-                }
-            }
 
             _simpleState.value = simpleState.value.copy(screenState = newState)
         }
@@ -175,11 +228,16 @@ class StatsPresenter(
     }
 
     private fun getMangaByTrackCount(mangaList: List<LibraryManga>, tracks: List<Track>): Int {
-        return mangaList.map { it.id!! }.map { mangaId ->
-            tracks.filter { it.manga_id == mangaId }.any {
-                !(it.sync_id == TrackManager.MDLIST && FollowStatus.isUnfollowed(it.status))
+        return mangaList
+            .map { it.id!! }
+            .map { mangaId ->
+                tracks
+                    .filter { it.manga_id == mangaId }
+                    .any {
+                        !(it.sync_id == TrackManager.MDLIST && FollowStatus.isUnfollowed(it.status))
+                    }
             }
-        }.count { it }
+            .count { it }
     }
 
     private fun getLoggedTrackers(): List<TrackService> {
@@ -194,29 +252,40 @@ class StatsPresenter(
         }
     }
 
-    private fun getGlobalUpdateManga(libraryManga: List<LibraryManga>): Map<Long?, List<LibraryManga>> {
-        val includedCategories = libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
-        val excludedCategories = libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
+    private fun getGlobalUpdateManga(
+        libraryManga: List<LibraryManga>
+    ): Map<Long?, List<LibraryManga>> {
+        val includedCategories =
+            libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
+        val excludedCategories =
+            libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
         val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
-        return libraryManga.groupBy { it.id }
+        return libraryManga
+            .groupBy { it.id }
             .filterNot { it.value.any { manga -> manga.category in excludedCategories } }
-            .filter { includedCategories.isEmpty() || it.value.any { manga -> manga.category in includedCategories } }
+            .filter {
+                includedCategories.isEmpty() ||
+                    it.value.any { manga -> manga.category in includedCategories }
+            }
             .filter {
                 val manga = it.value.first()
                 when {
                     MANGA_HAS_UNREAD in restrictions && manga.unread != 0 -> true
-                    MANGA_NOT_STARTED in restrictions && manga.totalChapters > 0 && !manga.hasStarted -> true
+                    MANGA_NOT_STARTED in restrictions &&
+                        manga.totalChapters > 0 &&
+                        !manga.hasStarted -> true
                     MANGA_NOT_COMPLETED in restrictions && manga.status == SManga.COMPLETED -> true
-                    MANGA_TRACKING_UNFOLLOWED in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_unfollowed) -> false
-                    MANGA_TRACKING_PLAN_TO_READ in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_plan_to_read) -> false
-
-                    MANGA_TRACKING_DROPPED in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_dropped) -> false
-
-                    MANGA_TRACKING_ON_HOLD in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_on_hold) -> false
-
-                    MANGA_TRACKING_COMPLETED in restrictions && hasTrackWithGivenStatus(manga, R.string.follows_completed) -> false
+                    MANGA_TRACKING_UNFOLLOWED in restrictions &&
+                        hasTrackWithGivenStatus(manga, R.string.follows_unfollowed) -> false
+                    MANGA_TRACKING_PLAN_TO_READ in restrictions &&
+                        hasTrackWithGivenStatus(manga, R.string.follows_plan_to_read) -> false
+                    MANGA_TRACKING_DROPPED in restrictions &&
+                        hasTrackWithGivenStatus(manga, R.string.follows_dropped) -> false
+                    MANGA_TRACKING_ON_HOLD in restrictions &&
+                        hasTrackWithGivenStatus(manga, R.string.follows_on_hold) -> false
+                    MANGA_TRACKING_COMPLETED in restrictions &&
+                        hasTrackWithGivenStatus(manga, R.string.follows_completed) -> false
                     else -> true
-
                 }
             }
     }
@@ -257,13 +326,11 @@ class StatsPresenter(
     }
 
     private fun getUserScore(mangaTracks: List<Track>): Double {
-        val scores = mangaTracks.filter { track ->
-            track.score > 0
-        }.mapNotNull { track ->
-            get10PointScore(track)
-        }.filter {
-            it > 0.0
-        }
+        val scores =
+            mangaTracks
+                .filter { track -> track.score > 0 }
+                .mapNotNull { track -> get10PointScore(track) }
+                .filter { it > 0.0 }
 
         return when (scores.isEmpty()) {
             true -> 0.0

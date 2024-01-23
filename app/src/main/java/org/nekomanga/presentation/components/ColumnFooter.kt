@@ -52,52 +52,59 @@ fun ColumnScope.SearchFooter(
     }
 
     OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .bringIntoViewRequester(bringIntoViewRequester)
-            .onFocusEvent {
-                if (it.isFocused || it.hasFocus) {
-                    scope.launch {
-                        bringIntoViewRequester.bringIntoView()
+        modifier =
+            Modifier.fillMaxWidth()
+                .bringIntoViewRequester(bringIntoViewRequester)
+                .onFocusEvent {
+                    if (it.isFocused || it.hasFocus) {
+                        scope.launch { bringIntoViewRequester.bringIntoView() }
                     }
                 }
-            }
-            .padding(horizontal = Size.small),
+                .padding(horizontal = Size.small),
         value = title,
         enabled = enabled,
         singleLine = true,
-        label = {
-            Text(text = labelText, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
+        label = { Text(text = labelText, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         trailingIcon = {
             if (isError) {
-                Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
             } else if (title.isNotEmpty()) {
                 IconButton(onClick = { textChanged("") }) {
-                    Icon(imageVector = Icons.Default.Cancel, contentDescription = null, tint = themeColorState.buttonColor)
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = null,
+                        tint = themeColorState.buttonColor
+                    )
                 }
             }
         },
         isError = isError,
         onValueChange = { textChanged(it) },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedLabelColor = themeColorState.buttonColor,
-            focusedBorderColor = themeColorState.buttonColor,
-            cursorColor = themeColorState.buttonColor,
-            errorBorderColor = MaterialTheme.colorScheme.error,
-            errorCursorColor = MaterialTheme.colorScheme.error,
-            errorLabelColor = MaterialTheme.colorScheme.error,
-        ),
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Search,
-        ),
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                if (!isError) {
-                    focusManager.clearFocus()
-                    search(title)
-                }
-            },
-        ),
+        colors =
+            TextFieldDefaults.outlinedTextFieldColors(
+                focusedLabelColor = themeColorState.buttonColor,
+                focusedBorderColor = themeColorState.buttonColor,
+                cursorColor = themeColorState.buttonColor,
+                errorBorderColor = MaterialTheme.colorScheme.error,
+                errorCursorColor = MaterialTheme.colorScheme.error,
+                errorLabelColor = MaterialTheme.colorScheme.error,
+            ),
+        keyboardOptions =
+            KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Search,
+            ),
+        keyboardActions =
+            KeyboardActions(
+                onSearch = {
+                    if (!isError) {
+                        focusManager.clearFocus()
+                        search(title)
+                    }
+                },
+            ),
     )
 }

@@ -7,6 +7,7 @@ import androidx.annotation.LayoutRes
 
 /**
  * Extension method to inflate a view directly from its parent.
+ *
  * @param layout the layout to inflate.
  * @param attachToRoot whether to attach the view to the root or not. Defaults to false.
  */

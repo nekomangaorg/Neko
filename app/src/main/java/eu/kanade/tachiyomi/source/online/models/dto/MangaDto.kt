@@ -152,7 +152,6 @@ data class AggregateChapter(
 )
 
 inline fun <reified T> JsonElement.asMdMap(): Map<String, T> {
-    return runCatching {
-        MdUtil.jsonParser.decodeFromJsonElement<Map<String, T>>(jsonObject)
-    }.getOrElse { emptyMap() }
+    return runCatching { MdUtil.jsonParser.decodeFromJsonElement<Map<String, T>>(jsonObject) }
+        .getOrElse { emptyMap() }
 }

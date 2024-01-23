@@ -28,9 +28,7 @@ fun ResultList(
     val scrollState = rememberLazyListState()
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Size.small),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
         state = scrollState,
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Size.small),
@@ -51,13 +49,10 @@ private fun ResultRow(
 ) {
     ElevatedCard(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
         ) {
             Text(
                 text = displayResult.title,
@@ -70,7 +65,10 @@ private fun ResultRow(
                 Text(
                     text = displayResult.information,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+                    color =
+                        MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = NekoColors.mediumAlphaLowContrast
+                        ),
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis,
                 )

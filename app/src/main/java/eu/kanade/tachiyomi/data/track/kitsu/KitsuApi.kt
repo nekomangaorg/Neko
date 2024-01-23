@@ -46,26 +46,29 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
 
     private val jsonBuilder = json.asConverterFactory("application/json".toMediaType())
 
-    private val rest = Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .client(authClient)
-        .addConverterFactory(jsonBuilder)
-        .build()
-        .create(Rest::class.java)
+    private val rest =
+        Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .client(authClient)
+            .addConverterFactory(jsonBuilder)
+            .build()
+            .create(Rest::class.java)
 
-    private val searchRest = Retrofit.Builder()
-        .baseUrl(algoliaKeyUrl)
-        .client(authClient)
-        .addConverterFactory(jsonBuilder)
-        .build()
-        .create(SearchKeyRest::class.java)
+    private val searchRest =
+        Retrofit.Builder()
+            .baseUrl(algoliaKeyUrl)
+            .client(authClient)
+            .addConverterFactory(jsonBuilder)
+            .build()
+            .create(SearchKeyRest::class.java)
 
-    private val algoliaRest = Retrofit.Builder()
-        .baseUrl(algoliaUrl)
-        .client(client)
-        .addConverterFactory(jsonBuilder)
-        .build()
-        .create(AgoliaSearchRest::class.java)
+    private val algoliaRest =
+        Retrofit.Builder()
+            .baseUrl(algoliaUrl)
+            .client(client)
+            .addConverterFactory(jsonBuilder)
+            .build()
+            .create(AgoliaSearchRest::class.java)
 
     suspend fun addLibManga(track: Track, userId: String): Track {
         val data = buildJsonObject {
@@ -106,10 +109,11 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                 put("id", track.media_id)
                 putJsonObject("attributes") {
                     put("status", track.toKitsuStatus())
-                    val chapterCount = listOfNotNull(
-                        track.total_chapters.takeIf { it > 0 },
-                        track.last_chapter_read.toInt(),
-                    )
+                    val chapterCount =
+                        listOfNotNull(
+                            track.total_chapters.takeIf { it > 0 },
+                            track.last_chapter_read.toInt(),
+                        )
                     put("progress", chapterCount.minOrNull())
                     put("ratingTwenty", track.toKitsuScore())
                     put("startedAt", KitsuDateHelper.convert(track.started_reading_date))
@@ -156,11 +160,18 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     ): List<TrackSearch> {
         if (!wasPreviouslyTracked && !manga.kitsu_id.isNullOrBlank()) {
             with(json) {
-                authClient.newCall(org.nekomanga.core.network.GET(apiMangaUrl(manga.kitsu_id!!)))
-                    .await().parseAs<JsonObject>().let {
+                authClient
+                    .newCall(org.nekomanga.core.network.GET(apiMangaUrl(manga.kitsu_id!!)))
+                    .await()
+                    .parseAs<JsonObject>()
+                    .let {
                         val id = it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive
                         val map =
-                            it["data"]!!.jsonArray[0].jsonObject["attributes"]!!.jsonObject.toMutableMap()
+                            it["data"]!!
+                                .jsonArray[0]
+                                .jsonObject["attributes"]!!
+                                .jsonObject
+                                .toMutableMap()
                         map["id"] = id
                         return listOf(KitsuSearchManga(JsonObject(map), true).toTrack())
                     }
@@ -174,11 +185,10 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     }
 
     private suspend fun algoliaSearch(key: String, query: String): List<TrackSearch> {
-        val jsonObject = buildJsonObject {
-            put("params", "query=$query$algoliaFilter")
-        }
+        val jsonObject = buildJsonObject { put("params", "query=$query$algoliaFilter") }
         return algoliaRest.getSearchQuery(algoliaAppId, key, jsonObject).let {
-            it["hits"]!!.jsonArray
+            it["hits"]!!
+                .jsonArray
                 .map { KitsuSearchManga(it.jsonObject) }
                 .filter { it.subType != "novel" }
                 .map { it.toTrack() }
@@ -266,8 +276,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     }
 
     private interface SearchKeyRest {
-        @GET("media/")
-        suspend fun getKey(): JsonObject
+        @GET("media/") suspend fun getKey(): JsonObject
     }
 
     private interface AgoliaSearchRest {
@@ -315,14 +324,16 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             return "${baseUrl}manga?filter[slug]=$remoteSlug"
         }
 
-        fun refreshTokenRequest(token: String) = POST(
-            "${loginUrl}oauth/token",
-            body = FormBody.Builder()
-                .add("grant_type", "refresh_token")
-                .add("refresh_token", token)
-                .add("client_id", clientId)
-                .add("client_secret", clientSecret)
-                .build(),
-        )
+        fun refreshTokenRequest(token: String) =
+            POST(
+                "${loginUrl}oauth/token",
+                body =
+                    FormBody.Builder()
+                        .add("grant_type", "refresh_token")
+                        .add("refresh_token", token)
+                        .add("client_id", clientId)
+                        .add("client_secret", clientSecret)
+                        .build(),
+            )
     }
 }

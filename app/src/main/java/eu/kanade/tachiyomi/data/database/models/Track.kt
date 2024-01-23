@@ -39,8 +39,6 @@ interface Track : Serializable {
     }
 
     companion object {
-        fun create(serviceId: Int): Track = TrackImpl().apply {
-            sync_id = serviceId
-        }
+        fun create(serviceId: Int): Track = TrackImpl().apply { sync_id = serviceId }
     }
 }

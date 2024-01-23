@@ -11,24 +11,27 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 
 class ChapterProgressPutResolver : PutResolver<Chapter>() {
 
-    override fun performPut(db: StorIOSQLite, chapter: Chapter) = db.inTransactionReturn {
-        val updateQuery = mapToUpdateQuery(chapter)
-        val contentValues = mapToContentValues(chapter)
+    override fun performPut(db: StorIOSQLite, chapter: Chapter) =
+        db.inTransactionReturn {
+            val updateQuery = mapToUpdateQuery(chapter)
+            val contentValues = mapToContentValues(chapter)
 
-        val numberOfRowsUpdated = db.lowLevel().update(updateQuery, contentValues)
-        PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
-    }
+            val numberOfRowsUpdated = db.lowLevel().update(updateQuery, contentValues)
+            PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
+        }
 
-    fun mapToUpdateQuery(chapter: Chapter) = UpdateQuery.builder()
-        .table(ChapterTable.TABLE)
-        .where("${ChapterTable.COL_ID} = ?")
-        .whereArgs(chapter.id)
-        .build()
+    fun mapToUpdateQuery(chapter: Chapter) =
+        UpdateQuery.builder()
+            .table(ChapterTable.TABLE)
+            .where("${ChapterTable.COL_ID} = ?")
+            .whereArgs(chapter.id)
+            .build()
 
-    fun mapToContentValues(chapter: Chapter) = ContentValues(3).apply {
-        put(ChapterTable.COL_READ, chapter.read)
-        put(ChapterTable.COL_BOOKMARK, chapter.bookmark)
-        put(ChapterTable.COL_LAST_PAGE_READ, chapter.last_page_read)
-        put(ChapterTable.COL_PAGES_LEFT, chapter.pages_left)
-    }
+    fun mapToContentValues(chapter: Chapter) =
+        ContentValues(3).apply {
+            put(ChapterTable.COL_READ, chapter.read)
+            put(ChapterTable.COL_BOOKMARK, chapter.bookmark)
+            put(ChapterTable.COL_LAST_PAGE_READ, chapter.last_page_read)
+            put(ChapterTable.COL_PAGES_LEFT, chapter.pages_left)
+        }
 }

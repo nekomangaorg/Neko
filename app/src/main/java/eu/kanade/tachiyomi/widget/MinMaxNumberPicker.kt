@@ -33,8 +33,6 @@ class MinMaxNumberPicker @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-        doOnLayout {
-            findDescendant<EditText>()?.setRawInputType(InputType.TYPE_CLASS_NUMBER)
-        }
+        doOnLayout { findDescendant<EditText>()?.setRawInputType(InputType.TYPE_CLASS_NUMBER) }
     }
 }

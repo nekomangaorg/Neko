@@ -20,7 +20,8 @@ class NucleusConductorDelegate<P : Presenter<*>>(private val factory: PresenterF
 
     fun onSaveInstanceState(): Bundle {
         val bundle = Bundle()
-        //        getPresenter(); // Workaround a crash related to saving instance state with child routers
+        //        getPresenter(); // Workaround a crash related to saving instance state with child
+        // routers
         presenter?.save(bundle)
         return bundle
     }

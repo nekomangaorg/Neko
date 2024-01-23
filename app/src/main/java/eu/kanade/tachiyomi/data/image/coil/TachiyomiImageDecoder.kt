@@ -14,16 +14,18 @@ import okio.BufferedSource
 import tachiyomi.decoder.ImageDecoder
 
 /**
- * A [Decoder] that uses built-in [ImageDecoder] to decode images that is not supported by the system.
+ * A [Decoder] that uses built-in [ImageDecoder] to decode images that is not supported by the
+ * system.
  */
-class TachiyomiImageDecoder(private val resources: ImageSource, private val options: Options) : Decoder {
+class TachiyomiImageDecoder(private val resources: ImageSource, private val options: Options) :
+    Decoder {
 
     override suspend fun decode(): DecodeResult {
-        val decoder = resources.sourceOrNull()?.use {
-            ImageDecoder.newInstance(it.inputStream())
-        }
+        val decoder = resources.sourceOrNull()?.use { ImageDecoder.newInstance(it.inputStream()) }
 
-        check(decoder != null && decoder.width > 0 && decoder.height > 0) { "Failed to initialize decoder." }
+        check(decoder != null && decoder.width > 0 && decoder.height > 0) {
+            "Failed to initialize decoder."
+        }
 
         val bitmap = decoder.decode(rgb565 = options.allowRgb565)
         decoder.recycle()
@@ -38,17 +40,20 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
 
     class Factory : Decoder.Factory {
 
-        override fun create(result: SourceResult, options: Options, imageLoader: ImageLoader): Decoder? {
+        override fun create(
+            result: SourceResult,
+            options: Options,
+            imageLoader: ImageLoader
+        ): Decoder? {
             if (!isApplicable(result.source.source())) return null
             return TachiyomiImageDecoder(result.source, options)
         }
 
         private fun isApplicable(source: BufferedSource): Boolean {
-            val type = source.peek().inputStream().use {
-                ImageUtil.findImageType(it)
-            }
+            val type = source.peek().inputStream().use { ImageUtil.findImageType(it) }
             return when (type) {
-                ImageUtil.ImageType.AVIF, ImageUtil.ImageType.JXL -> true
+                ImageUtil.ImageType.AVIF,
+                ImageUtil.ImageType.JXL -> true
                 ImageUtil.ImageType.HEIF -> Build.VERSION.SDK_INT < Build.VERSION_CODES.O
                 else -> false
             }

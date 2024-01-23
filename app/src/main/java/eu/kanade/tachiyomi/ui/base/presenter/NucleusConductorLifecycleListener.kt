@@ -4,7 +4,8 @@ import android.os.Bundle
 import android.view.View
 import com.bluelinelabs.conductor.Controller
 
-class NucleusConductorLifecycleListener(private val delegate: NucleusConductorDelegate<*>) : Controller.LifecycleListener() {
+class NucleusConductorLifecycleListener(private val delegate: NucleusConductorDelegate<*>) :
+    Controller.LifecycleListener() {
 
     override fun postCreateView(controller: Controller, view: View) {
         delegate.onTakeView(controller)

@@ -35,11 +35,12 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
     ) {
         // Update the unread count and its visibility.
 
-        val unreadBadgeBackground = if (showTotalChapters) {
-            context.contextCompatColor(R.color.total_badge)
-        } else {
-            context.getResourceColor(R.attr.unreadBadgeColor)
-        }
+        val unreadBadgeBackground =
+            if (showTotalChapters) {
+                context.contextCompatColor(R.color.total_badge)
+            } else {
+                context.getResourceColor(R.attr.unreadBadgeColor)
+            }
 
         with(binding.unreadText) {
             isVisible = unread > 0 || unread == -1 || showTotalChapters
@@ -64,11 +65,12 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
             if (!isVisible) {
                 return@with
             }
-            text = if (downloads == -2) {
-                resources.getString(R.string.local)
-            } else {
-                downloads.toString()
-            }
+            text =
+                if (downloads == -2) {
+                    resources.getString(R.string.local)
+                } else {
+                    downloads.toString()
+                }
 
             setTextColor(context.getResourceColor(R.attr.colorOnDownloadBadge))
             setBackgroundColor(context.getResourceColor(R.attr.colorDownloadBadge))
@@ -81,7 +83,9 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 binding.downloadText.background =
                     MaterialShapeDrawable(makeShapeCorners(topStart = radius)).apply {
                         this.fillColor =
-                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorDownloadBadge))
+                            ColorStateList.valueOf(
+                                context.getResourceColor(R.attr.colorDownloadBadge)
+                            )
                     }
                 binding.unreadText.background =
                     MaterialShapeDrawable(makeShapeCorners(bottomEnd = radius)).apply {
@@ -99,7 +103,9 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 binding.downloadText.background =
                     MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
                         this.fillColor =
-                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorDownloadBadge))
+                            ColorStateList.valueOf(
+                                context.getResourceColor(R.attr.colorDownloadBadge)
+                            )
                     }
             }
         }
@@ -147,15 +153,16 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
             unreadText.updatePaddingRelative(start = 5.dpToPx)
             unreadText.isVisible = true
-            val statusText = when (status) {
-                FollowStatus.READING -> R.string.follows_reading
-                FollowStatus.UNFOLLOWED -> R.string.follows_unfollowed
-                FollowStatus.COMPLETED -> R.string.follows_completed
-                FollowStatus.ON_HOLD -> R.string.follows_on_hold
-                FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
-                FollowStatus.DROPPED -> R.string.follows_dropped
-                FollowStatus.RE_READING -> R.string.follows_re_reading
-            }
+            val statusText =
+                when (status) {
+                    FollowStatus.READING -> R.string.follows_reading
+                    FollowStatus.UNFOLLOWED -> R.string.follows_unfollowed
+                    FollowStatus.COMPLETED -> R.string.follows_completed
+                    FollowStatus.ON_HOLD -> R.string.follows_on_hold
+                    FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
+                    FollowStatus.DROPPED -> R.string.follows_dropped
+                    FollowStatus.RE_READING -> R.string.follows_re_reading
+                }
             unreadText.text = resources.getText(statusText)
         }
     }

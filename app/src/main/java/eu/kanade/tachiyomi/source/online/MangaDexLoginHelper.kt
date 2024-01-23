@@ -25,7 +25,9 @@ class MangaDexLoginHelper {
 
     fun wasTokenRefreshedRecently(): Boolean {
         val lastRefreshTime = preferences.lastRefreshTime().get()
-        TimberKt.i { "$tag last refresh time $lastRefreshTime current time ${System.currentTimeMillis()}" }
+        TimberKt.i {
+            "$tag last refresh time $lastRefreshTime current time ${System.currentTimeMillis()}"
+        }
 
         if ((lastRefreshTime + TimeUnit.MINUTES.toMillis(15)) > System.currentTimeMillis()) {
             TimberKt.i { "$tag Token was refreshed recently don't hit dex to check" }
@@ -42,27 +44,35 @@ class MangaDexLoginHelper {
             invalidate()
             return false
         }
-        val formBody = FormBody.Builder()
-            .add("client_id", MdConstants.Login.clientId)
-            .add("grant_type", MdConstants.Login.refreshToken)
-            .add("refresh_token", refreshToken)
-            .add("code_verifier", preferences.codeVerifier().get())
-            .add("redirect_uri", MdConstants.Login.redirectUri)
-            .build()
-        val error = kotlin.runCatching {
-            with(MdUtil.jsonParser) {
-                val data = networkHelper.client.newCall(
-                    POST(
-                        url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
-                        body = formBody,
-                    ),
-                ).await().parseAs<LoginResponseDto>()
-                preferences.setTokens(
-                    data.refreshToken,
-                    data.accessToken,
-                )
-            }
-        }.exceptionOrNull()
+        val formBody =
+            FormBody.Builder()
+                .add("client_id", MdConstants.Login.clientId)
+                .add("grant_type", MdConstants.Login.refreshToken)
+                .add("refresh_token", refreshToken)
+                .add("code_verifier", preferences.codeVerifier().get())
+                .add("redirect_uri", MdConstants.Login.redirectUri)
+                .build()
+        val error =
+            kotlin
+                .runCatching {
+                    with(MdUtil.jsonParser) {
+                        val data =
+                            networkHelper.client
+                                .newCall(
+                                    POST(
+                                        url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
+                                        body = formBody,
+                                    ),
+                                )
+                                .await()
+                                .parseAs<LoginResponseDto>()
+                        preferences.setTokens(
+                            data.refreshToken,
+                            data.accessToken,
+                        )
+                    }
+                }
+                .exceptionOrNull()
 
         return when (error == null) {
             true -> true
@@ -74,33 +84,39 @@ class MangaDexLoginHelper {
         }
     }
 
-    /** Login given the generated authorization code
-     */
+    /** Login given the generated authorization code */
     suspend fun login(authorizationCode: String): Boolean {
 
-        val loginFormBody = FormBody.Builder()
-            .add("client_id", MdConstants.Login.clientId)
-            .add("grant_type", MdConstants.Login.authorizationCode)
-            .add("code", authorizationCode)
-            .add("code_verifier", preferences.codeVerifier().get())
-            .add("redirect_uri", MdConstants.Login.redirectUri)
-            .build()
+        val loginFormBody =
+            FormBody.Builder()
+                .add("client_id", MdConstants.Login.clientId)
+                .add("grant_type", MdConstants.Login.authorizationCode)
+                .add("code", authorizationCode)
+                .add("code_verifier", preferences.codeVerifier().get())
+                .add("redirect_uri", MdConstants.Login.redirectUri)
+                .build()
 
-        val error = kotlin.runCatching {
-            with(MdUtil.jsonParser) {
-                val data = networkHelper.mangadexClient.newCall(
-                    POST(
-                        url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
-                        body = loginFormBody,
-                    ),
-                ).await().parseAs<LoginResponseDto>()
-                preferences.setTokens(
-                    data.refreshToken,
-                    data.accessToken,
-                )
-            }
-
-        }.exceptionOrNull()
+        val error =
+            kotlin
+                .runCatching {
+                    with(MdUtil.jsonParser) {
+                        val data =
+                            networkHelper.mangadexClient
+                                .newCall(
+                                    POST(
+                                        url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
+                                        body = loginFormBody,
+                                    ),
+                                )
+                                .await()
+                                .parseAs<LoginResponseDto>()
+                        preferences.setTokens(
+                            data.refreshToken,
+                            data.accessToken,
+                        )
+                    }
+                }
+                .exceptionOrNull()
 
         return when (error == null) {
             true -> true
@@ -120,22 +136,31 @@ class MangaDexLoginHelper {
             return true
         }
 
-        val formBody = FormBody.Builder()
-            .add("client_id", MdConstants.Login.clientId)
-            .add("refresh_token", refreshToken)
-            .add("redirect_uri", MdConstants.Login.redirectUri)
-            .build()
+        val formBody =
+            FormBody.Builder()
+                .add("client_id", MdConstants.Login.clientId)
+                .add("refresh_token", refreshToken)
+                .add("redirect_uri", MdConstants.Login.redirectUri)
+                .build()
 
-        val error = kotlin.runCatching {
-            networkHelper.mangadexClient.newCall(
-                POST(
-                    url = MdConstants.Api.baseAuthUrl + MdConstants.Api.logout,
-                    headers = Headers.Builder().add("Authorization", "Bearer $sessionToken").build(),
-                    body = formBody,
-                ),
-            ).await()
-            invalidate()
-        }.exceptionOrNull()
+        val error =
+            kotlin
+                .runCatching {
+                    networkHelper.mangadexClient
+                        .newCall(
+                            POST(
+                                url = MdConstants.Api.baseAuthUrl + MdConstants.Api.logout,
+                                headers =
+                                    Headers.Builder()
+                                        .add("Authorization", "Bearer $sessionToken")
+                                        .build(),
+                                body = formBody,
+                            ),
+                        )
+                        .await()
+                    invalidate()
+                }
+                .exceptionOrNull()
 
         return when (error == null) {
             true -> true
@@ -146,16 +171,15 @@ class MangaDexLoginHelper {
         }
     }
 
-    /**
-     * Clears the session and refresh tokens
-     */
+    /** Clears the session and refresh tokens */
     fun invalidate() {
         preferences.removeMangaDexUserName()
         preferences.removeTokens()
     }
 
     fun isLoggedIn(): Boolean {
-        return preferences.refreshToken().get().isNotEmpty() && preferences.sessionToken().get().isNotEmpty()
+        return preferences.refreshToken().get().isNotEmpty() &&
+            preferences.sessionToken().get().isNotEmpty()
     }
 
     fun sessionToken(): String {

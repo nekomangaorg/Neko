@@ -8,7 +8,8 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.databinding.AddCategoryItemBinding
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 
-class AddCategoryItem(val category: Category) : AbstractItem<FastAdapter.ViewHolder<AddCategoryItem>>() {
+class AddCategoryItem(val category: Category) :
+    AbstractItem<FastAdapter.ViewHolder<AddCategoryItem>>() {
 
     /** defines the type defining this item. must be unique. preferably an id */
     override val type: Int = R.id.category_checkbox
@@ -23,6 +24,7 @@ class AddCategoryItem(val category: Category) : AbstractItem<FastAdapter.ViewHol
             field = value
             isSelected = value != TriStateCheckBox.State.UNCHECKED
         }
+
     var skipInversed = false
 
     override fun getViewHolder(v: View): FastAdapter.ViewHolder<AddCategoryItem> {

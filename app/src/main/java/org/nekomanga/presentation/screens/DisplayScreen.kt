@@ -75,12 +75,8 @@ fun DisplayScreen(
         )
     var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
 
-    /**
-     * Close the bottom sheet on back if its open
-     */
-    BackHandler(enabled = sheetState.isVisible) {
-        scope.launch { sheetState.hide() }
-    }
+    /** Close the bottom sheet on back if its open */
+    BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -94,38 +90,42 @@ fun DisplayScreen(
                     addNewCategory = addNewCategory,
                     confirmClicked = { selectedCategories ->
                         scope.launch { sheetState.hide() }
-                        longClickedMangaId?.let {
-                            toggleFavorite(it, selectedCategories)
-                        }
+                        longClickedMangaId?.let { toggleFavorite(it, selectedCategories) }
                     },
                 )
             }
         },
     ) {
         NekoScaffold(
-            title = if (displayScreenState.value.titleRes != null) stringResource(id = displayScreenState.value.titleRes!!) else displayScreenState.value.title,
+            title =
+                if (displayScreenState.value.titleRes != null)
+                    stringResource(id = displayScreenState.value.titleRes!!)
+                else displayScreenState.value.title,
             type = NekoScaffoldType.Title,
             onNavigationIconClicked = onBackPress,
             actions = {
                 AppBarActions(
                     actions =
-                    listOf(
-                        listGridAppBarAction(
-                            isList = displayScreenState.value.isList,
-                            onClick = switchDisplayClick,
+                        listOf(
+                            listGridAppBarAction(
+                                isList = displayScreenState.value.isList,
+                                onClick = switchDisplayClick,
+                            ),
+                            showLibraryEntriesAction(
+                                showEntries = displayScreenState.value.showLibraryEntries,
+                                onClick = switchLibraryVisibilityClick,
+                            ),
                         ),
-                        showLibraryEntriesAction(
-                            showEntries = displayScreenState.value.showLibraryEntries,
-                            onClick = switchLibraryVisibilityClick,
-                        ),
-                    ),
                 )
             },
         ) { incomingContentPadding ->
             val contentPadding =
                 PaddingValues(
-                    bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                        .asPaddingValues().calculateBottomPadding(),
+                    bottom =
+                        WindowInsets.navigationBars
+                            .only(WindowInsetsSides.Bottom)
+                            .asPaddingValues()
+                            .calculateBottomPadding(),
                     top = incomingContentPadding.calculateTopPadding(),
                 )
 
@@ -145,8 +145,7 @@ fun DisplayScreen(
             if (displayScreenState.value.isLoading && displayScreenState.value.page == 1) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Loading(
-                        Modifier
-                            .zIndex(1f)
+                        Modifier.zIndex(1f)
                             .padding(Size.small)
                             .padding(top = contentPadding.calculateTopPadding())
                             .align(Alignment.TopCenter),
@@ -157,7 +156,10 @@ fun DisplayScreen(
                     icon = Icons.Default.ErrorOutline,
                     iconSize = 176.dp,
                     message = displayScreenState.value.error,
-                    actions = if (displayScreenState.value.page == 1) persistentListOf(Action(R.string.retry, retryClick)) else persistentListOf(),
+                    actions =
+                        if (displayScreenState.value.page == 1)
+                            persistentListOf(Action(R.string.retry, retryClick))
+                        else persistentListOf(),
                     contentPadding = incomingContentPadding,
                 )
             } else {
@@ -175,7 +177,8 @@ fun DisplayScreen(
                     MangaGrid(
                         mangaList = displayScreenState.value.filteredDisplayManga,
                         shouldOutlineCover = displayScreenState.value.outlineCovers,
-                        columns = numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
+                        columns =
+                            numberOfColumns(rawValue = displayScreenState.value.rawColumnCount),
                         isComfortable = displayScreenState.value.isComfortableGrid,
                         contentPadding = contentPadding,
                         onClick = openManga,
@@ -187,10 +190,13 @@ fun DisplayScreen(
                 if (displayScreenState.value.isLoading && displayScreenState.value.page != 1) {
                     Box(Modifier.fillMaxSize()) {
                         LinearProgressIndicator(
-                            modifier = Modifier
-                                .padding(bottom = contentPadding.calculateBottomPadding() + Size.small)
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth(),
+                            modifier =
+                                Modifier.padding(
+                                        bottom =
+                                            contentPadding.calculateBottomPadding() + Size.small
+                                    )
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth(),
                         )
                     }
                 }

@@ -28,16 +28,10 @@ interface Chapter : SChapter, Serializable {
 
     companion object {
 
-        fun create(): Chapter = ChapterImpl().apply {
-            chapter_number = -1f
-        }
+        fun create(): Chapter = ChapterImpl().apply { chapter_number = -1f }
 
         fun List<Chapter>.copy(): List<Chapter> {
-            return map {
-                ChapterImpl().apply {
-                    copyFrom(it)
-                }
-            }
+            return map { ChapterImpl().apply { copyFrom(it) } }
         }
     }
 

@@ -13,7 +13,9 @@ import androidx.preference.PreferenceViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 
-class SwitchPreferenceCategory @JvmOverloads constructor(
+class SwitchPreferenceCategory
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) :

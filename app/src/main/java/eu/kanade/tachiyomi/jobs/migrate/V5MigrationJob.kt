@@ -63,10 +63,8 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
     }
 
     private fun updateNotificationProgress(title: String, progress: Int, total: Int) {
-        val notification = progressNotification
-            .setContentTitle(title)
-            .setProgress(total, progress, false)
-            .build()
+        val notification =
+            progressNotification.setContentTitle(title).setProgress(total, progress, false).build()
         applicationContext.notificationManager.notify(
             Notifications.Id.V5.Progress,
             notification,
@@ -75,18 +73,20 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
 
     private fun completeNotification(numberProcessed: Int) {
         val notification =
-            applicationContext.notificationBuilder(Notifications.Channel.v5Migration).apply {
-                setSmallIcon(R.drawable.ic_neko_notification)
-                setLargeIcon(notificationBitmap)
-                setAutoCancel(true)
-                setContentTitle(context.getString(R.string.v5_migration_complete))
-                setContentText(
-                    context.getString(
-                        R.string.number_of_migrated,
-                        numberProcessed,
-                    ),
-                )
-            }
+            applicationContext
+                .notificationBuilder(Notifications.Channel.v5Migration)
+                .apply {
+                    setSmallIcon(R.drawable.ic_neko_notification)
+                    setLargeIcon(notificationBitmap)
+                    setAutoCancel(true)
+                    setContentTitle(context.getString(R.string.v5_migration_complete))
+                    setContentText(
+                        context.getString(
+                            R.string.number_of_migrated,
+                            numberProcessed,
+                        ),
+                    )
+                }
                 .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.V5.Complete,
@@ -96,31 +96,32 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
 
     private fun errorNotification(errors: List<String>, uri: Uri?) {
         val notification =
-            applicationContext.notificationBuilder(Notifications.Channel.v5Migration).apply {
-                setContentTitle(context.getString(R.string.v5_migration_service))
-                setSmallIcon(R.drawable.ic_neko_notification)
-                setLargeIcon(notificationBitmap)
-                setAutoCancel(true)
-                setContentTitle(
-                    context.resources.getQuantityString(
-                        R.plurals.notification_update_failed,
-                        errors.size,
-                        errors.size,
-                    ),
-                )
-                addAction(
-                    R.drawable.ic_folder_24dp,
-                    context.getString(R.string.view_all_errors),
-                    NotificationReceiver.openErrorLogPendingActivity(context, uri!!),
-                )
-                setStyle(
-                    NotificationCompat.BigTextStyle().bigText(
-                        errors.joinToString("\n") {
-                            it.chop(TITLE_MAX_LEN)
-                        },
-                    ),
-                )
-            }
+            applicationContext
+                .notificationBuilder(Notifications.Channel.v5Migration)
+                .apply {
+                    setContentTitle(context.getString(R.string.v5_migration_service))
+                    setSmallIcon(R.drawable.ic_neko_notification)
+                    setLargeIcon(notificationBitmap)
+                    setAutoCancel(true)
+                    setContentTitle(
+                        context.resources.getQuantityString(
+                            R.plurals.notification_update_failed,
+                            errors.size,
+                            errors.size,
+                        ),
+                    )
+                    addAction(
+                        R.drawable.ic_folder_24dp,
+                        context.getString(R.string.view_all_errors),
+                        NotificationReceiver.openErrorLogPendingActivity(context, uri!!),
+                    )
+                    setStyle(
+                        NotificationCompat.BigTextStyle()
+                            .bigText(
+                                errors.joinToString("\n") { it.chop(TITLE_MAX_LEN) },
+                            ),
+                    )
+                }
                 .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Status.Error,

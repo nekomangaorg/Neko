@@ -22,9 +22,7 @@ import uy.kohesive.injekt.api.get
 class ComikeyHandler {
     val baseUrl = "https://comikey.com"
     private val apiUrl = "$baseUrl/sapi"
-    val headers = Headers.Builder()
-        .add("User-Agent", USER_AGENT)
-        .build()
+    val headers = Headers.Builder().add("User-Agent", USER_AGENT).build()
 
     val client: OkHttpClient by lazy { Injekt.get<NetworkHelper>().client }
 
@@ -63,7 +61,8 @@ class ComikeyHandler {
     fun pageListParse(response: Response): List<Page> {
         return Json.parseToJsonElement(response.body!!.string())
             .jsonObject["readingOrder"]!!
-            .jsonArray.mapIndexed { index, element ->
+            .jsonArray
+            .mapIndexed { index, element ->
                 val url = element.jsonObject["href"]!!.jsonPrimitive.content
                 Page(index, url, url)
             }

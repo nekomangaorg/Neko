@@ -12,9 +12,7 @@ open class BasePresenter<V> : RxPresenter<V>() {
 
     lateinit var presenterScope: CoroutineScope
 
-    /**
-     * Query from the view where applicable
-     */
+    /** Query from the view where applicable */
     var query: String = ""
         protected set
 
@@ -40,8 +38,10 @@ open class BasePresenter<V> : RxPresenter<V>() {
      * @param onNext function to execute when the observable emits an item.
      * @param onError function to execute when the observable throws an error.
      */
-    fun <T> Observable<T>.subscribeFirst(onNext: (V, T) -> Unit, onError: ((V, Throwable) -> Unit)? = null) =
-        compose(deliverFirst<T>()).subscribe(split(onNext, onError)).apply { add(this) }
+    fun <T> Observable<T>.subscribeFirst(
+        onNext: (V, T) -> Unit,
+        onError: ((V, Throwable) -> Unit)? = null
+    ) = compose(deliverFirst<T>()).subscribe(split(onNext, onError)).apply { add(this) }
 
     /**
      * Subscribes an observable with [deliverLatestCache] and adds it to the presenter's lifecycle
@@ -50,8 +50,10 @@ open class BasePresenter<V> : RxPresenter<V>() {
      * @param onNext function to execute when the observable emits an item.
      * @param onError function to execute when the observable throws an error.
      */
-    fun <T> Observable<T>.subscribeLatestCache(onNext: (V, T) -> Unit, onError: ((V, Throwable) -> Unit)? = null) =
-        compose(deliverLatestCache<T>()).subscribe(split(onNext, onError)).apply { add(this) }
+    fun <T> Observable<T>.subscribeLatestCache(
+        onNext: (V, T) -> Unit,
+        onError: ((V, Throwable) -> Unit)? = null
+    ) = compose(deliverLatestCache<T>()).subscribe(split(onNext, onError)).apply { add(this) }
 
     /**
      * Subscribes an observable with [deliverReplay] and adds it to the presenter's lifecycle
@@ -60,8 +62,10 @@ open class BasePresenter<V> : RxPresenter<V>() {
      * @param onNext function to execute when the observable emits an item.
      * @param onError function to execute when the observable throws an error.
      */
-    fun <T> Observable<T>.subscribeReplay(onNext: (V, T) -> Unit, onError: ((V, Throwable) -> Unit)? = null) =
-        compose(deliverReplay<T>()).subscribe(split(onNext, onError)).apply { add(this) }
+    fun <T> Observable<T>.subscribeReplay(
+        onNext: (V, T) -> Unit,
+        onError: ((V, Throwable) -> Unit)? = null
+    ) = compose(deliverReplay<T>()).subscribe(split(onNext, onError)).apply { add(this) }
 
     /**
      * Subscribes an observable with [DeliverWithView] and adds it to the presenter's lifecycle
@@ -70,13 +74,14 @@ open class BasePresenter<V> : RxPresenter<V>() {
      * @param onNext function to execute when the observable emits an item.
      * @param onError function to execute when the observable throws an error.
      */
-    fun <T> Observable<T>.subscribeWithView(onNext: (V, T) -> Unit, onError: ((V, Throwable) -> Unit)? = null) =
-        compose(DeliverWithView<V, T>(view())).subscribe(split(onNext, onError)).apply { add(this) }
+    fun <T> Observable<T>.subscribeWithView(
+        onNext: (V, T) -> Unit,
+        onError: ((V, Throwable) -> Unit)? = null
+    ) = compose(DeliverWithView<V, T>(view())).subscribe(split(onNext, onError)).apply { add(this) }
 
-    /**
-     * A deliverable that only emits to the view if attached, otherwise the event is ignored.
-     */
-    class DeliverWithView<View, T>(private val view: Observable<View>) : Observable.Transformer<T, Delivery<View, T>> {
+    /** A deliverable that only emits to the view if attached, otherwise the event is ignored. */
+    class DeliverWithView<View, T>(private val view: Observable<View>) :
+        Observable.Transformer<T, Delivery<View, T>> {
 
         override fun call(observable: Observable<T>): Observable<Delivery<View, T>> {
             return observable

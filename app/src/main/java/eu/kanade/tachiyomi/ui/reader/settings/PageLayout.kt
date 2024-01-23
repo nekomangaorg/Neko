@@ -13,11 +13,9 @@ enum class PageLayout(
     DOUBLE_PAGES(1, 2, R.string.double_pages),
     AUTOMATIC(2, 3, R.string.automatic, R.string.automatic_orientation),
     SPLIT_PAGES(3, 1, R.string.split_double_pages),
-
     ;
 
-    @StringRes
-    val fullStringRes = _fullStringRes ?: stringRes
+    @StringRes val fullStringRes = _fullStringRes ?: stringRes
 
     companion object {
         fun fromPreference(preference: Int): PageLayout =

@@ -16,8 +16,7 @@ class RecentMangaItem(
     val mch: MangaChapterHistory = MangaChapterHistory.createBlank(),
     chapter: Chapter = ChapterImpl(),
     header: AbstractHeaderItem<*>?,
-) :
-    BaseChapterItem<BaseChapterHolder, AbstractHeaderItem<*>>(chapter, header) {
+) : BaseChapterItem<BaseChapterHolder, AbstractHeaderItem<*>>(chapter, header) {
 
     override fun getLayoutRes(): Int {
         return if (mch.manga.id == null) {
@@ -70,7 +69,9 @@ class RecentMangaItem(
         payloads: MutableList<Any?>?,
     ) {
         if (mch.manga.id == null) {
-            (holder as? RecentMangaFooterHolder)?.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
+            (holder as? RecentMangaFooterHolder)?.bind(
+                (header as? RecentMangaHeaderItem)?.recentsType ?: 0
+            )
         } else if (chapter.id != null) (holder as? RecentMangaHolder)?.bind(this)
     }
 }

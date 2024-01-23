@@ -14,12 +14,13 @@ class RetryWithDelay(
 
     private var retryCount = 0
 
-    override fun call(attempts: Observable<out Throwable>) = attempts.flatMap { error ->
-        val count = ++retryCount
-        if (count <= maxRetries) {
-            Observable.timer(retryStrategy(count).toLong(), MILLISECONDS, scheduler)
-        } else {
-            Observable.error(error as Throwable)
+    override fun call(attempts: Observable<out Throwable>) =
+        attempts.flatMap { error ->
+            val count = ++retryCount
+            if (count <= maxRetries) {
+                Observable.timer(retryStrategy(count).toLong(), MILLISECONDS, scheduler)
+            } else {
+                Observable.error(error as Throwable)
+            }
         }
-    }
 }

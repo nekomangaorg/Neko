@@ -7,18 +7,21 @@ import android.util.AttributeSet
 import androidx.core.content.edit
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-open class ListMatPreference @JvmOverloads constructor(
+open class ListMatPreference
+@JvmOverloads
+constructor(
     activity: Activity?,
     context: Context,
-    attrs: AttributeSet? =
-        null,
-) :
-    MatPreference(activity, context, attrs) {
+    attrs: AttributeSet? = null,
+) : MatPreference(activity, context, attrs) {
 
     var entryValues: List<String> = emptyList()
     var entriesRes: Array<Int>
         get() = emptyArray()
-        set(value) { entries = value.map { context.getString(it) } }
+        set(value) {
+            entries = value.map { context.getString(it) }
+        }
+
     private var defValue: String = ""
     var entries: List<String> = emptyList()
 
@@ -27,19 +30,18 @@ open class ListMatPreference @JvmOverloads constructor(
         defValue = defaultValue as? String ?: defValue
     }
 
-    override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
-        val index = entryValues.indexOf(sharedPreferences?.getString(key, defValue))
-        if (entries.isEmpty() || index == -1) {
-            ""
-        } else {
-            entries[index]
+    override var customSummaryProvider: SummaryProvider<MatPreference>? =
+        SummaryProvider<MatPreference> {
+            val index = entryValues.indexOf(sharedPreferences?.getString(key, defValue))
+            if (entries.isEmpty() || index == -1) {
+                ""
+            } else {
+                entries[index]
+            }
         }
-    }
 
     override fun dialog(): MaterialAlertDialogBuilder {
-        return super.dialog().apply {
-            setListItems()
-        }
+        return super.dialog().apply { setListItems() }
     }
 
     @SuppressLint("CheckResult")

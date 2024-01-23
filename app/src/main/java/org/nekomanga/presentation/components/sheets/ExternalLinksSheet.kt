@@ -27,19 +27,19 @@ import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<ExternalLink>, onLinkClick: (String, String) -> Unit) {
+fun ExternalLinksSheet(
+    themeColorState: ThemeColorState,
+    externalLinks: List<ExternalLink>,
+    onLinkClick: (String, String) -> Unit
+) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Size.small),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
                 horizontalArrangement = Arrangement.spacedBy(Size.small, Alignment.Start),
                 verticalArrangement = Arrangement.spacedBy(Size.small),
             ) {
-                externalLinks.forEach {
-                    LinkCard(externalLink = it, onLinkClick = onLinkClick)
-                }
+                externalLinks.forEach { LinkCard(externalLink = it, onLinkClick = onLinkClick) }
             }
         }
     }
@@ -59,9 +59,7 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -
                 Image(
                     painter = painterResource(id = externalLink.logo),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(28.dp)
-                        .padding(top = Size.tiny, bottom = Size.tiny),
+                    modifier = Modifier.size(28.dp).padding(top = Size.tiny, bottom = Size.tiny),
                 )
                 Gap(Size.small)
             } else {
@@ -69,7 +67,10 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -
             }
             Text(
                 text = externalLink.name,
-                style = MaterialTheme.typography.bodyMedium.copy(color = Color(externalLink.onLogoColor)),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        color = Color(externalLink.onLogoColor)
+                    ),
             )
             Gap(12.dp)
         }

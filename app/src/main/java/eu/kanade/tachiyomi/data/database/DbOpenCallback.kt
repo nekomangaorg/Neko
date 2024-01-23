@@ -17,14 +17,10 @@ import eu.kanade.tachiyomi.data.database.tables.TrackTable
 class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
 
     companion object {
-        /**
-         * Name of the database file.
-         */
+        /** Name of the database file. */
         const val DATABASE_NAME = "tachiyomi.db"
 
-        /**
-         * Version of the database.
-         */
+        /** Version of the database. */
         const val DATABASE_VERSION = 36
     }
 
@@ -41,26 +37,27 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         cursor.close()
     }
 
-    override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
-        execSQL(MangaTable.createTableQuery)
-        execSQL(ChapterTable.createTableQuery)
-        execSQL(TrackTable.createTableQuery)
-        execSQL(CategoryTable.createTableQuery)
-        execSQL(MangaCategoryTable.createTableQuery)
-        execSQL(HistoryTable.createTableQuery)
-        execSQL(SimilarTable.createTableQuery)
-        execSQL(ArtworkTable.createTableQuery)
-        execSQL(ScanlatorTable.createTableQuery)
-        execSQL(BrowseFilterTable.createTableQuery)
-        execSQL(MergeMangaTable.createTableQuery)
+    override fun onCreate(db: SupportSQLiteDatabase) =
+        with(db) {
+            execSQL(MangaTable.createTableQuery)
+            execSQL(ChapterTable.createTableQuery)
+            execSQL(TrackTable.createTableQuery)
+            execSQL(CategoryTable.createTableQuery)
+            execSQL(MangaCategoryTable.createTableQuery)
+            execSQL(HistoryTable.createTableQuery)
+            execSQL(SimilarTable.createTableQuery)
+            execSQL(ArtworkTable.createTableQuery)
+            execSQL(ScanlatorTable.createTableQuery)
+            execSQL(BrowseFilterTable.createTableQuery)
+            execSQL(MergeMangaTable.createTableQuery)
 
-        // DB indexes
-        execSQL(MangaTable.createUrlIndexQuery)
-        execSQL(MangaTable.createLibraryIndexQuery)
-        execSQL(ChapterTable.createMangaIdIndexQuery)
-        execSQL(ChapterTable.createUnreadChaptersIndexQuery)
-        execSQL(HistoryTable.createChapterIdIndexQuery)
-    }
+            // DB indexes
+            execSQL(MangaTable.createUrlIndexQuery)
+            execSQL(MangaTable.createLibraryIndexQuery)
+            execSQL(ChapterTable.createMangaIdIndexQuery)
+            execSQL(ChapterTable.createUnreadChaptersIndexQuery)
+            execSQL(HistoryTable.createChapterIdIndexQuery)
+        }
 
     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 9) {

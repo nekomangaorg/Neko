@@ -25,51 +25,60 @@ import kotlin.math.roundToInt
 fun NekoSwipeToDismiss(
     state: DismissState,
     modifier: Modifier = Modifier,
-    directions: Set<DismissDirection> = setOf(DismissDirection.EndToStart, DismissDirection.StartToEnd),
+    directions: Set<DismissDirection> =
+        setOf(DismissDirection.EndToStart, DismissDirection.StartToEnd),
     dismissThresholds: (DismissDirection) -> ThresholdConfig = { FractionalThreshold(.3f) },
     background: @Composable RowScope.() -> Unit,
     dismissContent: @Composable RowScope.() -> Unit,
-) = BoxWithConstraints(modifier) {
-    val width = constraints.maxWidth.toFloat()
-    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+) =
+    BoxWithConstraints(modifier) {
+        val width = constraints.maxWidth.toFloat()
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    val anchors = mutableMapOf(0f to DismissValue.Default)
-    if (DismissDirection.StartToEnd in directions) anchors += width to DismissValue.DismissedToEnd
-    if (DismissDirection.EndToStart in directions) anchors += -width to DismissValue.DismissedToStart
+        val anchors = mutableMapOf(0f to DismissValue.Default)
+        if (DismissDirection.StartToEnd in directions)
+            anchors += width to DismissValue.DismissedToEnd
+        if (DismissDirection.EndToStart in directions)
+            anchors += -width to DismissValue.DismissedToStart
 
-    val thresholds = { from: DismissValue, to: DismissValue ->
-        dismissThresholds(getDismissDirection(from, to)!!)
-    }
-    val minFactor =
-        if (DismissDirection.EndToStart in directions) SwipeableDefaults.StandardResistanceFactor else SwipeableDefaults.StiffResistanceFactor
-    val maxFactor =
-        if (DismissDirection.StartToEnd in directions) SwipeableDefaults.StandardResistanceFactor else SwipeableDefaults.StiffResistanceFactor
-    Box(
-        Modifier.swipeable(
-            state = state,
-            anchors = anchors,
-            thresholds = thresholds,
-            orientation = Orientation.Horizontal,
-            enabled = state.currentValue == DismissValue.Default,
-            reverseDirection = isRtl,
-            resistance = ResistanceConfig(
-                basis = width,
-                factorAtMin = minFactor,
-                factorAtMax = maxFactor,
+        val thresholds = { from: DismissValue, to: DismissValue ->
+            dismissThresholds(getDismissDirection(from, to)!!)
+        }
+        val minFactor =
+            if (DismissDirection.EndToStart in directions)
+                SwipeableDefaults.StandardResistanceFactor
+            else SwipeableDefaults.StiffResistanceFactor
+        val maxFactor =
+            if (DismissDirection.StartToEnd in directions)
+                SwipeableDefaults.StandardResistanceFactor
+            else SwipeableDefaults.StiffResistanceFactor
+        Box(
+            Modifier.swipeable(
+                state = state,
+                anchors = anchors,
+                thresholds = thresholds,
+                orientation = Orientation.Horizontal,
+                enabled = state.currentValue == DismissValue.Default,
+                reverseDirection = isRtl,
+                resistance =
+                    ResistanceConfig(
+                        basis = width,
+                        factorAtMin = minFactor,
+                        factorAtMax = maxFactor,
+                    ),
+                velocityThreshold = SwipeableDefaults.VelocityThreshold * 100,
             ),
-            velocityThreshold = SwipeableDefaults.VelocityThreshold * 100,
-        ),
-    ) {
-        Row(
-            content = background,
-            modifier = Modifier.matchParentSize(),
-        )
-        Row(
-            content = dismissContent,
-            modifier = Modifier.offset { IntOffset(state.offset.value.roundToInt(), 0) },
-        )
+        ) {
+            Row(
+                content = background,
+                modifier = Modifier.matchParentSize(),
+            )
+            Row(
+                content = dismissContent,
+                modifier = Modifier.offset { IntOffset(state.offset.value.roundToInt(), 0) },
+            )
+        }
     }
-}
 
 private fun getDismissDirection(from: DismissValue, to: DismissValue): DismissDirection? {
     return when {
@@ -80,13 +89,17 @@ private fun getDismissDirection(from: DismissValue, to: DismissValue): DismissDi
         // has been dismissed to the start
         from == to && from == DismissValue.DismissedToStart -> DismissDirection.EndToStart
         // is currently being dismissed to the end
-        from == DismissValue.Default && to == DismissValue.DismissedToEnd -> DismissDirection.StartToEnd
+        from == DismissValue.Default && to == DismissValue.DismissedToEnd ->
+            DismissDirection.StartToEnd
         // is currently being dismissed to the start
-        from == DismissValue.Default && to == DismissValue.DismissedToStart -> DismissDirection.EndToStart
+        from == DismissValue.Default && to == DismissValue.DismissedToStart ->
+            DismissDirection.EndToStart
         // has been dismissed to the end but is now animated back to default
-        from == DismissValue.DismissedToEnd && to == DismissValue.Default -> DismissDirection.StartToEnd
+        from == DismissValue.DismissedToEnd && to == DismissValue.Default ->
+            DismissDirection.StartToEnd
         // has been dismissed to the start but is now animated back to default
-        from == DismissValue.DismissedToStart && to == DismissValue.Default -> DismissDirection.EndToStart
+        from == DismissValue.DismissedToStart && to == DismissValue.Default ->
+            DismissDirection.EndToStart
         else -> null
     }
 }

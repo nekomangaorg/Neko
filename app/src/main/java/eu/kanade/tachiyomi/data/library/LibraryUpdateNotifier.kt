@@ -37,23 +37,17 @@ class LibraryUpdateNotifier(private val context: Context) {
     private val preferences: PreferencesHelper by injectLazy()
     private val securityPreferences: SecurityPreferences by injectLazy()
 
-    /**
-     * Pending intent of action that cancels the library update
-     */
+    /** Pending intent of action that cancels the library update */
     private val cancelIntent by lazy {
         NotificationReceiver.cancelLibraryUpdatePendingBroadcast(context)
     }
 
-    /**
-     * Bitmap of the app for notifications.
-     */
+    /** Bitmap of the app for notifications. */
     private val notificationBitmap by lazy {
         BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
     }
 
-    /**
-     * Cached progress notification to avoid creating a lot.
-     */
+    /** Cached progress notification to avoid creating a lot. */
     val progressNotificationBuilder by lazy {
         context.notificationBuilder(Notifications.CHANNEL_LIBRARY_PROGRESS) {
             setContentTitle(context.getString(R.string.app_name_neko))
@@ -78,11 +72,12 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param total the total progress.
      */
     fun showProgressNotification(manga: SManga, current: Int, total: Int) {
-        val title = if (securityPreferences.hideNotificationContent().get()) {
-            context.getString(R.string.checking_for_new_chapters)
-        } else {
-            manga.title
-        }
+        val title =
+            if (securityPreferences.hideNotificationContent().get()) {
+                context.getString(R.string.checking_for_new_chapters)
+            } else {
+                manga.title
+            }
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_PROGRESS,
@@ -108,30 +103,33 @@ class LibraryUpdateNotifier(private val context: Context) {
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
-            context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
-                setContentTitle(context.getString(R.string.notification_update_error, errors.size))
-                setContentText(context.getString(R.string.tap_to_see_details))
-                setStyle(
-                    NotificationCompat.BigTextStyle().bigText(
-                        errors.joinToString("\n") {
-                            it.chop(TITLE_MAX_LEN)
-                        },
-                    ),
-                )
-                setContentIntent(pendingIntent)
-                setSmallIcon(R.drawable.ic_neko_notification)
-                addAction(
-                    R.drawable.ic_help_24dp,
-                    context.getString(R.string.open_log),
-                    pendingIntent,
-                )
-            }
+            context
+                .notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
+                    setContentTitle(
+                        context.getString(R.string.notification_update_error, errors.size)
+                    )
+                    setContentText(context.getString(R.string.tap_to_see_details))
+                    setStyle(
+                        NotificationCompat.BigTextStyle()
+                            .bigText(
+                                errors.joinToString("\n") { it.chop(TITLE_MAX_LEN) },
+                            ),
+                    )
+                    setContentIntent(pendingIntent)
+                    setSmallIcon(R.drawable.ic_neko_notification)
+                    addAction(
+                        R.drawable.ic_help_24dp,
+                        context.getString(R.string.open_log),
+                        pendingIntent,
+                    )
+                }
                 .build(),
         )
     }
 
     /**
-     * Shows notification containing update entries that were skipped with actions to open full log and learn more.
+     * Shows notification containing update entries that were skipped with actions to open full log
+     * and learn more.
      *
      * @param skips List of entry titles that were skipped.
      * @param uri Uri for error log file containing all titles that were skipped.
@@ -145,24 +143,26 @@ class LibraryUpdateNotifier(private val context: Context) {
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
-            context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
-                setContentTitle(context.getString(R.string.notification_update_skipped, skips.size))
-                setContentText(context.getString(R.string.tap_to_see_details))
-                setStyle(
-                    NotificationCompat.BigTextStyle().bigText(
-                        skips.joinToString("\n") {
-                            it.chop(TITLE_MAX_LEN)
-                        },
-                    ),
-                )
-                setContentIntent(pendingIntent)
-                setSmallIcon(R.drawable.ic_neko_notification)
-                addAction(
-                    R.drawable.ic_help_24dp,
-                    context.getString(R.string.open_log),
-                    pendingIntent,
-                )
-            }
+            context
+                .notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
+                    setContentTitle(
+                        context.getString(R.string.notification_update_skipped, skips.size)
+                    )
+                    setContentText(context.getString(R.string.tap_to_see_details))
+                    setStyle(
+                        NotificationCompat.BigTextStyle()
+                            .bigText(
+                                skips.joinToString("\n") { it.chop(TITLE_MAX_LEN) },
+                            ),
+                    )
+                    setContentIntent(pendingIntent)
+                    setSmallIcon(R.drawable.ic_neko_notification)
+                    addAction(
+                        R.drawable.ic_help_24dp,
+                        context.getString(R.string.open_log),
+                        pendingIntent,
+                    )
+                }
                 .build(),
         )
     }
@@ -187,31 +187,34 @@ class LibraryUpdateNotifier(private val context: Context) {
                             context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                                 setSmallIcon(R.drawable.ic_neko_notification)
                                 try {
-                                    val request = ImageRequest.Builder(context).data(manga)
-                                        .networkCachePolicy(CachePolicy.DISABLED)
-                                        .diskCachePolicy(CachePolicy.ENABLED)
-                                        .transformations(CircleCropTransformation())
-                                        .size(width = ICON_SIZE, height = ICON_SIZE).build()
+                                    val request =
+                                        ImageRequest.Builder(context)
+                                            .data(manga)
+                                            .networkCachePolicy(CachePolicy.DISABLED)
+                                            .diskCachePolicy(CachePolicy.ENABLED)
+                                            .transformations(CircleCropTransformation())
+                                            .size(width = ICON_SIZE, height = ICON_SIZE)
+                                            .build()
 
-                                    Coil.imageLoader(context)
-                                        .execute(request).drawable?.let { drawable ->
-                                            setLargeIcon((drawable as? BitmapDrawable)?.bitmap)
-                                        }
-                                } catch (e: Exception) {
-                                }
+                                    Coil.imageLoader(context).execute(request).drawable?.let {
+                                        drawable ->
+                                        setLargeIcon((drawable as? BitmapDrawable)?.bitmap)
+                                    }
+                                } catch (e: Exception) {}
                                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
                                 setContentTitle(manga.title)
                                 color = ContextCompat.getColor(context, R.color.new_neko_accent)
-                                val chaptersNames = if (chapterNames.size > MAX_CHAPTERS) {
-                                    "${chapterNames.take(MAX_CHAPTERS - 1).joinToString(", ")}, " +
-                                        context.resources.getQuantityString(
-                                            R.plurals.notification_and_n_more,
-                                            (chapterNames.size - (MAX_CHAPTERS - 1)),
-                                            (chapterNames.size - (MAX_CHAPTERS - 1)),
-                                        )
-                                } else {
-                                    chapterNames.joinToString(", ")
-                                }
+                                val chaptersNames =
+                                    if (chapterNames.size > MAX_CHAPTERS) {
+                                        "${chapterNames.take(MAX_CHAPTERS - 1).joinToString(", ")}, " +
+                                            context.resources.getQuantityString(
+                                                R.plurals.notification_and_n_more,
+                                                (chapterNames.size - (MAX_CHAPTERS - 1)),
+                                                (chapterNames.size - (MAX_CHAPTERS - 1)),
+                                            )
+                                    } else {
+                                        chapterNames.joinToString(", ")
+                                    }
                                 setContentText(chaptersNames)
                                 setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
                                 priority = NotificationCompat.PRIORITY_HIGH
@@ -280,9 +283,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                 setStyle(
                                     NotificationCompat.BigTextStyle()
                                         .bigText(
-                                            updates.keys.joinToString("\n") {
-                                                it.title.chop(45)
-                                            },
+                                            updates.keys.joinToString("\n") { it.title.chop(45) },
                                         ),
                                 )
                             }
@@ -298,28 +299,23 @@ class LibraryUpdateNotifier(private val context: Context) {
                     },
                 )
 
-                notifications.forEach {
-                    notify(it.second, it.first)
-                }
+                notifications.forEach { notify(it.second, it.first) }
             }
         }
     }
 
-    /**
-     * Cancels the progress notification.
-     */
+    /** Cancels the progress notification. */
     fun cancelProgressNotification() {
         context.notificationManager.cancel(Notifications.ID_LIBRARY_PROGRESS)
     }
 
-    /**
-     * Returns an intent to open the main activity.
-     */
+    /** Returns an intent to open the main activity. */
     private fun getNotificationIntent(): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            action = MainActivity.SHORTCUT_RECENTLY_UPDATED
-        }
+        val intent =
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                action = MainActivity.SHORTCUT_RECENTLY_UPDATED
+            }
         return PendingIntent.getActivity(
             context,
             0,

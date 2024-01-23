@@ -21,4 +21,3 @@ object Size {
     val extraHuge = 56.dp
     val navBarSize = 68.dp
 }
-

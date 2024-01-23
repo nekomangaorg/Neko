@@ -1,10 +1,11 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
-class InsertPage(parent: ReaderPage) : ReaderPage(
-    parent.index,
-    parent.url,
-    parent.imageUrl,
-) {
+class InsertPage(parent: ReaderPage) :
+    ReaderPage(
+        parent.index,
+        parent.url,
+        parent.imageUrl,
+    ) {
 
     override var chapter: ReaderChapter = parent.chapter
 

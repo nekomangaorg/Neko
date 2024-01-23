@@ -19,11 +19,12 @@ object SecureActivityDelegate {
 
     fun setSecure(activity: Activity?) {
         val incognitoMode = securityPreferences.incognitoMode().get()
-        val enabled = when (securityPreferences.secureScreen().get()) {
-            SecurityPreferences.SecureScreenMode.ALWAYS -> true
-            SecurityPreferences.SecureScreenMode.INCOGNITO -> incognitoMode
-            else -> false
-        }
+        val enabled =
+            when (securityPreferences.secureScreen().get()) {
+                SecurityPreferences.SecureScreenMode.ALWAYS -> true
+                SecurityPreferences.SecureScreenMode.INCOGNITO -> incognitoMode
+                else -> false
+            }
         activity?.window?.setSecureScreen(enabled)
     }
 
@@ -38,8 +39,13 @@ object SecureActivityDelegate {
     fun promptLockIfNeeded(activity: Activity?, requireSuccess: Boolean = false) {
         if (activity == null || AuthenticatorUtil.isAuthenticating) return
         val lockApp = securityPreferences.useBiometrics().get()
-        if (lockApp && BiometricManager.from(activity)
-                .canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS
+        if (
+            lockApp &&
+                BiometricManager.from(activity)
+                    .canAuthenticate(
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL or
+                            BiometricManager.Authenticators.BIOMETRIC_WEAK
+                    ) == BiometricManager.BIOMETRIC_SUCCESS
         ) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
@@ -60,10 +66,9 @@ object SecureActivityDelegate {
 
     private fun isAppLocked(): Boolean {
         return locked &&
-            (
-                securityPreferences.lockAfter().get() <= 0 ||
-                    Date().time >= securityPreferences.lastUnlock().get() + 60 * 1000 * securityPreferences
-                    .lockAfter().get()
-                )
+            (securityPreferences.lockAfter().get() <= 0 ||
+                Date().time >=
+                    securityPreferences.lastUnlock().get() +
+                        60 * 1000 * securityPreferences.lockAfter().get())
     }
 }

@@ -13,8 +13,7 @@ import rx.subjects.PublishSubject
 class DownloadQueue(
     private val store: DownloadStore,
     private val queue: MutableList<Download> = CopyOnWriteArrayList<Download>(),
-) :
-    List<Download> by queue {
+) : List<Download> by queue {
 
     private val statusSubject = PublishSubject.create<Download>()
 
@@ -42,7 +41,9 @@ class DownloadQueue(
         store.remove(download)
         download.setStatusSubject(null)
         download.setStatusCallback(null)
-        if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
+        if (
+            download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE
+        ) {
             download.status = Download.State.NOT_DOWNLOADED
         }
         downloadListeners.forEach { it.updateDownload(download) }
@@ -74,7 +75,10 @@ class DownloadQueue(
         queue.forEach { download ->
             download.setStatusSubject(null)
             download.setStatusCallback(null)
-            if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
+            if (
+                download.status == Download.State.DOWNLOADING ||
+                    download.status == Download.State.QUEUE
+            ) {
                 download.status = Download.State.NOT_DOWNLOADED
             }
             downloadListeners.forEach { it.updateDownload(download) }
@@ -87,15 +91,14 @@ class DownloadQueue(
     private fun setPagesFor(download: Download) {
         if (download.status == Download.State.DOWNLOADING) {
             if (download.pages != null) {
-                for (page in download.pages!!)
-                    scope.launch {
-                        page.statusFlow.collectLatest {
-                            callListeners(download)
-                        }
-                    }
+                for (page in download.pages!!) scope.launch {
+                    page.statusFlow.collectLatest { callListeners(download) }
+                }
             }
             callListeners(download)
-        } else if (download.status == Download.State.DOWNLOADED || download.status == Download.State.ERROR) {
+        } else if (
+            download.status == Download.State.DOWNLOADED || download.status == Download.State.ERROR
+        ) {
             if (download.status == Download.State.ERROR) {
                 callListeners(download)
             }
@@ -118,6 +121,7 @@ class DownloadQueue(
 
     interface DownloadListener {
         fun updateDownload(download: Download)
+
         fun updateDownloads()
     }
 }

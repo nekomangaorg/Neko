@@ -33,8 +33,7 @@ fun AutoSizeText(
         maxLines = 2,
         onTextLayout = { textLayoutResult ->
             if (textLayoutResult.didOverflowWidth) {
-                scaledTextStyle =
-                    scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
+                scaledTextStyle = scaledTextStyle.copy(fontSize = scaledTextStyle.fontSize * 0.9)
             } else {
                 readyToDraw = true
             }

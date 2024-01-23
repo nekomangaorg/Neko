@@ -16,7 +16,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class KomgaLoginPreference @JvmOverloads constructor(
+class KomgaLoginPreference
+@JvmOverloads
+constructor(
     context: Context,
     val source: Komga,
     attrs: AttributeSet? = null,
@@ -34,18 +36,17 @@ class KomgaLoginPreference @JvmOverloads constructor(
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
-        holder.itemView.setOnClickListener {
-            onLoginClick()
-        }
+        holder.itemView.setOnClickListener { onLoginClick() }
         scope.launch {
             (holder.findViewById(R.id.image_view) as? ImageView)?.setImageDrawable(
                 when (source.isLoggedIn()) {
                     true -> CommunityMaterial.Icon.cmd_account_circle.create(context, 24f)
-                    false -> CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(
-                        context,
-                        24f,
-                        R.color.material_on_surface_disabled,
-                    )
+                    false ->
+                        CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(
+                            context,
+                            24f,
+                            R.color.material_on_surface_disabled,
+                        )
                 },
             )
         }

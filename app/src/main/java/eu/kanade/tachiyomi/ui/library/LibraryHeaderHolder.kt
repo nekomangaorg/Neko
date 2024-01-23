@@ -65,7 +65,9 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         runningDrawable.setStyle(CircularProgressDrawable.DEFAULT)
         runningDrawable.centerRadius = 6f.dpToPx
         runningDrawable.strokeWidth = 2f.dpToPx
-        runningDrawable.setColorSchemeColors(itemView.context.getResourceColor(R.attr.colorSecondary))
+        runningDrawable.setColorSchemeColors(
+            itemView.context.getResourceColor(R.attr.colorSecondary)
+        )
 
         binding.endRefresh.setImageDrawable(progressDrawableEnd)
         binding.startRefresh.setImageDrawable(progressDrawableStart)
@@ -89,7 +91,8 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                     locked = false
                 }
                 when (event?.action) {
-                    MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP -> {
+                    MotionEvent.ACTION_CANCEL,
+                    MotionEvent.ACTION_UP -> {
                         itemView.parent.requestDisallowInterceptTouchEvent(false)
                         if (isCancelling) {
                             isCancelling = false
@@ -97,8 +100,11 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                         }
                         val result = gestureDetector.onTouchEvent(event)
                         if (!result) {
-                            val anim = binding.categoryHeaderLayout.animate().setDuration(150L)
-                                .translationX(0f)
+                            val anim =
+                                binding.categoryHeaderLayout
+                                    .animate()
+                                    .setDuration(150L)
+                                    .translationX(0f)
                             anim.withEndAction { rearView.isVisible = true }
                             anim.start()
                             if (headerGestureDetector.vibrated) {
@@ -125,12 +131,19 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         adapter.libraryListener?.toggleCategoryVisibility(flexibleAdapterPosition)
         val tutorial = Injekt.get<PreferencesHelper>().shownLongPressCategoryTutorial()
         if (!tutorial.get()) {
-            ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle).autoHide(true, 5000L)
-                .align(ViewTooltip.ALIGN.START).position(ViewTooltip.Position.TOP)
+            ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle)
+                .autoHide(true, 5000L)
+                .align(ViewTooltip.ALIGN.START)
+                .position(ViewTooltip.Position.TOP)
                 .text(R.string.long_press_category)
                 .color(itemView.context.getResourceColor(R.attr.colorSecondary))
-                .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.WHITE)
-                .withShadow(false).corner(30).arrowWidth(15).arrowHeight(15).distanceWithView(0)
+                .textSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+                .textColor(Color.WHITE)
+                .withShadow(false)
+                .corner(30)
+                .arrowWidth(15)
+                .arrowHeight(15)
+                .distanceWithView(0)
                 .show()
             tutorial.set(true)
         }
@@ -141,35 +154,34 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         val index = adapter.headerItems.indexOf(item)
         val previousIsCollapsed =
             if (index > 0) {
-                (adapter.headerItems[index - 1] as? LibraryHeaderItem)?.category?.isHidden
-                    ?: false
+                (adapter.headerItems[index - 1] as? LibraryHeaderItem)?.category?.isHidden ?: false
             } else {
                 false
             }
         val shorterMargin = adapter.headerItems.firstOrNull() == item
         binding.categoryTitle.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            topMargin = (
-                when {
-                    shorterMargin -> 2
-                    previousIsCollapsed -> 5
-                    else -> 32
-                }
-                ).dpToPx
+            topMargin =
+                (when {
+                        shorterMargin -> 2
+                        previousIsCollapsed -> 5
+                        else -> 32
+                    })
+                    .dpToPx
         }
         binding.rearView.updatePadding(top = binding.categoryTitle.marginTop - 6)
         val category = item.category
 
         binding.categoryTitle.text =
             if (category.isAlone && !category.isDynamic) {
-            ""
-        } else {
-            category.name
-        } +
-            if (adapter.showNumber) {
-                " (${adapter.itemsPerCategory[item.catId]})"
-            } else {
                 ""
-            }
+            } else {
+                category.name
+            } +
+                if (adapter.showNumber) {
+                    " (${adapter.itemsPerCategory[item.catId]})"
+                } else {
+                    ""
+                }
         binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
 
         val isAscending = category.isAscending()
@@ -247,19 +259,21 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         adapter.controller?.activity?.let { activity ->
             val items = LibrarySort.values().map { it.menuSheetItem(category.isDynamic) }
             val sortingMode = category.sortingMode(true)
-            val sheet = MaterialMenuSheet(
-                activity,
-                items,
-                activity.getString(R.string.sort_by),
-                sortingMode?.mainValue,
-            ) { sheet, item ->
-                onCatSortClicked(category, item)
-                val nCategory = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
-                val isAscending = nCategory?.isAscending() ?: false
-                val drawableRes = getSortRes(item, isAscending)
-                sheet.setDrawable(item, drawableRes)
-                false
-            }
+            val sheet =
+                MaterialMenuSheet(
+                    activity,
+                    items,
+                    activity.getString(R.string.sort_by),
+                    sortingMode?.mainValue,
+                ) { sheet, item ->
+                    onCatSortClicked(category, item)
+                    val nCategory =
+                        (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+                    val isAscending = nCategory?.isAscending() ?: false
+                    val drawableRes = getSortRes(item, isAscending)
+                    sheet.setDrawable(item, drawableRes)
+                    false
+                }
             val isAscending = category.isAscending()
             val drawableRes = getSortRes(sortingMode, isAscending)
             sheet.setDrawable(sortingMode?.mainValue ?: -1, drawableRes)
@@ -304,21 +318,24 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
     }
 
     private fun onCatSortClicked(category: Category, menuId: Int?) {
-        val modType = if (menuId == null) {
-            val sortingMode = category.sortingMode() ?: LibrarySort.Title
-            if (category.isAscending()) {
-                sortingMode.categoryValueDescending
+        val modType =
+            if (menuId == null) {
+                val sortingMode = category.sortingMode() ?: LibrarySort.Title
+                if (category.isAscending()) {
+                    sortingMode.categoryValueDescending
+                } else {
+                    sortingMode.categoryValue
+                }
             } else {
+                val sortingMode = LibrarySort.valueOf(menuId) ?: LibrarySort.Title
+                if (
+                    sortingMode != LibrarySort.DragAndDrop && sortingMode == category.sortingMode()
+                ) {
+                    onCatSortClicked(category, null)
+                    return
+                }
                 sortingMode.categoryValue
             }
-        } else {
-            val sortingMode = LibrarySort.valueOf(menuId) ?: LibrarySort.Title
-            if (sortingMode != LibrarySort.DragAndDrop && sortingMode == category.sortingMode()) {
-                onCatSortClicked(category, null)
-                return
-            }
-            sortingMode.categoryValue
-        }
         adapter.libraryListener?.sortCategory(category.id!!, modType)
     }
 
@@ -328,10 +345,12 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
 
     fun setSelection() {
         val allSelected = adapter.libraryListener?.allSelected(flexibleAdapterPosition) == true
-        val drawable = ContextCompat.getDrawable(
-            contentView.context,
-            if (allSelected) R.drawable.ic_check_circle_24dp else R.drawable.ic_radio_button_unchecked_24dp,
-        )
+        val drawable =
+            ContextCompat.getDrawable(
+                contentView.context,
+                if (allSelected) R.drawable.ic_check_circle_24dp
+                else R.drawable.ic_radio_button_unchecked_24dp,
+            )
         val tintedDrawable = drawable?.mutate()
         tintedDrawable?.setTint(
             if (allSelected) {

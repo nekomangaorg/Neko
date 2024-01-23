@@ -26,9 +26,7 @@ import kotlinx.coroutines.delay
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
-/**
- * WorkManager job that syncs FollowsList to and from Neko
- */
+/** WorkManager job that syncs FollowsList to and from Neko */
 class StatusSyncJob(
     val context: Context,
     params: WorkerParameters,
@@ -63,20 +61,21 @@ class StatusSyncJob(
         }
         try {
             when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
-                null, "0" -> {
+                null,
+                "0" -> {
                     followsSyncService.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
                         null,
                     )
                 }
-
                 "1" -> {
-                    val total = followsSyncService.fromMangaDex(
-                        ::errorNotification,
-                        ::updateNotificationProgress,
-                        ::completeNotificationFromDex,
-                    )
+                    val total =
+                        followsSyncService.fromMangaDex(
+                            ::errorNotification,
+                            ::updateNotificationProgress,
+                            ::completeNotificationFromDex,
+                        )
                     withUIContext {
                         applicationContext.toast(
                             applicationContext.getString(
@@ -87,7 +86,6 @@ class StatusSyncJob(
                         )
                     }
                 }
-
                 else -> {
                     followsSyncService.toMangaDex(
                         ::updateNotificationProgress,
@@ -110,10 +108,8 @@ class StatusSyncJob(
     }
 
     private fun updateNotificationProgress(title: String, progress: Int, total: Int) {
-        val notification = progressNotification
-            .setContentTitle(title)
-            .setProgress(total, progress, false)
-            .build()
+        val notification =
+            progressNotification.setContentTitle(title).setProgress(total, progress, false).build()
         applicationContext.notificationManager.notify(
             Notifications.Id.Status.Progress,
             notification,
@@ -138,9 +134,10 @@ class StatusSyncJob(
     }
 
     private fun completeNotification(@StringRes title: Int) {
-        val notification = progressNotification
-            .setContentTitle(context.getString(R.string.sync_follows_complete))
-            .build()
+        val notification =
+            progressNotification
+                .setContentTitle(context.getString(R.string.sync_follows_complete))
+                .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Status.Complete,
             notification,
@@ -148,10 +145,13 @@ class StatusSyncJob(
     }
 
     private fun errorNotification(errorTxt: String? = null) {
-        val notification = progressNotification
-            .setContentTitle(errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync))
-            .setAutoCancel(true)
-            .build()
+        val notification =
+            progressNotification
+                .setContentTitle(
+                    errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync)
+                )
+                .setAutoCancel(true)
+                .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Status.Complete,
             notification,
@@ -167,15 +167,17 @@ class StatusSyncJob(
         const val entireFollowsFromDex = "1"
 
         fun doWorkNow(context: Context, syncToMangadex: String) {
-            WorkManager.getInstance(context).enqueue(
-                OneTimeWorkRequestBuilder<StatusSyncJob>().apply {
-                    addTag(TAG)
-                    setInputData(
-                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex)
-                            .build(),
-                    )
-                }.build(),
-            )
+            WorkManager.getInstance(context)
+                .enqueue(
+                    OneTimeWorkRequestBuilder<StatusSyncJob>()
+                        .apply {
+                            addTag(TAG)
+                            setInputData(
+                                Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).build(),
+                            )
+                        }
+                        .build(),
+                )
         }
     }
 }

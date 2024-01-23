@@ -27,10 +27,8 @@ import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.injectLazy
 
 /**
- * Class used to create chapter cache
- * For each image in a chapter a file is created
- * For each chapter a Json list is created and converted to a file.
- * The files are in format *md5key*.0
+ * Class used to create chapter cache For each image in a chapter a file is created For each chapter
+ * a Json list is created and converted to a file. The files are in format *md5key*.0
  *
  * @param context the application context.
  * @constructor creates an instance of the chapter cache.
@@ -38,16 +36,16 @@ import uy.kohesive.injekt.injectLazy
 class ChapterCache(private val context: Context) {
 
     companion object {
-        /** Name of cache directory.  */
+        /** Name of cache directory. */
         const val PARAMETER_CACHE_DIRECTORY = "chapter_disk_cache"
 
-        /** Application cache version.  */
+        /** Application cache version. */
         const val PARAMETER_APP_VERSION = 1
 
-        /** The number of values per cache entry. Must be positive.  */
+        /** The number of values per cache entry. Must be positive. */
         const val PARAMETER_VALUE_COUNT = 1
 
-        /** The maximum number of bytes this cache should use to store.  */
+        /** The maximum number of bytes this cache should use to store. */
         const val PARAMETER_CACHE_SIZE = 50L * 1024 * 1024
     }
 
@@ -57,36 +55,33 @@ class ChapterCache(private val context: Context) {
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
-    /** Cache class used for cache management.  */
+    /** Cache class used for cache management. */
     private var diskCache = setupDiskCache(readerPreferences.preloadPageAmount().get())
 
-    /**
-     * Returns directory of cache.
-     */
+    /** Returns directory of cache. */
     val cacheDir: File
         get() = diskCache.directory
 
-    /**
-     * Returns real size of directory.
-     */
+    /** Returns real size of directory. */
     private val realSize: Long
         get() = DiskUtil.getDirectorySize(cacheDir)
 
-    /**
-     * Returns real size of directory in human readable format.
-     */
+    /** Returns real size of directory in human readable format. */
     val readableSize: String
         get() = Formatter.formatFileSize(context, realSize)
 
     init {
-        readerPreferences.preloadPageAmount().changes()
+        readerPreferences
+            .preloadPageAmount()
+            .changes()
             .drop(1)
             .onEach {
                 // Save old cache for destruction later
                 val oldCache = diskCache
                 diskCache = setupDiskCache(it)
                 oldCache.close()
-            }.launchIn(scope)
+            }
+            .launchIn(scope)
     }
 
     private fun setupDiskCache(cacheSize: Int): DiskLruCache {
@@ -138,9 +133,7 @@ class ChapterCache(private val context: Context) {
         val key = DiskUtil.hashKeyForDisk(getKey(chapter))
 
         // Convert JSON string to list of objects. Throws an exception if snapshot is null
-        return diskCache.get(key).use {
-            json.decodeFromString(it.getString(0))
-        }
+        return diskCache.get(key).use { json.decodeFromString(it.getString(0)) }
     }
 
     /**

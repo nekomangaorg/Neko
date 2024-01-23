@@ -3,7 +3,13 @@ package org.nekomanga.domain.manga
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.MergeType
 
-data class SourceManga(val currentThumbnail: String, val url: String, val title: String, val displayText: String = "", @StringRes val displayTextRes: Int? = null)
+data class SourceManga(
+    val currentThumbnail: String,
+    val url: String,
+    val title: String,
+    val displayText: String = "",
+    @StringRes val displayTextRes: Int? = null
+)
 
 data class DisplayManga(
     val mangaId: Long,

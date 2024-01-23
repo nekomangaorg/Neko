@@ -19,6 +19,9 @@ fun BottomSheetBehavior<*>.expand() {
 }
 
 fun BottomSheetBehavior<*>?.isExpanded() = this?.state == STATE_EXPANDED
+
 fun BottomSheetBehavior<*>?.isSettling() = this?.state == STATE_SETTLING
+
 fun BottomSheetBehavior<*>?.isCollapsed() = this?.state == STATE_COLLAPSED
+
 fun BottomSheetBehavior<*>?.isHidden() = this?.state == STATE_HIDDEN

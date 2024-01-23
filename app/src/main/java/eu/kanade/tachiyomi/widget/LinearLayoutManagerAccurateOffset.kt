@@ -53,7 +53,9 @@ class LinearLayoutManagerAccurateOffset(context: Context?) : LinearLayoutManager
 
     override fun computeVerticalScrollRange(state: RecyclerView.State): Int {
         if (childCount == 0) return 0
-        computedRange?.let { return it }
+        computedRange?.let {
+            return it
+        }
         val childAvgHeightMap = HashMap<Int, Int>()
         val computedRange = (0 until itemCount).sumOf { getItemHeight(it, childAvgHeightMap) }
         this.computedRange = computedRange
@@ -63,13 +65,17 @@ class LinearLayoutManagerAccurateOffset(context: Context?) : LinearLayoutManager
     override fun computeVerticalScrollOffset(state: RecyclerView.State): Int {
         if (childCount == 0) return 0
         val firstChild = getChildAt(0) ?: return 0
-        val firstChildPosition = (0 to childCount).toList()
-            .mapNotNull { getChildAt(it) }
-            .mapNotNull { pos -> getPosition(pos).takeIf { it != RecyclerView.NO_POSITION } }
-            .minOrNull() ?: 0
+        val firstChildPosition =
+            (0 to childCount)
+                .toList()
+                .mapNotNull { getChildAt(it) }
+                .mapNotNull { pos -> getPosition(pos).takeIf { it != RecyclerView.NO_POSITION } }
+                .minOrNull()
+                ?: 0
         val childAvgHeightMap = HashMap<Int, Int>()
-        val scrolledY: Int = -firstChild.y.toInt() +
-            (0 until firstChildPosition).sumOf { getItemHeight(it, childAvgHeightMap) }
+        val scrolledY: Int =
+            -firstChild.y.toInt() +
+                (0 until firstChildPosition).sumOf { getItemHeight(it, childAvgHeightMap) }
         return scrolledY + paddingTop
     }
 
@@ -100,28 +106,35 @@ fun RecyclerView.LayoutManager.getFirstPos(recyclerView: RecyclerView?, toolbarH
         .mapNotNull { getChildAt(it) }
         .filter {
             val isLibraryHeader = getItemViewType(it) == R.layout.library_category_header_item
-            val bottom = (
-                if (isLibraryHeader) {
+            val bottom =
+                (if (isLibraryHeader) {
                     it.findViewById<TextView>(R.id.category_title)?.bottom?.plus(it.y)?.roundToInt()
                 } else {
                     it.bottom
-                }
-                ) ?: it.bottom
+                })
+                    ?: it.bottom
             bottom >= inset + toolbarHeight && it.height > 0
         }
         .mapNotNull { pos -> getPosition(pos).takeIf { it != RecyclerView.NO_POSITION } }
-        .minOrNull() ?: RecyclerView.NO_POSITION
+        .minOrNull()
+        ?: RecyclerView.NO_POSITION
 }
 
-fun RecyclerView.LayoutManager.getFirstCompletePos(recyclerView: RecyclerView?, toolbarHeight: Int): Int {
+fun RecyclerView.LayoutManager.getFirstCompletePos(
+    recyclerView: RecyclerView?,
+    toolbarHeight: Int
+): Int {
     val inset = recyclerView?.rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0
     return (0 until childCount)
         .mapNotNull { getChildAt(it) }
         .filter {
             val isLibraryHeader = getItemViewType(it) == R.layout.library_category_header_item
-            val marginTop = if (isLibraryHeader) it.findViewById<TextView>(R.id.category_title)?.marginTop ?: 0 else 0
+            val marginTop =
+                if (isLibraryHeader) it.findViewById<TextView>(R.id.category_title)?.marginTop ?: 0
+                else 0
             it.y >= inset + toolbarHeight - marginTop && it.height > 0
         }
         .mapNotNull { pos -> getPosition(pos).takeIf { it != RecyclerView.NO_POSITION } }
-        .minOrNull() ?: RecyclerView.NO_POSITION
+        .minOrNull()
+        ?: RecyclerView.NO_POSITION
 }

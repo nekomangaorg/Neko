@@ -29,7 +29,11 @@ class LatestChapterHandler {
 
     private val uniqueManga = mutableSetOf<String>()
 
-    suspend fun getPage(page: Int = 1, blockedScanlatorUUIDs: List<String>, limit: Int = MdConstants.Limits.latest): Result<MangaListPage, ResultError> {
+    suspend fun getPage(
+        page: Int = 1,
+        blockedScanlatorUUIDs: List<String>,
+        limit: Int = MdConstants.Limits.latest
+    ): Result<MangaListPage, ResultError> {
         if (page == 1) uniqueManga.clear()
         return withContext(Dispatchers.IO) {
             val offset = MdUtil.getLatestChapterListOffset(page)
@@ -38,59 +42,83 @@ class LatestChapterHandler {
 
             val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
 
-            return@withContext service.latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+            return@withContext service
+                .latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
                 .getOrResultError("getting latest chapters")
-                .andThen {
-                    latestChapterParse(it)
-                }
+                .andThen { latestChapterParse(it) }
         }
     }
 
-    private suspend fun latestChapterParse(chapterListDto: ChapterListDto): Result<MangaListPage, ResultError> {
+    private suspend fun latestChapterParse(
+        chapterListDto: ChapterListDto
+    ): Result<MangaListPage, ResultError> {
         return runCatching {
-            val result = chapterListDto.data
-                .groupBy { chapterListDto ->
-                    chapterListDto.relationships
-                        .first { relationshipDto -> relationshipDto.type == MdConstants.Types.manga }.id
-                }.filterNot { uniqueManga.contains(it.key) }
-
-            val mangaIds = result.keys.toList()
-
-            uniqueManga.addAll(mangaIds)
-
-            val allContentRating = listOf(
-                MdConstants.ContentRating.safe,
-                MdConstants.ContentRating.suggestive,
-                MdConstants.ContentRating.erotica,
-                MdConstants.ContentRating.pornographic,
-            )
-
-            val queryParameters =
-                mutableMapOf(
-                    "ids[]" to mangaIds,
-                    "limit" to mangaIds.size,
-                    "contentRating[]" to allContentRating,
-                )
-
-            service.search(ProxyRetrofitQueryMap(queryParameters))
-                .getOrResultError("trying to search manga from latest chapters").andThen { mangaListDto ->
-                    val hasMoreResults = chapterListDto.limit + chapterListDto.offset < chapterListDto.total
-
-                    val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
-
-                    val thumbQuality = preferencesHelper.thumbnailQuality().get()
-                    val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }
-                        .sortedByDescending { result[it.id]!!.first().attributes.readableAt }
-                        .map {
-                            val chapterName = result[it.id]?.firstOrNull()?.buildChapterName() ?: ""
-                            it.toSourceManga(coverQuality = thumbQuality, displayText = chapterName)
+                val result =
+                    chapterListDto.data
+                        .groupBy { chapterListDto ->
+                            chapterListDto.relationships
+                                .first { relationshipDto ->
+                                    relationshipDto.type == MdConstants.Types.manga
+                                }
+                                .id
                         }
+                        .filterNot { uniqueManga.contains(it.key) }
 
-                    Ok(MangaListPage(sourceManga = mangaList.toPersistentList(), hasNextPage = hasMoreResults))
-                }
-        }.getOrElse {
-            TimberKt.e(it) { "Error parsing latest chapters" }
-            Err(ResultError.Generic(errorString = "Error parsing latest chapters response"))
-        }
+                val mangaIds = result.keys.toList()
+
+                uniqueManga.addAll(mangaIds)
+
+                val allContentRating =
+                    listOf(
+                        MdConstants.ContentRating.safe,
+                        MdConstants.ContentRating.suggestive,
+                        MdConstants.ContentRating.erotica,
+                        MdConstants.ContentRating.pornographic,
+                    )
+
+                val queryParameters =
+                    mutableMapOf(
+                        "ids[]" to mangaIds,
+                        "limit" to mangaIds.size,
+                        "contentRating[]" to allContentRating,
+                    )
+
+                service
+                    .search(ProxyRetrofitQueryMap(queryParameters))
+                    .getOrResultError("trying to search manga from latest chapters")
+                    .andThen { mangaListDto ->
+                        val hasMoreResults =
+                            chapterListDto.limit + chapterListDto.offset < chapterListDto.total
+
+                        val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
+
+                        val thumbQuality = preferencesHelper.thumbnailQuality().get()
+                        val mangaList =
+                            mangaIds
+                                .mapNotNull { mangaDtoMap[it] }
+                                .sortedByDescending {
+                                    result[it.id]!!.first().attributes.readableAt
+                                }
+                                .map {
+                                    val chapterName =
+                                        result[it.id]?.firstOrNull()?.buildChapterName() ?: ""
+                                    it.toSourceManga(
+                                        coverQuality = thumbQuality,
+                                        displayText = chapterName
+                                    )
+                                }
+
+                        Ok(
+                            MangaListPage(
+                                sourceManga = mangaList.toPersistentList(),
+                                hasNextPage = hasMoreResults
+                            )
+                        )
+                    }
+            }
+            .getOrElse {
+                TimberKt.e(it) { "Error parsing latest chapters" }
+                Err(ResultError.Generic(errorString = "Error parsing latest chapters response"))
+            }
     }
 }

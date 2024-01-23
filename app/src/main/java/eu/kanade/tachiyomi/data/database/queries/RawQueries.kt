@@ -7,9 +7,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable as MangaCateg
 import eu.kanade.tachiyomi.data.database.tables.MangaTable as Manga
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 
-/**
- * Query to get the manga from the library, with their categories and unread count.
- */
+/** Query to get the manga from the library, with their categories and unread count. */
 val libraryQuery =
     """
     SELECT M.*, COALESCE(MC.${MangaCategory.COL_CATEGORY_ID}, 0) AS ${Manga.COL_CATEGORY}
@@ -46,9 +44,7 @@ val libraryQuery =
         ON MC.${MangaCategory.COL_MANGA_ID} = M.${Manga.COL_ID}
     """
 
-/**
- * Query to get the recent chapters of manga from the library up to a date.
- */
+/** Query to get the recent chapters of manga from the library up to a date. */
 fun getRecentsQuery(search: String, offset: Int, isResuming: Boolean) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, * FROM ${Manga.TABLE} JOIN ${Chapter.TABLE}
@@ -60,9 +56,7 @@ fun getRecentsQuery(search: String, offset: Int, isResuming: Boolean) =
     ${limitAndOffset(true, isResuming, offset)}
     """
 
-/**
- * Query to get the recently added manga
- */
+/** Query to get the recently added manga */
 fun getRecentAdditionsQuery(search: String, endless: Boolean, offset: Int, isResuming: Boolean) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, * FROM ${Manga.TABLE}
@@ -80,9 +74,7 @@ fun limitAndOffset(endless: Boolean, isResuming: Boolean, offset: Int): String {
     }
 }
 
-/**
- * Query to get the manga with recently uploaded chapters
- */
+/** Query to get the manga with recently uploaded chapters */
 fun getRecentsQueryDistinct(search: String, offset: Int = 0, isResuming: Boolean) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*
@@ -104,10 +96,10 @@ fun getRecentsQueryDistinct(search: String, offset: Int = 0, isResuming: Boolean
     """
 
 /**
- * Query to get the recently read chapters of manga from the library up to a date.
- * The max_last_read table contains the most recent chapters grouped by manga
- * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
- * and are read after the given time period
+ * Query to get the recently read chapters of manga from the library up to a date. The max_last_read
+ * table contains the most recent chapters grouped by manga The select statement returns all
+ * information of chapters that have the same id as the chapter in max_last_read and are read after
+ * the given time period
  */
 fun getRecentMangaListLimitQuery(
     search: String = "",
@@ -135,10 +127,10 @@ fun getRecentMangaListLimitQuery(
     """
 
 /**
- * Query to get the recently read chapters of manga from the library up to a date.
- * The max_last_read table contains the most recent chapters grouped by manga
- * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
- * and are read after the given time period
+ * Query to get the recently read chapters of manga from the library up to a date. The max_last_read
+ * table contains the most recent chapters grouped by manga The select statement returns all
+ * information of chapters that have the same id as the chapter in max_last_read and are read after
+ * the given time period
  */
 fun getRecentHistoryUngrouped(
     search: String = "",
@@ -159,10 +151,10 @@ fun getRecentHistoryUngrouped(
     """
 
 /**
- * Query to get the read chapters of manga from the library during the period.
- * The max_last_read table contains the most recent chapters grouped by manga
- * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
- * and are read after the given time period
+ * Query to get the read chapters of manga from the library during the period. The max_last_read
+ * table contains the most recent chapters grouped by manga The select statement returns all
+ * information of chapters that have the same id as the chapter in max_last_read and are read after
+ * the given time period
  */
 fun getHistoryPerPeriodQuery(startDate: Long, endDate: Long) =
     """
@@ -178,13 +170,11 @@ fun getHistoryPerPeriodQuery(startDate: Long, endDate: Long) =
 """
 
 /**
- * Query to get the recently read manga that has more chapters to read
- * The first from checks that there's an unread chapter
- * The max_last_read table contains the most recent chapters grouped by manga
- * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
- * and are read after the given time period
- * The Second Union/Select gets recents chapters
- * Final Union gets newly added manga
+ * Query to get the recently read manga that has more chapters to read The first from checks that
+ * there's an unread chapter The max_last_read table contains the most recent chapters grouped by
+ * manga The select statement returns all information of chapters that have the same id as the
+ * chapter in max_last_read and are read after the given time period The Second Union/Select gets
+ * recents chapters Final Union gets newly added manga
  */
 fun getAllRecentsType(
     search: String = "",
@@ -192,7 +182,8 @@ fun getAllRecentsType(
     endless: Boolean,
     offset: Int = 0,
     isResuming: Boolean,
-) = """
+) =
+    """
     SELECT * FROM
     (SELECT mangas.url as mangaUrl, mangas.*, chapters.*, history.*
     FROM (
@@ -329,9 +320,7 @@ fun getTotalChapterMangaQuery() =
     ORDER by COUNT(*)
     """
 
-/**
- * Query to get the categories for a manga.
- */
+/** Query to get the categories for a manga. */
 fun getCategoriesForMangaQuery() =
     """
     SELECT ${Category.TABLE}.* FROM ${Category.TABLE}
@@ -340,9 +329,7 @@ fun getCategoriesForMangaQuery() =
     WHERE ${MangaCategory.COL_MANGA_ID} = ?
     """
 
-/**
- * Query to get manga that are not in library, but have read chapters
- */
+/** Query to get manga that are not in library, but have read chapters */
 fun getReadMangaNotInLibraryQuery() =
     """
     SELECT ${Manga.TABLE}.*

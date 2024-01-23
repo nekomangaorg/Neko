@@ -26,14 +26,17 @@ fun BrowseFollowsPage(
     if (displayMangaHolder.allDisplayManga.isEmpty()) {
         NoResultsEmptyScreen(contentPadding)
     } else {
-        val groupedManga = remember(displayMangaHolder) {
-            displayMangaHolder.filteredDisplayManga
-                .groupBy { it.displayTextRes!! }
-                .map { entry ->
-                    entry.key to entry.value.map { it.copy(displayTextRes = null) }.toImmutableList()
-                }.toMap()
-                .toImmutableMap()
-        }
+        val groupedManga =
+            remember(displayMangaHolder) {
+                displayMangaHolder.filteredDisplayManga
+                    .groupBy { it.displayTextRes!! }
+                    .map { entry ->
+                        entry.key to
+                            entry.value.map { it.copy(displayTextRes = null) }.toImmutableList()
+                    }
+                    .toMap()
+                    .toImmutableMap()
+            }
 
         if (isList) {
             MangaListWithHeader(

@@ -22,9 +22,10 @@ class CrashLogUtil(private val context: Context) {
 
     val preferences: PreferencesHelper by injectLazy()
 
-    private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_CRASH_LOGS) {
-        setSmallIcon(R.drawable.ic_neko_notification)
-    }
+    private val notificationBuilder =
+        context.notificationBuilder(Notifications.CHANNEL_CRASH_LOGS) {
+            setSmallIcon(R.drawable.ic_neko_notification)
+        }
 
     suspend fun dumpLogs(exception: Throwable? = null) = withNonCancellableContext {
         try {
@@ -52,7 +53,8 @@ class CrashLogUtil(private val context: Context) {
             Device name: ${Build.DEVICE}
             Device model: ${Build.MODEL}
             Device product name: ${Build.PRODUCT}
-        """.trimIndent()
+        """
+            .trimIndent()
     }
 
     private fun getExceptionBlock(exception: Throwable): String {
@@ -63,7 +65,8 @@ class CrashLogUtil(private val context: Context) {
             $exception
             ******************************************************************************************************************************************************************************************************************************
             ******************************************************************************************************************************************************************************************************************************
-        """.trimIndent()
+        """
+            .trimIndent()
     }
 
     private fun showNotification(uri: Uri) {
@@ -84,7 +87,11 @@ class CrashLogUtil(private val context: Context) {
             addAction(
                 R.drawable.ic_share_24dp,
                 context.getString(R.string.share),
-                NotificationReceiver.shareCrashLogPendingBroadcast(context, uri, Notifications.ID_CRASH_LOGS),
+                NotificationReceiver.shareCrashLogPendingBroadcast(
+                    context,
+                    uri,
+                    Notifications.ID_CRASH_LOGS
+                ),
             )
 
             context.notificationManager.notify(Notifications.ID_CRASH_LOGS, build())

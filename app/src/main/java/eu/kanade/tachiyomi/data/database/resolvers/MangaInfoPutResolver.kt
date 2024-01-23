@@ -11,26 +11,29 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable
 
 class MangaInfoPutResolver() : PutResolver<Manga>() {
 
-    override fun performPut(db: StorIOSQLite, manga: Manga) = db.inTransactionReturn {
-        val updateQuery = mapToUpdateQuery(manga)
-        val contentValues = mapToContentValues(manga)
+    override fun performPut(db: StorIOSQLite, manga: Manga) =
+        db.inTransactionReturn {
+            val updateQuery = mapToUpdateQuery(manga)
+            val contentValues = mapToContentValues(manga)
 
-        val numberOfRowsUpdated = db.lowLevel().update(updateQuery, contentValues)
-        PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
-    }
+            val numberOfRowsUpdated = db.lowLevel().update(updateQuery, contentValues)
+            PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
+        }
 
-    fun mapToUpdateQuery(manga: Manga) = UpdateQuery.builder()
-        .table(MangaTable.TABLE)
-        .where("${MangaTable.COL_ID} = ?")
-        .whereArgs(manga.id)
-        .build()
+    fun mapToUpdateQuery(manga: Manga) =
+        UpdateQuery.builder()
+            .table(MangaTable.TABLE)
+            .where("${MangaTable.COL_ID} = ?")
+            .whereArgs(manga.id)
+            .build()
 
-    fun mapToContentValues(manga: Manga) = ContentValues(1).apply {
-        put(MangaTable.COL_TITLE, manga.title)
-        put(MangaTable.COL_GENRE, manga.genre)
-        put(MangaTable.COL_AUTHOR, manga.author)
-        put(MangaTable.COL_ARTIST, manga.artist)
-        put(MangaTable.COL_DESCRIPTION, manga.description)
-        put(MangaTable.COL_STATUS, manga.status)
-    }
+    fun mapToContentValues(manga: Manga) =
+        ContentValues(1).apply {
+            put(MangaTable.COL_TITLE, manga.title)
+            put(MangaTable.COL_GENRE, manga.genre)
+            put(MangaTable.COL_AUTHOR, manga.author)
+            put(MangaTable.COL_ARTIST, manga.artist)
+            put(MangaTable.COL_DESCRIPTION, manga.description)
+            put(MangaTable.COL_STATUS, manga.status)
+        }
 }

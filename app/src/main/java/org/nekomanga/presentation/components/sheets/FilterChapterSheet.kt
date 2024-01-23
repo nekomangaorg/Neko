@@ -51,22 +51,32 @@ fun FilterChapterSheet(
 
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .requiredHeightIn(Size.none, maxLazyHeight.dp),
+                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
             ) {
                 item {
-                    Sort(themeColorState = themeColorState, sortFilter, changeSort) { setAsGlobal(MangaConstants.SetGlobal.Sort) }
+                    Sort(themeColorState = themeColorState, sortFilter, changeSort) {
+                        setAsGlobal(MangaConstants.SetGlobal.Sort)
+                    }
                 }
                 item {
-                    Filter(themeColorState = themeColorState, filter, changeFilter) { setAsGlobal(MangaConstants.SetGlobal.Filter) }
+                    Filter(themeColorState = themeColorState, filter, changeFilter) {
+                        setAsGlobal(MangaConstants.SetGlobal.Filter)
+                    }
                 }
 
                 item {
-                    Scanlator(themeColorState = themeColorState, scanlatorFilter, changeScanlatorFilter)
+                    Scanlator(
+                        themeColorState = themeColorState,
+                        scanlatorFilter,
+                        changeScanlatorFilter
+                    )
                 }
                 item {
-                    Language(themeColorState = themeColorState, languageFilter, changeLanguageFilter)
+                    Language(
+                        themeColorState = themeColorState,
+                        languageFilter,
+                        changeLanguageFilter
+                    )
                 }
             }
         }
@@ -74,37 +84,72 @@ fun FilterChapterSheet(
 }
 
 @Composable
-private fun Sort(themeColorState: ThemeColorState, sortFilter: MangaConstants.SortFilter, changeSort: (SortOption?) -> Unit, setGlobal: () -> Unit) {
+private fun Sort(
+    themeColorState: ThemeColorState,
+    sortFilter: MangaConstants.SortFilter,
+    changeSort: (SortOption?) -> Unit,
+    setGlobal: () -> Unit
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Size.small),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(modifier = Modifier.padding(vertical = 16.dp), text = stringResource(id = R.string.sort), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+            Text(
+                modifier = Modifier.padding(vertical = 16.dp),
+                text = stringResource(id = R.string.sort),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             if (!sortFilter.matchesGlobalDefaults) {
                 TextButton(onClick = setGlobal) {
-                    Text(text = stringResource(id = R.string.set_as_default), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                    Text(
+                        text = stringResource(id = R.string.set_as_default),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = themeColorState.buttonColor
+                    )
                 }
                 TextButton(onClick = { changeSort(null) }) {
-                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                    Text(
+                        text = stringResource(id = R.string.reset),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = themeColorState.buttonColor
+                    )
                 }
             }
         }
         Gap(Size.small)
-        SortLine(themeColorState, SortOption(sortFilter.sourceOrderSort, SourceOrder), stringResource(id = R.string.by_source_order), changeSort)
-        SortLine(themeColorState, SortOption(sortFilter.chapterNumberSort, ChapterNumber), stringResource(id = R.string.by_chapter_number), changeSort)
-        SortLine(themeColorState, SortOption(sortFilter.uploadDateSort, UploadDate), stringResource(id = R.string.by_update_date), changeSort)
+        SortLine(
+            themeColorState,
+            SortOption(sortFilter.sourceOrderSort, SourceOrder),
+            stringResource(id = R.string.by_source_order),
+            changeSort
+        )
+        SortLine(
+            themeColorState,
+            SortOption(sortFilter.chapterNumberSort, ChapterNumber),
+            stringResource(id = R.string.by_chapter_number),
+            changeSort
+        )
+        SortLine(
+            themeColorState,
+            SortOption(sortFilter.uploadDateSort, UploadDate),
+            stringResource(id = R.string.by_update_date),
+            changeSort
+        )
     }
 }
 
 @Composable
-private fun SortLine(themeColorState: ThemeColorState, state: SortOption, text: String, changeSort: (SortOption) -> Unit) {
+private fun SortLine(
+    themeColorState: ThemeColorState,
+    state: SortOption,
+    text: String,
+    changeSort: (SortOption) -> Unit
+) {
     SortRow(
         modifier = Modifier.fillMaxWidth(),
         sortState = state.sortState,
@@ -122,13 +167,10 @@ private fun Filter(
     setGlobal: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Size.small),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -141,10 +183,18 @@ private fun Filter(
 
             if (!filter.matchesGlobalDefaults) {
                 TextButton(onClick = setGlobal) {
-                    Text(text = stringResource(id = R.string.set_as_default), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                    Text(
+                        text = stringResource(id = R.string.set_as_default),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = themeColorState.buttonColor
+                    )
                 }
                 TextButton(onClick = { changeFilter(null) }) {
-                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                    Text(
+                        text = stringResource(id = R.string.reset),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = themeColorState.buttonColor
+                    )
                 }
             }
         }
@@ -153,38 +203,59 @@ private fun Filter(
             checked = filter.showAll,
             disabledOnChecked = true,
             text = stringResource(id = R.string.show_all),
-            onChecked = { changeFilter(MangaConstants.ChapterDisplayOptions(displayType = MangaConstants.ChapterDisplayType.All, displayState = ToggleableState(!filter.showAll))) },
+            onChecked = {
+                changeFilter(
+                    MangaConstants.ChapterDisplayOptions(
+                        displayType = MangaConstants.ChapterDisplayType.All,
+                        displayState = ToggleableState(!filter.showAll)
+                    )
+                )
+            },
         )
         FilterLine(
             themeColorState = themeColorState,
-            state = MangaConstants.ChapterDisplayOptions(displayType = MangaConstants.ChapterDisplayType.Unread, displayState = filter.unread),
+            state =
+                MangaConstants.ChapterDisplayOptions(
+                    displayType = MangaConstants.ChapterDisplayType.Unread,
+                    displayState = filter.unread
+                ),
             text = stringResource(id = R.string.show_unread_chapters),
             changeFilter = changeFilter,
         )
         FilterLine(
             themeColorState = themeColorState,
-            state = MangaConstants.ChapterDisplayOptions(displayType = MangaConstants.ChapterDisplayType.Downloaded, displayState = filter.downloaded),
+            state =
+                MangaConstants.ChapterDisplayOptions(
+                    displayType = MangaConstants.ChapterDisplayType.Downloaded,
+                    displayState = filter.downloaded
+                ),
             text = stringResource(id = R.string.show_downloaded_chapters),
             changeFilter = changeFilter,
         )
         FilterLine(
             themeColorState = themeColorState,
-            state = MangaConstants.ChapterDisplayOptions(displayType = MangaConstants.ChapterDisplayType.Bookmarked, displayState = filter.bookmarked),
+            state =
+                MangaConstants.ChapterDisplayOptions(
+                    displayType = MangaConstants.ChapterDisplayType.Bookmarked,
+                    displayState = filter.bookmarked
+                ),
             text = stringResource(id = R.string.show_bookmarked_chapters),
             changeFilter = changeFilter,
         )
 
         CheckboxLine(
-            themeColorState = themeColorState, checked = filter.hideChapterTitles == ToggleableState.On,
+            themeColorState = themeColorState,
+            checked = filter.hideChapterTitles == ToggleableState.On,
             text = stringResource(id = R.string.hide_chapter_titles),
             onChecked = {
                 changeFilter(
                     MangaConstants.ChapterDisplayOptions(
                         displayType = MangaConstants.ChapterDisplayType.HideTitles,
-                        displayState = when (filter.hideChapterTitles == ToggleableState.On) {
-                            true -> ToggleableState.Off
-                            false -> ToggleableState.On
-                        },
+                        displayState =
+                            when (filter.hideChapterTitles == ToggleableState.On) {
+                                true -> ToggleableState.Off
+                                false -> ToggleableState.On
+                            },
                     ),
                 )
             },
@@ -193,7 +264,12 @@ private fun Filter(
 }
 
 @Composable
-private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.ChapterDisplayOptions, text: String, changeFilter: (MangaConstants.ChapterDisplayOptions) -> Unit) {
+private fun FilterLine(
+    themeColorState: ThemeColorState,
+    state: MangaConstants.ChapterDisplayOptions,
+    text: String,
+    changeFilter: (MangaConstants.ChapterDisplayOptions) -> Unit
+) {
     TriStateCheckboxRow(
         modifier = Modifier.fillMaxWidth(),
         state = state.displayState,
@@ -204,20 +280,34 @@ private fun FilterLine(themeColorState: ThemeColorState, state: MangaConstants.C
 }
 
 @Composable
-private fun CheckboxLine(themeColorState: ThemeColorState, checked: Boolean, disabledOnChecked: Boolean = false, text: String, onChecked: () -> Unit = {}) {
-    CheckboxRow(modifier = Modifier.fillMaxWidth(), checkedState = checked, checkedChange = { onChecked() }, rowText = text, themeColorState = themeColorState, disabled = disabledOnChecked && checked)
+private fun CheckboxLine(
+    themeColorState: ThemeColorState,
+    checked: Boolean,
+    disabledOnChecked: Boolean = false,
+    text: String,
+    onChecked: () -> Unit = {}
+) {
+    CheckboxRow(
+        modifier = Modifier.fillMaxWidth(),
+        checkedState = checked,
+        checkedChange = { onChecked() },
+        rowText = text,
+        themeColorState = themeColorState,
+        disabled = disabledOnChecked && checked
+    )
 }
 
 @Composable
-private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaConstants.ScanlatorFilter, changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit) {
+private fun Scanlator(
+    themeColorState: ThemeColorState,
+    scanlatorFilter: MangaConstants.ScanlatorFilter,
+    changeScanlatorFilter: (MangaConstants.ScanlatorOption?) -> Unit
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Size.small),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -229,7 +319,11 @@ private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaCo
             )
             if (scanlatorFilter.scanlators.any { it.disabled }) {
                 TextButton(onClick = { changeScanlatorFilter(null) }) {
-                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                    Text(
+                        text = stringResource(id = R.string.reset),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = themeColorState.buttonColor
+                    )
                 }
             }
         }
@@ -241,17 +335,25 @@ private fun Scanlator(themeColorState: ThemeColorState, scanlatorFilter: MangaCo
                 themeColorState = themeColorState,
                 enabledButton = enabled,
                 scanlatorOption = scanlatorOption,
-            ) { changeScanlatorFilter(scanlatorOption.copy(disabled = !scanlatorOption.disabled)) }
+            ) {
+                changeScanlatorFilter(scanlatorOption.copy(disabled = !scanlatorOption.disabled))
+            }
         }
     }
 }
 
 @Composable
-private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: MangaConstants.ScanlatorOption, enabledButton: Boolean, changeScanlatorFilter: () -> Unit) {
+private fun ScanlatorLine(
+    themeColorState: ThemeColorState,
+    scanlatorOption: MangaConstants.ScanlatorOption,
+    enabledButton: Boolean,
+    changeScanlatorFilter: () -> Unit
+) {
     TriStateCheckboxRow(
         modifier = Modifier.fillMaxWidth(),
         disabled = !enabledButton,
-        state = if (scanlatorOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
+        state =
+            if (scanlatorOption.disabled) ToggleableState.Indeterminate else ToggleableState.Off,
         toggleState = { changeScanlatorFilter() },
         rowText = scanlatorOption.name,
         themeColorState = themeColorState,
@@ -259,15 +361,16 @@ private fun ScanlatorLine(themeColorState: ThemeColorState, scanlatorOption: Man
 }
 
 @Composable
-private fun Language(themeColorState: ThemeColorState, languageFilter: MangaConstants.LanguageFilter, changeLanguageFilter: (MangaConstants.LanguageOption?) -> Unit) {
+private fun Language(
+    themeColorState: ThemeColorState,
+    languageFilter: MangaConstants.LanguageFilter,
+    changeLanguageFilter: (MangaConstants.LanguageOption?) -> Unit
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal =Size.small),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -279,7 +382,11 @@ private fun Language(themeColorState: ThemeColorState, languageFilter: MangaCons
             )
             if (languageFilter.languages.any { it.disabled }) {
                 TextButton(onClick = { changeLanguageFilter(null) }) {
-                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                    Text(
+                        text = stringResource(id = R.string.reset),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = themeColorState.buttonColor
+                    )
                 }
             }
         }
@@ -291,13 +398,20 @@ private fun Language(themeColorState: ThemeColorState, languageFilter: MangaCons
                 themeColorState = themeColorState,
                 enabledButton = enabled,
                 languageOption = languageOption,
-            ) { changeLanguageFilter(languageOption.copy(disabled = !languageOption.disabled)) }
+            ) {
+                changeLanguageFilter(languageOption.copy(disabled = !languageOption.disabled))
+            }
         }
     }
 }
 
 @Composable
-private fun LanguageLine(themeColorState: ThemeColorState, languageOption: MangaConstants.LanguageOption, enabledButton: Boolean, changeLanguageFilter: () -> Unit) {
+private fun LanguageLine(
+    themeColorState: ThemeColorState,
+    languageOption: MangaConstants.LanguageOption,
+    enabledButton: Boolean,
+    changeLanguageFilter: () -> Unit
+) {
     TriStateCheckboxRow(
         modifier = Modifier.fillMaxWidth(),
         disabled = !enabledButton,

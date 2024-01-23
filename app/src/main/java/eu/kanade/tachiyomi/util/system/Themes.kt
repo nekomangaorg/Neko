@@ -68,7 +68,6 @@ enum class Themes(
         AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
         R.string.tako,
     ),
-
     LIME(
         R.style.Theme_Tachiyomi_FlatLime,
         AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
@@ -80,7 +79,5 @@ enum class Themes(
     val isDarkTheme = nightMode == AppCompatDelegate.MODE_NIGHT_YES
     val followsSystem = nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 
-    @StringRes
-    val darkNameRes: Int = altNameRes ?: nameRes
+    @StringRes val darkNameRes: Int = altNameRes ?: nameRes
 }
-

@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import tachiyomi.core.preference.Preference
 
-class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
-    (context, attrs) {
+class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    LinearLayout(context, attrs) {
 
     private var listener: FilterTagGroupListener? = null
 
@@ -91,9 +91,7 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun reset() {
-        buttons.forEach {
-            it.isActivated = false
-        }
+        buttons.forEach { it.isActivated = false }
         for (i in 0 until itemCount) {
             buttons[i].isVisible = true
             buttons[i].setTextColor(context.getResourceColor(R.attr.colorOnBackground))
@@ -102,8 +100,10 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     private fun toggleButton(index: Int, callBack: Boolean = true) {
-        if (index < 0 || itemCount == 0 ||
-            (isActivated && index != buttons.indexOfFirst { it.isActivated })
+        if (
+            index < 0 ||
+                itemCount == 0 ||
+                (isActivated && index != buttons.indexOfFirst { it.isActivated })
         ) {
             return
         }

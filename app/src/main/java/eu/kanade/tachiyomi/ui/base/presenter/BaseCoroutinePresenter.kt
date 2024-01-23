@@ -25,8 +25,7 @@ open class BaseCoroutinePresenter<T> {
         }
     }
 
-    open fun onCreate() {
-    }
+    open fun onCreate() {}
 
     open fun onDestroy() {
         presenterScope.cancel()

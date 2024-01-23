@@ -15,9 +15,7 @@ import org.nekomanga.logging.TimberKt
 
 class RestoreHelper(val context: Context) {
 
-    /**
-     * Pending intent of action that cancels the library update
-     */
+    /** Pending intent of action that cancels the library update */
     val cancelIntent by lazy {
         NotificationReceiver.cancelRestorePendingBroadcast(
             context,
@@ -25,9 +23,7 @@ class RestoreHelper(val context: Context) {
         )
     }
 
-    /**
-     * keep a partially constructed progress notification for resuse
-     */
+    /** keep a partially constructed progress notification for resuse */
     val progressNotification by lazy {
         NotificationCompat.Builder(context, Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS)
             .setContentTitle(context.getString(R.string.app_name_neko))
@@ -43,9 +39,7 @@ class RestoreHelper(val context: Context) {
             )
     }
 
-    /**Get the PendingIntent for the error log
-     *
-     */
+    /** Get the PendingIntent for the error log */
     fun getErrorLogIntent(path: String, file: String): PendingIntent {
         val destFile = File(path, file)
         val uri = destFile.getUriCompat(context.applicationContext)
@@ -76,8 +70,9 @@ class RestoreHelper(val context: Context) {
         )
     }
 
-    /**Show an error notification if something happens that prevents the restore from starting/working
-     *
+    /**
+     * Show an error notification if something happens that prevents the restore from
+     * starting/working
      */
     fun showErrorNotification(errorMessage: String) {
         val resultNotification =
@@ -93,9 +88,7 @@ class RestoreHelper(val context: Context) {
         )
     }
 
-    /**
-     * Show the result notification with option to show the error log
-     */
+    /** Show the result notification with option to show the error log */
     fun showResultNotification(
         path: String?,
         file: String?,
@@ -122,8 +115,7 @@ class RestoreHelper(val context: Context) {
         content.add(
             context.getString(
                 R.string.restore_completed_successful,
-                restoreProgress
-                    .toString(),
+                restoreProgress.toString(),
                 restoreAmount.toString(),
             ),
         )
@@ -168,8 +160,7 @@ class RestoreHelper(val context: Context) {
             resultNotification.addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(
-                    R.string
-                        .view_log,
+                    R.string.view_log,
                 ),
                 getErrorLogIntent(path, file),
             )
@@ -180,9 +171,7 @@ class RestoreHelper(val context: Context) {
         )
     }
 
-    /**
-     * Write errors to error log
-     */
+    /** Write errors to error log */
     fun writeErrorLog(
         errors: List<String>,
         skippedAmount: Int,
@@ -195,15 +184,11 @@ class RestoreHelper(val context: Context) {
                 destFile.bufferedWriter().use { out ->
                     if (skippedAmount > 0) {
                         out.write("skipped titles: \n")
-                        skippedTitles.forEach { message ->
-                            out.write("$message\n")
-                        }
+                        skippedTitles.forEach { message -> out.write("$message\n") }
                     }
                     if (errors.isNotEmpty()) {
                         out.write("\n\nErrors: \n")
-                        errors.forEach { message ->
-                            out.write("$message\n")
-                        }
+                        errors.forEach { message -> out.write("$message\n") }
                     }
                 }
                 return destFile

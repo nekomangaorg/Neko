@@ -11,9 +11,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 
 class DownloadSwipeTutorialItem : AbstractFlexibleItem<DownloadSwipeTutorialItem.Holder>() {
 
-    /**
-     * Returns the layout resource for this item.
-     */
+    /** Returns the layout resource for this item. */
     override fun getLayoutRes(): Int {
         return R.layout.download_swipe_tut_item
     }
@@ -44,12 +42,9 @@ class DownloadSwipeTutorialItem : AbstractFlexibleItem<DownloadSwipeTutorialItem
         holder: Holder,
         position: Int,
         payloads: MutableList<Any>,
-    ) {
-    }
+    ) {}
 
-    /**
-     * Returns true if this item is draggable.
-     */
+    /** Returns true if this item is draggable. */
     override fun isDraggable(): Boolean {
         return true
     }

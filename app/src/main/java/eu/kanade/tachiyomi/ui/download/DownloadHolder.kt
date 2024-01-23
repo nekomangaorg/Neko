@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
 
 /**
- * Class used to hold the data of a download.
- * All the elements from the layout file "download_item" are available in this class.
+ * Class used to hold the data of a download. All the elements from the layout file "download_item"
+ * are available in this class.
  *
  * @param view the inflated view for this holder.
  * @constructor creates a new download holder.
@@ -61,9 +61,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         )
     }
 
-    /**
-     * Updates the progress bar of the download.
-     */
+    /** Updates the progress bar of the download. */
     fun notifyProgress() {
         val pages = download.pages ?: return
         if (binding.downloadProgress.max == 1) {
@@ -72,9 +70,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         binding.downloadProgress.progress = download.pageProgress
     }
 
-    /**
-     * Updates the text field of the number of downloaded pages.
-     */
+    /** Updates the text field of the number of downloaded pages. */
     fun notifyDownloadedPages() {
         val pages = download.pages ?: return
         binding.downloadProgressText.text = "${download.downloadedImages}/${pages.size}"
@@ -104,8 +100,8 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         popup.inflate(R.menu.download_single)
 
         popup.menu.findItem(R.id.move_to_top).isVisible = flexibleAdapterPosition != 0
-        popup.menu.findItem(R.id.move_to_bottom).isVisible = flexibleAdapterPosition != adapter
-            .itemCount - 1
+        popup.menu.findItem(R.id.move_to_bottom).isVisible =
+            flexibleAdapterPosition != adapter.itemCount - 1
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->

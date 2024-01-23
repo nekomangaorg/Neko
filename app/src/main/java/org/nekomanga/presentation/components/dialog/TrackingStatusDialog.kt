@@ -33,18 +33,30 @@ import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, service: TrackServiceItem, onDismiss: () -> Unit, trackStatusChange: (Int) -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+fun TrackingStatusDialog(
+    themeColorState: ThemeColorState,
+    initialStatus: Int,
+    service: TrackServiceItem,
+    onDismiss: () -> Unit,
+    trackStatusChange: (Int) -> Unit
+) {
+    CompositionLocalProvider(
+        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors
+    ) {
         var selectedStatus by remember { mutableStateOf(initialStatus) }
         val scope = rememberCoroutineScope()
         AlertDialog(
             title = {
-                Text(text = stringResource(id = R.string.status), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text(
+                    text = stringResource(id = R.string.status),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     service.statusList.forEachIndexed { index, status ->
-
                         val clicked = {
                             selectedStatus = status
                             scope.launch {
@@ -55,32 +67,38 @@ fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, s
                         }
 
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .selectable(
-                                    selected = (status == selectedStatus),
-                                    onClick = {
-                                        clicked()
-                                    },
-                                ),
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .selectable(
+                                        selected = (status == selectedStatus),
+                                        onClick = { clicked() },
+                                    ),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RadioButton(
                                 selected = (status == selectedStatus),
-                                onClick = {
-                                    clicked()
-                                },
-                                colors = RadioButtonDefaults.colors(selectedColor = themeColorState.buttonColor),
+                                onClick = { clicked() },
+                                colors =
+                                    RadioButtonDefaults.colors(
+                                        selectedColor = themeColorState.buttonColor
+                                    ),
                             )
                             Gap(Size.small)
-                            Text(text = service.status(status), style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = service.status(status),
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
                     }
                 }
             },
             onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                TextButton(
+                    onClick = onDismiss,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },

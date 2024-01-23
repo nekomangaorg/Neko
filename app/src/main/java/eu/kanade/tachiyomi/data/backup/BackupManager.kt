@@ -65,21 +65,24 @@ class BackupManager(val context: Context) {
         var backup: Backup? = null
 
         databaseHelper.inTransaction {
-            val databaseManga = getFavoriteManga() + if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA) {
-                getReadManga()
-            } else {
-                emptyList()
-            }
-            backup = Backup(
-                backupManga(databaseManga, flags),
-                backupCategories(),
-            )
+            val databaseManga =
+                getFavoriteManga() +
+                    if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA) {
+                        getReadManga()
+                    } else {
+                        emptyList()
+                    }
+            backup =
+                Backup(
+                    backupManga(databaseManga, flags),
+                    backupCategories(),
+                )
         }
 
         var file: UniFile? = null
         try {
-            file = (
-                if (isAutoBackup) {
+            file =
+                (if (isAutoBackup) {
                     // Get dir of file and create
                     var dir = UniFile.fromUri(context, uri)
                     dir = dir.createDirectory("automatic")
@@ -96,9 +99,8 @@ class BackupManager(val context: Context) {
                     dir.createFile(Backup.getBackupFilename())
                 } else {
                     UniFile.fromUri(context, uri)
-                }
-                )
-                ?: throw Exception("Couldn't create backup file")
+                })
+                    ?: throw Exception("Couldn't create backup file")
 
             if (!file.isFile) {
                 throw IllegalStateException("Failed to get handle on file")
@@ -109,10 +111,16 @@ class BackupManager(val context: Context) {
                 throw IllegalStateException(context.getString(R.string.empty_backup_error))
             }
 
-            file.openOutputStream().also {
-                // Force overwrite old file
-                (it as? FileOutputStream)?.channel?.truncate(0)
-            }.sink().gzip().buffer().use { it.write(byteArray) }
+            file
+                .openOutputStream()
+                .also {
+                    // Force overwrite old file
+                    (it as? FileOutputStream)?.channel?.truncate(0)
+                }
+                .sink()
+                .gzip()
+                .buffer()
+                .use { it.write(byteArray) }
             val fileUri = file.uri
 
             // Make sure it's a valid backup file
@@ -127,9 +135,7 @@ class BackupManager(val context: Context) {
     }
 
     private fun backupManga(mangaList: List<Manga>, flags: Int): List<BackupManga> {
-        return mangaList.map {
-            backupMangaObject(it, flags)
-        }
+        return mangaList.map { backupMangaObject(it, flags) }
     }
 
     /**
@@ -138,9 +144,9 @@ class BackupManager(val context: Context) {
      * @return list of [BackupCategory] to be backed up
      */
     private fun backupCategories(): List<BackupCategory> {
-        return databaseHelper.getCategories()
-            .executeAsBlocking()
-            .map { BackupCategory.copyFrom(it) }
+        return databaseHelper.getCategories().executeAsBlocking().map {
+            BackupCategory.copyFrom(it)
+        }
     }
 
     /**
@@ -189,11 +195,14 @@ class BackupManager(val context: Context) {
         if (options and BACKUP_HISTORY_MASK == BACKUP_HISTORY) {
             val historyForManga = databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
             if (historyForManga.isNotEmpty()) {
-                val history = historyForManga.mapNotNull { history ->
-                    databaseHelper.getChapter(history.chapter_id).executeAsBlocking()?.url?.let {
-                        BackupHistory(it, history.last_read, history.time_read)
+                val history =
+                    historyForManga.mapNotNull { history ->
+                        databaseHelper
+                            .getChapter(history.chapter_id)
+                            .executeAsBlocking()
+                            ?.url
+                            ?.let { BackupHistory(it, history.last_read, history.time_read) }
                     }
-                }
                 if (history.isNotEmpty()) {
                     mangaObject.history = history
                 }
@@ -221,27 +230,29 @@ class BackupManager(val context: Context) {
         val dbCategories = databaseHelper.getCategories().executeAsBlocking()
 
         // Iterate over them
-        backupCategories.map { it.getCategoryImpl() }.forEach { category ->
-            // Used to know if the category is already in the db
-            var found = false
-            for (dbCategory in dbCategories) {
-                // If the category is already in the db, assign the id to the file's category
-                // and do nothing
-                if (category.name == dbCategory.name) {
-                    category.id = dbCategory.id
-                    found = true
-                    break
+        backupCategories
+            .map { it.getCategoryImpl() }
+            .forEach { category ->
+                // Used to know if the category is already in the db
+                var found = false
+                for (dbCategory in dbCategories) {
+                    // If the category is already in the db, assign the id to the file's category
+                    // and do nothing
+                    if (category.name == dbCategory.name) {
+                        category.id = dbCategory.id
+                        found = true
+                        break
+                    }
+                }
+                // If the category isn't in the db, remove the id and insert a new category
+                // Store the inserted id in the category
+                if (!found) {
+                    // Let the db assign the id
+                    category.id = null
+                    val result = databaseHelper.insertCategory(category).executeAsBlocking()
+                    category.id = result.insertedId()?.toInt()
                 }
             }
-            // If the category isn't in the db, remove the id and insert a new category
-            // Store the inserted id in the category
-            if (!found) {
-                // Let the db assign the id
-                category.id = null
-                val result = databaseHelper.insertCategory(category).executeAsBlocking()
-                category.id = result.insertedId()?.toInt()
-            }
-        }
     }
 
     /**
@@ -258,15 +269,15 @@ class BackupManager(val context: Context) {
         val dbCategories = databaseHelper.getCategories().executeAsBlocking()
         val mangaCategoriesToUpdate = ArrayList<MangaCategory>(categories.size)
         categories.forEach { backupCategoryOrder ->
-            backupCategories.firstOrNull {
-                it.order == backupCategoryOrder
-            }?.let { backupCategory ->
-                dbCategories.firstOrNull { dbCategory ->
-                    dbCategory.name == backupCategory.name
-                }?.let { dbCategory ->
-                    mangaCategoriesToUpdate += MangaCategory.create(manga, dbCategory)
+            backupCategories
+                .firstOrNull { it.order == backupCategoryOrder }
+                ?.let { backupCategory ->
+                    dbCategories
+                        .firstOrNull { dbCategory -> dbCategory.name == backupCategory.name }
+                        ?.let { dbCategory ->
+                            mangaCategoriesToUpdate += MangaCategory.create(manga, dbCategory)
+                        }
                 }
-            }
         }
 
         // Update database
@@ -296,10 +307,11 @@ class BackupManager(val context: Context) {
             } else {
                 // If not in database create
                 databaseHelper.getChapter(url).executeAsBlocking()?.let {
-                    val historyToAdd = History.create(it).apply {
-                        last_read = lastRead
-                        time_read = readDuration
-                    }
+                    val historyToAdd =
+                        History.create(it).apply {
+                            last_read = lastRead
+                            time_read = readDuration
+                        }
                     historyToBeUpdated.add(historyToAdd)
                 }
             }
@@ -364,9 +376,10 @@ class BackupManager(val context: Context) {
         mergeMangaList.forEach { mergeManga ->
             val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
             if (dbMergeManga == null) {
-                val newMergeManga = mergeManga.copy(
-                    mangaId = manga.id!!,
-                )
+                val newMergeManga =
+                    mergeManga.copy(
+                        mangaId = manga.id!!,
+                    )
                 databaseHelper.insertMergeManga(newMergeManga).executeAsBlocking()
             }
         }

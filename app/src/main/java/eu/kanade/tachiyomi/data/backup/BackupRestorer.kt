@@ -28,14 +28,10 @@ class BackupRestorer(val context: Context, val job: Job?) {
     lateinit var backupManager: BackupManager
     val restoreHelper = RestoreHelper(context)
 
-    /**
-     * The progress of a backup restore
-     */
+    /** The progress of a backup restore */
     private var restoreProgress = 0
 
-    /**
-     * Amount of manga in file (needed for restore)
-     */
+    /** Amount of manga in file (needed for restore) */
     private var restoreAmount = 0
 
     private var totalAmount = 0
@@ -56,8 +52,10 @@ class BackupRestorer(val context: Context, val job: Job?) {
     suspend fun restoreBackup(uri: Uri) {
         backupManager = BackupManager(context)
 
-        val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer()
-            .use { it.readByteArray() }
+        val backupString =
+            context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use {
+                it.readByteArray()
+            }
         val backup = backupManager.parser.decodeFromByteArray(BackupSerializer, backupString)
 
         val partitionedList =
@@ -76,9 +74,11 @@ class BackupRestorer(val context: Context, val job: Job?) {
             restoreCategories(backup.backupCategories)
         }
 
-        dexManga.groupBy { MdUtil.getMangaUUID(it.url) }.forEach { (_, mangaList) ->
-            restoreManga(mangaList.first().title, mangaList, backup.backupCategories)
-        }
+        dexManga
+            .groupBy { MdUtil.getMangaUUID(it.url) }
+            .forEach { (_, mangaList) ->
+                restoreManga(mangaList.first().title, mangaList, backup.backupCategories)
+            }
 
         context.notificationManager.cancel(Notifications.ID_RESTORE_PROGRESS)
 
@@ -111,7 +111,11 @@ class BackupRestorer(val context: Context, val job: Job?) {
         restoreHelper.showProgressNotification(restoreProgress, totalAmount, "Categories added")
     }
 
-    private fun restoreManga(title: String, backupMangaList: List<BackupManga>, backupCategories: List<BackupCategory>) {
+    private fun restoreManga(
+        title: String,
+        backupMangaList: List<BackupManga>,
+        backupCategories: List<BackupCategory>
+    ) {
         try {
             if (job?.isCancelled == false) {
                 restoreHelper.showProgressNotification(
@@ -124,21 +128,24 @@ class BackupRestorer(val context: Context, val job: Job?) {
                 throw java.lang.Exception("Job was cancelled")
             }
 
-            val backupManga = if (backupMangaList.size == 1) {
-                backupMangaList.first()
-            } else {
-                val tempCategories = backupMangaList.map { it.categories }.distinct().flatten()
-                val tempChapters = backupMangaList.map { it.chapters }.distinct().flatten()
-                val tempHistory = backupMangaList.map { it.history }.distinct().flatten()
-                val tempTracks = backupMangaList.map { it.tracking }.distinct().flatten()
+            val backupManga =
+                if (backupMangaList.size == 1) {
+                    backupMangaList.first()
+                } else {
+                    val tempCategories = backupMangaList.map { it.categories }.distinct().flatten()
+                    val tempChapters = backupMangaList.map { it.chapters }.distinct().flatten()
+                    val tempHistory = backupMangaList.map { it.history }.distinct().flatten()
+                    val tempTracks = backupMangaList.map { it.tracking }.distinct().flatten()
 
-                backupMangaList.first().copy(
-                    categories = tempCategories,
-                    chapters = tempChapters,
-                    history = tempHistory,
-                    tracking = tempTracks,
-                )
-            }
+                    backupMangaList
+                        .first()
+                        .copy(
+                            categories = tempCategories,
+                            chapters = tempChapters,
+                            history = tempHistory,
+                            tracking = tempTracks,
+                        )
+                }
             // always make it EN source
             backupManga.source = SourceManager.getId(MdLang.ENGLISH.lang)
 

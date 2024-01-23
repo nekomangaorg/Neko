@@ -4,37 +4,30 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import java.util.Locale
 
-/**
- * -R> = regex conversion.
- */
+/** -R> = regex conversion. */
 object ChapterRecognition {
-    /**
-     * All cases with Ch.xx
-     * Mokushiroku Alice Vol.1 Ch. 4: Misrepresentation -R> 4
-     */
+    /** All cases with Ch.xx Mokushiroku Alice Vol.1 Ch. 4: Misrepresentation -R> 4 */
     private val basic = Regex("""(?<=ch\.) *([0-9]+)(\.[0-9]+)?(\.?[a-z]+)?""")
 
     /**
-     * Regex used when only one number occurrence
-     * Example: Bleach 567: Down With Snowwhite -R> 567
+     * Regex used when only one number occurrence Example: Bleach 567: Down With Snowwhite -R> 567
      */
     private val occurrence = Regex("""([0-9]+)(\.[0-9]+)?(\.?[a-z]+)?""")
 
     /**
-     * Regex used when manga title removed
-     * Example: Solanin 028 Vol. 2 -> 028 Vol.2 -> 028Vol.2 -R> 028
+     * Regex used when manga title removed Example: Solanin 028 Vol. 2 -> 028 Vol.2 -> 028Vol.2 -R>
+     * 028
      */
     private val withoutManga = Regex("""^([0-9]+)(\.[0-9]+)?(\.?[a-z]+)?""")
 
     /**
-     * Regex used to remove unwanted tags
-     * Example Prison School 12 v.1 vol004 version1243 volume64 -R> Prison School 12
+     * Regex used to remove unwanted tags Example Prison School 12 v.1 vol004 version1243 volume64
+     * -R> Prison School 12
      */
     private val unwanted = Regex("""(?<![a-z])(v|ver|vol|version|volume|season|s).?[0-9]+""")
 
     /**
-     * Regex used to remove unwanted whitespace
-     * Example One Piece 12 special -R> One Piece 12special
+     * Regex used to remove unwanted whitespace Example One Piece 12 special -R> One Piece 12special
      */
     private val unwantedWhiteSpace = Regex("""(\s)(extra|special|omake)""")
 
@@ -76,9 +69,7 @@ object ChapterRecognition {
 
         // Check one number occurrence.
         val occurrences: MutableList<MatchResult> = arrayListOf()
-        occurrence.findAll(name).let {
-            it.forEach { occurrence -> occurrences.add(occurrence) }
-        }
+        occurrence.findAll(name).let { it.forEach { occurrence -> occurrences.add(occurrence) } }
 
         if (occurrences.size == 1) {
             if (updateChapter(occurrences[0], chapter)) {
@@ -102,6 +93,7 @@ object ChapterRecognition {
 
     /**
      * Check if volume is found and update chapter
+     *
      * @param match result of regex
      * @param chapter chapter object
      * @return true if volume is found
@@ -120,6 +112,7 @@ object ChapterRecognition {
 
     /**
      * Check for decimal in received strings
+     *
      * @param decimal decimal value of regex
      * @param alpha alpha value of regex
      * @return decimal/alpha float value
@@ -153,9 +146,7 @@ object ChapterRecognition {
         return .0f
     }
 
-    /**
-     * x.a -> x.1, x.b -> x.2, etc
-     */
+    /** x.a -> x.1, x.b -> x.2, etc */
     private fun parseAlphaPostFix(alpha: Char): Float {
         return ("0." + (alpha.code - 96).toString()).toFloat()
     }

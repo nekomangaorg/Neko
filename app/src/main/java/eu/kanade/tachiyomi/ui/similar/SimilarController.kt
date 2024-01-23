@@ -9,9 +9,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.SimilarScreen
 
-/**
- * Controller that shows the similar/related manga
- */
+/** Controller that shows the similar/related manga */
 class SimilarController(mangaUUID: String) : BaseComposeController<SimilarPresenter>() {
 
     constructor(bundle: Bundle) : this(bundle.getString(MANGA_EXTRA) ?: "")
@@ -24,7 +22,9 @@ class SimilarController(mangaUUID: String) : BaseComposeController<SimilarPresen
             similarScreenState = presenter.similarScreenState.collectAsStateWithLifecycle(),
             switchDisplayClick = presenter::switchDisplayMode,
             onBackPress = router::handleBack,
-            mangaClick = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
+            mangaClick = { mangaId: Long ->
+                router.pushController(MangaDetailController(mangaId).withFadeTransaction())
+            },
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
             onRefresh = presenter::refresh,

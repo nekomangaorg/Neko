@@ -19,8 +19,7 @@ import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.injectLazy
 
 class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: Boolean) :
-    AbstractItem<ReaderChapterItem.ViewHolder>(),
-    Chapter by chapter {
+    AbstractItem<ReaderChapterItem.ViewHolder>(), Chapter by chapter {
 
     val decimalFormat =
         DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
@@ -48,21 +47,23 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val chapterColor = ChapterUtil.chapterColor(itemView.context, item.chapter)
 
-            val typeface = if (item.isCurrent) {
-                ResourcesCompat.getFont(
-                    itemView.context,
-                    R.font.montserrat_black,
-                )
-            } else {
-                null
-            }
+            val typeface =
+                if (item.isCurrent) {
+                    ResourcesCompat.getFont(
+                        itemView.context,
+                        R.font.montserrat_black,
+                    )
+                } else {
+                    null
+                }
 
-            binding.chapterTitle.text = if (manga.hideChapterTitle(item.mangaDetailsPreferences)) {
-                val number = item.decimalFormat.format(item.chapter_number.toDouble())
-                itemView.context.getString(R.string.chapter_, number)
-            } else {
-                item.name
-            }
+            binding.chapterTitle.text =
+                if (manga.hideChapterTitle(item.mangaDetailsPreferences)) {
+                    val number = item.decimalFormat.format(item.chapter_number.toDouble())
+                    itemView.context.getString(R.string.chapter_, number)
+                } else {
+                    item.name
+                }
 
             val statuses = mutableListOf<String>()
             ChapterUtil.relativeDate(item)?.let { statuses.add(it) }
@@ -76,10 +77,12 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 binding.chapterSubtitle.setTypeface(null, Typeface.NORMAL)
             }
 
-            if (item.chapter.language.isNullOrBlank() || item.chapter.language.equals(
-                    "english",
-                    true,
-                )
+            if (
+                item.chapter.language.isNullOrBlank() ||
+                    item.chapter.language.equals(
+                        "english",
+                        true,
+                    )
             ) {
                 binding.chapterLanguage.isVisible = false
             } else {
@@ -106,7 +109,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             binding.chapterTitle.typeface = typeface
             binding.chapterSubtitle.typeface = typeface
             binding.chapterLanguage.typeface = typeface
-            binding.chapterSubtitle.text = statuses.joinToString(" â€¢ ")
+            binding.chapterSubtitle.text = statuses.joinToString(" • ")
         }
 
         override fun unbindView(item: ReaderChapterItem) {

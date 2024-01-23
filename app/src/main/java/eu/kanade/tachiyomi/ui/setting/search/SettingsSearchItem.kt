@@ -17,8 +17,7 @@ class SettingsSearchItem(
     val settingsSearchResult: SettingsSearchHelper.SettingsSearchResult,
     val results: List<SettingsSearchItem>?,
     val searchResult: String,
-) :
-    AbstractFlexibleItem<SettingsSearchHolder>() {
+) : AbstractFlexibleItem<SettingsSearchHolder>() {
 
     override fun getLayoutRes(): Int {
         return R.layout.settings_search_controller_card

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.backup.models
 
-import eu.kanade.tachiyomi.BuildConfig
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -13,7 +12,8 @@ data class Backup(
     @ProtoNumber(2) var backupCategories: List<BackupCategory> = emptyList(),
 ) {
     companion object {
-        val filenameRegex = """(neko|tachiyomi)?_\d+-\d+-\d+_\d+-\d+\.(tachibk|proto\.gz)""".toRegex()
+        val filenameRegex =
+            """(neko|tachiyomi)?_\d+-\d+-\d+_\d+-\d+\.(tachibk|proto\.gz)""".toRegex()
 
         fun getBackupFilename(): String {
             val date = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.getDefault()).format(Date())

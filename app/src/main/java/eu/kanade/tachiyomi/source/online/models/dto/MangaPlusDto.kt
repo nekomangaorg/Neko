@@ -31,8 +31,7 @@ data class MangaPLusSuccessResult(
     val webHomeViewV3: WebHomeViewV3? = null,
 )
 
-@Serializable
-data class TitleRankingView(val titles: List<Title> = emptyList())
+@Serializable data class TitleRankingView(val titles: List<Title> = emptyList())
 
 @Serializable
 data class AllTitlesViewV2(
@@ -45,8 +44,7 @@ data class AllTitlesGroup(
     val titles: List<Title> = emptyList(),
 )
 
-@Serializable
-data class WebHomeViewV3(val groups: List<UpdatedTitleV2Group> = emptyList())
+@Serializable data class WebHomeViewV3(val groups: List<UpdatedTitleV2Group> = emptyList())
 
 @Serializable
 data class TitleDetailView(
@@ -63,8 +61,7 @@ data class TitleDetailView(
     val chaptersDescending: Boolean = true,
 )
 
-@Serializable
-data class MangaViewer(val pages: List<MangaPlusPage> = emptyList())
+@Serializable data class MangaViewer(val pages: List<MangaPlusPage> = emptyList())
 
 @Serializable
 data class Title(
@@ -99,8 +96,7 @@ data class OriginalTitleGroup(
     val titles: List<UpdatedTitle> = emptyList(),
 )
 
-@Serializable
-data class UpdatedTitle(val title: Title)
+@Serializable data class UpdatedTitle(val title: Title)
 
 @Serializable
 data class Chapter(
@@ -113,8 +109,7 @@ data class Chapter(
     val isVerticalOnly: Boolean = false,
 )
 
-@Serializable
-data class MangaPlusPage(val mangaPage: MangaPage? = null)
+@Serializable data class MangaPlusPage(val mangaPage: MangaPage? = null)
 
 @Serializable
 data class MangaPage(

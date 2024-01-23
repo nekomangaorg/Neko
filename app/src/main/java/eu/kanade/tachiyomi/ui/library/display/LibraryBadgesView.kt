@@ -10,6 +10,7 @@ class LibraryBadgesView @JvmOverloads constructor(context: Context, attrs: Attri
     BaseLibraryDisplayView<LibraryBadgesLayoutBinding>(context, attrs) {
 
     override fun inflateBinding() = LibraryBadgesLayoutBinding.bind(this)
+
     override fun initGeneralPreferences() {
         binding.unreadBadgeGroup.bindToPreference(libraryPreferences.unreadBadgeType()) {
             controller?.presenter?.requestUnreadBadgesUpdate()

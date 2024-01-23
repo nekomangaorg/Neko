@@ -25,9 +25,7 @@ import uy.kohesive.injekt.injectLazy
  */
 class DownloadManager(val context: Context) {
 
-    /**
-     * The sources manager.
-     */
+    /** The sources manager. */
     private val sourceManager by injectLazy<SourceManager>()
 
     /**
@@ -35,30 +33,20 @@ class DownloadManager(val context: Context) {
      */
     private val provider = DownloadProvider(context)
 
-    /**
-     * Cache of downloaded chapters.
-     */
+    /** Cache of downloaded chapters. */
     private val cache = DownloadCache(context, provider, sourceManager)
 
-    /**
-     * Downloader whose only task is to download chapters.
-     */
+    /** Downloader whose only task is to download chapters. */
     private val downloader = Downloader(context, provider, cache, sourceManager)
 
-    /**
-     * Queue to delay the deletion of a list of chapters until triggered.
-     */
+    /** Queue to delay the deletion of a list of chapters until triggered. */
     private val pendingDeleter = DownloadPendingDeleter(context)
 
-    /**
-     * Downloads queue, where the pending chapters are stored.
-     */
+    /** Downloads queue, where the pending chapters are stored. */
     val queue: DownloadQueue
         get() = downloader.queue
 
-    /**
-     * Subject for subscribing to downloader status.
-     */
+    /** Subject for subscribing to downloader status. */
     val runningRelay: BehaviorRelay<Boolean>
         get() = downloader.runningRelay
 
@@ -82,9 +70,7 @@ class DownloadManager(val context: Context) {
         downloader.stop(reason)
     }
 
-    /**
-     * Tells the downloader to pause downloads.
-     */
+    /** Tells the downloader to pause downloads. */
     fun pauseDownloads() {
         downloader.pause()
     }
@@ -175,17 +161,15 @@ class DownloadManager(val context: Context) {
      */
     fun buildPageList(manga: Manga, chapter: Chapter): List<Page> {
         val chapterDir = provider.findChapterDir(chapter, manga)
-        val files = chapterDir?.listFiles().orEmpty()
-            .filter { "image" in it.type.orEmpty() }
+        val files = chapterDir?.listFiles().orEmpty().filter { "image" in it.type.orEmpty() }
 
         if (files.isEmpty()) {
             throw Exception(context.getString(R.string.no_pages_found))
         }
 
-        return files.sortedBy { it.name }
-            .mapIndexed { i, file ->
-                Page(i, uri = file.uri).apply { status = Page.State.READY }
-            }
+        return files
+            .sortedBy { it.name }
+            .mapIndexed { i, file -> Page(i, uri = file.uri).apply { status = Page.State.READY } }
     }
 
     /**
@@ -200,14 +184,15 @@ class DownloadManager(val context: Context) {
     }
 
     /**
-     * Returns the download from queue if the chapter is queued for download
-     * else it will return null which means that the chapter is not queued for download
+     * Returns the download from queue if the chapter is queued for download else it will return
+     * null which means that the chapter is not queued for download
      *
      * @param chapter the chapter to check.
      */
     fun getChapterDownloadOrNull(chapter: Chapter): Download? {
-        return downloader.queue
-            .firstOrNull { it.chapter.id == chapter.id && it.chapter.manga_id == chapter.manga_id }
+        return downloader.queue.firstOrNull {
+            it.chapter.id == chapter.id && it.chapter.manga_id == chapter.manga_id
+        }
     }
 
     /**
@@ -225,7 +210,8 @@ class DownloadManager(val context: Context) {
 
     /**
      * Calls delete chapter, which deletes temp downloads
-     *  @param downloads list of downloads to cancel
+     *
+     * @param downloads list of downloads to cancel
      */
     fun deletePendingDownloads(vararg downloads: Download) {
         val downloadsByManga = downloads.groupBy { it.manga.id }
@@ -268,10 +254,11 @@ class DownloadManager(val context: Context) {
                     provider.findChapterDirs(
                         chapters,
                         manga,
-                    ) + provider.findTempChapterDirs(
-                        chapters,
-                        manga,
-                    )
+                    ) +
+                        provider.findTempChapterDirs(
+                            chapters,
+                            manga,
+                        )
                 chapterDirs.forEach { it.delete() }
                 cache.removeChapters(chapters, manga)
                 if (cache.getDownloadCount(manga, true) == 0) { // Delete manga directory if empty
@@ -284,9 +271,7 @@ class DownloadManager(val context: Context) {
         }
     }
 
-    /**
-     * return the list of all manga folders
-     */
+    /** return the list of all manga folders */
     fun getMangaFolders(): List<UniFile> {
         return provider.findSourceDir()?.listFiles()?.toList() ?: emptyList()
     }
@@ -363,9 +348,7 @@ class DownloadManager(val context: Context) {
         pendingDeleter.addChapters(chapters, manga)
     }
 
-    /**
-     * Triggers the execution of the deletion of pending chapters.
-     */
+    /** Triggers the execution of the deletion of pending chapters. */
     fun deletePendingChapters() {
         val pendingChapters = pendingDeleter.getPendingChapters()
         for ((manga, chapters) in pendingChapters) {
@@ -401,5 +384,6 @@ class DownloadManager(val context: Context) {
     }
 
     fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
+
     fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
 }

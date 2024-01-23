@@ -6,10 +6,12 @@ import android.view.MotionEvent
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 
 /**
- * Implementation of subsampling scale image view that ignores all touch events, because the
- * webtoon viewer handles all the gestures.
+ * Implementation of subsampling scale image view that ignores all touch events, because the webtoon
+ * viewer handles all the gestures.
  */
-class WebtoonSubsamplingImageView @JvmOverloads constructor(
+class WebtoonSubsamplingImageView
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : SubsamplingScaleImageView(context, attrs) {

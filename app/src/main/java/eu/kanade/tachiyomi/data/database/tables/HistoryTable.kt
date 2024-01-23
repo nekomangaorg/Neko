@@ -2,34 +2,22 @@ package eu.kanade.tachiyomi.data.database.tables
 
 object HistoryTable {
 
-    /**
-     * Table name
-     */
+    /** Table name */
     const val TABLE = "history"
 
-    /**
-     * Id column name
-     */
+    /** Id column name */
     const val COL_ID = "${TABLE}_id"
 
-    /**
-     * Chapter id column name
-     */
+    /** Chapter id column name */
     const val COL_CHAPTER_ID = "${TABLE}_chapter_id"
 
-    /**
-     * Last read column name
-     */
+    /** Last read column name */
     const val COL_LAST_READ = "${TABLE}_last_read"
 
-    /**
-     * Time read column name
-     */
+    /** Time read column name */
     const val COL_TIME_READ = "${TABLE}_time_read"
 
-    /**
-     * query to create history table
-     */
+    /** query to create history table */
     val createTableQuery: String
         get() =
             """CREATE TABLE $TABLE(
@@ -42,9 +30,7 @@ object HistoryTable {
             )
             """
 
-    /**
-     * query to index history chapter id
-     */
+    /** query to index history chapter id */
     val createChapterIdIndexQuery: String
         get() = "CREATE INDEX ${TABLE}_${COL_CHAPTER_ID}_index ON $TABLE($COL_CHAPTER_ID)"
 }

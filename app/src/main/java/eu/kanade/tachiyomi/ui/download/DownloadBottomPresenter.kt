@@ -9,49 +9,47 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
 
-/**
- * Presenter of [DownloadBottomSheet].
- */
+/** Presenter of [DownloadBottomSheet]. */
 class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
 
-    /**
-     * Download manager.
-     */
+    /** Download manager. */
     val downloadManager: DownloadManager by injectLazy()
     var items = listOf<DownloadHeaderItem>()
 
-    /**
-     * Property to get the queue from the download manager.
-     */
+    /** Property to get the queue from the download manager. */
     val downloadQueue: DownloadQueue
         get() = downloadManager.queue
 
     fun getItems() {
         presenterScope.launch {
-            val items = downloadQueue
-                .groupBy { it.source }
-                .map { entry ->
-                    DownloadHeaderItem(entry.key.id, entry.key.name, entry.value.size).apply {
-                        addSubItems(0, entry.value.map { DownloadItem(it, this) })
+            val items =
+                downloadQueue
+                    .groupBy { it.source }
+                    .map { entry ->
+                        DownloadHeaderItem(entry.key.id, entry.key.name, entry.value.size).apply {
+                            addSubItems(0, entry.value.map { DownloadItem(it, this) })
+                        }
                     }
+            val hasChanged =
+                if (
+                    this@DownloadBottomPresenter.items.size != items.size ||
+                        this@DownloadBottomPresenter.items.sumOf { it.subItemsCount } !=
+                            items.sumOf { it.subItemsCount }
+                ) {
+                    true
+                } else {
+                    val oldItemsIds =
+                        this@DownloadBottomPresenter.items
+                            .map { header -> header.subItems.mapNotNull { it.download.chapter.id } }
+                            .flatten()
+                            .toLongArray()
+                    val newItemsIds =
+                        items
+                            .map { header -> header.subItems.mapNotNull { it.download.chapter.id } }
+                            .flatten()
+                            .toLongArray()
+                    !oldItemsIds.contentEquals(newItemsIds)
                 }
-            val hasChanged = if (this@DownloadBottomPresenter.items.size != items.size ||
-                this@DownloadBottomPresenter.items.sumOf { it.subItemsCount } != items.sumOf { it.subItemsCount }
-            ) {
-                true
-            } else {
-                val oldItemsIds = this@DownloadBottomPresenter.items.map { header ->
-                    header.subItems.mapNotNull { it.download.chapter.id }
-                }
-                    .flatten()
-                    .toLongArray()
-                val newItemsIds = items.map { header ->
-                    header.subItems.mapNotNull { it.download.chapter.id }
-                }
-                    .flatten()
-                    .toLongArray()
-                !oldItemsIds.contentEquals(newItemsIds)
-            }
             this@DownloadBottomPresenter.items = items
             if (hasChanged) {
                 withContext(Dispatchers.Main) { view?.onNextDownloads(items) }
@@ -59,16 +57,12 @@ class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
         }
     }
 
-    /**
-     * Pauses the download queue.
-     */
+    /** Pauses the download queue. */
     fun pauseDownloads() {
         downloadManager.pauseDownloads()
     }
 
-    /**
-     * Clears the download queue.
-     */
+    /** Clears the download queue. */
     fun clearQueue() {
         downloadManager.clearQueue()
     }

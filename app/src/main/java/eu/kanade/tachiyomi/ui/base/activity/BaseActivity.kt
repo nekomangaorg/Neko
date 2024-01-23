@@ -25,7 +25,8 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     val mangaDetailsPreferences: MangaDetailsPreferences by injectLazy()
 
     lateinit var binding: VB
-    val isBindingInitialized get() = this::binding.isInitialized
+    val isBindingInitialized
+        get() = this::binding.isInitialized
 
     private var updatedTheme: Resources.Theme? = null
 

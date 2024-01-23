@@ -41,10 +41,11 @@ open class WebViewActivity : AppCompatActivity() {
             return
         }
 
-        securityPreferences.incognitoMode()
-            .changes().onEach {
-                SecureActivityDelegate.setSecure(this)
-            }.launchIn(lifecycleScope)
+        securityPreferences
+            .incognitoMode()
+            .changes()
+            .onEach { SecureActivityDelegate.setSecure(this) }
+            .launchIn(lifecycleScope)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -72,10 +73,11 @@ open class WebViewActivity : AppCompatActivity() {
 
     private fun shareWebpage(url: String) {
         try {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, url)
-            }
+            val intent =
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, url)
+                }
             startActivity(Intent.createChooser(intent, getString(R.string.share)))
         } catch (e: Exception) {
             toast(e.message)
@@ -91,7 +93,9 @@ open class WebViewActivity : AppCompatActivity() {
     }
 
     private fun canOpenInApp(url: String): Boolean {
-        return url.contains("mangadex.org/manga/", true) || url.contains("mangadex.org/title/", true) || url.contains("mangadex.org/group", true)
+        return url.contains("mangadex.org/manga/", true) ||
+            url.contains("mangadex.org/title/", true) ||
+            url.contains("mangadex.org/group", true)
     }
 
     companion object {

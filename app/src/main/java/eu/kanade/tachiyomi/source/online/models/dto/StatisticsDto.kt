@@ -26,4 +26,3 @@ data class StatisticCommentsDto(
     val threadId: Int,
     val repliesCount: Int,
 )
-

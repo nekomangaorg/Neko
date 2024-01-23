@@ -10,7 +10,6 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import java.util.concurrent.TimeUnit
-
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
@@ -41,23 +40,26 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
             if (interval > 0) {
                 val restrictions = libraryPreferences.autoUpdateDeviceRestrictions().get()
 
-                val constraints = Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .setRequiresCharging(DEVICE_CHARGING in restrictions)
-                    .setRequiresBatteryNotLow(DEVICE_BATTERY_NOT_LOW in restrictions)
-                    .build()
+                val constraints =
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .setRequiresCharging(DEVICE_CHARGING in restrictions)
+                        .setRequiresBatteryNotLow(DEVICE_BATTERY_NOT_LOW in restrictions)
+                        .build()
 
-                val request = PeriodicWorkRequestBuilder<LibraryUpdateJob>(
-                    interval.toLong(),
-                    TimeUnit.HOURS,
-                    10,
-                    TimeUnit.MINUTES,
-                )
-                    .addTag(TAG)
-                    .setConstraints(constraints)
-                    .build()
+                val request =
+                    PeriodicWorkRequestBuilder<LibraryUpdateJob>(
+                            interval.toLong(),
+                            TimeUnit.HOURS,
+                            10,
+                            TimeUnit.MINUTES,
+                        )
+                        .addTag(TAG)
+                        .setConstraints(constraints)
+                        .build()
 
-                WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+                WorkManager.getInstance(context)
+                    .enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {
                 WorkManager.getInstance(context).cancelAllWorkByTag(TAG)
             }
