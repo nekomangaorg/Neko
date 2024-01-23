@@ -9,17 +9,13 @@ A Free, Open source unofficial manga reader for MangaDex
 ![](https://img.shields.io/github/actions/workflow/status/nekomangaorg/neko/ci-draft-release.yml?branch=main&style=flat)
 ![](https://img.shields.io/github/stars/nekomangaorg/Neko.svg?label=stars&labelColor=27303D&color=0D1117&logo=github&style=flat)
 
-#      
+## Download
 
-### Download
+[![](https://img.shields.io/github/v/release/nekomangaorg/neko.svg?maxAge=3600&label=Stable&labelColor=000000&color=ff124a&style=for-the-badge)](https://github.com/nekomangaorg/Neko/releases/latest)
 
-[![](https://img.shields.io/github/v/release/nekomangaorg/neko.svg?maxAge=3600&label=Stable&labelColor=000000&color=20aa5e&style=for-the-badge)](https://github.com/nekomangaorg/Neko/releases/latest)
+## Features include
 
-#
-
-### Features include
-
-</div>
+<div align="left">
 
 - [MangaDex](https://mangadex.org/) manga reader for Android 7+
 - Offline reading Supports native login to MangaDex
@@ -32,25 +28,19 @@ A Free, Open source unofficial manga reader for MangaDex
   MangaLife</a>, and <a target="_blank" href="https://komga.org/">Komga</a>
 - Plus much more...
 
-<div align="center">
+</div>
 
-#      
-
-### A big thanks to all who have contributed
+## A big thanks to all who have contributed
 
 <a href="https://github.com/nekomangaorg/neko/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=nekomangaorg/neko"  width="600" />
 </a>
 
-#
-
-### Disclaimer
+## Disclaimer
 
 The developer(s) of this application does not have any affiliation with the content providers available, and this application hosts zero content.
 
-#
-
-### License
+## License
 
 <pre>
 Copyright 2015 Javier Tomás
