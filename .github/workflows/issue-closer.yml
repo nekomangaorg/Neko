@@ -12,4 +12,3 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         AC_LABEL: "staged for next release"
-        AC_KEEP: 0
