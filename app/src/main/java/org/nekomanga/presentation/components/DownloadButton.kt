@@ -53,24 +53,29 @@ private const val iconSize = 20
 private const val borderSize = 2.5
 
 @Composable
-fun DownloadButton(modifier: Modifier = Modifier, themeColorState: ThemeColorState, downloadState: Download.State, downloadProgress: Float, onDownload: (MangaConstants.DownloadAction) -> Unit) {
+fun DownloadButton(
+    modifier: Modifier = Modifier,
+    themeColorState: ThemeColorState,
+    downloadState: Download.State,
+    downloadProgress: Float,
+    onDownload: (MangaConstants.DownloadAction) -> Unit
+) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-
         var showChapterDropdown by remember { mutableStateOf(false) }
         DlButton(
             themeColorState.buttonColor,
             downloadState,
             downloadProgress,
-            Modifier
-                .combinedClickable(
-                    onClick = {
-                        when (downloadState) {
-                            Download.State.NOT_DOWNLOADED -> onDownload(MangaConstants.DownloadAction.Download)
-                            else -> showChapterDropdown = true
-                        }
-                    },
-                    onLongClick = {},
-                ),
+            Modifier.combinedClickable(
+                onClick = {
+                    when (downloadState) {
+                        Download.State.NOT_DOWNLOADED ->
+                            onDownload(MangaConstants.DownloadAction.Download)
+                        else -> showChapterDropdown = true
+                    }
+                },
+                onLongClick = {},
+            ),
         )
 
         val scope = rememberCoroutineScope()
@@ -79,50 +84,53 @@ fun DownloadButton(modifier: Modifier = Modifier, themeColorState: ThemeColorSta
             themeColorState = themeColorState,
             onDismiss = { showChapterDropdown = false },
             dropDownItems =
-            when (downloadState) {
-                Download.State.DOWNLOADED -> {
-                    persistentListOf(
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.remove),
-                            onClick = {
-                                scope.launchDelayed {
-                                    onDownload(MangaConstants.DownloadAction.Remove)
-                                }
-                            },
-                        ),
-                    )
-                }
-
-                else -> {
-                    persistentListOf(
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.start_downloading_now),
-                            onClick = {
-                                scope.launchDelayed {
-                                    onDownload(MangaConstants.DownloadAction.ImmediateDownload)
-                                }
-                            },
-                        ),
-                        SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.cancel),
-                            onClick = {
-                                scope.launchDelayed {
-                                    onDownload(MangaConstants.DownloadAction.Cancel)
-                                }
-                            },
-                        ),
-                    )
-                }
-            },
+                when (downloadState) {
+                    Download.State.DOWNLOADED -> {
+                        persistentListOf(
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.remove),
+                                onClick = {
+                                    scope.launchDelayed {
+                                        onDownload(MangaConstants.DownloadAction.Remove)
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                    else -> {
+                        persistentListOf(
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.start_downloading_now),
+                                onClick = {
+                                    scope.launchDelayed {
+                                        onDownload(MangaConstants.DownloadAction.ImmediateDownload)
+                                    }
+                                },
+                            ),
+                            SimpleDropDownItem.Action(
+                                text = UiText.StringResource(R.string.cancel),
+                                onClick = {
+                                    scope.launchDelayed {
+                                        onDownload(MangaConstants.DownloadAction.Cancel)
+                                    }
+                                },
+                            ),
+                        )
+                    }
+                },
         )
     }
 }
 
 @Composable
-private fun DlButton(buttonColor: Color, downloadState: Download.State, downloadProgress: Float, modifier: Modifier = Modifier) {
+private fun DlButton(
+    buttonColor: Color,
+    downloadState: Download.State,
+    downloadProgress: Float,
+    modifier: Modifier = Modifier
+) {
     var downloadComplete by remember { mutableStateOf(false) }
     var wasDownloading by remember { mutableStateOf(false) }
-
 
     LaunchedEffect(downloadState) {
         when (downloadState) {

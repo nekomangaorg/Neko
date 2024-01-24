@@ -44,14 +44,13 @@ val libraryQuery =
         ON MC.${MangaCategory.COL_MANGA_ID} = M.${Manga.COL_ID}
     """
 
-/**
- * Query to get the recent chapters of manga from the library up to a date.
- */
+/** Query to get the recent chapters of manga from the library up to a date. */
 fun getRecentsQuery(search: String, offset: Int, limit: Int, sortByDateFetched: Boolean): String {
-    val orderBy = when (sortByDateFetched) {
-        true -> Chapter.COL_DATE_FETCH
-        false -> Chapter.COL_DATE_UPLOAD
-    }
+    val orderBy =
+        when (sortByDateFetched) {
+            true -> Chapter.COL_DATE_FETCH
+            false -> Chapter.COL_DATE_UPLOAD
+        }
 
     return """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, * FROM ${Manga.TABLE} JOIN ${Chapter.TABLE}
@@ -120,10 +119,10 @@ fun getAllChapterHistoryByMangaId(
 """
 
 /**
- * Query to get the recently read chapters of manga from the library up to a date.
- * The max_last_read table contains the most recent chapters grouped by manga
- * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
- * and are read after the given time period
+ * Query to get the recently read chapters of manga from the library up to a date. The max_last_read
+ * table contains the most recent chapters grouped by manga The select statement returns all
+ * information of chapters that have the same id as the chapter in max_last_read and are read after
+ * the given time period
  */
 fun getRecentMangasLimitQuery(
     search: String = "",

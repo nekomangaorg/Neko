@@ -29,18 +29,25 @@ fun FooterFilterChip(
             }
         },
         shape = RoundedCornerShape(100),
-        label = { Text(text = name, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)) },
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            labelColor = MaterialTheme.colorScheme.secondary,
-            selectedContainerColor = MaterialTheme.colorScheme.secondary,
-            selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
-            selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondary,
-        ),
-        border = FilterChipDefaults.filterChipBorder(
-            borderColor = MaterialTheme.colorScheme.secondary,
-            selectedBorderColor = Color.Transparent,
-            borderWidth = 2.dp,
-        ),
+        label = {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)
+            )
+        },
+        colors =
+            FilterChipDefaults.filterChipColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                labelColor = MaterialTheme.colorScheme.secondary,
+                selectedContainerColor = MaterialTheme.colorScheme.secondary,
+                selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
+                selectedLeadingIconColor = MaterialTheme.colorScheme.onSecondary,
+            ),
+        border =
+            FilterChipDefaults.filterChipBorder(
+                borderColor = MaterialTheme.colorScheme.secondary,
+                selectedBorderColor = Color.Transparent,
+                borderWidth = 2.dp,
+            ),
     )
 }

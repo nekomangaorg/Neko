@@ -48,22 +48,23 @@ fun FeedBottomSheet(
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
 
-    BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .6f, bottomPaddingAroundContent = contentPadding.calculateBottomPadding()) {
-
+    BaseSheet(
+        themeColor = themeColorState,
+        maxSheetHeightPercentage = .6f,
+        bottomPaddingAroundContent = contentPadding.calculateBottomPadding()
+    ) {
         Gap(16.dp)
 
         LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Size.medium),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
             verticalArrangement = Arrangement.spacedBy(Size.small),
         ) {
             when (feedScreenType) {
-                FeedScreenType.History -> historyContent(historyGrouping, groupHistoryClick, clearHistoryClick)
+                FeedScreenType.History ->
+                    historyContent(historyGrouping, groupHistoryClick, clearHistoryClick)
                 FeedScreenType.Updates -> uploadsContent(sortByFetched, sortClick)
             }
         }
-
     }
 }
 
@@ -74,21 +75,31 @@ private fun LazyListScope.historyContent(
 ) {
     item {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = stringResource(id = R.string.group_chapters_together), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = stringResource(id = R.string.group_chapters_together),
+                style = MaterialTheme.typography.bodyMedium
+            )
             var expanded by remember { mutableStateOf(false) }
-            var selectedText = when (historyGrouping) {
-                FeedHistoryGroup.Never -> R.string.group_never
-                FeedHistoryGroup.Series -> R.string.group_by_series
-                FeedHistoryGroup.Day -> R.string.group_by_day
-                FeedHistoryGroup.Week -> R.string.group_by_week
-            }
+            var selectedText =
+                when (historyGrouping) {
+                    FeedHistoryGroup.Never -> R.string.group_never
+                    FeedHistoryGroup.Series -> R.string.group_by_series
+                    FeedHistoryGroup.Day -> R.string.group_by_day
+                    FeedHistoryGroup.Week -> R.string.group_by_week
+                }
             ExposedDropdownMenuBox(
                 expanded = expanded,
-                modifier = Modifier.padding(start = Size.small, top = Size.small, bottom = Size.small, end = Size.none),
+                modifier =
+                    Modifier.padding(
+                        start = Size.small,
+                        top = Size.small,
+                        bottom = Size.small,
+                        end = Size.none
+                    ),
                 onExpandedChange = { expanded = !expanded },
             ) {
                 TextField(
@@ -96,20 +107,27 @@ private fun LazyListScope.historyContent(
                     onValueChange = {},
                     textStyle = MaterialTheme.typography.bodyMedium,
                     readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
                     modifier = Modifier.menuAnchor(),
                 )
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     FeedHistoryGroup.values().forEach { entry ->
-                        val textRes = when (entry) {
-                            FeedHistoryGroup.Never -> R.string.group_never
-                            FeedHistoryGroup.Series -> R.string.group_by_series
-                            FeedHistoryGroup.Day -> R.string.group_by_day
-                            FeedHistoryGroup.Week -> R.string.group_by_week
-                        }
+                        val textRes =
+                            when (entry) {
+                                FeedHistoryGroup.Never -> R.string.group_never
+                                FeedHistoryGroup.Series -> R.string.group_by_series
+                                FeedHistoryGroup.Day -> R.string.group_by_day
+                                FeedHistoryGroup.Week -> R.string.group_by_week
+                            }
                         DropdownMenuItem(
-                            text = { Text(text = stringResource(id = textRes), style = MaterialTheme.typography.bodyMedium) },
-
+                            text = {
+                                Text(
+                                    text = stringResource(id = textRes),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            },
                             onClick = {
                                 selectedText = textRes
                                 expanded = false
@@ -141,11 +159,14 @@ private fun LazyListScope.uploadsContent(
 ) {
     item {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = stringResource(id = R.string.sort_fetched_time), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = stringResource(id = R.string.sort_fetched_time),
+                style = MaterialTheme.typography.bodyMedium
+            )
             Switch(checked = fetchSort, onCheckedChange = { sortClick() })
         }
     }

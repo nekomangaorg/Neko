@@ -5,7 +5,13 @@ import eu.kanade.tachiyomi.data.database.models.MergeType
 
 data class BasicManga(val title: String, val id: Long)
 
-data class SourceManga(val currentThumbnail: String, val url: String, val title: String, val displayText: String = "", @StringRes val displayTextRes: Int? = null)
+data class SourceManga(
+    val currentThumbnail: String,
+    val url: String,
+    val title: String,
+    val displayText: String = "",
+    @StringRes val displayTextRes: Int? = null
+)
 
 data class DisplayManga(
     val mangaId: Long,

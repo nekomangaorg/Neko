@@ -62,5 +62,3 @@ data class FeedManga(
     val artwork: Artwork,
     val chapters: ImmutableList<ChapterItem>,
 )
-
-

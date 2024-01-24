@@ -839,7 +839,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         when (intent.action) {
             SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
-            SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
+            SHORTCUT_RECENTLY_UPDATED,
+            SHORTCUT_RECENTLY_READ -> {
                 if (nav.selectedItemId != R.id.nav_feed) {
                     nav.selectedItemId = R.id.nav_feed
                 } else {
@@ -987,8 +988,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     @IdRes
     private fun startingTab(): Int {
         return when (preferences.startingTab().get()) {
-            0, -1 -> R.id.nav_library
-            1, -2 -> R.id.nav_feed
+            0,
+            -1 -> R.id.nav_library
+            1,
+            -2 -> R.id.nav_feed
             -3 -> R.id.nav_browse
             else -> R.id.nav_library
         }

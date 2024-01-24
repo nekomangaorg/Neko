@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens.feed
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,9 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
-import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
@@ -61,21 +58,25 @@ private fun UpdatesRow(
     chapterClick: (Long) -> Unit,
     downloadClick: (MangaConstants.DownloadAction) -> Unit,
 ) {
-    val mediumAlphaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
+    val mediumAlphaColor =
+        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { chapterClick(chapterItem.chapter.id) }
-            .padding(vertical = Size.small),
+        modifier =
+            Modifier.fillMaxWidth()
+                .clickable { chapterClick(chapterItem.chapter.id) }
+                .padding(vertical = Size.small),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Gap(Size.small)
-        FeedCover(artwork = artwork, outlined = outlineCovers, coverSize = Size.extraHuge, onClick = mangaClick)
+        FeedCover(
+            artwork = artwork,
+            outlined = outlineCovers,
+            coverSize = Size.extraHuge,
+            onClick = mangaClick
+        )
         Column(
-            modifier = Modifier
-                .padding(horizontal = Size.small)
-                .weight(3f),
+            modifier = Modifier.padding(horizontal = Size.small).weight(3f),
         ) {
             val titleColor = getReadTextColor(isRead = chapterItem.chapter.read)
             val updatedColor = getReadTextColor(isRead = chapterItem.chapter.read, mediumAlphaColor)
@@ -108,6 +109,5 @@ private fun UpdatesRow(
             downloadProgress = chapterItem.downloadProgress,
             onDownload = downloadClick
         )
-
     }
 }

@@ -222,9 +222,11 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun groupChaptersHistory() = this.preferenceStore.getBoolean(Keys.groupChaptersHistory, true)
 
-    fun historyChapterGrouping() = preferenceStore.getEnum(Keys.historyChapterGrouping, FeedHistoryGroup.Series)
+    fun historyChapterGrouping() =
+        preferenceStore.getEnum(Keys.historyChapterGrouping, FeedHistoryGroup.Series)
 
-    fun showTitleFirstInRecents() = this.preferenceStore.getBoolean(Keys.showTitleFirstInRecents, false)
+    fun showTitleFirstInRecents() =
+        this.preferenceStore.getBoolean(Keys.showTitleFirstInRecents, false)
 
     fun lastAppCheck() = this.preferenceStore.getLong("last_app_check", 0)
 

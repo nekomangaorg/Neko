@@ -323,8 +323,7 @@ fun BrowseScreen(
                     if (!browseScreenState.value.hideFooterButton) {
                         ScreenTypeFooter(
                             screenType = browseScreenType,
-                            modifier = Modifier
-                                .align(Alignment.BottomStart),
+                            modifier = Modifier.align(Alignment.BottomStart),
                             isLoggedIn = browseScreenState.value.isLoggedIn,
                             screenTypeClick = { newScreenType: BrowseScreenType ->
                                 scope.launch { sheetState.hide() }
@@ -396,4 +395,3 @@ private fun ScreenTypeFooter(
         }
     }
 }
-

@@ -38,10 +38,8 @@ enum class MangaCover(private val ratio: Float) {
     ) {
         val color by remember { mutableStateOf(Pastel.getColorLight()) }
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(artwork)
-                    .placeholder(color)
-                    .build(),
+            model =
+                ImageRequest.Builder(LocalContext.current).data(artwork).placeholder(color).build(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
             modifier =

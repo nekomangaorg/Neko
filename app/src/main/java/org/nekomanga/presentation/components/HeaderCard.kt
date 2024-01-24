@@ -21,14 +21,11 @@ import org.nekomanga.presentation.theme.Size
 fun HeaderCard(headerText: @Composable () -> Unit) {
     ElevatedCard(
         shape = RoundedCornerShape(Shapes.coverRadius),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(Size.small),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondary),
-
-        ) {
+        modifier = Modifier.fillMaxWidth().padding(Size.small),
+        colors =
+            CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.secondary),
+    ) {
         headerText()
-
     }
 }
 
@@ -39,7 +36,7 @@ fun DefaultHeaderText(text: String) {
         style = MaterialTheme.typography.titleMedium,
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSecondary,
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+        modifier = Modifier.fillMaxWidth().padding(12.dp),
     )
 }
 
@@ -47,8 +44,6 @@ fun DefaultHeaderText(text: String) {
 @Composable
 private fun HeaderCardPreview() {
     Box(modifier = Modifier.statusBarsPadding()) {
-        HeaderCard {
-            DefaultHeaderText(text = "My Test Header")
-        }
+        HeaderCard { DefaultHeaderText(text = "My Test Header") }
     }
 }

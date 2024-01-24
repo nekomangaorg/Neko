@@ -62,11 +62,9 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
-import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -373,7 +371,7 @@ private fun ChapterInfo(
                         true -> {
                             TimberKt.e { "Missing flag for $language" }
                             Text(
-                                text = "$language � ",
+                                text = "$language ? ",
                                 style =
                                     MaterialTheme.typography.bodyMedium.copy(
                                         color = secondaryTextColor,
@@ -402,7 +400,7 @@ private fun ChapterInfo(
                     }
                 }
                 Text(
-                    text = statuses.joinToString(" � "),
+                    text = statuses.joinToString(" ? "),
                     style =
                         MaterialTheme.typography.bodyMedium.copy(
                             color = secondaryTextColor,
@@ -412,16 +410,15 @@ private fun ChapterInfo(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-
             }
         }
-            DownloadButton(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                themeColorState = themeColorState,
-                downloadState = downloadState,
-                downloadProgress = downloadProgress,
-                onDownload = onDownload
-                            )
+        DownloadButton(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            themeColorState = themeColorState,
+            downloadState = downloadState,
+            downloadProgress = downloadProgress,
+            onDownload = onDownload
+        )
     }
 }
 

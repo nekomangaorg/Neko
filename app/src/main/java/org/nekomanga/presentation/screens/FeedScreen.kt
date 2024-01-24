@@ -86,30 +86,24 @@ fun FeedScreen(
             animationSpec = tween(durationMillis = 150, easing = LinearEasing),
         )
 
-    var mainDropdownShowing by remember {
-        mutableStateOf(false)
-    }
+    var mainDropdownShowing by remember { mutableStateOf(false) }
 
     val feedScreenType = feedScreenState.value.feedScreenType
 
-    val searchHint by remember(feedScreenType) {
-        when (feedScreenType) {
-            FeedScreenType.History -> {
-                mutableIntStateOf(R.string.search_history)
-            }
-
-            FeedScreenType.Updates -> {
-                mutableIntStateOf(R.string.search_updates)
+    val searchHint by
+        remember(feedScreenType) {
+            when (feedScreenType) {
+                FeedScreenType.History -> {
+                    mutableIntStateOf(R.string.search_history)
+                }
+                FeedScreenType.Updates -> {
+                    mutableIntStateOf(R.string.search_updates)
+                }
             }
         }
-    }
 
-    /**
-     * Close the bottom sheet on back if its open
-     */
-    BackHandler(enabled = sheetState.isVisible) {
-        scope.launch { sheetState.hide() }
-    }
+    /** Close the bottom sheet on back if its open */
+    BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
     val sideNav = rememberSideBarVisible(windowSizeClass, feedScreenState.value.sideNavMode)
     val navBarPadding = rememberNavBarPadding(sideNav)
@@ -117,15 +111,11 @@ fun FeedScreen(
     var showClearHistoryDialog by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .conditional(mainDropdownShowing) {
-                this
-                    .blur(16.dp)
-                    .clickable(enabled = false) { }
+        modifier =
+            Modifier.fillMaxSize().conditional(mainDropdownShowing) {
+                this.blur(16.dp).clickable(enabled = false) {}
             },
     ) {
-
         ModalBottomSheetLayout(
             sheetState = sheetState,
             sheetShape = RoundedCornerShape(Shapes.sheetRadius),
@@ -136,7 +126,9 @@ fun FeedScreen(
                         feedScreenType = feedScreenState.value.feedScreenType,
                         historyGrouping = feedScreenState.value.historyGrouping,
                         sortByFetched = feedScreenState.value.updatesSortedByFetch,
-                        groupHistoryClick = { feedHistoryGroup -> feedSettingActions.groupHistoryClick(feedHistoryGroup) },
+                        groupHistoryClick = { feedHistoryGroup ->
+                            feedSettingActions.groupHistoryClick(feedHistoryGroup)
+                        },
                         clearHistoryClick = { showClearHistoryDialog = true },
                         sortClick = { feedSettingActions.switchUploadsSortOrder() },
                     )
@@ -152,58 +144,65 @@ fun FeedScreen(
                 actions = {
                     AppBarActions(
                         actions =
-                        listOf(
-                            AppBar.Action(
-                                title = UiText.StringResource(R.string.settings),
-                                icon = Icons.Outlined.Tune,
-                                onClick = { scope.launch { sheetState.show() } },
+                            listOf(
+                                AppBar.Action(
+                                    title = UiText.StringResource(R.string.settings),
+                                    icon = Icons.Outlined.Tune,
+                                    onClick = { scope.launch { sheetState.show() } },
+                                ),
+                                AppBar.MainDropdown(
+                                    incognitoMode = feedScreenState.value.incognitoMode,
+                                    incognitoModeClick = incognitoClick,
+                                    settingsClick = settingsClick,
+                                    statsClick = statsClick,
+                                    aboutClick = aboutClick,
+                                    helpClick = helpClick,
+                                    menuShowing = { visible -> mainDropdownShowing = visible },
+                                ),
                             ),
-                            AppBar.MainDropdown(
-                                incognitoMode = feedScreenState.value.incognitoMode,
-                                incognitoModeClick = incognitoClick,
-                                settingsClick = settingsClick,
-                                statsClick = statsClick,
-                                aboutClick = aboutClick,
-                                helpClick = helpClick,
-                                menuShowing = { visible -> mainDropdownShowing = visible },
-                            ),
-                        ),
                     )
                 },
             ) { incomingContentPadding ->
-
                 PullRefresh(
                     refreshing = feedScreenState.value.isRefreshing,
                     onRefresh = { feedScreenActions.updateLibrary(true) },
-                    indicatorOffset = incomingContentPadding.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+                    indicatorOffset =
+                        incomingContentPadding.calculateTopPadding() +
+                            WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
                 ) {
-
                     val recyclerContentPadding =
                         PaddingValues(
                             top = incomingContentPadding.calculateTopPadding(),
-                            bottom = if (sideNav) {
-                                Size.navBarSize
-                            } else {
-                                Size.navBarSize
-                            } + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                            bottom =
+                                if (sideNav) {
+                                    Size.navBarSize
+                                } else {
+                                    Size.navBarSize
+                                } +
+                                    WindowInsets.navigationBars
+                                        .asPaddingValues()
+                                        .calculateBottomPadding(),
                         )
 
                     Box(
-                        modifier = Modifier
-                            .padding(bottom = navBarPadding.calculateBottomPadding())
-                            .fillMaxSize(),
+                        modifier =
+                            Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
+                                .fillMaxSize(),
                     ) {
-                        val (feedManga, hasMoreResults) = if (feedScreenState.value.searchFeedManga.isNotEmpty()) {
-                            feedScreenState.value.searchFeedManga to false
-                        } else {
-                            feedScreenState.value.allFeedManga to feedScreenState.value.hasMoreResults
-                        }
+                        val (feedManga, hasMoreResults) =
+                            if (feedScreenState.value.searchFeedManga.isNotEmpty()) {
+                                feedScreenState.value.searchFeedManga to false
+                            } else {
+                                feedScreenState.value.allFeedManga to
+                                    feedScreenState.value.hasMoreResults
+                            }
 
                         FeedPage(
                             contentPadding = recyclerContentPadding,
                             feedMangaList = feedManga,
                             hasMoreResults = hasMoreResults,
-                            groupedBySeries = feedScreenState.value.historyGrouping == FeedHistoryGroup.Series,
+                            groupedBySeries =
+                                feedScreenState.value.historyGrouping == FeedHistoryGroup.Series,
                             feedScreenType = feedScreenState.value.feedScreenType,
                             outlineCovers = feedScreenState.value.outlineCovers,
                             hideChapterTitles = feedScreenState.value.hideChapterTitles,
@@ -215,9 +214,8 @@ fun FeedScreen(
                         if (!feedScreenState.value.firstLoad) {
                             ScreenTypeFooter(
                                 screenType = feedScreenType,
-                                modifier = Modifier
-                                    .align(Alignment.BottomStart)
-                                    .conditional(sideNav) {
+                                modifier =
+                                    Modifier.align(Alignment.BottomStart).conditional(sideNav) {
                                         this.navigationBarsPadding()
                                     },
                                 screenTypeClick = { newScreenType: FeedScreenType ->
@@ -235,28 +233,33 @@ fun FeedScreen(
         // this is needed for Android SDK where blur isn't available
         if (mainDropdownShowing && Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast)),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast)),
             )
         }
     }
     if (showClearHistoryDialog) {
-        DeleteAllHistoryDialog(defaultThemeColorState(), onDismiss = { showClearHistoryDialog = false }, onConfirm = { feedSettingActions.clearHistoryClick() })
+        DeleteAllHistoryDialog(
+            defaultThemeColorState(),
+            onDismiss = { showClearHistoryDialog = false },
+            onConfirm = { feedSettingActions.clearHistoryClick() }
+        )
     }
 }
 
 @Composable
-private fun ScreenTypeFooter(screenType: FeedScreenType, modifier: Modifier = Modifier, screenTypeClick: (FeedScreenType) -> Unit) {
+private fun ScreenTypeFooter(
+    screenType: FeedScreenType,
+    modifier: Modifier = Modifier,
+    screenTypeClick: (FeedScreenType) -> Unit
+) {
     LazyRow(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        item {
-            Gap(8.dp)
-        }
+        item { Gap(8.dp) }
 
         item {
             FooterFilterChip(
@@ -275,4 +278,3 @@ private fun ScreenTypeFooter(screenType: FeedScreenType, modifier: Modifier = Mo
         }
     }
 }
-
