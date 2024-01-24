@@ -15,45 +15,66 @@ class NetworkServices() {
     private val networkHelper: NetworkHelper by injectLazy()
     val json: Json by injectLazy()
 
-    private val scalarsRetrofitClient = Retrofit.Builder().addConverterFactory(
-        ScalarsConverterFactory.create(),
-    ).baseUrl(MdConstants.baseUrl)
-        .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
-        .client(networkHelper.client)
+    private val scalarsRetrofitClient =
+        Retrofit.Builder()
+            .addConverterFactory(
+                ScalarsConverterFactory.create(),
+            )
+            .baseUrl(MdConstants.baseUrl)
+            .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
+            .client(networkHelper.client)
 
-    private val jsonRetrofitClient = Retrofit.Builder().addConverterFactory(
-        json.asConverterFactory("application/json".toMediaType()),
-    ).baseUrl(MdConstants.baseUrl)
-        .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
-        .client(networkHelper.client)
+    private val jsonRetrofitClient =
+        Retrofit.Builder()
+            .addConverterFactory(
+                json.asConverterFactory("application/json".toMediaType()),
+            )
+            .baseUrl(MdConstants.baseUrl)
+            .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
+            .client(networkHelper.client)
 
     val service: MangaDexService =
-        jsonRetrofitClient.baseUrl(MdConstants.Api.baseUrl)
-            .client(networkHelper.mangadexClient).build()
+        jsonRetrofitClient
+            .baseUrl(MdConstants.Api.baseUrl)
+            .client(networkHelper.mangadexClient)
+            .build()
             .create(MangaDexService::class.java)
 
     val atHomeService: MangaDexAtHomeService =
-        jsonRetrofitClient.baseUrl(MdConstants.Api.baseUrl)
-            .client(networkHelper.atHomeClient).build()
+        jsonRetrofitClient
+            .baseUrl(MdConstants.Api.baseUrl)
+            .client(networkHelper.atHomeClient)
+            .build()
             .create(MangaDexAtHomeService::class.java)
 
-    val authService: MangaDexAuthorizedUserService = jsonRetrofitClient.baseUrl(MdConstants.Api.baseUrl)
-        .client(networkHelper.authClient).build()
-        .create(MangaDexAuthorizedUserService::class.java)
+    val authService: MangaDexAuthorizedUserService =
+        jsonRetrofitClient
+            .baseUrl(MdConstants.Api.baseUrl)
+            .client(networkHelper.authClient)
+            .build()
+            .create(MangaDexAuthorizedUserService::class.java)
 
     val thirdPartySimilarService: ThirdPartySimilarService =
-        jsonRetrofitClient.client(
-            networkHelper.client.newBuilder().connectTimeout(2, TimeUnit.SECONDS)
-                .readTimeout(2, TimeUnit.SECONDS).build(),
-        )
+        jsonRetrofitClient
+            .client(
+                networkHelper.client
+                    .newBuilder()
+                    .connectTimeout(2, TimeUnit.SECONDS)
+                    .readTimeout(2, TimeUnit.SECONDS)
+                    .build(),
+            )
             .build()
             .create(ThirdPartySimilarService::class.java)
 
     val similarService: SimilarService =
-        scalarsRetrofitClient.client(
-            networkHelper.client.newBuilder().connectTimeout(2, TimeUnit.SECONDS)
-                .readTimeout(2, TimeUnit.SECONDS).build(),
-        )
+        scalarsRetrofitClient
+            .client(
+                networkHelper.client
+                    .newBuilder()
+                    .connectTimeout(2, TimeUnit.SECONDS)
+                    .readTimeout(2, TimeUnit.SECONDS)
+                    .build(),
+            )
             .build()
             .create(SimilarService::class.java)
 }

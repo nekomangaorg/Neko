@@ -9,8 +9,8 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sign
 
-class LibraryCategoryGestureDetector(private val controller: LibraryController?) : GestureDetector
-.SimpleOnGestureListener() {
+class LibraryCategoryGestureDetector(private val controller: LibraryController?) :
+    GestureDetector.SimpleOnGestureListener() {
     var locked = false
     var cancelled = false
     private val poa = 1.7f
@@ -18,23 +18,30 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
     override fun onDown(e: MotionEvent): Boolean {
         locked = false
         controller ?: return false
-        val startingOnLibraryView = listOf(
-            controller.activityBinding?.bottomNav,
-            controller.binding.filterBottomSheet.root,
-            controller.binding.categoryHopperFrame,
-            controller.activityBinding?.appBar,
-            controller.visibleHeaderHolder()?.itemView,
-        ).none {
-            it ?: return false
-            val viewRect = Rect()
-            it.getGlobalVisibleRect(viewRect)
-            viewRect.contains(e.x.toInt(), e.y.toInt())
-        }
+        val startingOnLibraryView =
+            listOf(
+                    controller.activityBinding?.bottomNav,
+                    controller.binding.filterBottomSheet.root,
+                    controller.binding.categoryHopperFrame,
+                    controller.activityBinding?.appBar,
+                    controller.visibleHeaderHolder()?.itemView,
+                )
+                .none {
+                    it ?: return false
+                    val viewRect = Rect()
+                    it.getGlobalVisibleRect(viewRect)
+                    viewRect.contains(e.x.toInt(), e.y.toInt())
+                }
         cancelled = !startingOnLibraryView
         return startingOnLibraryView
     }
 
-    override fun onScroll(e: MotionEvent?, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+    override fun onScroll(
+        e: MotionEvent?,
+        e2: MotionEvent,
+        distanceX: Float,
+        distanceY: Float
+    ): Boolean {
         val controller = controller ?: return false
         val e1 = e ?: return false
         val distance = e1.rawX - e2.rawX
@@ -54,7 +61,12 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
         return super.onScroll(e1, e2, distanceX, distanceY)
     }
 
-    override fun onFling(e: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+    override fun onFling(
+        e: MotionEvent?,
+        e2: MotionEvent,
+        velocityX: Float,
+        velocityY: Float
+    ): Boolean {
         val e1 = e ?: return false
         locked = false
         if (cancelled) {
@@ -68,16 +80,21 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
         val diffX = e2.x - e1.x
         val recycler = controller.binding.libraryGridRecycler.recycler
         var moved = false
-        if (abs(diffX) >= abs(diffY) &&
-            abs(diffX) > SWIPE_THRESHOLD * 3 &&
-            abs(velocityX) > SWIPE_VELOCITY_THRESHOLD &&
-            sign(diffX) == sign(velocityX)
+        if (
+            abs(diffX) >= abs(diffY) &&
+                abs(diffX) > SWIPE_THRESHOLD * 3 &&
+                abs(velocityX) > SWIPE_VELOCITY_THRESHOLD &&
+                sign(diffX) == sign(velocityX)
         ) {
-            moved = controller.jumpToNextCategory((diffX >= 0).xor(controller.binding.root.resources.isLTR))
+            moved =
+                controller.jumpToNextCategory(
+                    (diffX >= 0).xor(controller.binding.root.resources.isLTR)
+                )
             result = true
         }
         if (!result || !moved) {
-            val animator = controller.binding.libraryGridRecycler.recycler.animate().setDuration(150L)
+            val animator =
+                controller.binding.libraryGridRecycler.recycler.animate().setDuration(150L)
             animator.translationX(0f)
             animator.withEndAction { recycler.translationX = 0f }
             animator.start()

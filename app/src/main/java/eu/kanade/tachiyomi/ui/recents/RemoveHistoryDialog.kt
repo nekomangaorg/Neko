@@ -13,8 +13,9 @@ import eu.kanade.tachiyomi.util.system.isPromptChecked
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 
-class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T : RemoveHistoryDialog.Listener {
+class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle) where
+T : Controller,
+T : RemoveHistoryDialog.Listener {
 
     private var manga: Manga? = null
 
@@ -32,7 +33,8 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val activity = activity!!
 
-        return activity.materialAlertDialog()
+        return activity
+            .materialAlertDialog()
             .setCustomTitleAndMessage(
                 R.string.reset_chapter_question,
                 if (chapter?.name != null) {
@@ -51,9 +53,7 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
                 ),
             )
             .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton(R.string.reset) { dialog, _ ->
-                onPositive(dialog.isPromptChecked)
-            }
+            .setPositiveButton(R.string.reset) { dialog, _ -> onPositive(dialog.isPromptChecked) }
             .create()
     }
 

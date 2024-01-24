@@ -8,10 +8,16 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 
-@Deprecated(message = "This is only used from the main screen when it auto checks. Manual checks use compose version remove when everything is composed")
+@Deprecated(
+    message =
+        "This is only used from the main screen when it auto checks. Manual checks use compose version remove when everything is composed"
+)
 class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundle) {
 
-    constructor(body: String, url: String) : this(
+    constructor(
+        body: String,
+        url: String
+    ) : this(
         Bundle().apply {
             putString(BODY_KEY, body)
             putString(URL_KEY, url)
@@ -20,7 +26,8 @@ class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundl
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-        return activity!!.materialAlertDialog()
+        return activity!!
+            .materialAlertDialog()
             .setTitle(R.string.new_version_available)
             .setMessage(args.getString(BODY_KEY) ?: "")
             .setPositiveButton(if (isOnA12) R.string.update else R.string.download) { _, _ ->

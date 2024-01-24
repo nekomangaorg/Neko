@@ -17,37 +17,47 @@ import eu.kanade.tachiyomi.data.database.tables.TrackTable
 class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
 
     companion object {
-        /**
-         * Name of the database file.
-         */
+        /** Name of the database file. */
         const val DATABASE_NAME = "tachiyomi.db"
 
-        /**
-         * Version of the database.
-         */
+        /** Version of the database. */
         const val DATABASE_VERSION = 36
     }
 
-    override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
-        execSQL(MangaTable.createTableQuery)
-        execSQL(ChapterTable.createTableQuery)
-        execSQL(TrackTable.createTableQuery)
-        execSQL(CategoryTable.createTableQuery)
-        execSQL(MangaCategoryTable.createTableQuery)
-        execSQL(HistoryTable.createTableQuery)
-        execSQL(SimilarTable.createTableQuery)
-        execSQL(ArtworkTable.createTableQuery)
-        execSQL(ScanlatorTable.createTableQuery)
-        execSQL(BrowseFilterTable.createTableQuery)
-        execSQL(MergeMangaTable.createTableQuery)
-
-        // DB indexes
-        execSQL(MangaTable.createUrlIndexQuery)
-        execSQL(MangaTable.createLibraryIndexQuery)
-        execSQL(ChapterTable.createMangaIdIndexQuery)
-        execSQL(ChapterTable.createUnreadChaptersIndexQuery)
-        execSQL(HistoryTable.createChapterIdIndexQuery)
+    override fun onOpen(db: SupportSQLiteDatabase) {
+        super.onOpen(db)
+        setPragma(db, "foreign_keys = ON")
+        setPragma(db, "journal_mode = WAL")
+        setPragma(db, "synchronous = NORMAL")
     }
+
+    private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
+        val cursor = db.query("PRAGMA $pragma")
+        cursor.moveToFirst()
+        cursor.close()
+    }
+
+    override fun onCreate(db: SupportSQLiteDatabase) =
+        with(db) {
+            execSQL(MangaTable.createTableQuery)
+            execSQL(ChapterTable.createTableQuery)
+            execSQL(TrackTable.createTableQuery)
+            execSQL(CategoryTable.createTableQuery)
+            execSQL(MangaCategoryTable.createTableQuery)
+            execSQL(HistoryTable.createTableQuery)
+            execSQL(SimilarTable.createTableQuery)
+            execSQL(ArtworkTable.createTableQuery)
+            execSQL(ScanlatorTable.createTableQuery)
+            execSQL(BrowseFilterTable.createTableQuery)
+            execSQL(MergeMangaTable.createTableQuery)
+
+            // DB indexes
+            execSQL(MangaTable.createUrlIndexQuery)
+            execSQL(MangaTable.createLibraryIndexQuery)
+            execSQL(ChapterTable.createMangaIdIndexQuery)
+            execSQL(ChapterTable.createUnreadChaptersIndexQuery)
+            execSQL(HistoryTable.createChapterIdIndexQuery)
+        }
 
     override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 9) {
@@ -156,18 +166,8 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(MangaTable.addThreadId)
             db.execSQL(MangaTable.addRepliesCount)
         }
-    }
-
-    override fun onConfigure(db: SupportSQLiteDatabase) {
-        db.setForeignKeyConstraintsEnabled(true)
-        setPragma(db, "foreign_keys = ON")
-        setPragma(db, "journal_mode = WAL")
-        setPragma(db, "synchronous = NORMAL")
-    }
-
-    private fun setPragma(db: SupportSQLiteDatabase, pragma: String) {
-        val cursor = db.query("PRAGMA $pragma")
-        cursor.moveToFirst()
-        cursor.close()
+        if (oldVersion < 37) {
+            db.execSQL(TrackTable.updateMangaUpdatesScore)
+        }
     }
 }

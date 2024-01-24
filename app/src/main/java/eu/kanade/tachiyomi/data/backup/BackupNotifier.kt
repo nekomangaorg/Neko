@@ -42,12 +42,13 @@ internal class BackupNotifier(private val context: Context) {
     }
 
     fun showBackupProgress(): NotificationCompat.Builder {
-        val builder = with(progressNotificationBuilder) {
-            setContentTitle(context.getString(R.string.creating_backup))
+        val builder =
+            with(progressNotificationBuilder) {
+                setContentTitle(context.getString(R.string.creating_backup))
 
-            setProgress(0, 0, true)
-            setOnlyAlertOnce(true)
-        }
+                setProgress(0, 0, true)
+                setOnlyAlertOnce(true)
+            }
 
         builder.show(Notifications.ID_BACKUP_PROGRESS)
 
@@ -94,28 +95,29 @@ internal class BackupNotifier(private val context: Context) {
         progress: Int = 0,
         maxAmount: Int = 100,
     ): NotificationCompat.Builder {
-        val builder = with(progressNotificationBuilder) {
-            setContentTitle(context.getString(R.string.restoring_backup))
+        val builder =
+            with(progressNotificationBuilder) {
+                setContentTitle(context.getString(R.string.restoring_backup))
 
-            if (!securityPreferences.hideNotificationContent().get()) {
-                setContentText(content)
+                if (!securityPreferences.hideNotificationContent().get()) {
+                    setContentText(content)
+                }
+
+                setProgress(maxAmount, progress, false)
+                setOnlyAlertOnce(true)
+
+                // Clear old actions if they exist
+                clearActions()
+
+                addAction(
+                    R.drawable.ic_close_24dp,
+                    context.getString(R.string.stop),
+                    NotificationReceiver.cancelRestorePendingBroadcast(
+                        context,
+                        Notifications.ID_RESTORE_PROGRESS,
+                    ),
+                )
             }
-
-            setProgress(maxAmount, progress, false)
-            setOnlyAlertOnce(true)
-
-            // Clear old actions if they exist
-            clearActions()
-
-            addAction(
-                R.drawable.ic_close_24dp,
-                context.getString(R.string.stop),
-                NotificationReceiver.cancelRestorePendingBroadcast(
-                    context,
-                    Notifications.ID_RESTORE_PROGRESS,
-                ),
-            )
-        }
 
         builder.show(Notifications.ID_RESTORE_PROGRESS)
 
@@ -136,13 +138,15 @@ internal class BackupNotifier(private val context: Context) {
     fun showRestoreComplete(time: Long, errorCount: Int, path: String?, file: String?) {
         context.notificationManager.cancel(Notifications.ID_RESTORE_PROGRESS)
 
-        val timeString = context.getString(
-            R.string.restore_duration,
-            TimeUnit.MILLISECONDS.toMinutes(time),
-            TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(
+        val timeString =
+            context.getString(
+                R.string.restore_duration,
                 TimeUnit.MILLISECONDS.toMinutes(time),
-            ),
-        )
+                TimeUnit.MILLISECONDS.toSeconds(time) -
+                    TimeUnit.MINUTES.toSeconds(
+                        TimeUnit.MILLISECONDS.toMinutes(time),
+                    ),
+            )
 
         with(completeNotificationBuilder) {
             setContentTitle(context.getString(R.string.restore_completed))

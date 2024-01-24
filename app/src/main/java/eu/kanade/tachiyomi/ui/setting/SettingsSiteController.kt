@@ -27,235 +27,258 @@ import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsSiteController :
-    SettingsController(), MangadexLogoutDialog.Listener {
+class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listener {
 
     private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
     private val db by lazy { Injekt.get<DatabaseHelper>() }
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
-        titleRes = R.string.site_specific_settings
+    override fun setupPreferenceScreen(screen: PreferenceScreen) =
+        screen.apply {
+            titleRes = R.string.site_specific_settings
 
-        val sourcePreference = SiteLoginPreference(context, mangaDexLoginHelper).apply {
-            title = "MangaDex Login"
-            key = PreferenceKeys.refreshToken
+            val sourcePreference =
+                SiteLoginPreference(context, mangaDexLoginHelper).apply {
+                    title = "MangaDex Login"
+                    key = PreferenceKeys.refreshToken
 
-            setOnLoginClickListener {
-                when (mangaDexLoginHelper.isLoggedIn()) {
-                    true -> {
-                        val dialog = MangadexLogoutDialog()
-                        dialog.targetController = this@SettingsSiteController
-                        dialog.showDialog(router)
-                    }
-
-                    false -> {
-                        val url = MdConstants.Login.authUrl(preferences.codeVerifier().get())
-                        when (BuildConfig.DEBUG) {
-                            true -> activity?.openInFirefox(url)
-                            false -> activity?.openInBrowser(url)
+                    setOnLoginClickListener {
+                        when (mangaDexLoginHelper.isLoggedIn()) {
+                            true -> {
+                                val dialog = MangadexLogoutDialog()
+                                dialog.targetController = this@SettingsSiteController
+                                dialog.showDialog(router)
+                            }
+                            false -> {
+                                val url =
+                                    MdConstants.Login.authUrl(preferences.codeVerifier().get())
+                                when (BuildConfig.DEBUG) {
+                                    true -> activity?.openInFirefox(url)
+                                    false -> activity?.openInBrowser(url)
+                                }
+                            }
                         }
                     }
+                    this.isIconSpaceReserved = false
                 }
 
+            addPreference(sourcePreference)
+
+            preference {
+                titleRes = R.string.show_languages
+                onClick {
+                    val ctrl = ChooseLanguagesDialog(preferences)
+                    ctrl.targetController = this@SettingsSiteController
+                    ctrl.showDialog(router)
+                }
             }
-            this.isIconSpaceReserved = false
-        }
 
-        addPreference(sourcePreference)
+            multiSelectListPreferenceMat(activity) {
+                key = PreferenceKeys.contentRating
+                titleRes = R.string.content_rating_title
+                summaryRes = R.string.content_rating_summary
+                entriesRes =
+                    arrayOf(
+                        R.string.content_rating_safe,
+                        R.string.content_rating_suggestive,
+                        R.string.content_rating_erotica,
+                        R.string.content_rating_pornographic,
+                    )
+                entryValues =
+                    listOf(
+                        MdConstants.ContentRating.safe,
+                        MdConstants.ContentRating.suggestive,
+                        MdConstants.ContentRating.erotica,
+                        MdConstants.ContentRating.pornographic,
+                    )
 
-        preference {
-            titleRes = R.string.show_languages
-            onClick {
-                val ctrl = ChooseLanguagesDialog(preferences)
-                ctrl.targetController = this@SettingsSiteController
-                ctrl.showDialog(router)
+                defValue =
+                    setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
+
+                defaultValue =
+                    listOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
             }
-        }
 
-        multiSelectListPreferenceMat(activity) {
-            key = PreferenceKeys.contentRating
-            titleRes = R.string.content_rating_title
-            summaryRes = R.string.content_rating_summary
-            entriesRes = arrayOf(
-                R.string.content_rating_safe,
-                R.string.content_rating_suggestive,
-                R.string.content_rating_erotica,
-                R.string.content_rating_pornographic,
-            )
-            entryValues = listOf(
-                MdConstants.ContentRating.safe,
-                MdConstants.ContentRating.suggestive,
-                MdConstants.ContentRating.erotica,
-                MdConstants.ContentRating.pornographic,
-            )
+            switchPreference {
+                key = PreferenceKeys.showContentRatingFilter
+                titleRes = R.string.show_content_rating_filter_in_search
+                defaultValue = true
+            }
 
-            defValue = setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
+            switchPreference {
+                key = PreferenceKeys.enablePort443Only
+                titleRes = R.string.use_port_443_title
+                summaryRes = R.string.use_port_443_summary
+                defaultValue = true
+            }
 
-            defaultValue = listOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
-        }
+            switchPreference {
+                key = PreferenceKeys.dataSaver
+                titleRes = R.string.data_saver
+                summaryRes = R.string.data_saver_summary
+                defaultValue = false
+            }
 
-        switchPreference {
-            key = PreferenceKeys.showContentRatingFilter
-            titleRes = R.string.show_content_rating_filter_in_search
-            defaultValue = true
-        }
+            intListPreference(activity) {
+                key = PreferenceKeys.thumbnailQuality
+                titleRes = R.string.thumbnail_quality
+                entriesRes =
+                    arrayOf(
+                        R.string.original_thumb,
+                        R.string.medium_thumb,
+                        R.string.low_thumb,
+                    )
+                entryRange = 0..2
+                defaultValue = 0
+            }
 
-        switchPreference {
-            key = PreferenceKeys.enablePort443Only
-            titleRes = R.string.use_port_443_title
-            summaryRes = R.string.use_port_443_summary
-            defaultValue = true
-        }
-
-        switchPreference {
-            key = PreferenceKeys.dataSaver
-            titleRes = R.string.data_saver
-            summaryRes = R.string.data_saver_summary
-            defaultValue = false
-        }
-
-        intListPreference(activity) {
-            key = PreferenceKeys.thumbnailQuality
-            titleRes = R.string.thumbnail_quality
-            entriesRes = arrayOf(
-                R.string.original_thumb,
-                R.string.medium_thumb,
-                R.string.low_thumb,
-            )
-            entryRange = 0..2
-            defaultValue = 0
-        }
-
-        preference {
-            titleRes = R.string.delete_saved_filters
-            summaryRes = R.string.delete_saved_filters_description
-            onClick {
-                activity!!.materialAlertDialog()
-                    .setTitle(R.string.delete_saved_filters)
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setPositiveButton(R.string.delete) { dialog, t ->
-                        viewScope.launch {
-                            db.deleteAllBrowseFilters().executeAsBlocking()
+            preference {
+                titleRes = R.string.delete_saved_filters
+                summaryRes = R.string.delete_saved_filters_description
+                onClick {
+                    activity!!
+                        .materialAlertDialog()
+                        .setTitle(R.string.delete_saved_filters)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(R.string.delete) { dialog, t ->
+                            viewScope.launch { db.deleteAllBrowseFilters().executeAsBlocking() }
                         }
-                    }
-                    .show()
+                        .show()
+                }
             }
-        }
 
-        preference {
+            preference {
+                titleRes = R.string.currently_blocked_scanlators
+                summaryRes = R.string.currently_blocked_scanlators_description
 
-            titleRes = R.string.currently_blocked_scanlators
-            summaryRes = R.string.currently_blocked_scanlators_description
-
-            onClick {
-                when (preferences.blockedScanlators().get().isEmpty()) {
-                    true -> context.toast(R.string.no_blocked_scanlator)
-                    false -> {
-                        activity!!.materialAlertDialog()
-                            .setTitle(R.string.unblock_scanlator)
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .setMultiChoiceItems(
-                                preferences.blockedScanlators().get().toTypedArray().sortedArrayDescending(),
-                                preferences.blockedScanlators().get().map { false }.toBooleanArray(),
-                            ) { dialog, position, bool ->
-                                val listView = (dialog as AlertDialog).listView
-                                listView.setItemChecked(position, bool)
-                            }
-                            .setPositiveButton(R.string.remove) { dialog, t ->
-                                val listView = (dialog as AlertDialog).listView
-                                val blockedScanlators = preferences.blockedScanlators().get().toList().sortedDescending()
-                                val selectedToRemove = HashSet<String>()
-                                for (i in 0 until listView.count) {
-                                    if (listView.isItemChecked(i)) {
-                                        selectedToRemove.add(blockedScanlators[i])
-                                    }
+                onClick {
+                    when (preferences.blockedScanlators().get().isEmpty()) {
+                        true -> context.toast(R.string.no_blocked_scanlator)
+                        false -> {
+                            activity!!
+                                .materialAlertDialog()
+                                .setTitle(R.string.unblock_scanlator)
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .setMultiChoiceItems(
+                                    preferences
+                                        .blockedScanlators()
+                                        .get()
+                                        .toTypedArray()
+                                        .sortedArrayDescending(),
+                                    preferences
+                                        .blockedScanlators()
+                                        .get()
+                                        .map { false }
+                                        .toBooleanArray(),
+                                ) { dialog, position, bool ->
+                                    val listView = (dialog as AlertDialog).listView
+                                    listView.setItemChecked(position, bool)
                                 }
-                                if (selectedToRemove.size > 0) {
-                                    val newBlocks = blockedScanlators.filter { it !in selectedToRemove }.toSet()
-                                    preferences.blockedScanlators().set(newBlocks)
-                                    selectedToRemove.map {
-                                        viewScope.launch {
-                                            db.deleteScanlator(it).executeOnIO()
+                                .setPositiveButton(R.string.remove) { dialog, t ->
+                                    val listView = (dialog as AlertDialog).listView
+                                    val blockedScanlators =
+                                        preferences
+                                            .blockedScanlators()
+                                            .get()
+                                            .toList()
+                                            .sortedDescending()
+                                    val selectedToRemove = HashSet<String>()
+                                    for (i in 0 until listView.count) {
+                                        if (listView.isItemChecked(i)) {
+                                            selectedToRemove.add(blockedScanlators[i])
+                                        }
+                                    }
+                                    if (selectedToRemove.size > 0) {
+                                        val newBlocks =
+                                            blockedScanlators
+                                                .filter { it !in selectedToRemove }
+                                                .toSet()
+                                        preferences.blockedScanlators().set(newBlocks)
+                                        selectedToRemove.map {
+                                            viewScope.launch {
+                                                db.deleteScanlator(it).executeOnIO()
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            .show()
+                                .show()
+                        }
                     }
                 }
             }
-        }
 
-        switchPreference {
-            key = PreferenceKeys.readingSync
-            titleRes = R.string.reading_sync
-            summaryRes = R.string.reading_sync_summary
-            defaultValue = false
-        }
+            switchPreference {
+                key = PreferenceKeys.readingSync
+                titleRes = R.string.reading_sync
+                summaryRes = R.string.reading_sync_summary
+                defaultValue = false
+            }
 
-        preference {
-            titleRes = R.string.sync_follows_to_library
-            summaryRes = R.string.sync_follows_to_library_summary
+            preference {
+                titleRes = R.string.sync_follows_to_library
+                summaryRes = R.string.sync_follows_to_library_summary
 
-            onClick {
-                activity!!.materialAlertDialog()
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setMultiChoiceItems(
-                        context.resources.getStringArray(R.array.follows_options).drop(1)
-                            .toTypedArray(),
-                        booleanArrayOf(true, false, false, false, false, true),
-                    ) { dialog, position, bool ->
-                        val listView = (dialog as AlertDialog).listView
-                        listView.setItemChecked(position, bool)
-                    }
-                    .setPositiveButton(android.R.string.ok) { dialog, t ->
-                        val listView = (dialog as AlertDialog).listView
-                        val indiciesSelected = mutableListOf<String>()
-                        for (i in 0 until listView.count) {
-                            if (listView.isItemChecked(i)) {
-                                indiciesSelected.add((i + 1).toString())
+                onClick {
+                    activity!!
+                        .materialAlertDialog()
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setMultiChoiceItems(
+                            context.resources
+                                .getStringArray(R.array.follows_options)
+                                .drop(1)
+                                .toTypedArray(),
+                            booleanArrayOf(true, false, false, false, false, true),
+                        ) { dialog, position, bool ->
+                            val listView = (dialog as AlertDialog).listView
+                            listView.setItemChecked(position, bool)
+                        }
+                        .setPositiveButton(android.R.string.ok) { dialog, t ->
+                            val listView = (dialog as AlertDialog).listView
+                            val indiciesSelected = mutableListOf<String>()
+                            for (i in 0 until listView.count) {
+                                if (listView.isItemChecked(i)) {
+                                    indiciesSelected.add((i + 1).toString())
+                                }
+                            }
+                            if (indiciesSelected.size > 0) {
+                                preferences
+                                    .mangadexSyncToLibraryIndexes()
+                                    .set(indiciesSelected.toSet())
+                                StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
                             }
                         }
-                        if (indiciesSelected.size > 0) {
-                            preferences.mangadexSyncToLibraryIndexes()
-                                .set(indiciesSelected.toSet())
-                            StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
+                        .show()
+                }
+            }
+
+            preference {
+                titleRes = R.string.push_favorites_to_mangadex
+                summaryRes = R.string.push_favorites_to_mangadex_summary
+
+                onClick { StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex) }
+            }
+
+            switchPreference {
+                key = PreferenceKeys.addToLibraryAsPlannedToRead
+                titleRes = R.string.add_favorites_as_planned_to_read
+                summaryRes = R.string.add_favorites_as_planned_to_read_summary
+                defaultValue = false
+            }
+
+            preference {
+                titleRes = R.string.v5_migration_service
+                summary = context.resources.getString(R.string.v5_migration_desc)
+                onClick {
+                    context
+                        .materialAlertDialog()
+                        .setTitle(R.string.v5_migration_notice)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            V5MigrationJob.doWorkNow(activity!!)
                         }
-                    }
-                    .show()
+                        .show()
+                }
             }
         }
-
-        preference {
-            titleRes = R.string.push_favorites_to_mangadex
-            summaryRes = R.string.push_favorites_to_mangadex_summary
-
-            onClick {
-                StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
-            }
-        }
-
-        switchPreference {
-            key = PreferenceKeys.addToLibraryAsPlannedToRead
-            titleRes = R.string.add_favorites_as_planned_to_read
-            summaryRes = R.string.add_favorites_as_planned_to_read_summary
-            defaultValue = false
-        }
-
-        preference {
-            titleRes = R.string.v5_migration_service
-            summary = context.resources.getString(R.string.v5_migration_desc)
-            onClick {
-                context.materialAlertDialog()
-                    .setTitle(R.string.v5_migration_notice)
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        V5MigrationJob.doWorkNow(activity!!)
-                    }
-                    .show()
-            }
-        }
-    }
 
     class ChooseLanguagesDialog() : DialogController() {
 
@@ -270,14 +293,20 @@ class SettingsSiteController :
 
             val options = MdLang.values().map { Pair(it.lang, it.prettyPrint) }
 
-            val initialLangs = preferences!!.langsToShow().get().split(",")
-                .map { lang -> options.indexOfFirst { it.first == lang } }.toIntArray()
+            val initialLangs =
+                preferences!!
+                    .langsToShow()
+                    .get()
+                    .split(",")
+                    .map { lang -> options.indexOfFirst { it.first == lang } }
+                    .toIntArray()
 
             val allLangs = (options.map { it.second }).toTypedArray()
             val enabledLangs =
                 (List(options.size) { index -> initialLangs.contains(index) }).toBooleanArray()
 
-            return activity.materialAlertDialog()
+            return activity
+                .materialAlertDialog()
                 .setTitle(R.string.show_languages)
                 .setMultiChoiceItems(
                     allLangs,

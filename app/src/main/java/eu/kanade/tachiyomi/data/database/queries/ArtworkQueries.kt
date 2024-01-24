@@ -11,35 +11,38 @@ interface ArtworkQueries : DbProvider {
 
     fun insertArtWorkList(artworkList: List<ArtworkImpl>) = db.put().objects(artworkList).prepare()
 
-    fun getArtwork(manga: Manga) = db.get()
-        .listOfObjects(ArtworkImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(ArtworkTable.TABLE)
-                .where("${ArtworkTable.COL_MANGA_ID} = ?")
-                .whereArgs(manga.id!!)
-                .build(),
-        )
-        .prepare()
+    fun getArtwork(manga: Manga) =
+        db.get()
+            .listOfObjects(ArtworkImpl::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(ArtworkTable.TABLE)
+                    .where("${ArtworkTable.COL_MANGA_ID} = ?")
+                    .whereArgs(manga.id!!)
+                    .build(),
+            )
+            .prepare()
 
-    fun getArtwork(mangaId: Long) = db.get()
-        .listOfObjects(ArtworkImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(ArtworkTable.TABLE)
-                .where("${ArtworkTable.COL_MANGA_ID} = ?")
-                .whereArgs(mangaId)
-                .build(),
-        )
-        .prepare()
+    fun getArtwork(mangaId: Long) =
+        db.get()
+            .listOfObjects(ArtworkImpl::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(ArtworkTable.TABLE)
+                    .where("${ArtworkTable.COL_MANGA_ID} = ?")
+                    .whereArgs(mangaId)
+                    .build(),
+            )
+            .prepare()
 
-    fun deleteArtworkForManga(manga: Manga) = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(ArtworkTable.TABLE)
-                .where("${ArtworkTable.COL_MANGA_ID} = ?")
-                .whereArgs(manga.id!!)
-                .build(),
-        )
-        .prepare()
+    fun deleteArtworkForManga(manga: Manga) =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(ArtworkTable.TABLE)
+                    .where("${ArtworkTable.COL_MANGA_ID} = ?")
+                    .whereArgs(manga.id!!)
+                    .build(),
+            )
+            .prepare()
 }

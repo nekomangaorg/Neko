@@ -11,9 +11,7 @@ import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.FilterBrowseSheet
 
-/**
- * Sealed class that holds the types of bottom sheets the details screen can show
- */
+/** Sealed class that holds the types of bottom sheets the details screen can show */
 sealed class BrowseBottomSheetScreen {
     data class CategoriesSheet(
         val addingToLibrary: Boolean = true,
@@ -36,33 +34,35 @@ fun BrowseBottomSheet(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     when (currentScreen) {
-        is BrowseBottomSheetScreen.CategoriesSheet -> EditCategorySheet(
-            addingToLibrary = currentScreen.addingToLibrary,
-            categories = browseScreenState.value.categories,
-            cancelClick = closeSheet,
-            bottomContentPadding = contentPadding.calculateBottomPadding(),
-            addNewCategory = addNewCategory,
-            confirmClicked = currentScreen.setCategories,
-        )
-        is BrowseBottomSheetScreen.FilterSheet -> FilterBrowseSheet(
-            filters = browseScreenState.value.filters,
-            savedFilters = browseScreenState.value.savedFilters,
-            defaultContentRatings = browseScreenState.value.defaultContentRatings,
-            bottomContentPadding = contentPadding.calculateBottomPadding(),
-            filterClick = {
-                keyboardController?.hide()
-                closeSheet()
-                filterActions.filterClick()
-            },
-            resetClick = {
-                keyboardController?.hide()
-                filterActions.resetClick()
-            },
-            filterChanged = filterActions.filterChanged,
-            saveClick = filterActions.saveFilterClick,
-            deleteFilterClick = filterActions.deleteFilterClick,
-            filterDefaultClick = filterActions.filterDefaultClick,
-            loadFilter = filterActions.loadFilter,
-        )
+        is BrowseBottomSheetScreen.CategoriesSheet ->
+            EditCategorySheet(
+                addingToLibrary = currentScreen.addingToLibrary,
+                categories = browseScreenState.value.categories,
+                cancelClick = closeSheet,
+                bottomContentPadding = contentPadding.calculateBottomPadding(),
+                addNewCategory = addNewCategory,
+                confirmClicked = currentScreen.setCategories,
+            )
+        is BrowseBottomSheetScreen.FilterSheet ->
+            FilterBrowseSheet(
+                filters = browseScreenState.value.filters,
+                savedFilters = browseScreenState.value.savedFilters,
+                defaultContentRatings = browseScreenState.value.defaultContentRatings,
+                bottomContentPadding = contentPadding.calculateBottomPadding(),
+                filterClick = {
+                    keyboardController?.hide()
+                    closeSheet()
+                    filterActions.filterClick()
+                },
+                resetClick = {
+                    keyboardController?.hide()
+                    filterActions.resetClick()
+                },
+                filterChanged = filterActions.filterChanged,
+                saveClick = filterActions.saveFilterClick,
+                deleteFilterClick = filterActions.deleteFilterClick,
+                filterDefaultClick = filterActions.filterDefaultClick,
+                loadFilter = filterActions.loadFilter,
+            )
     }
 }

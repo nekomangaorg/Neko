@@ -24,9 +24,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 /**
- * Class used to create cover cache.
- * It is used to store the covers of the library.
- * Names of files are created with the md5 of the thumbnail URL.
+ * Class used to create cover cache. It is used to store the covers of the library. Names of files
+ * are created with the md5 of the thumbnail URL.
  *
  * @param context the application context.
  * @constructor creates an instance of the cover cache.
@@ -39,13 +38,13 @@ class CoverCache(val context: Context) {
         private const val ONLINE_COVERS_DIR = "online_covers"
     }
 
-    /** Cache directory used for cache management.*/
+    /** Cache directory used for cache management. */
     private val cacheDir = getCacheDir(COVERS_DIR)
 
-    /** Cache directory used for custom cover cache management.*/
+    /** Cache directory used for custom cover cache management. */
     private val customCoverCacheDir = getCacheDir(CUSTOM_COVERS_DIR)
 
-    /** Cache directory used for covers not in library management.*/
+    /** Cache directory used for covers not in library management. */
     private val onlineCoverDirectory =
         File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
 
@@ -70,10 +69,13 @@ class CoverCache(val context: Context) {
     suspend fun deleteOldCovers() {
         val db = Injekt.get<DatabaseHelper>()
         var deletedSize = 0L
-        val urls = db.getFavoriteMangaList().executeOnIO().mapNotNull {
-            it.thumbnail_url?.let { url -> return@mapNotNull DiskUtil.hashKeyForDisk(url) }
-            null
-        }
+        val urls =
+            db.getFavoriteMangaList().executeOnIO().mapNotNull {
+                it.thumbnail_url?.let { url ->
+                    return@mapNotNull DiskUtil.hashKeyForDisk(url)
+                }
+                null
+            }
         val files = cacheDir.listFiles()?.iterator() ?: return
         while (files.hasNext()) {
             val file = files.next()
@@ -93,14 +95,11 @@ class CoverCache(val context: Context) {
         }
     }
 
-    /**
-     * Clear out online covers
-     */
+    /** Clear out online covers */
     suspend fun deleteAllCachedCovers() {
         val directory = onlineCoverDirectory
         var deletedSize = 0L
-        val files =
-            directory.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return
+        val files = directory.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return
         while (files.hasNext()) {
             val file = files.next()
             deletedSize += file.length()
@@ -120,9 +119,7 @@ class CoverCache(val context: Context) {
         lastClean = System.currentTimeMillis()
     }
 
-    /**
-     * Clear out online covers until its under a certain size
-     */
+    /** Clear out online covers until its under a certain size */
     suspend fun deleteCachedCovers() {
         withIOContext {
             if (lastClean + renewInterval < System.currentTimeMillis()) {
@@ -133,8 +130,9 @@ class CoverCache(val context: Context) {
                         return@withIOContext
                     }
                     var deletedSize = 0L
-                    val files = directory.listFiles()?.sortedBy { it.lastModified() }?.iterator()
-                        ?: return@withIOContext
+                    val files =
+                        directory.listFiles()?.sortedBy { it.lastModified() }?.iterator()
+                            ?: return@withIOContext
                     while (files.hasNext()) {
                         val file = files.next()
                         deletedSize += file.length()
@@ -187,7 +185,7 @@ class CoverCache(val context: Context) {
     }
 
     /**
-     * Saves the  given url as the manga's custom cover to cache.
+     * Saves the given url as the manga's custom cover to cache.
      *
      * @param manga the manga.
      * @throws IOException if there's any error.
@@ -212,9 +210,7 @@ class CoverCache(val context: Context) {
      * @return whether the cover was deleted.
      */
     fun deleteCustomCover(manga: Manga): Boolean {
-        val result = getCustomCoverFile(manga).let {
-            it.exists() && it.delete()
-        }
+        val result = getCustomCoverFile(manga).let { it.exists() && it.delete() }
         context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
         return result
     }
@@ -264,7 +260,6 @@ class CoverCache(val context: Context) {
     }
 
     private fun getCacheDir(dir: String): File {
-        return context.getExternalFilesDir(dir)
-            ?: File(context.filesDir, dir).also { it.mkdirs() }
+        return context.getExternalFilesDir(dir) ?: File(context.filesDir, dir).also { it.mkdirs() }
     }
 }

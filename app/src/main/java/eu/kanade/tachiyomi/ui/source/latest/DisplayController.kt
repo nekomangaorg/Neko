@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.source.latest
 import android.os.Bundle
 import android.view.View
 import androidx.compose.runtime.Composable
-import androidx.core.os.BundleCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
@@ -12,9 +11,7 @@ import org.nekomanga.presentation.screens.DisplayScreen
 
 class DisplayController(private val displayScreenType: DisplayScreenType) :
     BaseComposeController<DisplayPresenter>(
-        Bundle().apply {
-            putParcelable(Display_Type, displayScreenType)
-        },
+        Bundle().apply { putParcelable(Display_Type, displayScreenType) },
     ) {
 
     constructor(bundle: Bundle) : this(bundle.getParcelable<DisplayScreenType>(Display_Type)!!)
@@ -28,7 +25,9 @@ class DisplayController(private val displayScreenType: DisplayScreenType) :
             switchDisplayClick = presenter::switchDisplayMode,
             switchLibraryVisibilityClick = presenter::switchLibraryVisibility,
             onBackPress = router::handleBack,
-            openManga = { mangaId: Long -> router.pushController(MangaDetailController(mangaId).withFadeTransaction()) },
+            openManga = { mangaId: Long ->
+                router.pushController(MangaDetailController(mangaId).withFadeTransaction())
+            },
             addNewCategory = presenter::addNewCategory,
             toggleFavorite = presenter::toggleFavorite,
             loadNextPage = presenter::loadNextItems,

@@ -45,10 +45,10 @@ class SearchActivity : MainActivity() {
         binding.toolbar.setNavigationOnClickListener { popToRoot() }
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
-            if ((
-                    rootSearchController is RootSearchInterface ||
-                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                    ) && rootSearchController !is SmallToolbarInterface
+            if (
+                (rootSearchController is RootSearchInterface ||
+                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)) &&
+                    rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
             } else {
@@ -59,7 +59,8 @@ class SearchActivity : MainActivity() {
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
     }
 
-    // Override finishAfterTransition since the animation gets weird when launching this from other apps
+    // Override finishAfterTransition since the animation gets weird when launching this from other
+    // apps
     override fun finishAfterTransition() {
         if (backToMain) {
             super.finishAfterTransition()
@@ -78,23 +79,28 @@ class SearchActivity : MainActivity() {
         if (intentShouldGoBack()) {
             onBackPressedDispatcher.onBackPressed()
         } else if (!router.handleBack()) {
-            val intent = Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
+            val intent =
+                Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
             backToMain = true
             startActivity(intent)
             finishAfterTransition()
         }
     }
 
-    override fun setFloatingToolbar(show: Boolean, solidBG: Boolean, changeBG: Boolean, showSearchAnyway: Boolean) {
+    override fun setFloatingToolbar(
+        show: Boolean,
+        solidBG: Boolean,
+        changeBG: Boolean,
+        showSearchAnyway: Boolean
+    ) {
         super.setFloatingToolbar(show, solidBG, changeBG, showSearchAnyway)
         val useLargeTB = binding.appBar.useLargeToolbar
         if (!useLargeTB) {
             binding.searchToolbar.navigationIcon = backDrawable
         } else if (showSearchAnyway) {
-            binding.searchToolbar.navigationIcon =
-                if (!show) searchDrawable else backDrawable
+            binding.searchToolbar.navigationIcon = if (!show) searchDrawable else backDrawable
         }
     }
 
@@ -125,19 +131,24 @@ class SearchActivity : MainActivity() {
             )
         }
         when (intent.action) {
-            Intent.ACTION_SEARCH, Intent.ACTION_SEND, "com.google.android.gms.actions.SEARCH_ACTION" -> {
+            Intent.ACTION_SEARCH,
+            Intent.ACTION_SEND,
+            "com.google.android.gms.actions.SEARCH_ACTION" -> {
                 // If the intent match the "standard" Android search intent
-                // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
+                // or the Google-specific search intent (triggered by saying or typing "search
+                // *query* on *Tachiyomi*" in Google Search/Google Assistant)
 
-                // Get the search query provided in extras, and if not null, perform a global search with it.
-                val query = intent.getStringExtra(SearchManager.QUERY) ?: intent.getStringExtra(Intent.EXTRA_TEXT)
+                // Get the search query provided in extras, and if not null, perform a global search
+                // with it.
+                val query =
+                    intent.getStringExtra(SearchManager.QUERY)
+                        ?: intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (query != null && query.isNotEmpty()) {
                     router.replaceTopController(BrowseController(query).withFadeTransaction())
                 } else {
                     finish()
                 }
             }
-
             INTENT_SEARCH -> {
                 val host = intent.data?.host
                 val pathSegments = intent.data?.pathSegments
@@ -149,67 +160,73 @@ class SearchActivity : MainActivity() {
                             router.popToRoot()
                         }
 
-                        val query = when {
-                            host.contains("anilist", true) -> {
-                                val dexId = mappings.getMangadexUUID(id, "al")
-                                when (dexId == null) {
-                                    true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for AniList ID"
-                                    false -> MdConstants.DeepLinkPrefix.manga + dexId
+                        val query =
+                            when {
+                                host.contains("anilist", true) -> {
+                                    val dexId = mappings.getMangadexUUID(id, "al")
+                                    when (dexId == null) {
+                                        true ->
+                                            MdConstants.DeepLinkPrefix.error +
+                                                "Unable to map MangaDex manga, no mapping entry found for AniList ID"
+                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                    }
+                                }
+                                host.contains("myanimelist", true) -> {
+                                    val dexId = mappings.getMangadexUUID(id, "mal")
+                                    when (dexId == null) {
+                                        true ->
+                                            MdConstants.DeepLinkPrefix.error +
+                                                "Unable to map MangaDex manga, no mapping entry found for MyAnimeList ID"
+                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                    }
+                                }
+                                host.contains("mangaupdates", true) -> {
+                                    val base = BigInteger(id, 36)
+                                    val muID = base.toString(10)
+                                    val dexId = mappings.getMangadexUUID(muID, "mu_new")
+                                    when (dexId == null) {
+                                        true ->
+                                            MdConstants.DeepLinkPrefix.error +
+                                                "Unable to map MangaDex manga, no mapping entry found for MangaUpdates ID"
+                                        false -> MdConstants.DeepLinkPrefix.manga + dexId
+                                    }
+                                }
+                                path.equals("GROUP", true) -> {
+                                    MdConstants.DeepLinkPrefix.group + id
+                                }
+                                path.equals("AUTHOR", true) -> {
+                                    MdConstants.DeepLinkPrefix.author + id
+                                }
+                                path.equals("LIST", true) -> {
+                                    MdConstants.DeepLinkPrefix.list + id
+                                }
+                                else -> {
+                                    MdConstants.DeepLinkPrefix.manga + id
                                 }
                             }
-
-                            host.contains("myanimelist", true) -> {
-                                val dexId = mappings.getMangadexUUID(id, "mal")
-                                when (dexId == null) {
-                                    true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for MyAnimeList ID"
-                                    false -> MdConstants.DeepLinkPrefix.manga + dexId
-                                }
-                            }
-
-                            host.contains("mangaupdates", true) -> {
-                                val base = BigInteger(id, 36)
-                                val muID = base.toString(10)
-                                val dexId = mappings.getMangadexUUID(muID, "mu_new")
-                                when (dexId == null) {
-                                    true -> MdConstants.DeepLinkPrefix.error + "Unable to map MangaDex manga, no mapping entry found for MangaUpdates ID"
-                                    false -> MdConstants.DeepLinkPrefix.manga + dexId
-                                }
-                            }
-
-                            path.equals("GROUP", true) -> {
-                                MdConstants.DeepLinkPrefix.group + id
-                            }
-
-                            path.equals("AUTHOR", true) -> {
-                                MdConstants.DeepLinkPrefix.author + id
-                            }
-
-                            path.equals("LIST", true) -> {
-                                MdConstants.DeepLinkPrefix.list + id
-                            }
-
-                            else -> {
-                                MdConstants.DeepLinkPrefix.manga + id
-                            }
-                        }
                         router.replaceTopController(
                             BrowseController(
-                                query,
-                            ).withFadeTransaction(),
+                                    query,
+                                )
+                                .withFadeTransaction(),
                         )
                     }
                 }
             }
-
-            SHORTCUT_MANGA, SHORTCUT_MANGA_BACK -> {
+            SHORTCUT_MANGA,
+            SHORTCUT_MANGA_BACK -> {
                 val extras = intent.extras ?: return false
-                if (intent.action == SHORTCUT_MANGA_BACK && preferences.openChapterInShortcuts().get()) {
+                if (
+                    intent.action == SHORTCUT_MANGA_BACK &&
+                        preferences.openChapterInShortcuts().get()
+                ) {
                     val mangaId = extras.getLong(MangaDetailController.MANGA_EXTRA)
                     if (mangaId != 0L) {
                         val db = Injekt.get<DatabaseHelper>()
                         val chapters = db.getChapters(mangaId).executeAsBlocking()
                         db.getManga(mangaId).executeAsBlocking()?.let { manga ->
-                            val nextUnreadChapter = ChapterSort(manga).getNextUnreadChapter(chapters, false)
+                            val nextUnreadChapter =
+                                ChapterSort(manga).getNextUnreadChapter(chapters, false)
                             if (nextUnreadChapter != null) {
                                 val activity =
                                     ReaderActivity.newIntent(this, manga, nextUnreadChapter)
@@ -229,7 +246,6 @@ class SearchActivity : MainActivity() {
                         .popChangeHandler(FadeChangeHandler()),
                 )
             }
-
             SHORTCUT_SOURCE -> {
                 val extras = intent.extras ?: return false
                 SecureActivityDelegate.promptLockIfNeeded(this, true)
@@ -239,7 +255,6 @@ class SearchActivity : MainActivity() {
                         .popChangeHandler(FadeChangeHandler()),
                 )
             }
-
             SHORTCUT_READER_SETTINGS -> {
                 router.replaceTopController(
                     RouterTransaction.with(SettingsReaderController())
@@ -247,30 +262,27 @@ class SearchActivity : MainActivity() {
                         .popChangeHandler(FadeChangeHandler()),
                 )
             }
-
             else -> return false
         }
         return true
     }
 
     companion object {
-        fun openMangaIntent(context: Context, id: Long?, canReturnToMain: Boolean = false) = Intent(
-            context,
-            SearchActivity::class
-                .java,
-        )
-            .apply {
-                action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
-                putExtra(MangaDetailController.MANGA_EXTRA, id)
-            }
+        fun openMangaIntent(context: Context, id: Long?, canReturnToMain: Boolean = false) =
+            Intent(
+                    context,
+                    SearchActivity::class.java,
+                )
+                .apply {
+                    action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
+                    putExtra(MangaDetailController.MANGA_EXTRA, id)
+                }
 
-        fun openReaderSettings(context: Context) = Intent(
-            context,
-            SearchActivity::class
-                .java,
-        )
-            .apply {
-                action = SHORTCUT_READER_SETTINGS
-            }
+        fun openReaderSettings(context: Context) =
+            Intent(
+                    context,
+                    SearchActivity::class.java,
+                )
+                .apply { action = SHORTCUT_READER_SETTINGS }
     }
 }

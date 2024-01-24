@@ -11,14 +11,11 @@ abstract class WebtoonBaseHolder(
     protected val viewer: WebtoonViewer,
 ) : RecyclerView.ViewHolder(view) {
 
-    /**
-     * Context getter because it's used often.
-     */
-    val context: Context get() = itemView.context
+    /** Context getter because it's used often. */
+    val context: Context
+        get() = itemView.context
 
-    /**
-     * Called when the view is recycled and being added to the view pool.
-     */
+    /** Called when the view is recycled and being added to the view pool. */
     open fun recycle() {}
 
     /**
@@ -29,16 +26,12 @@ abstract class WebtoonBaseHolder(
         viewer.subscriptions.add(subscription)
     }
 
-    /**
-     * Removes a subscription from the list of subscriptions.
-     */
+    /** Removes a subscription from the list of subscriptions. */
     protected fun removeSubscription(subscription: Subscription?) {
         subscription?.let { viewer.subscriptions.remove(it) }
     }
 
-    /**
-     * Extension method to set layout params to wrap content on this view.
-     */
+    /** Extension method to set layout params to wrap content on this view. */
     protected fun View.wrapContent() {
         layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
     }

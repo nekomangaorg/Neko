@@ -8,19 +8,29 @@ import android.view.ViewGroup
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.changehandler.AnimatorChangeHandler
 
-/**
- * An [AnimatorChangeHandler] that will cross fade two views
- */
+/** An [AnimatorChangeHandler] that will cross fade two views */
 class OneWayFadeChangeHandler : AnimatorChangeHandler {
     constructor()
+
     constructor(removesFromViewOnPush: Boolean) : super(removesFromViewOnPush)
+
     constructor(duration: Long) : super(duration)
-    constructor(duration: Long, removesFromViewOnPush: Boolean) : super(
+
+    constructor(
+        duration: Long,
+        removesFromViewOnPush: Boolean
+    ) : super(
         duration,
         removesFromViewOnPush,
     )
 
-    override fun getAnimator(container: ViewGroup, from: View?, to: View?, isPush: Boolean, toAddedToContainer: Boolean): Animator {
+    override fun getAnimator(
+        container: ViewGroup,
+        from: View?,
+        to: View?,
+        isPush: Boolean,
+        toAddedToContainer: Boolean
+    ): Animator {
         val animator = AnimatorSet()
         if (to != null) {
             val start: Float = if (toAddedToContainer) 0F else to.alpha

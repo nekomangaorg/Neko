@@ -29,9 +29,7 @@ fun Long.toUtcCalendar(): Calendar? {
     if (this == 0L) {
         return null
     }
-    val rawCalendar = Calendar.getInstance().apply {
-        timeInMillis = this@toUtcCalendar
-    }
+    val rawCalendar = Calendar.getInstance().apply { timeInMillis = this@toUtcCalendar }
     return Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
         clear()
         set(
@@ -54,9 +52,10 @@ fun Long.toLocalCalendar(): Calendar? {
     if (this == 0L) {
         return null
     }
-    val rawCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-        timeInMillis = this@toLocalCalendar
-    }
+    val rawCalendar =
+        Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            timeInMillis = this@toLocalCalendar
+        }
     return Calendar.getInstance().apply {
         clear()
         set(

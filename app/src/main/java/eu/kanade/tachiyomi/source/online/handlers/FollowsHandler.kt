@@ -41,33 +41,39 @@ class FollowsHandler {
 
     val preferences: PreferencesHelper by injectLazy()
     private val statusHandler: StatusHandler by injectLazy()
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
+    private val authService: MangaDexAuthorizedUserService by lazy {
+        Injekt.get<NetworkServices>().authService
+    }
 
-    /**
-     * fetch all follows
-     */
+    /** fetch all follows */
     suspend fun fetchAllFollows(): Result<List<SourceManga>, ResultError> {
         return withContext(Dispatchers.IO) {
             return@withContext runCatching {
-                val readingFuture = async {
-                    statusHandler.fetchReadingStatusForAllManga()
-                }
+                    val readingFuture = async { statusHandler.fetchReadingStatusForAllManga() }
 
-                fetchOffset(0).andThen { mangaListDto ->
-                    Ok(
-                        when (mangaListDto.total > mangaListDto.limit) {
-                            true -> fetchRestOfFollows(mangaListDto.limit, mangaListDto.total) + mangaListDto
-                            false -> listOf(mangaListDto)
-                        }.map { it.data }.flatten(),
-                    )
+                    fetchOffset(0)
+                        .andThen { mangaListDto ->
+                            Ok(
+                                when (mangaListDto.total > mangaListDto.limit) {
+                                        true ->
+                                            fetchRestOfFollows(
+                                                mangaListDto.limit,
+                                                mangaListDto.total
+                                            ) + mangaListDto
+                                        false -> listOf(mangaListDto)
+                                    }
+                                    .map { it.data }
+                                    .flatten(),
+                            )
+                        }
+                        .andThen { allResults ->
+                            Ok(allFollowsParser(allResults, readingFuture.await()))
+                        }
                 }
-                    .andThen { allResults ->
-                        Ok(allFollowsParser(allResults, readingFuture.await()))
-                    }
-            }.getOrElse {
-                TimberKt.e(it) { "Error fetching all follows" }
-                Err(ResultError.Generic("Unknown error fetching all follows"))
-            }
+                .getOrElse {
+                    TimberKt.e(it) { "Error fetching all follows" }
+                    Err(ResultError.Generic("Unknown error fetching all follows"))
+                }
         }
     }
 
@@ -75,11 +81,10 @@ class FollowsHandler {
         return withContext(Dispatchers.IO) {
             val totalRequestNo = (total / limit)
 
-            (1..totalRequestNo).map { pos ->
-                async {
-                    fetchOffset(pos * limit)
-                }
-            }.awaitAll().mapNotNull { it.getOrElse { null } }
+            (1..totalRequestNo)
+                .map { pos -> async { fetchOffset(pos * limit) } }
+                .awaitAll()
+                .mapNotNull { it.getOrElse { null } }
         }
     }
 
@@ -87,25 +92,29 @@ class FollowsHandler {
         return authService.userFollowList(offset).getOrResultError("Failed to get follows")
     }
 
-    private fun allFollowsParser(mangaDataDtoList: List<MangaDataDto>, readingStatusMap: Map<String, String?>): List<SourceManga> {
+    private fun allFollowsParser(
+        mangaDataDtoList: List<MangaDataDto>,
+        readingStatusMap: Map<String, String?>
+    ): List<SourceManga> {
         val coverQuality = preferences.thumbnailQuality().get()
-        return mangaDataDtoList.asSequence().map {
-            val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
-            it.toSourceManga(coverQuality, displayTextRes = followStatus.stringRes)
-        }
+        return mangaDataDtoList
+            .asSequence()
+            .map {
+                val followStatus = FollowStatus.fromDex(readingStatusMap[it.id])
+                it.toSourceManga(coverQuality, displayTextRes = followStatus.stringRes)
+            }
             .sortedBy { it.title }
             .toList()
     }
 
-    /**
-     * Change the status of a manga
-     */
+    /** Change the status of a manga */
     suspend fun updateFollowStatus(mangaId: String, followStatus: FollowStatus): Boolean {
         return withContext(Dispatchers.IO) {
-            val status = when (followStatus == FollowStatus.UNFOLLOWED) {
-                true -> null
-                false -> followStatus.toDex()
-            }
+            val status =
+                when (followStatus == FollowStatus.UNFOLLOWED) {
+                    true -> null
+                    false -> followStatus.toDex()
+                }
             val readingStatusDto = ReadingStatusDto(status)
 
             withIOContext {
@@ -121,14 +130,13 @@ class FollowsHandler {
             }
 
             return@withContext when (
-                val response =
-                    authService.updateReadingStatusForManga(mangaId, readingStatusDto)
+                val response = authService.updateReadingStatusForManga(mangaId, readingStatusDto)
             ) {
-                is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception -> {
+                is ApiResponse.Failure.Error,
+                is ApiResponse.Failure.Exception -> {
                     response.log("trying to update reading status for manga $mangaId")
                     false
                 }
-
                 else -> true
             }
         }
@@ -166,11 +174,12 @@ class FollowsHandler {
     suspend fun updateRating(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaUUID(track.tracking_url)
-            val response = if (track.score == 0f) {
-                authService.removeRating(mangaID)
-            } else {
-                authService.updateRating(mangaID, RatingDto(track.score.toInt()))
-            }
+            val response =
+                if (track.score == 0f) {
+                    authService.removeRating(mangaID)
+                } else {
+                    authService.updateRating(mangaID, RatingDto(track.score.toInt()))
+                }
 
             response.getOrNull()?.result == "ok"
         }
@@ -186,15 +195,14 @@ class FollowsHandler {
                 this.log("trying to fetch reading status for $mangaUUID")
                 throw Exception("error trying to get tracking info")
             }
-            val followStatus =
-                FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
-            val rating =
-                ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaUUID]
-            val track = Track.create(TrackManager.MDLIST).apply {
-                status = followStatus.int
-                tracking_url = "${MdConstants.baseUrl}/title/$mangaUUID"
-                score = rating?.rating?.toFloat() ?: 0f
-            }
+            val followStatus = FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
+            val rating = ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaUUID]
+            val track =
+                Track.create(TrackManager.MDLIST).apply {
+                    status = followStatus.int
+                    tracking_url = "${MdConstants.baseUrl}/title/$mangaUUID"
+                    score = rating?.rating?.toFloat() ?: 0f
+                }
             return@withContext track
         }
     }

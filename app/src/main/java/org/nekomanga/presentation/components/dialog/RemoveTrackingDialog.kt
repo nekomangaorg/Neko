@@ -21,14 +21,21 @@ import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun RemoveTrackingDialog(themeColorState: ThemeColorState, name: String, canRemoveFromTracker: Boolean, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+fun RemoveTrackingDialog(
+    themeColorState: ThemeColorState,
+    name: String,
+    canRemoveFromTracker: Boolean,
+    onConfirm: (Boolean) -> Unit,
+    onDismiss: () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors
+    ) {
         var removeFromTracker by remember { mutableStateOf(true) }
 
         AlertDialog(
-            title = {
-                Text(text = stringResource(id = R.string.remove_tracking))
-            },
+            title = { Text(text = stringResource(id = R.string.remove_tracking)) },
             text = {
                 if (canRemoveFromTracker) {
                     Column {
@@ -49,13 +56,18 @@ fun RemoveTrackingDialog(themeColorState: ThemeColorState, name: String, canRemo
                         onConfirm(removeFromTracker && canRemoveFromTracker)
                         onDismiss()
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = R.string.remove))
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                TextButton(
+                    onClick = onDismiss,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },

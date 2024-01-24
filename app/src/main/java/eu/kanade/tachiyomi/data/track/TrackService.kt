@@ -20,30 +20,32 @@ abstract class TrackService(val id: Int) {
     val preferences: PreferencesHelper by injectLazy()
     val networkService: NetworkHelper by injectLazy()
     val db: DatabaseHelper by injectLazy()
+
     open fun canRemoveFromService() = false
+
     open fun isAutoAddTracker() = false
+
     open val client: OkHttpClient
         get() = networkService.client
 
     // Name of the manga sync service to display
-    @StringRes
-    abstract fun nameRes(): Int
+    @StringRes abstract fun nameRes(): Int
 
     // Application and remote support for reading dates
     open val supportsReadingDates: Boolean = false
 
-    @DrawableRes
-    abstract fun getLogo(): Int
+    @DrawableRes abstract fun getLogo(): Int
 
-    @ColorInt
-    abstract fun getLogoColor(): Int
+    @ColorInt abstract fun getLogoColor(): Int
 
     abstract fun getStatusList(): List<Int>
 
     abstract fun isCompletedStatus(index: Int): Boolean
 
     abstract fun completedStatus(): Int
+
     abstract fun readingStatus(): Int
+
     abstract fun planningStatus(): Int
 
     abstract fun getStatus(status: Int): String
@@ -91,10 +93,11 @@ abstract class TrackService(val id: Int) {
         if (setToReadStatus && track.status == planningStatus() && track.last_chapter_read != 0f) {
             track.status = readingStatus()
         }
-        if (setToComplete &&
-            (!mustReadToComplete || track.status == readingStatus()) &&
-            track.total_chapters != 0 &&
-            track.last_chapter_read.toInt() == track.total_chapters
+        if (
+            setToComplete &&
+                (!mustReadToComplete || track.status == readingStatus()) &&
+                track.total_chapters != 0 &&
+                track.last_chapter_read.toInt() == track.total_chapters
         ) {
             track.status = completedStatus()
         }
@@ -105,7 +108,8 @@ abstract class TrackService(val id: Int) {
         preferences.setTrackCredentials(this, "", "")
     }
 
-    open fun isLogged(): Boolean = getUsername().get().isNotEmpty() && getPassword().get().isNotEmpty()
+    open fun isLogged(): Boolean =
+        getUsername().get().isNotEmpty() && getPassword().get().isNotEmpty()
 
     fun getUsername() = preferences.trackUsername(this)
 
@@ -122,15 +126,14 @@ fun TrackService.matchingTrack(track: TrackItem): Boolean {
 
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
     val manga = db.getManga(track.manga_id).executeOnIO()
-    val allRead = manga?.isOneShotOrCompleted(db) == true &&
-        db.getChapters(track.manga_id).executeOnIO().all { it.read }
+    val allRead =
+        manga?.isOneShotOrCompleted(db) == true &&
+            db.getChapters(track.manga_id).executeOnIO().all { it.read }
     if (supportsReadingDates) {
         track.started_reading_date = getStartDate(track)
         track.finished_reading_date = getCompletedDate(track, allRead)
     }
-    track.last_chapter_read = getLastChapterRead(track).takeUnless {
-        it == 0f && allRead
-    } ?: 1f
+    track.last_chapter_read = getLastChapterRead(track).takeUnless { it == 0f && allRead } ?: 1f
     if (track.last_chapter_read == 0f) {
         track.status = planningStatus
     }

@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.data.preference
 
-/**
- * This class stores the keys for the preferences in the application.
- */
+/** This class stores the keys for the preferences in the application. */
 object PreferenceKeys {
 
     const val theme = "pref_theme_key"

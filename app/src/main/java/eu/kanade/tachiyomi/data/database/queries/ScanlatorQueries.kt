@@ -10,24 +10,26 @@ interface ScanlatorQueries : DbProvider {
 
     fun insertScanlators(scanlators: List<ScanlatorImpl>) = db.put().objects(scanlators).prepare()
 
-    fun getScanlatorByName(name: String) = db.get()
-        .`object`(ScanlatorImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(ScanlatorTable.TABLE)
-                .where("${ScanlatorTable.COL_NAME} = ?")
-                .whereArgs(name)
-                .build(),
-        )
-        .prepare()
+    fun getScanlatorByName(name: String) =
+        db.get()
+            .`object`(ScanlatorImpl::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(ScanlatorTable.TABLE)
+                    .where("${ScanlatorTable.COL_NAME} = ?")
+                    .whereArgs(name)
+                    .build(),
+            )
+            .prepare()
 
-    fun deleteScanlator(name: String) = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(ScanlatorTable.TABLE)
-                .where("${ScanlatorTable.COL_NAME} = ?")
-                .whereArgs(name)
-                .build(),
-        )
-        .prepare()
+    fun deleteScanlator(name: String) =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(ScanlatorTable.TABLE)
+                    .where("${ScanlatorTable.COL_NAME} = ?")
+                    .whereArgs(name)
+                    .build(),
+            )
+            .prepare()
 }

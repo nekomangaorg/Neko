@@ -22,11 +22,7 @@ abstract class BaseOAuthLoginActivity : BaseThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
-            NekoTheme {
-                LoadingScreen()
-            }
-        }
+        setContent { NekoTheme { LoadingScreen() } }
 
         handleResult(intent.data)
     }

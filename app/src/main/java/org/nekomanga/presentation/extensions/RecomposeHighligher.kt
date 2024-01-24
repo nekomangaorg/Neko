@@ -14,7 +14,6 @@ package org.nekomanga.presentation.extensions
  * permissions and limitations under the License.
  */
 
-
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
@@ -38,8 +37,7 @@ import kotlinx.coroutines.delay
  * A [Modifier] that draws a border around elements that are recomposing. The border increases in
  * size and interpolates from red to green as more recompositions occur before a timeout.
  */
-@Stable
-fun Modifier.recomposeHighlighter(): Modifier = this.then(recomposeModifier)
+@Stable fun Modifier.recomposeHighlighter(): Modifier = this.then(recomposeModifier)
 
 // Use a single instance + @Stable to ensure that recompositions can enable skipping optimizations
 // Modifier.composed will still remember unique data per call site.
@@ -82,7 +80,7 @@ private val recomposeModifier =
                         // color in blue.
                         1L -> Color.Blue to 1f
                         // 2 compositions is _probably_ okay.
-                        2L -> Color.Green to 2.dp.toPx()
+                        2L -> Color.Green to org.nekomanga.presentation.theme.Size.extraTiny.toPx()
                         // 3 or more compositions before timeout may indicate an issue. lerp the
                         // color from yellow to red, and continually increase the border size.
                         else -> {

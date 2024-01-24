@@ -23,12 +23,13 @@ class LicensesController : BasicComposeController() {
         ) { contentPadding ->
             LibrariesContainer(
                 contentPadding = contentPadding,
-                colors = libraryColors(
-                    backgroundColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    badgeBackgroundColor = MaterialTheme.colorScheme.primary,
-                    badgeContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
+                colors =
+                    libraryColors(
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        badgeBackgroundColor = MaterialTheme.colorScheme.primary,
+                        badgeContentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
                 padding = libraryPadding(badgeContentPadding = PaddingValues(Size.tiny)),
             )
         }

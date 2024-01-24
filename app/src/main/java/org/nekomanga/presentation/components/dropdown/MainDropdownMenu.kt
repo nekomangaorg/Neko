@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components.dropdown
 
-import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +9,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -67,10 +67,14 @@ fun MainDropdownMenu(
                 properties = PopupProperties(),
                 onDismissRequest = onDismiss,
             ) {
-                val (incognitoText, incognitoIcon) = when (incognitoModeEnabled) {
-                    true -> R.string.turn_off_incognito_mode to CommunityMaterial.Icon2.cmd_incognito_off
-                    false -> R.string.turn_on_incognito_mode to CommunityMaterial.Icon2.cmd_incognito
-                }
+                val (incognitoText, incognitoIcon) =
+                    when (incognitoModeEnabled) {
+                        true ->
+                            R.string.turn_off_incognito_mode to
+                                CommunityMaterial.Icon2.cmd_incognito_off
+                        false ->
+                            R.string.turn_on_incognito_mode to CommunityMaterial.Icon2.cmd_incognito
+                    }
 
                 Row(
                     title = UiText.StringResource(incognitoText),
@@ -110,23 +114,54 @@ fun MainDropdownMenu(
 }
 
 @Composable
-private fun Row(title: UiText, subTitle: UiText? = null, icon: UiIcon, onClick: () -> Unit, onDismiss: () -> Unit) {
+private fun Row(
+    title: UiText,
+    subTitle: UiText? = null,
+    icon: UiIcon,
+    onClick: () -> Unit,
+    onDismiss: () -> Unit
+) {
     MaterialDropdownMenuItem(
         text = {
             Column {
-                Text(text = title.asString(), style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp))
+                Text(
+                    text = title.asString(),
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            letterSpacing = (-.5).sp
+                        )
+                )
                 if (subTitle != null) {
                     Text(
                         text = subTitle.asString(),
-                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast), letterSpacing = (-.5).sp),
+                        style =
+                            MaterialTheme.typography.bodySmall.copy(
+                                color =
+                                    MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = NekoColors.mediumAlphaLowContrast
+                                    ),
+                                letterSpacing = (-.5).sp
+                            ),
                     )
                 }
             }
         },
         leadingIcon = {
             when (icon) {
-                is UiIcon.Icon -> Icon(imageVector = icon.icon, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
-                is UiIcon.IIcon -> Image(asset = icon.icon, modifier = Modifier.size(24.dp), colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface))
+                is UiIcon.Icon ->
+                    Icon(
+                        imageVector = icon.icon,
+                        modifier = Modifier.size(24.dp),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                is UiIcon.IIcon ->
+                    Image(
+                        asset = icon.icon,
+                        modifier = Modifier.size(24.dp),
+                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
+                    )
             }
         },
         onClick = {

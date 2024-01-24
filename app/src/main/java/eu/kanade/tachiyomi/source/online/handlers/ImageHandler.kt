@@ -54,12 +54,16 @@ class ImageHandler {
     suspend fun getImage(page: Page, isLogged: Boolean): Response {
         return withIOContext {
             return@withIOContext when {
-                isExternal(page, "mangaplus") -> getImageResponse(mangaPlusHandler.client, mangaPlusHandler.headers, page)
-                isExternal(page, "comikey") -> getImageResponse(comikeyHandler.client, comikeyHandler.headers, page)
-                isExternal(page, "azuki") -> getImageResponse(azukiHandler.client, azukiHandler.headers, page)
-                isExternal(page, "mangahot") -> getImageResponse(mangaHotHandler.client, mangaHotHandler.headers, page)
-                isExternal(page, "/bfs/comic/") -> getImageResponse(bilibiliHandler.client, bilibiliHandler.headers, page)
-
+                isExternal(page, "mangaplus") ->
+                    getImageResponse(mangaPlusHandler.client, mangaPlusHandler.headers, page)
+                isExternal(page, "comikey") ->
+                    getImageResponse(comikeyHandler.client, comikeyHandler.headers, page)
+                isExternal(page, "azuki") ->
+                    getImageResponse(azukiHandler.client, azukiHandler.headers, page)
+                isExternal(page, "mangahot") ->
+                    getImageResponse(mangaHotHandler.client, mangaHotHandler.headers, page)
+                isExternal(page, "/bfs/comic/") ->
+                    getImageResponse(bilibiliHandler.client, bilibiliHandler.headers, page)
                 else -> {
                     val request = imageRequest(page, isLogged)
                     requestImage(request, page)
@@ -70,27 +74,37 @@ class ImageHandler {
 
     private suspend fun requestImage(request: Request, page: Page): Response {
 
-        var attempt = com.github.michaelbull.result.runCatching {
-            network.cdnClient.newCachelessCallWithProgress(request, page).await()
-        }.onSuccess { response ->
-            withNonCancellableContext {
-                reportImageWithResponse(response)
-            }
-        }
+        var attempt =
+            com.github.michaelbull.result
+                .runCatching {
+                    network.cdnClient.newCachelessCallWithProgress(request, page).await()
+                }
+                .onSuccess { response ->
+                    withNonCancellableContext { reportImageWithResponse(response) }
+                }
 
-        if ((attempt.getError() != null || !attempt.get()!!.isSuccessful) && !request.url.toString().startsWith(MdConstants.cdnUrl)) {
-            TimberKt.e(attempt.getError()) { "$tag error getting image from at home node falling back to cdn" }
-
-            attempt = com.github.michaelbull.result.runCatching {
-                val newRequest = buildRequest(MdConstants.cdnUrl + page.imageUrl, network.headers)
-                network.cdnClient.newCachelessCallWithProgress(newRequest, page).await()
+        if (
+            (attempt.getError() != null || !attempt.get()!!.isSuccessful) &&
+                !request.url.toString().startsWith(MdConstants.cdnUrl)
+        ) {
+            TimberKt.e(attempt.getError()) {
+                "$tag error getting image from at home node falling back to cdn"
             }
+
+            attempt =
+                com.github.michaelbull.result.runCatching {
+                    val newRequest =
+                        buildRequest(MdConstants.cdnUrl + page.imageUrl, network.headers)
+                    network.cdnClient.newCachelessCallWithProgress(newRequest, page).await()
+                }
         }
 
         attempt.onSuccess { response ->
             if (!response.isSuccessful) {
                 response.close()
-                TimberKt.e(attempt.getError()) { "$tag response for image was not successful http status code ${response.code}" }
+                TimberKt.e(attempt.getError()) {
+                    "$tag response for image was not successful http status code ${response.code}"
+                }
                 throw Exception("HTTP error ${response.code}")
             }
         }
@@ -98,20 +112,19 @@ class ImageHandler {
         return attempt.getOrThrow { e ->
             if (e !is CancellationException) {
                 TimberKt.e(attempt.getError()) { "$tag error getting images" }
-                withNonCancellableContext {
-                    reportFailedImage(request.url.toString())
-                }
+                withNonCancellableContext { reportFailedImage(request.url.toString()) }
             }
             e
         }
     }
 
     private suspend fun reportFailedImage(url: String) {
-        val atHomeImageReportDto = AtHomeImageReportDto(
-            url,
-            false,
-            duration = 30.seconds.inWholeMilliseconds,
-        )
+        val atHomeImageReportDto =
+            AtHomeImageReportDto(
+                url,
+                false,
+                duration = 30.seconds.inWholeMilliseconds,
+            )
         sendReport(atHomeImageReportDto)
     }
 
@@ -119,13 +132,14 @@ class ImageHandler {
         val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
         val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
         val cache = response.header("X-Cache", "") == "HIT"
-        val atHomeImageReportDto = AtHomeImageReportDto(
-            response.request.url.toString(),
-            response.isSuccessful,
-            byteSize,
-            cache,
-            duration,
-        )
+        val atHomeImageReportDto =
+            AtHomeImageReportDto(
+                response.request.url.toString(),
+                response.isSuccessful,
+                byteSize,
+                cache,
+                duration,
+            )
         TimberKt.d { "$tag  $atHomeImageReportDto" }
         sendReport(atHomeImageReportDto)
     }
@@ -147,16 +161,21 @@ class ImageHandler {
         val currentTime = Date().time
 
         val mdAtHomeServerUrl =
-            when (tokenTracker[page.mangaDexChapterId] != null && (currentTime - tokenTracker[page.mangaDexChapterId]!!) < MdConstants.mdAtHomeTokenLifespan) {
+            when (
+                tokenTracker[page.mangaDexChapterId] != null &&
+                    (currentTime - tokenTracker[page.mangaDexChapterId]!!) <
+                        MdConstants.mdAtHomeTokenLifespan
+            ) {
                 true -> data[0]
                 false -> {
                     TimberKt.d { "$tag Time has expired get new at home url isLogged $isLogged" }
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
 
-                    networkServices.atHomeService.getAtHomeServer(
-                        page.mangaDexChapterId,
-                        preferences.usePort443Only().get(),
-                    )
+                    networkServices.atHomeService
+                        .getAtHomeServer(
+                            page.mangaDexChapterId,
+                            preferences.usePort443Only().get(),
+                        )
                         .getOrResultError("getting image")
                         .getOrThrow { Exception(it.message()) }
                         .baseUrl
@@ -174,14 +193,17 @@ class ImageHandler {
 
     // images will be cached or saved manually, so don't take up network cache
     private fun buildRequest(url: String, headers: Headers): Request {
-        return GET(url, headers)
-            .newBuilder()
-            .cacheControl(CACHE_CONTROL_NO_STORE)
-            .build()
+        return GET(url, headers).newBuilder().cacheControl(CACHE_CONTROL_NO_STORE).build()
     }
 
-    private suspend fun getImageResponse(client: OkHttpClient, headers: Headers, page: Page): Response {
-        return client.newCachelessCallWithProgress(buildRequest(page.imageUrl!!, headers), page).await()
+    private suspend fun getImageResponse(
+        client: OkHttpClient,
+        headers: Headers,
+        page: Page
+    ): Response {
+        return client
+            .newCachelessCallWithProgress(buildRequest(page.imageUrl!!, headers), page)
+            .await()
     }
 
     private fun isExternal(page: Page, scanlatorName: String): Boolean {

@@ -6,7 +6,7 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 object MdConstants {
-    const val currentSeasonalId = "907b6e91-b511-4095-927f-30227ccadfdc"
+    const val currentSeasonalId = "1cc30d64-45c6-45a6-8c45-3771e1933b0f"
     const val staffPicksId = "805ba886-dd99-4aa4-b460-4bd7c7b71352"
     const val nekoDevPicksId = "9650e839-1266-4456-860d-c7eee164b451"
     const val baseUrl = "https://mangadex.org"
@@ -39,7 +39,8 @@ object MdConstants {
     }
 
     object Login {
-        val redirectUri = if (BuildConfig.DEBUG) "neko://mangadex-auth-debug" else "neko://mangadex-auth"
+        val redirectUri =
+            if (BuildConfig.DEBUG) "neko://mangadex-auth-debug" else "neko://mangadex-auth"
         const val clientId = "neko"
         const val authorizationCode = "authorization_code"
         const val refreshToken = "refresh_token"
@@ -52,13 +53,17 @@ object MdConstants {
             val encoding = Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
             val codeChallenge = Base64.encodeToString(digest, encoding)
 
-            return Api.baseAuthUrl + Api.login.toUri().buildUpon()
-                .appendQueryParameter("client_id", clientId)
-                .appendQueryParameter("response_type", "code")
-                .appendQueryParameter("redirect_uri", redirectUri)
-                .appendQueryParameter("code_challenge", codeChallenge)
-                .appendQueryParameter("code_challenge_method", "S256")
-                .build().toString()
+            return Api.baseAuthUrl +
+                Api.login
+                    .toUri()
+                    .buildUpon()
+                    .appendQueryParameter("client_id", clientId)
+                    .appendQueryParameter("response_type", "code")
+                    .appendQueryParameter("redirect_uri", redirectUri)
+                    .appendQueryParameter("code_challenge", codeChallenge)
+                    .appendQueryParameter("code_challenge_method", "S256")
+                    .build()
+                    .toString()
         }
     }
 
@@ -135,7 +140,9 @@ object MdConstants {
         const val authorOrArtist = "authorOrArtist"
         const val group = "group"
         const val includedTagsParam = "includedTags[]"
+
         fun sortParam(sort: String) = "order[$sort]"
+
         const val excludedTagsParam = "excludedTags[]"
         const val includedTagModeParam = "includedTagsMode"
         const val excludedTagModeParam = "excludedTagsMode"

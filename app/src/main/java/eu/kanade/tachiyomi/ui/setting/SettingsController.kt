@@ -50,7 +50,11 @@ abstract class SettingsController : PreferenceController() {
         listView.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup,
+        savedInstanceState: Bundle?
+    ): View {
         if (untilDestroySubscriptions.isUnsubscribed) {
             untilDestroySubscriptions = CompositeSubscription()
         }
@@ -92,6 +96,7 @@ abstract class SettingsController : PreferenceController() {
     abstract fun setupPreferenceScreen(screen: PreferenceScreen): PreferenceScreen
 
     open fun onActionViewExpand(item: MenuItem?) {}
+
     open fun onActionViewCollapse(item: MenuItem?) {}
 
     private fun getThemedContext(): Context {
@@ -101,12 +106,17 @@ abstract class SettingsController : PreferenceController() {
     }
 
     private fun animatePreferenceHighlight(view: View) {
-        ValueAnimator
-            .ofObject(ArgbEvaluator(), Color.TRANSPARENT, view.context.getResourceColor(R.attr.colorControlHighlight))
+        ValueAnimator.ofObject(
+                ArgbEvaluator(),
+                Color.TRANSPARENT,
+                view.context.getResourceColor(R.attr.colorControlHighlight)
+            )
             .apply {
                 duration = 500L
                 repeatCount = 2
-                addUpdateListener { animator -> view.setBackgroundColor(animator.animatedValue as Int) }
+                addUpdateListener { animator ->
+                    view.setBackgroundColor(animator.animatedValue as Int)
+                }
                 reverse()
             }
     }

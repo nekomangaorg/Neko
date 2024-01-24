@@ -10,8 +10,7 @@ import kotlinx.coroutines.sync.withLock
  */
 class DeferredField<T> {
 
-    @Volatile
-    var content: T? = null
+    @Volatile var content: T? = null
 
     @Volatile
     var initialized = false
@@ -19,9 +18,7 @@ class DeferredField<T> {
 
     private val mutex = Mutex(true)
 
-    /**
-     * Initialize the field
-     */
+    /** Initialize the field */
     fun initialize(content: T) {
         // Fast-path new listeners
         this.content = content
@@ -39,9 +36,7 @@ class DeferredField<T> {
         mutex.unlock()
     }
 
-    /**
-     * Will only suspend if !initialized.
-     */
+    /** Will only suspend if !initialized. */
     suspend fun get(): T? {
         // Check if field is initialized and return immediately if it is
         if (initialized) return content

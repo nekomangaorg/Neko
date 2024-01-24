@@ -31,7 +31,8 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
 
 /**
- * This is a Tooltip Icon button, a wrapper around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip
+ * This is a Tooltip Icon button, a wrapper around a CombinedClickableIcon Button, in which the long
+ * click of the button with show the tooltip
  */
 @Composable
 fun ToolTipButton(
@@ -48,23 +49,30 @@ fun ToolTipButton(
 
     val haptic = LocalHapticFeedback.current
     PlainTooltipBox(
-        tooltip = { Text(modifier = Modifier.padding(Size.tiny), style = MaterialTheme.typography.bodyLarge, text = toolTipLabel) },
+        tooltip = {
+            Text(
+                modifier = Modifier.padding(Size.tiny),
+                style = MaterialTheme.typography.bodyLarge,
+                text = toolTipLabel
+            )
+        },
         contentColor = MaterialTheme.colorScheme.onSurface,
         containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
     ) {
         CombinedClickableIconButton(
             enabled = isEnabled,
             enabledTint = enabledTint,
-            modifier = modifier
-                .tooltipAnchor()
-                .iconButtonCombinedClickable(
-                    toolTipLabel = toolTipLabel,
-                    onClick = buttonClicked,
-                    isEnabled = isEnabled,
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    },
-                ),
+            modifier =
+                modifier
+                    .tooltipAnchor()
+                    .iconButtonCombinedClickable(
+                        toolTipLabel = toolTipLabel,
+                        onClick = buttonClicked,
+                        isEnabled = isEnabled,
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                    ),
         ) {
             if (icon != null) {
                 Icon(
@@ -84,7 +92,8 @@ fun ToolTipButton(
 }
 
 /**
- * This button doesnt override clickable, and allows you to pass a combined clickable to do long, double, and normal click
+ * This button doesnt override clickable, and allows you to pass a combined clickable to do long,
+ * double, and normal click
  */
 @Composable
 fun CombinedClickableIconButton(
@@ -94,10 +103,7 @@ fun CombinedClickableIconButton(
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier =
-        modifier
-            .minimumInteractiveComponentSize()
-            .size(IconButtonTokens.StateLayerSize),
+        modifier = modifier.minimumInteractiveComponentSize().size(IconButtonTokens.StateLayerSize),
         contentAlignment = Alignment.Center,
     ) {
         val contentColor =
@@ -112,8 +118,8 @@ fun CombinedClickableIconButton(
 }
 
 /**
- * This button wraps combinedClickable with the remember ripple from a normal IconButton, and is to be used with the
- * CombinedClickableIconButton
+ * This button wraps combinedClickable with the remember ripple from a normal IconButton, and is to
+ * be used with the CombinedClickableIconButton
  */
 fun Modifier.iconButtonCombinedClickable(
     toolTipLabel: String,
@@ -125,10 +131,11 @@ fun Modifier.iconButtonCombinedClickable(
     if (isEnabled) {
         combinedClickable(
             interactionSource = remember { MutableInteractionSource() },
-            indication = rememberRipple(
-                bounded = false,
-                radius = IconButtonTokens.StateLayerSize / 2,
-            ),
+            indication =
+                rememberRipple(
+                    bounded = false,
+                    radius = IconButtonTokens.StateLayerSize / 2,
+                ),
             onClickLabel = toolTipLabel,
             role = Role.Button,
             onClick = onClick,
@@ -139,4 +146,3 @@ fun Modifier.iconButtonCombinedClickable(
         this
     }
 }
-

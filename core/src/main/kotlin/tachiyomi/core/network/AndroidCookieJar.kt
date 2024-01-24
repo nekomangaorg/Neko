@@ -41,7 +41,8 @@ class AndroidCookieJar : CookieJar {
             }
         }
 
-        cookies.split(";")
+        cookies
+            .split(";")
             .map { it.substringBefore("=") }
             .filterNames()
             .onEach { manager.setCookie(urlString, "$it=;Max-Age=$maxAge") }

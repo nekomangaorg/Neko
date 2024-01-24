@@ -35,12 +35,13 @@ class ChapterHolder(
         val chapter = item.chapter
         val isLocked = item.isLocked
         itemView.transitionName = "details chapter ${chapter.id ?: 0L} transition"
-        binding.chapterTitle.text = if (manga.hideChapterTitle(adapter.mangaDetailsPreferences)) {
-            val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-            itemView.context.getString(R.string.chapter_, number)
-        } else {
-            chapter.name
-        }
+        binding.chapterTitle.text =
+            if (manga.hideChapterTitle(adapter.mangaDetailsPreferences)) {
+                val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
+                itemView.context.getString(R.string.chapter_, number)
+            } else {
+                chapter.name
+            }
 
         ChapterUtil.setTextViewForChapter(binding.chapterTitle, item, hideStatus = isLocked)
 
@@ -98,12 +99,13 @@ class ChapterHolder(
             showBookmark = false,
             hideStatus = isLocked,
         )
-        binding.chapterScanlator.text = statuses.joinToString(" â€¢ ")
+        binding.chapterScanlator.text = statuses.joinToString(" • ")
 
-        val status = when {
-            adapter.isSelected(flexibleAdapterPosition) -> Download.State.CHECKED
-            else -> item.status
-        }
+        val status =
+            when {
+                adapter.isSelected(flexibleAdapterPosition) -> Download.State.CHECKED
+                else -> item.status
+            }
 
         notifyStatus(status, item.isLocked, item.progress)
         resetFrontView()
@@ -160,23 +162,29 @@ class ChapterHolder(
         }
     }
 
-    fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
-        /* adapter.delegate.accentColor()?.let {
-             binding.startView.backgroundTintList = ColorStateList.valueOf(it)
-             binding.bookmark.imageTintList = ColorStateList.valueOf(
-                 context.getResourceColor(android.R.attr.textColorPrimaryInverse),
-             )
-             TextViewCompat.setCompoundDrawableTintList(
-                 binding.chapterTitle,
-                 ColorStateList.valueOf(it),
-             )
-             colorSecondary = it
-         }*/
-        if (locked) {
-            isVisible = false
-            return
+    fun notifyStatus(
+        status: Download.State,
+        locked: Boolean,
+        progress: Int,
+        animated: Boolean = false
+    ) =
+        with(binding.downloadButton.downloadButton) {
+            /* adapter.delegate.accentColor()?.let {
+                binding.startView.backgroundTintList = ColorStateList.valueOf(it)
+                binding.bookmark.imageTintList = ColorStateList.valueOf(
+                    context.getResourceColor(android.R.attr.textColorPrimaryInverse),
+                )
+                TextViewCompat.setCompoundDrawableTintList(
+                    binding.chapterTitle,
+                    ColorStateList.valueOf(it),
+                )
+                colorSecondary = it
+            }*/
+            if (locked) {
+                isVisible = false
+                return
+            }
+            isVisible = !localSource
+            setDownloadStatus(status, progress, animated)
         }
-        isVisible = !localSource
-        setDownloadStatus(status, progress, animated)
-    }
 }

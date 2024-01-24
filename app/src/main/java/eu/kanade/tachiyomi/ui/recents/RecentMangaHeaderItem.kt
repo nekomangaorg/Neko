@@ -53,11 +53,12 @@ class RecentMangaHeaderItem(val recentsType: Int) :
         return recentsType.hashCode()
     }
 
-    class Holder(val view: View, adapter: RecentMangaAdapter) : BaseFlexibleViewHolder(
-        view,
-        adapter,
-        true,
-    ) {
+    class Holder(val view: View, adapter: RecentMangaAdapter) :
+        BaseFlexibleViewHolder(
+            view,
+            adapter,
+            true,
+        ) {
 
         private val binding = RecentsHeaderItemBinding.bind(view)
 

@@ -25,8 +25,7 @@ abstract class WebViewClientCompat : WebViewClient() {
         description: String?,
         failingUrl: String,
         isMainFrame: Boolean,
-    ) {
-    }
+    ) {}
 
     @TargetApi(Build.VERSION_CODES.N)
     final override fun shouldOverrideUrlLoading(
@@ -86,8 +85,7 @@ abstract class WebViewClientCompat : WebViewClient() {
             view,
             error.statusCode,
             error.reasonPhrase,
-            request.url
-                .toString(),
+            request.url.toString(),
             request.isForMainFrame,
         )
     }

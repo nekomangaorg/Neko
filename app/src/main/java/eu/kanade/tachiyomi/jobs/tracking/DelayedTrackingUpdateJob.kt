@@ -22,7 +22,11 @@ import uy.kohesive.injekt.api.get
 class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
-    private data class DelayedTracking(val mangaId: Long, val syncId: Int, val lastReadChapter: Float) {
+    private data class DelayedTracking(
+        val mangaId: Long,
+        val syncId: Int,
+        val lastReadChapter: Float
+    ) {
         fun print() = "$mangaId:$syncId:$lastReadChapter"
     }
 
@@ -31,20 +35,24 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         val preferences = Injekt.get<PreferencesHelper>()
         val db = Injekt.get<DatabaseHelper>()
         val trackManager = Injekt.get<TrackManager>()
-        val trackings = preferences.trackingsToAddOnline().get().toMutableSet().mapNotNull {
-            val items = it.split(":")
-            if (items.size != 3) {
-                TimberKt.e {
-                    "items size was not 3 after split for: $it"
+        val trackings =
+            preferences
+                .trackingsToAddOnline()
+                .get()
+                .toMutableSet()
+                .mapNotNull {
+                    val items = it.split(":")
+                    if (items.size != 3) {
+                        TimberKt.e { "items size was not 3 after split for: $it" }
+                        null
+                    } else {
+                        val mangaId = items[0].toLongOrNull() ?: return@mapNotNull null
+                        val syncId = items[1].toIntOrNull() ?: return@mapNotNull null
+                        val chapterNumber = items[2].toFloatOrNull() ?: return@mapNotNull null
+                        DelayedTracking(mangaId, syncId, chapterNumber)
+                    }
                 }
-                null
-            } else {
-                val mangaId = items[0].toLongOrNull() ?: return@mapNotNull null
-                val syncId = items[1].toIntOrNull() ?: return@mapNotNull null
-                val chapterNumber = items[2].toFloatOrNull() ?: return@mapNotNull null
-                DelayedTracking(mangaId, syncId, chapterNumber)
-            }
-        }.groupBy { it.mangaId }
+                .groupBy { it.mangaId }
         withContext(Dispatchers.IO) {
             val trackingsToAdd = mutableSetOf<String>()
             trackings.forEach { entry ->
@@ -76,11 +84,12 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
         fun setupTask(context: Context) {
             val constraints =
                 Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-            val request = OneTimeWorkRequestBuilder<DelayedTrackingUpdateJob>()
-                .setConstraints(constraints)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 20, TimeUnit.SECONDS)
-                .addTag(TAG)
-                .build()
+            val request =
+                OneTimeWorkRequestBuilder<DelayedTrackingUpdateJob>()
+                    .setConstraints(constraints)
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 20, TimeUnit.SECONDS)
+                    .addTag(TAG)
+                    .build()
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)

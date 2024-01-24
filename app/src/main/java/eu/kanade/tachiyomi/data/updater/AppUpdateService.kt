@@ -42,9 +42,7 @@ class AppUpdateService : Service() {
 
     private val network: NetworkHelper by injectLazy()
 
-    /**
-     * Wake lock that will be held until the service is destroyed.
-     */
+    /** Wake lock that will be held until the service is destroyed. */
     private lateinit var wakeLock: PowerManager.WakeLock
 
     private lateinit var notifier: AppUpdateNotifier
@@ -65,9 +63,7 @@ class AppUpdateService : Service() {
         wakeLock = acquireWakeLock(javaClass.name)
     }
 
-    /**
-     * This method needs to be implemented, but it's not used/needed.
-     */
+    /** This method needs to be implemented, but it's not used/needed. */
     override fun onBind(intent: Intent): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -84,9 +80,7 @@ class AppUpdateService : Service() {
         val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.app_name_neko)
         val notifyOnInstall = intent.getBooleanExtra(EXTRA_NOTIFY_ON_INSTALL, false)
 
-        runningJob = GlobalScope.launch(handler) {
-            downloadApk(title, url, notifyOnInstall)
-        }
+        runningJob = GlobalScope.launch(handler) { downloadApk(title, url, notifyOnInstall) }
 
         runningJob?.invokeOnCompletion { stopSelf(startId) }
 
@@ -123,23 +117,24 @@ class AppUpdateService : Service() {
         // Show notification download starting.
         notifier.onDownloadStarted(title)
 
-        val progressListener = object : ProgressListener {
-            // Progress of the download
-            var savedProgress = 0
+        val progressListener =
+            object : ProgressListener {
+                // Progress of the download
+                var savedProgress = 0
 
-            // Keep track of the last notification sent to avoid posting too many.
-            var lastTick = 0L
+                // Keep track of the last notification sent to avoid posting too many.
+                var lastTick = 0L
 
-            override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                val progress = (100 * (bytesRead.toFloat() / contentLength)).toInt()
-                val currentTime = System.currentTimeMillis()
-                if (progress > savedProgress && currentTime - 200 > lastTick) {
-                    savedProgress = progress
-                    lastTick = currentTime
-                    notifier.onProgressChange(progress)
+                override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
+                    val progress = (100 * (bytesRead.toFloat() / contentLength)).toInt()
+                    val currentTime = System.currentTimeMillis()
+                    if (progress > savedProgress && currentTime - 200 > lastTick) {
+                        savedProgress = progress
+                        lastTick = currentTime
+                        notifier.onProgressChange(progress)
+                    }
                 }
             }
-        }
 
         try {
             // Download the new update.
@@ -163,8 +158,9 @@ class AppUpdateService : Service() {
             }
         } catch (error: Exception) {
             TimberKt.e(error)
-            if (error is CancellationException ||
-                (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
+            if (
+                error is CancellationException ||
+                    (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
             ) {
                 notifier.cancel()
             } else {
@@ -179,9 +175,10 @@ class AppUpdateService : Service() {
             val packageInstaller = packageManager.packageInstaller
             val data = file.inputStream()
 
-            val params = PackageInstaller.SessionParams(
-                PackageInstaller.SessionParams.MODE_FULL_INSTALL,
-            )
+            val params =
+                PackageInstaller.SessionParams(
+                    PackageInstaller.SessionParams.MODE_FULL_INSTALL,
+                )
             params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
             val sessionId = packageInstaller.createSession(params)
             val session = packageInstaller.openSession(sessionId)
@@ -194,12 +191,19 @@ class AppUpdateService : Service() {
                 }
             }
 
-            val newIntent = Intent(this, AppUpdateBroadcast::class.java)
-                .setAction(PACKAGE_INSTALLED_ACTION)
-                .putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
-                .putExtra(EXTRA_FILE_URI, file.getUriCompat(this).toString())
+            val newIntent =
+                Intent(this, AppUpdateBroadcast::class.java)
+                    .setAction(PACKAGE_INSTALLED_ACTION)
+                    .putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
+                    .putExtra(EXTRA_FILE_URI, file.getUriCompat(this).toString())
 
-            val pendingIntent = PendingIntent.getBroadcast(this, -10053, newIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+            val pendingIntent =
+                PendingIntent.getBroadcast(
+                    this,
+                    -10053,
+                    newIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                )
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             notifier.onInstalling()
@@ -236,10 +240,13 @@ class AppUpdateService : Service() {
 
         const val PACKAGE_INSTALLED_ACTION =
             "${BuildConfig.APPLICATION_ID}.SESSION_SELF_API_PACKAGE_INSTALLED"
-        internal const val EXTRA_NOTIFY_ON_INSTALL = "${BuildConfig.APPLICATION_ID}.UpdaterService.ACTION_ON_INSTALL"
-        internal const val EXTRA_DOWNLOAD_URL = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
+        internal const val EXTRA_NOTIFY_ON_INSTALL =
+            "${BuildConfig.APPLICATION_ID}.UpdaterService.ACTION_ON_INSTALL"
+        internal const val EXTRA_DOWNLOAD_URL =
+            "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
         internal const val EXTRA_FILE_URI = "${BuildConfig.APPLICATION_ID}.UpdaterService.FILE_URI"
-        internal const val EXTRA_DOWNLOAD_TITLE = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
+        internal const val EXTRA_DOWNLOAD_TITLE =
+            "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
 
         internal const val NOTIFY_ON_INSTALL_KEY = "notify_on_install_complete"
 
@@ -254,17 +261,19 @@ class AppUpdateService : Service() {
 
         /**
          * Downloads a new update and let the user install the new version from a notification.
+         *
          * @param context the application context.
          * @param url the url to the new update.
          */
         fun start(context: Context, url: String, notifyOnInstall: Boolean) {
             if (!isRunning()) {
                 val title = context.getString(R.string.app_name_neko)
-                val intent = Intent(context, AppUpdateService::class.java).apply {
-                    putExtra(EXTRA_DOWNLOAD_TITLE, title)
-                    putExtra(EXTRA_DOWNLOAD_URL, url)
-                    putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
-                }
+                val intent =
+                    Intent(context, AppUpdateService::class.java).apply {
+                        putExtra(EXTRA_DOWNLOAD_TITLE, title)
+                        putExtra(EXTRA_DOWNLOAD_URL, url)
+                        putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
+                    }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.startService(intent)
                 } else {
@@ -288,12 +297,22 @@ class AppUpdateService : Service() {
          * @param url the url to the new update.
          * @return [PendingIntent]
          */
-        internal fun downloadApkPendingService(context: Context, url: String, notifyOnInstall: Boolean = false): PendingIntent {
-            val intent = Intent(context, AppUpdateService::class.java).apply {
-                putExtra(EXTRA_DOWNLOAD_URL, url)
-                putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
-            }
-            return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        internal fun downloadApkPendingService(
+            context: Context,
+            url: String,
+            notifyOnInstall: Boolean = false
+        ): PendingIntent {
+            val intent =
+                Intent(context, AppUpdateService::class.java).apply {
+                    putExtra(EXTRA_DOWNLOAD_URL, url)
+                    putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
+                }
+            return PendingIntent.getService(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         }
     }
 }

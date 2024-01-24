@@ -28,9 +28,7 @@ class SettingsSearchController :
     SmallToolbarInterface,
     SettingsSearchAdapter.OnTitleClickListener {
 
-    /**
-     * Adapter containing search results grouped by lang.
-     */
+    /** Adapter containing search results grouped by lang. */
     private var adapter: SettingsSearchAdapter? = null
     private var searchView: SearchView? = null
 
@@ -38,7 +36,8 @@ class SettingsSearchController :
         setHasOptionsMenu(true)
     }
 
-    override fun createBinding(inflater: LayoutInflater) = SettingsSearchControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        SettingsSearchControllerBinding.inflate(inflater)
 
     override fun getTitle(): String {
         return presenter.query
@@ -66,7 +65,9 @@ class SettingsSearchController :
         val searchItem = activityBinding?.searchToolbar?.searchItem
         searchView = activityBinding?.searchToolbar?.searchView
 
-        activityBinding?.searchToolbar?.setQueryHint(applicationContext?.getString(R.string.search_settings), false)
+        activityBinding
+            ?.searchToolbar
+            ?.setQueryHint(applicationContext?.getString(R.string.search_settings), false)
 
         searchItem?.expandActionView()
         setItems(getResultSet())
@@ -125,13 +126,14 @@ class SettingsSearchController :
     }
 
     /**
-     * returns a list of `SettingsSearchItem` to be shown as search results
-     * Future update: should we add a minimum length to the query before displaying results? Consider other languages.
+     * returns a list of `SettingsSearchItem` to be shown as search results Future update: should we
+     * add a minimum length to the query before displaying results? Consider other languages.
      */
     fun getResultSet(query: String? = null): List<SettingsSearchItem> {
         if (!query.isNullOrBlank()) {
-            return SettingsSearchHelper.getFilteredResults(query)
-                .map { SettingsSearchItem(it, null, query) }
+            return SettingsSearchHelper.getFilteredResults(query).map {
+                SettingsSearchItem(it, null, query)
+            }
         }
 
         return mutableListOf()
@@ -146,13 +148,9 @@ class SettingsSearchController :
         adapter?.updateDataSet(searchResult)
     }
 
-    /**
-     * Opens a catalogue with the given search.
-     */
+    /** Opens a catalogue with the given search. */
     override fun onTitleClick(ctrl: SettingsController) {
-        searchView?.query.let {
-            lastSearch = it.toString()
-        }
+        searchView?.query.let { lastSearch = it.toString() }
 
         router.pushController(ctrl.withFadeTransaction())
     }

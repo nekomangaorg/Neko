@@ -10,6 +10,7 @@ class RecentsUpdatesView @JvmOverloads constructor(context: Context, attrs: Attr
     BaseRecentsDisplayView<RecentsUpdatesViewBinding>(context, attrs) {
 
     override fun inflateBinding() = RecentsUpdatesViewBinding.bind(this)
+
     override fun initGeneralPreferences() {
         binding.showUpdatedTime.bindToPreference(preferences.showUpdatedTime())
         binding.sortFetchedTime.bindToPreference(preferences.sortFetchedTime())

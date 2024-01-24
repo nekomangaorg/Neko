@@ -22,9 +22,7 @@ class AzukiHandler {
 
     val baseUrl = "https://www.azuki.co"
     private val apiUrl = "https://production.api.azuki.co"
-    val headers = Headers.Builder()
-        .add("User-Agent", HttpSource.USER_AGENT)
-        .build()
+    val headers = Headers.Builder().add("User-Agent", HttpSource.USER_AGENT).build()
 
     suspend fun fetchPageList(externalUrl: String): List<Page> {
         val chapterId = externalUrl.substringAfterLast("/").substringBefore("?")
@@ -39,9 +37,15 @@ class AzukiHandler {
     fun pageListParse(response: Response): List<Page> {
         return Json.parseToJsonElement(response.body!!.string())
             .jsonObject["pages"]!!
-            .jsonArray.mapIndexed { index, element ->
+            .jsonArray
+            .mapIndexed { index, element ->
                 val url =
-                    element.jsonObject["image_wm"]!!.jsonObject["webp"]!!.jsonArray[1].jsonObject["url"]!!.jsonPrimitive.content
+                    element.jsonObject["image_wm"]!!
+                        .jsonObject["webp"]!!
+                        .jsonArray[1]
+                        .jsonObject["url"]!!
+                        .jsonPrimitive
+                        .content
                 Page(index, url, url)
             }
     }

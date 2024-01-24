@@ -47,11 +47,12 @@ inline fun ImageView.loadManga(
     imageLoader: ImageLoader = context.imageLoader,
     builder: ImageRequest.Builder.() -> Unit = {},
 ): Disposable {
-    val request = ImageRequest.Builder(context)
-        .data(manga)
-        .target(LibraryMangaImageTarget(this, manga))
-        .apply(builder)
-        .memoryCacheKey(manga.key())
-        .build()
+    val request =
+        ImageRequest.Builder(context)
+            .data(manga)
+            .target(LibraryMangaImageTarget(this, manga))
+            .apply(builder)
+            .memoryCacheKey(manga.key())
+            .build()
     return imageLoader.enqueue(request)
 }

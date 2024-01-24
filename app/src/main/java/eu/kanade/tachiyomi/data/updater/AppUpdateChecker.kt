@@ -27,40 +27,44 @@ class AppUpdateChecker {
         doExtrasAfterNewUpdate: Boolean = true,
     ): AppUpdateResult {
         // Limit checks to once a day at most
-        if (!isUserPrompt && Date().time < preferences.lastAppCheck()
-                .get() + TimeUnit.DAYS.toMillis(1)
+        if (
+            !isUserPrompt &&
+                Date().time < preferences.lastAppCheck().get() + TimeUnit.DAYS.toMillis(1)
         ) {
             return AppUpdateResult.NoNewUpdate
         }
 
         return withIOContext {
-            val result = with(json) {
-                networkService.client
-                    .newCall(GET(LATEST_RELEASE_URL))
-                    .await()
-                    .parseAs<GithubRelease>()
-                    .let {
-                        preferences.lastAppCheck().set(Date().time)
+            val result =
+                with(json) {
+                    networkService.client
+                        .newCall(GET(LATEST_RELEASE_URL))
+                        .await()
+                        .parseAs<GithubRelease>()
+                        .let {
+                            preferences.lastAppCheck().set(Date().time)
 
-                        // Check if latest version is different from current version
-                        if (Version(it.version).isHigherThan(BuildConfig.VERSION_NAME)) {
-                            AppUpdateResult.NewUpdate(it)
-                        } else {
-                            AppUpdateResult.NoNewUpdate
+                            // Check if latest version is different from current version
+                            if (Version(it.version).isHigherThan(BuildConfig.VERSION_NAME)) {
+                                AppUpdateResult.NewUpdate(it)
+                            } else {
+                                AppUpdateResult.NoNewUpdate
+                            }
                         }
-                    }
-            }
+                }
             if (doExtrasAfterNewUpdate && result is AppUpdateResult.NewUpdate) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    preferences.appShouldAutoUpdate().get() != AutoAppUpdaterJob.NEVER
+                if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                        preferences.appShouldAutoUpdate().get() != AutoAppUpdaterJob.NEVER
                 ) {
                     AutoAppUpdaterJob.setupTask(context)
                 }
-                AppUpdateNotifier(context).promptUpdate(
-                    result.release.info,
-                    result.release.downloadLink,
-                    result.release.releaseLink,
-                )
+                AppUpdateNotifier(context)
+                    .promptUpdate(
+                        result.release.info,
+                        result.release.downloadLink,
+                        result.release.releaseLink,
+                    )
             }
 
             result
@@ -70,4 +74,5 @@ class AppUpdateChecker {
 
 const val GITHUB_REPO_NEW: String = "nekomangaorg/neko"
 const val LATEST_RELEASE_URL = "https://api.github.com/repos/$GITHUB_REPO_NEW/releases/latest"
-const val RELEASE_URL = "https://github.com/$GITHUB_REPO_NEW/releases/tag/${BuildConfig.VERSION_NAME}"
+const val RELEASE_URL =
+    "https://github.com/$GITHUB_REPO_NEW/releases/tag/${BuildConfig.VERSION_NAME}"

@@ -20,23 +20,26 @@ class MangaHotHandler {
 
     val baseUrl = "https://mangahot.jp"
     private val apiUrl = "https://api.mangahot.jp"
-    val headers = Headers.Builder()
-        .add("User-Agent", HttpSource.USER_AGENT)
-        .build()
+    val headers = Headers.Builder().add("User-Agent", HttpSource.USER_AGENT).build()
 
     suspend fun fetchPageList(externalUrl: String): List<Page> {
-        val request = GET(
-            externalUrl.substringBefore("?").replace(baseUrl, apiUrl)
-                .replace("viewer", "v1/works/storyDetail"),
-            headers,
-        )
+        val request =
+            GET(
+                externalUrl
+                    .substringBefore("?")
+                    .replace(baseUrl, apiUrl)
+                    .replace("viewer", "v1/works/storyDetail"),
+                headers,
+            )
         return pageListParse(client.newCall(request).await())
     }
 
     fun pageListParse(response: Response): List<Page> {
         return Json.parseToJsonElement(response.body!!.string())
-            .jsonObject["content"]!!.jsonObject["contentUrls"]!!
-            .jsonArray.mapIndexed { index, element ->
+            .jsonObject["content"]!!
+            .jsonObject["contentUrls"]!!
+            .jsonArray
+            .mapIndexed { index, element ->
                 val url = element.jsonPrimitive.content
                 Page(index, url, url)
             }

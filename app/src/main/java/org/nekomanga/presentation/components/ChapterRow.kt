@@ -103,31 +103,47 @@ fun ChapterRow(
         val dismissState = rememberDismissState(initialValue = DismissValue.Default)
         NekoSwipeToDismiss(
             state = dismissState,
-            modifier = Modifier
-                .padding(vertical = Dp(1f)),
+            modifier = Modifier.padding(vertical = Dp(1f)),
             background = {
-                val color = when (dismissState.dismissDirection) {
-                    null -> MaterialTheme.colorScheme.surface
-                    else -> MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColor.buttonColor, 8.dp)
-                }
+                val color =
+                    when (dismissState.dismissDirection) {
+                        null -> MaterialTheme.colorScheme.surface
+                        else ->
+                            MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+                                themeColor.buttonColor,
+                                8.dp
+                            )
+                    }
 
                 when (dismissState.dismissDirection) {
                     DismissDirection.EndToStart -> {
-                        val (icon, text) = when (read) {
-                            true -> Icons.Default.VisibilityOff to R.string.mark_as_unread
-                            false -> Icons.Default.Visibility to R.string.mark_as_read
-                        }
-                        Background(icon, Alignment.CenterEnd, color, stringResource(id = text), themeColor.buttonColor)
+                        val (icon, text) =
+                            when (read) {
+                                true -> Icons.Default.VisibilityOff to R.string.mark_as_unread
+                                false -> Icons.Default.Visibility to R.string.mark_as_read
+                            }
+                        Background(
+                            icon,
+                            Alignment.CenterEnd,
+                            color,
+                            stringResource(id = text),
+                            themeColor.buttonColor
+                        )
                     }
-
                     DismissDirection.StartToEnd -> {
-                        val (icon, text) = when (bookmark) {
-                            true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
-                            false -> Icons.Default.BookmarkAdd to R.string.add_bookmark
-                        }
-                        Background(icon, Alignment.CenterStart, color, stringResource(id = text), themeColor.buttonColor)
+                        val (icon, text) =
+                            when (bookmark) {
+                                true -> Icons.Default.BookmarkRemove to R.string.remove_bookmark
+                                false -> Icons.Default.BookmarkAdd to R.string.add_bookmark
+                            }
+                        Background(
+                            icon,
+                            Alignment.CenterStart,
+                            color,
+                            stringResource(id = text),
+                            themeColor.buttonColor
+                        )
                     }
-
                     else -> Unit
                 }
             },
@@ -157,8 +173,10 @@ fun ChapterRow(
             },
         )
         when {
-            dismissState.isDismissed(DismissDirection.EndToStart) -> Reset(dismissState = dismissState, action = onRead)
-            dismissState.isDismissed(DismissDirection.StartToEnd) -> Reset(dismissState = dismissState, action = onBookmark)
+            dismissState.isDismissed(DismissDirection.EndToStart) ->
+                Reset(dismissState = dismissState, action = onRead)
+            dismissState.isDismissed(DismissDirection.StartToEnd) ->
+                Reset(dismissState = dismissState, action = onBookmark)
         }
     }
 }
@@ -175,12 +193,15 @@ private fun Reset(dismissState: DismissState, action: () -> Unit) {
 }
 
 @Composable
-private fun Background(icon: ImageVector, alignment: Alignment, color: Color, text: String, contentColor: Color) {
+private fun Background(
+    icon: ImageVector,
+    alignment: Alignment,
+    color: Color,
+    text: String,
+    contentColor: Color
+) {
     Box(
-        Modifier
-            .fillMaxSize()
-            .background(color)
-            .padding(horizontal = Dp(20f)),
+        Modifier.fillMaxSize().background(color).padding(horizontal = Dp(20f)),
         contentAlignment = alignment,
     ) {
         Column(modifier = Modifier.align(alignment)) {
@@ -228,80 +249,96 @@ private fun ChapterInfo(
     val downloadProgress = remember(downloadProgressProvider()) { downloadProgressProvider() }
 
     val splitScanlator = remember {
-        ChapterUtil.getScanlators(scanlator).map {
-            SimpleDropDownItem.Action(
-                text = UiText.String(it),
-                onClick = { blockScanlator(it) },
-            )
-        }.toImmutableList()
+        ChapterUtil.getScanlators(scanlator)
+            .map {
+                SimpleDropDownItem.Action(
+                    text = UiText.String(it),
+                    onClick = { blockScanlator(it) },
+                )
+            }
+            .toImmutableList()
     }
 
     val haptic = LocalHapticFeedback.current
 
-    val lowContrast = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)
-    val (textColor, secondaryTextColor) = when (read) {
-        true -> lowContrast to lowContrast
-        false -> MaterialTheme.colorScheme.onSurface to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
-    }
+    val lowContrast =
+        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast)
+    val (textColor, secondaryTextColor) =
+        when (read) {
+            true -> lowContrast to lowContrast
+            false ->
+                MaterialTheme.colorScheme.onSurface to
+                    MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = NekoColors.mediumAlphaLowContrast
+                    )
+        }
 
-    val rowColor = when (dropdown) {
-        true -> themeColorState.rippleTheme.defaultColor().copy(alpha = themeColorState.rippleTheme.rippleAlpha().focusedAlpha)
-        false -> MaterialTheme.colorScheme.surface
-    }
+    val rowColor =
+        when (dropdown) {
+            true ->
+                themeColorState.rippleTheme
+                    .defaultColor()
+                    .copy(alpha = themeColorState.rippleTheme.rippleAlpha().focusedAlpha)
+            false -> MaterialTheme.colorScheme.surface
+        }
 
     SimpleDropdownMenu(
         expanded = dropdown,
         themeColorState = themeColorState,
         onDismiss = { dropdown = false },
-        dropDownItems = getDropDownItems(
-            showScanlator = scanlator.isNotBlank() && !isMerged,
-            showComments = !isMerged,
-            scanlators = splitScanlator,
-            onWebView = onWebView,
-            onComment = onComment,
-            markPrevious = markPrevious,
-        ),
+        dropDownItems =
+            getDropDownItems(
+                showScanlator = scanlator.isNotBlank() && !isMerged,
+                showComments = !isMerged,
+                scanlators = splitScanlator,
+                onWebView = onWebView,
+                onComment = onComment,
+                markPrevious = markPrevious,
+            ),
     )
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = rowColor)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    dropdown = !dropdown
-                },
-            )
-            .padding(start = 8.dp, top = 8.dp, bottom = 8.dp),
+        modifier =
+            Modifier.fillMaxWidth()
+                .background(color = rowColor)
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        dropdown = !dropdown
+                    },
+                )
+                .padding(start = Size.small, top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .fillMaxWidth(.8f),
+            modifier = Modifier.align(Alignment.CenterVertically).fillMaxWidth(.8f),
         ) {
-            val titleText = when (shouldHideChapterTitles) {
-                true -> stringResource(id = R.string.chapter_, decimalFormat.format(chapterNumber))
-                false -> title
-            }
+            val titleText =
+                when (shouldHideChapterTitles) {
+                    true ->
+                        stringResource(id = R.string.chapter_, decimalFormat.format(chapterNumber))
+                    false -> title
+                }
 
             Row {
                 if (bookmark) {
                     Icon(
                         imageVector = Icons.Filled.Bookmark,
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .align(Alignment.CenterVertically),
+                        modifier = Modifier.size(16.dp).align(Alignment.CenterVertically),
                         tint = themeColorState.buttonColor,
                     )
                     Gap(Size.tiny)
                 }
                 Text(
                     text = titleText,
-                    style = MaterialTheme.typography.bodyLarge.copy(color = textColor, fontWeight = FontWeight.Medium, letterSpacing = (-.6).sp),
+                    style =
+                        MaterialTheme.typography.bodyLarge.copy(
+                            color = textColor,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = (-.6).sp
+                        ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -336,22 +373,28 @@ private fun ChapterInfo(
                         true -> {
                             TimberKt.e { "Missing flag for $language" }
                             Text(
-                                text = "$language • ",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = secondaryTextColor,
-                                    fontWeight = FontWeight.Medium,
-                                    letterSpacing = (-.6).sp,
-                                ),
+                                text = "$language � ",
+                                style =
+                                    MaterialTheme.typography.bodyMedium.copy(
+                                        color = secondaryTextColor,
+                                        fontWeight = FontWeight.Medium,
+                                        letterSpacing = (-.6).sp,
+                                    ),
                             )
                         }
-
                         false -> {
-                            val painter = rememberDrawablePainter(drawable = AppCompatResources.getDrawable(LocalContext.current, iconRes))
+                            val painter =
+                                rememberDrawablePainter(
+                                    drawable =
+                                        AppCompatResources.getDrawable(
+                                            LocalContext.current,
+                                            iconRes
+                                        )
+                                )
                             Image(
                                 painter = painter,
-                                modifier = Modifier
-                                    .height(16.dp)
-                                    .clip(RoundedCornerShape(Size.tiny)),
+                                modifier =
+                                    Modifier.height(16.dp).clip(RoundedCornerShape(Size.tiny)),
                                 contentDescription = "flag",
                             )
                             Gap(Size.tiny)
@@ -359,12 +402,13 @@ private fun ChapterInfo(
                     }
                 }
                 Text(
-                    text = statuses.joinToString(" • "),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = secondaryTextColor,
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = (-.6).sp,
-                    ),
+                    text = statuses.joinToString(" � "),
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(
+                            color = secondaryTextColor,
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = (-.6).sp,
+                        ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -377,7 +421,7 @@ private fun ChapterInfo(
                 downloadState = downloadState,
                 downloadProgress = downloadProgress,
                 onDownload = onDownload
-            )
+                            )
     }
 }
 
@@ -390,24 +434,24 @@ private fun getDropDownItems(
     onComment: () -> Unit,
     markPrevious: (Boolean) -> Unit,
 ): ImmutableList<SimpleDropDownItem> {
-    return (
-        listOf(
+    return (listOf(
             SimpleDropDownItem.Action(
                 text = UiText.StringResource(R.string.open_in_webview),
                 onClick = { onWebView() },
             ),
             SimpleDropDownItem.Parent(
                 text = UiText.StringResource(R.string.mark_previous_as),
-                children = listOf(
-                    SimpleDropDownItem.Action(
-                        text = UiText.StringResource(R.string.read),
-                        onClick = { markPrevious(true) },
+                children =
+                    listOf(
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.read),
+                            onClick = { markPrevious(true) },
+                        ),
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.unread),
+                            onClick = { markPrevious(false) },
+                        ),
                     ),
-                    SimpleDropDownItem.Action(
-                        text = UiText.StringResource(R.string.unread),
-                        onClick = { markPrevious(false) },
-                    ),
-                ),
             ),
         ) +
             if (showScanlator) {
@@ -419,22 +463,22 @@ private fun getDropDownItems(
                 )
             } else {
                 emptyList()
-            }
-            + if (showComments) {
-            listOf(
-                SimpleDropDownItem.Action(
-                    text = UiText.StringResource(R.string.comments),
-                    onClick = onComment,
-                ),
-            )
-        } else {
-            emptyList()
-        }
-        ).toPersistentList()
+            } +
+            if (showComments) {
+                listOf(
+                    SimpleDropDownItem.Action(
+                        text = UiText.StringResource(R.string.comments),
+                        onClick = onComment,
+                    ),
+                )
+            } else {
+                emptyList()
+            })
+        .toPersistentList()
 }
 
-val decimalFormat = DecimalFormat(
-    "#.###",
-    DecimalFormatSymbols()
-        .apply { decimalSeparator = '.' },
-)
+val decimalFormat =
+    DecimalFormat(
+        "#.###",
+        DecimalFormatSymbols().apply { decimalSeparator = '.' },
+    )

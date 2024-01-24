@@ -53,6 +53,7 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun MangaDetailsHeader(
@@ -75,24 +76,29 @@ fun MangaDetailsHeader(
     informationActions: InformationActions,
     quickReadClick: () -> Unit = {},
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+    CompositionLocalProvider(
+        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors
+    ) {
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
-        val isExpanded = rememberSaveable(mangaState.value.inLibrary) {
-            when (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
-                true -> mutableStateOf(true)
-                false -> mutableStateOf(!mangaState.value.inLibrary)
-            }
-        }
-        val backdropHeight = when (isSearching) {
-            true -> (LocalConfiguration.current.screenHeightDp / 4).dp
-            false -> {
-                when (generalState.value.extraLargeBackdrop) {
-                    true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
-                    false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
+        val isExpanded =
+            rememberSaveable(mangaState.value.inLibrary) {
+                when (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
+                    true -> mutableStateOf(true)
+                    false -> mutableStateOf(!mangaState.value.inLibrary)
                 }
             }
-        }
+        val backdropHeight =
+            when (isSearching) {
+                true -> (LocalConfiguration.current.screenHeightDp / 4).dp
+                false -> {
+                    when (generalState.value.extraLargeBackdrop) {
+                        true -> (LocalConfiguration.current.screenHeightDp / 1.2).dp
+                        false -> (LocalConfiguration.current.screenHeightDp / 2.1).dp
+                    }
+                }
+            }
 
         Column {
             BoxWithConstraints {
@@ -100,22 +106,26 @@ fun MangaDetailsHeader(
                     themeColorState = themeColorState,
                     artworkProvider = { mangaState.value.currentArtwork },
                     showBackdropProvider = { generalState.value.themeBasedOffCovers },
-                    modifier = Modifier
-                        .animateContentSize()
-                        .fillMaxWidth()
-                        .requiredHeightIn(250.dp, maxOf(250.dp, backdropHeight)),
+                    modifier =
+                        Modifier.animateContentSize()
+                            .fillMaxWidth()
+                            .requiredHeightIn(250.dp, maxOf(250.dp, backdropHeight)),
                     generatePalette = generatePalette,
                 )
                 Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface),
+                    modifier =
+                        Modifier.align(Alignment.BottomStart)
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors =
+                                        listOf(
+                                            Color.Transparent,
+                                            MaterialTheme.colorScheme.surface
+                                        ),
+                                ),
                             ),
-                        ),
                 )
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
@@ -129,27 +139,37 @@ fun MangaDetailsHeader(
                         statusProvider = { mangaState.value.status },
                         isPornographicProvider = { mangaState.value.isPornographic },
                         missingChaptersProvider = { mangaState.value.missingChapters },
-                        estimatedMissingChapterProvider = { mangaState.value.estimatedMissingChapters },
-                        modifier = Modifier
-                            .statusBarsPadding()
-                            .padding(top = 70.dp),
+                        estimatedMissingChapterProvider = {
+                            mangaState.value.estimatedMissingChapters
+                        },
+                        modifier = Modifier.statusBarsPadding().padding(top = 70.dp),
                         isExpandedProvider = { isExpanded.value },
-                        showMergedIconProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes && !generalState.value.hideButtonText },
+                        showMergedIconProvider = {
+                            mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes &&
+                                !generalState.value.hideButtonText
+                        },
                         titleLongClick = informationActions.titleLongClick,
                         creatorCopyClick = informationActions.creatorCopy,
                         creatorSearchClick = informationActions.creatorSearch,
                     )
-                    AnimatedVisibility(visible = !isSearching, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
+                    AnimatedVisibility(
+                        visible = !isSearching,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
                         Column {
-
                             Gap(height = 16.dp)
                             ButtonBlock(
                                 hideButtonTextProvider = { generalState.value.hideButtonText },
                                 isInitializedProvider = { mangaState.value.initialized },
-                                isMergedProvider = { mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes },
+                                isMergedProvider = {
+                                    mangaState.value.isMerged is MergeConstants.IsMergedManga.Yes
+                                },
                                 inLibraryProvider = { mangaState.value.inLibrary },
                                 loggedIntoTrackersProvider = isLoggedIntoTrackersProvider,
-                                trackServiceCountProvider = { generalState.value.trackServiceCount },
+                                trackServiceCountProvider = {
+                                    generalState.value.trackServiceCount
+                                },
                                 themeColorState = themeColorState,
                                 favoriteClick = {
                                     if (!mangaState.value.inLibrary) {
@@ -158,7 +178,6 @@ fun MangaDetailsHeader(
                                         favoriteExpanded = true
                                     }
                                 },
-
                                 trackingClick = trackingClick,
                                 artworkClick = artworkClick,
                                 similarClick = similarClick,
@@ -179,13 +198,20 @@ fun MangaDetailsHeader(
                 }
             }
         }
-        AnimatedVisibility(visible = !isSearching, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
+        AnimatedVisibility(
+            visible = !isSearching,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
             Column {
-
                 if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
-                    QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
+                    QuickReadButton(
+                        { generalState.value.nextUnreadChapter },
+                        themeColorState,
+                        quickReadClick
+                    )
                 }
-                Gap(8.dp)
+                Gap(Size.tiny)
                 DescriptionBlock(
                     windowSizeClass = windowSizeClass,
                     titleProvider = { mangaState.value.currentTitle },
@@ -196,21 +222,22 @@ fun MangaDetailsHeader(
                     themeColorState = themeColorState,
                     isExpanded = isExpanded.value,
                     wrapAltTitles = generalState.value.wrapAltTitles,
-                    expandCollapseClick = {
-                        isExpanded.value = !isExpanded.value
-                    },
+                    expandCollapseClick = { isExpanded.value = !isExpanded.value },
                     genreSearch = descriptionActions.genreSearch,
                     genreSearchLibrary = descriptionActions.genreSearchLibrary,
                     altTitleClick = descriptionActions.altTitleClick,
                     altTitleResetClick = descriptionActions.altTitleResetClick,
                 )
                 if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
-                    QuickReadButton({ generalState.value.nextUnreadChapter }, themeColorState, quickReadClick)
-                    Gap(8.dp)
+                    QuickReadButton(
+                        { generalState.value.nextUnreadChapter },
+                        themeColorState,
+                        quickReadClick
+                    )
+                    Gap(Size.tiny)
                 }
             }
         }
-
     }
 }
 
@@ -221,38 +248,55 @@ private fun ColumnScope.QuickReadButton(
     quickReadClick: () -> Unit,
 ) {
     if (quickReadTextProvider().text.isNotEmpty() && quickReadTextProvider().id != null) {
-        Gap(8.dp)
-        CompositionLocalProvider(LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)) {
+        Gap(Size.tiny)
+        CompositionLocalProvider(
+            LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)
+        ) {
             ElevatedButton(
                 onClick = quickReadClick,
                 shape = RoundedCornerShape(35),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                modifier = Modifier.fillMaxWidth().padding(Size.small),
+                colors =
+                    ButtonDefaults.elevatedButtonColors(
+                        containerColor = themeColorState.buttonColor
+                    ),
             ) {
-                Text(text = stringResource(id = quickReadTextProvider().id!!, quickReadTextProvider().text), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.surface)
+                Text(
+                    text =
+                        stringResource(
+                            id = quickReadTextProvider().id!!,
+                            quickReadTextProvider().text
+                        ),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.surface
+                )
             }
         }
     }
 }
 
 @Composable
-private fun FavoriteDropDown(favoriteExpanded: Boolean, themeColorState: ThemeColorState, moveCategories: () -> Unit, toggleFavorite: () -> Unit, onDismiss: () -> Unit) {
+private fun FavoriteDropDown(
+    favoriteExpanded: Boolean,
+    themeColorState: ThemeColorState,
+    moveCategories: () -> Unit,
+    toggleFavorite: () -> Unit,
+    onDismiss: () -> Unit
+) {
     SimpleDropdownMenu(
         expanded = favoriteExpanded,
         themeColorState = themeColorState,
         onDismiss = onDismiss,
-        dropDownItems = persistentListOf(
-            SimpleDropDownItem.Action(
-                text = UiText.StringResource(R.string.remove_from_library),
-                onClick = { toggleFavorite() },
+        dropDownItems =
+            persistentListOf(
+                SimpleDropDownItem.Action(
+                    text = UiText.StringResource(R.string.remove_from_library),
+                    onClick = { toggleFavorite() },
+                ),
+                SimpleDropDownItem.Action(
+                    text = UiText.StringResource(R.string.edit_categories),
+                    onClick = { moveCategories() },
+                ),
             ),
-            SimpleDropDownItem.Action(
-                text = UiText.StringResource(R.string.edit_categories),
-                onClick = { moveCategories() },
-            ),
-        ),
-
-        )
+    )
 }

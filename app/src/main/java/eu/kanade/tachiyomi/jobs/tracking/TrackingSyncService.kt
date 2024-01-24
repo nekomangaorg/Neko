@@ -35,47 +35,68 @@ class TrackingSyncService {
         val autoAddTracker = preferences.autoAddTracker().get()
         val trackingCoordinator: TrackingCoordinator = Injekt.get()
 
-
         librayMangaList.forEach { manga ->
             updateNotification(manga.title, count++, librayMangaList.size)
 
             val tracks = db.getTracks(manga).executeOnIO()
 
-
             if (autoAddTracker.size > 1) {
                 val validContentRatings = preferences.autoTrackContentRatingSelections().get()
                 val contentRating = manga.getContentRating()
-                if (contentRating == null || validContentRatings.contains(contentRating.lowercase())) {
-                    autoAddTracker.map { it.toInt() }.map { autoAddTrackerId ->
-                        if (tracks.firstOrNull { it.sync_id == autoAddTrackerId } == null) {
-                            loggedServices
-                                .firstOrNull { it.id == autoAddTrackerId }?.let { trackService ->
-                                    scope.launchIO {
-                                        try {
-                                            val trackServiceItem = trackService.toTrackServiceItem()
-                                            val id = trackManager.getIdFromManga(trackServiceItem, manga)
-                                            if (id != null) {
-                                                val trackResult = trackingCoordinator.searchTrackerNonFlow("", trackManager.getService(trackService.id)!!.toTrackServiceItem(), manga, false)
-                                                when (trackResult) {
-                                                    is TrackingConstants.TrackSearchResult.Success -> {
-                                                        val trackSearchItem = trackResult.trackSearchResult[0]
-                                                        trackingCoordinator.registerTracking(TrackingConstants.TrackAndService(trackSearchItem.trackItem, trackServiceItem), manga.id!!)
+                if (
+                    contentRating == null || validContentRatings.contains(contentRating.lowercase())
+                ) {
+                    autoAddTracker
+                        .map { it.toInt() }
+                        .map { autoAddTrackerId ->
+                            if (tracks.firstOrNull { it.sync_id == autoAddTrackerId } == null) {
+                                loggedServices
+                                    .firstOrNull { it.id == autoAddTrackerId }
+                                    ?.let { trackService ->
+                                        scope.launchIO {
+                                            try {
+                                                val trackServiceItem =
+                                                    trackService.toTrackServiceItem()
+                                                val id =
+                                                    trackManager.getIdFromManga(
+                                                        trackServiceItem,
+                                                        manga
+                                                    )
+                                                if (id != null) {
+                                                    val trackResult =
+                                                        trackingCoordinator.searchTrackerNonFlow(
+                                                            "",
+                                                            trackManager
+                                                                .getService(trackService.id)!!
+                                                                .toTrackServiceItem(),
+                                                            manga,
+                                                            false
+                                                        )
+                                                    when (trackResult) {
+                                                        is TrackingConstants.TrackSearchResult.Success -> {
+                                                            val trackSearchItem =
+                                                                trackResult.trackSearchResult[0]
+                                                            trackingCoordinator.registerTracking(
+                                                                TrackingConstants.TrackAndService(
+                                                                    trackSearchItem.trackItem,
+                                                                    trackServiceItem
+                                                                ),
+                                                                manga.id!!
+                                                            )
+                                                        }
+                                                        else -> Unit
                                                     }
-
-                                                    else -> Unit
-
                                                 }
-                                            }
-                                        } catch (e: Exception) {
-                                            if (e !is CancellationException) {
-                                                TimberKt.e(e)
+                                            } catch (e: Exception) {
+                                                if (e !is CancellationException) {
+                                                    TimberKt.e(e)
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            delay(1.seconds)
+                                delay(1.seconds)
+                            }
                         }
-                    }
                 }
             }
 

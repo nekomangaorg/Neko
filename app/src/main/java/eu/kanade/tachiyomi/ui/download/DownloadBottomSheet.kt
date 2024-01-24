@@ -30,32 +30,31 @@ import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.toolbarHeight
 import uy.kohesive.injekt.injectLazy
 
-class DownloadBottomSheet @JvmOverloads constructor(
+class DownloadBottomSheet
+@JvmOverloads
+constructor(
     context: Context,
-    attrs: AttributeSet? =
-        null,
-) : LinearLayout(context, attrs),
+    attrs: AttributeSet? = null,
+) :
+    LinearLayout(context, attrs),
     DownloadAdapter.DownloadItemListener,
     FlexibleAdapter.OnActionStateListener {
     var controller: RecentsController? = null
     var sheetBehavior: BottomSheetBehavior<*>? = null
 
-    /**
-     * Adapter containing the active downloads.
-     */
+    /** Adapter containing the active downloads. */
     private var adapter: DownloadAdapter? = null
 
     private val presenter = DownloadBottomPresenter()
 
     val preferences: PreferencesHelper by injectLazy()
 
-    /**
-     * Whether the download queue is running or not.
-     */
+    /** Whether the download queue is running or not. */
     private var isRunning: Boolean = false
     private var activity: Activity? = null
 
     lateinit var binding: DownloadBottomSheetBinding
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         binding = DownloadBottomSheetBinding.bind(this)
@@ -82,9 +81,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
         val headerHeight = (activity as? MainActivity)?.toolbarHeight ?: 0
         binding.recyclerLayout.doOnApplyWindowInsetsCompat { v, windowInsets, _ ->
             v.updateLayoutParams<MarginLayoutParams> {
-                topMargin = windowInsets.getInsets(systemBars()).top +
-                    (controller.toolbarHeight ?: headerHeight) -
-                    binding.sheetLayout.height
+                topMargin =
+                    windowInsets.getInsets(systemBars()).top +
+                        (controller.toolbarHeight ?: headerHeight) - binding.sheetLayout.height
             }
         }
         binding.sheetLayout.setOnClickListener {
@@ -122,14 +121,15 @@ class DownloadBottomSheet @JvmOverloads constructor(
 
     private fun updateDLTitle() {
         val extCount = presenter.downloadQueue.firstOrNull()
-        binding.titleText.text = if (extCount != null) {
-            resources.getString(
-                R.string.downloading_,
-                extCount.chapter.name,
-            )
-        } else {
-            ""
-        }
+        binding.titleText.text =
+            if (extCount != null) {
+                resources.getString(
+                    R.string.downloading_,
+                    extCount.chapter.name,
+                )
+            } else {
+                ""
+            }
     }
 
     /**
@@ -201,9 +201,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         return binding.dlRecycler.findViewHolderForItemId(download.chapter.id!!) as? DownloadHolder
     }
 
-    /**
-     * Set information view when queue is empty
-     */
+    /** Set information view when queue is empty */
     private fun setInformationView() {
         updateDLTitle()
         setBottomSheet()
@@ -228,8 +226,11 @@ class DownloadBottomSheet @JvmOverloads constructor(
     }
 
     private fun updateFab() {
-        binding.downloadFab.text = context.getString(if (isRunning) R.string.pause else R.string.resume)
-        binding.downloadFab.setIconResource(if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp)
+        binding.downloadFab.text =
+            context.getString(if (isRunning) R.string.pause else R.string.resume)
+        binding.downloadFab.setIconResource(
+            if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp
+        )
     }
 
     fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -239,26 +240,32 @@ class DownloadBottomSheet @JvmOverloads constructor(
                 DownloadService.stop(context)
                 presenter.clearQueue()
             }
-            R.id.newest, R.id.oldest -> {
+            R.id.newest,
+            R.id.oldest -> {
                 reorderQueue({ it.download.chapter.date_upload }, item.itemId == R.id.newest)
             }
-            R.id.asc, R.id.desc -> {
+            R.id.asc,
+            R.id.desc -> {
                 reorderQueue({ it.download.chapter.chapter_number }, item.itemId == R.id.desc)
             }
         }
         return true
     }
 
-    private fun <R : Comparable<R>> reorderQueue(selector: (DownloadItem) -> R, reverse: Boolean = false) {
+    private fun <R : Comparable<R>> reorderQueue(
+        selector: (DownloadItem) -> R,
+        reverse: Boolean = false
+    ) {
         val adapter = adapter ?: return
         val newDownloads = mutableListOf<Download>()
         adapter.headerItems.forEach { headerItem ->
             headerItem as DownloadHeaderItem
-            headerItem.subItems = headerItem.subItems.sortedBy(selector).toMutableList().apply {
-                if (reverse) {
-                    reverse()
+            headerItem.subItems =
+                headerItem.subItems.sortedBy(selector).toMutableList().apply {
+                    if (reverse) {
+                        reverse()
+                    }
                 }
-            }
             newDownloads.addAll(headerItem.subItems.map { it.download })
         }
         presenter.reorder(newDownloads)
@@ -293,11 +300,10 @@ class DownloadBottomSheet @JvmOverloads constructor(
     override fun onItemReleased(position: Int) {
         controller?.isDragging = false
         val adapter = adapter ?: return
-        val downloads = adapter.headerItems.flatMap { header ->
-            adapter.getSectionItems(header).map { item ->
-                (item as DownloadItem).download
+        val downloads =
+            adapter.headerItems.flatMap { header ->
+                adapter.getSectionItems(header).map { item -> (item as DownloadItem).download }
             }
-        }
         presenter.reorder(downloads)
     }
 
@@ -313,11 +319,10 @@ class DownloadBottomSheet @JvmOverloads constructor(
 
         adapter?.removeItem(position)
         val adapter = adapter ?: return
-        val downloads = adapter.headerItems.flatMap { header ->
-            adapter.getSectionItems(header).map { item ->
-                (item as DownloadItem).download
+        val downloads =
+            adapter.headerItems.flatMap { header ->
+                adapter.getSectionItems(header).map { item -> (item as DownloadItem).download }
             }
-        }
         presenter.reorder(downloads)
         controller?.updateChapterDownload(download, false)
     }
@@ -332,7 +337,8 @@ class DownloadBottomSheet @JvmOverloads constructor(
         val item = adapter?.getItem(position) ?: return
         if (item is DownloadItem) {
             when (menuItem.itemId) {
-                R.id.move_to_top, R.id.move_to_bottom -> {
+                R.id.move_to_top,
+                R.id.move_to_bottom -> {
                     val headerItems = adapter?.headerItems ?: return
                     val newDownloads = mutableListOf<Download>()
                     headerItems.forEach { headerItem ->
@@ -350,18 +356,22 @@ class DownloadBottomSheet @JvmOverloads constructor(
                     presenter.reorder(newDownloads)
                 }
                 R.id.move_to_top_series -> {
-                    val (selectedSeries, otherSeries) = adapter?.currentItems
-                        ?.filterIsInstance<DownloadItem>()
-                        ?.map(DownloadItem::download)
-                        ?.partition { item.download.manga.id == it.manga.id }
-                        ?: Pair(listOf<Download>(), listOf<Download>())
+                    val (selectedSeries, otherSeries) =
+                        adapter
+                            ?.currentItems
+                            ?.filterIsInstance<DownloadItem>()
+                            ?.map(DownloadItem::download)
+                            ?.partition { item.download.manga.id == it.manga.id }
+                            ?: Pair(listOf<Download>(), listOf<Download>())
                     presenter.reorder(selectedSeries + otherSeries)
                 }
                 R.id.cancel_series -> {
-                    val allDownloadsForSeries = adapter?.currentItems
-                        ?.filterIsInstance<DownloadItem>()
-                        ?.filter { item.download.manga.id == it.download.manga.id }
-                        ?.map(DownloadItem::download)
+                    val allDownloadsForSeries =
+                        adapter
+                            ?.currentItems
+                            ?.filterIsInstance<DownloadItem>()
+                            ?.filter { item.download.manga.id == it.download.manga.id }
+                            ?.map(DownloadItem::download)
                     if (!allDownloadsForSeries.isNullOrEmpty()) {
                         presenter.cancelDownloads(allDownloadsForSeries)
                     }

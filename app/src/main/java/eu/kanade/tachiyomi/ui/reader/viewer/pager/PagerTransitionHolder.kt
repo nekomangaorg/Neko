@@ -18,35 +18,30 @@ import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 
-/**
- * View of the ViewPager that contains a chapter transition.
- */
+/** View of the ViewPager that contains a chapter transition. */
 @SuppressLint("ViewConstructor")
 class PagerTransitionHolder(
     val viewer: PagerViewer,
     val transition: ChapterTransition,
 ) : LinearLayout(viewer.activity), ViewPagerAdapter.PositionableView {
 
-    /**
-     * Item that identifies this view. Needed by the adapter to not recreate views.
-     */
+    /** Item that identifies this view. Needed by the adapter to not recreate views. */
     override val item: Any
         get() = transition
 
-    /**
-     * Subscription for status changes of the transition page.
-     */
+    /** Subscription for status changes of the transition page. */
     private var statusSubscription: Subscription? = null
 
     /**
      * View container of the current status of the transition page. Child views will be added
      * dynamically.
      */
-    private var pagesContainer = LinearLayout(context).apply {
-        layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-        orientation = VERTICAL
-        gravity = Gravity.CENTER
-    }
+    private var pagesContainer =
+        LinearLayout(context).apply {
+            layoutParams = LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+            orientation = VERTICAL
+            gravity = Gravity.CENTER
+        }
 
     init {
         orientation = VERTICAL
@@ -57,13 +52,15 @@ class PagerTransitionHolder(
         addView(transitionView)
         addView(pagesContainer)
 
-        transitionView.bind(transition, viewer.downloadManager, viewer.activity.viewModel.state.value.manga)
+        transitionView.bind(
+            transition,
+            viewer.downloadManager,
+            viewer.activity.viewModel.state.value.manga
+        )
         transition.to?.let { observeStatus(it) }
     }
 
-    /**
-     * Called when this view is detached from the window. Unsubscribes any active subscription.
-     */
+    /** Called when this view is detached from the window. Unsubscribes any active subscription. */
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         statusSubscription?.unsubscribe()
@@ -76,9 +73,8 @@ class PagerTransitionHolder(
      */
     private fun observeStatus(chapter: ReaderChapter) {
         statusSubscription?.unsubscribe()
-        statusSubscription = chapter.stateObserver
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { state ->
+        statusSubscription =
+            chapter.stateObserver.observeOn(AndroidSchedulers.mainThread()).subscribe { state ->
                 pagesContainer.removeAllViews()
                 when (state) {
                     is ReaderChapter.State.Wait -> {}
@@ -89,55 +85,50 @@ class PagerTransitionHolder(
             }
     }
 
-    /**
-     * Sets the loading state on the pages container.
-     */
+    /** Sets the loading state on the pages container. */
     private fun setLoading() {
         val progress = ProgressBar(context, null, android.R.attr.progressBarStyle)
 
-        val textView = AppCompatTextView(context).apply {
-            wrapContent()
-            setText(R.string.loading_pages)
-        }
+        val textView =
+            AppCompatTextView(context).apply {
+                wrapContent()
+                setText(R.string.loading_pages)
+            }
 
         pagesContainer.addView(progress)
         pagesContainer.addView(textView)
     }
 
-    /**
-     * Sets the loaded state on the pages container.
-     */
+    /** Sets the loaded state on the pages container. */
     private fun setLoaded() {
         // No additional view is added
     }
 
-    /**
-     * Sets the error state on the pages container.
-     */
+    /** Sets the error state on the pages container. */
     private fun setError(error: Throwable) {
-        val textView = AppCompatTextView(context).apply {
-            wrapContent()
-            text = context.getString(R.string.failed_to_load_pages_, error.message)
-        }
+        val textView =
+            AppCompatTextView(context).apply {
+                wrapContent()
+                text = context.getString(R.string.failed_to_load_pages_, error.message)
+            }
 
-        val retryBtn = PagerButton(context, viewer).apply {
-            wrapContent()
-            setText(R.string.retry)
-            setOnClickListener {
-                val toChapter = transition.to
-                if (toChapter != null) {
-                    viewer.activity.requestPreloadChapter(toChapter)
+        val retryBtn =
+            PagerButton(context, viewer).apply {
+                wrapContent()
+                setText(R.string.retry)
+                setOnClickListener {
+                    val toChapter = transition.to
+                    if (toChapter != null) {
+                        viewer.activity.requestPreloadChapter(toChapter)
+                    }
                 }
             }
-        }
 
         pagesContainer.addView(textView)
         pagesContainer.addView(retryBtn)
     }
 
-    /**
-     * Extension method to set layout params to wrap content on this view.
-     */
+    /** Extension method to set layout params to wrap content on this view. */
     private fun View.wrapContent() {
         layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
     }

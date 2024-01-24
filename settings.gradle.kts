@@ -1,12 +1,4 @@
 pluginManagement {
-    resolutionStrategy {
-        eachPlugin {
-            val regex = "com.android.(library|application)".toRegex()
-            if (regex matches requested.id.id) {
-                useModule("com.android.tools.build:gradle:${requested.version}")
-            }
-        }
-    }
     repositories {
         gradlePluginPortal()
         google()
@@ -33,6 +25,8 @@ dependencyResolutionManagement {
         maven { setUrl("https://jitpack.io") }
     }
 }
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "Neko"
 include(":app")

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.preference
 
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
@@ -9,6 +8,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
@@ -45,41 +45,61 @@ operator fun <T> Preference<Set<T>>.minusAssign(item: Collection<T>) {
 
 class PreferencesHelper(val context: Context, val preferenceStore: PreferenceStore) {
 
-    private val defaultFolder = context.getString(R.string.app_name_neko) + when (BuildConfig.DEBUG) {
-        true -> "_DEBUG"
-        false -> ""
-    }
+    private val defaultFolder =
+        context.getString(R.string.app_name_neko) +
+            when (BuildConfig.DEBUG) {
+                true -> "_DEBUG"
+                false -> ""
+            }
 
-    private val defaultDownloadsDir = Uri.fromFile(
-        File(
-            Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                defaultFolder,
-            "downloads",
-        ),
-    )
+    private val defaultDownloadsDir =
+        Uri.fromFile(
+            File(
+                Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator +
+                    defaultFolder,
+                "downloads",
+            ),
+        )
 
-    private val defaultBackupDir = Uri.fromFile(
-        File(
-            Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                defaultFolder,
-            "backup",
-        ),
-    )
+    private val defaultBackupDir =
+        Uri.fromFile(
+            File(
+                Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator +
+                    defaultFolder,
+                "backup",
+            ),
+        )
 
     fun getInt(key: String, default: Int) = this.preferenceStore.getInt(key, default)
-    fun getStringPref(key: String, default: String = "") = this.preferenceStore.getString(key, default)
+
+    fun getStringPref(key: String, default: String = "") =
+        this.preferenceStore.getString(key, default)
 
     fun startingTab() = this.preferenceStore.getInt(Keys.startingTab, 0)
+
     fun backReturnsToStart() = this.preferenceStore.getBoolean(Keys.backToStart, true)
 
-    fun hasDeniedA11FilePermission() = this.preferenceStore.getBoolean(Keys.deniedA11FilePermission, false)
+    fun hasDeniedA11FilePermission() =
+        this.preferenceStore.getBoolean(Keys.deniedA11FilePermission, false)
 
-    fun nightMode() = this.preferenceStore.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    fun nightMode() =
+        this.preferenceStore.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
     private val supportsDynamic = DynamicColors.isDynamicColorAvailable()
-    fun lightTheme() = this.preferenceStore.getEnum(Keys.lightTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
 
-    fun darkTheme() = this.preferenceStore.getEnum(Keys.darkTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
+    fun lightTheme() =
+        this.preferenceStore.getEnum(
+            Keys.lightTheme,
+            if (supportsDynamic) Themes.MONET else Themes.DEFAULT
+        )
+
+    fun darkTheme() =
+        this.preferenceStore.getEnum(
+            Keys.darkTheme,
+            if (supportsDynamic) Themes.MONET else Themes.DEFAULT
+        )
 
     fun showNavigationOverlayNewUser() =
         this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUser, true)
@@ -91,7 +111,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun trackMarkedAsRead() = this.preferenceStore.getBoolean(Keys.trackMarkedAsRead, false)
 
-    fun trackingsToAddOnline() = this.preferenceStore.getStringSet(Keys.trackingsToAddOnline, emptySet())
+    fun trackingsToAddOnline() =
+        this.preferenceStore.getStringSet(Keys.trackingsToAddOnline, emptySet())
 
     fun lastVersionCode() = this.preferenceStore.getInt("last_version_code", 0)
 
@@ -99,9 +120,11 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun browseShowLibrary() = this.preferenceStore.getBoolean(Keys.catalogueShowLibrary, true)
 
-    fun sourceUsername(source: Source) = this.preferenceStore.getString(Keys.sourceUsername(source.id), "")
+    fun sourceUsername(source: Source) =
+        this.preferenceStore.getString(Keys.sourceUsername(source.id), "")
 
-    fun sourcePassword(source: Source) = this.preferenceStore.getString(Keys.sourcePassword(source.id), "")
+    fun sourcePassword(source: Source) =
+        this.preferenceStore.getString(Keys.sourcePassword(source.id), "")
 
     fun sourceUrl(source: Source) = this.preferenceStore.getString(Keys.sourceUrl(source.id), "")
 
@@ -121,9 +144,11 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
         this.preferenceStore.getString(Keys.sourceUrl(source.id)).set(url)
     }
 
-    fun trackUsername(sync: TrackService) = this.preferenceStore.getString(Keys.trackUsername(sync.id))
+    fun trackUsername(sync: TrackService) =
+        this.preferenceStore.getString(Keys.trackUsername(sync.id))
 
-    fun trackPassword(sync: TrackService) = this.preferenceStore.getString(Keys.trackPassword(sync.id))
+    fun trackPassword(sync: TrackService) =
+        this.preferenceStore.getString(Keys.trackPassword(sync.id))
 
     fun setTrackCredentials(sync: TrackService, username: String, password: String) {
         this.preferenceStore.getString(Keys.trackUsername(sync.id)).set(username)
@@ -134,9 +159,12 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun anilistScoreType() = this.preferenceStore.getString("anilist_score_type", "POINT_10")
 
-    fun backupsDirectory() = this.preferenceStore.getString(Keys.backupDirectory, defaultBackupDir.toString())
+    fun backupsDirectory() =
+        this.preferenceStore.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun dateFormat(format: String = this.preferenceStore.getString(Keys.dateFormat, "").get()): DateFormat =
+    fun dateFormat(
+        format: String = this.preferenceStore.getString(Keys.dateFormat, "").get()
+    ): DateFormat =
         when (format) {
             "" -> DateFormat.getDateInstance(DateFormat.SHORT)
             else -> SimpleDateFormat(format, Locale.getDefault())
@@ -155,15 +183,18 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)
 
-    fun removeAfterMarkedAsRead() = this.preferenceStore.getBoolean(Keys.removeAfterMarkedAsRead, false)
+    fun removeAfterMarkedAsRead() =
+        this.preferenceStore.getBoolean(Keys.removeAfterMarkedAsRead, false)
 
     fun saveChaptersAsCBZ() = this.preferenceStore.getBoolean("save_chapter_as_cbz", true)
 
     fun downloadNewChapters() = this.preferenceStore.getBoolean("download_new")
 
-    fun downloadNewChaptersInCategories() = this.preferenceStore.getStringSet("download_new_categories")
+    fun downloadNewChaptersInCategories() =
+        this.preferenceStore.getStringSet("download_new_categories")
 
-    fun excludeCategoriesInDownloadNew() = this.preferenceStore.getStringSet("download_new_categories_exclude")
+    fun excludeCategoriesInDownloadNew() =
+        this.preferenceStore.getStringSet("download_new_categories_exclude")
 
     fun langsToShow() = this.preferenceStore.getString(Keys.langToShow, "en")
 
@@ -178,7 +209,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun showRecentsDownloads() =
         this.preferenceStore.getEnum(Keys.showDLsInRecents, RecentMangaAdapter.ShowRecentsDLs.All)
 
-    fun showRecentsRemHistory() = this.preferenceStore.getBoolean(Keys.showRemHistoryInRecents, true)
+    fun showRecentsRemHistory() =
+        this.preferenceStore.getBoolean(Keys.showRemHistoryInRecents, true)
 
     fun showReadInAllRecents() = this.preferenceStore.getBoolean(Keys.showReadInAllRecents, false)
 
@@ -201,32 +233,39 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     // Tutorial preferences
     fun shownFilterTutorial() = this.preferenceStore.getBoolean("shown_filter_tutorial", false)
 
-    fun shownLongPressCategoryTutorial() = this.preferenceStore.getBoolean("shown_long_press_category")
+    fun shownLongPressCategoryTutorial() =
+        this.preferenceStore.getBoolean("shown_long_press_category")
 
     fun shownHopperSwipeTutorial() = this.preferenceStore.getBoolean("shown_hopper_swipe")
 
     fun shownChapterSwipeTutorial() = this.preferenceStore.getBoolean("shown_swipe_tutorial", false)
 
-    fun shownDownloadQueueTutorial() = this.preferenceStore.getBoolean("shown_download_queue", false)
+    fun shownDownloadQueueTutorial() =
+        this.preferenceStore.getBoolean("shown_download_queue", false)
 
-    fun shownDownloadSwipeTutorial() = this.preferenceStore.getBoolean("shown_download_tutorial", false)
+    fun shownDownloadSwipeTutorial() =
+        this.preferenceStore.getBoolean("shown_download_tutorial", false)
 
-    fun hideBottomNavOnScroll() = this.preferenceStore.getBoolean("false_key") // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
+    fun hideBottomNavOnScroll() =
+        this.preferenceStore.getBoolean(
+            "false_key"
+        ) // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
 
     fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
 
     fun useLargeToolbar() = this.preferenceStore.getBoolean("use_large_toolbar", false)
 
     fun showSeriesInShortcuts() = this.preferenceStore.getBoolean(Keys.showSeriesInShortcuts, true)
-    fun openChapterInShortcuts() = this.preferenceStore.getBoolean(Keys.openChapterInShortcuts, true)
+
+    fun openChapterInShortcuts() =
+        this.preferenceStore.getBoolean(Keys.openChapterInShortcuts, true)
 
     fun sideNavMode() = this.preferenceStore.getInt(Keys.sideNavMode, 0)
 
     fun appShouldAutoUpdate() =
         this.preferenceStore.getInt(Keys.shouldAutoUpdate, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
 
-    fun blockedScanlators() =
-        this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
+    fun blockedScanlators() = this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
 
     fun dataSaver() = this.preferenceStore.getBoolean(Keys.dataSaver, false)
 
@@ -234,19 +273,34 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun usePort443Only() = this.preferenceStore.getBoolean(Keys.enablePort443Only, false)
 
-    fun showContentRatingFilter() = this.preferenceStore.getBoolean(Keys.showContentRatingFilter, true)
+    fun showContentRatingFilter() =
+        this.preferenceStore.getBoolean(Keys.showContentRatingFilter, true)
 
-    fun addToLibraryAsPlannedToRead() = this.preferenceStore.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
+    fun addToLibraryAsPlannedToRead() =
+        this.preferenceStore.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
-    fun contentRatingSelections() = this.preferenceStore.getStringSet(Keys.contentRating, setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive))
+    fun contentRatingSelections() =
+        this.preferenceStore.getStringSet(
+            Keys.contentRating,
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
+        )
 
     fun autoTrackContentRatingSelections() =
         this.preferenceStore.getStringSet(
             Keys.autoTrackContentRating,
-            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic),
+            setOf(
+                MdConstants.ContentRating.safe,
+                MdConstants.ContentRating.suggestive,
+                MdConstants.ContentRating.erotica,
+                MdConstants.ContentRating.pornographic
+            ),
         )
 
-    fun autoAddTracker() = this.preferenceStore.getStringSet(Keys.autoAddTracker, setOf(TrackManager.MDLIST.toString()))
+    fun autoAddTracker() =
+        this.preferenceStore.getStringSet(
+            Keys.autoAddTracker,
+            setOf(TrackManager.MDLIST.toString())
+        )
 
     fun setAutoAddTracker(trackersToAutoAdd: Set<String>) {
         autoAddTracker().set(trackersToAutoAdd)
@@ -264,11 +318,12 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     }
 
     fun setTokens(refresh: String, session: String) {
-        val time = if (refresh.isBlank() && session.isBlank()) {
-            0
-        } else {
-            System.currentTimeMillis()
-        }
+        val time =
+            if (refresh.isBlank() && session.isBlank()) {
+                0
+            } else {
+                System.currentTimeMillis()
+            }
 
         sessionToken().set(session)
         refreshToken().set(refresh)
@@ -276,6 +331,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     }
 
     fun lastRefreshTime() = this.preferenceStore.getLong(Keys.lastRefreshTokenTime, 0)
+
     fun readingSync() = this.preferenceStore.getBoolean(Keys.readingSync, false)
 
     fun mangadexSyncToLibraryIndexes() =
@@ -294,7 +350,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
                 this.preferenceStore.getString(Keys.mangadexCodeVerifier).set(newCodeVerifier)
                 this.preferenceStore.getString(Keys.mangadexCodeVerifier)
             }
-
         }
     }
 }

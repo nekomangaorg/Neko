@@ -5,20 +5,29 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.next
 
-enum class ReadingModeType(val prefValue: Int, @StringRes val stringRes: Int, @DrawableRes val iconRes: Int) {
+enum class ReadingModeType(
+    val prefValue: Int,
+    @StringRes val stringRes: Int,
+    @DrawableRes val iconRes: Int
+) {
     DEFAULT(0, R.string.default_value, R.drawable.ic_reader_default_24dp),
     LEFT_TO_RIGHT(1, R.string.left_to_right_viewer, R.drawable.ic_reader_ltr_24dp),
     RIGHT_TO_LEFT(2, R.string.right_to_left_viewer, R.drawable.ic_reader_rtl_24dp),
     VERTICAL(3, R.string.vertical_viewer, R.drawable.ic_reader_vertical_24dp),
     WEBTOON(4, R.string.webtoon, R.drawable.ic_reader_webtoon_24dp),
-    CONTINUOUS_VERTICAL(5, R.string.continuous_vertical, R.drawable.ic_reader_continuous_vertical_24dp),
+    CONTINUOUS_VERTICAL(
+        5,
+        R.string.continuous_vertical,
+        R.drawable.ic_reader_continuous_vertical_24dp
+    ),
     ;
 
-    @Suppress("RemoveRedundantQualifierName")
-    val flagValue = prefValue shl ReadingModeType.SHIFT
+    @Suppress("RemoveRedundantQualifierName") val flagValue = prefValue shl ReadingModeType.SHIFT
 
     companion object {
-        fun fromPreference(preference: Int): ReadingModeType = values().find { it.flagValue == preference } ?: DEFAULT
+        fun fromPreference(preference: Int): ReadingModeType =
+            values().find { it.flagValue == preference } ?: DEFAULT
+
         private const val SHIFT = 0x00000000
         const val MASK = 7 shl SHIFT
 
@@ -37,6 +46,7 @@ enum class ReadingModeType(val prefValue: Int, @StringRes val stringRes: Int, @D
             return mode == WEBTOON || mode == CONTINUOUS_VERTICAL
         }
 
-        fun fromSpinner(position: Int?) = values().find { value -> value.prefValue == position } ?: DEFAULT
+        fun fromSpinner(position: Int?) =
+            values().find { value -> value.prefValue == position } ?: DEFAULT
     }
 }

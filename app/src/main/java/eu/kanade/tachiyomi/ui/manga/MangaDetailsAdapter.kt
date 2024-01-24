@@ -20,11 +20,11 @@ class MangaDetailsAdapter : BaseChapterAdapter<IFlexible<*>>(null) {
 
     var items: List<ChapterItem> = emptyList()
 
-    val decimalFormat = DecimalFormat(
-        "#.###",
-        DecimalFormatSymbols()
-            .apply { decimalSeparator = '.' },
-    )
+    val decimalFormat =
+        DecimalFormat(
+            "#.###",
+            DecimalFormatSymbols().apply { decimalSeparator = '.' },
+        )
 
     fun setChapters(items: List<ChapterItem>?) {
         this.items = items ?: emptyList()
@@ -46,8 +46,7 @@ class MangaDetailsAdapter : BaseChapterAdapter<IFlexible<*>>(null) {
         } else {
             updateDataSet(
                 items.filter {
-                    it.name.contains(s, true) ||
-                        it.scanlator?.contains(s, true) == true
+                    it.name.contains(s, true) || it.scanlator?.contains(s, true) == true
                 },
             )
         }

@@ -31,6 +31,7 @@ class MangaShortcutManager(
 ) {
 
     val context: Context = preferences.context
+
     fun updateShortcuts() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
             if (!preferences.showSeriesInShortcuts().get()) {
@@ -41,11 +42,12 @@ class MangaShortcutManager(
             GlobalScope.launchIO {
                 val shortcutManager = context.getSystemService(ShortcutManager::class.java)
 
-                val recentManga = if (preferences.showSeriesInShortcuts().get()) {
-                    RecentsPresenter.getRecentManga()
-                } else {
-                    emptyList()
-                }
+                val recentManga =
+                    if (preferences.showSeriesInShortcuts().get()) {
+                        RecentsPresenter.getRecentManga()
+                    } else {
+                        emptyList()
+                    }
 
                 val recents =
                     (recentManga.take(shortcutManager.maxShortcutCountPerActivity))
@@ -53,43 +55,52 @@ class MangaShortcutManager(
                         .map { it.first }
                         .take(shortcutManager.maxShortcutCountPerActivity)
 
-                val shortcuts = recents.map { item ->
-                    val request = ImageRequest.Builder(context).data(item).build()
-                    val bitmap = (
-                        Coil.imageLoader(context)
-                            .execute(request).drawable as? BitmapDrawable
-                        )?.bitmap
+                val shortcuts =
+                    recents.map { item ->
+                        val request = ImageRequest.Builder(context).data(item).build()
+                        val bitmap =
+                            (Coil.imageLoader(context).execute(request).drawable as? BitmapDrawable)
+                                ?.bitmap
 
-                    ShortcutInfo.Builder(
-                        context,
-                        "Manga-${item.id?.toString() ?: item.title}",
-                    )
-                        .setShortLabel(
-                            item.title.takeUnless { it.isBlank() }
-                                ?: context.getString(R.string.manga),
-                        )
-                        .setLongLabel(
-                            item.title.takeUnless { it.isBlank() }
-                                ?: context.getString(R.string.manga),
-                        )
-                        .setIcon(
-                            if (bitmap != null) if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                Icon.createWithAdaptiveBitmap(bitmap.toSquare())
-                            } else {
-                                Icon.createWithBitmap(bitmap)
-                            }
-                            else {
-                                Icon.createWithResource(context, R.drawable.ic_book_24dp)
-                            },
-                        )
-                        .setIntent(
-                            SearchActivity.openMangaIntent(context, item.id, true)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
-                        )
-                        .build()
+                        ShortcutInfo.Builder(
+                                context,
+                                "Manga-${item.id?.toString() ?: item.title}",
+                            )
+                            .setShortLabel(
+                                item.title.takeUnless { it.isBlank() }
+                                    ?: context.getString(R.string.manga),
+                            )
+                            .setLongLabel(
+                                item.title.takeUnless { it.isBlank() }
+                                    ?: context.getString(R.string.manga),
+                            )
+                            .setIcon(
+                                if (bitmap != null)
+                                    if (
+                                        android.os.Build.VERSION.SDK_INT >=
+                                            android.os.Build.VERSION_CODES.O
+                                    ) {
+                                        Icon.createWithAdaptiveBitmap(bitmap.toSquare())
+                                    } else {
+                                        Icon.createWithBitmap(bitmap)
+                                    }
+                                else {
+                                    Icon.createWithResource(context, R.drawable.ic_book_24dp)
+                                },
+                            )
+                            .setIntent(
+                                SearchActivity.openMangaIntent(context, item.id, true)
+                                    .addFlags(
+                                        Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                            Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                    ),
+                            )
+                            .build()
+                    }
+
+                TimberKt.d {
+                    "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}"
                 }
-
-                TimberKt.d { "Shortcuts: ${shortcuts.joinToString(", ") { it.longLabel ?: "n/a" }}" }
                 shortcutManager.dynamicShortcuts = shortcuts
             }
         }

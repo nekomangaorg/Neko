@@ -54,9 +54,6 @@ enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int)
     ;
 
     companion object {
-        fun fromIsoCode(isoCode: String): MdLang? =
-            values().firstOrNull {
-                it.lang == isoCode
-            }
+        fun fromIsoCode(isoCode: String): MdLang? = values().firstOrNull { it.lang == isoCode }
     }
 }

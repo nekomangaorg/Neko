@@ -34,9 +34,7 @@ class DownloadService : Service() {
 
     companion object {
 
-        /**
-         * Relay used to know when the service is running.
-         */
+        /** Relay used to know when the service is running. */
         val runningRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
 
         private val listeners = mutableSetOf<DownloadServiceListener>()
@@ -94,52 +92,43 @@ class DownloadService : Service() {
         private const val STOP_REASON_NO_INTERNET = 2
     }
 
-    /**
-     * Download manager.
-     */
+    /** Download manager. */
     private val downloadManager: DownloadManager by injectLazy()
 
-    /**
-     * Preferences helper.
-     */
+    /** Preferences helper. */
     private val preferences: PreferencesHelper by injectLazy()
 
-    /**
-     * Wake lock to prevent the device to enter sleep mode.
-     */
+    /** Wake lock to prevent the device to enter sleep mode. */
     private lateinit var wakeLock: PowerManager.WakeLock
 
-    /**
-     * Subscriptions to store while the service is running.
-     */
+    /** Subscriptions to store while the service is running. */
     private lateinit var subscriptions: CompositeSubscription
 
     private var stopReason: Int? = null
 
-    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) {
-            onNetworkStateChanged()
+    private val networkCallback =
+        object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                onNetworkStateChanged()
+            }
+
+            override fun onLost(network: Network) {
+                onNetworkStateChanged()
+            }
+
+            override fun onCapabilitiesChanged(
+                network: Network,
+                networkCapabilities: NetworkCapabilities,
+            ) {
+                onNetworkStateChanged()
+            }
+
+            override fun onUnavailable() {
+                onNetworkStateChanged()
+            }
         }
 
-        override fun onLost(network: Network) {
-            onNetworkStateChanged()
-        }
-
-        override fun onCapabilitiesChanged(
-            network: Network,
-            networkCapabilities: NetworkCapabilities,
-        ) {
-            onNetworkStateChanged()
-        }
-
-        override fun onUnavailable() {
-            onNetworkStateChanged()
-        }
-    }
-
-    /**
-     * Called when the service is created.
-     */
+    /** Called when the service is created. */
     override fun onCreate() {
         super.onCreate()
         startForeground(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS, getPlaceholderNotification())
@@ -150,9 +139,7 @@ class DownloadService : Service() {
         listenNetworkChanges()
     }
 
-    /**
-     * Called when the service is destroyed.
-     */
+    /** Called when the service is destroyed. */
     override fun onDestroy() {
         runningRelay.call(false)
         subscriptions.unsubscribe()
@@ -169,16 +156,12 @@ class DownloadService : Service() {
         super.onDestroy()
     }
 
-    /**
-     * Not used.
-     */
+    /** Not used. */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         return START_NOT_STICKY
     }
 
-    /**
-     * Not used.
-     */
+    /** Not used. */
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
@@ -195,10 +178,7 @@ class DownloadService : Service() {
         return
     }
 
-    /**
-     * Called when the network state changes.
-     *
-     */
+    /** Called when the network state changes. */
     private fun onNetworkStateChanged() {
         val manager = connectivityManager
         val networkCapabilities = manager.getNetworkCapabilities(manager.activeNetwork)
@@ -217,31 +197,26 @@ class DownloadService : Service() {
         }
     }
 
-    /**
-     * Listens to downloader status. Enables or disables the wake lock depending on the status.
-     */
+    /** Listens to downloader status. Enables or disables the wake lock depending on the status. */
     private fun listenDownloaderState() {
-        subscriptions += downloadManager.runningRelay
-            .doOnError { /* Swallow wakelock error */ }
-            .subscribe { running ->
-                if (running) {
-                    wakeLock.acquireIfNeeded()
-                } else {
-                    wakeLock.releaseIfNeeded()
+        subscriptions +=
+            downloadManager.runningRelay
+                .doOnError { /* Swallow wakelock error */}
+                .subscribe { running ->
+                    if (running) {
+                        wakeLock.acquireIfNeeded()
+                    } else {
+                        wakeLock.releaseIfNeeded()
+                    }
                 }
-            }
     }
 
-    /**
-     * Releases the wake lock if it's held.
-     */
+    /** Releases the wake lock if it's held. */
     fun PowerManager.WakeLock.releaseIfNeeded() {
         if (isHeld) release()
     }
 
-    /**
-     * Acquires the wake lock if it's not held.
-     */
+    /** Acquires the wake lock if it's not held. */
     fun PowerManager.WakeLock.acquireIfNeeded() {
         if (!isHeld) acquire()
     }

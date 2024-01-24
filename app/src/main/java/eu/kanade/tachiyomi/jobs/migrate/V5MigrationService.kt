@@ -20,9 +20,7 @@ import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/**
- * This class will perform migration of old mangaList ids to the new v5 mangadex.
- */
+/** This class will perform migration of old mangaList ids to the new v5 mangadex. */
 class V5MigrationService(
     private val db: DatabaseHelper = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
@@ -37,9 +35,7 @@ class V5MigrationService(
     private var totalManga: Int = 0
     private var actualMigrated: Int = 0
 
-    /**
-     * This will migrate the mangaList in the library to the new ids
-     */
+    /** This will migrate the mangaList in the library to the new ids */
     suspend fun migrateLibraryToV5(
         context: Context,
         progressNotification: (String, Int, Int) -> Unit,
@@ -52,9 +48,9 @@ class V5MigrationService(
 
             // Return if job was canceled
             /*  if (job?.isCancelled == true) {
-                  totalManga--
-                  return
-              }*/
+                totalManga--
+                return
+            }*/
 
             // Update progress bar
             progressNotification(manga.title, index + 1, totalManga)
@@ -67,12 +63,13 @@ class V5MigrationService(
             // We skip mangaList which have already been converted (non-numeric ids)
             var mangaErroredOut = false
             if (isNumericId) {
-                val responseDto = networkServices.service.legacyMapping(
-                    LegacyIdDto(
-                        type = "manga",
-                        listOf(oldMangaId.toInt()),
-                    ),
-                )
+                val responseDto =
+                    networkServices.service.legacyMapping(
+                        LegacyIdDto(
+                            type = "manga",
+                            listOf(oldMangaId.toInt()),
+                        ),
+                    )
 
                 when (responseDto) {
                     is ApiResponse.Success -> {
@@ -82,22 +79,26 @@ class V5MigrationService(
                         manga.thumbnail_url = null
                         db.insertManga(manga).executeAsBlocking()
                         val tracks = db.getTracks(manga).executeAsBlocking()
-                        tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
-                            it.tracking_url = MdConstants.baseUrl + manga.url
-                            db.insertTrack(it).executeAsBlocking()
-                        }
+                        tracks
+                            .firstOrNull { it.sync_id == trackManager.mdList.id }
+                            ?.let {
+                                it.tracking_url = MdConstants.baseUrl + manga.url
+                                db.insertTrack(it).executeAsBlocking()
+                            }
                         actualMigrated++
                     }
-
-                    is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception,
-                    -> {
+                    is ApiResponse.Failure.Error,
+                    is ApiResponse.Failure.Exception, -> {
                         responseDto.log(" trying to map legacy id")
                         if (responseDto is ApiResponse.Failure.Exception) {
                             failedUpdatesMangaList[manga] = "error processing"
                             failedUpdatesErrors.add(manga.title + ": error processing")
                         } else {
                             failedUpdatesMangaList[manga] = "unable to find new manga id"
-                            failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed this manga or the id changed")
+                            failedUpdatesErrors.add(
+                                manga.title +
+                                    ": unable to find new manga id, MangaDex might have removed this manga or the id changed"
+                            )
                         }
                         mangaErroredOut = true
                     }
@@ -109,14 +110,24 @@ class V5MigrationService(
             if (!mangaErroredOut) {
                 val chapters = db.getChapters(manga).executeAsBlocking()
 
-                val chapterMap = chapters.filter { !it.isMergedChapter() }
-                    .filter { it.mangadex_chapter_id.isDigitsOnly() && it.mangadex_chapter_id.isNotBlank() }
-                    .map { it.mangadex_chapter_id.toInt() to it }
-                    .toMap()
-                val chapterChunks = chapters.filter { !it.isMergedChapter() }
-                    .filter { it.mangadex_chapter_id.isDigitsOnly() && it.mangadex_chapter_id.isNotBlank() }
-                    .map { it.mangadex_chapter_id.toInt() }
-                    .chunked(100)
+                val chapterMap =
+                    chapters
+                        .filter { !it.isMergedChapter() }
+                        .filter {
+                            it.mangadex_chapter_id.isDigitsOnly() &&
+                                it.mangadex_chapter_id.isNotBlank()
+                        }
+                        .map { it.mangadex_chapter_id.toInt() to it }
+                        .toMap()
+                val chapterChunks =
+                    chapters
+                        .filter { !it.isMergedChapter() }
+                        .filter {
+                            it.mangadex_chapter_id.isDigitsOnly() &&
+                                it.mangadex_chapter_id.isNotBlank()
+                        }
+                        .map { it.mangadex_chapter_id.toInt() }
+                        .chunked(100)
 
                 chapterChunks.asSequence().forEach { legacyIds ->
                     val responseDto =
@@ -139,9 +150,8 @@ class V5MigrationService(
                                 db.insertChapter(chapter).executeAsBlocking()
                             }
                         }
-
-                        is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception,
-                        -> {
+                        is ApiResponse.Failure.Error,
+                        is ApiResponse.Failure.Exception, -> {
                             legacyIds.forEach {
                                 val failedChapter = chapterMap[it]!!
                                 failedUpdatesChapters[failedChapter] =
@@ -159,18 +169,14 @@ class V5MigrationService(
                 // Append chapter errors if we have them
                 if (chapterErrors.size > 0) {
                     failedUpdatesErrors.add(manga.title + ": has chapter conversion errors")
-                    chapterErrors.forEach {
-                        failedUpdatesErrors.add(it)
-                    }
+                    chapterErrors.forEach { failedUpdatesErrors.add(it) }
                 }
             }
         }
         finishUpdates(context, errorNotification, completeNotificaton)
     }
 
-    /**
-     * Finall function called when we have finished / requested to stop the update
-     */
+    /** Finall function called when we have finished / requested to stop the update */
     private fun finishUpdates(
         context: Context,
         errorNotification: (List<String>, Uri?) -> Unit,
@@ -187,17 +193,13 @@ class V5MigrationService(
         completeNotification(actualMigrated)
     }
 
-    /**
-     * Writes basic file of update errors to cache dir.
-     */
+    /** Writes basic file of update errors to cache dir. */
     private fun writeErrorFile(context: Context, errors: MutableList<String>): File {
         try {
             if (errors.isNotEmpty()) {
                 val destFile = File(context.externalCacheDir, "neko_v5_migration_errors.txt")
                 destFile.bufferedWriter().use { out ->
-                    errors.forEach { error ->
-                        out.write("$error\n")
-                    }
+                    errors.forEach { error -> out.write("$error\n") }
                 }
                 return destFile
             }

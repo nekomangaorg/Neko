@@ -55,67 +55,66 @@ fun WebViewScreen(
         navigationIconLabel = stringResource(id = R.string.close),
         actions = {
             AppBarActions(
-                actions = listOf(
-                    if (navigator.canGoBack) {
-                        AppBar.Action(
-                            title = UiText.StringResource(R.string.back),
-                            icon = Icons.Filled.ArrowBack,
-                            onClick = {
-                                navigator.navigateBack()
+                actions =
+                    listOf(
+                        if (navigator.canGoBack) {
+                            AppBar.Action(
+                                title = UiText.StringResource(R.string.back),
+                                icon = Icons.Filled.ArrowBack,
+                                onClick = { navigator.navigateBack() },
+                            )
+                        } else {
+                            AppBar.Empty
+                        },
+                    ) +
+                        listOf(
+                            if (navigator.canGoForward) {
+                                AppBar.Action(
+                                    title = UiText.StringResource(R.string.forward),
+                                    icon = Icons.Default.ArrowForward,
+                                    onClick = { navigator.navigateForward() },
+                                )
+                            } else {
+                                AppBar.Empty
                             },
-                        )
-                    } else {
-                        AppBar.Empty
-                    },
-                ) + listOf(
-                    if (navigator.canGoForward) {
-                        AppBar.Action(
-                            title = UiText.StringResource(R.string.forward),
-                            icon = Icons.Default.ArrowForward,
-                            onClick = {
-                                navigator.navigateForward()
+                        ) +
+                        listOf(
+                            AppBar.OverflowAction(
+                                title = UiText.StringResource(R.string.refresh),
+                                onClick = { navigator.reload() },
+                            ),
+                            AppBar.OverflowAction(
+                                title = UiText.StringResource(R.string.share),
+                                onClick = { onShare(state.content.getCurrentUrl()!!) },
+                            ),
+                            AppBar.OverflowAction(
+                                title = UiText.StringResource(R.string.open_in_browser),
+                                onClick = { onOpenInBrowser(state.content.getCurrentUrl()!!) },
+                            ),
+                        ) +
+                        listOf(
+                            if (
+                                navigator.canGoBack && canOpenInApp(state.content.getCurrentUrl()!!)
+                            ) {
+                                AppBar.OverflowAction(
+                                    title = UiText.StringResource(R.string.open_in_app),
+                                    onClick = { onOpenInApp(state.content.getCurrentUrl()!!) },
+                                )
+                            } else {
+                                AppBar.Empty
                             },
-                        )
-                    } else {
-                        AppBar.Empty
-                    },
-                ) + listOf(
-                    AppBar.OverflowAction(
-                        title = UiText.StringResource(R.string.refresh),
-                        onClick = { navigator.reload() },
-                    ),
-                    AppBar.OverflowAction(
-                        title = UiText.StringResource(R.string.share),
-                        onClick = { onShare(state.content.getCurrentUrl()!!) },
-                    ),
-                    AppBar.OverflowAction(
-                        title = UiText.StringResource(R.string.open_in_browser),
-                        onClick = { onOpenInBrowser(state.content.getCurrentUrl()!!) },
-                    ),
-                ) + listOf(
-                    if (navigator.canGoBack && canOpenInApp(state.content.getCurrentUrl()!!)) {
-                        AppBar.OverflowAction(
-                            title = UiText.StringResource(R.string.open_in_app),
-                            onClick = { onOpenInApp(state.content.getCurrentUrl()!!) },
-                        )
-                    } else {
-                        AppBar.Empty
-                    },
-                ),
+                        ),
             )
         },
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
         ) {
             val loadingState = state.loadingState
             if (loadingState is LoadingState.Loading) {
                 LinearProgressIndicator(
                     progress = loadingState.progress,
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 
@@ -125,9 +124,7 @@ fun WebViewScreen(
                         view: WebView?,
                         request: WebResourceRequest?,
                     ): Boolean {
-                        request?.let {
-                            view?.loadUrl(it.url.toString(), headers)
-                        }
+                        request?.let { view?.loadUrl(it.url.toString(), headers) }
                         return super.shouldOverrideUrlLoading(view, request)
                     }
                 }
@@ -140,13 +137,14 @@ fun WebViewScreen(
                     webView.setDefaultSettings()
 
                     // Debug mode (chrome://inspect/#devices)
-                    if (BuildConfig.DEBUG && 0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) {
+                    if (
+                        BuildConfig.DEBUG &&
+                            0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+                    ) {
                         WebView.setWebContentsDebuggingEnabled(true)
                     }
 
-                    headers["User-Agent"]?.let {
-                        webView.settings.userAgentString = it
-                    }
+                    headers["User-Agent"]?.let { webView.settings.userAgentString = it }
                 },
                 client = webClient,
             )

@@ -10,14 +10,10 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 class CategoryAdapter(controller: CategoryController) :
     FlexibleAdapter<CategoryItem>(null, controller, true) {
 
-    /**
-     * Listener called when an item of the list is released.
-     */
+    /** Listener called when an item of the list is released. */
     val categoryItemListener: CategoryItemListener = controller
 
-    /**
-     * Clears the active selections from the model.
-     */
+    /** Clears the active selections from the model. */
     fun resetEditing(position: Int) {
         for (i in 0..itemCount) {
             getItem(i)?.isEditing = false
@@ -27,11 +23,11 @@ class CategoryAdapter(controller: CategoryController) :
     }
 
     interface CategoryItemListener {
-        /**
-         * Called when an item of the list is released.
-         */
+        /** Called when an item of the list is released. */
         fun onItemReleased(position: Int)
+
         fun onCategoryRename(position: Int, newName: String): Boolean
+
         fun onItemDelete(position: Int)
     }
 }

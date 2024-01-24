@@ -12,7 +12,8 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import org.nekomanga.logging.TimberKt
 
-class GlobalExceptionHandler private constructor(
+class GlobalExceptionHandler
+private constructor(
     private val applicationContext: Context,
     private val defaultHandler: Thread.UncaughtExceptionHandler,
     private val activityToBeLaunched: Class<*>,
@@ -44,11 +45,12 @@ class GlobalExceptionHandler private constructor(
         activity: Class<*>,
         exception: Throwable,
     ) {
-        val intent = Intent(applicationContext, activity).apply {
-            putExtra(INTENT_EXTRA, Json.encodeToString(ThrowableSerializer, exception))
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
+        val intent =
+            Intent(applicationContext, activity).apply {
+                putExtra(INTENT_EXTRA, Json.encodeToString(ThrowableSerializer, exception))
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
         applicationContext.startActivity(intent)
     }
 
@@ -59,11 +61,12 @@ class GlobalExceptionHandler private constructor(
             applicationContext: Context,
             activityToBeLaunched: Class<*>,
         ) {
-            val handler = GlobalExceptionHandler(
-                applicationContext,
-                Thread.getDefaultUncaughtExceptionHandler() as Thread.UncaughtExceptionHandler,
-                activityToBeLaunched,
-            )
+            val handler =
+                GlobalExceptionHandler(
+                    applicationContext,
+                    Thread.getDefaultUncaughtExceptionHandler() as Thread.UncaughtExceptionHandler,
+                    activityToBeLaunched,
+                )
             Thread.setDefaultUncaughtExceptionHandler(handler)
         }
 

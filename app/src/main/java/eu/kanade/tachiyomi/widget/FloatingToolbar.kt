@@ -65,12 +65,13 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
         }
 
     init {
-        val a = context.obtainStyledAttributes(
-            attrs,
-            R.styleable.Toolbar,
-            0,
-            defStyleRes,
-        )
+        val a =
+            context.obtainStyledAttributes(
+                attrs,
+                R.styleable.Toolbar,
+                0,
+                defStyleRes,
+            )
         subtitleTextAppearance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0)
         a.recycle()
     }
@@ -89,9 +90,10 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
         cardIncogImage = findViewById(R.id.card_incog_image)
 
         setNavigationIconTint(actionColorAlpha)
-        collapseIcon = context.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
-            setTint(actionColorAlpha)
-        }
+        collapseIcon =
+            context.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
+                setTint(actionColorAlpha)
+            }
         inflateMenu(R.menu.search)
     }
 
@@ -115,8 +117,6 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun setCustomTitle(title: CharSequence?) {
         super.setCustomTitle(title)
-        toolbarTitle.updateLayoutParams<LinearLayout.LayoutParams> {
-            gravity = Gravity.START
-        }
+        toolbarTitle.updateLayoutParams<LinearLayout.LayoutParams> { gravity = Gravity.START }
     }
 }

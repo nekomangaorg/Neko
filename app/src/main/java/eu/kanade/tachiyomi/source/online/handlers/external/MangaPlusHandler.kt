@@ -22,16 +22,20 @@ import uy.kohesive.injekt.injectLazy
 
 class MangaPlusHandler {
     val baseUrl = "https://jumpg-webapi.tokyo-cdn.com/api"
-    val headers = Headers.Builder()
-        .add("Origin", WEB_URL)
-        .add("Referer", WEB_URL)
-        .add("User-Agent", USER_AGENT)
-        .add("SESSION-TOKEN", UUID.randomUUID().toString()).build()
+    val headers =
+        Headers.Builder()
+            .add("Origin", WEB_URL)
+            .add("Referer", WEB_URL)
+            .add("User-Agent", USER_AGENT)
+            .add("SESSION-TOKEN", UUID.randomUUID().toString())
+            .build()
 
     private val json: Json by injectLazy()
 
     val client: OkHttpClient by lazy {
-        Injekt.get<NetworkHelper>().client.newBuilder()
+        Injekt.get<NetworkHelper>()
+            .client
+            .newBuilder()
             .addInterceptor { imageIntercept(it) }
             .build()
     }
@@ -55,9 +59,13 @@ class MangaPlusHandler {
     private fun pageListParse(response: Response): List<Page> {
         val result = response.asMangaPlusResponse()
 
-        checkNotNull(result.success) { result.error!!.popups.firstOrNull { it.language == Language.ENGLISH } ?: "Error with MangaPlus" }
+        checkNotNull(result.success) {
+            result.error!!.popups.firstOrNull { it.language == Language.ENGLISH }
+                ?: "Error with MangaPlus"
+        }
 
-        return result.success.mangaViewer!!.pages
+        return result.success.mangaViewer!!
+            .pages
             .mapNotNull { it.mangaPage }
             .mapIndexed { i, page ->
                 val encryptionKey =
@@ -88,14 +96,10 @@ class MangaPlusHandler {
     }
 
     private fun decodeImage(encryptionKey: String, image: ByteArray): ByteArray {
-        val keyStream = HEX_GROUP
-            .findAll(encryptionKey)
-            .map { it.groupValues[1].toInt(16) }
-            .toList()
+        val keyStream =
+            HEX_GROUP.findAll(encryptionKey).map { it.groupValues[1].toInt(16) }.toList()
 
-        val content = image
-            .map { it.toInt() }
-            .toMutableList()
+        val content = image.map { it.toInt() }.toMutableList()
 
         val blockSizeInBytes = keyStream.size
 

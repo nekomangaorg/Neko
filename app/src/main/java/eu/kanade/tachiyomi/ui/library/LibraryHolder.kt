@@ -11,17 +11,18 @@ import eu.kanade.tachiyomi.util.view.setCards
 
 /**
  * Generic class used to hold the displayed data of a manga in the library.
+ *
  * @param view the inflated view for this holder.
  * @param adapter the adapter handling this holder.
  * @param listener a listener to react to the single tap and long tap events.
  */
-
 abstract class LibraryHolder(
     view: View,
     val adapter: LibraryCategoryAdapter,
 ) : BaseFlexibleViewHolder(view, adapter) {
 
-    protected val color = ColorUtils.setAlphaComponent(itemView.context.getResourceColor(R.attr.colorSecondary), 75)
+    protected val color =
+        ColorUtils.setAlphaComponent(itemView.context.getResourceColor(R.attr.colorSecondary), 75)
 
     init {
         val card = itemView.findViewById<MaterialCardView>(R.id.card)

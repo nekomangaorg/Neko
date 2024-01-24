@@ -39,7 +39,8 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
 
     // Get all categories, else default category (0)
     val categoriesForManga =
-        db.getCategoriesForManga(this).executeAsBlocking()
+        db.getCategoriesForManga(this)
+            .executeAsBlocking()
             .mapNotNull { it.id }
             .takeUnless { it.isEmpty() } ?: listOf(0)
 
@@ -60,14 +61,15 @@ fun Manga.moveCategories(
     val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()
     val ids = categoriesForManga.mapNotNull { it.id }.toTypedArray()
     SetCategoriesSheet(
-        activity,
-        this,
-        categories.toMutableList(),
-        ids,
-        false,
-    ) {
-        onMangaMoved()
-    }.show()
+            activity,
+            this,
+            categories.toMutableList(),
+            ids,
+            false,
+        ) {
+            onMangaMoved()
+        }
+        .show()
 }
 
 fun List<Manga>.moveCategories(
@@ -77,27 +79,35 @@ fun List<Manga>.moveCategories(
 ) {
     if (this.isEmpty()) return
     val categories = db.getCategories().executeAsBlocking()
-    val commonCategories = map { db.getCategoriesForManga(it).executeAsBlocking() }
-        .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2.toSet()).toMutableList() }
-        .toTypedArray()
-    val mangaCategories = map { db.getCategoriesForManga(it).executeAsBlocking() }
-    val common = mangaCategories.reduce { set1, set2 -> set1.intersect(set2.toSet()).toMutableList() }
-    val mixedCategories = mangaCategories.flatten().distinct().subtract(common.toSet()).toMutableList()
-    SetCategoriesSheet(
-        activity,
-        this,
-        categories.toMutableList(),
-        categories.map {
-            when (it) {
-                in commonCategories -> TriStateCheckBox.State.CHECKED
-                in mixedCategories -> TriStateCheckBox.State.IGNORE
-                else -> TriStateCheckBox.State.UNCHECKED
+    val commonCategories =
+        map { db.getCategoriesForManga(it).executeAsBlocking() }
+            .reduce { set1: Iterable<Category>, set2 ->
+                set1.intersect(set2.toSet()).toMutableList()
             }
-        }.toTypedArray(),
-        false,
-    ) {
-        onMangaMoved()
-    }.show()
+            .toTypedArray()
+    val mangaCategories = map { db.getCategoriesForManga(it).executeAsBlocking() }
+    val common =
+        mangaCategories.reduce { set1, set2 -> set1.intersect(set2.toSet()).toMutableList() }
+    val mixedCategories =
+        mangaCategories.flatten().distinct().subtract(common.toSet()).toMutableList()
+    SetCategoriesSheet(
+            activity,
+            this,
+            categories.toMutableList(),
+            categories
+                .map {
+                    when (it) {
+                        in commonCategories -> TriStateCheckBox.State.CHECKED
+                        in mixedCategories -> TriStateCheckBox.State.IGNORE
+                        else -> TriStateCheckBox.State.UNCHECKED
+                    }
+                }
+                .toTypedArray(),
+            false,
+        ) {
+            onMangaMoved()
+        }
+        .show()
 }
 
 fun Manga.addOrRemoveToFavorites(
@@ -122,12 +132,9 @@ fun Manga.addOrRemoveToFavorites(
                 db.setMangaCategories(listOf(mc), listOf(this))
                 onMangaMoved()
                 return view.snack(activity.getString(R.string.added_to_, defaultCategory.name)) {
-                    setAction(R.string.change) {
-                        moveCategories(db, activity, onMangaMoved)
-                    }
+                    setAction(R.string.change) { moveCategories(db, activity, onMangaMoved) }
                 }
             }
-
             defaultCategoryId == 0 || categories.isEmpty() -> { // 'Default' or no category
                 favorite = true
                 date_added = Date().time
@@ -141,28 +148,26 @@ fun Manga.addOrRemoveToFavorites(
                             activity.getString(R.string.default_value),
                         ),
                     ) {
-                        setAction(R.string.change) {
-                            moveCategories(db, activity, onMangaMoved)
-                        }
+                        setAction(R.string.change) { moveCategories(db, activity, onMangaMoved) }
                     }
                 } else {
                     view.snack(R.string.added_to_library)
                 }
             }
-
             else -> {
                 val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()
                 val ids = categoriesForManga.mapNotNull { it.id }.toTypedArray()
 
                 SetCategoriesSheet(
-                    activity,
-                    this,
-                    categories.toMutableList(),
-                    ids,
-                    true,
-                ) {
-                    onMangaAdded()
-                }.show()
+                        activity,
+                        this,
+                        categories.toMutableList(),
+                        ids,
+                        true,
+                    ) {
+                        onMangaAdded()
+                    }
+                    .show()
             }
         }
     } else {
@@ -197,8 +202,8 @@ fun Manga.addOrRemoveToFavorites(
 }
 
 /**
- * Returns a manga from the database for the given manga from network. It creates a new entry
- * if the manga is not yet in the database.
+ * Returns a manga from the database for the given manga from network. It creates a new entry if the
+ * manga is not yet in the database.
  *
  * @param sManga the manga from the source.
  * @return a manga from the database.
@@ -218,17 +223,12 @@ fun SManga.toLocalManga(db: DatabaseHelper, sourceId: Long): Manga {
     return localManga
 }
 
-/**
- * Takes a SourceManga and converts to a display manga
- */
-
+/** Takes a SourceManga and converts to a display manga */
 fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga {
     var localManga = db.getManga(this.url, sourceId).executeAsBlocking()
     if (localManga == null) {
         val newManga = Manga.create(this.url, this.title, sourceId)
-        newManga.apply {
-            this.thumbnail_url = currentThumbnail
-        }
+        newManga.apply { this.thumbnail_url = currentThumbnail }
         val result = db.insertManga(newManga).executeAsBlocking()
         newManga.id = result.insertedId()
         localManga = newManga
@@ -239,7 +239,10 @@ fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga
     return localManga.toDisplayManga(this.displayText, this.displayTextRes)
 }
 
-fun Manga.toDisplayManga(displayText: String = "", @StringRes displayTextRes: Int? = null): DisplayManga {
+fun Manga.toDisplayManga(
+    displayText: String = "",
+    @StringRes displayTextRes: Int? = null
+): DisplayManga {
     return DisplayManga(
         mangaId = this.id!!,
         url = this.url,
@@ -247,12 +250,21 @@ fun Manga.toDisplayManga(displayText: String = "", @StringRes displayTextRes: In
         inLibrary = this.favorite,
         displayText = displayText.replace("_", " ").capitalizeWords(),
         displayTextRes = displayTextRes,
-        currentArtwork = Artwork(mangaId = this.id!!, originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl),
+        currentArtwork =
+            Artwork(
+                mangaId = this.id!!,
+                originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl
+            ),
     )
 }
 
 fun SManga.getSlug(): String {
-    val title = this.title.trim().lowercase().replace("[^a-z0-9]+".toRegex(), "-").replace("-+$".toRegex(), "")
+    val title =
+        this.title
+            .trim()
+            .lowercase()
+            .replace("[^a-z0-9]+".toRegex(), "-")
+            .replace("-+$".toRegex(), "")
 
     val wordList = title.split('-')
     val slug = mutableListOf<String>()
@@ -268,37 +280,43 @@ fun SManga.getSlug(): String {
     return slug.joinToString("-")
 }
 
-/**
- * resync homepage manga with db manga
- */
+/** resync homepage manga with db manga */
 fun List<HomePageManga>.resync(db: DatabaseHelper): ImmutableList<HomePageManga> {
     return this.map { homePageManga ->
-        homePageManga.copy(
-            displayManga = homePageManga.displayManga.resync(db).toImmutableList(),
-        )
-    }.toImmutableList()
+            homePageManga.copy(
+                displayManga = homePageManga.displayManga.resync(db).toImmutableList(),
+            )
+        }
+        .toImmutableList()
 }
 
 fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
     return this.map {
         val dbManga = db.getManga(it.mangaId).executeAsBlocking()!!
-        it.copy(inLibrary = dbManga.favorite, currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
+        it.copy(
+            inLibrary = dbManga.favorite,
+            currentArtwork =
+                it.currentArtwork.copy(
+                    url = dbManga.user_cover ?: "",
+                    originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl
+                )
+        )
     }
 }
 
-/**
- * Updates the visibility of HomePageManga display manga
- */
+/** Updates the visibility of HomePageManga display manga */
 fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): ImmutableList<HomePageManga> {
     return this.map { homePageManga ->
-        homePageManga.copy(
-            displayManga = homePageManga.displayManga.updateVisibility(prefs).toImmutableList(),
-        )
-    }.toImmutableList()
+            homePageManga.copy(
+                displayManga = homePageManga.displayManga.updateVisibility(prefs).toImmutableList(),
+            )
+        }
+        .toImmutableList()
 }
 
 /**
- * Marks display manga as visible when show library entries is enabled, otherwise hides library entries
+ * Marks display manga as visible when show library entries is enabled, otherwise hides library
+ * entries
  */
 fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayManga> {
     return this.map { displayManga ->
@@ -306,7 +324,6 @@ fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayM
             true -> {
                 displayManga.copy(isVisible = true)
             }
-
             false -> {
                 displayManga.copy(isVisible = !displayManga.inLibrary)
             }
@@ -314,9 +331,7 @@ fun List<DisplayManga>.updateVisibility(prefs: PreferencesHelper): List<DisplayM
     }
 }
 
-/**
- * Filters out library manga if enabled
- */
+/** Filters out library manga if enabled */
 fun List<DisplayManga>.filterVisibility(prefs: PreferencesHelper): List<DisplayManga> {
     return this.filter { displayManga ->
         prefs.browseShowLibrary().get() || !displayManga.inLibrary

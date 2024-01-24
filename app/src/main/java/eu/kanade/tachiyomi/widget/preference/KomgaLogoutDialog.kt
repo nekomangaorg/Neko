@@ -27,30 +27,32 @@ class KomgaLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
     constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        return activity!!.materialAlertDialog().apply {
-            setTitle(R.string.log_out)
-            setNegativeButton(android.R.string.cancel, null)
-            setPositiveButton(R.string.log_out) { _, _ ->
-                launchNow {
-                    runCatching {
-                        // val loggedOut = source.logout()
+        return activity!!
+            .materialAlertDialog()
+            .apply {
+                setTitle(R.string.log_out)
+                setNegativeButton(android.R.string.cancel, null)
+                setPositiveButton(R.string.log_out) { _, _ ->
+                    launchNow {
+                        runCatching {
+                                // val loggedOut = source.logout()
 
-                        // if (loggedOut.loggedOut) {
-                        launch {
-                            preferences.setKomgaCredentials(source, "", "", "")
-                        }
-                        activity?.toast(R.string.successfully_logged_out)
-                        (targetController as? Listener)?.siteLogoutDialogClosed(source)
-                        /* } else {
-                             activity?.toast(loggedOut.error)
-                         }*/
-                    }.onFailure { e ->
-                        TimberKt.e(e) { "error logging out" }
-                        activity?.toast(R.string.could_not_log_in)
+                                // if (loggedOut.loggedOut) {
+                                launch { preferences.setKomgaCredentials(source, "", "", "") }
+                                activity?.toast(R.string.successfully_logged_out)
+                                (targetController as? Listener)?.siteLogoutDialogClosed(source)
+                                /* } else {
+                                    activity?.toast(loggedOut.error)
+                                }*/
+                            }
+                            .onFailure { e ->
+                                TimberKt.e(e) { "error logging out" }
+                                activity?.toast(R.string.could_not_log_in)
+                            }
                     }
                 }
             }
-        }.create()
+            .create()
     }
 
     interface Listener {

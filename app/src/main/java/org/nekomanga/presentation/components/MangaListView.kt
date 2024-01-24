@@ -56,13 +56,13 @@ fun MangaList(
             MangaRow(
                 displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .combinedClickable(
-                        onClick = { onClick(displayManga.mangaId) },
-                        onLongClick = { onLongClick(displayManga) },
-                    ),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .wrapContentHeight()
+                        .combinedClickable(
+                            onClick = { onClick(displayManga.mangaId) },
+                            onLongClick = { onLongClick(displayManga) },
+                        ),
             )
         }
     }
@@ -78,8 +78,7 @@ fun MangaListWithHeader(
     onLongClick: (DisplayManga) -> Unit = {},
 ) {
     LazyColumn(
-        modifier = modifier
-            .wrapContentWidth(align = Alignment.CenterHorizontally),
+        modifier = modifier.wrapContentWidth(align = Alignment.CenterHorizontally),
         contentPadding = contentPadding,
     ) {
         groupedManga.forEach { (stringRes, mangaList) ->
@@ -87,18 +86,18 @@ fun MangaListWithHeader(
                 HeaderCard {
                     DefaultHeaderText(text = stringResource(id = stringRes))
                 }
-            }
-            itemsIndexed(mangaList, key = { _, displayManga -> Objects.hash(displayManga.title, displayManga.mangaId, stringRes) }) { _, displayManga ->
+                }
+            ) { _, displayManga ->
                 MangaRow(
                     displayManga = displayManga,
                     shouldOutlineCover,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .combinedClickable(
-                            onClick = { onClick(displayManga.mangaId) },
-                            onLongClick = { onLongClick(displayManga) },
-                        ),
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .wrapContentHeight()
+                            .combinedClickable(
+                                onClick = { onClick(displayManga.mangaId) },
+                                onLongClick = { onLongClick(displayManga) },
+                            ),
                 )
             }
         }
@@ -115,17 +114,19 @@ private fun MangaRow(
         MangaListCover(displayManga, shouldOutlineCover)
 
         Column(
-            modifier = Modifier
-                .padding(Size.tiny)
-                .align(alignment = Alignment.CenterVertically),
+            modifier = Modifier.padding(Size.tiny).align(alignment = Alignment.CenterVertically),
         ) {
-            val titleLineCount = when (displayManga.displayText.isBlank()) {
-                true -> 2
-                false -> 1
-            }
+            val titleLineCount =
+                when (displayManga.displayText.isBlank()) {
+                    true -> 2
+                    false -> 1
+                }
 
             MangaListTitle(title = displayManga.title, maxLines = titleLineCount)
-            MangaListSubtitle(text = displayManga.displayText, textRes = displayManga.displayTextRes)
+            MangaListSubtitle(
+                text = displayManga.displayText,
+                textRes = displayManga.displayTextRes
+            )
         }
     }
 }
@@ -143,15 +144,17 @@ private fun MangaListTitle(title: String, maxLines: Int) {
 
 @Composable
 private fun MangaListSubtitle(text: String, @StringRes textRes: Int?) {
-    val displayText = when (textRes) {
-        null -> text
-        else -> stringResource(textRes)
-    }
+    val displayText =
+        when (textRes) {
+            null -> text
+            else -> stringResource(textRes)
+        }
     if (displayText.isNotBlank()) {
         Text(
             text = displayText,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+            color =
+                MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -164,9 +167,7 @@ private fun RowScope.MangaListCover(displayManga: DisplayManga, shouldOutlineCov
         MangaCover.Square.invoke(
             artwork = displayManga.currentArtwork,
             shouldOutlineCover = shouldOutlineCover,
-            modifier = Modifier
-                .size(Size.huge)
-                .padding(Size.tiny),
+            modifier = Modifier.size(Size.huge).padding(Size.tiny),
         )
 
         if (displayManga.inLibrary) {

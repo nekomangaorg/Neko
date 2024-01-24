@@ -23,10 +23,17 @@ import uy.kohesive.injekt.api.get
  * @param remoteTrack the remote Track object.
  * @param service the tracker service.
  */
-fun syncChaptersWithTrackServiceTwoWay(db: DatabaseHelper, chapters: List<Chapter>, remoteTrack: Track, service: TrackService) {
+fun syncChaptersWithTrackServiceTwoWay(
+    db: DatabaseHelper,
+    chapters: List<Chapter>,
+    remoteTrack: Track,
+    service: TrackService
+) {
     val sortedChapters = chapters.sortedBy { it.chapter_number }
     sortedChapters
-        .filter { chapter -> chapter.chapter_number <= remoteTrack.last_chapter_read && !chapter.read }
+        .filter { chapter ->
+            chapter.chapter_number <= remoteTrack.last_chapter_read && !chapter.read
+        }
         .forEach { it.read = true }
     db.updateChaptersProgress(sortedChapters).executeAsBlocking()
 
@@ -49,8 +56,8 @@ fun syncChaptersWithTrackServiceTwoWay(db: DatabaseHelper, chapters: List<Chapte
 private var trackingJobs = HashMap<Long, Pair<Job?, Float?>>()
 
 /**
- * Starts the service that updates the last chapter read in sync services. This operation
- * will run in a background thread and errors are ignored.
+ * Starts the service that updates the last chapter read in sync services. This operation will run
+ * in a background thread and errors are ignored.
  */
 fun updateTrackChapterMarkedAsRead(
     db: DatabaseHelper,
@@ -70,12 +77,13 @@ fun updateTrackChapterMarkedAsRead(
         trackingJobs[mangaId]?.first?.cancel()
 
         // We want these to execute even if the presenter is destroyed
-        trackingJobs[mangaId] = launchIO {
-            delay(delay)
-            updateTrackChapterRead(db, preferences, mangaId, newChapterRead)
-            fetchTracks?.invoke()
-            trackingJobs.remove(mangaId)
-        } to newChapterRead
+        trackingJobs[mangaId] =
+            launchIO {
+                delay(delay)
+                updateTrackChapterRead(db, preferences, mangaId, newChapterRead)
+                fetchTracks?.invoke()
+                trackingJobs.remove(mangaId)
+            } to newChapterRead
     }
 }
 

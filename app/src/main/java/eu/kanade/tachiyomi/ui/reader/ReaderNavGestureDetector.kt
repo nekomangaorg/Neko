@@ -6,8 +6,8 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import kotlin.math.abs
 
-class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDetector
-.SimpleOnGestureListener() {
+class ReaderNavGestureDetector(private val activity: ReaderActivity) :
+    GestureDetector.SimpleOnGestureListener() {
 
     var hasScrollHorizontal = false
     var lockVertical = false
@@ -47,9 +47,11 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
         val diffY = e2.y - e1.y
         val diffX = e2.x - e1.x
         val sheetBehavior = activity.binding.chaptersSheet.root.sheetBehavior
-        if (!hasScrollHorizontal && abs(diffX) < abs(diffY) &&
-            (abs(diffY) > SWIPE_THRESHOLD || abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) &&
-            diffY <= 0
+        if (
+            !hasScrollHorizontal &&
+                abs(diffX) < abs(diffY) &&
+                (abs(diffY) > SWIPE_THRESHOLD || abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) &&
+                diffY <= 0
         ) {
             lockVertical = true
             sheetBehavior?.expand()

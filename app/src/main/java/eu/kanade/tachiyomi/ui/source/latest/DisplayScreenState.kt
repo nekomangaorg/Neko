@@ -28,8 +28,7 @@ data class DisplayScreenState(
 
 @Parcelize
 sealed interface DisplayScreenType : Parcelable {
-    @Parcelize
-    data class LatestChapters(val titleRes: Int = R.string.latest) : DisplayScreenType
+    @Parcelize data class LatestChapters(val titleRes: Int = R.string.latest) : DisplayScreenType
 
     @Parcelize
     data class RecentlyAdded(val titleRes: Int = R.string.recently_added) : DisplayScreenType
@@ -37,6 +36,5 @@ sealed interface DisplayScreenType : Parcelable {
     @Parcelize
     data class PopularNewTitles(val titleRes: Int = R.string.popularNewTitles) : DisplayScreenType
 
-    @Parcelize
-    data class List(val title: String, val listUUID: String) : DisplayScreenType
+    @Parcelize data class List(val title: String, val listUUID: String) : DisplayScreenType
 }

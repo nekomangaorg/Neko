@@ -8,5 +8,4 @@ data class RatingResponseDto(
     val ratings: JsonElement,
 )
 
-@Serializable
-data class RatingDto(val rating: Int)
+@Serializable data class RatingDto(val rating: Int)

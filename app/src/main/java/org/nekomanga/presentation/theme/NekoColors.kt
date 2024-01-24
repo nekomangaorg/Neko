@@ -42,32 +42,33 @@ object ChartColors {
 
 object PrimaryColorRippleTheme : RippleTheme {
 
-    @Composable
-    override fun defaultColor(): Color = MaterialTheme.colorScheme.primary
+    @Composable override fun defaultColor(): Color = MaterialTheme.colorScheme.primary
 
     @Composable
-    override fun rippleAlpha() = RippleAlpha(
-        draggedAlpha = 0.9f,
-        focusedAlpha = 0.9f,
-        hoveredAlpha = 0.9f,
-        pressedAlpha = 0.9f,
-    )
+    override fun rippleAlpha() =
+        RippleAlpha(
+            draggedAlpha = 0.9f,
+            focusedAlpha = 0.9f,
+            hoveredAlpha = 0.9f,
+            pressedAlpha = 0.9f,
+        )
 }
 
 class DynamicRippleTheme(val color: Color) : RippleTheme {
-    @Composable
-    override fun defaultColor(): Color = color
+    @Composable override fun defaultColor(): Color = color
 
     @Composable
-    override fun rippleAlpha() = RippleAlpha(
-        draggedAlpha = 0.9f,
-        focusedAlpha = 0.9f,
-        hoveredAlpha = 0.9f,
-        pressedAlpha = 0.9f,
-    )
+    override fun rippleAlpha() =
+        RippleAlpha(
+            draggedAlpha = 0.9f,
+            focusedAlpha = 0.9f,
+            hoveredAlpha = 0.9f,
+            pressedAlpha = 0.9f,
+        )
 }
 
-fun dynamicTextSelectionColor(color: Color) = TextSelectionColors(
-    handleColor = color,
-    backgroundColor = color.copy(alpha = NekoColors.disabledAlphaHighContrast),
-)
+fun dynamicTextSelectionColor(color: Color) =
+    TextSelectionColors(
+        handleColor = color,
+        backgroundColor = color.copy(alpha = NekoColors.disabledAlphaHighContrast),
+    )

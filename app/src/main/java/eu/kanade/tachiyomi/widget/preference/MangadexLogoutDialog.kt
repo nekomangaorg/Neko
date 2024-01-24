@@ -19,27 +19,29 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
     val preferences: PreferencesHelper by injectLazy()
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        return activity!!.materialAlertDialog().apply {
-            setTitle(R.string.log_out)
-            setNegativeButton(android.R.string.cancel, null)
-            setPositiveButton(R.string.log_out) { _, _ ->
-
-                launchNow {
-                    runCatching {
-                        when (loginHelper.logout()) {
-                            true -> activity?.toast(R.string.successfully_logged_out)
-                            false -> activity?.toast(R.string.successfully_logged_out)
-
-                        }
-                        activity?.toast(R.string.successfully_logged_out)
-                        (targetController as? Listener)?.siteLogoutDialogClosed()
-                    }.onFailure { e ->
-                        TimberKt.e(e) { "Error logging out" }
-                        activity?.toast(R.string.could_not_log_in)
+        return activity!!
+            .materialAlertDialog()
+            .apply {
+                setTitle(R.string.log_out)
+                setNegativeButton(android.R.string.cancel, null)
+                setPositiveButton(R.string.log_out) { _, _ ->
+                    launchNow {
+                        runCatching {
+                                when (loginHelper.logout()) {
+                                    true -> activity?.toast(R.string.successfully_logged_out)
+                                    false -> activity?.toast(R.string.successfully_logged_out)
+                                }
+                                activity?.toast(R.string.successfully_logged_out)
+                                (targetController as? Listener)?.siteLogoutDialogClosed()
+                            }
+                            .onFailure { e ->
+                                TimberKt.e(e) { "Error logging out" }
+                                activity?.toast(R.string.could_not_log_in)
+                            }
                     }
                 }
             }
-        }.create()
+            .create()
     }
 
     interface Listener {

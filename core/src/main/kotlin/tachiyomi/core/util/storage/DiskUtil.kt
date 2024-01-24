@@ -31,9 +31,7 @@ object DiskUtil {
         return size
     }
 
-    /**
-     * Gets the available space for the disk that a file path points to, in bytes.
-     */
+    /** Gets the available space for the disk that a file path points to, in bytes. */
     fun getAvailableStorageSpace(f: UniFile): Long {
         return try {
             val stat = StatFs(f.uri.path)
@@ -43,17 +41,17 @@ object DiskUtil {
         }
     }
 
-    /**
-     * Returns the root folders of all the available external storages.
-     */
+    /** Returns the root folders of all the available external storages. */
     fun getExternalStorages(context: Context): Collection<File> {
         val directories = mutableSetOf<File>()
-        directories += ContextCompat.getExternalFilesDirs(context, null)
-            .filterNotNull()
-            .mapNotNull {
+        directories +=
+            ContextCompat.getExternalFilesDirs(context, null).filterNotNull().mapNotNull {
                 val file = File(it.absolutePath.substringBefore("/Android/"))
                 val state = EnvironmentCompat.getStorageState(file)
-                if (state == Environment.MEDIA_MOUNTED || state == Environment.MEDIA_MOUNTED_READ_ONLY) {
+                if (
+                    state == Environment.MEDIA_MOUNTED ||
+                        state == Environment.MEDIA_MOUNTED_READ_ONLY
+                ) {
                     file
                 } else {
                     null
@@ -63,9 +61,7 @@ object DiskUtil {
         return directories
     }
 
-    /**
-     * Don't display downloaded chapters in gallery apps creating `.nomedia`.
-     */
+    /** Don't display downloaded chapters in gallery apps creating `.nomedia`. */
     fun createNoMediaFile(dir: UniFile?, context: Context?) {
         if (dir != null && dir.exists()) {
             val nomedia = dir.findFile(".nomedia")
@@ -76,16 +72,12 @@ object DiskUtil {
         }
     }
 
-    /**
-     * Scans the given file so that it can be shown in gallery apps, for example.
-     */
+    /** Scans the given file so that it can be shown in gallery apps, for example. */
     fun scanMedia(context: Context, file: File) {
         scanMedia(context, Uri.fromFile(file))
     }
 
-    /**
-     * Scans the given file so that it can be shown in gallery apps, for example.
-     */
+    /** Scans the given file so that it can be shown in gallery apps, for example. */
     fun scanMedia(context: Context, uri: Uri) {
         val action = Intent.ACTION_MEDIA_SCANNER_SCAN_FILE
         val mediaScanIntent = Intent(action)
@@ -94,23 +86,25 @@ object DiskUtil {
     }
 
     /**
-     * Mutate the given filename to make it valid for a FAT filesystem,
-     * replacing any invalid characters with "_". This method doesn't allow hidden files (starting
-     * with a dot), but you can manually add it later.
+     * Mutate the given filename to make it valid for a FAT filesystem, replacing any invalid
+     * characters with "_". This method doesn't allow hidden files (starting with a dot), but you
+     * can manually add it later.
      */
     fun buildValidFilename(origName: String, suffix: String = ""): String {
         val name = origName.trim('.', ' ')
         if (name.isEmpty()) {
             return "(invalid)"
         }
-        val fatCompliantName = name.map { ch ->
-            if (isValidFatFilenameChar(ch)) {
-                ch
-            } else {
-                "_"
-            }
-        }.joinToString("")
-
+        val fatCompliantName =
+            name
+                .map { ch ->
+                    if (isValidFatFilenameChar(ch)) {
+                        ch
+                    } else {
+                        "_"
+                    }
+                }
+                .joinToString("")
 
         if (suffix.isNotEmpty()) {
             return fatCompliantName.take(240 - suffix.length) + suffix
@@ -121,15 +115,24 @@ object DiskUtil {
         }
     }
 
-    /**
-     * Returns true if the given character is a valid filename character, false otherwise.
-     */
+    /** Returns true if the given character is a valid filename character, false otherwise. */
     private fun isValidFatFilenameChar(c: Char): Boolean {
         if (0x00.toChar() <= c && c <= 0x1f.toChar()) {
             return false
         }
         return when (c) {
-            '\'', '"', '*', '/', ':', '<', '>', '?', '\\', '|', '~', 0x7f.toChar() -> false
+            '\'',
+            '"',
+            '*',
+            '/',
+            ':',
+            '<',
+            '>',
+            '?',
+            '\\',
+            '|',
+            '~',
+            0x7f.toChar() -> false
             else -> true
         }
     }

@@ -22,4 +22,3 @@ object Size {
     val navBarSize = 68.dp
     val squareCover = 80.dp
 }
-

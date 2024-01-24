@@ -60,8 +60,6 @@ class TrackSearch : Track {
 
     companion object {
 
-        fun create(serviceId: Int): TrackSearch = TrackSearch().apply {
-            sync_id = serviceId
-        }
+        fun create(serviceId: Int): TrackSearch = TrackSearch().apply { sync_id = serviceId }
     }
 }

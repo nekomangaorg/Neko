@@ -7,7 +7,8 @@ import okhttp3.Response
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
 
-class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var token: String?) : Interceptor {
+class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var token: String?) :
+    Interceptor {
 
     private var oauth: OAuth? = null
     private val json: Json by injectLazy()
@@ -27,13 +28,15 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
         }
 
         // Add the authorization header to the original request
-        val authRequest = originalRequest.newBuilder()
-            .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
-            .build()
+        val authRequest =
+            originalRequest
+                .newBuilder()
+                .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
+                .build()
 
         val response = chain.proceed(authRequest)
-        val tokenIsExpired = response.headers["www-authenticate"]
-            ?.contains("The access token expired") ?: false
+        val tokenIsExpired =
+            response.headers["www-authenticate"]?.contains("The access token expired") ?: false
 
         // Retry the request once with a new token in case it was not already refreshed
         // by the is expired check before.
@@ -43,9 +46,11 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
             val newToken = refreshToken(chain)
             setAuth(newToken)
 
-            val newRequest = originalRequest.newBuilder()
-                .addHeader("Authorization", "Bearer ${newToken.access_token}")
-                .build()
+            val newRequest =
+                originalRequest
+                    .newBuilder()
+                    .addHeader("Authorization", "Bearer ${newToken.access_token}")
+                    .build()
 
             return chain.proceed(newRequest)
         }
@@ -54,8 +59,8 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
     }
 
     /**
-     * Called when the user authenticates with MyAnimeList for the first time. Sets the refresh token
-     * and the oauth object.
+     * Called when the user authenticates with MyAnimeList for the first time. Sets the refresh
+     * token and the oauth object.
      */
     fun setAuth(oauth: OAuth?) {
         token = oauth?.access_token
@@ -68,9 +73,7 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
             val oauthResponse = chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!))
 
             if (oauthResponse.isSuccessful) {
-                with(json) {
-                    oauthResponse.parseAs<OAuth>()
-                }
+                with(json) { oauthResponse.parseAs<OAuth>() }
             } else {
                 oauthResponse.close()
                 null

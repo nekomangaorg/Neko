@@ -7,8 +7,7 @@ abstract class ViewPagerAdapter : androidx.viewpager.widget.PagerAdapter() {
 
     protected abstract fun createView(container: ViewGroup, position: Int): View
 
-    protected open fun destroyView(container: ViewGroup, position: Int, view: View) {
-    }
+    protected open fun destroyView(container: ViewGroup, position: Int, view: View) {}
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val view = createView(container, position)

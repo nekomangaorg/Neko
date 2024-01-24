@@ -18,25 +18,20 @@ import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.theme.Size
 
-/**
- * Column scoped header with a cancel button
- */
+/** Column scoped header with a cancel button */
 @Composable
 fun ColumnScope.Header(text: String, cancelClick: () -> Unit) {
-    Box(modifier = Modifier.padding(horizontal = 8.dp)) {
+    Box(modifier = Modifier.padding(horizontal = Size.small)) {
         IconButton(onClick = { cancelClick() }) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = null,
-                modifier = Modifier
-                    .size(28.dp),
+                modifier = Modifier.size(28.dp),
                 tint = MaterialTheme.colorScheme.onSurface,
             )
         }
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center),
+            modifier = Modifier.fillMaxWidth().align(Alignment.Center),
             text = text,
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,

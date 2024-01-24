@@ -18,160 +18,199 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-/**
- *
- */
+/**  */
 class TrackingCoordinator {
     private val db: DatabaseHelper by injectLazy()
     private val trackManager: TrackManager = Injekt.get()
 
-    /**
-     * Update tracker with new status
-     */
-    suspend fun updateTrackStatus(statusIndex: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
-        var track = trackAndService.track.copy(status = trackAndService.service.statusList[statusIndex])
+    /** Update tracker with new status */
+    suspend fun updateTrackStatus(
+        statusIndex: Int,
+        trackAndService: TrackingConstants.TrackAndService
+    ): TrackingUpdate {
+        var track =
+            trackAndService.track.copy(status = trackAndService.service.statusList[statusIndex])
 
-        if (trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) && track.totalChapters > 0) {
+        if (
+            trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) &&
+                track.totalChapters > 0
+        ) {
             track = track.copy(lastChapterRead = track.totalChapters.toFloat())
         }
         return updateTrackingService(track, trackAndService.service)
     }
 
-    /**
-     * Update tracker with new score
-     */
-    suspend fun updateTrackScore(scoreIndex: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
-        val trackItem = trackAndService.track.copy(
-            score = trackAndService.service.indexToScore(scoreIndex),
-        )
+    /** Update tracker with new score */
+    suspend fun updateTrackScore(
+        scoreIndex: Int,
+        trackAndService: TrackingConstants.TrackAndService
+    ): TrackingUpdate {
+        val trackItem =
+            trackAndService.track.copy(
+                score = trackAndService.service.indexToScore(scoreIndex),
+            )
 
         return if (trackAndService.service.isMdList) {
             runCatching {
-                trackManager.mdList.updateScore(trackItem.toDbTrack())
-                TrackingUpdate.Success
-            }.getOrElse {
-                TrackingUpdate.Error("Error updating MangaDex Score", it)
-            }
+                    trackManager.mdList.updateScore(trackItem.toDbTrack())
+                    TrackingUpdate.Success
+                }
+                .getOrElse { TrackingUpdate.Error("Error updating MangaDex Score", it) }
         } else {
             updateTrackingService(trackItem, trackAndService.service)
         }
     }
 
-    /**
-     * Update the tracker with the new chapter information
-     */
-    suspend fun updateTrackChapter(newChapterNumber: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
+    /** Update the tracker with the new chapter information */
+    suspend fun updateTrackChapter(
+        newChapterNumber: Int,
+        trackAndService: TrackingConstants.TrackAndService
+    ): TrackingUpdate {
         val track = trackAndService.track.copy(lastChapterRead = newChapterNumber.toFloat())
         return updateTrackingService(track, trackAndService.service)
     }
 
-    /**
-     * Update the tracker with the start/finished date
-     */
-    suspend fun updateTrackDate(trackDateChange: TrackingConstants.TrackDateChange): TrackingUpdate {
-        val date = when (trackDateChange) {
-            is TrackingConstants.TrackDateChange.EditTrackingDate -> {
-                trackDateChange.newDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    /** Update the tracker with the start/finished date */
+    suspend fun updateTrackDate(
+        trackDateChange: TrackingConstants.TrackDateChange
+    ): TrackingUpdate {
+        val date =
+            when (trackDateChange) {
+                is TrackingConstants.TrackDateChange.EditTrackingDate -> {
+                    trackDateChange.newDate
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()
+                }
+                else -> 0L
             }
-
-            else -> 0L
-        }
         val track =
             when (trackDateChange.readingDate) {
-                TrackingConstants.ReadingDate.Start -> trackDateChange.trackAndService.track.copy(startedReadingDate = date)
-                TrackingConstants.ReadingDate.Finish -> trackDateChange.trackAndService.track.copy(finishedReadingDate = date)
+                TrackingConstants.ReadingDate.Start ->
+                    trackDateChange.trackAndService.track.copy(startedReadingDate = date)
+                TrackingConstants.ReadingDate.Finish ->
+                    trackDateChange.trackAndService.track.copy(finishedReadingDate = date)
             }
 
         return updateTrackingService(track, trackDateChange.trackAndService.service)
     }
 
-    /**
-     * Register tracker
-     */
-    suspend fun registerTracking(trackAndService: TrackingConstants.TrackAndService, mangaId: Long): TrackingUpdate {
+    /** Register tracker */
+    suspend fun registerTracking(
+        trackAndService: TrackingConstants.TrackAndService,
+        mangaId: Long
+    ): TrackingUpdate {
         return runCatching {
-            val trackItem = trackAndService.track.copy(
-                mangaId = mangaId,
-            )
+                val trackItem =
+                    trackAndService.track.copy(
+                        mangaId = mangaId,
+                    )
 
-            val track = trackManager.getService(trackAndService.service.id)!!.bind(trackItem.toDbTrack())
-            db.insertTrack(track).executeOnIO()
-            TrackingUpdate.Success
-        }.getOrElse { exception ->
-            TimberKt.e(exception) { "Error registering tracker" }
-            TrackingUpdate.Error("Error registering tracker", exception)
-        }
+                val track =
+                    trackManager
+                        .getService(trackAndService.service.id)!!
+                        .bind(trackItem.toDbTrack())
+                db.insertTrack(track).executeOnIO()
+                TrackingUpdate.Success
+            }
+            .getOrElse { exception ->
+                TimberKt.e(exception) { "Error registering tracker" }
+                TrackingUpdate.Error("Error registering tracker", exception)
+            }
     }
 
-    /**
-     * Remove a tracker with an option to remove it from the tracking service
-     */
-    suspend fun removeTracking(alsoRemoveFromTracker: Boolean, serviceItem: TrackServiceItem, mangaId: Long): TrackingUpdate {
+    /** Remove a tracker with an option to remove it from the tracking service */
+    suspend fun removeTracking(
+        alsoRemoveFromTracker: Boolean,
+        serviceItem: TrackServiceItem,
+        mangaId: Long
+    ): TrackingUpdate {
         val service = trackManager.getService(serviceItem.id)!!
         val tracks = db.getTracks(mangaId).executeOnIO().filter { it.sync_id == service.id }
         db.deleteTrackForManga(mangaId, service).executeOnIO()
         if (alsoRemoveFromTracker && service.canRemoveFromService()) {
             withNonCancellableContext {
                 tracks.forEach {
-                    runCatching {
-                        service.removeFromService(it)
-                    }.onFailure {
-                        TimberKt.e(it) { "Unable to remove from service" }
-                    }
+                    runCatching { service.removeFromService(it) }
+                        .onFailure { TimberKt.e(it) { "Unable to remove from service" } }
                 }
             }
         }
         return TrackingUpdate.Success
     }
 
-    /**
-     * Updates the remote tracking service with tracking changes
-     */
+    /** Updates the remote tracking service with tracking changes */
     suspend fun updateTrackingService(track: TrackItem, service: TrackServiceItem): TrackingUpdate {
         return runCatching {
-            val updatedTrack = trackManager.getService(service.id)!!.update(track.toDbTrack())
-            db.insertTrack(updatedTrack).executeOnIO()
-            TrackingUpdate.Success
-        }.getOrElse {
-            TrackingUpdate.Error("Error updating tracker", it)
-        }
-    }
-
-    /**
-     * Search Tracker
-     */
-    suspend fun searchTracker(title: String, service: TrackServiceItem, manga: Manga, previouslyTracker: Boolean) = flow {
-        emit(TrackingConstants.TrackSearchResult.Loading)
-        val results = trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
-        emit(
-            when (results.isEmpty()) {
-                true -> TrackingConstants.TrackSearchResult.NoResult
-                false -> TrackingConstants.TrackSearchResult.Success(results.map { it.toTrackSearchItem() }.toImmutableList())
-            },
-        )
-    }.catch {
-        TimberKt.e(it) { "error searching tracker" }
-        emit(TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker", service.nameRes))
-    }
-
-    /**
-     * Search Tracker
-     */
-    suspend fun searchTrackerNonFlow(title: String, service: TrackServiceItem, manga: Manga, previouslyTracker: Boolean): TrackingConstants.TrackSearchResult {
-        return kotlin.runCatching {
-            val results = trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
-            when (results.isEmpty()) {
-                true -> TrackingConstants.TrackSearchResult.NoResult
-                false -> TrackingConstants.TrackSearchResult.Success(results.map { it.toTrackSearchItem() }.toImmutableList())
+                val updatedTrack = trackManager.getService(service.id)!!.update(track.toDbTrack())
+                db.insertTrack(updatedTrack).executeOnIO()
+                TrackingUpdate.Success
             }
-        }.getOrElse {
-            TimberKt.e(it) { "error searching tracker" }
-            TrackingConstants.TrackSearchResult.Error(it.message ?: "Error searching tracker", service.nameRes)
-        }
+            .getOrElse { TrackingUpdate.Error("Error updating tracker", it) }
+    }
+
+    /** Search Tracker */
+    suspend fun searchTracker(
+        title: String,
+        service: TrackServiceItem,
+        manga: Manga,
+        previouslyTracker: Boolean
+    ) =
+        flow {
+                emit(TrackingConstants.TrackSearchResult.Loading)
+                val results =
+                    trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
+                emit(
+                    when (results.isEmpty()) {
+                        true -> TrackingConstants.TrackSearchResult.NoResult
+                        false ->
+                            TrackingConstants.TrackSearchResult.Success(
+                                results.map { it.toTrackSearchItem() }.toImmutableList()
+                            )
+                    },
+                )
+            }
+            .catch {
+                TimberKt.e(it) { "error searching tracker" }
+                emit(
+                    TrackingConstants.TrackSearchResult.Error(
+                        it.message ?: "Error searching tracker",
+                        service.nameRes
+                    )
+                )
+            }
+
+    /** Search Tracker */
+    suspend fun searchTrackerNonFlow(
+        title: String,
+        service: TrackServiceItem,
+        manga: Manga,
+        previouslyTracker: Boolean
+    ): TrackingConstants.TrackSearchResult {
+        return kotlin
+            .runCatching {
+                val results =
+                    trackManager.getService(service.id)!!.search(title, manga, previouslyTracker)
+                when (results.isEmpty()) {
+                    true -> TrackingConstants.TrackSearchResult.NoResult
+                    false ->
+                        TrackingConstants.TrackSearchResult.Success(
+                            results.map { it.toTrackSearchItem() }.toImmutableList()
+                        )
+                }
+            }
+            .getOrElse {
+                TimberKt.e(it) { "error searching tracker" }
+                TrackingConstants.TrackSearchResult.Error(
+                    it.message ?: "Error searching tracker",
+                    service.nameRes
+                )
+            }
     }
 }
 
 sealed class TrackingUpdate {
     object Success : TrackingUpdate()
+
     data class Error(val message: String, val exception: Throwable) : TrackingUpdate()
 }

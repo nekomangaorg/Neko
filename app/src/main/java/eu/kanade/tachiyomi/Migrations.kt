@@ -31,12 +31,16 @@ object Migrations {
      * @param preferences Preferences of the application.
      * @return true if a migration is performed, false otherwise.
      */
-    fun upgrade(preferences: PreferencesHelper, networkPreferences: NetworkPreferences, libraryPreferences: LibraryPreferences, readerPreferences: ReaderPreferences, scope: CoroutineScope): Boolean {
+    fun upgrade(
+        preferences: PreferencesHelper,
+        networkPreferences: NetworkPreferences,
+        libraryPreferences: LibraryPreferences,
+        readerPreferences: ReaderPreferences,
+        scope: CoroutineScope
+    ): Boolean {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        prefs.edit {
-            remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY)
-        }
+        prefs.edit { remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY) }
         val oldVersion = preferences.lastVersionCode().get()
         TimberKt.d { "last version $oldVersion" }
         if (oldVersion < BuildConfig.VERSION_CODE) {
@@ -97,14 +101,15 @@ object Migrations {
 
             if (oldVersion < 120) {
                 // Migrate Rotation and Viewer values to default values for viewer_flags
-                val newOrientation = when (prefs.getInt("pref_rotation_type_key", 1)) {
-                    1 -> OrientationType.FREE.flagValue
-                    2 -> OrientationType.PORTRAIT.flagValue
-                    3 -> OrientationType.LANDSCAPE.flagValue
-                    4 -> OrientationType.LOCKED_PORTRAIT.flagValue
-                    5 -> OrientationType.LOCKED_LANDSCAPE.flagValue
-                    else -> OrientationType.FREE.flagValue
-                }
+                val newOrientation =
+                    when (prefs.getInt("pref_rotation_type_key", 1)) {
+                        1 -> OrientationType.FREE.flagValue
+                        2 -> OrientationType.PORTRAIT.flagValue
+                        3 -> OrientationType.LANDSCAPE.flagValue
+                        4 -> OrientationType.LOCKED_PORTRAIT.flagValue
+                        5 -> OrientationType.LOCKED_LANDSCAPE.flagValue
+                        else -> OrientationType.FREE.flagValue
+                    }
 
                 // Reading mode flag and prefValue is the same value
                 val newReadingMode = prefs.getInt("pref_default_viewer_key", 1)
@@ -117,9 +122,7 @@ object Migrations {
                 }
             }
             if (oldVersion < 142) {
-                scope.launchIO {
-                    LibraryPresenter.updateRatiosAndColors()
-                }
+                scope.launchIO { LibraryPresenter.updateRatiosAndColors() }
                 val oldReaderTap = prefs.getBoolean("reader_tap", true)
                 if (!oldReaderTap) {
                     readerPreferences.navigationModePager().set(5)
@@ -151,7 +154,6 @@ object Migrations {
                 val updated = preferences.langsToShow().get().split(",").filter { it != "NULL" }
                 preferences.langsToShow().set(updated.joinToString(","))
             }
-
 
             return true
         }

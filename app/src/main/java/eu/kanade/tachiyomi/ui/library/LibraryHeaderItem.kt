@@ -12,8 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 class LibraryHeaderItem(
     private val categoryF: (Int) -> Category,
     val catId: Int,
-) :
-    AbstractHeaderItem<LibraryHeaderHolder>() {
+) : AbstractHeaderItem<LibraryHeaderHolder>() {
 
     override fun getLayoutRes(): Int {
         return R.layout.library_category_header_item

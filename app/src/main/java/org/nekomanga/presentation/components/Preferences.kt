@@ -33,10 +33,7 @@ fun Divider(modifier: Modifier = Modifier) {
 @Composable
 fun VerticalDivider(modifier: Modifier = Modifier) {
     androidx.compose.material3.Divider(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(1.dp)
-            .then(modifier),
+        modifier = Modifier.fillMaxHeight().width(1.dp).then(modifier),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
     )
 }
@@ -52,35 +49,33 @@ fun PreferenceRow(
 ) {
     val height = if (subtitle != null) 72.dp else 56.dp
 
-    val titleTextStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
-    val subtitleTextStyle = MaterialTheme.typography.bodyMedium.copy(
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-    )
+    val titleTextStyle =
+        MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
+    val subtitleTextStyle =
+        MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+        )
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = height)
-            .combinedClickable(
-                onLongClick = onLongClick,
-                onClick = onClick,
-            ),
+        modifier =
+            Modifier.fillMaxWidth()
+                .heightIn(min = height)
+                .combinedClickable(
+                    onLongClick = onLongClick,
+                    onClick = onClick,
+                ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (painter != null) {
             Icon(
                 painter = painter,
-                modifier = Modifier
-                    .padding(horizontal = medium)
-                    .size(24.dp),
+                modifier = Modifier.padding(horizontal = medium).size(24.dp),
                 tint = MaterialTheme.colorScheme.primary,
                 contentDescription = null,
             )
         }
         Column(
-            Modifier
-                .padding(horizontal = medium)
-                .weight(1f),
+            Modifier.padding(horizontal = medium).weight(1f),
         ) {
             Text(
                 text = title,
@@ -95,9 +90,7 @@ fun PreferenceRow(
             }
         }
         if (action != null) {
-            Box(Modifier.widthIn(min = 56.dp)) {
-                action()
-            }
+            Box(Modifier.widthIn(min = 56.dp)) { action() }
         }
     }
 }

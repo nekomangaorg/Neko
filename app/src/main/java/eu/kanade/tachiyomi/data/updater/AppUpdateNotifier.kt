@@ -23,9 +23,7 @@ import eu.kanade.tachiyomi.util.system.notificationManager
  */
 internal class AppUpdateNotifier(private val context: Context) {
 
-    /**
-     * Builder to manage notifications.
-     */
+    /** Builder to manage notifications. */
     private val notificationBuilder by lazy {
         NotificationCompat.Builder(context, Notifications.CHANNEL_COMMON)
     }
@@ -44,10 +42,11 @@ internal class AppUpdateNotifier(private val context: Context) {
     }
 
     fun promptUpdate(body: String, url: String, releaseUrl: String) {
-        val intent = Intent(context, AppUpdateService::class.java).apply {
-            putExtra(AppUpdateService.EXTRA_DOWNLOAD_URL, url)
-            putExtra(AppUpdateService.EXTRA_NOTIFY_ON_INSTALL, true)
-        }
+        val intent =
+            Intent(context, AppUpdateService::class.java).apply {
+                putExtra(AppUpdateService.EXTRA_DOWNLOAD_URL, url)
+                putExtra(AppUpdateService.EXTRA_NOTIFY_ON_INSTALL, true)
+            }
 
         val pendingIntent = NotificationReceiver.openUpdatePendingActivity(context, body, url)
         releasePageUrl = releaseUrl
@@ -78,13 +77,19 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     private fun NotificationCompat.Builder.addReleasePageAction() {
         releasePageUrl?.let { releaseUrl ->
-            val releaseIntent = Intent(Intent.ACTION_VIEW, releaseUrl.toUri()).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
+            val releaseIntent =
+                Intent(Intent.ACTION_VIEW, releaseUrl.toUri()).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
             addAction(
                 R.drawable.ic_new_releases_24dp,
                 context.getString(R.string.release_page),
-                PendingIntent.getActivity(context, releaseUrl.hashCode(), releaseIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
+                PendingIntent.getActivity(
+                    context,
+                    releaseUrl.hashCode(),
+                    releaseIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                ),
             )
         }
     }
@@ -163,7 +168,10 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_INSTALL),
+                NotificationReceiver.dismissNotificationPendingBroadcast(
+                    context,
+                    Notifications.ID_INSTALL
+                ),
             )
             addReleasePageAction()
         }
@@ -182,12 +190,13 @@ internal class AppUpdateNotifier(private val context: Context) {
             setAutoCancel(true)
             setOngoing(false)
             setProgress(0, 0, false)
-            val pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                context.packageManager.getLaunchIntentForPackage(BuildConfig.APPLICATION_ID),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
+            val pendingIntent =
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    context.packageManager.getLaunchIntentForPackage(BuildConfig.APPLICATION_ID),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                )
             setContentIntent(pendingIntent)
             clearActions()
             addAction(

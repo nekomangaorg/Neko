@@ -8,8 +8,7 @@ abstract class BaseFlexibleViewHolder(
     view: View,
     adapter: FlexibleAdapter<*>,
     stickyHeader: Boolean = false,
-) :
-    FlexibleViewHolder(view, adapter, stickyHeader) {
+) : FlexibleViewHolder(view, adapter, stickyHeader) {
     override fun getRearRightView(): View? {
         return getRearEndView()
     }

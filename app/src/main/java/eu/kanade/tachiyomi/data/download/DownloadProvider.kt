@@ -26,34 +26,34 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /**
- * This class is used to provide the directories where the downloads should be saved.
- * It uses the following path scheme: /<root downloads dir>/<source name>/<manga>/<chapter>
+ * This class is used to provide the directories where the downloads should be saved. It uses the
+ * following path scheme: /<root downloads dir>/<source name>/<manga>/<chapter>
  *
  * @param context the application context.
  */
 class DownloadProvider(private val context: Context) {
 
-    /**
-     * Preferences helper.
-     */
+    /** Preferences helper. */
     private val preferences: PreferencesHelper by injectLazy()
     private val source = Injekt.get<SourceManager>().mangaDex
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    /**
-     * The root directory for downloads.
-     */
-    private var downloadsDir = preferences.downloadsDirectory().get().let {
-        val dir = UniFile.fromUri(context, it.toUri())
-        DiskUtil.createNoMediaFile(dir, context)
-        dir
-    }
+    /** The root directory for downloads. */
+    private var downloadsDir =
+        preferences.downloadsDirectory().get().let {
+            val dir = UniFile.fromUri(context, it.toUri())
+            DiskUtil.createNoMediaFile(dir, context)
+            dir
+        }
 
     init {
-        preferences.downloadsDirectory().changes().drop(1).onEach {
-            downloadsDir = UniFile.fromUri(context, it.toUri())
-        }.launchIn(scope)
+        preferences
+            .downloadsDirectory()
+            .changes()
+            .drop(1)
+            .onEach { downloadsDir = UniFile.fromUri(context, it.toUri()) }
+            .launchIn(scope)
     }
 
     /**
@@ -68,8 +68,7 @@ class DownloadProvider(private val context: Context) {
             val mangaDirName = getMangaDirName(manga)
             val sourceDirName = getSourceDirName()
             TimberKt.d { "creating directory for $sourceDirName : $mangaDirName" }
-            return downloadsDir.createDirectory(sourceDirName)
-                .createDirectory(mangaDirName)
+            return downloadsDir.createDirectory(sourceDirName).createDirectory(mangaDirName)
         } catch (e: Exception) {
             TimberKt.e(e) { "error getting download folder for ${manga.title}" }
             throw Exception(context.getString(R.string.invalid_download_location))
@@ -105,14 +104,13 @@ class DownloadProvider(private val context: Context) {
      */
     fun findChapterDir(chapter: Chapter, manga: Manga): UniFile? {
         val mangaDir = findMangaDir(manga)
-        return getValidChapterDirNames(chapter).asSequence()
-            .mapNotNull {
-                mangaDir?.findFile(it, true)
-                    ?: mangaDir?.findFile("$it.cbz", true)
-            }.firstOrNull()
-            ?: mangaDir?.listFiles { _, filename ->
-                filename.contains(chapter.uuid())
-            }?.firstOrNull()
+        return getValidChapterDirNames(chapter)
+            .asSequence()
+            .mapNotNull { mangaDir?.findFile(it, true) ?: mangaDir?.findFile("$it.cbz", true) }
+            .firstOrNull()
+            ?: mangaDir
+                ?.listFiles { _, filename -> filename.contains(chapter.uuid()) }
+                ?.firstOrNull()
     }
 
     /**
@@ -147,9 +145,10 @@ class DownloadProvider(private val context: Context) {
                         return@filter true
                     }
                     val afterScanlatorCheck = fileName.substringAfter("_")
-                    return@filter chapterNameHashSet.contains(fileName) || chapterNameHashSet.contains(
-                        afterScanlatorCheck,
-                    )
+                    return@filter chapterNameHashSet.contains(fileName) ||
+                        chapterNameHashSet.contains(
+                            afterScanlatorCheck,
+                        )
                 }
             }
             return@filter false
@@ -190,9 +189,10 @@ class DownloadProvider(private val context: Context) {
                     }
 
                     val afterScanlatorCheck = fileName.substringAfter("_")
-                    return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(
-                        afterScanlatorCheck,
-                    )
+                    return@filter !chapterNameHashSet.contains(fileName) &&
+                        !chapterNameHashSet.contains(
+                            afterScanlatorCheck,
+                        )
                 }
             }
             // everything else is considered true
@@ -209,10 +209,13 @@ class DownloadProvider(private val context: Context) {
 
     fun renameChapterFoldersForLegacyMerged(manga: Manga) {
         val mangaDir = findMangaDir(manga) ?: return
-        mangaDir.listFiles()?.filter { file -> file.name != null && file.name!!.startsWith(MangaLife.oldName) }?.forEach { file ->
-            val newFileName = file.name!!.replace(MangaLife.oldName, MangaLife.name)
-            file.renameTo(newFileName)
-        }
+        mangaDir
+            .listFiles()
+            ?.filter { file -> file.name != null && file.name!!.startsWith(MangaLife.oldName) }
+            ?.forEach { file ->
+                val newFileName = file.name!!.replace(MangaLife.oldName, MangaLife.name)
+                file.renameTo(newFileName)
+            }
     }
 
     /**
@@ -224,11 +227,14 @@ class DownloadProvider(private val context: Context) {
      */
     fun findTempChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
         val mangaDir = findMangaDir(manga) ?: return emptyList()
-        return chapters.mapNotNull { mangaDir.findFile("${getChapterDirName(it)}${Downloader.TMP_DIR_SUFFIX}") }
+        return chapters.mapNotNull {
+            mangaDir.findFile("${getChapterDirName(it)}${Downloader.TMP_DIR_SUFFIX}")
+        }
     }
 
     /**
-     * Returns the download directory name for a source always english to not break with other forks or current neko
+     * Returns the download directory name for a source always english to not break with other forks
+     * or current neko
      *
      * @param source the source to query.
      */
@@ -279,13 +285,14 @@ class DownloadProvider(private val context: Context) {
      */
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
         return listOf(
-            getChapterDirName(chapter, true),
-            // chapter names from j2k
-            getJ2kChapterName(chapter),
-            // legacy manga id
-            getChapterDirName(chapter, false),
-            // Legacy chapter directory name used in v0.8.4 and before
-            DiskUtil.buildValidFilename(chapter.name),
-        ).filter { it.isNotEmpty() }
+                getChapterDirName(chapter, true),
+                // chapter names from j2k
+                getJ2kChapterName(chapter),
+                // legacy manga id
+                getChapterDirName(chapter, false),
+                // Legacy chapter directory name used in v0.8.4 and before
+                DiskUtil.buildValidFilename(chapter.name),
+            )
+            .filter { it.isNotEmpty() }
     }
 }

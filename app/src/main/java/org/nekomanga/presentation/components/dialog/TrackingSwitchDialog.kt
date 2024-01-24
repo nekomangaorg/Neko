@@ -12,33 +12,47 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun TrackingSwitchDialog(themeColorState: ThemeColorState, name: String, oldName: String, newName: String, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+fun TrackingSwitchDialog(
+    themeColorState: ThemeColorState,
+    name: String,
+    oldName: String,
+    newName: String,
+    onConfirm: (Boolean) -> Unit,
+    onDismiss: () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors
+    ) {
         AlertDialog(
-            title = {
-                Text(text = stringResource(id = R.string.remove_previous_tracker))
-            },
+            title = { Text(text = stringResource(id = R.string.remove_previous_tracker)) },
             text = {
                 Column {
                     TextButton(
                         onClick = { onConfirm(true) },
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text(text = stringResource(id = R.string.remove_x_from_service_and_add_y, oldName, name, newName))
+                        Text(
+                            text =
+                                stringResource(
+                                    id = R.string.remove_x_from_service_and_add_y,
+                                    oldName,
+                                    name,
+                                    newName
+                                )
+                        )
                     }
 
-                    Gap(8.dp)
+                    Gap(Size.small)
                     TextButton(
                         onClick = { onConfirm(false) },
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(text = stringResource(id = R.string.keep_both_on_service, name))
                     }
@@ -46,7 +60,11 @@ fun TrackingSwitchDialog(themeColorState: ThemeColorState, name: String, oldName
             },
             onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
+                TextButton(
+                    onClick = onDismiss,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },

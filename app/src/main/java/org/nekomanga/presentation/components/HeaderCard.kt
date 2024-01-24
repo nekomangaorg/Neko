@@ -39,9 +39,7 @@ fun DefaultHeaderText(text: String) {
         style = MaterialTheme.typography.titleMedium,
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSecondary,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
     )
 }
 

@@ -16,21 +16,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.nekomanga.logging.TimberKt
 
-/**
- * Restores backup.
- */
+/** Restores backup. */
 class BackupRestoreService : Service() {
 
-    /**
-     * Wake lock that will be held until the service is destroyed.
-     */
+    /** Wake lock that will be held until the service is destroyed. */
     private lateinit var wakeLock: PowerManager.WakeLock
 
     private val restoreHelper = RestoreHelper(this)
 
-    /**
-     * Subscription where the update is done.
-     */
+    /** Subscription where the update is done. */
     private var job: Job? = null
 
     /**
@@ -57,9 +51,7 @@ class BackupRestoreService : Service() {
         super.onDestroy()
     }
 
-    /**
-     * This method needs to be implemented, but it's not used/needed.
-     */
+    /** This method needs to be implemented, but it's not used/needed. */
     override fun onBind(intent: Intent): IBinder? = null
 
     /**
@@ -81,12 +73,14 @@ class BackupRestoreService : Service() {
             restoreHelper.showErrorNotification(exception.message!!)
             stopSelf(startId)
         }
-        job = GlobalScope.launch(handler) {
-            BackupRestorer(
-                this@BackupRestoreService,
-                job,
-            ).restoreBackup(uri)
-        }
+        job =
+            GlobalScope.launch(handler) {
+                BackupRestorer(
+                        this@BackupRestoreService,
+                        job,
+                    )
+                    .restoreBackup(uri)
+            }
         job?.invokeOnCompletion { stopSelf(startId) }
 
         return START_NOT_STICKY
@@ -119,10 +113,11 @@ class BackupRestoreService : Service() {
          */
         fun start(context: Context, uri: Uri, mode: Int) {
             if (!isRunning(context)) {
-                val intent = Intent(context, BackupRestoreService::class.java).apply {
-                    putExtra(BackupConst.EXTRA_URI, uri)
-                    putExtra(BackupConst.EXTRA_MODE, mode)
-                }
+                val intent =
+                    Intent(context, BackupRestoreService::class.java).apply {
+                        putExtra(BackupConst.EXTRA_URI, uri)
+                        putExtra(BackupConst.EXTRA_MODE, mode)
+                    }
                 ContextCompat.startForegroundService(context, intent)
             }
         }

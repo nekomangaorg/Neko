@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -14,6 +13,7 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withOriginalWidth
@@ -28,135 +28,163 @@ class SettingsDownloadController : SettingsController() {
 
     private val db: DatabaseHelper by injectLazy()
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
-        titleRes = R.string.downloads
+    override fun setupPreferenceScreen(screen: PreferenceScreen) =
+        screen.apply {
+            titleRes = R.string.downloads
 
-        preference {
-            key = Keys.downloadsDirectory
-            titleRes = R.string.download_location
-            onClick {
-                DownloadDirectoriesDialog(this@SettingsDownloadController).show()
+            preference {
+                key = Keys.downloadsDirectory
+                titleRes = R.string.download_location
+                onClick { DownloadDirectoriesDialog(this@SettingsDownloadController).show() }
+
+                preferences
+                    .downloadsDirectory()
+                    .changes()
+                    .onEach { path ->
+                        val dir = UniFile.fromUri(context, path.toUri())
+                        summary = dir.filePath ?: path
+                    }
+                    .launchIn(viewScope)
             }
-
-            preferences.downloadsDirectory().changes().onEach { path ->
-                val dir = UniFile.fromUri(context, path.toUri())
-                summary = dir.filePath ?: path
-            }.launchIn(viewScope)
-        }
-        switchPreference {
-            key = Keys.downloadOnlyOverWifi
-            titleRes = R.string.only_download_over_wifi
-            defaultValue = true
-        }
-        switchPreference {
-            key = Keys.saveChaptersAsCBZ
-            titleRes = R.string.save_chapters_as_cbz
-            defaultValue = true
-        }
-        switchPreference {
-            bindTo(readerPreferences.splitTallImages())
-            titleRes = R.string.split_tall_images
-            summaryRes = R.string.split_tall_images_summary
-        }
-
-        preferenceCategory {
-            titleRes = R.string.remove_after_read
-
             switchPreference {
-                key = Keys.removeAfterMarkedAsRead
-                titleRes = R.string.remove_when_marked_as_read
-                defaultValue = false
+                key = Keys.downloadOnlyOverWifi
+                titleRes = R.string.only_download_over_wifi
+                defaultValue = true
             }
-            intListPreference(activity) {
-                key = Keys.removeAfterReadSlots
+            switchPreference {
+                key = Keys.saveChaptersAsCBZ
+                titleRes = R.string.save_chapters_as_cbz
+                defaultValue = true
+            }
+            switchPreference {
+                bindTo(readerPreferences.splitTallImages())
+                titleRes = R.string.split_tall_images
+                summaryRes = R.string.split_tall_images_summary
+            }
+
+            preferenceCategory {
                 titleRes = R.string.remove_after_read
-                entriesRes = arrayOf(
-                    R.string.never,
-                    R.string.last_read_chapter,
-                    R.string.second_to_last,
-                    R.string.third_to_last,
-                    R.string.fourth_to_last,
-                    R.string.fifth_to_last,
-                )
-                entryRange = -1..4
-                defaultValue = -1
-            }
-        }
 
-        val dbCategories = db.getCategories().executeAsBlocking()
-        val categories = listOf(Category.createDefault(context)) + dbCategories
-
-        preferenceCategory {
-            titleRes = R.string.download_new_chapters
-
-            switchPreference {
-                bindTo(preferences.downloadNewChapters())
-                titleRes = R.string.download_new_chapters
-            }
-            triStateListPreference(activity) {
-                preferences.apply {
-                    bindTo(downloadNewChaptersInCategories(), excludeCategoriesInDownloadNew())
+                switchPreference {
+                    key = Keys.removeAfterMarkedAsRead
+                    titleRes = R.string.remove_when_marked_as_read
+                    defaultValue = false
                 }
-                titleRes = R.string.categories
-                entries = categories.map { it.name }
-                entryValues = categories.map { it.id.toString() }
-                allSelectionRes = R.string.all
+                intListPreference(activity) {
+                    key = Keys.removeAfterReadSlots
+                    titleRes = R.string.remove_after_read
+                    entriesRes =
+                        arrayOf(
+                            R.string.never,
+                            R.string.last_read_chapter,
+                            R.string.second_to_last,
+                            R.string.third_to_last,
+                            R.string.fourth_to_last,
+                            R.string.fifth_to_last,
+                        )
+                    entryRange = -1..4
+                    defaultValue = -1
+                }
+            }
 
-                preferences.downloadNewChapters().changes().onEach { isVisible = it }.launchIn(viewScope)
+            val dbCategories = db.getCategories().executeAsBlocking()
+            val categories = listOf(Category.createDefault(context)) + dbCategories
+
+            preferenceCategory {
+                titleRes = R.string.download_new_chapters
+
+                switchPreference {
+                    bindTo(preferences.downloadNewChapters())
+                    titleRes = R.string.download_new_chapters
+                }
+                triStateListPreference(activity) {
+                    preferences.apply {
+                        bindTo(downloadNewChaptersInCategories(), excludeCategoriesInDownloadNew())
+                    }
+                    titleRes = R.string.categories
+                    entries = categories.map { it.name }
+                    entryValues = categories.map { it.id.toString() }
+                    allSelectionRes = R.string.all
+
+                    preferences
+                        .downloadNewChapters()
+                        .changes()
+                        .onEach { isVisible = it }
+                        .launchIn(viewScope)
+                }
+            }
+
+            preferenceCategory {
+                titleRes = R.string.download_ahead
+
+                intListPreference(activity) {
+                    bindTo(preferences.autoDownloadWhileReading())
+                    titleRes = R.string.auto_download_while_reading
+                    entries =
+                        listOf(
+                            context.getString(R.string.never),
+                            context.resources.getQuantityString(
+                                R.plurals.next_unread_chapters,
+                                2,
+                                2
+                            ),
+                            context.resources.getQuantityString(
+                                R.plurals.next_unread_chapters,
+                                3,
+                                3
+                            ),
+                            context.resources.getQuantityString(
+                                R.plurals.next_unread_chapters,
+                                5,
+                                5
+                            ),
+                            context.resources.getQuantityString(
+                                R.plurals.next_unread_chapters,
+                                10,
+                                10
+                            ),
+                        )
+                    entryValues = listOf(0, 2, 3, 5, 10)
+                }
+                infoPreference(R.string.download_ahead_info)
+            }
+
+            preferenceCategory {
+                titleRes = R.string.automatic_removal
+
+                intListPreference(activity) {
+                    bindTo(preferences.deleteRemovedChapters())
+                    titleRes = R.string.delete_removed_chapters
+                    summary = activity?.getString(R.string.delete_downloaded_if_removed_online)
+                    entriesRes =
+                        arrayOf(
+                            R.string.ask_on_chapters_page,
+                            R.string.always_keep,
+                            R.string.always_delete,
+                        )
+                    entryRange = 0..2
+                }
             }
         }
-
-        preferenceCategory {
-            titleRes = R.string.download_ahead
-
-            intListPreference(activity) {
-                bindTo(preferences.autoDownloadWhileReading())
-                titleRes = R.string.auto_download_while_reading
-                entries = listOf(
-                    context.getString(R.string.never),
-                    context.resources.getQuantityString(R.plurals.next_unread_chapters, 2, 2),
-                    context.resources.getQuantityString(R.plurals.next_unread_chapters, 3, 3),
-                    context.resources.getQuantityString(R.plurals.next_unread_chapters, 5, 5),
-                    context.resources.getQuantityString(R.plurals.next_unread_chapters, 10, 10),
-                )
-                entryValues = listOf(0, 2, 3, 5, 10)
-            }
-            infoPreference(R.string.download_ahead_info)
-        }
-
-        preferenceCategory {
-            titleRes = R.string.automatic_removal
-
-            intListPreference(activity) {
-                bindTo(preferences.deleteRemovedChapters())
-                titleRes = R.string.delete_removed_chapters
-                summary = activity?.getString(R.string.delete_downloaded_if_removed_online)
-                entriesRes = arrayOf(
-                    R.string.ask_on_chapters_page,
-                    R.string.always_keep,
-                    R.string.always_delete,
-                )
-                entryRange = 0..2
-            }
-        }
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            DOWNLOAD_DIR -> if (data != null && resultCode == Activity.RESULT_OK) {
-                val context = applicationContext ?: return
-                val uri = data.data
-                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            DOWNLOAD_DIR ->
+                if (data != null && resultCode == Activity.RESULT_OK) {
+                    val context = applicationContext ?: return
+                    val uri = data.data
+                    val flags =
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
-                if (uri != null) {
-                    @Suppress("NewApi")
-                    context.contentResolver.takePersistableUriPermission(uri, flags)
+                    if (uri != null) {
+                        @Suppress("NewApi")
+                        context.contentResolver.takePersistableUriPermission(uri, flags)
+                    }
+
+                    val file = UniFile.fromUri(context, uri)
+                    preferences.downloadsDirectory().set(file.uri.toString())
                 }
-
-                val file = UniFile.fromUri(context, uri)
-                preferences.downloadsDirectory().set(file.uri.toString())
-            }
         }
     }
 
@@ -201,9 +229,12 @@ class SettingsDownloadController : SettingsController() {
         }
 
         private fun getExternalDirs(): List<File> {
-            val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
-                File.separator + activity.resources?.getString(R.string.app_name_neko) +
-                File.separator + "downloads"
+            val defaultDir =
+                Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator +
+                    activity.resources?.getString(R.string.app_name_neko) +
+                    File.separator +
+                    "downloads"
 
             return mutableListOf(File(defaultDir)) +
                 ContextCompat.getExternalFilesDirs(activity, "").filterNotNull()
