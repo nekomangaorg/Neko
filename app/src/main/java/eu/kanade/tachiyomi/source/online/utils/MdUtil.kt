@@ -70,12 +70,16 @@ class MdUtil {
             originalLanguage: String,
         ): String {
             return titleMap[MdLang.ENGLISH.lang]
-                ?: titleMap[originalLanguage] ?: titleMap["$originalLanguage-ro"]
-                    ?: titleMap[MdLang.JAPANESE.lang] ?: titleMap["${MdLang.JAPANESE.lang}-ro"]
-                    ?: titleMap[MdLang.KOREAN.lang] ?: titleMap["${MdLang.KOREAN.lang}-ro"]
-                    ?: titleMap[MdLang.CHINESE_TRAD.lang]
-                    ?: titleMap[MdLang.CHINESE_SIMPLIFIED.lang]
-                    ?: titleMap.entries.firstOrNull()?.value ?: ""
+                ?: titleMap[originalLanguage]
+                ?: titleMap["$originalLanguage-ro"]
+                ?: titleMap[MdLang.JAPANESE.lang]
+                ?: titleMap["${MdLang.JAPANESE.lang}-ro"]
+                ?: titleMap[MdLang.KOREAN.lang]
+                ?: titleMap["${MdLang.KOREAN.lang}-ro"]
+                ?: titleMap[MdLang.CHINESE_TRAD.lang]
+                ?: titleMap[MdLang.CHINESE_SIMPLIFIED.lang]
+                ?: titleMap.entries.firstOrNull()?.value
+                ?: ""
         }
     }
 }

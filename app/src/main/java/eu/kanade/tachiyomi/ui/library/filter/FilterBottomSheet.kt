@@ -123,7 +123,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         ?.rootWindowInsetsCompat
                         ?.getInsets(systemBars())
                         ?.bottom
-                        ?: 0
+                    ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {

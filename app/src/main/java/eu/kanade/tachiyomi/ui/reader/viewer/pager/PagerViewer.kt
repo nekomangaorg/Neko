@@ -116,31 +116,29 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         pager.id = R.id.reader_pager
         pager.adapter = adapter
         pager.addOnPageChangeListener(pagerListener)
-        pager.tapListener =
-            f@{ event ->
-                val pos = PointF(event.rawX / pager.width, event.rawY / pager.height)
-                val navigator = config.navigator
-                when (navigator.getAction(pos)) {
-                    ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
-                    ViewerNavigation.NavigationRegion.NEXT -> moveToNext()
-                    ViewerNavigation.NavigationRegion.PREV -> moveToPrevious()
-                    ViewerNavigation.NavigationRegion.RIGHT -> moveRight()
-                    ViewerNavigation.NavigationRegion.LEFT -> moveLeft()
+        pager.tapListener = f@{ event ->
+            val pos = PointF(event.rawX / pager.width, event.rawY / pager.height)
+            val navigator = config.navigator
+            when (navigator.getAction(pos)) {
+                ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
+                ViewerNavigation.NavigationRegion.NEXT -> moveToNext()
+                ViewerNavigation.NavigationRegion.PREV -> moveToPrevious()
+                ViewerNavigation.NavigationRegion.RIGHT -> moveRight()
+                ViewerNavigation.NavigationRegion.LEFT -> moveLeft()
+            }
+        }
+        pager.longTapListener = f@{
+            if (activity.menuVisible || config.longTapEnabled) {
+                val item = adapter.joinedItems.getOrNull(pager.currentItem)
+                val firstPage = item?.first as? ReaderPage
+                val secondPage = item?.second as? ReaderPage
+                if (firstPage is ReaderPage) {
+                    activity.onPageLongTap(firstPage, secondPage)
+                    return@f true
                 }
             }
-        pager.longTapListener =
-            f@{
-                if (activity.menuVisible || config.longTapEnabled) {
-                    val item = adapter.joinedItems.getOrNull(pager.currentItem)
-                    val firstPage = item?.first as? ReaderPage
-                    val secondPage = item?.second as? ReaderPage
-                    if (firstPage is ReaderPage) {
-                        activity.onPageLongTap(firstPage, secondPage)
-                        return@f true
-                    }
-                }
-                false
-            }
+            false
+        }
 
         config.imagePropertyChangedListener = {
             activity.isScrollingThroughPagesOrChapters = true

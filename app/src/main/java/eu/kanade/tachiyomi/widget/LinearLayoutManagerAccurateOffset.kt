@@ -70,8 +70,7 @@ class LinearLayoutManagerAccurateOffset(context: Context?) : LinearLayoutManager
                 .toList()
                 .mapNotNull { getChildAt(it) }
                 .mapNotNull { pos -> getPosition(pos).takeIf { it != RecyclerView.NO_POSITION } }
-                .minOrNull()
-                ?: 0
+                .minOrNull() ?: 0
         val childAvgHeightMap = HashMap<Int, Int>()
         val scrolledY: Int =
             -firstChild.y.toInt() +
@@ -111,13 +110,11 @@ fun RecyclerView.LayoutManager.getFirstPos(recyclerView: RecyclerView?, toolbarH
                     it.findViewById<TextView>(R.id.category_title)?.bottom?.plus(it.y)?.roundToInt()
                 } else {
                     it.bottom
-                })
-                    ?: it.bottom
+                }) ?: it.bottom
             bottom >= inset + toolbarHeight && it.height > 0
         }
         .mapNotNull { pos -> getPosition(pos).takeIf { it != RecyclerView.NO_POSITION } }
-        .minOrNull()
-        ?: RecyclerView.NO_POSITION
+        .minOrNull() ?: RecyclerView.NO_POSITION
 }
 
 fun RecyclerView.LayoutManager.getFirstCompletePos(
@@ -135,6 +132,5 @@ fun RecyclerView.LayoutManager.getFirstCompletePos(
             it.y >= inset + toolbarHeight - marginTop && it.height > 0
         }
         .mapNotNull { pos -> getPosition(pos).takeIf { it != RecyclerView.NO_POSITION } }
-        .minOrNull()
-        ?: RecyclerView.NO_POSITION
+        .minOrNull() ?: RecyclerView.NO_POSITION
 }

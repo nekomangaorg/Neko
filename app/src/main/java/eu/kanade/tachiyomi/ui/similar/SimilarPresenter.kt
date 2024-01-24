@@ -198,8 +198,8 @@ class SimilarPresenter(
                                         currentArtwork =
                                             it.currentArtwork.copy(
                                                 url = dbManga.user_cover ?: "",
-                                                originalArtwork = dbManga.thumbnail_url
-                                                        ?: MdConstants.noCoverUrl
+                                                originalArtwork =
+                                                    dbManga.thumbnail_url ?: MdConstants.noCoverUrl
                                             )
                                     )
                                 }

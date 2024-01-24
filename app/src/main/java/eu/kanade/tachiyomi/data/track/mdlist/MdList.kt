@@ -65,8 +65,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
             try {
                 val manga =
                     db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
-                        .executeAsBlocking()
-                        ?: return@withContext track
+                        .executeAsBlocking() ?: return@withContext track
                 val followStatus = FollowStatus.fromInt(track.status)
 
                 // allow follow status to update

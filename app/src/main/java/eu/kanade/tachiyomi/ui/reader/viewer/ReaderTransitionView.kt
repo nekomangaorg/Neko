@@ -113,8 +113,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(contex
                     val size = binding.lowerText.textSize + 4f.dpToPx
                     setTint(binding.lowerText.currentTextColor)
                     setBounds(0, 0, size.roundToInt(), size.roundToInt())
-                }
-                ?: return
+                } ?: return
         append(" ")
         inSpans(ImageSpan(icon)) { append("image") }
     }

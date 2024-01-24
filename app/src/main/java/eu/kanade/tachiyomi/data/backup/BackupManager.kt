@@ -99,8 +99,7 @@ class BackupManager(val context: Context) {
                     dir.createFile(Backup.getBackupFilename())
                 } else {
                     UniFile.fromUri(context, uri)
-                })
-                    ?: throw Exception("Couldn't create backup file")
+                }) ?: throw Exception("Couldn't create backup file")
 
             if (!file.isFile) {
                 throw IllegalStateException("Failed to get handle on file")

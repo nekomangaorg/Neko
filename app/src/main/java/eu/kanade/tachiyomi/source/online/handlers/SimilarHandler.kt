@@ -153,8 +153,7 @@ class SimilarHandler {
         // Get data from db
         return dbDto.similarManga
             ?.map { it.toSourceManga() }
-            ?.sortedByDescending { it.displayText.split("%")[0].toDouble() }
-            ?: emptyList()
+            ?.sortedByDescending { it.displayText.split("%")[0].toDouble() } ?: emptyList()
     }
 
     private suspend fun similarMangaParse(
@@ -235,8 +234,7 @@ class SimilarHandler {
         // Get data from db
         return dbDto.aniListManga
             ?.map { it.toSourceManga() }
-            ?.sortedByDescending { it.displayText.split(" ")[0].toDouble() }
-            ?: emptyList()
+            ?.sortedByDescending { it.displayText.split(" ")[0].toDouble() } ?: emptyList()
     }
 
     private suspend fun anilistRecommendationParse(
@@ -309,8 +307,7 @@ class SimilarHandler {
         // Get data from db
         return dbDto.myAnimeListManga
             ?.map { it.toSourceManga() }
-            ?.sortedByDescending { it.displayText.split(" ")[0].toDouble() }
-            ?: emptyList()
+            ?.sortedByDescending { it.displayText.split(" ")[0].toDouble() } ?: emptyList()
     }
 
     private suspend fun similarMangaExternalMalParse(
@@ -382,8 +379,7 @@ class SimilarHandler {
                     true -> -1.0
                     false -> it.displayText.split(" ")[0].toDouble()
                 }
-            }
-            ?: emptyList()
+            } ?: emptyList()
     }
 
     private suspend fun similarMangaExternalMUParse(

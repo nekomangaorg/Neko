@@ -119,8 +119,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                             .scrollToPositionWithOffset(
                                 adapter?.getPosition(
                                     viewModel.getCurrentChapter()?.chapter?.id ?: 0L
-                                )
-                                    ?: 0,
+                                ) ?: 0,
                                 binding.chapterRecycler.height / 2 - 30.dpToPx,
                             )
                         if (canShowNav) {

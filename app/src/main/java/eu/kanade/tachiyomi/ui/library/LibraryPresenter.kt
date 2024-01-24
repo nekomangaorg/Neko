@@ -286,7 +286,8 @@ class LibraryPresenter(
         view?.onNextLibraryUpdate(
             if (!show) {
                 sectionedLibraryItems[currentCategory]
-                    ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
+                    ?: sectionedLibraryItems[categories.first().id]
+                    ?: blankItem()
             } else {
                 libraryItems
             },
@@ -311,7 +312,8 @@ class LibraryPresenter(
             view?.onNextLibraryUpdate(
                 if (!showAll) {
                     sectionedLibraryItems[currentCategory]
-                        ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
+                        ?: sectionedLibraryItems[categories.first().id]
+                        ?: blankItem()
                 } else {
                     libraryItems
                 },
@@ -642,13 +644,11 @@ class LibraryPresenter(
                                             val category1 =
                                                 allCategories
                                                     .find { i1.manga.category == it.id }
-                                                    ?.order
-                                                    ?: 0
+                                                    ?.order ?: 0
                                             val category2 =
                                                 allCategories
                                                     .find { i2.manga.category == it.id }
-                                                    ?.order
-                                                    ?: 0
+                                                    ?.order ?: 0
                                             category1.compareTo(category2)
                                         } else {
                                             sortAlphabetical(i1, i2)
@@ -755,8 +755,7 @@ class LibraryPresenter(
                                     catItemAll
                                 } else {
                                     headerItems[it.category]
-                                })
-                                    ?: return@mapNotNull null
+                                }) ?: return@mapNotNull null
                             categorySet.add(it.category)
                             LibraryItem(it, headerItem)
                         }
@@ -880,8 +879,7 @@ class LibraryPresenter(
                                         ?.mapNotNull {
                                             val tag = it.trim().capitalizeWords()
                                             tag.ifBlank { null }
-                                        }
-                                        ?: listOf(unknown)
+                                        } ?: listOf(unknown)
                                 }
                             tags.map { LibraryItem(manga, makeOrGetHeader(it)) }
                         }
@@ -1536,8 +1534,7 @@ class LibraryPresenter(
                             }
                         }
                         else -> ""
-                    }
-                        ?: "",
+                    } ?: "",
                 )
 
             if (!libraryPreferences.showSearchSuggestions().isSet()) {

@@ -26,8 +26,7 @@ fun MangaDataDto.toBasicManga(coverQuality: Int = 0, useNoCoverUrl: Boolean = tr
                 ?.fileName
                 ?.let { coverFileName ->
                     MdUtil.cdnCoverUrl(this@toBasicManga.id, coverFileName, coverQuality)
-                }
-                ?: if (useNoCoverUrl) MdConstants.noCoverUrl else null
+                } ?: if (useNoCoverUrl) MdConstants.noCoverUrl else null
     }
 }
 
@@ -44,8 +43,7 @@ fun MangaDataDto.toSourceManga(
             ?.fileName
             ?.let { coverFileName ->
                 MdUtil.cdnCoverUrl(this@toSourceManga.id, coverFileName, coverQuality)
-            }
-            ?: if (useNoCoverUrl) MdConstants.noCoverUrl else ""
+            } ?: if (useNoCoverUrl) MdConstants.noCoverUrl else ""
 
     return SourceManga(
         url = "/title/" + this@toSourceManga.id,

@@ -42,8 +42,7 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
         db.getCategoriesForManga(this)
             .executeAsBlocking()
             .mapNotNull { it.id }
-            .takeUnless { it.isEmpty() }
-            ?: listOf(0)
+            .takeUnless { it.isEmpty() } ?: listOf(0)
 
     if (categoriesForManga.any { it in excludedCategories }) return false
 

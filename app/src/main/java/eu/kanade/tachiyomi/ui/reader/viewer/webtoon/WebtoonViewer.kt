@@ -90,33 +90,31 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                 }
             },
         )
-        recycler.tapListener =
-            f@{ event ->
-                val pos = PointF(event.rawX / recycler.width, event.rawY / recycler.height)
-                val navigator = config.navigator
-                when (navigator.getAction(pos)) {
-                    ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
-                    ViewerNavigation.NavigationRegion.NEXT,
-                    ViewerNavigation.NavigationRegion.RIGHT -> moveToNext()
-                    ViewerNavigation.NavigationRegion.PREV,
-                    ViewerNavigation.NavigationRegion.LEFT -> moveToPrevious()
-                }
+        recycler.tapListener = f@{ event ->
+            val pos = PointF(event.rawX / recycler.width, event.rawY / recycler.height)
+            val navigator = config.navigator
+            when (navigator.getAction(pos)) {
+                ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
+                ViewerNavigation.NavigationRegion.NEXT,
+                ViewerNavigation.NavigationRegion.RIGHT -> moveToNext()
+                ViewerNavigation.NavigationRegion.PREV,
+                ViewerNavigation.NavigationRegion.LEFT -> moveToPrevious()
             }
-        recycler.longTapListener =
-            f@{ event ->
-                if (activity.menuVisible || config.longTapEnabled) {
-                    val child = recycler.findChildViewUnder(event.x, event.y)
-                    if (child != null) {
-                        val position = recycler.getChildAdapterPosition(child)
-                        val item = adapter.items.getOrNull(position)
-                        if (item is ReaderPage) {
-                            activity.onPageLongTap(item)
-                            return@f true
-                        }
+        }
+        recycler.longTapListener = f@{ event ->
+            if (activity.menuVisible || config.longTapEnabled) {
+                val child = recycler.findChildViewUnder(event.x, event.y)
+                if (child != null) {
+                    val position = recycler.getChildAdapterPosition(child)
+                    val item = adapter.items.getOrNull(position)
+                    if (item is ReaderPage) {
+                        activity.onPageLongTap(item)
+                        return@f true
                     }
                 }
-                false
             }
+            false
+        }
 
         config.imagePropertyChangedListener = { refreshAdapter() }
 

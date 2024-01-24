@@ -92,7 +92,8 @@ object ImageUtil {
 
     fun getExtensionFromMimeType(mime: String?): String {
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime)
-            ?: SUPPLEMENTARY_MIMETYPE_MAPPING[mime] ?: "jpg"
+            ?: SUPPLEMENTARY_MIMETYPE_MAPPING[mime]
+            ?: "jpg"
     }
 
     fun isAnimatedAndSupported(stream: InputStream): Boolean {
@@ -823,8 +824,7 @@ object ImageUtil {
             .filterNotNull()
             .average()
             .toFloat()
-            .takeIf { it in 0f..1f }
-            ?: 0f
+            .takeIf { it in 0f..1f } ?: 0f
     }
 
     /** Used to check an image's dimensions without loading it in the memory. */

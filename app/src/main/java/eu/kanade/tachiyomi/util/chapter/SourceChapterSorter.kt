@@ -32,7 +32,8 @@ fun getChapterNum(chapter: SChapter): Float? {
         false -> {
             val txt = chapter.chapter_txt
             txt.subStringfloatOrNull("Ch.")
-                ?: txt.subStringfloatOrNull("Chp.") ?: txt.subStringfloatOrNull("Chapter")
+                ?: txt.subStringfloatOrNull("Chp.")
+                ?: txt.subStringfloatOrNull("Chapter")
         }
     }
 }

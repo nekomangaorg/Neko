@@ -63,8 +63,7 @@ constructor(
                     ?.mapNotNull { value -> entryValues.indexOf(value).takeUnless { it == -1 } }
                     ?.toIntArray()
                     ?.sorted()
-                    ?.map { entries[it] }
-                    ?: return@SummaryProvider ""
+                    ?.map { entries[it] } ?: return@SummaryProvider ""
             allSelectionRes?.let { allRes ->
                 when {
                     includedStrings.isEmpty() -> includedStrings = listOf(context.getString(allRes))
@@ -85,8 +84,7 @@ constructor(
                     ?.toIntArray()
                     ?.sorted()
                     ?.map { entries[it] }
-                    ?.takeIf { it.isNotEmpty() }
-                    ?: listOf(context.getString(R.string.none))
+                    ?.takeIf { it.isNotEmpty() } ?: listOf(context.getString(R.string.none))
             buildSpannedString {
                 append(context.getString(R.string.include_, includedStrings.joinToString()))
                 appendLine()

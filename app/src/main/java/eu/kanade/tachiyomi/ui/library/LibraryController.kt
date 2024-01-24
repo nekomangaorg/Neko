@@ -234,8 +234,8 @@ class LibraryController(
             if (activityBinding?.bottomNav != null) {
                 55f.dpToPx
             } else {
-                (view?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom?.toFloat()
-                    ?: 0f) + 55f.dpToPx
+                (view?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom?.toFloat() ?: 0f) +
+                    55f.dpToPx
             }
 
     override val mainRecycler: RecyclerView
@@ -397,8 +397,7 @@ class LibraryController(
         val shortAnimationDuration =
             resources?.getInteger(
                 android.R.integer.config_shortAnimTime,
-            )
-                ?: 0
+            ) ?: 0
         if (libraryPreferences.autoHideHopper().get()) {
             // Flow same snap rules as bottom nav
             val closerToHopperBottom = hopperOffset > maxHopperOffset / 2
@@ -2024,7 +2023,7 @@ class LibraryController(
     override fun onSearchActionViewLongClickQuery(): String? {
         if (libraryPreferences.showSearchSuggestions().get()) {
             val suggestion = libraryPreferences.searchSuggestions().get().takeIf { it.isNotBlank() }
-            return suggestion?.removeSuffix("…")
+            return suggestion?.removeSuffix("?")
         }
         return null
     }

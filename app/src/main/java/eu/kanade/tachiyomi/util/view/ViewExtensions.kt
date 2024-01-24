@@ -311,7 +311,8 @@ fun RecyclerView.smoothScrollToTop() {
         smoothScroller.targetPosition = 0
         val firstItemPos =
             linearLayoutManager?.findFirstVisibleItemPosition()
-                ?: staggeredLayoutManager?.findFirstVisibleItemPosition() ?: 0
+                ?: staggeredLayoutManager?.findFirstVisibleItemPosition()
+                ?: 0
         if (firstItemPos > 15) {
             scrollToPosition(15)
             post {

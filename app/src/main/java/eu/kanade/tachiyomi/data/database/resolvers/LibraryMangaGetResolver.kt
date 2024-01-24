@@ -39,7 +39,6 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
             list.count {
                 ChapterUtil.getScanlators(it).none { group -> filteredScanlators.contains(group) }
             }
-        }
-            ?: list.size
+        } ?: list.size
     }
 }

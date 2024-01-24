@@ -22,8 +22,7 @@ class DirectoryPageLoader(val file: File) : PageLoader() {
                     stream = streamFn
                     status = Page.State.READY
                 }
-            }
-            ?: emptyList()
+            } ?: emptyList()
     }
 
     /** No additional action required to load the page */

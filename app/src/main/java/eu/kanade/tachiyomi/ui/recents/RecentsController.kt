@@ -223,7 +223,7 @@ class RecentsController(bundle: Bundle? = null) :
                             systemBars(),
                         )
                         ?.bottom
-                        ?: 0
+                    ?: 0
             binding.recycler.updatePaddingRelative(bottom = height)
             binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
                 bottom = height,

@@ -116,8 +116,7 @@ fun FilterBrowseSheet(
                 mutableStateOf(
                     savedFilters
                         .firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }
-                        ?.name
-                        ?: "",
+                        ?.name ?: "",
                 )
             }
 
@@ -726,8 +725,7 @@ fun SavedFilters(
                             val isDefault =
                                 savedFilters
                                     .firstOrNull { nameOfEnabledFilter.equals(it.name, true) }
-                                    ?.default
-                                    ?: false
+                                    ?.default ?: false
                             val (textRes, makeDefault, icon) =
                                 when (isDefault) {
                                     true ->

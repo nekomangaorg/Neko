@@ -93,8 +93,7 @@ fun Controller.setOnQueryTextChangeListener(
                     if (hideKbOnSubmit) {
                         val imm =
                             activity?.getSystemService(Context.INPUT_METHOD_SERVICE)
-                                as? InputMethodManager
-                                ?: return f(query)
+                                as? InputMethodManager ?: return f(query)
                         imm.hideSoftInputFromWindow(searchView.windowToken, 0)
                     }
                     return f(query)
@@ -190,30 +189,29 @@ fun <T> Controller.liftAppbarWith(
     var toolbarColorAnim: ValueAnimator? = null
     var isToolbarColored = false
 
-    val colorToolbar: (Boolean) -> Unit =
-        f@{ isColored ->
-            isToolbarColored = isColored
-            toolbarColorAnim?.cancel()
-            liftOnScroll?.invoke(isColored)
-            val floatingBar =
-                !(activityBinding?.toolbar?.isVisible == true ||
-                    activityBinding?.tabsFrameLayout?.isVisible == true)
-            val percent =
-                ImageUtil.getPercentOfColor(
-                    activityBinding!!.appBar.backgroundColor ?: Color.TRANSPARENT,
-                    activity!!.getResourceColor(R.attr.colorSurface),
-                    activity!!.getResourceColor(R.attr.colorPrimaryVariant),
-                )
-            if (floatingBar) {
-                setAppBarBG(0f)
-                return@f
-            }
-            toolbarColorAnim = ValueAnimator.ofFloat(percent, isColored.toInt().toFloat())
-            toolbarColorAnim?.addUpdateListener { valueAnimator ->
-                setAppBarBG(valueAnimator.animatedValue as Float)
-            }
-            toolbarColorAnim?.start()
+    val colorToolbar: (Boolean) -> Unit = f@{ isColored ->
+        isToolbarColored = isColored
+        toolbarColorAnim?.cancel()
+        liftOnScroll?.invoke(isColored)
+        val floatingBar =
+            !(activityBinding?.toolbar?.isVisible == true ||
+                activityBinding?.tabsFrameLayout?.isVisible == true)
+        val percent =
+            ImageUtil.getPercentOfColor(
+                activityBinding!!.appBar.backgroundColor ?: Color.TRANSPARENT,
+                activity!!.getResourceColor(R.attr.colorSurface),
+                activity!!.getResourceColor(R.attr.colorPrimaryVariant),
+            )
+        if (floatingBar) {
+            setAppBarBG(0f)
+            return@f
         }
+        toolbarColorAnim = ValueAnimator.ofFloat(percent, isColored.toInt().toFloat())
+        toolbarColorAnim?.addUpdateListener { valueAnimator ->
+            setAppBarBG(valueAnimator.animatedValue as Float)
+        }
+        toolbarColorAnim?.start()
+    }
 
     val floatingBar =
         !(activityBinding?.toolbar?.isVisible == true ||
@@ -291,24 +289,22 @@ fun Controller.scrollViewWith(
     var fakeBottomNavView: View? = null
     if (!customPadding) {
         recycler.updatePaddingRelative(
-            top = (activity?.window?.decorView?.rootWindowInsetsCompat?.getInsets(systemBars())?.top
+            top =
+                (activity?.window?.decorView?.rootWindowInsetsCompat?.getInsets(systemBars())?.top
                     ?: 0) + appBarHeight,
         )
     }
-    val atTopOfRecyclerView: () -> Boolean =
-        f@{
-            if (
-                this is SmallToolbarInterface || activityBinding?.appBar?.useLargeToolbar == false
-            ) {
-                return@f !recycler.canScrollVertically(-1)
-            }
-            val activityBinding = activityBinding ?: return@f true
-            return@f recycler.computeVerticalScrollOffset() - recycler.paddingTop <=
-                0 -
-                    activityBinding.appBar.paddingTop -
-                    activityBinding.toolbar.height -
-                    if (includeTabView) tabBarHeight else 0
+    val atTopOfRecyclerView: () -> Boolean = f@{
+        if (this is SmallToolbarInterface || activityBinding?.appBar?.useLargeToolbar == false) {
+            return@f !recycler.canScrollVertically(-1)
         }
+        val activityBinding = activityBinding ?: return@f true
+        return@f recycler.computeVerticalScrollOffset() - recycler.paddingTop <=
+            0 -
+                activityBinding.appBar.paddingTop -
+                activityBinding.toolbar.height -
+                if (includeTabView) tabBarHeight else 0
+    }
     recycler.doOnApplyWindowInsetsCompat { view, insets, _ ->
         appBarHeight = fullAppBarHeight ?: 0
         val systemInsets =
@@ -333,32 +329,31 @@ fun Controller.scrollViewWith(
     var toolbarColorAnim: ValueAnimator? = null
     var isToolbarColor = false
     var isInView = true
-    val colorToolbar: (Boolean) -> Unit =
-        f@{ isColored ->
-            isToolbarColor = isColored
-            if (liftOnScroll != null) {
-                liftOnScroll.invoke(isColored)
-            } else {
-                toolbarColorAnim?.cancel()
-                val floatingBar =
-                    (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
-                if (floatingBar) {
-                    setAppBarBG(isColored.toInt().toFloat(), false)
-                    return@f
-                }
-                val percent =
-                    ImageUtil.getPercentOfColor(
-                        activityBinding!!.appBar.backgroundColor ?: Color.TRANSPARENT,
-                        activity!!.getResourceColor(R.attr.colorSurface),
-                        activity!!.getResourceColor(R.attr.colorPrimaryVariant),
-                    )
-                toolbarColorAnim = ValueAnimator.ofFloat(percent, isColored.toInt().toFloat())
-                toolbarColorAnim?.addUpdateListener { valueAnimator ->
-                    setAppBarBG(valueAnimator.animatedValue as Float, includeTabView)
-                }
-                toolbarColorAnim?.start()
+    val colorToolbar: (Boolean) -> Unit = f@{ isColored ->
+        isToolbarColor = isColored
+        if (liftOnScroll != null) {
+            liftOnScroll.invoke(isColored)
+        } else {
+            toolbarColorAnim?.cancel()
+            val floatingBar =
+                (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
+            if (floatingBar) {
+                setAppBarBG(isColored.toInt().toFloat(), false)
+                return@f
             }
+            val percent =
+                ImageUtil.getPercentOfColor(
+                    activityBinding!!.appBar.backgroundColor ?: Color.TRANSPARENT,
+                    activity!!.getResourceColor(R.attr.colorSurface),
+                    activity!!.getResourceColor(R.attr.colorPrimaryVariant),
+                )
+            toolbarColorAnim = ValueAnimator.ofFloat(percent, isColored.toInt().toFloat())
+            toolbarColorAnim?.addUpdateListener { valueAnimator ->
+                setAppBarBG(valueAnimator.animatedValue as Float, includeTabView)
+            }
+            toolbarColorAnim?.start()
         }
+    }
     if ((this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView) {
         setAppBarBG(0f, false)
     }
@@ -463,8 +458,7 @@ fun Controller.scrollViewWith(
                         val shortAnimationDuration =
                             resources?.getInteger(
                                 android.R.integer.config_shortAnimTime,
-                            )
-                                ?: 0
+                            ) ?: 0
                         activityBinding?.appBar?.y = 0f
                         activityBinding?.appBar?.updateAppBarAfterY(recycler)
                         if (router.backstackSize == 1 && isInView) {
@@ -537,8 +531,7 @@ fun Controller.scrollViewWith(
                         val shortAnimationDuration =
                             resources?.getInteger(
                                 android.R.integer.config_shortAnimTime,
-                            )
-                                ?: 0
+                            ) ?: 0
                         val closerToTop = abs(activityBinding.appBar.y) > halfWay
                         val halfWayBottom = (activityBinding.bottomNav?.height?.toFloat() ?: 0f) / 2
                         val closerToBottom =
@@ -587,8 +580,7 @@ fun Controller.scrollViewWith(
                     val view = activity?.window?.currentFocus ?: return
                     val imm =
                         activity?.getSystemService(Context.INPUT_METHOD_SERVICE)
-                            as? InputMethodManager
-                            ?: return
+                            as? InputMethodManager ?: return
                     imm.hideSoftInputFromWindow(view.windowToken, 0)
                 }
             }

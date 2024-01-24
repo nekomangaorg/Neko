@@ -200,7 +200,8 @@ class Komga : ReducedHttpSource() {
         val firstAttempt = runCatching { dateTimeIso8601Formatter.parse(this)?.time }
 
         return firstAttempt.getOrNull()
-            ?: runCatching { dateTimeFullIso8601Formatter.parse(this)?.time }.getOrNull() ?: 0L
+            ?: runCatching { dateTimeFullIso8601Formatter.parse(this)?.time }.getOrNull()
+            ?: 0L
     }
 
     private val dateIso8601Formatter by lazy { SimpleDateFormat("yyyy-MM-dd", Locale.US) }

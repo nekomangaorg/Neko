@@ -148,14 +148,13 @@ class SetCategoriesSheet(
             },
         )
         setCategoriesButtons()
-        fastAdapter.onClickListener =
-            onClickListener@{ view, _, item, _ ->
-                val checkBox = view as? TriStateCheckBox ?: return@onClickListener true
-                checkBox.goToNextStep()
-                item.state = checkBox.state
-                setCategoriesButtons()
-                true
-            }
+        fastAdapter.onClickListener = onClickListener@{ view, _, item, _ ->
+            val checkBox = view as? TriStateCheckBox ?: return@onClickListener true
+            checkBox.goToNextStep()
+            item.state = checkBox.state
+            setCategoriesButtons()
+            true
+        }
     }
 
     private fun setCategoriesButtons() {

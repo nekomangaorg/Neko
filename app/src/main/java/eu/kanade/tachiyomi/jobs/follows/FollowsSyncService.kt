@@ -115,8 +115,7 @@ class FollowsSyncService {
             val listManga =
                 ids?.split(", ")
                     ?.mapNotNull { db.getManga(it.toLong()).executeAsBlocking() }
-                    ?.toList()
-                    ?: db.getLibraryMangaList().executeAsBlocking()
+                    ?.toList() ?: db.getLibraryMangaList().executeAsBlocking()
 
             // only add if the current tracker is not set to reading
 

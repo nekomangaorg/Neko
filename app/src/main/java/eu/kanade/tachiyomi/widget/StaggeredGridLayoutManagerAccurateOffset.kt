@@ -44,8 +44,7 @@ class StaggeredGridLayoutManagerAccurateOffset(
                 .mapNotNull { pos ->
                     (pos to getPosition(pos)).takeIf { it.second != RecyclerView.NO_POSITION }
                 }
-                .minByOrNull { it.second }
-                ?: return 0
+                .minByOrNull { it.second } ?: return 0
         val scrolledY: Int = -firstChild.first.y.toInt()
         return if (firstChild.second == 0) {
             scrolledY + paddingTop

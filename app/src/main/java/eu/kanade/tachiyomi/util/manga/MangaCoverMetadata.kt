@@ -95,7 +95,7 @@ object MangaCoverMetadata {
         val file =
             ogFile
                 ?: coverCache.getCustomCoverFile(mangaId).takeIf { it.exists() }
-                    ?: coverCache.getCoverFile(originalThumbnailUrl, inLibrary)
+                ?: coverCache.getCoverFile(originalThumbnailUrl, inLibrary)
         // if the file exists and the there was still an error then the file is corrupted
         if (file.exists()) {
             val options = BitmapFactory.Options()

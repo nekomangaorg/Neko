@@ -431,8 +431,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
                 } else {
                     android.R.integer.config_longAnimTime
                 },
-            )
-                ?: 0
+            ) ?: 0
         val realHeight = preLayoutHeightWhileSearching + paddingTop
         val closerToTop = abs(y) > realHeight - halfWay
         val atTop = !recyclerView.canScrollVertically(-1)

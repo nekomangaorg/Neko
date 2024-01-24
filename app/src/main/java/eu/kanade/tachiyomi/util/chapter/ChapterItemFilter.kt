@@ -101,8 +101,7 @@ class ChapterItemFilter(
                     filteredScanlators.contains(group)
                 }
             }
-        }
-            ?: chapters
+        } ?: chapters
     }
 
     /** filters chapters for language */
@@ -114,7 +113,6 @@ class ChapterItemFilter(
                     filteredLanguages.contains(lang)
                 }
             }
-        }
-            ?: chapters
+        } ?: chapters
     }
 }

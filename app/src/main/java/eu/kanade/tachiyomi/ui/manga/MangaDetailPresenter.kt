@@ -552,7 +552,8 @@ class MangaDetailPresenter(
     private fun saveCover(directory: File, artwork: Artwork): File {
         val cover =
             when (artwork.url.isBlank() || currentManga().thumbnail_url == artwork.url) {
-                true -> coverCache.getCustomCoverFile(currentManga()).takeIf { it.exists() }
+                true ->
+                    coverCache.getCustomCoverFile(currentManga()).takeIf { it.exists() }
                         ?: coverCache.getCoverFile(
                             currentManga().thumbnail_url,
                             currentManga().favorite
@@ -779,8 +780,7 @@ class MangaDetailPresenter(
                                 downloadManager.hasQueue() ->
                                     downloadManager.queue
                                         .find { it.chapter.id == chapter.id }
-                                        ?.status
-                                        ?: Download.State.default
+                                        ?.status ?: Download.State.default
                                 else -> Download.State.default
                             }
 
@@ -1427,8 +1427,7 @@ class MangaDetailPresenter(
             isMerged = isMerged(m),
             isPornographic =
                 m.getContentRating()
-                    ?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true)
-                    ?: false,
+                    ?.equals(MdConstants.ContentRating.pornographic, ignoreCase = true) ?: false,
             langFlag = m.lang_flag,
             missingChapters = m.missing_chapters,
             originalTitle = m.originalTitle,
@@ -1646,7 +1645,8 @@ class MangaDetailPresenter(
                         markAction is MangaConstants.MarkAction.PreviousUnread
                 ) {
                     when (currentManga().sortDescending(mangaDetailsPreferences)) {
-                        true -> (markAction as? MangaConstants.MarkAction.PreviousRead)?.altChapters
+                        true ->
+                            (markAction as? MangaConstants.MarkAction.PreviousRead)?.altChapters
                                 ?: (markAction as MangaConstants.MarkAction.PreviousUnread)
                                     .altChapters
                         false -> chapterItems

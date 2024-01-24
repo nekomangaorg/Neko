@@ -205,7 +205,7 @@ class Toonily : ReducedHttpSource() {
                         ?: element.select("span a").firstOrNull()?.attr("title")?.let {
                             parseChapterDate(it)
                         }
-                            ?: parseChapterDate(
+                        ?: parseChapterDate(
                             element.select("span.chapter-release-date").firstOrNull()?.text()
                         )
 

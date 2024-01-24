@@ -98,7 +98,7 @@ class ChapterFilter(
                     .map { (_, chapters) ->
                         chapters.find { it.id == selectedChapter?.id }
                             ?: chapters.find { it.scanlator == selectedChapter?.scanlator }
-                                ?: chapters.find {
+                            ?: chapters.find {
                                 val mainScans = ChapterUtil.getScanlators(it.scanlator)
                                 val currScans =
                                     ChapterUtil.getScanlators(selectedChapter?.scanlator)
@@ -108,7 +108,7 @@ class ChapterFilter(
 
                                 mainScans.any { scanlator -> currScans.contains(scanlator) }
                             }
-                                ?: chapters.first()
+                            ?: chapters.first()
                     }
         }
 
@@ -135,7 +135,6 @@ class ChapterFilter(
                     filteredScanlators.contains(group)
                 }
             }
-        }
-            ?: chapters
+        } ?: chapters
     }
 }

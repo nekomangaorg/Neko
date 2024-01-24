@@ -560,13 +560,11 @@ class PagerPageHolder(
                         topCutoutInset =
                             viewer.activity.window.decorView.rootWindowInsets
                                 ?.topCutoutInset()
-                                ?.toFloat()
-                                ?: 0f,
+                                ?.toFloat() ?: 0f,
                         bottomCutoutInset =
                             viewer.activity.window.decorView.rootWindowInsets
                                 ?.bottomCutoutInset()
-                                ?.toFloat()
-                                ?: 0f,
+                                ?.toFloat() ?: 0f,
                         scaleTypeIsFullFit = viewer.config.scaleTypeIsFullFit(),
                         isFullscreen =
                             Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&

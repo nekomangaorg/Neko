@@ -706,7 +706,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 setOnClickListener {
                     popupMenu(
                         items = OrientationType.values().map { it.flagValue to it.stringRes },
-                        selectedItemId = viewModel.manga?.orientationType
+                        selectedItemId =
+                            viewModel.manga?.orientationType
                                 ?: readerPreferences.defaultOrientationType().get(),
                     ) {
                         val newOrientation = OrientationType.fromPreference(itemId)
@@ -1217,8 +1218,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     (currentChapter
                         ?.pages
                         ?.take(binding.readerNav.pageSeekbar.value.roundToInt())
-                        ?.count { it.fullPage == true || it.isolatedPage }
-                        ?: 0)) % 2 != 0
+                        ?.count { it.fullPage == true || it.isolatedPage } ?: 0)) % 2 != 0
         }
         viewModel.state.value.viewerChapters?.let {
             TimberKt.d { "about to reloadChapter call set chaptersDoubleShift" }
@@ -1249,8 +1249,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 (currentChapter.requestedPage +
                     (currentChapter.pages?.take(currentChapter.requestedPage)?.count {
                         it.fullPage == true || it.isolatedPage
-                    }
-                        ?: 0)) % 2 != 0
+                    } ?: 0)) % 2 != 0
         }
         val currentChapterPageCount = viewerChapters.currChapter.pages?.size ?: 1
         binding.readerNav.root.visibility =
@@ -1680,8 +1679,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                     )
                                 val dRatio = intrinsicWidth / intrinsicHeight.toFloat()
                                 setBounds(0, 0, (size * dRatio).roundToInt(), size.roundToInt())
-                            }
-                                ?: return
+                            } ?: return
                         val alignment =
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                                 DynamicDrawableSpan.ALIGN_CENTER
