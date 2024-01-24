@@ -6,7 +6,7 @@
 A Free, Open source unofficial manga reader for MangaDex
 
 ![](https://img.shields.io/github/downloads/nekomangaorg/neko/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)
-![](https://img.shields.io/github/actions/workflow/status/nekomangaorg/neko/ci-draft-release.yml?branch=main&style=flat)
+![](https://img.shields.io/github/actions/workflow/status/nekomangaorg/neko/ci-draft-release.yml?labelColor=27303D&style=flat)
 ![](https://img.shields.io/github/stars/nekomangaorg/Neko.svg?label=stars&labelColor=27303D&color=0D1117&logo=github&style=flat)
 
 ## Download
