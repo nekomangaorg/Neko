@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.data.backup.BackupFileValidator
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
@@ -197,6 +198,7 @@ class SettingsBackupController : SettingsController() {
                     BackupCreatorJob.startNow(activity, uri, backupFlags)
                 }
                 CODE_BACKUP_RESTORE -> {
+                    (activity as? MainActivity)?.showNotificationPermissionPrompt(true)
                     RestoreBackupDialog(uri).showDialog(router)
                 }
             }

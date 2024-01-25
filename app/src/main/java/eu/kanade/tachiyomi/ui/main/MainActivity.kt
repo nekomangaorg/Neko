@@ -825,6 +825,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
                         // Create confirmation window
                         withContext(Dispatchers.Main) {
+                            showNotificationPermissionPrompt()
                             AppUpdateNotifier.releasePageUrl = result.release.releaseLink
                             NewUpdateDialogController(body, url).showDialog(router)
                         }
@@ -1412,25 +1413,29 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         )
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+        private var startingX = 0f
+        private var startingY = 0f
+
         override fun onDown(e: MotionEvent): Boolean {
+            startingX = e.x
+            startingY = e.y
             return true
         }
 
         override fun onFling(
-            e: MotionEvent?,
+            e1: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float,
         ): Boolean {
-            val e1 = e ?: return false
             var result = false
-            val diffY = e2.y - e1.y
-            val diffX = e2.x - e1.x
+            val diffY = e2.y - startingY
+            val diffX = e2.x - startingX
             if (abs(diffX) <= abs(diffY)) {
                 val sheetRect = Rect()
                 nav.getGlobalVisibleRect(sheetRect)
                 if (
-                    sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                    sheetRect.contains(startingX.toInt(), startingY.toInt()) &&
                         abs(diffY) > Companion.SWIPE_THRESHOLD &&
                         abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
                         diffY <= 0
@@ -1440,7 +1445,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     bottomSheetController?.showSheet()
                 } else if (
                     nav == binding.sideNav &&
-                        sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                        sheetRect.contains(startingX.toInt(), startingY.toInt()) &&
                         abs(diffY) > Companion.SWIPE_THRESHOLD &&
                         abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
                         diffY > 0

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.security
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.view.Window
 import android.view.WindowManager
 import androidx.biometric.BiometricManager
@@ -51,7 +52,11 @@ object SecureActivityDelegate {
                 val intent = Intent(activity, BiometricActivity::class.java)
                 intent.putExtra("fromSearch", (activity is SearchActivity) && !requireSuccess)
                 activity.startActivity(intent)
-                activity.overridePendingTransition(0, 0)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    activity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0)
+                } else {
+                    activity.overridePendingTransition(0, 0)
+                }
             }
         } else if (lockApp) {
             securityPreferences.useBiometrics().set(false)
