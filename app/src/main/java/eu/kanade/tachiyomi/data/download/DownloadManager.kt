@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import com.hippo.unifile.UniFile
-import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -25,6 +24,8 @@ import uy.kohesive.injekt.injectLazy
  */
 class DownloadManager(val context: Context) {
 
+    val isRunning: Boolean get() = downloader.isRunning
+
     /** The sources manager. */
     private val sourceManager by injectLazy<SourceManager>()
 
@@ -46,10 +47,6 @@ class DownloadManager(val context: Context) {
     val queue: DownloadQueue
         get() = downloader.queue
 
-    /** Subject for subscribing to downloader status. */
-    val runningRelay: BehaviorRelay<Boolean>
-        get() = downloader.runningRelay
-
     /**
      * Tells the downloader to begin downloads.
      *
@@ -57,7 +54,7 @@ class DownloadManager(val context: Context) {
      */
     fun startDownloads(): Boolean {
         val hasStarted = downloader.start()
-        DownloadService.callListeners(hasStarted)
+        DownloadJob.callListeners(downloadManager = this)
         return hasStarted
     }
 
@@ -83,7 +80,7 @@ class DownloadManager(val context: Context) {
     fun clearQueue(isNotification: Boolean = false) {
         deletePendingDownloads(*downloader.queue.toTypedArray())
         downloader.clearQueue(isNotification)
-        DownloadService.callListeners(false)
+        DownloadJob.callListeners(false, this)
     }
 
     fun startDownloadNow(chapter: Chapter) {
@@ -93,11 +90,11 @@ class DownloadManager(val context: Context) {
         queue.add(0, download)
         reorderQueue(queue)
         if (isPaused()) {
-            if (DownloadService.isRunning(context)) {
+            if (DownloadJob.isRunning(context)) {
                 downloader.start()
-                DownloadService.callListeners(true)
+                DownloadJob.callListeners(true, this)
             } else {
-                DownloadService.start(context)
+                DownloadJob.start(context)
             }
         }
     }
@@ -110,7 +107,7 @@ class DownloadManager(val context: Context) {
     fun reorderQueue(downloads: List<Download>) {
         val wasPaused = isPaused()
         if (downloads.isEmpty()) {
-            DownloadService.stop(context)
+            DownloadJob.stop(context)
             downloader.queue.clear()
             return
         }
@@ -119,11 +116,11 @@ class DownloadManager(val context: Context) {
         downloader.queue.addAll(downloads)
         if (!wasPaused) {
             downloader.start()
-            DownloadService.callListeners(true)
+            DownloadJob.callListeners(true, this)
         }
     }
 
-    fun isPaused() = downloader.isPaused()
+    fun isPaused() = !downloader.isRunning
 
     fun hasQueue() = downloader.queue.isNotEmpty()
 
@@ -149,7 +146,7 @@ class DownloadManager(val context: Context) {
             addAll(0, downloads)
             reorderQueue(this)
         }
-        if (!DownloadService.isRunning(context)) DownloadService.start(context)
+        if (!DownloadJob.isRunning(context)) DownloadJob.start(context)
     }
 
     /**
@@ -234,7 +231,7 @@ class DownloadManager(val context: Context) {
             try {
                 val wasPaused = isPaused()
                 if (chapters.isEmpty()) {
-                    DownloadService.stop(context)
+                    DownloadJob.stop(context)
                     downloader.queue.clear()
                     return@launch
                 }
@@ -242,11 +239,11 @@ class DownloadManager(val context: Context) {
                 downloader.queue.remove(chapters)
                 if (!wasPaused && downloader.queue.isNotEmpty()) {
                     downloader.start()
-                    DownloadService.callListeners(true)
-                } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
-                    DownloadService.stop(context)
+                    DownloadJob.callListeners(true)
+                } else if (downloader.queue.isEmpty() && DownloadJob.isRunning(context)) {
+                    DownloadJob.stop(context)
                 } else if (downloader.queue.isEmpty()) {
-                    DownloadService.callListeners(false)
+                    DownloadJob.callListeners(false)
                     downloader.stop()
                 }
                 queue.remove(chapters)
@@ -366,11 +363,18 @@ class DownloadManager(val context: Context) {
      */
     fun renameChapter(manga: Manga, oldChapter: Chapter, newChapter: Chapter) {
         val oldName = provider.getChapterDirName(oldChapter)
-        val newName = provider.getChapterDirName(newChapter)
+        var newName = provider.getChapterDirName(newChapter)
         val mangaDir = provider.getMangaDir(manga)
 
-        val oldFolder = mangaDir.findFile(oldName)
-        if (oldFolder?.renameTo(newName) == true) {
+        val oldDownload = mangaDir.findFile(oldName) ?: return
+
+        if (oldDownload.isFile && oldDownload.name?.endsWith(".cbz") == true) {
+            newName += ".cbz"
+        }
+
+        if (oldDownload.name == newName) return
+
+        if (oldDownload.renameTo(newName)) {
             cache.removeChapters(listOf(oldChapter), manga)
             cache.addChapter(newName, manga)
         } else {

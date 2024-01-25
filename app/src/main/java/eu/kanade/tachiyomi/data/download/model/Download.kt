@@ -11,9 +11,11 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
 
     var pages: List<Page>? = null
 
-    @Volatile @Transient var totalProgress: Int = 0
+    val totalProgress: Int
+        get() = pages?.sumOf(Page::progress) ?: 0
 
-    @Volatile @Transient var downloadedImages: Int = 0
+    val downloadedImages: Int
+        get() = pages?.count { it.status == Page.State.READY } ?: 0
 
     @Volatile
     @Transient

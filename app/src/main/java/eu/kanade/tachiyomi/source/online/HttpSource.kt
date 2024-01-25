@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.util.system.awaitSingle
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
@@ -71,15 +72,6 @@ abstract class HttpSource : Source {
         return GET(baseUrl + manga.url, headers)
     }
 
-    /**
-     * Returns an observable with the page containing the source url of the image. If there's any
-     * error, it will return null instead of throwing an exception.
-     *
-     * @param page the page whose source image has to be fetched.
-     */
-    open fun fetchImageUrl(page: Page): Observable<String> {
-        return Observable.just("")
-    }
 
     protected open fun imageRequest(page: Page): Request {
         return GET(page.imageUrl!!, headers)

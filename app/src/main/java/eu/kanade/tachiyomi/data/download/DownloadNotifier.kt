@@ -28,8 +28,8 @@ internal class DownloadNotifier(private val context: Context) {
     private val securityPreferences: SecurityPreferences by injectLazy()
 
     /** Notification builder. */
-    private val progressNotificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_PROGRESS) {
+    private val notificationBuilder by lazy {
+        context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER) {
             setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
         }
     }
@@ -68,8 +68,49 @@ internal class DownloadNotifier(private val context: Context) {
      * those can only be dismissed by the user.
      */
     fun dismiss() {
-        context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
+        context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER)
     }
+
+    fun setPlaceholder(download: Download?): NotificationCompat.Builder {
+        with(notificationBuilder) {
+            // Check if first call.
+            if (!isDownloading) {
+                setSmallIcon(android.R.drawable.stat_sys_download)
+                setAutoCancel(false)
+                clearActions()
+                setOngoing(true)
+                // Open download manager when clicked
+                setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+                color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
+                isDownloading = true
+                // Pause action
+                addAction(
+                    R.drawable.ic_pause_24dp,
+                    context.getString(R.string.pause),
+                    NotificationReceiver.pauseDownloadsPendingBroadcast(context),
+                )
+            }
+
+            if (download != null && securityPreferences.hideNotificationContent().get()) {
+                val title = download.manga.title.chop(15)
+                val quotedTitle = Pattern.quote(title)
+                val chapter =
+                    download.chapter.name.replaceFirst(
+                        "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
+                        "",
+                    )
+                setContentTitle("$title - $chapter".chop(30))
+                setContentText(context.getString(R.string.downloading))
+            } else {
+                setContentTitle(context.getString(R.string.downloading))
+                setContentText(null)
+            }
+            setProgress(0, 0, true)
+            setStyle(null)
+        }
+        return notificationBuilder
+    }
+
 
     /** This function shows a notification to inform download tasks are done. */
     fun downloadFinished() {
@@ -97,7 +138,7 @@ internal class DownloadNotifier(private val context: Context) {
      */
     fun onProgressChange(download: Download) {
         // Create notification
-        with(progressNotificationBuilder) {
+        with(notificationBuilder) {
             // Check if first call.
             if (!isDownloading) {
                 setSmallIcon(android.R.drawable.stat_sys_download)
@@ -135,13 +176,13 @@ internal class DownloadNotifier(private val context: Context) {
             }
             setStyle(null)
             setProgress(download.pages!!.size, download.downloadedImages, false)
-            show(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
+            show(Notifications.ID_DOWNLOAD_CHAPTER)
         }
     }
 
     /** Show notification when download is paused. */
     fun onDownloadPaused() {
-        with(progressNotificationBuilder) {
+        with(notificationBuilder) {
             setContentTitle(context.getString(R.string.paused))
             setContentText(context.getString(R.string.download_paused))
             setSmallIcon(R.drawable.ic_pause_24dp)
@@ -163,7 +204,7 @@ internal class DownloadNotifier(private val context: Context) {
                 context.getString(R.string.cancel_all),
                 NotificationReceiver.clearDownloadsPendingBroadcast(context),
             )
-            show(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
+            show(Notifications.ID_DOWNLOAD_CHAPTER)
         }
 
         // Reset initial values

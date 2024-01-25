@@ -31,7 +31,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -619,7 +619,7 @@ class RecentsController(bundle: Bundle? = null) :
             presenter.deleteChapter(chapter, manga)
         } else {
             if (item.status == Download.State.ERROR) {
-                DownloadService.start(view.context)
+                DownloadJob.start(view.context)
             } else {
                 presenter.downloadChapter(manga, chapter)
             }

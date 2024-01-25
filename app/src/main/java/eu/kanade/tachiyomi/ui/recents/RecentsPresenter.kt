@@ -8,9 +8,8 @@ import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.models.uuid
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -49,8 +48,7 @@ class RecentsPresenter(
     private val chapterFilter: ChapterFilter = Injekt.get(),
 ) :
     BaseCoroutinePresenter<RecentsController>(),
-    DownloadQueue.DownloadListener,
-    DownloadServiceListener {
+    DownloadQueue.DownloadListener{
 
     val statusHandler: StatusHandler by injectLazy()
     private var recentsJob: Job? = null
@@ -91,8 +89,8 @@ class RecentsPresenter(
     override fun onCreate() {
         super.onCreate()
         downloadManager.addListener(this)
-        DownloadService.addListener(this)
-        LibraryUpdateJob.updateFlow.onEach { ::onUpdateManga }.launchIn(presenterScope)
+        DownloadJob.downloadFlow.onEach(::downloadStatusChanged).launchIn(presenterScope)
+        LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
         if (lastRecents != null) {
             if (recentItems.isEmpty()) {
                 recentItems = lastRecents ?: emptyList()
@@ -401,7 +399,6 @@ class RecentsPresenter(
     override fun onDestroy() {
         super.onDestroy()
         downloadManager.removeListener(this)
-        DownloadService.removeListener(this)
         lastRecents = recentItems
     }
 
@@ -446,13 +443,12 @@ class RecentsPresenter(
         }
     }
 
-    override fun downloadStatusChanged(downloading: Boolean) {
-        presenterScope.launch {
-            withContext(Dispatchers.Main) { view?.updateDownloadStatus(downloading) }
-        }
+    private fun downloadStatusChanged(downloading: Boolean) {
+        presenterScope.launchUI {
+            view?.updateDownloadStatus(downloading) }
     }
 
-    fun onUpdateManga(mangaId: Long?) {
+    private fun onUpdateManga(mangaId: Long?) {
         when {
             mangaId == null -> {
                 presenterScope.launchUI { view?.setRefreshing(false) }

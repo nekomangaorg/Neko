@@ -62,9 +62,8 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Manifest
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -135,7 +134,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 @SuppressLint("ResourceType")
-open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
+open class MainActivity : BaseActivity<MainActivityBinding>() {
 
     protected lateinit var router: Router
 
@@ -285,7 +284,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val container: ViewGroup = binding.controllerContainer
 
         val content: ViewGroup = binding.mainContent
-        DownloadService.addListener(this)
+        DownloadJob.addListener(this)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowCustomEnabled(true)
@@ -760,7 +759,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onResume() {
         super.onResume()
         checkForAppUpdates()
-        DownloadService.callListeners()
+        DownloadJob.callListeners()
         showDLQueueTutorial()
         reEnableBackPressedCallBack()
     }
@@ -942,7 +941,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         super.onDestroy()
         overflowDialog?.dismiss()
         overflowDialog = null
-        DownloadService.removeListener(this)
         if (isBindingInitialized) {
             binding.appBar.mainActivity = null
             binding.toolbar.setNavigationOnClickListener(null)
