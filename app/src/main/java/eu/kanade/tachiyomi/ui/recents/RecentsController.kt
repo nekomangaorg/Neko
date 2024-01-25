@@ -33,7 +33,7 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
@@ -348,9 +348,9 @@ class RecentsController(bundle: Bundle? = null) :
                 }
             },
         )
-        binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+        binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view.context)
         binding.swipeRefresh.setOnRefreshListener {
-            if (!LibraryUpdateService.isRunning()) {
+            if (!LibraryUpdateJob.isRunning(view.context)) {
                 snack?.dismiss()
                 snack =
                     view.snack(R.string.updating_library) {
@@ -361,7 +361,7 @@ class RecentsController(bundle: Bundle? = null) :
                                 activityBinding?.bottomNav ?: binding.downloadBottomSheet.root
                             }
                         setAction(R.string.cancel) {
-                            LibraryUpdateService.stop(context)
+                            LibraryUpdateJob.stop(context)
                             viewScope.launchUI {
                                 NotificationReceiver.dismissNotification(
                                     context,
@@ -377,12 +377,12 @@ class RecentsController(bundle: Bundle? = null) :
                                 ) {
                                     super.onDismissed(transientBottomBar, event)
                                     binding.swipeRefresh.isRefreshing =
-                                        LibraryUpdateService.isRunning()
+                                        LibraryUpdateJob.isRunning(view.context)
                                 }
                             },
                         )
                     }
-                LibraryUpdateService.start(view.context)
+                LibraryUpdateJob.startNow(view.context)
             }
         }
         ogRadius = view.resources.getDimension(R.dimen.rounded_radius)
@@ -529,11 +529,14 @@ class RecentsController(bundle: Bundle? = null) :
         shouldMoveToTop: Boolean = false,
     ) {
         if (view == null) return
+        if (!binding.progress.isVisible && recents.isNotEmpty()) {
+            (activity as? MainActivity)?.showNotificationPermissionPrompt()
+        }
         binding.progress.isVisible = false
         binding.recentsFrameLayout.alpha = 1f
-        binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+        binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view!!.context)
         adapter.removeAllScrollableHeaders()
-        adapter.updateItems(recents)
+        adapter.updateDataSet(recents)
         adapter.onLoadMoreComplete(null)
         if (isControllerVisible) {
             activityBinding?.appBar?.lockYPos = false
@@ -584,6 +587,7 @@ class RecentsController(bundle: Bundle? = null) :
 
     fun updateChapterDownload(download: Download, updateDLSheet: Boolean = true) {
         if (view == null) return
+
         if (updateDLSheet) {
             binding.downloadBottomSheet.dlBottomSheet.update(!presenter.downloadManager.isPaused())
             binding.downloadBottomSheet.dlBottomSheet.onUpdateProgress(download)

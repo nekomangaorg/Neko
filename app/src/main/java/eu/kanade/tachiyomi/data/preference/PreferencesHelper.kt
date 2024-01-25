@@ -79,6 +79,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun backReturnsToStart() = this.preferenceStore.getBoolean(Keys.backToStart, true)
 
+    fun hasShownNotifPermission() = this.preferenceStore.getBoolean("has_shown_notification_permission", false)
+
     fun hasDeniedA11FilePermission() =
         this.preferenceStore.getBoolean(Keys.deniedA11FilePermission, false)
 

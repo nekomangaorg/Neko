@@ -21,8 +21,7 @@ import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
-import eu.kanade.tachiyomi.data.library.LibraryServiceListener
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.matchingTrack
@@ -76,6 +75,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
@@ -115,8 +117,7 @@ class MangaDetailPresenter(
     private val trackingCoordinator: TrackingCoordinator = Injekt.get(),
 ) :
     BaseCoroutinePresenter<MangaDetailController>(),
-    DownloadQueue.DownloadListener,
-    LibraryServiceListener {
+    DownloadQueue.DownloadListener{
 
     private val _currentManga = MutableStateFlow<Manga?>(null)
     val manga: StateFlow<Manga?> = _currentManga.asStateFlow()
@@ -157,8 +158,8 @@ class MangaDetailPresenter(
     override fun onCreate() {
         super.onCreate()
         downloadManager.addListener(this)
-
-        LibraryUpdateService.setListener(this)
+        LibraryUpdateJob.updateFlow.filter { it == currentManga().id }
+            .onEach { ::onUpdateManga }.launchIn(presenterScope)
         presenterScope.launch {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
@@ -1934,12 +1935,10 @@ class MangaDetailPresenter(
         presenterScope.launchIO { updateChapterFlows() }
     }
 
-    // callback from library update listener
-    override fun onUpdateManga(manga: Manga?) {
-        if (manga?.id == mangaId) {
+    // This is already filtered before reaching here, so directly update the chapters
+    fun onUpdateManga(mangaId: Long?) {
             updateChapterFlows()
         }
-    }
 
     fun copiedToClipboard(message: String) {
         presenterScope.launchIO {
@@ -1971,7 +1970,6 @@ class MangaDetailPresenter(
     override fun onDestroy() {
         super.onDestroy()
         downloadManager.removeListener(this)
-        LibraryUpdateService.removeListener(this)
     }
 
     fun getChapterUrl(chapter: SimpleChapter): String {

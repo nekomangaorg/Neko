@@ -222,6 +222,7 @@
     <string name="shift_double_pages">Shift double pages</string>
 
     <!-- Library update service notifications -->
+    <string name="allow_notifications_recommended">Allowing notifications is recommended to keep your library and app up to date.</string>
     <string name="checking_for_new_chapters">Checking for new chapters</string>
     <string name="new_chapters_found">New chapters found</string>
     <plurals name="for_n_titles">
@@ -1219,6 +1220,7 @@
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>
     <string name="view">View</string>
+    <string name="warning">Warning</string>
     <string name="wifi">Wi-Fi</string>
 
 

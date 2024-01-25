@@ -8,6 +8,7 @@ import android.app.assist.AssistContent
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
@@ -25,6 +26,7 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.IdRes
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.view.menu.ActionMenuItemView
@@ -32,6 +34,7 @@ import androidx.appcompat.view.menu.MenuItemImpl
 import androidx.appcompat.widget.ActionMenuView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.animation.doOnEnd
+import androidx.core.app.ActivityCompat
 import androidx.core.content.getSystemService
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
@@ -56,12 +59,13 @@ import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.Manifest
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.DownloadServiceListener
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
@@ -100,6 +104,7 @@ import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
@@ -166,6 +171,17 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         ta.recycle()
         dimenW to dimenH
     }
+
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (!isGranted) {
+                materialAlertDialog()
+                    .setTitle(R.string.warning)
+                    .setMessage(R.string.allow_notifications_recommended)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+        }
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -237,12 +253,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         var continueSwitchingTabs = false
         nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
-            if (!LibraryUpdateService.isRunning()) {
-                LibraryUpdateService.start(this)
+            if (!LibraryUpdateJob.isRunning(this)) {
+                LibraryUpdateJob.startNow(this)
                 binding.mainContent.snack(R.string.updating_library) {
                     anchorView = binding.bottomNav
                     setAction(R.string.cancel) {
-                        LibraryUpdateService.stop(context)
+                        LibraryUpdateJob.stop(context)
                         lifecycleScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
@@ -818,6 +834,18 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     TimberKt.e(error) { "Error checking for app update" }
                 }
             }
+        }
+    }
+
+    fun showNotificationPermissionPrompt(showAnyway: Boolean = false) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val notificationPermission = Manifest.permission.POST_NOTIFICATIONS
+        val hasPermission = ActivityCompat.checkSelfPermission(this, notificationPermission)
+        if (hasPermission != PackageManager.PERMISSION_GRANTED &&
+            (!preferences.hasShownNotifPermission().get() || showAnyway)
+        ) {
+            preferences.hasShownNotifPermission().set(true)
+            requestNotificationPermissionLauncher.launch((notificationPermission))
         }
     }
 
