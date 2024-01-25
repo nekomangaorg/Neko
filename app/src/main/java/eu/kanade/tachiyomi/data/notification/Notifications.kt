@@ -166,7 +166,7 @@ object Notifications {
                         setShowBadge(false)
                     },
                 NotificationChannel(
-                    CHANNEL_DOWNLOADER,
+                        CHANNEL_DOWNLOADER,
                         context.getString(R.string.downloads),
                         NotificationManager.IMPORTANCE_LOW,
                     )

@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.util.system.awaitSingle
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
@@ -17,7 +16,6 @@ import okhttp3.Request
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
-import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 /** A simple implementation for sources from a website. */
@@ -71,7 +69,6 @@ abstract class HttpSource : Source {
     open fun mangaDetailsRequest(manga: SManga): Request {
         return GET(baseUrl + manga.url, headers)
     }
-
 
     protected open fun imageRequest(page: Page): Request {
         return GET(page.imageUrl!!, headers)

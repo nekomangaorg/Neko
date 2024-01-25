@@ -24,7 +24,8 @@ import uy.kohesive.injekt.injectLazy
  */
 class DownloadManager(val context: Context) {
 
-    val isRunning: Boolean get() = downloader.isRunning
+    val isRunning: Boolean
+        get() = downloader.isRunning
 
     /** The sources manager. */
     private val sourceManager by injectLazy<SourceManager>()

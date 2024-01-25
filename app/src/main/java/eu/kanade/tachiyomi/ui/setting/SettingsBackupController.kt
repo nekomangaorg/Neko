@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupFileValidator
-import eu.kanade.tachiyomi.data.backup.BackupRestoreService
+import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.MiuiUtil
@@ -76,7 +76,7 @@ class SettingsBackupController : SettingsController() {
                         context.toast(R.string.restore_miui_warning, Toast.LENGTH_LONG)
                     }
 
-                    if (!BackupRestoreService.isRunning(context)) {
+                    if (!BackupRestoreJob.isRunning(context)) {
                         val intent = Intent(Intent.ACTION_GET_CONTENT)
                         intent.addCategory(Intent.CATEGORY_OPENABLE)
                         intent.type = "*/*"
@@ -303,7 +303,7 @@ class SettingsBackupController : SettingsController() {
                         val context = applicationContext
                         if (context != null) {
                             activity.toast(R.string.restoring_backup)
-                            BackupRestoreService.start(context, uri, type)
+                            BackupRestoreJob.start(context, uri)
                         }
                     }
                     .create()

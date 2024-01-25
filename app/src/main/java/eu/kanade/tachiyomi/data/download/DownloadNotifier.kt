@@ -111,7 +111,6 @@ internal class DownloadNotifier(private val context: Context) {
         return notificationBuilder
     }
 
-
     /** This function shows a notification to inform download tasks are done. */
     fun downloadFinished() {
         // Create notification

@@ -146,7 +146,7 @@ class LibraryController(
     LibraryCategoryAdapter.LibraryListener,
     BottomSheetController,
     RootSearchInterface,
-    FloatingSearchInterface{
+    FloatingSearchInterface {
 
     init {
         setHasOptionsMenu(true)
@@ -1104,7 +1104,6 @@ class LibraryController(
         }
     }
 
-
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         if (!isBindingInitialized) return
@@ -1809,7 +1808,8 @@ class LibraryController(
                 resources!!.getString(
                     when {
                         inQueue -> R.string._already_in_queue
-                        LibraryUpdateJob.isRunning(view!!.context) -> R.string.adding_category_to_queue
+                        LibraryUpdateJob.isRunning(view!!.context) ->
+                            R.string.adding_category_to_queue
                         else -> R.string.updating_
                     },
                     category.name,

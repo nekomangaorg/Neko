@@ -840,8 +840,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         val notificationPermission = Manifest.permission.POST_NOTIFICATIONS
         val hasPermission = ActivityCompat.checkSelfPermission(this, notificationPermission)
-        if (hasPermission != PackageManager.PERMISSION_GRANTED &&
-            (!preferences.hasShownNotifPermission().get() || showAnyway)
+        if (
+            hasPermission != PackageManager.PERMISSION_GRANTED &&
+                (!preferences.hasShownNotifPermission().get() || showAnyway)
         ) {
             preferences.hasShownNotifPermission().set(true)
             requestNotificationPermissionLauncher.launch((notificationPermission))

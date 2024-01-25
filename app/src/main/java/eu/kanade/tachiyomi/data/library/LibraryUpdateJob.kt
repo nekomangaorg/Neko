@@ -721,30 +721,33 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private fun addManga(mangaToAdd: List<LibraryManga>) {
         val distinctManga = mangaToAdd.filter { it !in mangaToUpdate }
         mangaToUpdate.addAll(distinctManga)
-        distinctManga.groupBy { it.source }.forEach {
-            // if added queue items is a new source not in the async list or an async list has
-            // finished running
-            if (mangaToUpdateMap[it.key].isNullOrEmpty()) {
-                mangaToUpdateMap[it.key] = it.value
-                extraScope.launch {
-                    extraDeferredJobs.add(
-                        async(Dispatchers.IO) {
-                            val hasDLs = try {
-                                requestSemaphore.withPermit { updateMangaInSource(it.key) }
-                            } catch (e: Exception) {
-                                false
-                            }
-                            if (!hasDownloads) {
-                                hasDownloads = hasDLs
-                            }
-                        },
-                    )
+        distinctManga
+            .groupBy { it.source }
+            .forEach {
+                // if added queue items is a new source not in the async list or an async list has
+                // finished running
+                if (mangaToUpdateMap[it.key].isNullOrEmpty()) {
+                    mangaToUpdateMap[it.key] = it.value
+                    extraScope.launch {
+                        extraDeferredJobs.add(
+                            async(Dispatchers.IO) {
+                                val hasDLs =
+                                    try {
+                                        requestSemaphore.withPermit { updateMangaInSource(it.key) }
+                                    } catch (e: Exception) {
+                                        false
+                                    }
+                                if (!hasDownloads) {
+                                    hasDownloads = hasDLs
+                                }
+                            },
+                        )
+                    }
+                } else {
+                    val list = mangaToUpdateMap[it.key] ?: emptyList()
+                    mangaToUpdateMap[it.key] = (list + it.value)
                 }
-            } else {
-                val list = mangaToUpdateMap[it.key] ?: emptyList()
-                mangaToUpdateMap[it.key] = (list + it.value)
             }
-        }
     }
 
     companion object {
@@ -820,7 +823,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             mangaToUse: List<LibraryManga>? = null,
         ): Boolean {
             if (isRunning(context)) {
-                category?.id?.let  { if (mangaToUse != null) {
+                category?.id?.let {
+                    if (mangaToUse != null) {
                         instance?.get()?.addMangaToQueue(it, mangaToUse)
                     } else {
                         instance?.get()?.addCategory(it)
@@ -841,11 +845,12 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 }
             }
             val inputData = builder.build()
-            val request = OneTimeWorkRequestBuilder<LibraryUpdateJob>()
-                .addTag(TAG)
-                .addTag(WORK_NAME_MANUAL)
-                .setInputData(inputData)
-                .build()
+            val request =
+                OneTimeWorkRequestBuilder<LibraryUpdateJob>()
+                    .addTag(TAG)
+                    .addTag(WORK_NAME_MANUAL)
+                    .setInputData(inputData)
+                    .build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(WORK_NAME_MANUAL, ExistingWorkPolicy.KEEP, request)
 
@@ -854,10 +859,12 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         fun stop(context: Context) {
             val wm = WorkManager.getInstance(context)
-            val workQuery = WorkQuery.Builder.fromTags(listOf(TAG))
-                .addStates(listOf(WorkInfo.State.RUNNING))
-                .build()
-            wm.getWorkInfos(workQuery).get()
+            val workQuery =
+                WorkQuery.Builder.fromTags(listOf(TAG))
+                    .addStates(listOf(WorkInfo.State.RUNNING))
+                    .build()
+            wm.getWorkInfos(workQuery)
+                .get()
                 // Should only return one work but just in case
                 .forEach {
                     wm.cancelWorkById(it.id)

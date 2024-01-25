@@ -1,13 +1,10 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -45,6 +42,7 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -271,7 +269,6 @@ fun Context.isConnectedToWifi(): Boolean {
     }
 }
 
-
 fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
     return packageManager
@@ -335,16 +332,19 @@ fun Context.isInNightMode(): Boolean {
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
 }
 
+
 suspend fun CoroutineWorker.tryToSetForeground() {
     try {
         setForeground(getForegroundInfo())
     } catch (e: IllegalStateException) {
-        Timber.e(e, "Not allowed to set foreground job")
+        TimberKt.e(e){ "Not allowed to set foreground job"}
     }
 }
 
-fun WorkManager.jobIsRunning(tag: String): Boolean = getWorkInfosForUniqueWork(tag).get()
-    .let { list -> list.count { it.state == WorkInfo.State.RUNNING } == 1 }
+fun WorkManager.jobIsRunning(tag: String): Boolean =
+    getWorkInfosForUniqueWork(tag).get().let { list ->
+        list.count { it.state == WorkInfo.State.RUNNING } == 1
+    }
 
 fun Context.appDelegateNightMode(): Int {
     return if (isInNightMode()) {

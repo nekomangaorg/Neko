@@ -46,9 +46,7 @@ class RecentsPresenter(
     val downloadManager: DownloadManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
-) :
-    BaseCoroutinePresenter<RecentsController>(),
-    DownloadQueue.DownloadListener{
+) : BaseCoroutinePresenter<RecentsController>(), DownloadQueue.DownloadListener {
 
     val statusHandler: StatusHandler by injectLazy()
     private var recentsJob: Job? = null
@@ -444,8 +442,7 @@ class RecentsPresenter(
     }
 
     private fun downloadStatusChanged(downloading: Boolean) {
-        presenterScope.launchUI {
-            view?.updateDownloadStatus(downloading) }
+        presenterScope.launchUI { view?.updateDownloadStatus(downloading) }
     }
 
     private fun onUpdateManga(mangaId: Long?) {

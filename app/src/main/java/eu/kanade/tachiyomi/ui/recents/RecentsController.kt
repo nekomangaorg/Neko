@@ -28,7 +28,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.backup.BackupRestoreService
+import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadJob
@@ -908,7 +908,7 @@ class RecentsController(bundle: Bundle? = null) :
         val view = view ?: return
         if (
             presenter.finished ||
-                BackupRestoreService.isRunning(view.context.applicationContext) ||
+            BackupRestoreJob.isRunning(view.context.applicationContext) ||
                 (presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL && !isSearching())
         ) {
             loadNoMore()

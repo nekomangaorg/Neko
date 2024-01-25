@@ -587,8 +587,9 @@ class Downloader(
                 }
             }
 
-        download.status = if (downloadedImagesCount == downloadPageCount) {
-            // Only rename the directory if it's downloaded.
+        download.status =
+            if (downloadedImagesCount == downloadPageCount) {
+                // Only rename the directory if it's downloaded.
                 if (preferences.saveChaptersAsCBZ().get()) {
                     archiveChapter(mangaDir, dirname, tmpDir)
                 } else {

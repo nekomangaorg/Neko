@@ -115,9 +115,7 @@ class MangaDetailPresenter(
     private val trackManager: TrackManager = Injekt.get(),
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
     private val trackingCoordinator: TrackingCoordinator = Injekt.get(),
-) :
-    BaseCoroutinePresenter<MangaDetailController>(),
-    DownloadQueue.DownloadListener{
+) : BaseCoroutinePresenter<MangaDetailController>(), DownloadQueue.DownloadListener {
 
     private val _currentManga = MutableStateFlow<Manga?>(null)
     val manga: StateFlow<Manga?> = _currentManga.asStateFlow()
@@ -158,8 +156,10 @@ class MangaDetailPresenter(
     override fun onCreate() {
         super.onCreate()
         downloadManager.addListener(this)
-        LibraryUpdateJob.updateFlow.filter { it == currentManga().id }
-            .onEach { ::onUpdateManga }.launchIn(presenterScope)
+        LibraryUpdateJob.updateFlow
+            .filter { it == currentManga().id }
+            .onEach { ::onUpdateManga }
+            .launchIn(presenterScope)
         presenterScope.launch {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
             _currentManga.value = dbManga
@@ -1937,8 +1937,8 @@ class MangaDetailPresenter(
 
     // This is already filtered before reaching here, so directly update the chapters
     fun onUpdateManga(mangaId: Long?) {
-            updateChapterFlows()
-        }
+        updateChapterFlows()
+    }
 
     fun copiedToClipboard(message: String) {
         presenterScope.launchIO {

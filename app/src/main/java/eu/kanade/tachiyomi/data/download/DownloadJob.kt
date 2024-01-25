@@ -26,9 +26,10 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class DownloadJob(val context: Context, workerParameters: WorkerParameters): CoroutineWorker(context, workerParameters){
+class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
+    CoroutineWorker(context, workerParameters) {
     private val downloadManager by injectLazy<DownloadManager>()
-    private val preferences  by injectLazy<PreferencesHelper>()
+    private val preferences by injectLazy<PreferencesHelper>()
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val firstDL = downloadManager.queue.firstOrNull()
@@ -70,11 +71,15 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters): Cor
             if (isOnline()) {
                 val noWifi = preferences.downloadOnlyOverWifi().get() && !isConnectedToWifi()
                 if (noWifi) {
-                    downloadManager.stopDownloads(applicationContext.getString(R.string.no_wifi_connection))
+                    downloadManager.stopDownloads(
+                        applicationContext.getString(R.string.no_wifi_connection)
+                    )
                 }
                 !noWifi
             } else {
-                downloadManager.stopDownloads(applicationContext.getString(R.string.no_network_connection))
+                downloadManager.stopDownloads(
+                    applicationContext.getString(R.string.no_network_connection)
+                )
                 false
             }
         }
@@ -83,17 +88,19 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters): Cor
     companion object {
         private const val TAG = "Downloader"
 
-        private val downloadChannel = MutableSharedFlow<Boolean>(
-            extraBufferCapacity = 1,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
+        private val downloadChannel =
+            MutableSharedFlow<Boolean>(
+                extraBufferCapacity = 1,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST,
+            )
         val downloadFlow = downloadChannel.asSharedFlow()
 
         fun start(context: Context) {
-            val request = OneTimeWorkRequestBuilder<DownloadJob>()
-                .addTag(TAG)
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .build()
+            val request =
+                OneTimeWorkRequestBuilder<DownloadJob>()
+                    .addTag(TAG)
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)
         }
@@ -108,10 +115,10 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters): Cor
         }
 
         fun isRunning(context: Context): Boolean {
-            return WorkManager.getInstance(context)
-                .getWorkInfosForUniqueWork(TAG)
-                .get()
-                .let { list -> list.count { it.state == WorkInfo.State.RUNNING } == 1 }
+            return WorkManager.getInstance(context).getWorkInfosForUniqueWork(TAG).get().let { list
+                ->
+                list.count { it.state == WorkInfo.State.RUNNING } == 1
+            }
         }
     }
 }

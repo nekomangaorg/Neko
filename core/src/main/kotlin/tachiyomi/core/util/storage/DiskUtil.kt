@@ -138,5 +138,4 @@ object DiskUtil {
     }
 
     const val NOMEDIA_FILE = ".nomedia"
-
 }

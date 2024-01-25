@@ -285,9 +285,6 @@
             android:name=".data.updater.AppUpdateService"
             android:exported="false" />
 
-        <service
-            android:name=".data.backup.BackupRestoreService"
-            android:exported="false" />
 
         <meta-data
             android:name="android.webkit.WebView.EnableSafeBrowsing"
