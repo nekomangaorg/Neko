@@ -104,7 +104,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setAutoCancel(false)
                 clearActions()
                 // Open download manager when clicked
-                color = ContextCompat.getColor(context, R.color.new_neko_accent)
+                color = ContextCompat.getColor(context, R.color.iconBackground)
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 isDownloading = true
                 // Pause action
@@ -147,7 +147,7 @@ internal class DownloadNotifier(private val context: Context) {
             setSmallIcon(R.drawable.ic_pause_24dp)
             setAutoCancel(false)
             setProgress(0, 0, false)
-            color = ContextCompat.getColor(context, R.color.new_neko_accent)
+            color = ContextCompat.getColor(context, R.color.iconBackground)
             clearActions()
             // Open download manager when clicked
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
@@ -179,7 +179,7 @@ internal class DownloadNotifier(private val context: Context) {
         with(errorNotificationBuilder) {
             setContentTitle(context.getString(R.string.downloads))
             setContentText(reason)
-            color = ContextCompat.getColor(context, R.color.new_neko_accent)
+            color = ContextCompat.getColor(context, R.color.iconBackground)
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setAutoCancel(true)
             clearActions()
@@ -233,7 +233,7 @@ internal class DownloadNotifier(private val context: Context) {
             } else {
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
             }
-            color = ContextCompat.getColor(context, R.color.new_neko_accent)
+            color = ContextCompat.getColor(context, R.color.iconBackground)
             setProgress(0, 0, false)
             show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)
         }

@@ -25,7 +25,7 @@ internal class BackupNotifier(private val context: Context) {
             setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
             setSmallIcon(R.drawable.ic_neko_notification)
             setAutoCancel(false)
-            color = context.contextCompatColor(R.color.new_neko_accent)
+            color = context.contextCompatColor(R.color.iconBackground)
             setOngoing(true)
         }
 
@@ -33,7 +33,7 @@ internal class BackupNotifier(private val context: Context) {
         context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE) {
             setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
             setSmallIcon(R.drawable.ic_neko_notification)
-            color = context.contextCompatColor(R.color.new_neko_accent)
+            color = context.contextCompatColor(R.color.iconBackground)
             setAutoCancel(false)
         }
 
