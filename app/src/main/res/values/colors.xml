@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Colors -->
-    <color name="iconCat">#2A2121</color>
-    <color name="iconOutline">#2A2121</color>
+    <color name="iconColor">#2A2121</color>
+    <color name="iconOutline">#ff124a</color>
     <color name="iconBackground">#ffffff</color>
 
     <color name="primaryVariantTachiyomi">@color/md_white_1000</color>

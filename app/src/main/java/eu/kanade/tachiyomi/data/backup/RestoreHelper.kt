@@ -31,7 +31,7 @@ class RestoreHelper(val context: Context) {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
-            .setColor(ContextCompat.getColor(context, R.color.iconBackground))
+            .setColor(ContextCompat.getColor(context, R.color.iconOutline))
             .addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(android.R.string.cancel),
@@ -154,7 +154,7 @@ class RestoreHelper(val context: Context) {
                 .setContentText(restoreString)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
                 .setSmallIcon(R.drawable.ic_neko_notification)
-                .setColor(ContextCompat.getColor(context, R.color.iconBackground))
+                .setColor(ContextCompat.getColor(context, R.color.iconOutline))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
         if (!path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(

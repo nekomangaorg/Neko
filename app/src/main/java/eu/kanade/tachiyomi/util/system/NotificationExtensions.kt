@@ -12,7 +12,7 @@ fun NotificationCompat.Builder.customize(
 ): NotificationCompat.Builder {
     setContentTitle(title)
     setSmallIcon(smallIcon)
-    color = context.contextCompatColor(R.color.iconBackground)
+    color = context.contextCompatColor(R.color.iconOutline)
     if (ongoing) {
         setOngoing(true)
     }
