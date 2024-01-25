@@ -181,7 +181,7 @@ class MangaLife : ReducedHttpSource() {
      *
      * @param chapter the chapter whose page list has to be fetched.
      */
-    override suspend fun fetchPageList(chapter: SChapter): List<Page> {
+    override suspend fun getPageList(chapter: SChapter): List<Page> {
         val response = client.newCall(GET("$baseUrl${chapter.url}", headers)).await()
         return pageListParse(response)
     }

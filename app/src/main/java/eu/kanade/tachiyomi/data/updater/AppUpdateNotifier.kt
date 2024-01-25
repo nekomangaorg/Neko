@@ -42,11 +42,6 @@ internal class AppUpdateNotifier(private val context: Context) {
     }
 
     fun promptUpdate(body: String, url: String, releaseUrl: String) {
-        val intent =
-            Intent(context, AppUpdateService::class.java).apply {
-                putExtra(AppUpdateService.EXTRA_DOWNLOAD_URL, url)
-                putExtra(AppUpdateService.EXTRA_NOTIFY_ON_INSTALL, true)
-            }
 
         val pendingIntent = NotificationReceiver.openUpdatePendingActivity(context, body, url)
         releasePageUrl = releaseUrl
@@ -63,12 +58,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 android.R.drawable.stat_sys_download_done,
                 context.getString(if (isOnA12) R.string.update else R.string.download),
-                PendingIntent.getService(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                ),
+                NotificationReceiver.startAppUpdatePendingJob(context, url, true),
             )
             addReleasePageAction()
         }
@@ -99,16 +89,15 @@ internal class AppUpdateNotifier(private val context: Context) {
      *
      * @param title tile of notification.
      */
-    fun onDownloadStarted(title: String): NotificationCompat.Builder {
+    fun onDownloadStarted(): NotificationCompat.Builder {
         with(notificationBuilder) {
-            setContentTitle(title)
+            setContentTitle(context.getString(R.string.app_name_neko))
             setContentText(context.getString(R.string.downloading))
             setSmallIcon(android.R.drawable.stat_sys_download)
+            setProgress(0, 0, true)
             setAutoCancel(false)
             setOngoing(true)
             clearActions()
-
-            // Cancel action
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
@@ -127,8 +116,17 @@ internal class AppUpdateNotifier(private val context: Context) {
      */
     fun onProgressChange(progress: Int) {
         with(notificationBuilder) {
+            setContentTitle(context.getString(R.string.app_name))
+            setContentText(context.getString(R.string.downloading))
+            setSmallIcon(android.R.drawable.stat_sys_download)
             setProgress(100, progress, false)
             setOnlyAlertOnce(true)
+            clearActions()
+            addAction(
+                R.drawable.ic_close_24dp,
+                context.getString(R.string.cancel),
+                NotificationReceiver.cancelUpdateDownloadPendingBroadcast(context),
+            )
         }
         notificationBuilder.show()
     }
@@ -185,7 +183,8 @@ internal class AppUpdateNotifier(private val context: Context) {
      */
     fun onInstallFinished() {
         with(NotificationCompat.Builder(context, Notifications.Channel.Updated)) {
-            setContentTitle(context.getString(R.string.updated_to_, BuildConfig.VERSION_NAME))
+            setContentTitle(context.getString(R.string.update_completed))
+            setContentText(context.getString(R.string.updated_to_, BuildConfig.VERSION_NAME))
             setSmallIcon(R.drawable.ic_neko_notification)
             setAutoCancel(true)
             setOngoing(false)
@@ -227,7 +226,7 @@ internal class AppUpdateNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_refresh_24dp,
                 context.getString(R.string.retry),
-                AppUpdateService.downloadApkPendingService(context, url),
+                NotificationReceiver.startAppUpdatePendingJob(context, url),
             )
             // Cancel action
             addAction(
@@ -245,6 +244,7 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     fun onInstallError(uri: Uri) {
         with(notificationBuilder) {
+            setContentTitle(context.getString(R.string.app_name_neko))
             setContentText(context.getString(R.string.could_not_install_update))
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setOnlyAlertOnce(false)

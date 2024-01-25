@@ -113,7 +113,7 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
                     addAction(
                         R.drawable.ic_folder_24dp,
                         context.getString(R.string.view_all_errors),
-                        NotificationReceiver.openErrorLogPendingActivity(context, uri!!),
+                        NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri!!),
                     )
                     setStyle(
                         NotificationCompat.BigTextStyle()

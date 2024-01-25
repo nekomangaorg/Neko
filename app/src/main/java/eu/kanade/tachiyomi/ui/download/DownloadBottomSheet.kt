@@ -14,7 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.DownloadBottomSheetBinding
@@ -95,9 +95,8 @@ constructor(
         }
         binding.downloadFab.setOnClickListener {
             if (controller.presenter.downloadManager.isPaused()) {
-                DownloadService.start(context)
+                DownloadJob.start(context)
             } else {
-                DownloadService.stop(context)
                 presenter.pauseDownloads()
             }
             updateFab()
@@ -237,7 +236,6 @@ constructor(
         val context = activity ?: return false
         when (item.itemId) {
             R.id.clear_queue -> {
-                DownloadService.stop(context)
                 presenter.clearQueue()
             }
             R.id.newest,

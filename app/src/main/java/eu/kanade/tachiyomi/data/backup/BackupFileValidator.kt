@@ -22,7 +22,7 @@ class BackupFileValidator(
      * @throws Exception if manga cannot be found.
      */
     fun validate(context: Context, uri: Uri): Results {
-        val backupManager = BackupManager(context)
+        val backupManager = BackupCreator(context)
 
         val backup =
             try {

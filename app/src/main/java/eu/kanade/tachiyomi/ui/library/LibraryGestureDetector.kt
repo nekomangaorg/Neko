@@ -13,19 +13,23 @@ import kotlin.math.sign
 
 class LibraryGestureDetector(private val controller: LibraryController) :
     GestureDetector.SimpleOnGestureListener() {
+
+    private var startingX = 0f
+    private var startingY = 0f
+
     override fun onDown(e: MotionEvent): Boolean {
+        startingX = e.x
+        startingY = e.y
         return false
     }
 
     override fun onScroll(
-        e: MotionEvent?,
+        e1: MotionEvent?,
         e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
-        val e1 = e ?: return false
-
-        val distance = (e1.rawX - e2.rawX) / 50
+        val distance = (startingX - e2.x) / 50
         val poa = 1.7f
         controller.binding.categoryHopperFrame.translationX =
             abs(distance).pow(poa) * -sign(distance)
@@ -34,15 +38,14 @@ class LibraryGestureDetector(private val controller: LibraryController) :
 
     @SuppressLint("RtlHardcoded")
     override fun onFling(
-        e: MotionEvent?,
+        e1: MotionEvent?,
         e2: MotionEvent,
         velocityX: Float,
         velocityY: Float,
     ): Boolean {
-        val e1 = e ?: return false
         var result = false
-        val diffY = e2.y - e1.y
-        val diffX = e2.x - e1.x
+        val diffY = e2.y - startingY
+        val diffX = e2.x - startingX
         val hopperFrame = controller.binding.categoryHopperFrame
         val animator = controller.binding.categoryHopperFrame.animate().setDuration(150L)
         animator.translationX(0f)

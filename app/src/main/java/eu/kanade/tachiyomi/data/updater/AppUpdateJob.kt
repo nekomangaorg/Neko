@@ -5,9 +5,7 @@ import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -38,13 +36,6 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
     companion object {
         private const val TAG = "UpdateChecker"
 
-        fun doWorkNow(context: Context) {
-            val request = OneTimeWorkRequestBuilder<AppUpdateJob>().build()
-
-            WorkManager.getInstance(context)
-                .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)
-        }
-
         fun setupTask(context: Context) {
             val constraints =
                 Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
@@ -61,7 +52,7 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
                     .build()
 
             WorkManager.getInstance(context)
-                .enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+                .enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.UPDATE, request)
         }
 
         fun cancelTask(context: Context) {

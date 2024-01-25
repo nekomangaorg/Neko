@@ -279,11 +279,11 @@ open class MangaDex : HttpSource() {
         return mangaHandler.fetchChapterList(manga.uuid(), manga.last_chapter_number)
     }
 
-    override suspend fun fetchPageList(chapter: SChapter): List<Page> {
+    override suspend fun getPageList(chapter: SChapter): List<Page> {
         return pageHandler.fetchPageList(chapter)
     }
 
-    override suspend fun fetchImage(page: Page): Response {
+    override suspend fun getImage(page: Page): Response {
         return imageHandler.getImage(page, loginHelper.isLoggedIn())
     }
 

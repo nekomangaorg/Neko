@@ -58,8 +58,8 @@ object Notifications {
 
     /** Notification channel and ids used by the downloader. */
     private const val GROUP_DOWNLOADER = "group_downloader"
-    const val CHANNEL_DOWNLOADER_PROGRESS = "downloader_progress_channel"
-    const val ID_DOWNLOAD_CHAPTER_PROGRESS = -201
+    const val CHANNEL_DOWNLOADER = "downloader_progress_channel"
+    const val ID_DOWNLOAD_CHAPTER = -201
     const val CHANNEL_DOWNLOADER_ERROR = "downloader_error_channel"
     const val ID_DOWNLOAD_CHAPTER_ERROR = -202
     const val CHANNEL_DOWNLOADER_COMPLETE = "downloader_complete_channel"
@@ -166,7 +166,7 @@ object Notifications {
                         setShowBadge(false)
                     },
                 NotificationChannel(
-                        CHANNEL_DOWNLOADER_PROGRESS,
+                        CHANNEL_DOWNLOADER,
                         context.getString(R.string.downloads),
                         NotificationManager.IMPORTANCE_LOW,
                     )

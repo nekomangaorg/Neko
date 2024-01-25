@@ -171,7 +171,7 @@ class Komga : ReducedHttpSource() {
         }
     }
 
-    override suspend fun fetchPageList(chapter: SChapter): List<Page> {
+    override suspend fun getPageList(chapter: SChapter): List<Page> {
         if (hostUrl().isBlank()) {
             throw Exception("Invalid host name")
         }

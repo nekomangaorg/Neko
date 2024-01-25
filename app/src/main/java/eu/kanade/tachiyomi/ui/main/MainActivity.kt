@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.main
 
+import android.Manifest
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
@@ -8,6 +9,7 @@ import android.app.assist.AssistContent
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
@@ -25,6 +27,7 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.IdRes
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.view.menu.ActionMenuItemView
@@ -32,6 +35,7 @@ import androidx.appcompat.view.menu.MenuItemImpl
 import androidx.appcompat.widget.ActionMenuView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.animation.doOnEnd
+import androidx.core.app.ActivityCompat
 import androidx.core.content.getSystemService
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
@@ -58,10 +62,9 @@ import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.download.DownloadServiceListener
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
@@ -100,6 +103,7 @@ import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
@@ -130,7 +134,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 @SuppressLint("ResourceType")
-open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
+open class MainActivity : BaseActivity<MainActivityBinding>() {
 
     protected lateinit var router: Router
 
@@ -166,6 +170,17 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         ta.recycle()
         dimenW to dimenH
     }
+
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (!isGranted) {
+                materialAlertDialog()
+                    .setTitle(R.string.warning)
+                    .setMessage(R.string.allow_notifications_recommended)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
+        }
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -237,12 +252,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         var continueSwitchingTabs = false
         nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
-            if (!LibraryUpdateService.isRunning()) {
-                LibraryUpdateService.start(this)
+            if (!LibraryUpdateJob.isRunning(this)) {
+                LibraryUpdateJob.startNow(this)
                 binding.mainContent.snack(R.string.updating_library) {
                     anchorView = binding.bottomNav
                     setAction(R.string.cancel) {
-                        LibraryUpdateService.stop(context)
+                        LibraryUpdateJob.stop(context)
                         lifecycleScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
@@ -269,7 +284,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val container: ViewGroup = binding.controllerContainer
 
         val content: ViewGroup = binding.mainContent
-        DownloadService.addListener(this)
+        DownloadJob.downloadFlow.onEach(::downloadStatusChanged).launchIn(lifecycleScope)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowCustomEnabled(true)
@@ -744,7 +759,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onResume() {
         super.onResume()
         checkForAppUpdates()
-        DownloadService.callListeners()
+        DownloadJob.callListeners()
         showDLQueueTutorial()
         reEnableBackPressedCallBack()
     }
@@ -810,6 +825,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
                         // Create confirmation window
                         withContext(Dispatchers.Main) {
+                            showNotificationPermissionPrompt()
                             AppUpdateNotifier.releasePageUrl = result.release.releaseLink
                             NewUpdateDialogController(body, url).showDialog(router)
                         }
@@ -818,6 +834,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     TimberKt.e(error) { "Error checking for app update" }
                 }
             }
+        }
+    }
+
+    fun showNotificationPermissionPrompt(showAnyway: Boolean = false) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val notificationPermission = Manifest.permission.POST_NOTIFICATIONS
+        val hasPermission = ActivityCompat.checkSelfPermission(this, notificationPermission)
+        if (
+            hasPermission != PackageManager.PERMISSION_GRANTED &&
+                (!preferences.hasShownNotifPermission().get() || showAnyway)
+        ) {
+            preferences.hasShownNotifPermission().set(true)
+            requestNotificationPermissionLauncher.launch((notificationPermission))
         }
     }
 
@@ -914,7 +943,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         super.onDestroy()
         overflowDialog?.dismiss()
         overflowDialog = null
-        DownloadService.removeListener(this)
         if (isBindingInitialized) {
             binding.appBar.mainActivity = null
             binding.toolbar.setNavigationOnClickListener(null)
@@ -1336,9 +1364,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         return binding.bottomNav == null
     }
 
-    override fun downloadStatusChanged(downloading: Boolean) {
-        val hasQueue = downloading || downloadManager.hasQueue()
+    private fun downloadStatusChanged(downloading: Boolean) {
         lifecycleScope.launchUI {
+            val hasQueue = downloading || downloadManager.hasQueue()
+
             if (hasQueue) {
                 nav.getOrCreateBadge(R.id.nav_recents)
                 showDLQueueTutorial()
@@ -1384,25 +1413,29 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         )
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+        private var startingX = 0f
+        private var startingY = 0f
+
         override fun onDown(e: MotionEvent): Boolean {
+            startingX = e.x
+            startingY = e.y
             return true
         }
 
         override fun onFling(
-            e: MotionEvent?,
+            e1: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float,
         ): Boolean {
-            val e1 = e ?: return false
             var result = false
-            val diffY = e2.y - e1.y
-            val diffX = e2.x - e1.x
+            val diffY = e2.y - startingY
+            val diffX = e2.x - startingX
             if (abs(diffX) <= abs(diffY)) {
                 val sheetRect = Rect()
                 nav.getGlobalVisibleRect(sheetRect)
                 if (
-                    sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                    sheetRect.contains(startingX.toInt(), startingY.toInt()) &&
                         abs(diffY) > Companion.SWIPE_THRESHOLD &&
                         abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
                         diffY <= 0
@@ -1412,7 +1445,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     bottomSheetController?.showSheet()
                 } else if (
                     nav == binding.sideNav &&
-                        sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                        sheetRect.contains(startingX.toInt(), startingY.toInt()) &&
                         abs(diffY) > Companion.SWIPE_THRESHOLD &&
                         abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
                         diffY > 0

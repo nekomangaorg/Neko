@@ -99,7 +99,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             return
         }
 
-        val pendingIntent = NotificationReceiver.openErrorLogPendingActivity(context, uri)
+        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
@@ -139,7 +139,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             return
         }
 
-        val pendingIntent = NotificationReceiver.openErrorLogPendingActivity(context, uri)
+        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,

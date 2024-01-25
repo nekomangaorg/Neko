@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
 import android.app.PendingIntent
@@ -7,11 +8,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -131,6 +134,14 @@ open class App : Application(), DefaultLifecycleObserver {
                                 )
                             setContentIntent(pendingIntent)
                         }
+                    if (
+                        ActivityCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.POST_NOTIFICATIONS,
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        return@onEach
+                    }
                     notificationManager.notify(Notifications.ID_INCOGNITO_MODE, notification)
                 } else {
                     disableIncognitoReceiver.unregister()

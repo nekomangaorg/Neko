@@ -20,9 +20,9 @@ interface Source {
      *
      * @param chapter the chapter.
      */
-    suspend fun fetchPageList(chapter: SChapter): List<Page>
+    suspend fun getPageList(chapter: SChapter): List<Page>
 
-    suspend fun fetchImage(page: Page): Response
+    suspend fun getImage(page: Page): Response
 }
 
 data class MangaDetailChapterInformation(

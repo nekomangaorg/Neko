@@ -64,9 +64,9 @@ object DiskUtil {
     /** Don't display downloaded chapters in gallery apps creating `.nomedia`. */
     fun createNoMediaFile(dir: UniFile?, context: Context?) {
         if (dir != null && dir.exists()) {
-            val nomedia = dir.findFile(".nomedia")
+            val nomedia = dir.findFile(NOMEDIA_FILE)
             if (nomedia == null) {
-                dir.createFile(".nomedia")
+                dir.createFile(NOMEDIA_FILE)
                 context?.let { scanMedia(it, dir.uri) }
             }
         }
@@ -136,4 +136,6 @@ object DiskUtil {
             else -> true
         }
     }
+
+    const val NOMEDIA_FILE = ".nomedia"
 }

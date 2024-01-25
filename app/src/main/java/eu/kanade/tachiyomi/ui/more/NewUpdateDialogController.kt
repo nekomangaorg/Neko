@@ -4,7 +4,7 @@ import android.app.Dialog
 import android.os.Build
 import android.os.Bundle
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.updater.AppUpdateService
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 
@@ -35,7 +35,7 @@ class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundl
                 if (appContext != null) {
                     // Start download
                     val url = args.getString(URL_KEY) ?: ""
-                    AppUpdateService.start(appContext, url, true)
+                    AppDownloadInstallJob.start(appContext, url, true)
                 }
             }
             .setNegativeButton(R.string.ignore, null)

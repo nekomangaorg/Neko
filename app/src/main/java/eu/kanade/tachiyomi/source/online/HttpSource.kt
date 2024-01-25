@@ -16,7 +16,6 @@ import okhttp3.Request
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
-import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 /** A simple implementation for sources from a website. */
@@ -69,16 +68,6 @@ abstract class HttpSource : Source {
     // used to get the manga url instead of the api manga url
     open fun mangaDetailsRequest(manga: SManga): Request {
         return GET(baseUrl + manga.url, headers)
-    }
-
-    /**
-     * Returns an observable with the page containing the source url of the image. If there's any
-     * error, it will return null instead of throwing an exception.
-     *
-     * @param page the page whose source image has to be fetched.
-     */
-    open fun fetchImageUrl(page: Page): Observable<String> {
-        return Observable.just("")
     }
 
     protected open fun imageRequest(page: Page): Request {

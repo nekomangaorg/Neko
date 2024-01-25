@@ -1,13 +1,10 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -31,6 +28,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import androidx.work.CoroutineWorker
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -236,21 +237,6 @@ fun Context.isLandscape(): Boolean {
     return resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
 }
 
-/** Convenience method to acquire a partial wake lock. */
-fun Context.acquireWakeLock(tag: String? = null, timeout: Long? = null): PowerManager.WakeLock {
-    val wakeLock =
-        powerManager.newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "${tag ?: javaClass.name}:WakeLock",
-        )
-    if (timeout != null) {
-        wakeLock.acquire(timeout)
-    } else {
-        wakeLock.acquire()
-    }
-    return wakeLock
-}
-
 /** Property to get the notification manager from the context. */
 val Context.notificationManager: NotificationManager
     get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -265,55 +251,6 @@ val Context.wifiManager: WifiManager
 /** Property to get the power manager from the context. */
 val Context.powerManager: PowerManager
     get() = getSystemService()!!
-
-/**
- * Function used to send a local broadcast asynchronous
- *
- * @param intent intent that contains broadcast information
- */
-fun Context.sendLocalBroadcast(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
-        .sendBroadcast(
-            intent,
-        )
-}
-
-/**
- * Function used to send a local broadcast synchronous
- *
- * @param intent intent that contains broadcast information
- */
-fun Context.sendLocalBroadcastSync(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
-        .sendBroadcastSync(
-            intent,
-        )
-}
-
-/**
- * Function used to register local broadcast
- *
- * @param receiver receiver that gets registered.
- */
-fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
-        .registerReceiver(
-            receiver,
-            filter,
-        )
-}
-
-/**
- * Function used to unregister local broadcast
- *
- * @param receiver receiver that gets unregistered.
- */
-fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
-        .unregisterReceiver(
-            receiver,
-        )
-}
 
 /** Returns true if device is connected to Wifi. */
 fun Context.isConnectedToWifi(): Boolean {
@@ -330,14 +267,6 @@ fun Context.isConnectedToWifi(): Boolean {
         @Suppress("DEPRECATION")
         wifiManager.connectionInfo.bssid != null
     }
-}
-
-/** Returns true if the given service class is running. */
-fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
-    val className = serviceClass.name
-    val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    @Suppress("DEPRECATION")
-    return manager.getRunningServices(Integer.MAX_VALUE).any { className == it.service.className }
 }
 
 fun Context.defaultBrowserPackageName(): String? {
@@ -402,6 +331,19 @@ fun Context.isInNightMode(): Boolean {
     val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
 }
+
+suspend fun CoroutineWorker.tryToSetForeground() {
+    try {
+        setForeground(getForegroundInfo())
+    } catch (e: IllegalStateException) {
+        TimberKt.e(e) { "Not allowed to set foreground job" }
+    }
+}
+
+fun WorkManager.jobIsRunning(tag: String): Boolean =
+    getWorkInfosForUniqueWork(tag).get().let { list ->
+        list.count { it.state == WorkInfo.State.RUNNING } == 1
+    }
 
 fun Context.appDelegateNightMode(): Int {
     return if (isInNightMode()) {

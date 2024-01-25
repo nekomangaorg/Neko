@@ -92,7 +92,7 @@ class HttpPageLoader(
                 if (e is CancellationException) {
                     throw e
                 }
-                source.fetchPageList(chapter.chapter)
+                source.getPageList(chapter.chapter)
             }
         return pages.mapIndexed { index, page ->
             // Don't trust sources and use our own indexing
@@ -195,7 +195,7 @@ class HttpPageLoader(
             val imageUrl = page.imageUrl!!
             if (!chapterCache.isImageInCache(imageUrl)) {
                 page.status = Page.State.DOWNLOAD_IMAGE
-                val imageResponse = source.fetchImage(page)
+                val imageResponse = source.getImage(page)
                 chapterCache.putImageToCache(imageUrl, imageResponse)
             }
 
