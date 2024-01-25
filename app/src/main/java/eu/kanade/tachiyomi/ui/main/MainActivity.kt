@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.main
 
+import android.Manifest
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
@@ -59,7 +60,6 @@ import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.Manifest
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadJob
@@ -284,7 +284,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         val container: ViewGroup = binding.controllerContainer
 
         val content: ViewGroup = binding.mainContent
-        DownloadJob.addListener(this)
+        DownloadJob.downloadFlow.onEach(::downloadStatusChanged).launchIn(lifecycleScope)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowCustomEnabled(true)
@@ -1363,9 +1363,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         return binding.bottomNav == null
     }
 
-    override fun downloadStatusChanged(downloading: Boolean) {
-        val hasQueue = downloading || downloadManager.hasQueue()
+    private fun downloadStatusChanged(downloading: Boolean) {
         lifecycleScope.launchUI {
+            val hasQueue = downloading || downloadManager.hasQueue()
+
             if (hasQueue) {
                 nav.getOrCreateBadge(R.id.nav_recents)
                 showDLQueueTutorial()

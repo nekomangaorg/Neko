@@ -6,8 +6,8 @@ import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateJob
-import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
@@ -40,7 +40,7 @@ object Migrations {
     ): Boolean {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        prefs.edit { remove(AppUpdateService.NOTIFY_ON_INSTALL_KEY) }
+        prefs.edit { remove(AppDownloadInstallJob.NOTIFY_ON_INSTALL_KEY) }
         val oldVersion = preferences.lastVersionCode().get()
         TimberKt.d { "last version $oldVersion" }
         if (oldVersion < BuildConfig.VERSION_CODE) {
@@ -153,6 +153,11 @@ object Migrations {
                 LibraryPresenter.updateSavedFilters()
                 val updated = preferences.langsToShow().get().split(",").filter { it != "NULL" }
                 preferences.langsToShow().set(updated.joinToString(","))
+            }
+
+            if (oldVersion < 196) {
+                LibraryUpdateJob.cancelAllWorks(context)
+                LibraryUpdateJob.setupTask(context)
             }
 
             return true

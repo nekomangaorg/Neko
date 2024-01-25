@@ -19,11 +19,11 @@ import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlin.coroutines.cancellation.CancellationException
 
-class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) :
+    CoroutineWorker(context, workerParams) {
 
     private val notifier = BackupNotifier(context)
     private val restorer = BackupRestorer(context, notifier)
-
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = notifier.showRestoreProgress(progress = -1).build()
@@ -63,11 +63,12 @@ class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) : C
         private const val TAG = "BackupRestorer"
 
         fun start(context: Context, uri: Uri) {
-            val request = OneTimeWorkRequestBuilder<BackupRestoreJob>()
-                .addTag(TAG)
-                .setInputData(workDataOf(BackupConst.EXTRA_URI to uri.toString()))
-                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .build()
+            val request =
+                OneTimeWorkRequestBuilder<BackupRestoreJob>()
+                    .addTag(TAG)
+                    .setInputData(workDataOf(BackupConst.EXTRA_URI to uri.toString()))
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .build()
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)
         }
@@ -78,5 +79,4 @@ class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) : C
 
         fun isRunning(context: Context) = WorkManager.getInstance(context).jobIsRunning(TAG)
     }
-
 }

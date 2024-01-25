@@ -332,12 +332,11 @@ fun Context.isInNightMode(): Boolean {
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
 }
 
-
 suspend fun CoroutineWorker.tryToSetForeground() {
     try {
         setForeground(getForegroundInfo())
     } catch (e: IllegalStateException) {
-        TimberKt.e(e){ "Not allowed to set foreground job"}
+        TimberKt.e(e) { "Not allowed to set foreground job" }
     }
 }
 

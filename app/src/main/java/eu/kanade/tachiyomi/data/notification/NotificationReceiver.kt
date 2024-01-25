@@ -19,11 +19,10 @@ import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.updater.AppUpdateService
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -302,7 +301,15 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     private fun cancelDownloadUpdate(context: Context) {
-        AppUpdateService.stop(context)
+        AppDownloadInstallJob.stop(context)
+        dismissNotification(context, Notifications.ID_UPDATER)
+    }
+
+    private fun startAppUpdate(context: Context, intent: Intent) {
+        val url = intent.getStringExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL) ?: return
+        val notifyOnInstall =
+            intent.getBooleanExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, false)
+        AppDownloadInstallJob.start(context, url, notifyOnInstall)
     }
 
     /**
@@ -346,6 +353,8 @@ class NotificationReceiver : BroadcastReceiver() {
         private const val ACTION_CANCEL_V5_MIGRATION = "$ID.$NAME.CANCEL_V5_MIGRATION"
 
         private const val ACTION_CANCEL_UPDATE_DOWNLOAD = "$ID.$NAME.CANCEL_UPDATE_DOWNLOAD"
+
+        private const val ACTION_START_APP_UPDATE = "$ID.$NAME.START_APP_UPDATE"
 
         // Called to mark as read
         private const val ACTION_MARK_AS_READ = "$ID.$NAME.MARK_AS_READ"
@@ -672,7 +681,10 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param uri uri of error log file
          * @return [PendingIntent]
          */
-        internal fun openErrorOrSkippedLogPendingActivity(context: Context, uri: Uri?): PendingIntent {
+        internal fun openErrorOrSkippedLogPendingActivity(
+            context: Context,
+            uri: Uri?
+        ): PendingIntent {
             val intent =
                 Intent().apply {
                     action = Intent.ACTION_VIEW
@@ -792,6 +804,25 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent =
                 Intent(context, NotificationReceiver::class.java).apply {
                     action = ACTION_CANCEL_V5_MIGRATION
+                }
+            return PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        }
+
+        internal fun startAppUpdatePendingJob(
+            context: Context,
+            url: String,
+            notifyOnInstall: Boolean = false
+        ): PendingIntent {
+            val intent =
+                Intent(context, NotificationReceiver::class.java).apply {
+                    action = ACTION_START_APP_UPDATE
+                    putExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL, url)
+                    putExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
                 }
             return PendingIntent.getBroadcast(
                 context,

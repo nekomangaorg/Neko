@@ -42,12 +42,13 @@ class BackupNotifier(private val context: Context) {
     }
 
     fun showBackupProgress() {
-        val builder = with(progressNotificationBuilder) {
-            setContentTitle(context.getString(R.string.creating_backup))
+        val builder =
+            with(progressNotificationBuilder) {
+                setContentTitle(context.getString(R.string.creating_backup))
 
-            setProgress(0, 0, true)
-            setOnlyAlertOnce(true)
-        }
+                setProgress(0, 0, true)
+                setOnlyAlertOnce(true)
+            }
 
         builder.show(Notifications.ID_BACKUP_PROGRESS)
     }
@@ -100,18 +101,21 @@ class BackupNotifier(private val context: Context) {
                     setContentText(content)
                 }
 
-            setProgress(maxAmount, progress, progress == -1)
-            setOnlyAlertOnce(true)
+                setProgress(maxAmount, progress, progress == -1)
+                setOnlyAlertOnce(true)
 
-            // Clear old actions if they exist
-            clearActions()
+                // Clear old actions if they exist
+                clearActions()
 
-            addAction(
-                R.drawable.ic_close_24dp,
-                context.getString(R.string.stop),
-                NotificationReceiver.cancelRestorePendingBroadcast(context, Notifications.ID_RESTORE_PROGRESS),
-            )
-        }
+                addAction(
+                    R.drawable.ic_close_24dp,
+                    context.getString(R.string.stop),
+                    NotificationReceiver.cancelRestorePendingBroadcast(
+                        context,
+                        Notifications.ID_RESTORE_PROGRESS
+                    ),
+                )
+            }
 
         if (progress != -1) {
             builder.show(Notifications.ID_RESTORE_PROGRESS)

@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
@@ -261,7 +261,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun sideNavMode() = this.preferenceStore.getInt(Keys.sideNavMode, 0)
 
     fun appShouldAutoUpdate() =
-        this.preferenceStore.getInt(Keys.shouldAutoUpdate, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
+        this.preferenceStore.getInt(Keys.shouldAutoUpdate, AppDownloadInstallJob.ONLY_ON_UNMETERED)
 
     fun blockedScanlators() = this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
 

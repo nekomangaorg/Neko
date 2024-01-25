@@ -281,11 +281,6 @@
             </intent-filter>
         </receiver>
 
-        <service
-            android:name=".data.updater.AppUpdateService"
-            android:exported="false" />
-
-
         <meta-data
             android:name="android.webkit.WebView.EnableSafeBrowsing"
             android:value="false" />

@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.db
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -32,8 +31,8 @@ import uy.kohesive.injekt.injectLazy
 
 class RestoreHelper(val context: Context) {
 
-    val db : DatabaseHelper by injectLazy()
-    val trackManager : TrackManager by injectLazy()
+    val db: DatabaseHelper by injectLazy()
+    val trackManager: TrackManager by injectLazy()
 
     /** Pending intent of action that cancels the library update */
     val cancelIntent by lazy {
@@ -235,35 +234,35 @@ class RestoreHelper(val context: Context) {
     internal fun restoreCategories(backupCategories: List<BackupCategory>) {
         // Get categories from file and from db
         db.inTransaction {
-        val dbCategories = db.getCategories().executeAsBlocking()
+            val dbCategories = db.getCategories().executeAsBlocking()
 
-        // Iterate over them
-        backupCategories
-            .map { it.getCategoryImpl() }
-            .forEach { category ->
-                // Used to know if the category is already in the db
-                var found = false
-                for (dbCategory in dbCategories) {
-                    // If the category is already in the db, assign the id to the file's category
-                    // and do nothing
-                    if (category.name == dbCategory.name) {
-                        category.id = dbCategory.id
-                        found = true
-                        break
+            // Iterate over them
+            backupCategories
+                .map { it.getCategoryImpl() }
+                .forEach { category ->
+                    // Used to know if the category is already in the db
+                    var found = false
+                    for (dbCategory in dbCategories) {
+                        // If the category is already in the db, assign the id to the file's
+                        // category
+                        // and do nothing
+                        if (category.name == dbCategory.name) {
+                            category.id = dbCategory.id
+                            found = true
+                            break
+                        }
+                    }
+                    // If the category isn't in the db, remove the id and insert a new category
+                    // Store the inserted id in the category
+                    if (!found) {
+                        // Let the db assign the id
+                        category.id = null
+                        val result = db.insertCategory(category).executeAsBlocking()
+                        category.id = result.insertedId()?.toInt()
                     }
                 }
-                // If the category isn't in the db, remove the id and insert a new category
-                // Store the inserted id in the category
-                if (!found) {
-                    // Let the db assign the id
-                    category.id = null
-                    val result = db.insertCategory(category).executeAsBlocking()
-                    category.id = result.insertedId()?.toInt()
-                }
-            }
         }
     }
-
 
     /**
      * Restores the categories a manga is in.
@@ -427,5 +426,4 @@ class RestoreHelper(val context: Context) {
         newChapters[true]?.let { db.updateKnownChaptersBackup(it).executeAsBlocking() }
         newChapters[false]?.let { db.insertChapters(it).executeAsBlocking() }
     }
-
 }

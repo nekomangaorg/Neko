@@ -908,7 +908,7 @@ class RecentsController(bundle: Bundle? = null) :
         val view = view ?: return
         if (
             presenter.finished ||
-            BackupRestoreJob.isRunning(view.context.applicationContext) ||
+                BackupRestoreJob.isRunning(view.context.applicationContext) ||
                 (presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL && !isSearching())
         ) {
             loadNoMore()

@@ -9,7 +9,7 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 
 class SettingsGeneralController : SettingsController() {
 
@@ -133,7 +133,7 @@ class SettingsGeneralController : SettingsController() {
                                 R.string.over_wifi_only,
                                 R.string.dont_auto_update
                             )
-                        defaultValue = AutoAppUpdaterJob.ONLY_ON_UNMETERED
+                        defaultValue = AppDownloadInstallJob.ONLY_ON_UNMETERED
                     }
                 }
             }
