@@ -134,7 +134,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
         const val MANGA_TRACKING_COMPLETED = "manga_tracking_completed"
         const val MANGA_TRACKING_DROPPED = "manga_tracking_dropped"
         const val MANGA_TRACKING_ON_HOLD = "manga_tracking_on_hold"
-        const val MANGA_TRACKING_PLAN_TO_READ = "manga_tracking_completed"
+        const val MANGA_TRACKING_PLAN_TO_READ = "manga_tracking_plan_to_read"
         const val MANGA_TRACKING_UNFOLLOWED = "manga_tracking_unfollowed"
 
         // Device
