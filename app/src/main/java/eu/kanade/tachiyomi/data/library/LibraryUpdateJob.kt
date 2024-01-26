@@ -504,6 +504,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         ) {
                             val track = trackManager.mdList.createInitialTracker(manga)
                             db.insertTrack(track).executeAsBlocking()
+                            trackManager.mdList.bind(track)
                         }
                     }
                 }
