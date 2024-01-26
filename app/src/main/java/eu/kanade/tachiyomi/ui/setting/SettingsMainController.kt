@@ -131,18 +131,6 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                 titleRes = R.string.advanced
                 onClick { navigateTo(SettingsAdvancedController()) }
             }
-            preference {
-                iconDrawable =
-                    MaterialDesignDx.Icon.gmf_volunteer_activism.create(
-                        context,
-                        colorAttr = R.attr.colorOnSurface,
-                    )
-                titleRes = R.string.dex_loot
-                onClick {
-                    val intent = Intent(Intent.ACTION_VIEW, "https://loot.moe/".toUri())
-                    startActivity(intent)
-                }
-            }
             this
         }
 
