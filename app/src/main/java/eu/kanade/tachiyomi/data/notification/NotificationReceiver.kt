@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
-import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -74,7 +73,6 @@ class NotificationReceiver : BroadcastReceiver() {
                 )
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
-            ACTION_CANCEL_V5_MIGRATION -> cancelV5Migration(context)
             ACTION_CANCEL_TRACKING_SYNC -> cancelTrackingSync(context)
             ACTION_CANCEL_FOLLOW_SYNC -> cancelFollowSync(context)
             ACTION_CANCEL_UPDATE_DOWNLOAD -> cancelDownloadUpdate(context)
@@ -236,17 +234,6 @@ class NotificationReceiver : BroadcastReceiver() {
         LibraryUpdateJob.stop(context)
     }
 
-    /**
-     * Method called when user wants to stop a library update
-     *
-     * @param context context of application
-     * @param notificationId id of notification
-     */
-    private fun cancelV5Migration(context: Context) {
-        WorkManager.getInstance(context).cancelAllWorkByTag(V5MigrationJob.TAG)
-        Handler().post { dismissNotification(context, Notifications.Id.V5.Progress) }
-    }
-
     private fun cancelTrackingSync(context: Context) {
         WorkManager.getInstance(context).cancelAllWorkByTag(TrackingSyncJob.TAG)
         Handler().post { dismissNotification(context, Notifications.Id.Tracking.Progress) }
@@ -347,9 +334,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to cancel follow sync update.
         private const val ACTION_CANCEL_FOLLOW_SYNC = "$ID.$NAME.CANCEL_FOLLOW_SYNC"
-
-        // Called to cancel library v5 migration update.
-        private const val ACTION_CANCEL_V5_MIGRATION = "$ID.$NAME.CANCEL_V5_MIGRATION"
 
         private const val ACTION_CANCEL_UPDATE_DOWNLOAD = "$ID.$NAME.CANCEL_UPDATE_DOWNLOAD"
 
@@ -784,25 +768,6 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent =
                 Intent(context, NotificationReceiver::class.java).apply {
                     action = ACTION_CANCEL_FOLLOW_SYNC
-                }
-            return PendingIntent.getBroadcast(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            )
-        }
-
-        /**
-         * Returns [PendingIntent] that starts a service which stops the library update
-         *
-         * @param context context of application
-         * @return [PendingIntent]
-         */
-        internal fun cancelV5MigrationUpdatePendingBroadcast(context: Context): PendingIntent {
-            val intent =
-                Intent(context, NotificationReceiver::class.java).apply {
-                    action = ACTION_CANCEL_V5_MIGRATION
                 }
             return PendingIntent.getBroadcast(
                 context,

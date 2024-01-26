@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
-import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -264,21 +263,6 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                 titleRes = R.string.add_favorites_as_planned_to_read
                 summaryRes = R.string.add_favorites_as_planned_to_read_summary
                 defaultValue = false
-            }
-
-            preference {
-                titleRes = R.string.v5_migration_service
-                summary = context.resources.getString(R.string.v5_migration_desc)
-                onClick {
-                    context
-                        .materialAlertDialog()
-                        .setTitle(R.string.v5_migration_notice)
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .setPositiveButton(android.R.string.ok) { _, _ ->
-                            V5MigrationJob.doWorkNow(activity!!)
-                        }
-                        .show()
-                }
             }
         }
 

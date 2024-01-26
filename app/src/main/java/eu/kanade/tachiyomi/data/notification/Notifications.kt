@@ -17,10 +17,7 @@ object Notifications {
         const val Status = "status_channel"
         const val Tracking = "tracking_channel"
         const val Updated = "updated_channel"
-        const val v5Migration = "v5_migration_channel"
         const val Installing = "installing_channel"
-        const val ID_V5_MIGRATION_PROGRESS = -901
-        const val ID_V5_MIGRATION_ERROR = -902
     }
 
     object Id {
@@ -38,12 +35,6 @@ object Notifications {
 
         object Updated {
             const val Installed = -6
-        }
-
-        object V5 {
-            const val Progress = -901
-            const val Error = -902
-            const val Complete = -903
         }
     }
 
@@ -238,15 +229,6 @@ object Notifications {
                     context.getString(R.string.status_channel),
                     NotificationManager.IMPORTANCE_HIGH,
                 ),
-                NotificationChannel(
-                        Channel.v5Migration,
-                        context.getString(R.string.v5_migration_service),
-                        NotificationManager.IMPORTANCE_HIGH,
-                    )
-                    .apply {
-                        setShowBadge(true)
-                        setSound(null, null)
-                    },
                 NotificationChannel(
                         CHANNEL_INCOGNITO_MODE,
                         context.getString(R.string.incognito_mode),
