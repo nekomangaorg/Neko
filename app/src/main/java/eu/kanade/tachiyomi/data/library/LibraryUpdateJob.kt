@@ -368,7 +368,11 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         val tracks = db.getTracks(libraryManga).executeAsBlocking()
         return tracks.any { track ->
             val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
-            return@any status != null && status != globalStatus
+            return if (status.isNullOrBlank()) {
+                false
+            } else {
+                status == globalStatus
+            }
         }
     }
 

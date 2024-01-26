@@ -248,7 +248,11 @@ class StatsPresenter(
         val tracks = db.getTracks(manga).executeAsBlocking()
         return tracks.any { track ->
             val status = trackManager.getService(track.sync_id)?.getGlobalStatus(track.status)
-            return@any status != null && globalStatusId != trackManager.getGlobalStatusResId(status)
+            return if (status.isNullOrBlank()) {
+                false
+            } else {
+                globalStatusId == trackManager.getGlobalStatusResId(status)
+            }
         }
     }
 
