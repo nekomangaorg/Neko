@@ -17,7 +17,7 @@ import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class TrackingSyncService {
+class TrackSyncProcessor {
 
     val db: DatabaseHelper = Injekt.get()
     val trackManager: TrackManager = Injekt.get()

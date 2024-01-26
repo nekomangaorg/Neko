@@ -27,7 +27,7 @@ class TrackingSyncJob(
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
 
-    val trackingSyncService: TrackingSyncService by injectLazy()
+    val trackingSyncService: TrackSyncProcessor by injectLazy()
 
     // List containing failed updates
     private val failedUpdates = mutableMapOf<Manga, String?>()
