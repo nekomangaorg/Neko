@@ -253,8 +253,7 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     private fun cancelFollowSync(context: Context) {
-        WorkManager.getInstance(context).cancelAllWorkByTag(StatusSyncJob.TAG)
-        Handler().post { dismissNotification(context, Notifications.Id.Status.Progress) }
+        StatusSyncJob.stop(context)
     }
 
     /** Method called when user wants to mark as read */

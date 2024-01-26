@@ -1446,7 +1446,7 @@ class LibraryPresenter(
         presenterScope.launch {
             withContext(Dispatchers.IO) {
                 val mangaIds = mangaList.mapNotNull { it.id }.joinToString()
-                StatusSyncJob.doWorkNow(context, mangaIds)
+                StatusSyncJob.startNow(context, mangaIds)
             }
         }
     }

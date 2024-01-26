@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import kotlinx.coroutines.launch
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -243,7 +244,8 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                                 preferences
                                     .mangadexSyncToLibraryIndexes()
                                     .set(indiciesSelected.toSet())
-                                StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
+                                TimberKt.d { "Starting sync job" }
+                                StatusSyncJob.startNow(context, StatusSyncJob.entireFollowsFromDex)
                             }
                         }
                         .show()
@@ -254,7 +256,7 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                 titleRes = R.string.push_favorites_to_mangadex
                 summaryRes = R.string.push_favorites_to_mangadex_summary
 
-                onClick { StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex) }
+                onClick { StatusSyncJob.startNow(context, StatusSyncJob.entireLibraryToDex) }
             }
 
             switchPreference {

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.jobs.follows
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -12,6 +13,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
@@ -20,22 +22,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
-class FollowsSyncService {
+class FollowsSyncProcessor {
 
-    val preferences: PreferencesHelper = Injekt.get()
-    val db: DatabaseHelper = Injekt.get()
-    val sourceManager: SourceManager = Injekt.get()
-    val trackManager: TrackManager = Injekt.get()
-    private val followsHandler: FollowsHandler = Injekt.get()
+    val preferences: PreferencesHelper by injectLazy()
+    val db: DatabaseHelper by injectLazy()
+    val sourceManager: SourceManager by injectLazy()
+    val trackManager: TrackManager by injectLazy()
+    private val followsHandler: FollowsHandler by injectLazy()
+    private val mangaUpdateCoordinator: MangaUpdateCoordinator by injectLazy()
 
     /** Syncs follows list manga into library based off the preference */
     suspend fun fromMangaDex(
         errorNotification: (String) -> Unit,
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: () -> Unit,
+        updateManga: (List<LibraryManga>) -> Unit,
     ): Int {
         return withContext(Dispatchers.IO) {
             TimberKt.d { "Starting from MangaDex sync" }
@@ -94,6 +98,16 @@ class FollowsSyncService {
                             db.insertManga(dbManga).executeAsBlocking()
                         }
                     }
+                    val mangaToUpdate =
+                        listManga
+                            .mapNotNull {
+                                db.getManga(it.url, sourceManager.mangaDex.id).executeAsBlocking()
+                            }
+                            .map {
+                                val libraryManga = LibraryManga().apply { this.title = it.title }
+                                libraryManga
+                            }
+                    updateManga(mangaToUpdate)
                 }
 
             completeNotification()

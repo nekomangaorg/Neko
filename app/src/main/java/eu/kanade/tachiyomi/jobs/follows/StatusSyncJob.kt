@@ -1,15 +1,21 @@
 package eu.kanade.tachiyomi.jobs.follows
 
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.work.CoroutineWorker
 import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.source.SourceManager
@@ -19,6 +25,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
@@ -32,9 +39,9 @@ class StatusSyncJob(
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
 
-    val followsSyncService: FollowsSyncService by injectLazy()
+    private val followsSyncProcessor: FollowsSyncProcessor by injectLazy()
     val source: SourceManager by injectLazy()
-    val loginHelper: MangaDexLoginHelper by injectLazy()
+    private val loginHelper: MangaDexLoginHelper by injectLazy()
 
     private val progressNotification =
         applicationContext.notificationBuilder(Notifications.Channel.Status).apply {
@@ -48,12 +55,20 @@ class StatusSyncJob(
             )
         }
 
-    override suspend fun doWork(): Result = coroutineScope {
-        withUIContext {
-            val notification = progressNotification.build()
-            val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
-            setForeground(foregroundInfo)
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        val notification = progressNotification.build()
+        val id = Notifications.Id.Status.Progress
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(id, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(id, notification)
         }
+    }
+
+    override suspend fun doWork(): Result = coroutineScope {
+        TimberKt.d { "Doing work" }
+        tryToSetForeground()
+        TimberKt.d { "Checking if logged in" }
         if (!loginHelper.isLoggedIn()) {
             context.notificationManager.cancel(Notifications.Id.Status.Complete)
             errorNotification()
@@ -63,18 +78,22 @@ class StatusSyncJob(
             when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
                 null,
                 "0" -> {
-                    followsSyncService.toMangaDex(
+                    TimberKt.d { "sync to dex" }
+                    followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
                         null,
                     )
                 }
                 "1" -> {
+                    TimberKt.d { "sync to dex" }
+
                     val total =
-                        followsSyncService.fromMangaDex(
+                        followsSyncProcessor.fromMangaDex(
                             ::errorNotification,
                             ::updateNotificationProgress,
                             ::completeNotificationFromDex,
+                            ::updateManga
                         )
                     withUIContext {
                         applicationContext.toast(
@@ -87,7 +106,7 @@ class StatusSyncJob(
                     }
                 }
                 else -> {
-                    followsSyncService.toMangaDex(
+                    followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
                         ids,
@@ -102,6 +121,7 @@ class StatusSyncJob(
         } finally {
             launchIO {
                 delay(3.seconds.inWholeMilliseconds)
+                context.notificationManager.cancel(Notifications.Id.Status.Progress)
                 context.notificationManager.cancel(Notifications.Id.Status.Complete)
             }
         }
@@ -133,18 +153,25 @@ class StatusSyncJob(
         completeNotification(R.string.sync_to_follows_complete)
     }
 
+    private fun updateManga(libraryMangaList: List<LibraryManga>) {
+        LibraryUpdateJob.startNow(context.applicationContext, mangaToUse = libraryMangaList)
+    }
+
     private fun completeNotification(@StringRes title: Int) {
+        context.notificationManager.cancel(Notifications.Id.Status.Progress)
+
         val notification =
             progressNotification
                 .setContentTitle(context.getString(R.string.sync_follows_complete))
                 .build()
-        context.applicationContext.notificationManager.notify(
+        context.notificationManager.notify(
             Notifications.Id.Status.Complete,
             notification,
         )
     }
 
     private fun errorNotification(errorTxt: String? = null) {
+        context.notificationManager.cancel(Notifications.Id.Status.Progress)
         val notification =
             progressNotification
                 .setContentTitle(
@@ -152,7 +179,7 @@ class StatusSyncJob(
                 )
                 .setAutoCancel(true)
                 .build()
-        context.applicationContext.notificationManager.notify(
+        context.notificationManager.notify(
             Notifications.Id.Status.Complete,
             notification,
         )
@@ -166,18 +193,22 @@ class StatusSyncJob(
         const val entireLibraryToDex: String = "0"
         const val entireFollowsFromDex = "1"
 
-        fun doWorkNow(context: Context, syncToMangadex: String) {
+        fun startNow(context: Context, syncToMangadex: String) {
+            val request =
+                OneTimeWorkRequestBuilder<StatusSyncJob>()
+                    .addTag(TAG)
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                    .setInputData(
+                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).build(),
+                    )
+                    .build()
+
             WorkManager.getInstance(context)
-                .enqueue(
-                    OneTimeWorkRequestBuilder<StatusSyncJob>()
-                        .apply {
-                            addTag(TAG)
-                            setInputData(
-                                Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).build(),
-                            )
-                        }
-                        .build(),
-                )
+                .enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
+        }
+
+        fun stop(context: Context) {
+            WorkManager.getInstance(context).cancelUniqueWork(TAG)
         }
     }
 }
