@@ -374,7 +374,7 @@ private fun ChapterInfo(
                         true -> {
                             TimberKt.e { "Missing flag for $language" }
                             Text(
-                                text = "$language • ",
+                                text = "$language â‹… ",
                                 style =
                                     MaterialTheme.typography.bodyMedium.copy(
                                         color = secondaryTextColor,
@@ -403,7 +403,7 @@ private fun ChapterInfo(
                     }
                 }
                 Text(
-                    text = statuses.joinToString(" • "),
+                    text = statuses.joinToString(" â‹… "),
                     style =
                         MaterialTheme.typography.bodyMedium.copy(
                             color = secondaryTextColor,
@@ -414,7 +414,7 @@ private fun ChapterInfo(
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                statuses.joinToString(" • ")
+                statuses.joinToString(" â‹… ")
             }
         }
         Box(

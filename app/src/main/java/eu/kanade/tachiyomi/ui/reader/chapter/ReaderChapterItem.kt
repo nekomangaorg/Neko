@@ -109,7 +109,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             binding.chapterTitle.typeface = typeface
             binding.chapterSubtitle.typeface = typeface
             binding.chapterLanguage.typeface = typeface
-            binding.chapterSubtitle.text = statuses.joinToString(" • ")
+            binding.chapterSubtitle.text = statuses.joinToString(" â‹… ")
         }
 
         override fun unbindView(item: ReaderChapterItem) {

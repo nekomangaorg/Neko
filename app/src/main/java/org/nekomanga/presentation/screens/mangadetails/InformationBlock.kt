@@ -97,7 +97,7 @@ fun InformationBlock(
                     true -> authorProvider().trim()
                     false -> {
                         listOfNotNull(authorProvider().trim(), artistProvider().trim())
-                            .joinToString(" • ")
+                            .joinToString(" â‹… ")
                     }
                 }
 
@@ -111,7 +111,7 @@ fun InformationBlock(
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
-            val creators = creator.split(" • ").map { it.trim() }
+            val creators = creator.split(" â‹… ").map { it.trim() }
             SimpleDropdownMenu(
                 expanded = creatorExpanded,
                 onDismiss = { creatorExpanded = false },

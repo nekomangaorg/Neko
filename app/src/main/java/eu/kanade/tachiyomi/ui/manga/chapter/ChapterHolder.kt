@@ -99,7 +99,7 @@ class ChapterHolder(
             showBookmark = false,
             hideStatus = isLocked,
         )
-        binding.chapterScanlator.text = statuses.joinToString(" • ")
+        binding.chapterScanlator.text = statuses.joinToString(" â‹… ")
 
         val status =
             when {

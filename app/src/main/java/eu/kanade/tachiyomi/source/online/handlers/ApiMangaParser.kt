@@ -51,7 +51,7 @@ class ApiMangaParser {
                     }
                     .mapNotNull { it.attributes!!.name }
                     .distinct()
-                    .joinToString(" • ")
+                    .joinToString(" â‹… ")
 
             manga.artist =
                 mangaDto.relationships
@@ -60,7 +60,7 @@ class ApiMangaParser {
                     }
                     .mapNotNull { it.attributes!!.name }
                     .distinct()
-                    .joinToString(" • ")
+                    .joinToString(" â‹… ")
 
             val altTitles =
                 mangaAttributesDto.altTitles?.map { it.asMdMap<String>().values }?.flatten()

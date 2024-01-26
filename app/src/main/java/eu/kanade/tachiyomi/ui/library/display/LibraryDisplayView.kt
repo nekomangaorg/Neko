@@ -115,7 +115,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                         R.string.landscape
                     },
                 )
-            "$mainOrientation: $mainText • $altOrientation: $altText"
+            "$mainOrientation: $mainText â‹… $altOrientation: $altText"
         }
         binding.gridSeekbar.addOnChangeListener { _, value, fromUser ->
             if (!fromUser) {

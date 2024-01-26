@@ -73,7 +73,7 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
     val estimateChapterString =
         when (estimateChapters.isEmpty()) {
             true -> null
-            false -> estimateChapters.joinToString(" • ")
+            false -> estimateChapters.joinToString(" â‹… ")
         }
 
     return MissingChapterHolder(
