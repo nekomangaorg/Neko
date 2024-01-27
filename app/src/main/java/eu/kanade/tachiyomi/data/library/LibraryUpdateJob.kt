@@ -226,15 +226,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         context.getString(R.string.skipped_reason_completed)
                     false
                 }
-                LibraryPreferences.MANGA_TRACKING_UNFOLLOWED in restrictions &&
-                    hasTrackWithGivenStatus(
-                        libraryManga,
-                        context.getString(R.string.follows_unfollowed)
-                    ) -> {
-                    skippedUpdates[libraryManga] =
-                        context.getString(R.string.skipped_reason_tracking_unfollowed)
-                    return@filter false
-                }
                 LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ in restrictions &&
                     hasTrackWithGivenStatus(
                         libraryManga,
@@ -504,7 +495,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         ) {
                             val track = trackManager.mdList.createInitialTracker(manga)
                             db.insertTrack(track).executeAsBlocking()
-                            trackManager.mdList.bind(track)
+                            if (mangaDexLoginHelper.isLoggedIn()) {
+                                trackManager.mdList.bind(track)
+                            }
                         }
                     }
                 }
