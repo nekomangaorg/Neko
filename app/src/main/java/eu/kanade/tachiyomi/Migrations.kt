@@ -51,7 +51,7 @@ object Migrations {
                 AppUpdateJob.setupTask(context)
             }
             LibraryUpdateJob.setupTask(context)
-            BackupCreatorJob.setupTask(context)
+            BackupCreatorJob.setupTask(context, 12)
 
             if (oldVersion == 0) {
                 return BuildConfig.DEBUG
@@ -64,7 +64,7 @@ object Migrations {
             }
             if (oldVersion < 53) {
                 LibraryUpdateJob.setupTask(context)
-                BackupCreatorJob.setupTask(context)
+                BackupCreatorJob.setupTask(context, 12)
             }
             if (oldVersion < 95) {
                 // Force MAL log out due to login flow change

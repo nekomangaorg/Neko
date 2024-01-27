@@ -109,6 +109,10 @@ class SettingsBackupController : SettingsController() {
 
                     onChange { newValue ->
                         val interval = newValue as Int
+                        when (interval > 0) {
+                            true -> BackupCreatorJob.setupTask(context, interval)
+                            false -> BackupCreatorJob.cancelTask(context)
+                        }
                         BackupCreatorJob.setupTask(context, interval)
                         true
                     }
@@ -139,17 +143,6 @@ class SettingsBackupController : SettingsController() {
                             val dir = UniFile.fromUri(context, path.toUri())
                             summary = dir.filePath + "/automatic"
                         }
-                        .launchIn(viewScope)
-                }
-                intListPreference(activity) {
-                    bindTo(preferences.numberOfBackups())
-                    titleRes = R.string.max_auto_backups
-                    entries = (1..5).map(Int::toString)
-                    entryRange = 1..5
-                    preferences
-                        .backupInterval()
-                        .changes()
-                        .onEach { isVisible = it > 0 }
                         .launchIn(viewScope)
                 }
             }

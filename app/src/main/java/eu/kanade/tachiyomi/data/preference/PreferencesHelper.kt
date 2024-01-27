@@ -178,9 +178,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun folderPerManga() = this.preferenceStore.getBoolean(Keys.folderPerManga, false)
 
-    fun numberOfBackups() = this.preferenceStore.getInt(Keys.numberOfBackups, 2)
-
-    fun backupInterval() = this.preferenceStore.getInt(Keys.backupInterval, 0)
+    fun backupInterval() = this.preferenceStore.getInt(Keys.backupInterval, 12)
 
     fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)
 

@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import java.io.FileOutputStream
@@ -40,7 +39,8 @@ class BackupCreator(val context: Context) {
     internal val databaseHelper: DatabaseHelper by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
-    private val preferences: PreferencesHelper by injectLazy()
+
+    private val MAX_AUTO_BACKUPS: Int = 6
 
     val parser = ProtoBuf
 
@@ -78,11 +78,10 @@ class BackupCreator(val context: Context) {
                     dir = dir.createDirectory("automatic")
 
                     // Delete older backups
-                    val numberOfBackups = preferences.numberOfBackups().get()
                     dir.listFiles { _, filename -> Backup.filenameRegex.matches(filename) }
                         .orEmpty()
                         .sortedByDescending { it.name }
-                        .drop(numberOfBackups - 1)
+                        .drop(MAX_AUTO_BACKUPS - 1)
                         .forEach { it.delete() }
 
                     // Create new file to place backup

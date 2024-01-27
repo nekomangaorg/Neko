@@ -55,30 +55,28 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
             return list.find { it.state == WorkInfo.State.RUNNING } != null
         }
 
-        fun setupTask(context: Context, prefInterval: Int? = null) {
-            val preferences = Injekt.get<PreferencesHelper>()
-            val interval = prefInterval ?: preferences.backupInterval().get()
-            val workManager = WorkManager.getInstance(context)
-            if (interval > 0) {
-                val request =
-                    PeriodicWorkRequestBuilder<BackupCreatorJob>(
-                            interval.toLong(),
-                            TimeUnit.HOURS,
-                            10,
-                            TimeUnit.MINUTES,
-                        )
-                        .addTag(TAG_AUTO)
-                        .setInputData(workDataOf(IS_AUTO_BACKUP_KEY to true))
-                        .build()
+        fun cancelTask(context: Context) {
+            WorkManager.getInstance(context).cancelUniqueWork(TAG_AUTO)
+        }
 
-                workManager.enqueueUniquePeriodicWork(
-                    TAG_AUTO,
-                    ExistingPeriodicWorkPolicy.UPDATE,
-                    request
-                )
-            } else {
-                workManager.cancelUniqueWork(TAG_AUTO)
-            }
+        fun setupTask(context: Context, interval: Int) {
+            val workManager = WorkManager.getInstance(context)
+            val request =
+                PeriodicWorkRequestBuilder<BackupCreatorJob>(
+                        interval.toLong(),
+                        TimeUnit.HOURS,
+                        10,
+                        TimeUnit.MINUTES,
+                    )
+                    .addTag(TAG_AUTO)
+                    .setInputData(workDataOf(IS_AUTO_BACKUP_KEY to true))
+                    .build()
+
+            workManager.enqueueUniquePeriodicWork(
+                TAG_AUTO,
+                ExistingPeriodicWorkPolicy.UPDATE,
+                request
+            )
         }
 
         fun startNow(context: Context, uri: Uri, flags: Int) {

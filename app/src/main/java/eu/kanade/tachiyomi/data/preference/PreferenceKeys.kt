@@ -37,8 +37,6 @@ object PreferenceKeys {
 
     const val folderPerManga = "create_folder_per_manga"
 
-    const val numberOfBackups = "backup_slots"
-
     const val backupInterval = "backup_interval"
 
     const val removeAfterReadSlots = "remove_after_read_slots"
