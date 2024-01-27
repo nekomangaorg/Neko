@@ -27,7 +27,6 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_UNFOLLOWED
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -196,7 +195,6 @@ class SettingsLibraryController : SettingsController() {
                             MANGA_HAS_UNREAD,
                             MANGA_NOT_STARTED,
                             MANGA_NOT_COMPLETED,
-                            MANGA_TRACKING_UNFOLLOWED,
                             MANGA_TRACKING_PLAN_TO_READ,
                             MANGA_TRACKING_DROPPED,
                             MANGA_TRACKING_ON_HOLD,
@@ -208,7 +206,6 @@ class SettingsLibraryController : SettingsController() {
                             MANGA_HAS_UNREAD,
                             MANGA_NOT_STARTED,
                             MANGA_NOT_COMPLETED,
-                            MANGA_TRACKING_UNFOLLOWED,
                             MANGA_TRACKING_PLAN_TO_READ,
                             MANGA_TRACKING_DROPPED,
                             MANGA_TRACKING_ON_HOLD,

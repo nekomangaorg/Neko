@@ -36,7 +36,6 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_UNFOLLOWED
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.MangaStatus
 import org.nekomanga.domain.manga.MangaType
@@ -279,8 +278,6 @@ class StatsPresenter(
                         manga.totalChapters > 0 &&
                         !manga.hasStarted -> true
                     MANGA_NOT_COMPLETED in restrictions && manga.status == SManga.COMPLETED -> true
-                    MANGA_TRACKING_UNFOLLOWED in restrictions &&
-                        hasTrackWithGivenStatus(manga, R.string.follows_unfollowed) -> false
                     MANGA_TRACKING_PLAN_TO_READ in restrictions &&
                         hasTrackWithGivenStatus(manga, R.string.follows_plan_to_read) -> false
                     MANGA_TRACKING_DROPPED in restrictions &&
