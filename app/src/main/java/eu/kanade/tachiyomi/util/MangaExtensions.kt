@@ -151,16 +151,20 @@ fun List<HomePageManga>.resync(db: DatabaseHelper): ImmutableList<HomePageManga>
 }
 
 fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
-    return this.map {
-        val dbManga = db.getManga(it.mangaId).executeAsBlocking()!!
-        it.copy(
-            inLibrary = dbManga.favorite,
-            currentArtwork =
-                it.currentArtwork.copy(
-                    url = dbManga.user_cover ?: "",
-                    originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl
+    return this.mapNotNull { displayManga ->
+        val dbManga = db.getManga(displayManga.mangaId).executeAsBlocking()
+        when (dbManga == null) {
+            true -> null
+            else ->
+                displayManga.copy(
+                    inLibrary = dbManga.favorite,
+                    currentArtwork =
+                        displayManga.currentArtwork.copy(
+                            url = dbManga.user_cover ?: "",
+                            originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl
+                        )
                 )
-        )
+        }
     }
 }
 
