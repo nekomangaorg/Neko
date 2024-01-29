@@ -10,7 +10,7 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.padding
 import com.mikepenz.iconics.utils.size
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 fun IIcon.create(
     context: Context,

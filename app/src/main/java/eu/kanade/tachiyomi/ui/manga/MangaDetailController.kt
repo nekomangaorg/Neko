@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.palette.graphics.Palette
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -46,6 +45,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy

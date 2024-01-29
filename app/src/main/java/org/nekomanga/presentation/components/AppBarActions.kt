@@ -14,8 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.R
 import org.nekomanga.presentation.components.dropdown.MainDropdownMenu
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu

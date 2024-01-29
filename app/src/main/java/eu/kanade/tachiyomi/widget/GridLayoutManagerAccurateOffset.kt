@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.widget
 import android.content.Context
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 class GridLayoutManagerAccurateOffset(context: Context?, spanCount: Int) :
     GridLayoutManager(context, spanCount) {

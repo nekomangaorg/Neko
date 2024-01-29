@@ -8,12 +8,12 @@ import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
+import org.nekomanga.R
 
 /** Class used to show BigPictureStyle notifications */
 class SaveImageNotifier(private val context: Context) {

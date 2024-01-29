@@ -19,7 +19,6 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.mikepenz.iconics.IconicsDrawable
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.startAuthentication
@@ -29,6 +28,7 @@ import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
 import eu.kanade.tachiyomi.widget.preference.TriStateListPreference
+import org.nekomanga.R
 
 @DslMarker @Target(AnnotationTarget.TYPE) annotation class DSL
 

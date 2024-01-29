@@ -5,12 +5,12 @@ import android.view.GestureDetector
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import androidx.core.view.isVisible
-import eu.kanade.tachiyomi.databinding.LibraryCategoryHeaderItemBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sign
+import org.nekomanga.databinding.LibraryCategoryHeaderItemBinding
 
 class LibraryHeaderGestureDetector(
     private val header: LibraryHeaderHolder?,

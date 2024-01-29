@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortOption
@@ -27,6 +26,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.ChapterNumber
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.SourceOrder
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.SortType.UploadDate
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.components.SortRow
 import org.nekomanga.presentation.components.TriStateCheckboxRow

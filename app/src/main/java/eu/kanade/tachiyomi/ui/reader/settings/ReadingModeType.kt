@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.reader.settings
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.next
+import org.nekomanga.R
 
 enum class ReadingModeType(
     val prefValue: Int,

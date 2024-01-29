@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.FileProvider
-import eu.kanade.tachiyomi.BuildConfig
 import java.io.File
+import org.nekomanga.BuildConfig
 
 /**
  * Returns the uri of a file

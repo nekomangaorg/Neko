@@ -51,8 +51,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
-import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes

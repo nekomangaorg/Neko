@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer
 import android.graphics.PointF
 import android.graphics.RectF
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 abstract class ViewerNavigation {
 

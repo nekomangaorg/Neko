@@ -19,13 +19,13 @@ val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
 android {
     compileSdk = AndroidConfig.compileSdkVersion
-    namespace = "eu.kanade.tachiyomi"
+    namespace = "org.nekomanga"
 
     defaultConfig {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
-        applicationId = "tachiyomi.mangadex"
-        versionCode = 196
+        applicationId = "org.nekomanga.neko"
+        versionCode = 1
         versionName = "2.16.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

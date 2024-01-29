@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
+import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.details.MangaDetailsPreferences

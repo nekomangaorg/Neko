@@ -55,7 +55,6 @@ import com.himanshoe.charty.line.model.LineData
 import com.himanshoe.charty.pie.PieChart
 import com.himanshoe.charty.pie.config.PieConfig
 import com.himanshoe.charty.pie.config.PieData
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.DetailedState
 import eu.kanade.tachiyomi.ui.more.stats.StatsHelper.getReadDuration
@@ -68,6 +67,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
 

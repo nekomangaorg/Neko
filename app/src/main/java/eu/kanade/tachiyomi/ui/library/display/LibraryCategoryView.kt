@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.ui.library.display
 
 import android.content.Context
 import android.util.AttributeSet
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.LibraryCategoryLayoutBinding
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
 import kotlin.math.min
+import org.nekomanga.R
+import org.nekomanga.databinding.LibraryCategoryLayoutBinding
 
 class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseLibraryDisplayView<LibraryCategoryLayoutBinding>(context, attrs) {

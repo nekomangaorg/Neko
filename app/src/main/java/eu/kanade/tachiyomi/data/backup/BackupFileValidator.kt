@@ -2,12 +2,12 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
 import eu.kanade.tachiyomi.data.track.TrackManager
 import okio.buffer
 import okio.gzip
 import okio.source
+import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

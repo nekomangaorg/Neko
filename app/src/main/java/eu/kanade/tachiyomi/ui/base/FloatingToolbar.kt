@@ -12,9 +12,9 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.textview.MaterialTextView
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.R
 
 class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseToolbar(context, attrs) {

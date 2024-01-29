@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi
+package org.nekomanga
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -24,6 +24,8 @@ import androidx.multidex.MultiDex
 import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import eu.kanade.tachiyomi.AppModule
+import eu.kanade.tachiyomi.PreferenceModule
 import eu.kanade.tachiyomi.crash.CrashActivity
 import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
@@ -46,6 +48,8 @@ import org.nekomanga.logging.DebugReportingTree
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.injectLazy
+
+private const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"
 
 open class App : Application(), DefaultLifecycleObserver {
 
@@ -194,5 +198,3 @@ open class App : Application(), DefaultLifecycleObserver {
         }
     }
 }
-
-private const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"

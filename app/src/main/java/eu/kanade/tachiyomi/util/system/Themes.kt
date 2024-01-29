@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.util.system
 import androidx.annotation.StringRes
 import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatDelegate
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 @Suppress("unused")
 enum class Themes(

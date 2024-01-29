@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 class StaggeredGridLayoutManagerAccurateOffset(
     context: Context?,

@@ -59,9 +59,7 @@ import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.primitives.Ints.max
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -71,7 +69,6 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
-import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -128,6 +125,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import me.saket.cascade.CascadePopupMenu
 import me.saket.cascade.overrideAllPopupMenus
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
+import org.nekomanga.databinding.MainActivityBinding
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -515,10 +515,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             if (
                 Migrations.upgrade(
                     preferences,
-                    networkPreferences,
-                    libraryPreferences,
-                    readerPreferences,
-                    lifecycleScope
                 )
             ) {
                 if (!BuildConfig.DEBUG) {

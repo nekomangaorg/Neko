@@ -6,8 +6,6 @@ import android.os.Environment
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -20,6 +18,8 @@ import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import tachiyomi.core.preference.Preference
 import tachiyomi.core.preference.PreferenceStore

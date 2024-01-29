@@ -9,12 +9,12 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.googlematerial.OutlinedGoogleMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import org.nekomanga.R
 
 class SettingsMainController : SettingsController(), FloatingSearchInterface {
 

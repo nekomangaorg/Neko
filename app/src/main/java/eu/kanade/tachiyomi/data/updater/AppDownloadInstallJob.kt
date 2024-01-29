@@ -19,7 +19,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -44,6 +43,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
 import okhttp3.internal.http2.StreamResetException
+import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.GET
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.ProgressListener

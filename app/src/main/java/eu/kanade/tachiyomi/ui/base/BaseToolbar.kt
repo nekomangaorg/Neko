@@ -7,8 +7,8 @@ import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import com.bluelinelabs.conductor.Router
 import com.google.android.material.appbar.MaterialToolbar
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.SearchActivity
+import org.nekomanga.R
 
 open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialToolbar(context, attrs) {

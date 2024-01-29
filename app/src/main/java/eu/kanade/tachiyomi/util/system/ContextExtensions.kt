@@ -35,12 +35,12 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt

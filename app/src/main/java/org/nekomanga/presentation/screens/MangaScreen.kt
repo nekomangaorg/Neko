@@ -51,7 +51,6 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
 import eu.kanade.presentation.components.VerticalDivider
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.ChapterActions
@@ -68,6 +67,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow

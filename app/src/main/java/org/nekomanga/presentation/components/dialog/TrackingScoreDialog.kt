@@ -22,8 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.ListItemPicker
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
+import org.nekomanga.R
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable

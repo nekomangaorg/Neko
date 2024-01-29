@@ -2,9 +2,9 @@ package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import java.io.Serializable
+import org.nekomanga.R
 
 interface Category : Serializable {
 

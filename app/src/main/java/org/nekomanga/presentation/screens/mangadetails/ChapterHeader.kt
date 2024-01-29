@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size

@@ -9,8 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import androidx.work.WorkManager
-import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -35,6 +33,8 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
+import org.nekomanga.BuildConfig.APPLICATION_ID as ID
+import org.nekomanga.R
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get

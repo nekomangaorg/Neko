@@ -7,8 +7,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.tabs.TabLayout
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.ReaderColorFilterBinding
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -16,6 +14,8 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
+import org.nekomanga.R
+import org.nekomanga.databinding.ReaderColorFilterBinding
 
 class TabbedReaderSettingsSheet(
     val readerActivity: ReaderActivity,

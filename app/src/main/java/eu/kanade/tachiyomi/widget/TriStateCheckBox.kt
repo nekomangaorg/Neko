@@ -8,12 +8,12 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.updateLayoutParams
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.TriStateCheckBoxBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setAnimVectorCompat
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import kotlin.math.roundToInt
+import org.nekomanga.R
+import org.nekomanga.databinding.TriStateCheckBoxBinding
 
 class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {

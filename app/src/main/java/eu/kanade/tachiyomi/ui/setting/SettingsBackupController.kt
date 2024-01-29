@@ -16,7 +16,6 @@ import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.preference.PreferenceScreen
 import com.hippo.unifile.UniFile
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupFileValidator
@@ -32,6 +31,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.R
 
 class SettingsBackupController : SettingsController() {
 

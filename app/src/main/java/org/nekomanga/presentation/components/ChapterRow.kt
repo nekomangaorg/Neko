@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
@@ -66,6 +65,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
@@ -374,7 +374,7 @@ private fun ChapterInfo(
                         true -> {
                             TimberKt.e { "Missing flag for $language" }
                             Text(
-                                text = "$language ⋅ ",
+                                text = "$language ? ",
                                 style =
                                     MaterialTheme.typography.bodyMedium.copy(
                                         color = secondaryTextColor,
@@ -403,7 +403,7 @@ private fun ChapterInfo(
                     }
                 }
                 Text(
-                    text = statuses.joinToString(" ⋅ "),
+                    text = statuses.joinToString(" ? "),
                     style =
                         MaterialTheme.typography.bodyMedium.copy(
                             color = secondaryTextColor,
@@ -414,7 +414,7 @@ private fun ChapterInfo(
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                statuses.joinToString(" ⋅ ")
+                statuses.joinToString(" ? ")
             }
         }
         Box(

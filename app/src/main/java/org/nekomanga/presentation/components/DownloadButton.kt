@@ -36,8 +36,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
+import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
 private const val size = 24

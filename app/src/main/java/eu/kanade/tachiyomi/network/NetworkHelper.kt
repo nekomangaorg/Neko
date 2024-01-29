@@ -4,7 +4,6 @@ import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.google.common.net.HttpHeaders
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import java.io.File
@@ -13,6 +12,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Cache
 import okhttp3.Headers
 import okhttp3.OkHttpClient
+import org.nekomanga.BuildConfig
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.NetworkPreferences

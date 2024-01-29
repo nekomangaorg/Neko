@@ -5,8 +5,6 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -22,6 +20,8 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import kotlinx.coroutines.launch
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt

@@ -7,8 +7,8 @@ import android.content.pm.PackageInstaller
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.toast
+import org.nekomanga.R
 
 class AppUpdateBroadcast : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {

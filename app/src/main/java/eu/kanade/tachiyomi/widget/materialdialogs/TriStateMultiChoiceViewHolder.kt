@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.widget.materialdialogs
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import org.nekomanga.R
 
 internal class TriStateMultiChoiceViewHolder(
     itemView: View,

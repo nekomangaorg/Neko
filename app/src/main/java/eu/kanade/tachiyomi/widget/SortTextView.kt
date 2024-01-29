@@ -5,9 +5,9 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.updateLayoutParams
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.SortTextViewBinding
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import org.nekomanga.R
+import org.nekomanga.databinding.SortTextViewBinding
 
 class SortTextView constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {

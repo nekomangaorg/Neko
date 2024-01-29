@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.app.Application
 import android.content.Context
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -69,6 +68,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt

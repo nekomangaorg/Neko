@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.library
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
+import org.nekomanga.R
 
 enum class LibrarySort(
     val mainValue: Int,

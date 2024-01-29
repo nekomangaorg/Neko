@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.view.View
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
+import org.nekomanga.R
 
 open class BaseChapterHolder(
     view: View,

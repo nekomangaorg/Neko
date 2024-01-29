@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
 import com.hippo.unifile.UniFile
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -13,6 +12,7 @@ import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
 import java.util.concurrent.TimeUnit
+import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 

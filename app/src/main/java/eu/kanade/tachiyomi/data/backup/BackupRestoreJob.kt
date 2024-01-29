@@ -12,12 +12,12 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.jobIsRunning
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlin.coroutines.cancellation.CancellationException
+import org.nekomanga.R
 
 class BackupRestoreJob(val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {

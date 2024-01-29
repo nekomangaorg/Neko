@@ -3,8 +3,6 @@ package eu.kanade.tachiyomi.util
 import android.content.Context
 import android.net.Uri
 import android.os.Build
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -16,6 +14,8 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import eu.kanade.tachiyomi.util.system.withUIContext
 import java.io.IOException
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import uy.kohesive.injekt.injectLazy
 
 class CrashLogUtil(private val context: Context) {

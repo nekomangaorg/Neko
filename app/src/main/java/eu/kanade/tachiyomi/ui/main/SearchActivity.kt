@@ -10,7 +10,6 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
@@ -26,6 +25,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import java.math.BigInteger
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get

@@ -7,14 +7,14 @@ import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.view.isVisible
 import coil.load
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.databinding.ChaptersItemBinding
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import org.nekomanga.R
+import org.nekomanga.databinding.ChaptersItemBinding
 
 class ChapterHolder(
     view: View,
@@ -99,7 +99,7 @@ class ChapterHolder(
             showBookmark = false,
             hideStatus = isLocked,
         )
-        binding.chapterScanlator.text = statuses.joinToString(" ⋅ ")
+        binding.chapterScanlator.text = statuses.joinToString(" ? ")
 
         val status =
             when {

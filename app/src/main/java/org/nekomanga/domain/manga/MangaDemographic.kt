@@ -1,6 +1,6 @@
 package org.nekomanga.domain.manga
 
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 
 enum class MangaDemographic(val key: String, val nameRes: Int) {

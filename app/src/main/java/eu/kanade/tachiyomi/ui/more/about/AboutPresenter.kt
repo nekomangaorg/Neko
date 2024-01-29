@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.ui.more.about
 
 import android.content.Context
 import android.os.Build
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
@@ -20,6 +18,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.domain.snackbar.SnackbarState
 import uy.kohesive.injekt.injectLazy
 

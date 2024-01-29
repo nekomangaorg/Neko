@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
 import android.text.format.DateUtils
-import eu.kanade.tachiyomi.R
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
+import org.nekomanga.R
 
 val Long.timeSpanFromNow: String
     get() = DateUtils.getRelativeTimeSpanString(this).toString()

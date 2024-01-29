@@ -13,12 +13,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.databinding.SetCategoriesSheetBinding
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -29,6 +27,8 @@ import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
+import org.nekomanga.R
+import org.nekomanga.databinding.SetCategoriesSheetBinding
 import uy.kohesive.injekt.injectLazy
 
 class SetCategoriesSheet(

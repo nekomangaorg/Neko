@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.screens.ThemeColorState
 

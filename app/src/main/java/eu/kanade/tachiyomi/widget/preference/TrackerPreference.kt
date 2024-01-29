@@ -9,7 +9,7 @@ import androidx.core.view.isVisible
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.google.android.material.card.MaterialCardView
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 class TrackerPreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     Preference(context, attrs) {

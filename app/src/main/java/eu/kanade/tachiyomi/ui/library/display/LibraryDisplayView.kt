@@ -7,8 +7,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.slider.Slider
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.LibraryDisplayLayoutBinding
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.library.filter.ManageFilterItem
 import eu.kanade.tachiyomi.util.bindToPreference
@@ -24,6 +22,8 @@ import eu.kanade.tachiyomi.util.view.numberOfRowsForValue
 import eu.kanade.tachiyomi.util.view.rowsForValue
 import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
 import kotlin.math.roundToInt
+import org.nekomanga.R
+import org.nekomanga.databinding.LibraryDisplayLayoutBinding
 
 class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseLibraryDisplayView<LibraryDisplayLayoutBinding>(context, attrs) {
@@ -115,7 +115,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                         R.string.landscape
                     },
                 )
-            "$mainOrientation: $mainText ⋅ $altOrientation: $altText"
+            "$mainOrientation: $mainText ? $altOrientation: $altText"
         }
         binding.gridSeekbar.addOnChangeListener { _, value, fromUser ->
             if (!fromUser) {

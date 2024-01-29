@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.more.stats
 
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -28,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.nekomanga.R
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_HAS_UNREAD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_NOT_COMPLETED

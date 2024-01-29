@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
 import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

@@ -1,13 +1,13 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.widget.preference.KomgaLoginDialog
 import eu.kanade.tachiyomi.widget.preference.KomgaLoginPreference
 import eu.kanade.tachiyomi.widget.preference.KomgaLogoutDialog
+import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

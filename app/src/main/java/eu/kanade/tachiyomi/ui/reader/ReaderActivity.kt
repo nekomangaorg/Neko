@@ -57,14 +57,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
@@ -141,8 +138,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.preferences.toggle
+import org.nekomanga.databinding.ReaderActivityBinding
 import org.nekomanga.logging.TimberKt
 
 /**

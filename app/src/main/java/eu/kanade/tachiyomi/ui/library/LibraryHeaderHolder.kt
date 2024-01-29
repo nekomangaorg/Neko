@@ -17,17 +17,17 @@ import androidx.core.view.updatePadding
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.SelectableAdapter
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.LibraryCategoryHeaderItemBinding
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.compatToolTipText
+import org.nekomanga.R
+import org.nekomanga.databinding.LibraryCategoryHeaderItemBinding
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

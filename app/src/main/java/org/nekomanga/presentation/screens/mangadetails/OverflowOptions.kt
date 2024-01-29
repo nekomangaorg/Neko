@@ -1,9 +1,9 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.runtime.Composable
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions

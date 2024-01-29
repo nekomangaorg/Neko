@@ -5,9 +5,9 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.DownloadSwipeTutItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import org.nekomanga.R
+import org.nekomanga.databinding.DownloadSwipeTutItemBinding
 
 class DownloadSwipeTutorialItem : AbstractFlexibleItem<DownloadSwipeTutorialItem.Holder>() {
 

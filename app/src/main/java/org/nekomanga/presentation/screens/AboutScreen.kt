@@ -31,14 +31,14 @@ import androidx.compose.ui.unit.dp
 import compose.icons.SimpleIcons
 import compose.icons.simpleicons.Github
 import eu.kanade.presentation.components.PreferenceRow
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.ui.more.about.AboutScreenState
 import eu.kanade.tachiyomi.util.system.isOnline
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType

@@ -6,9 +6,9 @@ import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import kotlin.math.roundToInt
+import org.nekomanga.R
 
 class LinearLayoutManagerAccurateOffset(context: Context?) : LinearLayoutManager(context) {
 

@@ -8,7 +8,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
 

@@ -3,13 +3,13 @@ package eu.kanade.tachiyomi.ui.download
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
+import org.nekomanga.R
+import org.nekomanga.databinding.DownloadItemBinding
 
 /**
  * Class used to hold the data of a download. All the elements from the layout file "download_item"

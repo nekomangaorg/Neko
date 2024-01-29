@@ -5,12 +5,12 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.ReaderPagedLayoutBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
+import org.nekomanga.R
+import org.nekomanga.databinding.ReaderPagedLayoutBinding
 
 class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseReaderSettingsView<ReaderPagedLayoutBinding>(context, attrs) {

@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.model.markdownColor
 import com.mikepenz.markdown.model.markdownTypography
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.GithubRelease
+import org.nekomanga.R
 
 /** Dialog that shows when an app update is available */
 @Composable

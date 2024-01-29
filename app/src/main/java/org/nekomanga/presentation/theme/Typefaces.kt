@@ -5,7 +5,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 object Typefaces {
     private val defaultTypography = Typography()

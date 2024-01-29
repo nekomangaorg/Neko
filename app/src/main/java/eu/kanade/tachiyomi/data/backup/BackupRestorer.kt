@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -21,6 +20,7 @@ import java.io.File
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import okio.source
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 

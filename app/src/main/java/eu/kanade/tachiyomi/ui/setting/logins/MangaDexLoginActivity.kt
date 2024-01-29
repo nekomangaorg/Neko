@@ -3,9 +3,9 @@ package eu.kanade.tachiyomi.ui.setting.logins
 import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import org.nekomanga.R
 
 class MangaDexLoginActivity : BaseOAuthLoginActivity() {
     override fun handleResult(data: Uri?) {

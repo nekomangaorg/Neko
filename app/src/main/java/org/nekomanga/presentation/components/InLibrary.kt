@@ -19,7 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 import org.nekomanga.presentation.extensions.conditional
 import org.nekomanga.presentation.theme.Size
 

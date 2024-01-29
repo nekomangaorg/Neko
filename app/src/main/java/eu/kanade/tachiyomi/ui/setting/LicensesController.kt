@@ -7,8 +7,8 @@ import androidx.compose.ui.res.stringResource
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults.libraryColors
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults.libraryPadding
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.BasicComposeController
+import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
 import org.nekomanga.presentation.theme.Size

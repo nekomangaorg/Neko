@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.os.Build
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -14,6 +13,7 @@ import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.view.activityBinding
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.R
 import org.nekomanga.core.preferences.PreferenceValues
 
 class SettingsReaderController : SettingsController() {

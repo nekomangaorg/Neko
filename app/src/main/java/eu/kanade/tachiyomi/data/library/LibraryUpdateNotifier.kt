@@ -14,7 +14,6 @@ import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -29,6 +28,7 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 

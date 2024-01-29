@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.sp
 import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.text.NumberFormat
@@ -41,6 +40,7 @@ import java.util.Locale
 import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.R
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
@@ -97,7 +97,7 @@ fun InformationBlock(
                     true -> authorProvider().trim()
                     false -> {
                         listOfNotNull(authorProvider().trim(), artistProvider().trim())
-                            .joinToString(" ⋅ ")
+                            .joinToString(" ? ")
                     }
                 }
 
@@ -111,7 +111,7 @@ fun InformationBlock(
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
-            val creators = creator.split(" ⋅ ").map { it.trim() }
+            val creators = creator.split(" ? ").map { it.trim() }
             SimpleDropdownMenu(
                 expanded = creatorExpanded,
                 onDismiss = { creatorExpanded = false },

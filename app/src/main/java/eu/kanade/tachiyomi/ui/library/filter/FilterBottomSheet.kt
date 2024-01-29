@@ -12,10 +12,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.updatePaddingRelative
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.databinding.FilterBottomSheetBinding
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -39,6 +37,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
+import org.nekomanga.databinding.FilterBottomSheetBinding
 import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get

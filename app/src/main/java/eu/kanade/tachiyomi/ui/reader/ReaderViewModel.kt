@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -71,6 +70,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem

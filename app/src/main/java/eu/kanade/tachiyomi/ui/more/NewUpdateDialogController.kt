@@ -3,10 +3,10 @@ package eu.kanade.tachiyomi.ui.more
 import android.app.Dialog
 import android.os.Build
 import android.os.Bundle
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import org.nekomanga.R
 
 @Deprecated(
     message =

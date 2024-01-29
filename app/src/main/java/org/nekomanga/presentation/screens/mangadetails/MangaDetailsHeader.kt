@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DescriptionActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.InformationActions
@@ -48,6 +47,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaConstants.NextUnreadChapter
 import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem

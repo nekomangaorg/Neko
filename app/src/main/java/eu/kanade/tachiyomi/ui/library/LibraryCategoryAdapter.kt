@@ -4,7 +4,6 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -16,6 +15,7 @@ import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.runBlocking
+import org.nekomanga.R
 import org.nekomanga.core.util.withDefContext
 import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.injectLazy

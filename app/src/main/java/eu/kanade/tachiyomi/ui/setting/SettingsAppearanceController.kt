@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
@@ -14,6 +13,7 @@ import eu.kanade.tachiyomi.util.system.getPrefTheme
 import kotlin.math.max
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get

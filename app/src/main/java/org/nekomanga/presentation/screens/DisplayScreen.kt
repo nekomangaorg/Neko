@@ -35,10 +35,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBarActions

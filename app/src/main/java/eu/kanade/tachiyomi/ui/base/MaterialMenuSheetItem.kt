@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.ui.base
 import android.view.View
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.MenuSheetItemBinding
+import org.nekomanga.R
+import org.nekomanga.databinding.MenuSheetItemBinding
 
 class MaterialMenuSheetItem(val sheetItem: MaterialMenuSheet.MenuSheetItem) :
     AbstractItem<MaterialMenuSheetItem.ViewHolder>() {

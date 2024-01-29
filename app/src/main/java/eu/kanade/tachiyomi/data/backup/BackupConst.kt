@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.data.backup
 
-import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
+import org.nekomanga.BuildConfig.APPLICATION_ID as ID
 
 object BackupConst {
 

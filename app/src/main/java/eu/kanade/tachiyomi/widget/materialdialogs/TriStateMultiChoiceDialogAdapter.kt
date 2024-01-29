@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.databinding.ListitemTristatechoiceBinding
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import org.nekomanga.databinding.ListitemTristatechoiceBinding
 
 private object CheckPayload
 

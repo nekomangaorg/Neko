@@ -28,9 +28,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
 @Composable

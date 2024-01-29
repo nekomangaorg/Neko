@@ -19,9 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 

@@ -11,10 +11,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.databinding.DownloadButtonBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.R
+import org.nekomanga.databinding.DownloadButtonBinding
 
 class DownloadButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
