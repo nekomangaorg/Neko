@@ -7,23 +7,26 @@ import okhttp3.Response
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
 
-class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var token: String?) :
-    Interceptor {
+class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
 
-    private var oauth: OAuth? = null
     private val json: Json by injectLazy()
+
+    private var oauth: OAuth? = myanimelist.loadOAuth()
+    private val tokenExpired
+        get() = myanimelist.getIfAuthExpired()
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
+        if (tokenExpired) {
+            throw MALTokenExpired()
+        }
 
-        if (token.isNullOrEmpty()) {
-            throw IOException("Not authenticated with MyAnimeList")
-        }
         if (oauth == null) {
-            oauth = myanimelist.loadOAuth()
+            throw IOException("MAL: User is not authenticated")
         }
+
         // Refresh access token if expired
-        if (oauth != null && oauth!!.isExpired()) {
+        if (oauth!!.isExpired()) {
             setAuth(refreshToken(chain))
         }
 
@@ -63,27 +66,27 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
      * token and the oauth object.
      */
     fun setAuth(oauth: OAuth?) {
-        token = oauth?.access_token
         this.oauth = oauth
         myanimelist.saveOAuth(oauth)
     }
 
     private fun refreshToken(chain: Interceptor.Chain): OAuth {
-        val newOauth = runCatching {
-            val oauthResponse = chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!))
+        return runCatching {
+                val oauthResponse = chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!))
 
-            if (oauthResponse.isSuccessful) {
-                with(json) { oauthResponse.parseAs<OAuth>() }
-            } else {
-                oauthResponse.close()
-                null
+                if (oauthResponse.code == 401) {
+                    myanimelist.setAuthExpired()
+                }
+
+                if (oauthResponse.isSuccessful) {
+                    with(json) { oauthResponse.parseAs<OAuth>() }
+                } else {
+                    oauthResponse.close()
+                    null
+                }
             }
-        }
-
-        if (newOauth.getOrNull() == null) {
-            throw IOException("Failed to refresh the access token")
-        }
-
-        return newOauth.getOrNull()!!
+            .getOrNull() ?: throw MALTokenExpired()
     }
 }
+
+class MALTokenExpired : IOException("MAL: Login has expired")

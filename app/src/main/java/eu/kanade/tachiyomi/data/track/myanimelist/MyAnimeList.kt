@@ -17,7 +17,7 @@ import uy.kohesive.injekt.injectLazy
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     private val json: Json by injectLazy()
-    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword().get()) }
+    private val interceptor by lazy { MyAnimeListInterceptor(this) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
     @StringRes override fun nameRes() = R.string.myanimelist
@@ -147,6 +147,14 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         super.logout()
         preferences.trackToken(this).delete()
         interceptor.setAuth(null)
+    }
+
+    fun getIfAuthExpired(): Boolean {
+        return preferences.trackAuthExpired(this).get()
+    }
+
+    fun setAuthExpired() {
+        preferences.trackAuthExpired(this).set(true)
     }
 
     fun saveOAuth(oAuth: OAuth?) {
