@@ -56,6 +56,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
+import com.hippo.unifile.UniFile
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -86,7 +87,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -118,7 +119,6 @@ import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.doOnEnd
 import eu.kanade.tachiyomi.widget.doOnStart
-import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -1540,7 +1540,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called from the view model when a page is ready to be shared. It shows Android's default
      * sharing tool.
      */
-    fun onShareImageResult(file: File, page: ReaderPage, secondPage: ReaderPage? = null) {
+    fun onShareImageResult(file: UniFile, page: ReaderPage, secondPage: ReaderPage? = null) {
         val manga = viewModel.manga ?: return
         val chapter = page.chapter.chapter
 
@@ -1566,7 +1566,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             )
         }, $pageNumber, <${MdConstants.baseUrl + manga.url}>"
 
-        val stream = file.getUriCompat(this)
+        val stream = file.uri.getUriWithAuthority(this)
         val intent =
             Intent(Intent.ACTION_SEND).apply {
                 putExtra(Intent.EXTRA_TEXT, text)

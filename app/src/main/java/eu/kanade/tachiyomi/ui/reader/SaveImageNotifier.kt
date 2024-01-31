@@ -8,11 +8,11 @@ import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.notificationManager
-import java.io.File
 import org.nekomanga.R
 
 /** Class used to show BigPictureStyle notifications */
@@ -32,12 +32,12 @@ class SaveImageNotifier(private val context: Context) {
      *
      * @param file image file containing downloaded page image.
      */
-    fun onComplete(file: File) {
+    fun onComplete(file: UniFile) {
         val request =
             ImageRequest.Builder(context)
                 .memoryCachePolicy(CachePolicy.DISABLED)
                 .diskCachePolicy(CachePolicy.DISABLED)
-                .data(file)
+                .data(file.uri)
                 .size(720, 1280)
                 .target(
                     onSuccess = {
@@ -53,7 +53,7 @@ class SaveImageNotifier(private val context: Context) {
         Coil.imageLoader(context).enqueue(request)
     }
 
-    private fun showCompleteNotification(file: File, image: Bitmap) {
+    private fun showCompleteNotification(file: UniFile, image: Bitmap) {
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.picture_saved))
             setSmallIcon(R.drawable.ic_photo_24dp)
@@ -71,7 +71,7 @@ class SaveImageNotifier(private val context: Context) {
                 context.getString(R.string.share),
                 NotificationReceiver.shareImagePendingBroadcast(
                     context,
-                    file.absolutePath,
+                    file.uri.path ?: "",
                     notificationId
                 ),
             )
@@ -81,7 +81,7 @@ class SaveImageNotifier(private val context: Context) {
                 context.getString(R.string.delete),
                 NotificationReceiver.deleteImagePendingBroadcast(
                     context,
-                    file.absolutePath,
+                    file.uri.path ?: "",
                     notificationId
                 ),
             )

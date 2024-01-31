@@ -421,5 +421,7 @@ fun Context.iconicsDrawable(
 }
 
 fun Context.sharedCacheDir(): UniFile? {
-    return UniFile.fromFile(this.cacheDir)?.createDirectory("shared_image")
+    val uniFile = UniFile.fromFile(this.cacheDir)?.createDirectory("shared_image")
+    uniFile?.listFiles()?.filter { it.isFile }?.map { it.delete() }
+    return uniFile
 }

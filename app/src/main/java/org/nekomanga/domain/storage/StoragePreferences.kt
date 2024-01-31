@@ -21,6 +21,7 @@ class StoragePreferences(
         const val BACKUP_DIR = "backup"
         const val AUTOMATIC_DIR = "automatic"
         const val COVER_DIR = "covers"
+        const val PAGES_DIR = "pages"
         const val DOWNLOADS_DIR = "downloads"
     }
 }
