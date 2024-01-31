@@ -169,6 +169,7 @@ class PreferenceModule(val application: Application) : InjektModule {
 
         addSingletonFactory {
             StoragePreferences(
+                context = application,
                 folderProvider = get<AndroidStorageFolderProvider>(),
                 preferenceStore = get()
             )

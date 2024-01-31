@@ -31,6 +31,7 @@ import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.hippo.unifile.UniFile
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
@@ -419,6 +420,6 @@ fun Context.iconicsDrawable(
     }
 }
 
-fun Context.sharedCacheDir(): File {
-    return File(this.cacheDir, "shared_image")
+fun Context.sharedCacheDir(): UniFile? {
+    return UniFile.fromFile(this.cacheDir)?.createDirectory("shared_image")
 }

@@ -36,7 +36,7 @@ import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.util.getSlug
-import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.getBestColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -209,17 +209,18 @@ class MangaDetailController(private val mangaId: Long) :
     /** Share a cover with the given url */
     fun shareCover(context: Context, artwork: Artwork) {
         viewScope.launch {
-            val cover = presenter.shareMangaCover(context.sharedCacheDir(), artwork)
+            val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
+            val cover = presenter.shareMangaCover(dir, artwork)
+            val sharableCover = cover?.getUriWithAuthority(context)
             withUIContext {
-                val stream = cover?.getUriCompat(context)
                 try {
                     val intent =
                         Intent(Intent.ACTION_SEND).apply {
-                            putExtra(Intent.EXTRA_STREAM, stream)
+                            putExtra(Intent.EXTRA_STREAM, sharableCover)
                             flags =
                                 Intent.FLAG_ACTIVITY_NEW_TASK or
                                     Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            clipData = ClipData.newRawUri(null, stream)
+                            clipData = ClipData.newRawUri(null, sharableCover)
                             type = "image/*"
                         }
                     startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
@@ -233,13 +234,12 @@ class MangaDetailController(private val mangaId: Long) :
     /** Share the given manga */
     private fun shareManga(context: Context) {
         viewScope.launch {
-            val cover =
-                presenter.shareMangaCover(
-                    context.sharedCacheDir(),
-                    presenter.mangaState.value.currentArtwork
-                )
+            val dir = context.sharedCacheDir() ?: throw Exception("Error accessing cache dir")
+
+            val cover = presenter.shareMangaCover(dir, presenter.mangaState.value.currentArtwork)
+            val sharableCover = cover?.getUriWithAuthority(context)
+
             withUIContext {
-                val stream = cover?.getUriCompat(context)
                 try {
                     val manga = presenter.manga.value!!
                     var url =
@@ -251,8 +251,8 @@ class MangaDetailController(private val mangaId: Long) :
                             putExtra(Intent.EXTRA_TEXT, url)
                             putExtra(Intent.EXTRA_TITLE, manga.title)
                             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            if (stream != null) {
-                                clipData = ClipData.newRawUri(null, stream)
+                            if (cover != null) {
+                                clipData = ClipData.newRawUri(null, sharableCover)
                             }
                         }
                     startActivity(Intent.createChooser(intent, context.getString(R.string.share)))

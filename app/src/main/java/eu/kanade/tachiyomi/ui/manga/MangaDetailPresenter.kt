@@ -1,14 +1,15 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
+import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import androidx.compose.ui.state.ToggleableState
 import androidx.core.text.isDigitsOnly
 import com.crazylegend.string.isNotNullOrEmpty
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
+import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -56,7 +57,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInWebView
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withIOContext
-import java.io.File
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -92,6 +92,7 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.snackbar.SnackbarState
+import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
@@ -111,10 +112,11 @@ class MangaDetailPresenter(
     chapterItemFilter: ChapterItemFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     private val loginHelper: MangaDexLoginHelper = Injekt.get(),
-    val statusHandler: StatusHandler = Injekt.get(),
+    private val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
     private val trackingCoordinator: TrackingCoordinator = Injekt.get(),
+    private val storagePreferences: StoragePreferences = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaDetailController>(), DownloadQueue.DownloadListener {
 
     private val _currentManga = MutableStateFlow<Manga?>(null)
@@ -506,10 +508,9 @@ class MangaDetailPresenter(
      * share the cover that is written in the destination folder. If a url is passed in then share
      * that one instead of the manga thumbnail url one
      */
-    suspend fun shareMangaCover(destDir: File, artwork: Artwork): File? {
+    suspend fun shareMangaCover(destDir: UniFile, artwork: Artwork): Uri? {
         return withIOContext {
             return@withIOContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                destDir.deleteRecursively()
                 try {
                     saveCover(destDir, artwork)
                 } catch (e: java.lang.Exception) {
@@ -524,23 +525,19 @@ class MangaDetailPresenter(
     }
 
     /** Save the given url cover to file */
-    fun saveCover(artwork: Artwork) {
+    fun saveCover(artwork: Artwork, destDir: UniFile? = null) {
         presenterScope.launchIO {
             try {
-
-
                 val directory =
-                    File(
-                        Environment.getExternalStorageDirectory().absolutePath +
-                            File.separator +
-                            Environment.DIRECTORY_PICTURES +
-                            File.separator +
-                            preferences.context.getString(R.string.app_name_neko),
-                    )
-                val destinationFile = saveCover(directory, artwork)
+                    destDir
+                        ?: storagePreferences
+                            .baseStorageDirectoryAsUniFile()
+                            .createDirectory(StoragePreferences.COVER_DIR)
+
+                val destinationUri = saveCover(directory, artwork)
                 launchUI {
                     view?.applicationContext?.let { context ->
-                        DiskUtil.scanMedia(context, destinationFile)
+                        DiskUtil.scanMedia(context, destinationUri)
                         view?.applicationContext?.toast(R.string.cover_saved)
                     }
                 }
@@ -552,7 +549,7 @@ class MangaDetailPresenter(
     }
 
     /** Save Cover to directory, if given a url save that specific cover */
-    private fun saveCover(directory: File, artwork: Artwork): File {
+    private fun saveCover(directory: UniFile, artwork: Artwork): Uri {
         val cover =
             when (artwork.url.isBlank() || currentManga().thumbnail_url == artwork.url) {
                 true ->
@@ -566,8 +563,6 @@ class MangaDetailPresenter(
 
         val type = ImageUtil.findImageType(cover.inputStream()) ?: throw Exception("Not an image")
 
-        directory.mkdirs()
-
         // Build destination file.
         val fileNameNoExtension =
             listOfNotNull(
@@ -579,11 +574,12 @@ class MangaDetailPresenter(
 
         val filename = DiskUtil.buildValidFilename("$fileNameNoExtension.${type.extension}")
 
-        val destFile = File(directory, filename)
+        val destFile = directory.createFile(filename)
+
         cover.inputStream().use { input ->
-            destFile.outputStream().use { output -> input.copyTo(output) }
+            destFile.openOutputStream().use { output -> input.copyTo(output) }
         }
-        return destFile
+        return destFile.uri
     }
 
     /** Set custom cover */
