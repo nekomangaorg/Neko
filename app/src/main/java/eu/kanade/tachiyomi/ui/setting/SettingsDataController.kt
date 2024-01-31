@@ -6,9 +6,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -26,26 +23,43 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.disableItems
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.nekomanga.R
+import org.nekomanga.domain.backup.BackupPreferences
+import org.nekomanga.domain.storage.StoragePreferences
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
-class SettingsBackupController : SettingsController() {
+class SettingsDataController : SettingsController() {
+    private val storagePreferences: StoragePreferences = Injekt.get()
+    private val backupPreferences: BackupPreferences = Injekt.get()
 
     /** Flags containing information of what to backup. */
     private var backupFlags = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requestFilePermissionsSafe(500, preferences)
     }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) =
         screen.apply {
-            titleRes = R.string.backup_and_restore
+            titleRes = R.string.data_storage
+
+            preference {
+                titleRes = R.string.storage_location
+                onClick { pickFileDirectory() }
+
+                storagePreferences
+                    .baseStorageDirectory()
+                    .changes()
+                    .onEach { path ->
+                        val dir = UniFile.fromUri(context, path.toUri())
+                        summary = dir.filePath ?: path
+                    }
+                    .launchIn(viewScope)
+            }
 
             preference {
                 key = "pref_create_backup"
@@ -59,7 +73,7 @@ class SettingsBackupController : SettingsController() {
 
                     if (!BackupCreatorJob.isManualJobRunning(context)) {
                         val ctrl = CreateBackupDialog()
-                        ctrl.targetController = this@SettingsBackupController
+                        ctrl.targetController = this@SettingsDataController
                         ctrl.showDialog(router)
                     } else {
                         context.toast(R.string.backup_in_progress)
@@ -94,7 +108,7 @@ class SettingsBackupController : SettingsController() {
                 titleRes = R.string.automatic_backups
 
                 intListPreference(activity) {
-                    bindTo(preferences.backupInterval())
+                    bindTo(backupPreferences.backupInterval())
                     titleRes = R.string.backup_frequency
                     entriesRes =
                         arrayOf(
@@ -117,49 +131,10 @@ class SettingsBackupController : SettingsController() {
                         true
                     }
                 }
-                preference {
-                    bindTo(preferences.backupsDirectory())
-                    titleRes = R.string.backup_location
-
-                    onClick {
-                        try {
-                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-                            startActivityForResult(intent, CODE_BACKUP_DIR)
-                        } catch (e: ActivityNotFoundException) {
-                            activity?.toast(R.string.file_picker_error)
-                        }
-                    }
-
-                    preferences
-                        .backupInterval()
-                        .changes()
-                        .onEach { isVisible = it > 0 }
-                        .launchIn(viewScope)
-
-                    preferences
-                        .backupsDirectory()
-                        .changes()
-                        .onEach { path ->
-                            val dir = UniFile.fromUri(context, path.toUri())
-                            summary = dir.filePath + "/automatic"
-                        }
-                        .launchIn(viewScope)
-                }
             }
 
             infoPreference(R.string.backup_info)
         }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.settings_backup, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_backup_help -> activity?.openInBrowser(HELP_URL)
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (data != null && resultCode == Activity.RESULT_OK) {
@@ -172,15 +147,22 @@ class SettingsBackupController : SettingsController() {
             }
 
             when (requestCode) {
-                CODE_BACKUP_DIR -> {
-                    // Get UriPermission so it's possible to write files
-                    val flags =
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                STORAGE_DIR ->
+                    if (data != null && resultCode == Activity.RESULT_OK) {
+                        val context = applicationContext ?: return
+                        val uri = data.data
+                        val flags =
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
-                    activity.contentResolver.takePersistableUriPermission(uri, flags)
-                    preferences.backupsDirectory().set(uri.toString())
-                }
+                        if (uri != null) {
+                            context.contentResolver.takePersistableUriPermission(uri, flags)
+                        }
+
+                        val file = UniFile.fromUri(context, uri)
+
+                        storagePreferences.baseStorageDirectory().set(file.uri.toString())
+                    }
                 CODE_BACKUP_CREATE -> {
                     val flags =
                         Intent.FLAG_GRANT_READ_URI_PERMISSION or
@@ -254,7 +236,7 @@ class SettingsBackupController : SettingsController() {
                             }
                         }
                     }
-                    (targetController as? SettingsBackupController)?.createBackup(flags)
+                    (targetController as? SettingsDataController)?.createBackup(flags)
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
@@ -312,12 +294,20 @@ class SettingsBackupController : SettingsController() {
             }
         }
     }
+
+    private fun pickFileDirectory() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        try {
+            startActivityForResult(intent, STORAGE_DIR)
+        } catch (e: ActivityNotFoundException) {
+            activity?.toast(R.string.file_picker_error)
+        }
+    }
+
+    companion object {
+        const val STORAGE_DIR = 104
+        const val KEY_URI = "RestoreBackupDialog.uri"
+        const val CODE_BACKUP_CREATE = 504
+        const val CODE_BACKUP_RESTORE = 505
+    }
 }
-
-private const val KEY_URI = "RestoreBackupDialog.uri"
-
-private const val CODE_BACKUP_DIR = 503
-private const val CODE_BACKUP_CREATE = 504
-private const val CODE_BACKUP_RESTORE = 505
-
-private const val HELP_URL = "https://tachiyomi.org/docs/guides/backups"

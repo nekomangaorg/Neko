@@ -55,6 +55,16 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                 titleRes = R.string.library
                 onClick { navigateTo(SettingsLibraryController()) }
             }
+
+            preference {
+                iconDrawable =
+                    OutlinedGoogleMaterial.Icon.gmo_folder_open.create(
+                        context,
+                        colorAttr = R.attr.colorOnSurface,
+                    )
+                titleRes = R.string.data_storage
+                onClick { navigateTo(SettingsDataController()) }
+            }
             preference {
                 iconDrawable =
                     CommunityMaterial.Icon2.cmd_google_chrome.create(
@@ -101,15 +111,6 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                     )
                 titleRes = R.string.tracking
                 onClick { navigateTo(SettingsTrackingController()) }
-            }
-            preference {
-                iconDrawable =
-                    MaterialDesignDx.Icon.gmf_settings_backup_restore.create(
-                        context,
-                        colorAttr = R.attr.colorOnSurface,
-                    )
-                titleRes = R.string.backup_and_restore
-                onClick { navigateTo(SettingsBackupController()) }
             }
             preference {
                 iconDrawable =

@@ -527,6 +527,8 @@ class MangaDetailPresenter(
     fun saveCover(artwork: Artwork) {
         presenterScope.launchIO {
             try {
+
+
                 val directory =
                     File(
                         Environment.getExternalStorageDirectory().absolutePath +

@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.concurrent.TimeUnit
+import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -27,9 +28,7 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     override fun doWork(): Result {
         val preferences = Injekt.get<PreferencesHelper>()
         val notifier = BackupNotifier(context)
-        val uri =
-            inputData.getString(LOCATION_URI_KEY)?.let { Uri.parse(it) }
-                ?: preferences.backupsDirectory().get().toUri()
+        val uri = inputData.getString(LOCATION_URI_KEY)?.toUri() ?: getAutomaticBackupLocation()
         val flags = inputData.getInt(BACKUP_FLAGS_KEY, BackupConst.BACKUP_ALL)
         val isAutoBackup = inputData.getBoolean(IS_AUTO_BACKUP_KEY, true)
 
@@ -46,6 +45,15 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
             Result.failure()
         } finally {
             context.notificationManager.cancel(Notifications.ID_BACKUP_PROGRESS)
+        }
+    }
+
+    private fun getAutomaticBackupLocation(): Uri {
+        val storagePreferences = Injekt.get<StoragePreferences>()
+        return storagePreferences.baseStorageDirectory().get().let {
+            val dir =
+                UniFile.fromUri(context, it.toUri()).createDirectory(StoragePreferences.BACKUP_DIR)
+            dir.uri
         }
     }
 

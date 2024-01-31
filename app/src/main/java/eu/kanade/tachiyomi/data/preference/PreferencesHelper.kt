@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.data.preference
 
 import android.content.Context
-import android.net.Uri
-import android.os.Environment
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
@@ -13,13 +11,10 @@ import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
-import java.io.File
 import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
-import org.nekomanga.BuildConfig
-import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import tachiyomi.core.preference.Preference
 import tachiyomi.core.preference.PreferenceStore
@@ -43,33 +38,6 @@ operator fun <T> Preference<Set<T>>.minusAssign(item: Collection<T>) {
 
 class PreferencesHelper(val context: Context, val preferenceStore: PreferenceStore) {
 
-    private val defaultFolder =
-        context.getString(R.string.app_name_neko) +
-            when (BuildConfig.DEBUG) {
-                true -> "_DEBUG"
-                false -> ""
-            }
-
-    private val defaultDownloadsDir =
-        Uri.fromFile(
-            File(
-                Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator +
-                    defaultFolder,
-                "downloads",
-            ),
-        )
-
-    private val defaultBackupDir =
-        Uri.fromFile(
-            File(
-                Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator +
-                    defaultFolder,
-                "backup",
-            ),
-        )
-
     fun getInt(key: String, default: Int) = this.preferenceStore.getInt(key, default)
 
     fun getStringPref(key: String, default: String = "") =
@@ -81,9 +49,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun hasShownNotifPermission() =
         this.preferenceStore.getBoolean("has_shown_notification_permission", false)
-
-    fun hasDeniedA11FilePermission() =
-        this.preferenceStore.getBoolean(Keys.deniedA11FilePermission, false)
 
     fun nightMode() =
         this.preferenceStore.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
@@ -167,9 +132,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun anilistScoreType() = this.preferenceStore.getString("anilist_score_type", "POINT_10")
 
-    fun backupsDirectory() =
-        this.preferenceStore.getString(Keys.backupDirectory, defaultBackupDir.toString())
-
     fun dateFormat(
         format: String = this.preferenceStore.getString(Keys.dateFormat, "").get()
     ): DateFormat =
@@ -178,14 +140,9 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
             else -> SimpleDateFormat(format, Locale.getDefault())
         }
 
-    fun downloadsDirectory() =
-        this.preferenceStore.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
-
     fun downloadOnlyOverWifi() = this.preferenceStore.getBoolean(Keys.downloadOnlyOverWifi, true)
 
     fun folderPerManga() = this.preferenceStore.getBoolean(Keys.folderPerManga, false)
-
-    fun backupInterval() = this.preferenceStore.getInt(Keys.backupInterval, 12)
 
     fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)
 

@@ -15,10 +15,8 @@ import eu.kanade.tachiyomi.util.lang.isUUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import org.nekomanga.R
+import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -31,7 +29,10 @@ import uy.kohesive.injekt.injectLazy
  *
  * @param context the application context.
  */
-class DownloadProvider(private val context: Context) {
+class DownloadProvider(
+    private val context: Context,
+    private val storagePreferences: StoragePreferences = Injekt.get()
+) {
 
     /** Preferences helper. */
     private val preferences: PreferencesHelper by injectLazy()
@@ -40,21 +41,13 @@ class DownloadProvider(private val context: Context) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /** The root directory for downloads. */
-    private var downloadsDir =
-        preferences.downloadsDirectory().get().let {
-            val dir = UniFile.fromUri(context, it.toUri())
-            DiskUtil.createNoMediaFile(dir, context)
-            dir
-        }
-
-    init {
-        preferences
-            .downloadsDirectory()
-            .changes()
-            .drop(1)
-            .onEach { downloadsDir = UniFile.fromUri(context, it.toUri()) }
-            .launchIn(scope)
-    }
+    private val downloadsDir: UniFile?
+        get() =
+            storagePreferences.baseStorageDirectory().get().let {
+                UniFile.fromUri(context, it.toUri())
+                    ?.createDirectory(StoragePreferences.DOWNLOADS_DIR)
+                    ?.also { dir -> DiskUtil.createNoMediaFile(dir, context) }
+            }
 
     /**
      * Returns the download directory for a manga. For internal use only.
@@ -68,7 +61,7 @@ class DownloadProvider(private val context: Context) {
             val mangaDirName = getMangaDirName(manga)
             val sourceDirName = getSourceDirName()
             TimberKt.d { "creating directory for $sourceDirName : $mangaDirName" }
-            return downloadsDir.createDirectory(sourceDirName).createDirectory(mangaDirName)
+            return downloadsDir!!.createDirectory(sourceDirName).createDirectory(mangaDirName)
         } catch (e: Exception) {
             TimberKt.e(e) { "error getting download folder for ${manga.title}" }
             throw Exception(context.getString(R.string.invalid_download_location))
@@ -81,7 +74,7 @@ class DownloadProvider(private val context: Context) {
      * @param source the source to query.
      */
     fun findSourceDir(): UniFile? {
-        return downloadsDir.findFile(getSourceDirName(), true)
+        return downloadsDir?.findFile(getSourceDirName(), true)
     }
 
     /**

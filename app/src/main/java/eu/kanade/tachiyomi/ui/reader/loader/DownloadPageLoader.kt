@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import java.io.File
+import tachiyomi.core.util.storage.toTempFile
 import uy.kohesive.injekt.injectLazy
 
 /** Loader used to load a chapter from the downloaded chapters. */
@@ -44,7 +44,7 @@ class DownloadPageLoader(
     }
 
     private suspend fun getPagesFromArchive(chapterPath: UniFile): List<ReaderPage> {
-        val loader = ZipPageLoader(File(chapterPath.filePath!!)).also { zipPageLoader = it }
+        val loader = ZipPageLoader(chapterPath.toTempFile(context)).also { zipPageLoader = it }
         return loader.getPages()
     }
 

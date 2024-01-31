@@ -2,10 +2,6 @@
 <resources>
     <string name="app_name_neko" translatable="false">Neko</string>
 
-    <string name="all_files_permission_required">File permissions required</string>
-    <string name="external_storage_permission_notice">Neko requires access to all files in Android 11 to download chapters, and create automatic backups. \n\nOn the next screen, enable \"Allow access to manage all files.\"</string>
-    <string name="external_storage_download_notice">Neko requires access to all files to download chapters. Tap here, then enable \"Allow access to manage all files.\"</string>
-
     <!--Models-->
 
     <!-- Manga Type -->
@@ -795,12 +791,16 @@
     <string name="series_opens_new_chapters">Series shortcuts opens new chapters</string>
     <string name="no_new_chapters_open_details">When there\'s no new chapters, the series\' details will open instead</string>
 
-    <!-- Backup -->
+    <!-- Data and Storage -->
+    <string name="data_storage">Data and Storage</string>
+    <string name="storage_location">Storage location</string>
+    <string name="storage_location_info">Used for automatic backups, saved images and chapter downloads.</string>
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
     <string name="restore_backup">Restore backup</string>
+    <string name="restore_neko">Data from the backup file will be restored.\n\n If this a pre v5 backup you will need to v5 migrate after you restore.</string>
     <string name="restore_from_backup_file">Restore library from backup file</string>
     <string name="restore_in_progress">Restore already in progress</string>
     <string name="backup_in_progress">Backup already in progress</string>
@@ -976,11 +976,9 @@
     <string name="no_network_connection">No network connection available</string>
 
     <!-- Downloads settings -->
-    <string name="download_location">Download location</string>
     <string name="only_download_over_wifi">Only download over Wi-Fi</string>
     <string name="remove_when_marked_as_read">Remove when marked as read</string>
     <string name="remove_after_read">Remove after read</string>
-    <string name="custom_location">Custom location</string>
     <string name="last_read_chapter">Last read chapter</string>
     <string name="second_to_last">Second to last chapter</string>
     <string name="third_to_last">Third to last chapter</string>
@@ -1001,6 +999,7 @@
     <string name="save_chapters_as_cbz">Save as CBZ archive</string>
     <string name="split_tall_images">Split tall images</string>
     <string name="split_tall_images_summary">Improves reader performance</string>
+
 
     <!-- Stats -->
     <string name="stat">Stat</string>
@@ -1396,9 +1395,6 @@
     <string name="use_cache_source_summary">Recommended to not use at this time, this was a legacy feature for V3 of MangaDex</string>
 
     <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
-
-    <!-- Backup Settings -->
-    <string name="restore_neko">Data from the backup file will be restored.\n\n If this a pre v5 backup you will need to v5 migrate after you restore.</string>
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>

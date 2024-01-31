@@ -31,6 +31,7 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import org.nekomanga.R
+import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -74,8 +75,9 @@ class BackupCreator(val context: Context) {
             file =
                 (if (isAutoBackup) {
                     // Get dir of file and create
-                    var dir = UniFile.fromUri(context, uri)
-                    dir = dir.createDirectory("automatic")
+                    val dir =
+                        UniFile.fromUri(context, uri)
+                            .createDirectory(StoragePreferences.AUTOMATIC_DIR)
 
                     // Delete older backups
                     dir.listFiles { _, filename -> Backup.filenameRegex.matches(filename) }

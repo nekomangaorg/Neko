@@ -29,15 +29,9 @@ object PreferenceKeys {
 
     const val catalogueShowLibrary = "pref_display_catalogue_already_in_library"
 
-    const val backupDirectory = "backup_directory"
-
-    const val downloadsDirectory = "download_directory"
-
     const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
 
     const val folderPerManga = "create_folder_per_manga"
-
-    const val backupInterval = "backup_interval"
 
     const val removeAfterReadSlots = "remove_after_read_slots"
 

@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.FollowsSyncProcessor
@@ -43,11 +44,14 @@ import kotlinx.serialization.json.Json
 import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.backup.BackupPreferences
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.domain.storage.StoragePreferences
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
+import tachiyomi.core.provider.AndroidStorageFolderProvider
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
@@ -158,6 +162,19 @@ class AppModule(val app: Application) : InjektModule {
 class PreferenceModule(val application: Application) : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
         addSingletonFactory<PreferenceStore> { AndroidPreferenceStore(application) }
+
+        addSingletonFactory { DownloadProvider(get()) }
+
+        addSingletonFactory { AndroidStorageFolderProvider(application) }
+
+        addSingletonFactory {
+            StoragePreferences(
+                folderProvider = get<AndroidStorageFolderProvider>(),
+                preferenceStore = get()
+            )
+        }
+
+        addSingletonFactory { BackupPreferences(get()) }
 
         addSingletonFactory { SecurityPreferences(get()) }
 

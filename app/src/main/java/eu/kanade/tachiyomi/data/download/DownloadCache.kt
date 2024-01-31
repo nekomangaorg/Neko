@@ -21,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.domain.storage.StoragePreferences
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -42,6 +43,7 @@ class DownloadCache(
     private val provider: DownloadProvider,
     private val sourceManager: SourceManager,
     private val preferences: PreferencesHelper = Injekt.get(),
+    private val storagePreferences: StoragePreferences = Injekt.get(),
 ) {
 
     /**
@@ -59,8 +61,9 @@ class DownloadCache(
     val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     init {
-        preferences
-            .downloadsDirectory()
+
+        storagePreferences
+            .baseStorageDirectory()
             .changes()
             .drop(1)
             .onEach { lastRenew = 0L } // invalidate cache
@@ -69,8 +72,11 @@ class DownloadCache(
 
     /** Returns the downloads directory from the user's preferences. */
     private fun getDirectoryFromPreference(): UniFile {
-        val dir = preferences.downloadsDirectory().get()
-        return UniFile.fromUri(context, dir.toUri())
+        return storagePreferences.baseStorageDirectory().get().let {
+            UniFile.fromUri(context, it.toUri()).also { uniFile ->
+                uniFile?.createDirectory(StoragePreferences.DOWNLOADS_DIR)
+            }
+        }
     }
 
     /**

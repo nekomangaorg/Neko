@@ -7,12 +7,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <!-- Storage -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission
-        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" />
-
     <!-- For background jobs -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -48,12 +42,10 @@
         android:name="org.nekomanga.App"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
-        android:preserveLegacyExternalStorage="true"
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="Neko"
