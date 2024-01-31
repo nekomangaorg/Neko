@@ -49,7 +49,7 @@ jobs:
           write-mode: overwrite # optional, default is preserve
 
       - name: Build app
-        uses: eskatos/gradle-command-action@v2
+        uses: eskatos/gradle-command-action@v3
         with:
           arguments: assembleStandardRelease
 
