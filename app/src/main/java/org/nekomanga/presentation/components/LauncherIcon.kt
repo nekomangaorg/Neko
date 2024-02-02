@@ -1,30 +1,20 @@
 package org.nekomanga.presentation.components
 
 import android.graphics.Bitmap
-import android.graphics.drawable.AdaptiveIconDrawable
-import android.os.Build
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
 import org.nekomanga.R
 
 @Composable
-fun LauncherIcon(size: Dp) {
-    ResourcesCompat.getDrawable(
-            LocalContext.current.resources,
-            R.mipmap.ic_launcher,
-            LocalContext.current.theme
-        )
+fun LauncherIcon(size: Dp, iconId: Int = R.mipmap.ic_launcher, onClick: () -> Unit = {}) {
+    ResourcesCompat.getDrawable(LocalContext.current.resources, iconId, LocalContext.current.theme)
         ?.let { drawable ->
             val bitmap =
                 Bitmap.createBitmap(
@@ -38,28 +28,7 @@ fun LauncherIcon(size: Dp) {
             Image(
                 bitmap = bitmap.asImageBitmap(),
                 contentDescription = null,
-                modifier = Modifier.requiredSize(size)
+                modifier = Modifier.requiredSize(size).clickable { onClick() }
             )
         }
-}
-
-@Composable
-fun adaptiveIconPainterResource(@DrawableRes id: Int): Painter {
-    val res = LocalContext.current.resources
-    val theme = LocalContext.current.theme
-
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        // Android O supports adaptive icons, try loading this first (even though this is least
-        // likely to be the format).
-        val adaptiveIcon = ResourcesCompat.getDrawable(res, id, theme) as? AdaptiveIconDrawable
-        if (adaptiveIcon != null) {
-            BitmapPainter(adaptiveIcon.toBitmap().asImageBitmap())
-        } else {
-            // We couldn't load the drawable as an Adaptive Icon, just use painterResource
-            painterResource(id)
-        }
-    } else {
-        // We're not on Android O or later, just use painterResource
-        painterResource(id)
-    }
 }

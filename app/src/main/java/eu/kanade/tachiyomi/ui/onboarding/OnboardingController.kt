@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.ui.base.controller.BasicComposeController
 import org.nekomanga.R
 import org.nekomanga.presentation.InfoScreen
 import org.nekomanga.presentation.screens.onboarding.FirstStep
+import org.nekomanga.presentation.screens.onboarding.IconStep
 import org.nekomanga.presentation.screens.onboarding.PermissionStep
 import org.nekomanga.presentation.screens.onboarding.StorageStep
 import org.nekomanga.presentation.screens.onboarding.ThemeStep
@@ -43,7 +44,9 @@ class OnboardingController : BasicComposeController() {
 
         var currentStep by rememberSaveable { mutableIntStateOf(0) }
 
-        val steps = remember { listOf(FirstStep(), ThemeStep(), StorageStep(), PermissionStep()) }
+        val steps = remember {
+            listOf(FirstStep(), IconStep(), ThemeStep(), StorageStep(), PermissionStep())
+        }
 
         val isLastStep = currentStep == steps.lastIndex
 
