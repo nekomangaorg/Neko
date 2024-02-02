@@ -14,10 +14,17 @@ class NekoColors {
         const val highAlphaLowContrast = .87f
         const val mediumAlphaHighContrast = .74f
         const val mediumAlphaLowContrast = .6f
+        const val halfAlpha = .5f
         const val disabledAlphaHighContrast = .38f
         const val disabledAlphaLowContrast = .38f
         const val veryLowContrast = .1f
     }
+}
+
+object IconColors {
+    val icon = Color(0xFF2A2121)
+    val outline = Color(0xFFff124a)
+    val background = Color(0xFFffffff)
 }
 
 object Outline {

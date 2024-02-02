@@ -15,8 +15,6 @@ if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
 
 val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
-
-
 android {
     compileSdk = AndroidConfig.compileSdkVersion
     namespace = "org.nekomanga"
@@ -35,9 +33,7 @@ android {
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
 
-        ndk {
-            abiFilters += supportedAbis
-        }
+        ndk { abiFilters += supportedAbis }
     }
 
     splits {
@@ -61,7 +57,6 @@ android {
             manifestPlaceholders["mangadexAuthRedirectUri"] = "mangadex-auth"
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
-
     }
 
     buildFeatures {
@@ -78,17 +73,14 @@ android {
 
     flavorDimensions.add("default")
 
-    productFlavors {
-        create("standard") {
-            buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
-        }
-    }
-
+    productFlavors { create("standard") { buildConfigField("Boolean", "INCLUDE_UPDATER", "true") } }
 }
 
 dependencies {
     implementation(projects.constants)
     implementation(projects.core)
+
+    implementation("com.github.akshaaatt:Onboarding:1.1.3")
 
     implementation(androidx.core.kts)
     implementation(kotlinx.bundles.kotlin)
@@ -106,9 +98,7 @@ dependencies {
     implementation(libs.tachi.unifile)
 
     // Modified dependencies
-    implementation(libs.j2k.subsample) {
-        exclude(module = "image-decoder")
-    }
+    implementation(libs.j2k.subsample) { exclude(module = "image-decoder") }
 
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)
@@ -163,7 +153,6 @@ dependencies {
     implementation(libs.bundles.fastadapter)
     implementation(libs.loadingButtonAndroid)
 
-
     implementation(libs.bundles.flexibleadapter)
 
     implementation(libs.photoView)
@@ -172,14 +161,13 @@ dependencies {
     implementation(libs.cascade)
     implementation(libs.cascade.compose)
 
-    //Compose
+    // Compose
     implementation(compose.bundles.compose)
     implementation(compose.gap)
     implementation(compose.bundles.accompanist)
     implementation(compose.number.picker)
 
     implementation(compose.bundles.charting)
-
 
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
@@ -189,13 +177,9 @@ dependencies {
     implementation(libs.bundles.kahelpers)
     implementation(libs.bundles.sandwich)
     implementation(libs.aboutLibraries.compose)
-    debugImplementation(libs.leakcanary)
+    // debugImplementation(libs.leakcanary)
 
     implementation(libs.bundles.results)
 
     testImplementation(libs.bundles.tests)
-
 }
-
-
-

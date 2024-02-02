@@ -51,7 +51,7 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.storage.StoragePreferences
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
-import tachiyomi.core.provider.AndroidStorageFolderProvider
+import tachiyomi.core.util.storage.AndroidStorageFolderProvider
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton

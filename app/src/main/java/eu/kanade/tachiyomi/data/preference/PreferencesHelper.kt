@@ -50,6 +50,9 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun hasShownNotifPermission() =
         this.preferenceStore.getBoolean("has_shown_notification_permission", false)
 
+    fun hasShownOnboarding() =
+        preferenceStore.getBoolean(Preference.appStateKey("onboarding_complete"), false)
+
     fun nightMode() =
         this.preferenceStore.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 

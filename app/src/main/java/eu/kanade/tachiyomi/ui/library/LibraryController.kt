@@ -1140,9 +1140,6 @@ class LibraryController(
         view ?: return
         destroyActionModeIfNeeded()
         if (mangaMap.isNotEmpty()) {
-            if (!binding.progress.isVisible) {
-                (activity as? MainActivity)?.showNotificationPermissionPrompt()
-            }
             binding.emptyView.hide()
         } else {
             binding.emptyView.show(

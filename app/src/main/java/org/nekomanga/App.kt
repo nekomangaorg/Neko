@@ -65,6 +65,14 @@ open class App : Application(), DefaultLifecycleObserver {
 
         GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
 
+        if (!BuildConfig.DEBUG) {
+            TimberKt.plant(CrashReportingTree())
+        }
+        // also plant a debug tree in prod if enabled
+        if (BuildConfig.DEBUG || networkPreferences.verboseLogging().get()) {
+            TimberKt.plant(DebugReportingTree())
+        }
+
         kotlin
             .runCatching { CookieManager.getInstance() }
             .onFailure {
@@ -90,13 +98,6 @@ open class App : Application(), DefaultLifecycleObserver {
 
         Injekt.importModule(PreferenceModule(this))
         Injekt.importModule(AppModule(this))
-
-        if (!BuildConfig.DEBUG) {
-            TimberKt.plant(CrashReportingTree())
-        }
-        if (networkPreferences.verboseLogging().get()) {
-            TimberKt.plant(DebugReportingTree())
-        }
 
         CoilSetup(this)
         setupNotificationChannels()

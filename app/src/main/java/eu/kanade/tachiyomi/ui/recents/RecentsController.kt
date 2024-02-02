@@ -527,9 +527,7 @@ class RecentsController(bundle: Bundle? = null) :
         shouldMoveToTop: Boolean = false,
     ) {
         if (view == null) return
-        if (!binding.progress.isVisible && recents.isNotEmpty()) {
-            (activity as? MainActivity)?.showNotificationPermissionPrompt()
-        }
+
         binding.progress.isVisible = false
         binding.recentsFrameLayout.alpha = 1f
         binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view!!.context)

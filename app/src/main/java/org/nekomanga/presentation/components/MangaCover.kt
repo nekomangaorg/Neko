@@ -23,7 +23,7 @@ import org.nekomanga.presentation.theme.Shapes
  * Taken from main app then modified
  * https://github.com/tachiyomiorg/tachiyomi/blob/cd3cb72b65d2f5f6ec038eb319717e21e3a1731e/app/src/main/java/eu/kanade/presentation/components/MangaCover.kt
  */
-enum class MangaCover(private val ratio: Float) {
+enum class MangaCover(val ratio: Float) {
     Square(1f / 1f),
     Book(2f / 3f),
     ;

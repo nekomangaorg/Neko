@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
 import tachiyomi.core.preference.PreferenceStore
-import tachiyomi.core.provider.FolderProvider
+import tachiyomi.core.util.storage.FolderProvider
 
 class StoragePreferences(
     private val context: Context,

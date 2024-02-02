@@ -1,4 +1,4 @@
-package tachiyomi.core.provider
+package tachiyomi.core.util.storage
 
 import android.content.Context
 import android.os.Environment
