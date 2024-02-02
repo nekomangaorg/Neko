@@ -154,7 +154,10 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun setTrackCredentials(sync: TrackService, username: String, password: String) {
         this.preferenceStore.getString(Keys.trackUsername(sync.id)).set(username)
         this.preferenceStore.getString(Keys.trackPassword(sync.id)).set(password)
+        this.preferenceStore.getBoolean(Keys.trackAuthExpired(sync.id), false).set(false)
     }
+
+    fun trackAuthExpired(sync: TrackService) = this.preferenceStore.getBoolean(Keys.trackAuthExpired(sync.id), false)
 
     fun trackToken(sync: TrackService) = this.preferenceStore.getString(Keys.trackToken(sync.id))
 

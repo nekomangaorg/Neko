@@ -10,6 +10,7 @@ data class OAuth(
     val created_at: Long = System.currentTimeMillis(),
     val expires_in: Long,
 ) {
-
-    fun isExpired() = System.currentTimeMillis() > created_at + (expires_in * 1000)
-}
+    // Assumes expired a minute earlier
+    private val adjustedExpiresIn: Long = (expires_in - 60) * 1000
+    fun isExpired() = created_at + adjustedExpiresIn < System.currentTimeMillis()
+}}

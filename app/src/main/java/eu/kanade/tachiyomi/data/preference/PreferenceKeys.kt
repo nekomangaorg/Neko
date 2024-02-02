@@ -78,6 +78,8 @@ object PreferenceKeys {
 
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
 
+    fun trachAuthExpired(syncId: Int) = "pref_tracker_auth_expired_$syncId"
+
     fun trackToken(syncId: Int) = "track_token_$syncId"
 
     const val sessionToken = "mangadex_session_token"

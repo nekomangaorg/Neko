@@ -12,19 +12,20 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
 
     private var oauth: OAuth? = null
     private val json: Json by injectLazy()
+    private val tokenExpired get() = myanimelist.getIfAuthExpired()
 
     override fun intercept(chain: Interceptor.Chain): Response {
+        if (tokenExpired) {
+            throw MALTokenExpired()
+        }
         val originalRequest = chain.request()
 
-        if (token.isNullOrEmpty()) {
-            throw IOException("Not authenticated with MyAnimeList")
+        if (oauth?.isExpired() == true) {
+            refreshToken(chain)
         }
+
         if (oauth == null) {
-            oauth = myanimelist.loadOAuth()
-        }
-        // Refresh access token if expired
-        if (oauth != null && oauth!!.isExpired()) {
-            setAuth(refreshToken(chain))
+            throw IOException("MAL: User is not authenticated")
         }
 
         // Add the authorization header to the original request
@@ -34,30 +35,8 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
                 .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
                 .build()
 
-        val response = chain.proceed(authRequest)
-        val tokenIsExpired =
-            response.headers["www-authenticate"]?.contains("The access token expired") ?: false
-
-        // Retry the request once with a new token in case it was not already refreshed
-        // by the is expired check before.
-        if (response.code == 401 && tokenIsExpired) {
-            response.close()
-
-            val newToken = refreshToken(chain)
-            setAuth(newToken)
-
-            val newRequest =
-                originalRequest
-                    .newBuilder()
-                    .addHeader("Authorization", "Bearer ${newToken.access_token}")
-                    .build()
-
-            return chain.proceed(newRequest)
-        }
-
-        return response
+        return chain.proceed(authRequest)
     }
-
     /**
      * Called when the user authenticates with MyAnimeList for the first time. Sets the refresh
      * token and the oauth object.
@@ -68,22 +47,37 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
         myanimelist.saveOAuth(oauth)
     }
 
-    private fun refreshToken(chain: Interceptor.Chain): OAuth {
-        val newOauth = runCatching {
-            val oauthResponse = chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!))
+    private fun refreshToken(chain: Interceptor.Chain): OAuth = synchronized(this) {
+        if (tokenExpired) throw MALTokenExpired()
+        oauth?.takeUnless { it.isExpired() }?.let { return@synchronized it }
 
-            if (oauthResponse.isSuccessful) {
-                with(json) { oauthResponse.parseAs<OAuth>() }
-            } else {
-                oauthResponse.close()
+        val response = try {
+            chain.proceed(MyAnimeListApi.refreshTokenRequest(oauth!!))
+        } catch (_: Throwable) {
+            throw MALTokenRefreshFailed()
+        }
+
+        if (response.code == 401) {
+            myanimelist.setAuthExpired()
+            throw MALTokenExpired()
+        }
+
+        return runCatching {
+            if (response.isSuccessful) {
+                with(json) { response.parseAs<OAuth>() }
+             } else {
+                response.close()
                 null
             }
         }
-
-        if (newOauth.getOrNull() == null) {
-            throw IOException("Failed to refresh the access token")
-        }
-
-        return newOauth.getOrNull()!!
+            .getOrNull()
+            ?.also {
+                this.oauth = it
+                myanimelist.saveOAuth(it)
+            }
+            ?: throw MALTokenRefreshFailed()
     }
 }
+
+class MALTokenRefreshFailed : IOException("MAL: Failed to refresh account token")
+class MALTokenExpired : IOException("MAL: Login has expired")

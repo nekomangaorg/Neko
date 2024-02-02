@@ -149,6 +149,14 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         interceptor.setAuth(null)
     }
 
+    fun getIfAuthExpired(): Boolean {
+        return preferences.trackAuthExpired(this).get()
+    }
+
+    fun setAuthExpired() {
+        preferences.trackAuthExpired(this).set(true)
+    }
+
     fun saveOAuth(oAuth: OAuth?) {
         preferences.trackToken(this).set(json.encodeToString(oAuth))
     }
