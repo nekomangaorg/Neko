@@ -38,7 +38,7 @@ A Free, Open source unofficial manga reader for MangaDex
 
 ## Disclaimer
 
-The developer(s) of this application does not have any affiliation with the content providers available, and this application hosts zero content.
+The developer(s) of this application do not have any affiliation with the content providers available, and this application hosts zero content.
 
 ## License
 
