@@ -10,14 +10,16 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PlainTooltipBox
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.material3.toColor
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.tokens.IconButtonTokens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -27,6 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import kotlinx.coroutines.launch
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
 
@@ -48,31 +51,34 @@ fun ToolTipButton(
     require(icon != null || painter != null)
 
     val haptic = LocalHapticFeedback.current
-    PlainTooltipBox(
+    val scope = rememberCoroutineScope()
+    val textFieldTooltipState = rememberTooltipState()
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        state = textFieldTooltipState,
         tooltip = {
-            Text(
-                modifier = Modifier.padding(Size.tiny),
-                style = MaterialTheme.typography.bodyLarge,
-                text = toolTipLabel
-            )
+            PlainTooltip {
+                Text(
+                    modifier = Modifier.padding(Size.tiny),
+                    style = MaterialTheme.typography.bodyLarge,
+                    text = toolTipLabel
+                )
+            }
         },
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
     ) {
         CombinedClickableIconButton(
             enabled = isEnabled,
             enabledTint = enabledTint,
             modifier =
-                modifier
-                    .tooltipAnchor()
-                    .iconButtonCombinedClickable(
-                        toolTipLabel = toolTipLabel,
-                        onClick = buttonClicked,
-                        isEnabled = isEnabled,
-                        onLongClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        },
-                    ),
+                modifier.iconButtonCombinedClickable(
+                    toolTipLabel = toolTipLabel,
+                    onClick = buttonClicked,
+                    isEnabled = isEnabled,
+                    onLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        scope.launch { textFieldTooltipState.show() }
+                    },
+                ),
         ) {
             if (icon != null) {
                 Icon(
@@ -110,8 +116,9 @@ fun CombinedClickableIconButton(
             if (enabled) {
                 enabledTint
             } else {
-                IconButtonTokens.DisabledIconColor.toColor()
-                    .copy(alpha = NekoColors.disabledAlphaLowContrast)
+                MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = NekoColors.disabledAlphaLowContrast
+                )
             }
         CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
     }

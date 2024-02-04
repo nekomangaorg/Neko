@@ -439,6 +439,8 @@ private fun FooterFilterChip(
             ),
         border =
             FilterChipDefaults.filterChipBorder(
+                enabled = true,
+                selected = false,
                 borderColor = MaterialTheme.colorScheme.secondary,
                 selectedBorderColor = Color.Transparent,
                 borderWidth = Size.extraTiny,
