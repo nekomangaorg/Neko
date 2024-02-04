@@ -37,7 +37,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         client
             .newBuilder()
             .addInterceptor(interceptor)
-            .rateLimit(permits = 85, period = 1, unit = TimeUnit.MINUTES)
+            .rateLimit(3, period = 10, unit = TimeUnit.SECONDS)
             .build()
 
     suspend fun addLibManga(track: Track): Track {
