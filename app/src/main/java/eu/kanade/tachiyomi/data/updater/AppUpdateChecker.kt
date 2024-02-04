@@ -72,7 +72,7 @@ class AppUpdateChecker {
     }
 }
 
-const val GITHUB_REPO_NEW: String = "nekomangaorg/neko"
-const val LATEST_RELEASE_URL = "https://api.github.com/repos/$GITHUB_REPO_NEW/releases/latest"
+const val GITHUB_REPO: String = "nekomangaorg/neko"
+const val LATEST_RELEASE_URL = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
 const val RELEASE_URL =
-    "https://github.com/$GITHUB_REPO_NEW/releases/tag/${BuildConfig.VERSION_NAME}"
+    "https://github.com/$GITHUB_REPO/releases/tag/${BuildConfig.VERSION_NAME}"
