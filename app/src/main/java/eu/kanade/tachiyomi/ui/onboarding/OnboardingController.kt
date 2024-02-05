@@ -94,8 +94,8 @@ class OnboardingController : BasicComposeController() {
                         )
                     },
                     label = "stepContent",
-                ) {
-                    steps[currentStep].Content()
+                ) { step ->
+                    steps[step].Content()
                 }
             }
         }
