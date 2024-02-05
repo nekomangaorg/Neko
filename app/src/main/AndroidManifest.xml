@@ -28,7 +28,7 @@
 
     <!-- Allows opening in browser -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-    
+
 
     <!-- Remove permission from Firebase dependency -->
     <uses-permission
@@ -85,6 +85,8 @@
             <meta-data
                 android:name="com.samsung.android.support.REMOTE_ACTION"
                 android:resource="@xml/s_pen_actions" />
+
+
         </activity>
         <activity
             android:name="eu.kanade.tachiyomi.ui.webview.WebViewActivity"

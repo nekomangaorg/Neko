@@ -114,7 +114,7 @@ versioncompare = "io.github.g00fy2:versioncompare:1.5.0"
 
 timber = "com.jakewharton.timber:timber:5.0.1"
 
-aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutlibVersion" }
+aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibVersion" }
 
 leakcanary = "com.squareup.leakcanary:leakcanary-android:2.13"
 pastelplaceholders = "com.github.zedlabs:pastelPlaceholders:1.0.4"
