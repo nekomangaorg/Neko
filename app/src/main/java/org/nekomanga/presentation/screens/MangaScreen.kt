@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens
 
+import android.app.Activity
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.LinearEasing
@@ -49,7 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.core.graphics.ColorUtils
-import com.crazylegend.activity.asActivity
 import eu.kanade.presentation.components.VerticalDivider
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
@@ -203,7 +203,7 @@ fun MangaScreen(
                         mergeActions = mergeActions,
                         chapterFilterActions = chapterFilterActions,
                         openInWebView = { url, title ->
-                            context.asActivity().openInWebView(url, title)
+                            (context as? Activity)?.openInWebView(url, title)
                         },
                         closeSheet = { scope.launch { sheetState.hide() } },
                     )
