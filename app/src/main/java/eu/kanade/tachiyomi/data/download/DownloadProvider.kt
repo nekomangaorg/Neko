@@ -66,7 +66,12 @@ class DownloadProvider(
         } catch (e: Exception) {
             TimberKt.e(e) { "error getting download folder for ${manga.title}" }
 
-            throw Exception(context.getString(R.string.invalid_download_location, downloadsDir?.displayablePath ?: ""))
+            throw Exception(
+                context.getString(
+                    R.string.invalid_download_location,
+                    downloadsDir?.displayablePath ?: ""
+                )
+            )
         }
     }
 
