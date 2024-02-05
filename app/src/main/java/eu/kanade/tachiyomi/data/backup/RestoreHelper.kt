@@ -45,7 +45,7 @@ class RestoreHelper(val context: Context) {
     /** keep a partially constructed progress notification for resuse */
     val progressNotification by lazy {
         NotificationCompat.Builder(context, Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS)
-            .setContentTitle(context.getString(R.string.app_name_neko))
+            .setContentTitle(context.getString(R.string.app_name))
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

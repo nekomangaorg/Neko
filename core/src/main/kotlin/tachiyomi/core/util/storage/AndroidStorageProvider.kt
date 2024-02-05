@@ -16,8 +16,8 @@ class AndroidStorageFolderProvider(
             Environment.getExternalStorageDirectory().absolutePath +
                 File.separator +
                 when (BuildConfig.DEBUG) {
-                    true -> context.getString(R.string.app_name_neko) + "_debug"
-                    false -> context.getString(R.string.app_name_neko)
+                    true -> context.getString(R.string.app_name) + "_debug"
+                    false -> context.getString(R.string.app_name)
                 }
         )
     }

@@ -29,7 +29,7 @@ class FirstStep : OnboardingStep {
                 text =
                     stringResource(
                         R.string.onboarding_guides_returning_user,
-                        stringResource(R.string.app_name_neko)
+                        stringResource(R.string.app_name)
                     ),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center

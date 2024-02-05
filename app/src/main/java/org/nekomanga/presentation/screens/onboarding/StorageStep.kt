@@ -60,7 +60,7 @@ internal class StorageStep : OnboardingStep {
             Text(
                 stringResource(
                     R.string.onboarding_storage_info,
-                    stringResource(R.string.app_name_neko),
+                    stringResource(R.string.app_name),
                     storageLocationText(storagePref),
                 ),
             )
@@ -86,7 +86,7 @@ internal class StorageStep : OnboardingStep {
             Text(
                 stringResource(
                     R.string.onboarding_storage_help_info,
-                    stringResource(R.string.app_name_neko)
+                    stringResource(R.string.app_name)
                 )
             )
             Button(

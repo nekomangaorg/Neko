@@ -46,7 +46,7 @@ internal class AppUpdateNotifier(private val context: Context) {
         val pendingIntent = NotificationReceiver.openUpdatePendingActivity(context, body, url)
         releasePageUrl = releaseUrl
         with(notificationBuilder) {
-            setContentTitle(context.getString(R.string.app_name_neko))
+            setContentTitle(context.getString(R.string.app_name))
             setContentText(context.getString(R.string.new_version_available))
             setContentIntent(pendingIntent)
             setAutoCancel(true)
@@ -91,7 +91,7 @@ internal class AppUpdateNotifier(private val context: Context) {
      */
     fun onDownloadStarted(): NotificationCompat.Builder {
         with(notificationBuilder) {
-            setContentTitle(context.getString(R.string.app_name_neko))
+            setContentTitle(context.getString(R.string.app_name))
             setContentText(context.getString(R.string.downloading))
             setSmallIcon(android.R.drawable.stat_sys_download)
             setProgress(0, 0, true)
@@ -244,7 +244,7 @@ internal class AppUpdateNotifier(private val context: Context) {
 
     fun onInstallError(uri: Uri) {
         with(notificationBuilder) {
-            setContentTitle(context.getString(R.string.app_name_neko))
+            setContentTitle(context.getString(R.string.app_name))
             setContentText(context.getString(R.string.could_not_install_update))
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setOnlyAlertOnce(false)
