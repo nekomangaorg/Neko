@@ -327,10 +327,6 @@ fun BrowseScreen(
                         }
                     }
 
-                    TimberKt.d { "ESCO ${windowSizeClass.heightSizeClass}" }
-                    TimberKt.d { "ESCO ${windowSizeClass.widthSizeClass}" }
-                    TimberKt.d { "ESCO sideNav $actualSideNav" }
-
                     // hide these on initial load
                     if (!browseScreenState.value.hideFooterButton) {
                         ScreenTypeFooter(

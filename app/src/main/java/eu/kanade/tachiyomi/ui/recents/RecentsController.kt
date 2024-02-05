@@ -615,7 +615,7 @@ class RecentsController(bundle: Bundle? = null) :
             presenter.deleteChapter(chapter, manga)
         } else {
             if (item.status == Download.State.ERROR) {
-                DownloadJob.start(view.context)
+                DownloadJob.start(view.context.applicationContext)
             } else {
                 presenter.downloadChapter(manga, chapter)
             }
