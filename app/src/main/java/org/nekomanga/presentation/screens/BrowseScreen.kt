@@ -60,7 +60,6 @@ import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
-import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.Loading

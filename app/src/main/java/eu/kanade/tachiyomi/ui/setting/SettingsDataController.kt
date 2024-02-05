@@ -54,7 +54,7 @@ class SettingsDataController : SettingsController() {
                     .baseStorageDirectory()
                     .changes()
                     .onEach { path ->
-                        val dir = UniFile.fromUri(context, path.toUri())
+                        val dir = UniFile.fromUri(context, path.toUri())!!
                         summary = dir.filePath ?: path
                     }
                     .launchIn(viewScope)
@@ -158,7 +158,7 @@ class SettingsDataController : SettingsController() {
                             context.contentResolver.takePersistableUriPermission(uri, flags)
                         }
 
-                        val file = UniFile.fromUri(context, uri)
+                        val file = UniFile.fromUri(context, uri)!!
 
                         storagePreferences.baseStorageDirectory().set(file.uri.toString())
                     }

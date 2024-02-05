@@ -531,7 +531,7 @@ class MangaDetailPresenter(
                     destDir
                         ?: storagePreferences
                             .baseStorageDirectoryAsUniFile()
-                            .createDirectory(StoragePreferences.COVER_DIR)
+                            .createDirectory(StoragePreferences.COVER_DIR)!!
 
                 val destinationUri = saveCover(directory, artwork)
                 launchUI {
@@ -573,7 +573,7 @@ class MangaDetailPresenter(
 
         val filename = DiskUtil.buildValidFilename("$fileNameNoExtension.${type.extension}")
 
-        val destFile = directory.createFile(filename)
+        val destFile = directory.createFile(filename)!!
 
         cover.inputStream().use { input ->
             destFile.openOutputStream().use { output -> input.copyTo(output) }

@@ -37,7 +37,7 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
         return try {
             val location = BackupCreator(context).createBackup(uri, flags, isAutoBackup)
             if (!isAutoBackup)
-                notifier.showBackupComplete(UniFile.fromUri(context, location.toUri()))
+                notifier.showBackupComplete(UniFile.fromUri(context, location.toUri())!!)
             Result.success()
         } catch (e: Exception) {
             TimberKt.e(e)
@@ -52,7 +52,9 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
         val storagePreferences = Injekt.get<StoragePreferences>()
         return storagePreferences.baseStorageDirectory().get().let {
             val dir =
-                UniFile.fromUri(context, it.toUri()).createDirectory(StoragePreferences.BACKUP_DIR)
+                UniFile.fromUri(context, it.toUri())!!.createDirectory(
+                    StoragePreferences.BACKUP_DIR
+                )!!
             dir.uri
         }
     }

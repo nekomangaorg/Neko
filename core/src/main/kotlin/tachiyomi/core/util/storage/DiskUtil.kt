@@ -43,7 +43,7 @@ object DiskUtil {
         if (dir != null && dir.exists()) {
             val nomedia = dir.findFile(NOMEDIA_FILE)
             if (nomedia == null) {
-                dir.createFile(NOMEDIA_FILE)
+                dir.createFile(NOMEDIA_FILE)!!
                 context?.let { scanMedia(it, dir.uri) }
             }
         }

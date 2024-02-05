@@ -76,8 +76,9 @@ class BackupCreator(val context: Context) {
                 (if (isAutoBackup) {
                     // Get dir of file and create
                     val dir =
-                        UniFile.fromUri(context, uri)
-                            .createDirectory(StoragePreferences.AUTOMATIC_DIR)
+                        UniFile.fromUri(context, uri)!!.createDirectory(
+                            StoragePreferences.AUTOMATIC_DIR
+                        )!!
 
                     // Delete older backups
                     dir.listFiles { _, filename -> Backup.filenameRegex.matches(filename) }

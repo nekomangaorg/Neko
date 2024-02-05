@@ -738,7 +738,7 @@ class ReaderViewModel(
         val filename =
             DiskUtil.buildValidFilename("$trimmedTitle - $pageName") + ".${type.extension}"
 
-        val destFile = directory.createFile(filename)
+        val destFile = directory.createFile(filename)!!
 
         stream().use { input -> destFile.openOutputStream().use { output -> input.copyTo(output) } }
         return destFile
@@ -809,7 +809,7 @@ class ReaderViewModel(
                 "${manga.title} - ${chapter.name}".take(225),
             ) + " - ${page1.number}-${page2.number}.jpg"
 
-        val destFile = directory.createFile(filename)
+        val destFile = directory.createFile(filename)!!
         stream.use { input -> destFile.openOutputStream().use { output -> input.copyTo(output) } }
         stream.close()
         return destFile
@@ -830,10 +830,10 @@ class ReaderViewModel(
         var directory =
             storagePreferences
                 .baseStorageDirectoryAsUniFile()
-                .createDirectory(StoragePreferences.PAGES_DIR)
+                .createDirectory(StoragePreferences.PAGES_DIR)!!
 
         if (preferences.folderPerManga().get()) {
-            directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))
+            directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
         }
 
         // Copy file in background.
@@ -870,10 +870,10 @@ class ReaderViewModel(
             var directory =
                 storagePreferences
                     .baseStorageDirectoryAsUniFile()
-                    .createDirectory(StoragePreferences.PAGES_DIR)
+                    .createDirectory(StoragePreferences.PAGES_DIR)!!
 
             if (preferences.folderPerManga().get()) {
-                directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))
+                directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
             }
 
             try {

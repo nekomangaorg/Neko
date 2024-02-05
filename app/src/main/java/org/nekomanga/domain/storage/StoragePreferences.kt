@@ -15,7 +15,7 @@ class StoragePreferences(
     fun baseStorageDirectory() = preferenceStore.getString("storage_dir", folderProvider.path())
 
     fun baseStorageDirectoryAsUniFile() =
-        UniFile.fromUri(context, baseStorageDirectory().get().toUri())
+        UniFile.fromUri(context, baseStorageDirectory().get().toUri())!!
 
     companion object {
         const val BACKUP_DIR = "backup"

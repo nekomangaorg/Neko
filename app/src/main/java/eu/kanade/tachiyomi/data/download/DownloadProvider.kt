@@ -7,14 +7,10 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.uuid
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import org.nekomanga.R
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
@@ -22,7 +18,6 @@ import tachiyomi.core.util.storage.DiskUtil
 import tachiyomi.core.util.storage.displayablePath
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 /**
  * This class is used to provide the directories where the downloads should be saved. It uses the
@@ -36,10 +31,7 @@ class DownloadProvider(
 ) {
 
     /** Preferences helper. */
-    private val preferences: PreferencesHelper by injectLazy()
     private val source = Injekt.get<SourceManager>().mangaDex
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /** The root directory for downloads. */
     private val downloadsDir: UniFile?
@@ -62,7 +54,7 @@ class DownloadProvider(
             val mangaDirName = getMangaDirName(manga)
             val sourceDirName = getSourceDirName()
             TimberKt.d { "creating directory for $sourceDirName : $mangaDirName" }
-            return downloadsDir!!.createDirectory(sourceDirName).createDirectory(mangaDirName)
+            return downloadsDir!!.createDirectory(sourceDirName)!!.createDirectory(mangaDirName)!!
         } catch (e: Exception) {
             TimberKt.e(e) { "error getting download folder for ${manga.title}" }
 
