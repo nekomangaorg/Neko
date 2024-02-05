@@ -19,6 +19,7 @@ import org.nekomanga.R
 import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
+import tachiyomi.core.util.storage.displayablePath
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -64,7 +65,8 @@ class DownloadProvider(
             return downloadsDir!!.createDirectory(sourceDirName).createDirectory(mangaDirName)
         } catch (e: Exception) {
             TimberKt.e(e) { "error getting download folder for ${manga.title}" }
-            throw Exception(context.getString(R.string.invalid_download_location))
+
+            throw Exception(context.getString(R.string.invalid_download_location, downloadsDir?.displayablePath ?: ""))
         }
     }
 
