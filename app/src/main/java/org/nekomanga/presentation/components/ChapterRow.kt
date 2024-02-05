@@ -51,7 +51,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -367,7 +366,7 @@ private fun ChapterInfo(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (language.isNotNullOrEmpty() && !language.equals("en", true)) {
+                if (!language.isNullOrEmpty() && !language.equals("en", true)) {
                     val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
 
                     when (iconRes == null) {

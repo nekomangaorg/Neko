@@ -10,7 +10,6 @@ firebasePluginVersion = "2.9.9"
 googleServicesPluginVersion = "4.4.0"
 iconicsVersion = "5.4.0"
 injektCoreVersion = "65b0440"
-kaHelpersVersion = "3.4.8"
 kotlinResultVersion = "1.1.18"
 ktfmtVersion = "0.17.0"
 loadingButtonAndroidVersion = "2.2.0"
@@ -88,11 +87,6 @@ tachi-directional-view-pager = "com.github.tachiyomiorg:DirectionalViewPager:1.0
 tachi-unifile = "com.github.tachiyomiorg:unifile:17bec43"
 
 
-ka-helpers-kotlin-ext = { module = "com.github.FunkyMuse.KAHelpers:kotlinextensions", version.ref = "kaHelpersVersion" }
-ka-helpers-activity = { module = "com.github.FunkyMuse.KAHelpers:activity", version.ref = "kaHelpersVersion" }
-ka-helpers-string = { module = "com.github.FunkyMuse.KAHelpers:string", version.ref = "kaHelpersVersion" }
-ka-helpers-common = { module = "com.github.FunkyMuse.KAHelpers:common", version.ref = "kaHelpersVersion" }
-
 chucker-debug = { module = "com.github.ChuckerTeam.Chucker:library", version.ref = "chuckerVersion" }
 chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", version.ref = "chuckerVersion" }
 # TLS 1.3 support for Android < 10
@@ -152,7 +146,6 @@ firebase = ["firebase-analytics", "firebase-crashlytics"]
 flexibleadapter = ["flexible-adapter-core", "flexible-adapter-ui"]
 google = ["material", "guava-fix", "play-services", "flex-box"]
 iconics = ["iconics-core", "iconics-views", "iconics-compose"]
-kahelpers = ["ka-helpers-kotlin-ext", "ka-helpers-activity", "ka-helpers-string", "ka-helpers-common"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 nucleus = ["nucleus", "nucleus-support"]
 sandwich = ["sandwich", "sandwich-retrofit", "sandwich-retrofit-serialization"]

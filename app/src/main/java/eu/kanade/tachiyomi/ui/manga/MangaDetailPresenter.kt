@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.state.ToggleableState
 import androidx.core.text.isDigitsOnly
-import com.crazylegend.string.isNotNullOrEmpty
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.runCatching
@@ -802,7 +801,7 @@ class MangaDetailPresenter(
                 allChapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
             if (
                 allChapterScanlators.size == 1 &&
-                    currentManga().filtered_scanlators.isNotNullOrEmpty()
+                    !currentManga().filtered_scanlators.isNullOrEmpty()
             ) {
                 updateMangaScanlator(emptySet())
             }
@@ -1059,7 +1058,7 @@ class MangaDetailPresenter(
     private fun getDescription(): String {
         return when {
             currentManga().uuid().isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
-            currentManga().description.isNotNullOrEmpty() -> currentManga().description!!
+            !currentManga().description.isNullOrEmpty() -> currentManga().description!!
             !currentManga().initialized -> ""
             else -> "No description"
         }

@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.util.system
 import android.content.Context
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
-import com.crazylegend.kotlinextensions.themeAttrColor
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.IconicsSize
 import com.mikepenz.iconics.typeface.IIcon
@@ -18,7 +17,7 @@ fun IIcon.create(
     @AttrRes colorAttr: Int = R.attr.colorAccent,
 ): IconicsDrawable {
     return IconicsDrawable(context, this).apply {
-        colorInt = context.themeAttrColor(colorAttr)
+        colorInt = context.getResourceColor(colorAttr)
         size = IconicsSize.dp(iconSize)
     }
 }

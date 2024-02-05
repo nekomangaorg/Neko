@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.source.model.SManga
@@ -77,7 +76,7 @@ fun InformationBlock(
     Column(
         modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small),
     ) {
-        if (titleProvider().isNotNullOrEmpty()) {
+        if (!titleProvider().isNullOrEmpty()) {
             NoRippleText(
                 text = titleProvider(),
                 maxLines = if (isExpandedProvider()) Integer.MAX_VALUE else 4,

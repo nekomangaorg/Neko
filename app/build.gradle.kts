@@ -174,7 +174,6 @@ dependencies {
     implementation(libs.fuzzysearch)
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
-    implementation(libs.bundles.kahelpers)
     implementation(libs.bundles.sandwich)
     implementation(libs.aboutLibraries.compose)
     // debugImplementation(libs.leakcanary)
