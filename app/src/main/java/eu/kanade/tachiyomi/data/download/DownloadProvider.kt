@@ -16,7 +16,6 @@ import org.nekomanga.domain.storage.StoragePreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import tachiyomi.core.util.storage.displayablePath
-import tachiyomi.core.util.storage.extension
 import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -111,26 +110,14 @@ class DownloadProvider(
         var exists =
             getValidChapterDirNames(chapter).none { chapterDir ->
                 chapterDirs.none { uniFile ->
-                    when {
-                        uniFile.nameWithoutExtension == null -> true
-                        uniFile.extension == null -> true
-                        uniFile.extension == ".tmp" -> true
-                        uniFile.nameWithoutExtension!!.equals(chapterDir, true) -> false
-                        else -> true
-                    }
+                    uniFile.nameWithoutExtension!!.equals(chapterDir, true)
                 }
             }
 
         if (!exists) {
             exists =
                 chapterDirs.none { uniFile ->
-                    when {
-                        uniFile.nameWithoutExtension == null -> true
-                        uniFile.extension == null -> true
-                        uniFile.extension == ".tmp" -> true
-                        uniFile.name!!.contains(chapter.uuid()) -> false
-                        else -> true
-                    }
+                    uniFile.nameWithoutExtension!!.contains(chapter.uuid())
                 }
         }
 
