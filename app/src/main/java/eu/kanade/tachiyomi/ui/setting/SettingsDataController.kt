@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
 import android.view.View
@@ -190,10 +191,12 @@ class SettingsDataController : SettingsController() {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     setDataAndType(storageManager.getBackupDirectory()!!.uri, "application/*")
                     putExtra(Intent.EXTRA_TITLE, Backup.getBackupFilename())
-                    putExtra(
-                        DocumentsContract.EXTRA_INITIAL_URI,
-                        storageManager.getBackupDirectory()!!.uri
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        putExtra(
+                            DocumentsContract.EXTRA_INITIAL_URI,
+                            storageManager.getBackupDirectory()!!.uri
+                        )
+                    }
                 }
 
             startActivityForResult(intent, CODE_BACKUP_CREATE)
