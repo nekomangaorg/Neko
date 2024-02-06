@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -18,10 +17,10 @@ import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.nekomanga.domain.storage.StoragePreferences
+import org.nekomanga.domain.storage.StorageManager
+import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -43,7 +42,7 @@ class DownloadCache(
     private val provider: DownloadProvider,
     private val sourceManager: SourceManager,
     private val preferences: PreferencesHelper = Injekt.get(),
-    private val storagePreferences: StoragePreferences = Injekt.get(),
+    private val storageManager: StorageManager = Injekt.get(),
 ) {
 
     /**
@@ -61,22 +60,9 @@ class DownloadCache(
     val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     init {
-
-        storagePreferences
-            .baseStorageDirectory()
-            .changes()
-            .drop(1)
-            .onEach { lastRenew = 0L } // invalidate cache
+        storageManager.baseDirChanges
+            .onEach { forceRenewCache() } // invalidate cache
             .launchIn(scope)
-    }
-
-    /** Returns the downloads directory from the user's preferences. */
-    private fun getDirectoryFromPreference(): UniFile {
-        return storagePreferences.baseStorageDirectory().get().let {
-            UniFile.fromUri(context, it.toUri())!!.also { uniFile ->
-                uniFile.createDirectory(StoragePreferences.DOWNLOADS_DIR)
-            }
-        }
     }
 
     /**
@@ -176,10 +162,12 @@ class DownloadCache(
 
     /** Renews the downloads cache. */
     private fun renew() {
+        TimberKt.d { "Renewing cache" }
         val onlineSources = listOf(sourceManager.mangaDex)
 
         val sourceDirs =
-            getDirectoryFromPreference()
+            storageManager
+                .getDownloadsDirectory()!!
                 .listFiles()
                 .orEmpty()
                 .associate { it.name to SourceDirectory(it) }

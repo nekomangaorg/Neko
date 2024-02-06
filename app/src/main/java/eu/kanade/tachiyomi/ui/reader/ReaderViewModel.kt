@@ -76,7 +76,7 @@ import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.reader.ReaderPreferences
-import org.nekomanga.domain.storage.StoragePreferences
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
@@ -95,7 +95,7 @@ class ReaderViewModel(
     private val securityPreferences: SecurityPreferences = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
     private val chapterItemFilter: ChapterItemFilter = Injekt.get(),
-    private val storagePreferences: StoragePreferences = Injekt.get(),
+    private val storageManager: StorageManager = Injekt.get(),
 ) : ViewModel() {
 
     private val mutableState = MutableStateFlow(State())
@@ -827,10 +827,7 @@ class ReaderViewModel(
         val notifier = SaveImageNotifier(context)
         notifier.onClear()
 
-        var directory =
-            storagePreferences
-                .baseStorageDirectoryAsUniFile()
-                .createDirectory(StoragePreferences.PAGES_DIR)!!
+        var directory = storageManager.getPagesDirectory()!!
 
         if (preferences.folderPerManga().get()) {
             directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
@@ -867,10 +864,7 @@ class ReaderViewModel(
             val notifier = SaveImageNotifier(context)
             notifier.onClear()
 
-            var directory =
-                storagePreferences
-                    .baseStorageDirectoryAsUniFile()
-                    .createDirectory(StoragePreferences.PAGES_DIR)!!
+            var directory = storageManager.getPagesDirectory()!!
 
             if (preferences.folderPerManga().get()) {
                 directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!

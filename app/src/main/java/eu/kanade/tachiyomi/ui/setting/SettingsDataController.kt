@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -27,12 +28,14 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.nekomanga.R
 import org.nekomanga.domain.backup.BackupPreferences
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SettingsDataController : SettingsController() {
     private val storagePreferences: StoragePreferences = Injekt.get()
+    private val storageManager: StorageManager = Injekt.get()
     private val backupPreferences: BackupPreferences = Injekt.get()
 
     /** Flags containing information of what to backup. */
@@ -183,10 +186,15 @@ class SettingsDataController : SettingsController() {
         try {
             // Use Android's built-in file creator
             val intent =
-                Intent(Intent.ACTION_CREATE_DOCUMENT)
-                    .addCategory(Intent.CATEGORY_OPENABLE)
-                    .setType("application/*")
-                    .putExtra(Intent.EXTRA_TITLE, Backup.getBackupFilename())
+                Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    setDataAndType(storageManager.getBackupDirectory()!!.uri, "application/*")
+                    putExtra(Intent.EXTRA_TITLE, Backup.getBackupFilename())
+                    putExtra(
+                        DocumentsContract.EXTRA_INITIAL_URI,
+                        storageManager.getBackupDirectory()!!.uri
+                    )
+                }
 
             startActivityForResult(intent, CODE_BACKUP_CREATE)
         } catch (e: ActivityNotFoundException) {

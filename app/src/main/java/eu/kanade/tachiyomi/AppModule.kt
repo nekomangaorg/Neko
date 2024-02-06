@@ -48,6 +48,7 @@ import org.nekomanga.domain.backup.BackupPreferences
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
@@ -145,6 +146,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { MangaShortcutManager() }
+
+        addSingletonFactory { StorageManager(app, get()) }
 
         // Asynchronously init expensive components for a faster cold start
         ContextCompat.getMainExecutor(app).execute {

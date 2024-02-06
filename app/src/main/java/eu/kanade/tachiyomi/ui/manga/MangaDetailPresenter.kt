@@ -91,7 +91,7 @@ import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.snackbar.SnackbarState
-import org.nekomanga.domain.storage.StoragePreferences
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.domain.track.toDbTrack
 import org.nekomanga.domain.track.toTrackItem
@@ -115,7 +115,7 @@ class MangaDetailPresenter(
     private val trackManager: TrackManager = Injekt.get(),
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
     private val trackingCoordinator: TrackingCoordinator = Injekt.get(),
-    private val storagePreferences: StoragePreferences = Injekt.get(),
+    private val storageManager: StorageManager = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaDetailController>(), DownloadQueue.DownloadListener {
 
     private val _currentManga = MutableStateFlow<Manga?>(null)
@@ -527,11 +527,7 @@ class MangaDetailPresenter(
     fun saveCover(artwork: Artwork, destDir: UniFile? = null) {
         presenterScope.launchIO {
             try {
-                val directory =
-                    destDir
-                        ?: storagePreferences
-                            .baseStorageDirectoryAsUniFile()
-                            .createDirectory(StoragePreferences.COVER_DIR)!!
+                val directory = destDir ?: storageManager.getCoverDirectory()!!
 
                 val destinationUri = saveCover(directory, artwork)
                 launchUI {

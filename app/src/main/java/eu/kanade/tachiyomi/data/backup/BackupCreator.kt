@@ -31,7 +31,7 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import org.nekomanga.R
-import org.nekomanga.domain.storage.StoragePreferences
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -40,6 +40,7 @@ class BackupCreator(val context: Context) {
     internal val databaseHelper: DatabaseHelper by injectLazy()
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
+    internal val storageManager: StorageManager by injectLazy()
 
     private val MAX_AUTO_BACKUPS: Int = 6
 
@@ -75,10 +76,7 @@ class BackupCreator(val context: Context) {
             file =
                 (if (isAutoBackup) {
                     // Get dir of file and create
-                    val dir =
-                        UniFile.fromUri(context, uri)!!.createDirectory(
-                            StoragePreferences.AUTOMATIC_DIR
-                        )!!
+                    val dir = storageManager.getAutomaticBackupsDirectory()!!
 
                     // Delete older backups
                     dir.listFiles { _, filename -> Backup.filenameRegex.matches(filename) }

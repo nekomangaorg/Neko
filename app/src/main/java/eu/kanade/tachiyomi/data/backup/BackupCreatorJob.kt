@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.concurrent.TimeUnit
-import org.nekomanga.domain.storage.StoragePreferences
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -49,14 +49,8 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     }
 
     private fun getAutomaticBackupLocation(): Uri {
-        val storagePreferences = Injekt.get<StoragePreferences>()
-        return storagePreferences.baseStorageDirectory().get().let {
-            val dir =
-                UniFile.fromUri(context, it.toUri())!!.createDirectory(
-                    StoragePreferences.BACKUP_DIR
-                )!!
-            dir.uri
-        }
+        val storageManager = Injekt.get<StorageManager>()
+        return storageManager.getBackupDirectory()!!.uri
     }
 
     companion object {

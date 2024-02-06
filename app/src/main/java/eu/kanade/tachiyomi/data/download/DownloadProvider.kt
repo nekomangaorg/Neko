@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -12,7 +11,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
 import org.nekomanga.R
-import org.nekomanga.domain.storage.StoragePreferences
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
 import tachiyomi.core.util.storage.displayablePath
@@ -28,7 +27,7 @@ import uy.kohesive.injekt.api.get
  */
 class DownloadProvider(
     private val context: Context,
-    private val storagePreferences: StoragePreferences = Injekt.get()
+    private val storageManager: StorageManager = Injekt.get()
 ) {
 
     /** Preferences helper. */
@@ -36,12 +35,7 @@ class DownloadProvider(
 
     /** The root directory for downloads. */
     private val downloadsDir: UniFile?
-        get() =
-            storagePreferences.baseStorageDirectory().get().let {
-                UniFile.fromUri(context, it.toUri())
-                    ?.createDirectory(StoragePreferences.DOWNLOADS_DIR)
-                    ?.also { dir -> DiskUtil.createNoMediaFile(dir, context) }
-            }
+        get() = storageManager.getDownloadsDirectory()
 
     /**
      * Returns the download directory for a manga. For internal use only.
