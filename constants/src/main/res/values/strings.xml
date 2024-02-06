@@ -830,7 +830,7 @@
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
     <string name="restore_backup">Restore backup</string>
-    <string name="restore_neko">Data from the backup file will be restored.\n\n If this a pre v5 backup you will need to v5 migrate after you restore.</string>
+    <string name="restore_neko">Data from the backup file will be restored.</string>
     <string name="restore_from_backup_file">Restore library from backup file</string>
     <string name="restore_in_progress">Restore already in progress</string>
     <string name="backup_in_progress">Backup already in progress</string>
@@ -1432,7 +1432,7 @@
     <string name="verbose_logging_summary">Print verbose logs to system log (reduces app performance)</string>
 
     <string name="force_download_cache_refresh">Refresh the download cache</string>
-    <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use after you migrated to v5 or if you copied downloads outside of this app</string>
+    <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use this if  you copied downloads outside of this app using your file explorer.</string>
 
 
     <!-- Login dialog -->
