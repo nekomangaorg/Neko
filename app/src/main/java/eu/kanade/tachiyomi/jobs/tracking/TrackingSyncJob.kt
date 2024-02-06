@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.jobs.tracking
 
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
@@ -13,7 +15,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
-import eu.kanade.tachiyomi.util.system.withUIContext
+import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -50,13 +52,18 @@ class TrackingSyncJob(
             setSmallIcon(R.drawable.ic_neko_notification)
         }
 
-    override suspend fun doWork(): Result = coroutineScope {
-        withUIContext {
-            failedUpdates.clear()
-            val notification = progressNotification.build()
-            val foregroundInfo = ForegroundInfo(Notifications.Id.Tracking.Progress, notification)
-            setForeground(foregroundInfo)
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        val notification = progressNotification.build()
+        val id = Notifications.ID_RESTORE_PROGRESS
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(id, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(id, notification)
         }
+    }
+
+    override suspend fun doWork(): Result = coroutineScope {
+        tryToSetForeground()
 
         try {
             trackingSyncService.process(
