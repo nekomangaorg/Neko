@@ -241,13 +241,13 @@ class Downloader(
         if (chapters.isEmpty()) {
             return@launchIO
         }
-
         val wasEmpty = queue.isEmpty()
         // Called in background thread, the operation can be slow with SAF.
         val chaptersWithoutDir = async {
+            val chapterDirFiles = provider.findMangaDir(manga)?.listFiles()?.asList() ?: emptyList()
             chapters
                 // Filter out those already downloaded.
-                .filter { provider.findChapterDir(it, manga) == null }
+                .filter { provider.chapterDirDoesNotExist(it, chapterDirFiles) }
                 .filter { it.scanlator?.contains("Comikey")?.not() ?: true }
                 // Add chapters to queue from the start.
                 .sortedByDescending { it.source_order }
