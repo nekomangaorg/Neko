@@ -182,7 +182,6 @@ class SettingsLibraryController : SettingsController() {
                             R.string.smart_library_has_unread,
                             R.string.smart_library_has_not_started,
                             R.string.smart_library_status_is_completed,
-                            R.string.smart_library_tracking_is_unfollowed,
                             R.string.smart_library_tracking_is_plan_to_read,
                             R.string.smart_library_tracking_is_dropped,
                             R.string.smart_library_tracking_is_on_hold,

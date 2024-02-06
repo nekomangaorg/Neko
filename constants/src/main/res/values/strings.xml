@@ -289,7 +289,6 @@
     <string name="smart_library_has_unread">Skip manga with unread chapter(s)</string>
     <string name="smart_library_has_not_started">Skip unstarted manga</string>
     <string name="smart_library_status_is_completed">Skip manga with "Completed" status</string>
-    <string name="smart_library_tracking_is_unfollowed">Skip manga with tracking status "Unfollowed"</string>
     <string name="smart_library_tracking_is_on_hold">Skip manga with tracking status "On hold"</string>
     <string name="smart_library_tracking_is_completed">Skip manga with tracking status "Completed"</string>
     <string name="smart_library_tracking_is_dropped">Skip manga with tracking status "Dropped"</string>
