@@ -40,6 +40,7 @@ import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
@@ -96,7 +97,7 @@ fun InformationBlock(
                     true -> authorProvider().trim()
                     false -> {
                         listOfNotNull(authorProvider().trim(), artistProvider().trim())
-                            .joinToString(" ? ")
+                            .joinToString(Constants.SEPARATOR)
                     }
                 }
 
@@ -110,7 +111,7 @@ fun InformationBlock(
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
-            val creators = creator.split(" ? ").map { it.trim() }
+            val creators = creator.split(Constants.SEPARATOR).map { it.trim() }
             SimpleDropdownMenu(
                 expanded = creatorExpanded,
                 onDismiss = { creatorExpanded = false },

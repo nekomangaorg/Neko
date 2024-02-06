@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.databinding.ChaptersItemBinding
 
 class ChapterHolder(
@@ -99,7 +100,7 @@ class ChapterHolder(
             showBookmark = false,
             hideStatus = isLocked,
         )
-        binding.chapterScanlator.text = statuses.joinToString(" ? ")
+        binding.chapterScanlator.text = statuses.joinToString(Constants.SEPARATOR)
 
         val status =
             when {

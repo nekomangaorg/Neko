@@ -65,6 +65,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
@@ -402,7 +403,7 @@ private fun ChapterInfo(
                     }
                 }
                 Text(
-                    text = statuses.joinToString(" ? "),
+                    text = statuses.joinToString(Constants.SEPARATOR),
                     style =
                         MaterialTheme.typography.bodyMedium.copy(
                             color = secondaryTextColor,
@@ -413,7 +414,7 @@ private fun ChapterInfo(
                     overflow = TextOverflow.Ellipsis,
                 )
 
-                statuses.joinToString(" ? ")
+                statuses.joinToString(Constants.SEPARATOR)
             }
         }
         Box(

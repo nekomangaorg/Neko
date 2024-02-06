@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.databinding.ReaderChapterItemBinding
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.injectLazy
@@ -109,7 +110,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             binding.chapterTitle.typeface = typeface
             binding.chapterSubtitle.typeface = typeface
             binding.chapterLanguage.typeface = typeface
-            binding.chapterSubtitle.text = statuses.joinToString(" ? ")
+            binding.chapterSubtitle.text = statuses.joinToString(Constants.SEPARATOR)
         }
 
         override fun unbindView(item: ReaderChapterItem) {
