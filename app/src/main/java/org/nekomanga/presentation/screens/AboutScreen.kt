@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.SimpleIcons
+import compose.icons.simpleicons.Discord
 import compose.icons.simpleicons.Github
 import eu.kanade.presentation.components.PreferenceRow
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
@@ -173,6 +174,13 @@ fun AboutScreen(
                 ) {
                     val modifier = Modifier.size(Size.extraLarge)
                     LinkIcon(
+                        label = "Discord",
+                        modifier = modifier,
+                        icon = SimpleIcons.Discord,
+                        url = "https://discord.com/invite/G28rfG9X",
+                    )
+                    LinkIcon(
+                        modifier = modifier,
                         label = "GitHub",
                         icon = SimpleIcons.Github,
                         url = "https://nekomanga.org/",
