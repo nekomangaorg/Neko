@@ -107,15 +107,8 @@ suspend fun Call.awaitSuccess(): Response {
     val response = await(callStack)
     if (!response.isSuccessful) {
         response.close()
-        val exception =
-            when (response.code) {
-                502 -> Exception("MangaDex appears to be down, or under heavy load")
-                404 ->
-                    Exception(
-                        "Http error 404.  It is possible that MangaDex is down, or under heavy load"
-                    )
-                else -> Exception("HTTP error ${response.code}")
-            }
+        val exception = Exception("HTTP error ${response.code}")
+
         throw exception.apply { stackTrace = callStack }
     }
     return response

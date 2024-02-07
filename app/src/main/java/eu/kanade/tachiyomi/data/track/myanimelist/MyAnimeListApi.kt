@@ -30,7 +30,7 @@ import okhttp3.RequestBody
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.POST
 import org.nekomanga.logging.TimberKt
-import tachiyomi.core.network.await
+import tachiyomi.core.network.awaitSuccess
 import tachiyomi.core.network.parseAs
 import uy.kohesive.injekt.injectLazy
 
@@ -49,7 +49,10 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     .add("grant_type", "authorization_code")
                     .build()
             with(json) {
-                client.newCall(POST("$baseOAuthUrl/token", body = formBody)).await().parseAs()
+                client
+                    .newCall(POST("$baseOAuthUrl/token", body = formBody))
+                    .awaitSuccess()
+                    .parseAs()
             }
         }
     }
@@ -58,7 +61,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return withIOContext {
             val request = Request.Builder().url("$baseApiUrl/users/@me").get().build()
             with(json) {
-                authClient.newCall(request).await().parseAs<JsonObject>().let {
+                authClient.newCall(request).awaitSuccess().parseAs<JsonObject>().let {
                     it["name"]!!.jsonPrimitive.content
                 }
             }
@@ -83,19 +86,23 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                         .appendQueryParameter("nsfw", "true")
                         .build()
                 with(json) {
-                    authClient.newCall(GET(url.toString())).await().parseAs<JsonObject>().let {
-                        it["data"]!!
-                            .jsonArray
-                            .map { data -> data.jsonObject["node"]!!.jsonObject }
-                            .map { node ->
-                                val id = node["id"]!!.jsonPrimitive.long
-                                async { getMangaDetails(id) }
-                            }
-                            .awaitAll()
-                            .filter { trackSearch ->
-                                !trackSearch.publishing_type.contains("novel")
-                            }
-                    }
+                    authClient
+                        .newCall(GET(url.toString()))
+                        .awaitSuccess()
+                        .parseAs<JsonObject>()
+                        .let {
+                            it["data"]!!
+                                .jsonArray
+                                .map { data -> data.jsonObject["node"]!!.jsonObject }
+                                .map { node ->
+                                    val id = node["id"]!!.jsonPrimitive.long
+                                    async { getMangaDetails(id) }
+                                }
+                                .awaitAll()
+                                .filter { trackSearch ->
+                                    !trackSearch.publishing_type.contains("novel")
+                                }
+                        }
                 }
             }
         }
@@ -114,7 +121,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     )
                     .build()
             with(json) {
-                authClient.newCall(GET(url.toString())).await().parseAs<JsonObject>().let {
+                authClient.newCall(GET(url.toString())).awaitSuccess().parseAs<JsonObject>().let {
                     val obj = it.jsonObject
                     TrackSearch.create(TrackManager.MYANIMELIST).apply {
                         media_id = obj["id"]!!.jsonPrimitive.long
@@ -162,7 +169,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     .put(formBodyBuilder.build())
                     .build()
             with(json) {
-                authClient.newCall(request).await().parseAs<JsonObject>().let {
+                authClient.newCall(request).awaitSuccess().parseAs<JsonObject>().let {
                     parseMangaItem(it, track)
                 }
             }
@@ -187,7 +194,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     )
                     .build()
             with(json) {
-                authClient.newCall(GET(uri.toString())).await().parseAs<JsonObject>().let {
+                authClient.newCall(GET(uri.toString())).awaitSuccess().parseAs<JsonObject>().let {
                     obj: JsonObject ->
                     track.total_chapters = obj["num_chapters"]!!.jsonPrimitive.int
                     obj.jsonObject["my_list_status"]?.jsonObject?.let { parseMangaItem(it, track) }
@@ -242,7 +249,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             }
 
             val request = Request.Builder().url(urlBuilder.build().toString()).get().build()
-            with(json) { authClient.newCall(request).await().parseAs() }
+            with(json) { authClient.newCall(request).awaitSuccess().parseAs() }
         }
     }
 
@@ -291,7 +298,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             try {
                 val request =
                     Request.Builder().url(mangaUrl(track.media_id).toString()).delete().build()
-                authClient.newCall(request).await()
+                authClient.newCall(request).awaitSuccess()
                 true
             } catch (e: Exception) {
                 TimberKt.e(e) { "Error removing MAL track" }

@@ -16,18 +16,19 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
         get() = myanimelist.getIfAuthExpired()
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val originalRequest = chain.request()
         if (tokenExpired) {
             throw MALTokenExpired()
         }
 
-        if (oauth == null) {
-            throw IOException("MAL: User is not authenticated")
-        }
+        val originalRequest = chain.request()
 
         // Refresh access token if expired
         if (oauth?.isExpired() == true) {
             refreshToken(chain)
+        }
+
+        if (oauth == null) {
+            throw IOException("MAL: User is not authenticated")
         }
 
         // Add the authorization header to the original request
