@@ -48,6 +48,7 @@ class DownloadProvider(
         try {
             val mangaDirName = getMangaDirName(manga)
             val sourceDirName = getSourceDirName()
+            DiskUtil.createNoMediaFile(downloadsDir, context)
             TimberKt.d { "creating directory for $sourceDirName : $mangaDirName" }
             return downloadsDir!!.createDirectory(sourceDirName)!!.createDirectory(mangaDirName)!!
         } catch (e: Exception) {
