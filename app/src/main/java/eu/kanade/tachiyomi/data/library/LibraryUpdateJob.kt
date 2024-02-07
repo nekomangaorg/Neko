@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.Data
@@ -287,7 +286,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 libraryManga.filter { it.category == categoryId }
             } else {
                 val categoriesToUpdate =
-                    libraryPreferences.whichCategoriesToExclude().get().map(String::toInt)
+                    libraryPreferences.whichCategoriesToUpdate().get().map(String::toInt)
                 if (categoriesToUpdate.isNotEmpty()) {
                     categoryIds.addAll(categoriesToUpdate)
                     libraryManga.filter { it.category in categoriesToUpdate }.distinctBy { it.id }
