@@ -177,7 +177,7 @@ fun AboutScreen(
                         label = "Discord",
                         modifier = modifier,
                         icon = SimpleIcons.Discord,
-                        url = "https://discord.com/invite/G28rfG9X",
+                        url = "https://discord.gg/4vmK42QuKG",
                     )
                     LinkIcon(
                         modifier = modifier,
