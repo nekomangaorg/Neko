@@ -33,6 +33,7 @@ If you got any questions, [join our Discord server](https://discord.gg/4vmK42QuK
 </div>
 
 ## A big thanks to all who have contributed
+
 <a href="https://github.com/nekomangaorg/neko/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=nekomangaorg/neko"  width="600" />
 </a>

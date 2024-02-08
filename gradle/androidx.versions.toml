@@ -16,7 +16,7 @@ annotation = "androidx.annotation:annotation:1.7.1"
 browser = "androidx.browser:browser:1.7.0"
 biometric = "androidx.biometric:biometric:1.1.0"
 palette = "androidx.palette:palette:1.0.0"
-core-kts = "androidx.core:core-ktx:1.12.0"
+core-ktx = "androidx.core:core-ktx:1.12.0"
 constraintlayout = "androidx.constraintlayout:constraintlayout:2.1.4"
 multidex = "androidx.multidex:multidex:2.0.1"
 work = "androidx.work:work-runtime-ktx:2.9.0"
@@ -27,7 +27,7 @@ lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx
 
 
 [bundles]
-androidx = ["appcompat", "cardview", "webkit", "recyclerview", "preferencektx", "annotation", "browser", "biometric", "palette", "core-kts", "constraintlayout", "multidex", "lifecycle-process", "lifecycle-runtime-ktx", "lifecycle-viewmodel-ktx", "work"]
+androidx = ["appcompat", "cardview", "webkit", "recyclerview", "preferencektx", "annotation", "browser", "biometric", "palette", "core-ktx", "constraintlayout", "multidex", "lifecycle-process", "lifecycle-runtime-ktx", "lifecycle-viewmodel-ktx", "work"]
 
 
 [plugins]

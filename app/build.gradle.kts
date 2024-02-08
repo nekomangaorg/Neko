@@ -82,12 +82,10 @@ dependencies {
 
     implementation("com.github.akshaaatt:Onboarding:1.1.3")
 
-    implementation(androidx.core.kts)
     implementation(kotlinx.bundles.kotlin)
 
     coreLibraryDesugaring(libs.desugaring)
 
-    implementation(androidx.preferencektx)
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.serialization.okio)
