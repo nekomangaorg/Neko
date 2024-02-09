@@ -65,22 +65,26 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
 
         fun setupTask(context: Context, interval: Int) {
             val workManager = WorkManager.getInstance(context)
-            val request =
-                PeriodicWorkRequestBuilder<BackupCreatorJob>(
-                        interval.toLong(),
-                        TimeUnit.HOURS,
-                        10,
-                        TimeUnit.MINUTES,
-                    )
-                    .addTag(TAG_AUTO)
-                    .setInputData(workDataOf(IS_AUTO_BACKUP_KEY to true))
-                    .build()
+            if (interval == 0) {
+                cancelTask(context)
+            } else {
+                val request =
+                    PeriodicWorkRequestBuilder<BackupCreatorJob>(
+                            interval.toLong(),
+                            TimeUnit.HOURS,
+                            10,
+                            TimeUnit.MINUTES,
+                        )
+                        .addTag(TAG_AUTO)
+                        .setInputData(workDataOf(IS_AUTO_BACKUP_KEY to true))
+                        .build()
 
-            workManager.enqueueUniquePeriodicWork(
-                TAG_AUTO,
-                ExistingPeriodicWorkPolicy.UPDATE,
-                request
-            )
+                workManager.enqueueUniquePeriodicWork(
+                    TAG_AUTO,
+                    ExistingPeriodicWorkPolicy.UPDATE,
+                    request
+                )
+            }
         }
 
         fun startNow(context: Context, uri: Uri, flags: Int) {

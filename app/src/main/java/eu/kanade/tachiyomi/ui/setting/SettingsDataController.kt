@@ -115,7 +115,7 @@ class SettingsDataController : SettingsController() {
                     titleRes = R.string.backup_frequency
                     entriesRes =
                         arrayOf(
-                            R.string.manual,
+                            R.string.off,
                             R.string.every_6_hours,
                             R.string.every_12_hours,
                             R.string.daily,
