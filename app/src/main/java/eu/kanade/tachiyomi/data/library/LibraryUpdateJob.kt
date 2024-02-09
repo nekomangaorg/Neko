@@ -155,7 +155,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         instance = WeakReference(this)
 
         val selectedScheme = libraryPreferences.updatePrioritization().get()
-        val savedMangaList = inputData.getLongArray(KEY_MANGAS)?.asList()
+        val savedMangaList = inputData.getLongArray(KEY_MANGA_LIST)?.asList()
 
         val mangaList =
             (if (savedMangaList != null) {
@@ -756,7 +756,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         const val KEY_CATEGORY = "category"
         const val STARTING_UPDATE_SOURCE = -5L
         /** Key for list of manga to be updated. (For dynamic categories) */
-        const val KEY_MANGAS = "mangaList"
+        const val KEY_MANGA_LIST = "mangaList"
 
         private var instance: WeakReference<LibraryUpdateJob>? = null
 
@@ -836,7 +836,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 builder.putInt(KEY_CATEGORY, id)
                 if (mangaToUse != null) {
                     builder.putLongArray(
-                        KEY_MANGAS,
+                        KEY_MANGA_LIST,
                         mangaToUse.mapNotNull { it.id }.toLongArray(),
                     )
                 }

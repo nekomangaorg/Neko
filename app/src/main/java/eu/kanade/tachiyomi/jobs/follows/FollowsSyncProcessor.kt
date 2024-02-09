@@ -22,7 +22,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.nekomanga.domain.network.ResultError
 import org.nekomanga.logging.TimberKt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class FollowsSyncProcessor {
@@ -70,38 +69,44 @@ class FollowsSyncProcessor {
                     val defaultCategoryId = preferences.defaultCategory().get()
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-                    listManga.forEach { networkManga ->
-                        updateNotification(networkManga.title, count.andIncrement, listManga.size)
-
-                        var dbManga =
-                            db.getManga(networkManga.url, sourceManager.mangaDex.id)
-                                .executeAsBlocking()
-                        if (dbManga == null) {
-                            dbManga =
-                                Manga.create(
-                                    networkManga.url,
-                                    networkManga.title,
-                                    sourceManager.mangaDex.id,
-                                )
-                            dbManga.date_added = Date().time
-                        }
-
-                        // Increment and update if it is not already favorited
-                        if (!dbManga.favorite) {
-                            countOfAdded.incrementAndGet()
-                            dbManga.favorite = true
-                            if (defaultCategory != null) {
-                                val mc = MangaCategory.create(dbManga, defaultCategory)
-                                db.setMangaCategories(listOf(mc), listOf(dbManga))
-                            }
-
-                            db.insertManga(dbManga).executeAsBlocking()
-                        }
-                    }
                     val mangaToUpdate =
                         listManga
-                            .mapNotNull {
-                                db.getManga(it.url, sourceManager.mangaDex.id).executeAsBlocking()
+                            .mapNotNull { networkManga ->
+                                updateNotification(
+                                    networkManga.title,
+                                    count.andIncrement,
+                                    listManga.size
+                                )
+                                var newDbMangaSynced = false
+                                var dbManga =
+                                    db.getManga(networkManga.url, sourceManager.mangaDex.id)
+                                        .executeAsBlocking()
+                                if (dbManga == null) {
+                                    dbManga =
+                                        Manga.create(
+                                            networkManga.url,
+                                            networkManga.title,
+                                            sourceManager.mangaDex.id,
+                                        )
+                                    dbManga.date_added = Date().time
+                                    newDbMangaSynced = true
+                                }
+
+                                // Increment and update if it is not already favorited
+                                if (!dbManga.favorite) {
+                                    countOfAdded.incrementAndGet()
+                                    dbManga.favorite = true
+                                    if (defaultCategory != null) {
+                                        val mc = MangaCategory.create(dbManga, defaultCategory)
+                                        db.setMangaCategories(listOf(mc), listOf(dbManga))
+                                    }
+
+                                    db.insertManga(dbManga).executeAsBlocking()
+                                }
+                                when (newDbMangaSynced) {
+                                    true -> dbManga
+                                    false -> null
+                                }
                             }
                             .map {
                                 val libraryManga = LibraryManga().apply { this.title = it.title }
