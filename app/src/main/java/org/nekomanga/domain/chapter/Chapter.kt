@@ -130,8 +130,8 @@ data class SimpleChapter(
         }
 
     fun toChapterItem(
-        downloadState: Download.State = Download.State.default,
-        downloadProgress: Float = 0f
+        downloadState: Download.State = Download.State.NOT_DOWNLOADED,
+        downloadProgress: Int = 0
     ): ChapterItem =
         ChapterItem(
             chapter = this,
@@ -167,13 +167,10 @@ fun Chapter.toSimpleChapter(): SimpleChapter? {
 
 data class ChapterItem(
     val chapter: SimpleChapter,
-    val downloadState: Download.State = Download.State.default,
-    val downloadProgress: Float = -1f,
+    val downloadState: Download.State = Download.State.NOT_DOWNLOADED,
+    val downloadProgress: Int = -1,
 ) {
     val isDownloaded = downloadState == Download.State.DOWNLOADED
 
-    val isNotDownloaded =
-        downloadState == Download.State.NOT_DOWNLOADED || downloadState == Download.State.default
-
-    val isNotDefaultDownload = downloadState != Download.State.default
+    val isNotDownloaded = downloadState == Download.State.NOT_DOWNLOADED
 }

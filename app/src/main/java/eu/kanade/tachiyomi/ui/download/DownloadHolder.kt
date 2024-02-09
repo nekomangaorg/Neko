@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.view.View
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -50,7 +49,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             binding.downloadProgress.max = 1
             binding.downloadProgressText.text = ""
         } else {
-            binding.downloadProgress.max = pages.size * 100
+            binding.downloadProgress.max = 100
             notifyProgress()
             notifyDownloadedPages()
         }
@@ -63,11 +62,10 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
 
     /** Updates the progress bar of the download. */
     fun notifyProgress() {
-        val pages = download.pages ?: return
         if (binding.downloadProgress.max == 1) {
-            binding.downloadProgress.max = pages.size * 100
+            binding.downloadProgress.max = 100
         }
-        binding.downloadProgress.progress = download.pageProgress
+        binding.downloadProgress.progress = download.progress
     }
 
     /** Updates the text field of the number of downloaded pages. */

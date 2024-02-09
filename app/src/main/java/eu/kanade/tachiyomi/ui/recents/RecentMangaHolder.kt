@@ -196,8 +196,7 @@ class RecentMangaHolder(
             binding.coverThumbnail.loadManga(item.mch.manga)
         }
         notifyStatus(
-            if (adapter.isSelected(flexibleAdapterPosition)) Download.State.CHECKED
-            else item.status,
+            item.status,
             item.progress,
             item.chapter.read,
         )
@@ -235,8 +234,7 @@ class RecentMangaHolder(
             when (adapter.showDownloads) {
                 RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded,
                 RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded, ->
-                    status !in Download.State.CHECKED..Download.State.NOT_DOWNLOADED ||
-                        !isChapterRead
+                    status != Download.State.NOT_DOWNLOADED || !isChapterRead
                 else -> binding.downloadButton.downloadButton.isVisible
             }
     }

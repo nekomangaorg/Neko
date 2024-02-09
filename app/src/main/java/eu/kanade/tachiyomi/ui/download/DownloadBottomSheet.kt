@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsController
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.expand
@@ -26,6 +27,8 @@ import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.toolbarHeight
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.nekomanga.R
 import org.nekomanga.databinding.DownloadBottomSheetBinding
 import uy.kohesive.injekt.injectLazy
@@ -64,6 +67,26 @@ constructor(
         // Initialize adapter, scroll listener and recycler views
         presenter.attachView(this)
         presenter.onCreate()
+        presenter.queueState
+            .onEach { downloads ->
+                withUIContext {
+                    binding.downloadFab.isInvisible = downloads.isEmpty()
+                    val oldRunning = isRunning
+                    isRunning = presenter.downloadManager.isRunning
+                    updateFab()
+                    if (oldRunning != isRunning) {
+                        prepareMenu()
+                        // Check if download queue is empty and update information accordingly.
+                        setInformationView()
+                    }
+                }
+            }
+            .launchIn(presenter.presenterScope)
+
+        presenter.downloadManager.isDownloaderRunning
+            .onEach { running -> withUIContext { updateFab() } }
+            .launchIn(presenter.presenterScope)
+
         adapter = DownloadAdapter(this)
         sheetBehavior = BottomSheetBehavior.from(this)
         activity = controller.activity
@@ -94,14 +117,13 @@ constructor(
             }
         }
         binding.downloadFab.setOnClickListener {
-            if (controller.presenter.downloadManager.isPaused()) {
+            if (!controller.presenter.downloadManager.isRunning) {
                 DownloadJob.start(context)
             } else {
                 presenter.pauseDownloads()
             }
-            updateFab()
         }
-        update(!presenter.downloadManager.isPaused())
+        prepareMenu()
         setInformationView()
         if (!controller.hasQueue()) {
             sheetBehavior?.isHideable = true
@@ -109,17 +131,8 @@ constructor(
         }
     }
 
-    fun update(isRunning: Boolean) {
-        presenter.getItems()
-        onQueueStatusChange(isRunning)
-        if (binding.downloadFab.isInvisible != presenter.downloadQueue.isEmpty()) {
-            binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
-        }
-        prepareMenu()
-    }
-
     private fun updateDLTitle() {
-        val extCount = presenter.downloadQueue.firstOrNull()
+        val extCount = presenter.downloadManager.queueState.value.firstOrNull()
         binding.titleText.text =
             if (extCount != null) {
                 resources.getString(
@@ -129,26 +142,6 @@ constructor(
             } else {
                 ""
             }
-    }
-
-    /**
-     * Called when the queue's status has changed. Updates the visibility of the buttons.
-     *
-     * @param running whether the queue is now running or not.
-     */
-    private fun onQueueStatusChange(running: Boolean) {
-        val oldRunning = isRunning
-        isRunning = running
-        if (binding.downloadFab.isInvisible != presenter.downloadQueue.isEmpty()) {
-            binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
-        }
-        updateFab()
-        if (oldRunning != running) {
-            prepareMenu()
-
-            // Check if download queue is empty and update information accordingly.
-            setInformationView()
-        }
     }
 
     /**
@@ -204,7 +197,7 @@ constructor(
     private fun setInformationView() {
         updateDLTitle()
         setBottomSheet()
-        if (presenter.downloadQueue.isEmpty()) {
+        if (presenter.downloadManager.queueState.value.isEmpty()) {
             binding.emptyView.show(
                 CommunityMaterial.Icon.cmd_download_off,
                 R.string.nothing_is_downloading,
@@ -218,17 +211,22 @@ constructor(
         val menu = binding.sheetToolbar.menu
         updateFab()
         // Set clear button visibility.
-        menu.findItem(R.id.clear_queue)?.isVisible = !presenter.downloadQueue.isEmpty()
+        menu.findItem(R.id.clear_queue)?.isVisible =
+            !presenter.downloadManager.queueState.value.isEmpty()
 
         // Set reorder button visibility.
-        menu.findItem(R.id.reorder)?.isVisible = !presenter.downloadQueue.isEmpty()
+        menu.findItem(R.id.reorder)?.isVisible =
+            !presenter.downloadManager.queueState.value.isEmpty()
     }
 
     private fun updateFab() {
         binding.downloadFab.text =
-            context.getString(if (isRunning) R.string.pause else R.string.resume)
+            context.getString(
+                if (presenter.downloadManager.isRunning) R.string.pause else R.string.resume
+            )
         binding.downloadFab.setIconResource(
-            if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp
+            if (presenter.downloadManager.isRunning) R.drawable.ic_pause_24dp
+            else R.drawable.ic_play_arrow_24dp
         )
     }
 
@@ -278,7 +276,7 @@ constructor(
     }
 
     private fun setBottomSheet() {
-        val hasQueue = presenter.downloadQueue.isNotEmpty()
+        val hasQueue = presenter.downloadManager.queueState.value.isNotEmpty()
         if (hasQueue) {
             sheetBehavior?.skipCollapsed = !hasQueue
             if (sheetBehavior.isHidden()) sheetBehavior?.collapse()
