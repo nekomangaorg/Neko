@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.util.getOrResultError
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -116,8 +117,10 @@ class LatestChapterHandler {
                         )
                     }
             }
-            .getOrElse {
-                TimberKt.e(it) { "Error parsing latest chapters" }
+            .getOrElse { e ->
+                if (e !is CancellationException) {
+                    TimberKt.e(e) { "Error parsing latest chapters" }
+                }
                 Err(ResultError.Generic(errorString = "Error parsing latest chapters response"))
             }
     }
