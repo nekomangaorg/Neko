@@ -592,21 +592,6 @@ class RecentsPresenter(
         }
     }
 
-    /* override fun updateDownload(download: Download) {
-        recentItems.find { it.chapter.id == download.chapter.id }?.download = download
-        presenterScope.launchUI { view?.updateChapterDownload(download) }
-    }
-
-    override fun updateDownloads() {
-        presenterScope.launch {
-            setDownloadedChapters(recentItems)
-            withContext(Dispatchers.Main) {
-                view?.showLists(recentItems, true)
-                view?.updateDownloadStatus(!downloadManager.isPaused())
-            }
-        }
-    }*/
-
     private fun observeDownloads() {
 
         presenterScope.launchIO {

@@ -1957,12 +1957,6 @@ class MangaDetailPresenter(
 
     // callback from Downloader
     fun updateDownloadState(download: Download) {
-        TimberKt.d {
-            """
-            ESCO - ${download.status}:${download.progress}
-        """
-                .trimIndent()
-        }
         presenterScope.launchIO {
             val currentChapters = generalState.value.activeChapters
             val index = currentChapters.indexOfFirst { it.chapter.id == download.chapter.id }

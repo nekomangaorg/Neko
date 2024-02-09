@@ -33,6 +33,9 @@ class DownloadManager(val context: Context) {
     val isRunning: Boolean
         get() = downloader.isRunning
 
+    val isPaused: Boolean
+        get() = downloader.isPaused
+
     /** The sources manager. */
     private val sourceManager by injectLazy<SourceManager>()
 
@@ -61,6 +64,8 @@ class DownloadManager(val context: Context) {
     val isDownloaderRunning
         get() = DownloadJob.isRunningFlow(context)
 
+    fun isDownloadRunningTemp() = downloader.isRunning
+
     /**
      * Tells the downloader to begin downloads.
      *
@@ -87,6 +92,7 @@ class DownloadManager(val context: Context) {
     /** Tells the downloader to pause downloads. */
     fun pauseDownloads() {
         downloader.pause()
+        downloader.stop()
     }
 
     /**

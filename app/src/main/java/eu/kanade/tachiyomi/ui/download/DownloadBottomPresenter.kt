@@ -104,9 +104,12 @@ class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
             .launchIn(presenterScope)
     }
 
-    /** Pauses the download queue. */
-    fun pauseDownloads() {
-        downloadManager.pauseDownloads()
+    fun flipDownloads() {
+        if (!downloadManager.isRunning) {
+            downloadManager.startDownloads()
+        } else {
+            downloadManager.pauseDownloads()
+        }
     }
 
     /** Clears the download queue. */

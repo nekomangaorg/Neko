@@ -655,7 +655,6 @@ class Downloader(
     }
 
     private fun _clearQueue() {
-        TimberKt.d { "ESCO clearing queue: queue size ${_queueState.value.size}" }
         _queueState.update {
             it.forEach { download ->
                 if (
@@ -668,7 +667,6 @@ class Downloader(
             store.clear()
             emptyList()
         }
-        TimberKt.d { "ESCO clearing queue: queue size ${_queueState.value.size}" }
     }
 
     fun updateQueue(downloads: List<Download>) {
