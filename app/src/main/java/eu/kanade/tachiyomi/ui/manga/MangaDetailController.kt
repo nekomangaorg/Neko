@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.manga.Artwork
+import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy
 
@@ -180,7 +181,12 @@ class MangaDetailController(private val mangaId: Long) :
                         context.openInBrowser(url)
                     },
                 ),
-            onBackPressed = router::handleBack,
+            onBackPressed = {
+                when (router.backstackSize > 1) {
+                    true -> router.handleBack()
+                    false -> activity?.onBackPressed()
+                }
+            },
         )
     }
 

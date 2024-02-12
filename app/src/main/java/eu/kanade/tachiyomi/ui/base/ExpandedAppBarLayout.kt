@@ -50,8 +50,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
     private var tabsFrameLayout: FrameLayout? = null
     var mainActivity: MainActivity? = null
     private var isExtraSmall = false
-    val useLargeToolbar: Boolean
-        get() = preferences.useLargeToolbar().get() && !isExtraSmall
+    val useLargeToolbar: Boolean = false
 
     var compactSearchMode = false
 

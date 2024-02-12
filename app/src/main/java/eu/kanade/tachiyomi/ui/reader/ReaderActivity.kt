@@ -194,7 +194,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private var lastCropRes = 0
 
     val isSplitScreen: Boolean
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
+        get() = isInMultiWindowMode
 
     var didTransistionFromChapter = false
     var visibleChapterRange = longArrayOf()
@@ -294,9 +294,18 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         if (savedInstanceState != null) {
             menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
-            lastShiftDoubleState = savedInstanceState.get(SHIFT_DOUBLE_PAGES) as? Boolean
-            indexPageToShift = savedInstanceState.get(SHIFTED_PAGE_INDEX) as? Int
-            indexChapterToShift = savedInstanceState.get(SHIFTED_CHAP_INDEX) as? Long
+            lastShiftDoubleState =
+                savedInstanceState.getBoolean(SHIFT_DOUBLE_PAGES).takeIf {
+                    savedInstanceState.containsKey(SHIFT_DOUBLE_PAGES)
+                }
+            indexPageToShift =
+                savedInstanceState.getInt(SHIFTED_PAGE_INDEX, Int.MIN_VALUE).takeIf {
+                    it != Int.MIN_VALUE
+                }
+            indexChapterToShift =
+                savedInstanceState.getLong(SHIFTED_CHAP_INDEX, Long.MIN_VALUE).takeIf {
+                    it != Long.MIN_VALUE
+                }
             binding.readerNav.root.isInvisible = !menuVisible
         } else {
             binding.readerNav.root.isInvisible = true
