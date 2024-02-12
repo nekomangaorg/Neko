@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.nekomanga.R
 import org.nekomanga.databinding.DownloadBottomSheetBinding
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class DownloadBottomSheet
