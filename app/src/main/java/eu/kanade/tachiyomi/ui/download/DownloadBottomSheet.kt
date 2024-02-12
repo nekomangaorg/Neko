@@ -77,7 +77,9 @@ constructor(
         presenter.downloadManager.isDownloaderRunning
             .onEach { running ->
                 withUIContext {
-                    prepareMenu()
+                    if (running) {
+                        prepareMenu()
+                    }
                     updateFab(running)
                 }
             }
