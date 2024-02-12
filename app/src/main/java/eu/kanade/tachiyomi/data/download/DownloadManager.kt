@@ -423,7 +423,7 @@ class DownloadManager(val context: Context) {
     fun statusFlow(): Flow<Download> =
         queueState
             .flatMapLatest { downloads ->
-                downloads.map { download -> download.statusFlow.drop(1).map { download } }.merge()
+                downloads.map { download -> download.statusFlow.map { download } }.merge()
             }
             .onStart {
                 emitAll(
