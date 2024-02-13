@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.flow
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+private const val PROGRESS_DELAY = 50L
+
 data class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
 
     var pages: List<Page>? = null
@@ -44,7 +46,7 @@ data class Download(val source: HttpSource, val manga: Manga, val chapter: Chapt
                 if (pages == null) {
                     emit(0)
                     while (pages == null) {
-                        delay(50)
+                        delay(PROGRESS_DELAY)
                     }
                 }
 
@@ -52,7 +54,7 @@ data class Download(val source: HttpSource, val manga: Manga, val chapter: Chapt
                 emitAll(combine(progressFlows) { it.average().toInt() })
             }
             .distinctUntilChanged()
-            .debounce(50)
+            .debounce(PROGRESS_DELAY)
 
     val progress: Int
         get() {
@@ -69,13 +71,17 @@ data class Download(val source: HttpSource, val manga: Manga, val chapter: Chapt
     }
 
     companion object {
+
+        // max progress
+        const val MaxProgress = 100
+
         suspend fun fromChapterId(
             chapterId: Long,
             db: DatabaseHelper = Injekt.get(),
             sourceManager: SourceManager = Injekt.get(),
         ): Download? {
-            val chapter = db.getChapter(chapterId).executeOnIO() ?: return null
-            chapter.manga_id ?: return null
+            val chapter = db.getChapter(chapterId).executeOnIO()
+            chapter?.manga_id ?: return null
             val manga = db.getManga(chapter.manga_id!!).executeOnIO() ?: return null
             val source = chapter.getHttpSource(sourceManager)
 

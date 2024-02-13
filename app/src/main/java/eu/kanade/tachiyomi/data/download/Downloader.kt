@@ -147,8 +147,7 @@ class Downloader(
     /** Removes everything from the queue. */
     fun clearQueue() {
         cancelDownloaderJob()
-
-        _clearQueue()
+        clearQueueState()
         notifier.dismissProgress()
     }
 
@@ -548,13 +547,12 @@ class Downloader(
         download: Download,
         tmpDir: UniFile,
     ): Boolean {
-        // Page list hasn't been initialized
-        val downloadPageCount = download.pages?.size ?: return false
-
-        // Ensure that all pages have been downloaded
-        if (download.downloadedImages != downloadPageCount) {
+        // Page list hasn't been initialized or all pages have not been downloaded
+        if (download.pages?.size == null || download.pages!!.size != download.downloadedImages) {
             return false
         }
+
+        val downloadPageCount = download.pages?.size
 
         // Ensure that the chapter folder has all the pages
         val downloadedImagesCount =
@@ -654,7 +652,7 @@ class Downloader(
         removeFromQueueIf { it.manga.id == manga.id }
     }
 
-    private fun _clearQueue() {
+    private fun clearQueueState() {
         _queueState.update {
             it.forEach { download ->
                 if (
@@ -679,7 +677,7 @@ class Downloader(
         }
 
         pause()
-        _clearQueue()
+        clearQueueState()
         addAllToQueue(downloads)
 
         if (wasRunning) {

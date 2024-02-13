@@ -49,7 +49,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             binding.downloadProgress.max = 1
             binding.downloadProgressText.text = ""
         } else {
-            binding.downloadProgress.max = 100
+            binding.downloadProgress.max = Download.MaxProgress
             notifyProgress()
             notifyDownloadedPages()
         }

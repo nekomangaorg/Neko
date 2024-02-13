@@ -152,7 +152,7 @@ private fun Queued(modifier: Modifier) {
 private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress: Int) {
     val (bgColor, iconColor, progressColor) =
         when {
-            downloadProgress >= 100 ->
+            downloadProgress >= Download.MaxProgress ->
                 Triple(buttonColor, MaterialTheme.colorScheme.surface, Color.Transparent)
             else ->
                 Triple(
@@ -169,7 +169,7 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
 
     val animatedProgress =
         animateFloatAsState(
-                targetValue = (downloadProgress / 100f),
+                targetValue = (downloadProgress / Download.MaxProgress.toFloat()),
                 animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
                 label = "downloadingProgress"
             )
