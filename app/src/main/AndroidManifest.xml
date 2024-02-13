@@ -155,7 +155,7 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
 
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -166,7 +166,7 @@
                     android:host="mangadex.org"
                     android:pathPattern="/manga/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -177,7 +177,7 @@
                     android:host="mangadex.org"
                     android:pathPattern="/title/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -188,7 +188,7 @@
                     android:host="mangadex.org"
                     android:pathPattern="/group/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -199,7 +199,7 @@
                     android:host="mangadex.org"
                     android:pathPattern="/list/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
