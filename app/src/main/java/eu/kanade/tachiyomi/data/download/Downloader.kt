@@ -294,6 +294,7 @@ class Downloader(
 
         val chapterDirname = provider.getChapterDirName(download.chapter)
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)!!
+
         val pagesToDownload = if (download.source is MangaDex) 6 else 3
 
         try {
@@ -354,13 +355,11 @@ class Downloader(
                 archiveChapter(mangaDir, chapterDirname, tmpDir)
             } else {
                 tmpDir.renameTo(chapterDirname)
+                DiskUtil.createNoMediaFile(tmpDir, context)
             }
             cache.addChapter(chapterDirname, download.manga)
-
-            DiskUtil.createNoMediaFile(tmpDir, context)
-
             download.status = Download.State.DOWNLOADED
-        } catch (error: Throwable) {
+        } catch (error: Exception) {
             if (error is CancellationException) throw error
             // If the page list threw, it will resume here
             TimberKt.e(error)
