@@ -47,7 +47,6 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy
 

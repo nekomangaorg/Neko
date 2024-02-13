@@ -223,10 +223,10 @@ fun TrackingDateSheet(
                 Arrangement.SpaceBetween,
             ) {
                 DateTextField(
-                    onEditingComplete = { currentDate -> newDate = currentDate },
+                    onValueChanged = { currentDate -> newDate = currentDate },
                     format = format,
                     maxDate = LocalDate.now(),
-                    contentTextStyle =
+                    textStyle =
                         MaterialTheme.typography.headlineSmall.copy(
                             color = MaterialTheme.colorScheme.onSurface
                         ),
@@ -238,6 +238,7 @@ fun TrackingDateSheet(
                                     alpha = NekoColors.disabledAlphaHighContrast
                                 )
                         ),
+                    delimiterSpacing = Size.extraExtraTiny,
                 )
                 ElevatedButton(
                     onClick = {
