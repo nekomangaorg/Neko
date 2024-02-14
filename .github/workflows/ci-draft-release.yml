@@ -74,6 +74,12 @@ jobs:
         run: |
           set -e
 
+          $(curl -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/nekomangaorg/neko/releaes/latest" \
+            | jq '.| {tag_name} | .tag_name') >> $LAST_TAG
+
+          echo $LAST_TAG
+
           current_sha=$(git rev-parse --short HEAD)
           echo "CURRENT_SHA=$current_sha"
           echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
