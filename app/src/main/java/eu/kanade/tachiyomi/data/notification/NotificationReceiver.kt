@@ -62,8 +62,8 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_PAUSE_DOWNLOADS -> {
                 downloadManager.pauseDownloads()
             }
-            // Clear the download queue
-            ACTION_CLEAR_DOWNLOADS -> downloadManager.clearQueue(true)
+            // Clear the download
+            ACTION_CLEAR_DOWNLOADS -> downloadManager.clearQueue()
             // Delete image from path and dismiss notification
             ACTION_DELETE_IMAGE ->
                 deleteImage(

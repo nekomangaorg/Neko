@@ -542,8 +542,8 @@ class ReaderViewModel(
      * queued for download
      */
     private fun deleteChapterFromDownloadQueue(currentChapter: ReaderChapter): Download? {
-        return downloadManager.getChapterDownloadOrNull(currentChapter.chapter)?.apply {
-            downloadManager.deletePendingDownloads(this)
+        return downloadManager.getQueuedDownloadOrNull(currentChapter.chapter.id!!)?.apply {
+            downloadManager.deletePendingDownloads(listOf(this))
         }
     }
 

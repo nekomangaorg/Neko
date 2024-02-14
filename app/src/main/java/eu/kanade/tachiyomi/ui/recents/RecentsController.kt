@@ -328,7 +328,7 @@ class RecentsController(bundle: Bundle? = null) :
                         }
                     }
 
-                    if (presenter.downloadManager.hasQueue()) {
+                    if (presenter.downloadManager.queueState.value.isNotEmpty()) {
                         binding.downloadBottomSheet.downloadFab.alpha = 1f
                         if (state == BottomSheetBehavior.STATE_EXPANDED) {
                             binding.downloadBottomSheet.downloadFab.show()
@@ -501,7 +501,6 @@ class RecentsController(bundle: Bundle? = null) :
             refresh()
         }
         setBottomPadding()
-        binding.downloadBottomSheet.dlBottomSheet.update(!presenter.downloadManager.isPaused())
     }
 
     override fun onDestroy() {
@@ -585,17 +584,12 @@ class RecentsController(bundle: Bundle? = null) :
         if (view == null) return
 
         if (updateDLSheet) {
-            binding.downloadBottomSheet.dlBottomSheet.update(!presenter.downloadManager.isPaused())
             binding.downloadBottomSheet.dlBottomSheet.onUpdateProgress(download)
             binding.downloadBottomSheet.dlBottomSheet.onUpdateDownloadedPages(download)
         }
         val id = download.chapter.id ?: return
         val holder = binding.recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
         holder.notifyStatus(download.status, download.progress, download.chapter.read, true)
-    }
-
-    fun updateDownloadStatus(isRunning: Boolean) {
-        binding.downloadBottomSheet.dlBottomSheet.update(isRunning)
     }
 
     private fun refreshItem(chapterId: Long) {
@@ -847,7 +841,7 @@ class RecentsController(bundle: Bundle? = null) :
         }
     }
 
-    fun hasQueue() = presenter.downloadManager.hasQueue()
+    fun hasQueue() = presenter.downloadManager.queueState.value.isNotEmpty()
 
     override fun showSheet() {
         if (!isBindingInitialized) return

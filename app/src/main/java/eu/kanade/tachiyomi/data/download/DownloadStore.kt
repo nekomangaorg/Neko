@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uy.kohesive.injekt.injectLazy
@@ -48,6 +47,15 @@ class DownloadStore(
      */
     fun remove(download: Download) {
         preferences.edit { remove(getKey(download)) }
+    }
+
+    /**
+     * Removes a list of downloads from the store.
+     *
+     * @param downloads the download to remove.
+     */
+    fun removeAll(downloads: List<Download>) {
+        preferences.edit { downloads.forEach { remove(getKey(it)) } }
     }
 
     /** Removes all the downloads from the store. */

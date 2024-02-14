@@ -7,10 +7,8 @@ import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.models.uuid
-import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -31,12 +29,14 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.nekomanga.R
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -46,7 +46,7 @@ class RecentsPresenter(
     val downloadManager: DownloadManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
-) : BaseCoroutinePresenter<RecentsController>(), DownloadQueue.DownloadListener {
+) : BaseCoroutinePresenter<RecentsController>() {
 
     val statusHandler: StatusHandler by injectLazy()
     private var recentsJob: Job? = null
@@ -86,8 +86,8 @@ class RecentsPresenter(
 
     override fun onCreate() {
         super.onCreate()
-        downloadManager.addListener(this)
-        DownloadJob.downloadFlow.onEach(::downloadStatusChanged).launchIn(presenterScope)
+
+        observeDownloads()
         LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
         if (lastRecents != null) {
             if (recentItems.isEmpty()) {
@@ -396,7 +396,6 @@ class RecentsPresenter(
 
     override fun onDestroy() {
         super.onDestroy()
-        downloadManager.removeListener(this)
         lastRecents = recentItems
     }
 
@@ -418,31 +417,11 @@ class RecentsPresenter(
         for (item in chapters.filter { it.chapter.id != null }) {
             if (downloadManager.isChapterDownloaded(item.chapter, item.mch.manga)) {
                 item.status = Download.State.DOWNLOADED
-            } else if (downloadManager.hasQueue()) {
-                item.status =
-                    downloadManager.queue.find { it.chapter.id == item.chapter.id }?.status
-                        ?: Download.State.default
+            } else if (downloadManager.queueState.value.isNotEmpty()) {
+                downloadManager.getQueuedDownloadOrNull(item.chapter.id!!)?.status
+                    ?: Download.State.NOT_DOWNLOADED
             }
         }
-    }
-
-    override fun updateDownload(download: Download) {
-        recentItems.find { it.chapter.id == download.chapter.id }?.download = download
-        presenterScope.launchUI { view?.updateChapterDownload(download) }
-    }
-
-    override fun updateDownloads() {
-        presenterScope.launch {
-            setDownloadedChapters(recentItems)
-            withContext(Dispatchers.Main) {
-                view?.showLists(recentItems, true)
-                view?.updateDownloadStatus(!downloadManager.isPaused())
-            }
-        }
-    }
-
-    private fun downloadStatusChanged(downloading: Boolean) {
-        presenterScope.launchUI { view?.updateDownloadStatus(downloading) }
     }
 
     private fun onUpdateManga(mangaId: Long?) {
@@ -610,6 +589,29 @@ class RecentsPresenter(
             return presenter.recentItems
                 .filter { it.mch.manga.id != null }
                 .map { it.mch.manga to it.mch.history.last_read }
+        }
+    }
+
+    private fun observeDownloads() {
+
+        presenterScope.launchIO {
+            downloadManager
+                .statusFlow()
+                .catch { error -> TimberKt.e(error) }
+                .collect { download ->
+                    recentItems.find { it.chapter.id == download.chapter.id }?.download = download
+                    withUIContext { view?.updateChapterDownload(download) }
+                }
+        }
+
+        presenterScope.launchIO {
+            downloadManager
+                .progressFlow()
+                .catch { error -> TimberKt.e(error) }
+                .collect { download ->
+                    recentItems.find { it.chapter.id == download.chapter.id }?.download = download
+                    withUIContext { view?.updateChapterDownload(download) }
+                }
         }
     }
 }

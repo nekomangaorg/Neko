@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -73,6 +72,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -116,7 +116,7 @@ class MangaDetailPresenter(
     private val mangaUpdateCoordinator: MangaUpdateCoordinator = Injekt.get(),
     private val trackingCoordinator: TrackingCoordinator = Injekt.get(),
     private val storageManager: StorageManager = Injekt.get(),
-) : BaseCoroutinePresenter<MangaDetailController>(), DownloadQueue.DownloadListener {
+) : BaseCoroutinePresenter<MangaDetailController>() {
 
     private val _currentManga = MutableStateFlow<Manga?>(null)
     val manga: StateFlow<Manga?> = _currentManga.asStateFlow()
@@ -156,10 +156,10 @@ class MangaDetailPresenter(
 
     override fun onCreate() {
         super.onCreate()
-        downloadManager.addListener(this)
+
         LibraryUpdateJob.updateFlow
             .filter { it == currentManga().id }
-            .onEach { ::onUpdateManga }
+            .onEach(::onUpdateManga)
             .launchIn(presenterScope)
         presenterScope.launch {
             val dbManga = db.getManga(mangaId).executeAsBlocking()!!
@@ -195,6 +195,7 @@ class MangaDetailPresenter(
                 syncChaptersReadStatus()
             }
         }
+        observeDownloads()
     }
 
     /** Update all flows */
@@ -771,11 +772,14 @@ class MangaDetailPresenter(
                                     chapter.toDbChapter(),
                                     currentManga()
                                 ) -> Download.State.DOWNLOADED
-                                downloadManager.hasQueue() ->
-                                    downloadManager.queue
-                                        .find { it.chapter.id == chapter.id }
-                                        ?.status ?: Download.State.default
-                                else -> Download.State.default
+                                else -> {
+                                    val download =
+                                        downloadManager.getQueuedDownloadOrNull(chapter.id)
+                                    when (download == null) {
+                                        true -> Download.State.NOT_DOWNLOADED
+                                        false -> download.status
+                                    }
+                                }
                             }
 
                         ChapterItem(
@@ -784,10 +788,10 @@ class MangaDetailPresenter(
                             downloadProgress =
                                 when (downloadState == Download.State.DOWNLOADING) {
                                     true ->
-                                        downloadManager.queue
-                                            .find { it.chapter.id == chapter.id }!!
-                                            .progressFloat
-                                    false -> 0f
+                                        downloadManager
+                                            .getQueuedDownloadOrNull(chapter.id)!!
+                                            .progress
+                                    false -> 0
                                 },
                         )
                     }
@@ -1610,7 +1614,7 @@ class MangaDetailPresenter(
                     deleteChapters(chapterItems, chapterItems.size == allChapterSize)
                 is DownloadAction.RemoveAll ->
                     deleteChapters(
-                        generalState.value.activeChapters.filter { it.isNotDefaultDownload },
+                        generalState.value.activeChapters,
                         generalState.value.activeChapters.size == allChapterSize,
                         true,
                     )
@@ -1842,28 +1846,6 @@ class MangaDetailPresenter(
         }
     }
 
-    // callback from Downloader
-    override fun updateDownload(download: Download) {
-        presenterScope.launchIO {
-            val currentChapters = generalState.value.activeChapters
-            val index = currentChapters.indexOfFirst { it.chapter.id == download.chapter.id }
-            if (index >= 0) {
-                val mutableChapters = currentChapters.toMutableList()
-                val updateChapter =
-                    currentChapters[index].copy(
-                        downloadState = download.status,
-                        downloadProgress = download.progressFloat
-                    )
-                mutableChapters[index] = updateChapter
-                _generalState.update {
-                    it.copy(
-                        activeChapters = mutableChapters.toImmutableList(),
-                    )
-                }
-            }
-        }
-    }
-
     fun openComment(context: Context, chapterId: String) {
         presenterScope.launch {
             when (!isOnline()) {
@@ -1923,11 +1905,6 @@ class MangaDetailPresenter(
         }
     }
 
-    // callback from Downloader
-    override fun updateDownloads() {
-        presenterScope.launchIO { updateChapterFlows() }
-    }
-
     // This is already filtered before reaching here, so directly update the chapters
     fun onUpdateManga(mangaId: Long?) {
         updateChapterFlows()
@@ -1960,10 +1937,49 @@ class MangaDetailPresenter(
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        downloadManager.removeListener(this)
+    private fun observeDownloads() {
+        presenterScope.launchIO {
+            downloadManager
+                .statusFlow()
+                .filter { it.manga.id == currentManga().id }
+                .catch { error -> TimberKt.e(error) }
+                .collect { updateDownloadState(it) }
+        }
+
+        presenterScope.launchIO {
+            downloadManager
+                .progressFlow()
+                .filter { it.manga.id == currentManga().id }
+                .catch { error -> TimberKt.e(error) }
+                .collect { updateDownloadState(it) }
+        }
     }
+
+    // callback from Downloader
+    fun updateDownloadState(download: Download) {
+        presenterScope.launchIO {
+            val currentChapters = generalState.value.activeChapters
+            val index = currentChapters.indexOfFirst { it.chapter.id == download.chapter.id }
+            if (index >= 0) {
+                val mutableChapters = currentChapters.toMutableList()
+                val updateChapter =
+                    currentChapters[index].copy(
+                        downloadState = download.status,
+                        downloadProgress = download.progress
+                    )
+                mutableChapters[index] = updateChapter
+                _generalState.update {
+                    it.copy(
+                        activeChapters = mutableChapters.toImmutableList(),
+                    )
+                }
+            }
+        }
+    }
+
+    /*  override fun updateDownloads() {
+        presenterScope.launchIO { updateChapterFlows() }
+    }*/
 
     fun getChapterUrl(chapter: SimpleChapter): String {
         return chapter.getHttpSource(sourceManager).getChapterUrl(chapter)
