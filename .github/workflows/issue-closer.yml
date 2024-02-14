@@ -4,11 +4,11 @@ on:
     tags:
       - '*'
 jobs:
-  close:
+  close_isssues:
     name: Close old issues
     runs-on: ubuntu-latest
     steps:
-    - uses: lowply/auto-closer@v0.0.6
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        AC_LABEL: "staged for next release"
+      - uses: lowply/auto-closer@v0.0.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AC_LABEL: "staged for next release"
