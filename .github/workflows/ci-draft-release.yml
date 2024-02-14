@@ -67,14 +67,14 @@ jobs:
         run: |
           set -e
 
-          $LAST_TAG=$(curl -H "Accept: application/vnd.github.v3+json" \
+          echo "LAST_TAG=$(curl -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/nekomangaorg/neko/releaes/latest" \
-            | jq '.| {tag_name} | .tag_name')
+            | jq '.| {tag_name} | .tag_name') >> $GITHUB_ENV"
 
           current_sha=$(git rev-parse --short HEAD)
           echo "CURRENT_SHA=$current_sha"
           echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
-          prev_release_sha=$(git rev-list -n 1 ${{ LAST_TAG }})
+          prev_release_sha=$(git rev-list -n 1 $LAST_TAG)
           echo "PREV_RELEASE_SHA=$prev_release_sha"
           echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
           echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"
