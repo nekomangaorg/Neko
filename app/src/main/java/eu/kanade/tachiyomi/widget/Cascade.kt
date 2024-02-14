@@ -7,10 +7,10 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.PaintDrawable
 import android.graphics.drawable.RippleDrawable
 import androidx.core.content.res.ResourcesCompat
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import me.saket.cascade.CascadePopupMenu
+import org.nekomanga.R
 
 class RoundedRectDrawable(color: Int, radius: Float) : PaintDrawable(color) {
     init {

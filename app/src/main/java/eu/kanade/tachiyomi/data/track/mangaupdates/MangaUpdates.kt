@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.track.mangaupdates
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -14,6 +13,7 @@ import eu.kanade.tachiyomi.data.track.mangaupdates.dto.toTrackSearch
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.collections.immutable.toImmutableList
+import org.nekomanga.R
 
 class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 

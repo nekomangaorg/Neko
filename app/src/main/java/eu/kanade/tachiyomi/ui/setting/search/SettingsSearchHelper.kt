@@ -9,8 +9,8 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.ui.setting.SettingsAdvancedController
 import eu.kanade.tachiyomi.ui.setting.SettingsAppearanceController
-import eu.kanade.tachiyomi.ui.setting.SettingsBackupController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
+import eu.kanade.tachiyomi.ui.setting.SettingsDataController
 import eu.kanade.tachiyomi.ui.setting.SettingsDownloadController
 import eu.kanade.tachiyomi.ui.setting.SettingsGeneralController
 import eu.kanade.tachiyomi.ui.setting.SettingsLibraryController
@@ -35,7 +35,7 @@ object SettingsSearchHelper {
         listOf(
             SettingsAdvancedController::class,
             SettingsAppearanceController::class,
-            SettingsBackupController::class,
+            SettingsDataController::class,
             SettingsDownloadController::class,
             SettingsGeneralController::class,
             SettingsLibraryController::class,

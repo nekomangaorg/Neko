@@ -15,18 +15,16 @@ if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
 
 val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
-
-
 android {
     compileSdk = AndroidConfig.compileSdkVersion
-    namespace = "eu.kanade.tachiyomi"
+    namespace = "org.nekomanga"
 
     defaultConfig {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
-        applicationId = "tachiyomi.mangadex"
-        versionCode = 195
-        versionName = "2.15.0"
+        applicationId = "org.nekomanga.neko"
+        versionCode = 2
+        versionName = "2.16.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -35,9 +33,7 @@ android {
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
 
-        ndk {
-            abiFilters += supportedAbis
-        }
+        ndk { abiFilters += supportedAbis }
     }
 
     splits {
@@ -61,7 +57,6 @@ android {
             manifestPlaceholders["mangadexAuthRedirectUri"] = "mangadex-auth"
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
-
     }
 
     buildFeatures {
@@ -78,24 +73,19 @@ android {
 
     flavorDimensions.add("default")
 
-    productFlavors {
-        create("standard") {
-            buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
-        }
-    }
-
+    productFlavors { create("standard") { buildConfigField("Boolean", "INCLUDE_UPDATER", "true") } }
 }
 
 dependencies {
     implementation(projects.constants)
     implementation(projects.core)
 
-    implementation(androidx.core.kts)
+    implementation("com.github.akshaaatt:Onboarding:1.1.3")
+
     implementation(kotlinx.bundles.kotlin)
 
     coreLibraryDesugaring(libs.desugaring)
 
-    implementation(androidx.preferencektx)
     implementation(kotlinx.coroutines.core)
     implementation(kotlinx.serialization.json)
     implementation(kotlinx.serialization.okio)
@@ -106,9 +96,7 @@ dependencies {
     implementation(libs.tachi.unifile)
 
     // Modified dependencies
-    implementation(libs.j2k.subsample) {
-        exclude(module = "image-decoder")
-    }
+    implementation(libs.j2k.subsample) { exclude(module = "image-decoder") }
 
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)
@@ -163,7 +151,6 @@ dependencies {
     implementation(libs.bundles.fastadapter)
     implementation(libs.loadingButtonAndroid)
 
-
     implementation(libs.bundles.flexibleadapter)
 
     implementation(libs.photoView)
@@ -172,7 +159,7 @@ dependencies {
     implementation(libs.cascade)
     implementation(libs.cascade.compose)
 
-    //Compose
+    // Compose
     implementation(compose.bundles.compose)
     implementation(compose.gap)
     implementation(compose.bundles.accompanist)
@@ -180,22 +167,16 @@ dependencies {
 
     implementation(compose.bundles.charting)
 
-
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
     implementation(libs.fuzzysearch)
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
-    implementation(libs.bundles.kahelpers)
     implementation(libs.bundles.sandwich)
     implementation(libs.aboutLibraries.compose)
-    debugImplementation(libs.leakcanary)
+    // debugImplementation(libs.leakcanary)
 
     implementation(libs.bundles.results)
 
     testImplementation(libs.bundles.tests)
-
 }
-
-
-

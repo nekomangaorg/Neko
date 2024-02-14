@@ -3,10 +3,10 @@ package eu.kanade.tachiyomi.ui.category.addtolibrary
 import android.view.View
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.databinding.AddCategoryItemBinding
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import org.nekomanga.R
+import org.nekomanga.databinding.AddCategoryItemBinding
 
 class AddCategoryItem(val category: Category) :
     AbstractItem<FastAdapter.ViewHolder<AddCategoryItem>>() {

@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.data.external
 
 import androidx.annotation.DrawableRes
 import androidx.core.text.isDigitsOnly
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 
 data class AnimePlanet(override val id: String) : ExternalLink() {

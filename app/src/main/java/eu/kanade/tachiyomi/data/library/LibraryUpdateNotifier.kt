@@ -14,7 +14,6 @@ import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -29,6 +28,7 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.core.security.SecurityPreferences
 import uy.kohesive.injekt.injectLazy
 
@@ -50,12 +50,12 @@ class LibraryUpdateNotifier(private val context: Context) {
     /** Cached progress notification to avoid creating a lot. */
     val progressNotificationBuilder by lazy {
         context.notificationBuilder(Notifications.CHANNEL_LIBRARY_PROGRESS) {
-            setContentTitle(context.getString(R.string.app_name_neko))
+            setContentTitle(context.getString(R.string.app_name))
             setSmallIcon(R.drawable.ic_refresh_24dp)
             setLargeIcon(notificationBitmap)
             setOngoing(true)
             setOnlyAlertOnce(true)
-            color = ContextCompat.getColor(context, R.color.new_neko_accent)
+            color = ContextCompat.getColor(context, R.color.iconOutline)
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(android.R.string.cancel),
@@ -99,7 +99,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             return
         }
 
-        val pendingIntent = NotificationReceiver.openErrorLogPendingActivity(context, uri)
+        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
@@ -139,7 +139,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             return
         }
 
-        val pendingIntent = NotificationReceiver.openErrorLogPendingActivity(context, uri)
+        val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
 
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
@@ -203,7 +203,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                 } catch (e: Exception) {}
                                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
                                 setContentTitle(manga.title)
-                                color = ContextCompat.getColor(context, R.color.new_neko_accent)
+                                color = ContextCompat.getColor(context, R.color.iconOutline)
                                 val chaptersNames =
                                     if (chapterNames.size > MAX_CHAPTERS) {
                                         "${chapterNames.take(MAX_CHAPTERS - 1).joinToString(", ")}, " +
@@ -270,7 +270,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                         setSmallIcon(R.drawable.ic_neko_notification)
                         setLargeIcon(notificationBitmap)
                         setContentTitle(context.getString(R.string.new_chapters_found))
-                        color = ContextCompat.getColor(context, R.color.new_neko_accent)
+                        color = ContextCompat.getColor(context, R.color.iconOutline)
                         if (updates.size > 1) {
                             setContentText(
                                 context.resources.getQuantityString(

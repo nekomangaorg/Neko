@@ -5,14 +5,13 @@ cascadeVersion = "2.3.0"
 chuckerVersion = "3.5.2"
 coilVersion = "2.5.0"
 fastAdapterVersion = "5.7.0"
-firebaseBomVersion = "32.7.1"
+firebaseBomVersion = "32.7.2"
 firebasePluginVersion = "2.9.9"
-googleServicesPluginVersion = "4.4.0"
+googleServicesPluginVersion = "4.4.1"
 iconicsVersion = "5.4.0"
 injektCoreVersion = "65b0440"
-kaHelpersVersion = "3.4.8"
 kotlinResultVersion = "1.1.18"
-ktfmtVersion = "0.16.0"
+ktfmtVersion = "0.17.0"
 loadingButtonAndroidVersion = "2.2.0"
 nucleusVersion = "3.0.0"
 okhttpVersion = "5.0.0-alpha.11"
@@ -85,13 +84,8 @@ sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqliteVersion" }
 tachi-image-decoder = "com.github.tachiyomiorg:image-decoder:7879b45"
 tachi-source-api = "org.tachiyomi:source-api:1.1"
 tachi-directional-view-pager = "com.github.tachiyomiorg:DirectionalViewPager:1.0.0"
-tachi-unifile = "com.github.tachiyomiorg:unifile:17bec43"
+tachi-unifile = "com.github.tachiyomiorg:unifile:7c257e1c64"
 
-
-ka-helpers-kotlin-ext = { module = "com.github.FunkyMuse.KAHelpers:kotlinextensions", version.ref = "kaHelpersVersion" }
-ka-helpers-activity = { module = "com.github.FunkyMuse.KAHelpers:activity", version.ref = "kaHelpersVersion" }
-ka-helpers-string = { module = "com.github.FunkyMuse.KAHelpers:string", version.ref = "kaHelpersVersion" }
-ka-helpers-common = { module = "com.github.FunkyMuse.KAHelpers:common", version.ref = "kaHelpersVersion" }
 
 chucker-debug = { module = "com.github.ChuckerTeam.Chucker:library", version.ref = "chuckerVersion" }
 chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", version.ref = "chuckerVersion" }
@@ -109,7 +103,7 @@ flexible-adapter-ui = "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c801
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttpVersion" }
 okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttpVersion" }
 okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttpVersion" }
-okio = "com.squareup.okio:okio:3.7.0"
+okio = "com.squareup.okio:okio:3.8.0"
 
 sandwich = { module = "com.github.skydoves:sandwich", version.ref = "sandwichVersion" }
 sandwich-retrofit = { module = "com.github.skydoves:sandwich-retrofit", version.ref = "sandwichVersion" }
@@ -120,7 +114,7 @@ versioncompare = "io.github.g00fy2:versioncompare:1.5.0"
 
 timber = "com.jakewharton.timber:timber:5.0.1"
 
-aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutlibVersion" }
+aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibVersion" }
 
 leakcanary = "com.squareup.leakcanary:leakcanary-android:2.13"
 pastelplaceholders = "com.github.zedlabs:pastelPlaceholders:1.0.4"
@@ -152,7 +146,6 @@ firebase = ["firebase-analytics", "firebase-crashlytics"]
 flexibleadapter = ["flexible-adapter-core", "flexible-adapter-ui"]
 google = ["material", "guava-fix", "play-services", "flex-box"]
 iconics = ["iconics-core", "iconics-views", "iconics-compose"]
-kahelpers = ["ka-helpers-kotlin-ext", "ka-helpers-activity", "ka-helpers-string", "ka-helpers-common"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 nucleus = ["nucleus", "nucleus-support"]
 sandwich = ["sandwich", "sandwich-retrofit", "sandwich-retrofit-serialization"]

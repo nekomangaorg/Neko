@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.Amazon
 import eu.kanade.tachiyomi.data.external.AniList
@@ -24,6 +23,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import java.util.Locale
+import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import tachiyomi.source.model.MangaInfo
 

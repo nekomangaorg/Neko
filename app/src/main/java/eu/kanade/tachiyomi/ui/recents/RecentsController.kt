@@ -27,16 +27,14 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.backup.BackupRestoreService
+import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -68,7 +66,6 @@ import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.moveRecyclerViewUp
-import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -79,6 +76,8 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
 import java.util.Locale
 import kotlin.math.max
+import org.nekomanga.R
+import org.nekomanga.databinding.RecentsControllerBinding
 
 /**
  * Fragment that shows recently read manga. Uses R.layout.fragment_recently_read. UI related actions
@@ -348,9 +347,9 @@ class RecentsController(bundle: Bundle? = null) :
                 }
             },
         )
-        binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+        binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view.context)
         binding.swipeRefresh.setOnRefreshListener {
-            if (!LibraryUpdateService.isRunning()) {
+            if (!LibraryUpdateJob.isRunning(view.context)) {
                 snack?.dismiss()
                 snack =
                     view.snack(R.string.updating_library) {
@@ -361,7 +360,7 @@ class RecentsController(bundle: Bundle? = null) :
                                 activityBinding?.bottomNav ?: binding.downloadBottomSheet.root
                             }
                         setAction(R.string.cancel) {
-                            LibraryUpdateService.stop(context)
+                            LibraryUpdateJob.stop(context)
                             viewScope.launchUI {
                                 NotificationReceiver.dismissNotification(
                                     context,
@@ -377,12 +376,12 @@ class RecentsController(bundle: Bundle? = null) :
                                 ) {
                                     super.onDismissed(transientBottomBar, event)
                                     binding.swipeRefresh.isRefreshing =
-                                        LibraryUpdateService.isRunning()
+                                        LibraryUpdateJob.isRunning(view.context)
                                 }
                             },
                         )
                     }
-                LibraryUpdateService.start(view.context)
+                LibraryUpdateJob.startNow(view.context)
             }
         }
         ogRadius = view.resources.getDimension(R.dimen.rounded_radius)
@@ -391,7 +390,6 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
         }
         setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
-        requestFilePermissionsSafe(301, presenter.preferences)
 
         binding.downloadBottomSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
     }
@@ -529,11 +527,12 @@ class RecentsController(bundle: Bundle? = null) :
         shouldMoveToTop: Boolean = false,
     ) {
         if (view == null) return
+
         binding.progress.isVisible = false
         binding.recentsFrameLayout.alpha = 1f
-        binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+        binding.swipeRefresh.isRefreshing = LibraryUpdateJob.isRunning(view!!.context)
         adapter.removeAllScrollableHeaders()
-        adapter.updateItems(recents)
+        adapter.updateDataSet(recents)
         adapter.onLoadMoreComplete(null)
         if (isControllerVisible) {
             activityBinding?.appBar?.lockYPos = false
@@ -584,6 +583,7 @@ class RecentsController(bundle: Bundle? = null) :
 
     fun updateChapterDownload(download: Download, updateDLSheet: Boolean = true) {
         if (view == null) return
+
         if (updateDLSheet) {
             binding.downloadBottomSheet.dlBottomSheet.update(!presenter.downloadManager.isPaused())
             binding.downloadBottomSheet.dlBottomSheet.onUpdateProgress(download)
@@ -615,7 +615,7 @@ class RecentsController(bundle: Bundle? = null) :
             presenter.deleteChapter(chapter, manga)
         } else {
             if (item.status == Download.State.ERROR) {
-                DownloadService.start(view.context)
+                DownloadJob.start(view.context.applicationContext)
             } else {
                 presenter.downloadChapter(manga, chapter)
             }
@@ -904,7 +904,7 @@ class RecentsController(bundle: Bundle? = null) :
         val view = view ?: return
         if (
             presenter.finished ||
-                BackupRestoreService.isRunning(view.context.applicationContext) ||
+                BackupRestoreJob.isRunning(view.context.applicationContext) ||
                 (presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL && !isSearching())
         ) {
             loadNoMore()

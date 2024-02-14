@@ -1,24 +1,17 @@
 package eu.kanade.tachiyomi.util
 
 import android.app.Activity
-import android.view.View
 import androidx.annotation.StringRes
-import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.google.android.material.snackbar.Snackbar
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
-import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
-import java.util.Date
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.constants.MdConstants
@@ -50,26 +43,6 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
     if (includedCategories.isEmpty()) return true
 
     return categoriesForManga.any { it in includedCategories }
-}
-
-fun Manga.moveCategories(
-    db: DatabaseHelper,
-    activity: Activity,
-    onMangaMoved: () -> Unit = {},
-) {
-    val categories = db.getCategories().executeAsBlocking()
-    val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()
-    val ids = categoriesForManga.mapNotNull { it.id }.toTypedArray()
-    SetCategoriesSheet(
-            activity,
-            this,
-            categories.toMutableList(),
-            ids,
-            false,
-        ) {
-            onMangaMoved()
-        }
-        .show()
 }
 
 fun List<Manga>.moveCategories(
@@ -108,119 +81,6 @@ fun List<Manga>.moveCategories(
             onMangaMoved()
         }
         .show()
-}
-
-fun Manga.addOrRemoveToFavorites(
-    db: DatabaseHelper,
-    preferences: PreferencesHelper,
-    view: View,
-    activity: Activity,
-    onMangaAdded: () -> Unit,
-    onMangaMoved: () -> Unit,
-    onMangaDeleted: () -> Unit,
-): Snackbar? {
-    if (!favorite) {
-        val categories = db.getCategories().executeAsBlocking()
-        val defaultCategoryId = preferences.defaultCategory().get()
-        val defaultCategory = categories.find { it.id == defaultCategoryId }
-        when {
-            defaultCategory != null -> {
-                favorite = true
-                date_added = Date().time
-                db.insertManga(this).executeAsBlocking()
-                val mc = MangaCategory.create(this, defaultCategory)
-                db.setMangaCategories(listOf(mc), listOf(this))
-                onMangaMoved()
-                return view.snack(activity.getString(R.string.added_to_, defaultCategory.name)) {
-                    setAction(R.string.change) { moveCategories(db, activity, onMangaMoved) }
-                }
-            }
-            defaultCategoryId == 0 || categories.isEmpty() -> { // 'Default' or no category
-                favorite = true
-                date_added = Date().time
-                db.insertManga(this).executeAsBlocking()
-                db.setMangaCategories(emptyList(), listOf(this))
-                onMangaMoved()
-                return if (categories.isNotEmpty()) {
-                    view.snack(
-                        activity.getString(
-                            R.string.added_to_,
-                            activity.getString(R.string.default_value),
-                        ),
-                    ) {
-                        setAction(R.string.change) { moveCategories(db, activity, onMangaMoved) }
-                    }
-                } else {
-                    view.snack(R.string.added_to_library)
-                }
-            }
-            else -> {
-                val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()
-                val ids = categoriesForManga.mapNotNull { it.id }.toTypedArray()
-
-                SetCategoriesSheet(
-                        activity,
-                        this,
-                        categories.toMutableList(),
-                        ids,
-                        true,
-                    ) {
-                        onMangaAdded()
-                    }
-                    .show()
-            }
-        }
-    } else {
-        val lastAddedDate = date_added
-        favorite = false
-        date_added = 0
-        db.insertManga(this).executeAsBlocking()
-        onMangaMoved()
-        return view.snack(
-            view.context.getString(R.string.removed_from_library),
-            Snackbar.LENGTH_INDEFINITE,
-        ) {
-            setAction(R.string.undo) {
-                favorite = true
-                date_added = lastAddedDate
-                db.insertManga(this@addOrRemoveToFavorites).executeAsBlocking()
-                onMangaMoved()
-            }
-            addCallback(
-                object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                        super.onDismissed(transientBottomBar, event)
-                        if (!favorite) {
-                            onMangaDeleted()
-                        }
-                    }
-                },
-            )
-        }
-    }
-    return null
-}
-
-/**
- * Returns a manga from the database for the given manga from network. It creates a new entry if the
- * manga is not yet in the database.
- *
- * @param sManga the manga from the source.
- * @return a manga from the database.
- */
-fun SManga.toLocalManga(db: DatabaseHelper, sourceId: Long): Manga {
-    var localManga = db.getManga(this.url, sourceId).executeAsBlocking()
-    if (localManga == null) {
-        val newManga = Manga.create(this.url, this.title, sourceId)
-        newManga.copyFrom(this)
-        val result = db.insertManga(newManga).executeAsBlocking()
-        newManga.id = result.insertedId()
-        localManga = newManga
-    } else if (localManga.title.isBlank()) {
-        localManga.title = this.title
-        db.insertManga(localManga).executeAsBlocking()
-    }
-    return localManga
 }
 
 /** Takes a SourceManga and converts to a display manga */
@@ -291,16 +151,20 @@ fun List<HomePageManga>.resync(db: DatabaseHelper): ImmutableList<HomePageManga>
 }
 
 fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
-    return this.map {
-        val dbManga = db.getManga(it.mangaId).executeAsBlocking()!!
-        it.copy(
-            inLibrary = dbManga.favorite,
-            currentArtwork =
-                it.currentArtwork.copy(
-                    url = dbManga.user_cover ?: "",
-                    originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl
+    return this.mapNotNull { displayManga ->
+        val dbManga = db.getManga(displayManga.mangaId).executeAsBlocking()
+        when (dbManga == null) {
+            true -> null
+            else ->
+                displayManga.copy(
+                    inLibrary = dbManga.favorite,
+                    currentArtwork =
+                        displayManga.currentArtwork.copy(
+                            url = dbManga.user_cover ?: "",
+                            originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl
+                        )
                 )
-        )
+        }
     }
 }
 

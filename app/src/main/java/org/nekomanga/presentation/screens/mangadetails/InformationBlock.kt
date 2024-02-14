@@ -30,10 +30,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.text.NumberFormat
@@ -41,6 +39,8 @@ import java.util.Locale
 import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
@@ -77,7 +77,7 @@ fun InformationBlock(
     Column(
         modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small),
     ) {
-        if (titleProvider().isNotNullOrEmpty()) {
+        if (!titleProvider().isNullOrEmpty()) {
             NoRippleText(
                 text = titleProvider(),
                 maxLines = if (isExpandedProvider()) Integer.MAX_VALUE else 4,
@@ -97,7 +97,7 @@ fun InformationBlock(
                     true -> authorProvider().trim()
                     false -> {
                         listOfNotNull(authorProvider().trim(), artistProvider().trim())
-                            .joinToString(" • ")
+                            .joinToString(Constants.SEPARATOR)
                     }
                 }
 
@@ -111,7 +111,7 @@ fun InformationBlock(
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
-            val creators = creator.split(" • ").map { it.trim() }
+            val creators = creator.split(Constants.SEPARATOR).map { it.trim() }
             SimpleDropdownMenu(
                 expanded = creatorExpanded,
                 onDismiss = { creatorExpanded = false },

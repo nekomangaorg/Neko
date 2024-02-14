@@ -9,10 +9,10 @@ import androidx.annotation.StringRes
 import androidx.core.view.isVisible
 import com.google.android.material.button.MaterialButton
 import com.mikepenz.iconics.typeface.IIcon
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import org.nekomanga.R
+import org.nekomanga.databinding.CommonViewEmptyBinding
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     RelativeLayout(context, attrs) {

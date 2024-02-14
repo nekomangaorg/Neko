@@ -7,10 +7,10 @@ import android.util.AttributeSet
 import androidx.core.content.edit
 import androidx.core.text.buildSpannedString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.setting.defaultValue
 import eu.kanade.tachiyomi.util.system.setTriStateItems
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import org.nekomanga.R
 
 class TriStateListPreference
 @JvmOverloads

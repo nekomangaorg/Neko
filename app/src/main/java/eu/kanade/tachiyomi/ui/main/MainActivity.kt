@@ -55,20 +55,16 @@ import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.primitives.Ints.max
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
-import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.download.DownloadServiceListener
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
-import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -83,6 +79,7 @@ import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.more.OverflowDialog
 import eu.kanade.tachiyomi.ui.more.about.AboutController
 import eu.kanade.tachiyomi.ui.more.stats.StatsController
+import eu.kanade.tachiyomi.ui.onboarding.OnboardingController
 import eu.kanade.tachiyomi.ui.recents.FeedController
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
@@ -125,13 +122,16 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import me.saket.cascade.CascadePopupMenu
 import me.saket.cascade.overrideAllPopupMenus
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
+import org.nekomanga.databinding.MainActivityBinding
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 @SuppressLint("ResourceType")
-open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
+open class MainActivity : BaseActivity<MainActivityBinding>() {
 
     protected lateinit var router: Router
 
@@ -219,6 +219,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         window.sharedElementsUseOverlay = false
 
         super.onCreate(savedInstanceState)
+
         backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
@@ -238,12 +239,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         var continueSwitchingTabs = false
         nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
-            if (!LibraryUpdateService.isRunning()) {
-                LibraryUpdateService.start(this)
+            if (!LibraryUpdateJob.isRunning(this)) {
+                LibraryUpdateJob.startNow(this)
                 binding.mainContent.snack(R.string.updating_library) {
                     anchorView = binding.bottomNav
                     setAction(R.string.cancel) {
-                        LibraryUpdateService.stop(context)
+                        LibraryUpdateJob.stop(context)
                         lifecycleScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
@@ -270,7 +271,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val container: ViewGroup = binding.controllerContainer
 
         val content: ViewGroup = binding.mainContent
-        DownloadService.addListener(this)
+        DownloadJob.downloadFlow.onEach(::downloadStatusChanged).launchIn(lifecycleScope)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowCustomEnabled(true)
@@ -365,6 +366,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             // Set start screen
             if (!handleIntentAction(intent)) {
                 goToStartingTab()
+                if (!preferences.hasShownOnboarding().get()) {
+                    router.pushController(OnboardingController().withFadeInTransaction())
+                }
             }
         }
 
@@ -501,10 +505,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             if (
                 Migrations.upgrade(
                     preferences,
-                    networkPreferences,
-                    libraryPreferences,
-                    readerPreferences,
-                    lifecycleScope
                 )
             ) {
                 if (!BuildConfig.DEBUG) {
@@ -745,7 +745,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onResume() {
         super.onResume()
         checkForAppUpdates()
-        DownloadService.callListeners()
+        DownloadJob.callListeners()
         showDLQueueTutorial()
         reEnableBackPressedCallBack()
     }
@@ -915,7 +915,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         super.onDestroy()
         overflowDialog?.dismiss()
         overflowDialog = null
-        DownloadService.removeListener(this)
         if (isBindingInitialized) {
             binding.appBar.mainActivity = null
             binding.toolbar.setNavigationOnClickListener(null)
@@ -1337,9 +1336,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         return binding.bottomNav == null
     }
 
-    override fun downloadStatusChanged(downloading: Boolean) {
-        val hasQueue = downloading || downloadManager.hasQueue()
+    private fun downloadStatusChanged(downloading: Boolean) {
         lifecycleScope.launchUI {
+            val hasQueue = downloading || downloadManager.hasQueue()
+
             if (hasQueue) {
                 nav.getOrCreateBadge(R.id.nav_feed)
                 showDLQueueTutorial()
@@ -1385,25 +1385,29 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         )
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+        private var startingX = 0f
+        private var startingY = 0f
+
         override fun onDown(e: MotionEvent): Boolean {
+            startingX = e.x
+            startingY = e.y
             return true
         }
 
         override fun onFling(
-            e: MotionEvent?,
+            e1: MotionEvent?,
             e2: MotionEvent,
             velocityX: Float,
             velocityY: Float,
         ): Boolean {
-            val e1 = e ?: return false
             var result = false
-            val diffY = e2.y - e1.y
-            val diffX = e2.x - e1.x
+            val diffY = e2.y - startingY
+            val diffX = e2.x - startingX
             if (abs(diffX) <= abs(diffY)) {
                 val sheetRect = Rect()
                 nav.getGlobalVisibleRect(sheetRect)
                 if (
-                    sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                    sheetRect.contains(startingX.toInt(), startingY.toInt()) &&
                         abs(diffY) > Companion.SWIPE_THRESHOLD &&
                         abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
                         diffY <= 0
@@ -1413,7 +1417,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     bottomSheetController?.showSheet()
                 } else if (
                     nav == binding.sideNav &&
-                        sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                        sheetRect.contains(startingX.toInt(), startingY.toInt()) &&
                         abs(diffY) > Companion.SWIPE_THRESHOLD &&
                         abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
                         diffY > 0

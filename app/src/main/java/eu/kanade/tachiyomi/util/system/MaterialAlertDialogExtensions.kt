@@ -12,11 +12,11 @@ import androidx.appcompat.widget.AppCompatCheckedTextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.databinding.CustomDialogTitleMessageBinding
-import eu.kanade.tachiyomi.databinding.DialogQuadstateBinding
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import eu.kanade.tachiyomi.widget.materialdialogs.TriStateMultiChoiceDialogAdapter
 import eu.kanade.tachiyomi.widget.materialdialogs.TriStateMultiChoiceListener
+import org.nekomanga.databinding.CustomDialogTitleMessageBinding
+import org.nekomanga.databinding.DialogQuadstateBinding
 
 fun Context.materialAlertDialog() = MaterialAlertDialogBuilder(withOriginalWidth())
 

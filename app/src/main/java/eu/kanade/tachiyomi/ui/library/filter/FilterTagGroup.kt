@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.R
+import org.nekomanga.databinding.FilterTagGroupBinding
 import tachiyomi.core.preference.Preference
 
 class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :

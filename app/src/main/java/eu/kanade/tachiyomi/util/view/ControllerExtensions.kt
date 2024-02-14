@@ -1,16 +1,12 @@
 package eu.kanade.tachiyomi.util.view
 
-import android.Manifest
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
-import android.os.Environment
-import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +17,6 @@ import android.widget.ImageView
 import androidx.annotation.MainThread
 import androidx.appcompat.widget.SearchView
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils
 import androidx.core.net.toUri
@@ -44,9 +39,7 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -59,7 +52,6 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
-import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
@@ -67,6 +59,8 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import org.nekomanga.R
+import org.nekomanga.databinding.MainActivityBinding
 import uy.kohesive.injekt.injectLazy
 
 fun Controller.setOnQueryTextChangeListener(
@@ -749,52 +743,6 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
                 ),
             )
         }
-    }
-}
-
-fun Controller.requestFilePermissionsSafe(
-    requestCode: Int,
-    preferences: PreferencesHelper,
-    showA11PermissionAnyway: Boolean = false,
-) {
-    val activity = activity ?: return
-    val permissions = mutableListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    permissions.forEach { permission ->
-        if (
-            ContextCompat.checkSelfPermission(
-                activity,
-                permission,
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(permission), requestCode)
-        }
-    }
-    if (
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
-            !Environment.isExternalStorageManager() &&
-            (!preferences.hasDeniedA11FilePermission().get() || showA11PermissionAnyway)
-    ) {
-        preferences.hasDeniedA11FilePermission().set(true)
-        activity
-            .materialAlertDialog()
-            .setTitle(R.string.all_files_permission_required)
-            .setMessage(R.string.external_storage_permission_notice)
-            .setCancelable(false)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val intent =
-                    Intent(
-                        Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                        "package:${activity.packageName}".toUri(),
-                    )
-                try {
-                    activity.startActivity(intent)
-                } catch (_: Exception) {
-                    val intent2 = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-                    activity.startActivity(intent2)
-                }
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .show()
     }
 }
 

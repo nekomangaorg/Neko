@@ -214,7 +214,7 @@ class Toonily : ReducedHttpSource() {
         return Ok(chapters)
     }
 
-    override suspend fun fetchPageList(chapter: SChapter): List<Page> {
+    override suspend fun getPageList(chapter: SChapter): List<Page> {
         val response = client.newCall(GET(chapter.url, headers)).await()
         val document = response.asJsoup()
         response.closeQuietly()

@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.ui.source.latest.DisplayController
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
-import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import org.nekomanga.presentation.screens.BrowseScreen
 
@@ -92,7 +91,6 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        requestFilePermissionsSafe(301, presenter.preferences)
         presenter.updateMangaForChanges()
     }
 }

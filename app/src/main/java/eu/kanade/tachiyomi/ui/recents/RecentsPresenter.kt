@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.recents
 
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
@@ -8,13 +7,11 @@ import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.models.uuid
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
-import eu.kanade.tachiyomi.data.library.LibraryServiceListener
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -39,6 +36,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -48,11 +46,7 @@ class RecentsPresenter(
     val downloadManager: DownloadManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
-) :
-    BaseCoroutinePresenter<RecentsController>(),
-    DownloadQueue.DownloadListener,
-    LibraryServiceListener,
-    DownloadServiceListener {
+) : BaseCoroutinePresenter<RecentsController>(), DownloadQueue.DownloadListener {
 
     val statusHandler: StatusHandler by injectLazy()
     private var recentsJob: Job? = null
@@ -93,8 +87,8 @@ class RecentsPresenter(
     override fun onCreate() {
         super.onCreate()
         downloadManager.addListener(this)
-        DownloadService.addListener(this)
-        LibraryUpdateService.setListener(this)
+        DownloadJob.downloadFlow.onEach(::downloadStatusChanged).launchIn(presenterScope)
+        LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
         if (lastRecents != null) {
             if (recentItems.isEmpty()) {
                 recentItems = lastRecents ?: emptyList()
@@ -396,8 +390,6 @@ class RecentsPresenter(
     override fun onDestroy() {
         super.onDestroy()
         downloadManager.removeListener(this)
-        LibraryUpdateService.removeListener(this)
-        DownloadService.removeListener(this)
         lastRecents = recentItems
     }
 
@@ -442,18 +434,16 @@ class RecentsPresenter(
         }
     }
 
-    override fun downloadStatusChanged(downloading: Boolean) {
-        presenterScope.launch {
-            withContext(Dispatchers.Main) { view?.updateDownloadStatus(downloading) }
-        }
+    private fun downloadStatusChanged(downloading: Boolean) {
+        presenterScope.launchUI { view?.updateDownloadStatus(downloading) }
     }
 
-    override fun onUpdateManga(manga: Manga?) {
+    private fun onUpdateManga(mangaId: Long?) {
         when {
-            manga == null -> {
+            mangaId == null -> {
                 presenterScope.launchUI { view?.setRefreshing(false) }
             }
-            manga.source == LibraryUpdateService.STARTING_UPDATE_SOURCE -> {
+            mangaId == LibraryUpdateJob.STARTING_UPDATE_SOURCE -> {
                 presenterScope.launchUI { view?.setRefreshing(true) }
             }
             else -> {

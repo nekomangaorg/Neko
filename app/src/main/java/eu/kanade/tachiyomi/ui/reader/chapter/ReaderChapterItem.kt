@@ -7,14 +7,15 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.ReaderChapterItemBinding
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import org.nekomanga.R
+import org.nekomanga.constants.Constants
+import org.nekomanga.databinding.ReaderChapterItemBinding
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.injectLazy
 
@@ -109,7 +110,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             binding.chapterTitle.typeface = typeface
             binding.chapterSubtitle.typeface = typeface
             binding.chapterLanguage.typeface = typeface
-            binding.chapterSubtitle.text = statuses.joinToString(" • ")
+            binding.chapterSubtitle.text = statuses.joinToString(Constants.SEPARATOR)
         }
 
         override fun unbindView(item: ReaderChapterItem) {

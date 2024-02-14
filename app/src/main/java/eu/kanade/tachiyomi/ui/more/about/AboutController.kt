@@ -7,12 +7,12 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.core.content.getSystemService
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.updater.AppUpdateService
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.setting.LicensesController
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import org.nekomanga.R
 import org.nekomanga.presentation.screens.AboutScreen
 
 class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPresenter>(bundle) {
@@ -50,6 +50,6 @@ class AboutController(bundle: Bundle? = null) : BaseComposeController<AboutPrese
     /** Start the process to download the update */
     private fun downloadApp(url: String) {
         applicationContext ?: return
-        AppUpdateService.start(applicationContext!!, url, true)
+        AppDownloadInstallJob.start(applicationContext!!, url, true)
     }
 }

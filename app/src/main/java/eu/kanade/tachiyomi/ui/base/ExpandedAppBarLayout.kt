@@ -19,7 +19,6 @@ import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.Controller
 import com.google.android.material.appbar.AppBarLayout
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -33,6 +32,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import org.nekomanga.R
 import uy.kohesive.injekt.injectLazy
 
 class ExpandedAppBarLayout
@@ -50,8 +50,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
     private var tabsFrameLayout: FrameLayout? = null
     var mainActivity: MainActivity? = null
     private var isExtraSmall = false
-    val useLargeToolbar: Boolean
-        get() = preferences.useLargeToolbar().get() && !isExtraSmall
+    val useLargeToolbar: Boolean = false
 
     var compactSearchMode = false
 

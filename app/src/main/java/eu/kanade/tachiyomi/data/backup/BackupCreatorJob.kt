@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.concurrent.TimeUnit
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -27,20 +28,16 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     override fun doWork(): Result {
         val preferences = Injekt.get<PreferencesHelper>()
         val notifier = BackupNotifier(context)
-        val uri =
-            inputData.getString(LOCATION_URI_KEY)?.let { Uri.parse(it) }
-                ?: preferences.backupsDirectory().get().toUri()
+        val uri = inputData.getString(LOCATION_URI_KEY)?.toUri() ?: getAutomaticBackupLocation()
         val flags = inputData.getInt(BACKUP_FLAGS_KEY, BackupConst.BACKUP_ALL)
         val isAutoBackup = inputData.getBoolean(IS_AUTO_BACKUP_KEY, true)
 
-        context.notificationManager.notify(
-            Notifications.ID_BACKUP_PROGRESS,
-            notifier.showBackupProgress().build()
-        )
+        notifier.showBackupProgress()
+
         return try {
-            val location = BackupManager(context).createBackup(uri, flags, isAutoBackup)
+            val location = BackupCreator(context).createBackup(uri, flags, isAutoBackup)
             if (!isAutoBackup)
-                notifier.showBackupComplete(UniFile.fromUri(context, location.toUri()))
+                notifier.showBackupComplete(UniFile.fromUri(context, location.toUri())!!)
             Result.success()
         } catch (e: Exception) {
             TimberKt.e(e)
@@ -51,17 +48,26 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
         }
     }
 
+    private fun getAutomaticBackupLocation(): Uri {
+        val storageManager = Injekt.get<StorageManager>()
+        return storageManager.getBackupDirectory()!!.uri
+    }
+
     companion object {
         fun isManualJobRunning(context: Context): Boolean {
             val list = WorkManager.getInstance(context).getWorkInfosByTag(TAG_MANUAL).get()
             return list.find { it.state == WorkInfo.State.RUNNING } != null
         }
 
-        fun setupTask(context: Context, prefInterval: Int? = null) {
-            val preferences = Injekt.get<PreferencesHelper>()
-            val interval = prefInterval ?: preferences.backupInterval().get()
+        fun cancelTask(context: Context) {
+            WorkManager.getInstance(context).cancelUniqueWork(TAG_AUTO)
+        }
+
+        fun setupTask(context: Context, interval: Int) {
             val workManager = WorkManager.getInstance(context)
-            if (interval > 0) {
+            if (interval == 0) {
+                cancelTask(context)
+            } else {
                 val request =
                     PeriodicWorkRequestBuilder<BackupCreatorJob>(
                             interval.toLong(),
@@ -75,11 +81,9 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
 
                 workManager.enqueueUniquePeriodicWork(
                     TAG_AUTO,
-                    ExistingPeriodicWorkPolicy.REPLACE,
+                    ExistingPeriodicWorkPolicy.UPDATE,
                     request
                 )
-            } else {
-                workManager.cancelUniqueWork(TAG_AUTO)
             }
         }
 

@@ -1,23 +1,18 @@
 package eu.kanade.tachiyomi.data.preference
 
 import android.content.Context
-import android.net.Uri
-import android.os.Environment
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
-import java.io.File
 import java.security.SecureRandom
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -45,33 +40,6 @@ operator fun <T> Preference<Set<T>>.minusAssign(item: Collection<T>) {
 
 class PreferencesHelper(val context: Context, val preferenceStore: PreferenceStore) {
 
-    private val defaultFolder =
-        context.getString(R.string.app_name_neko) +
-            when (BuildConfig.DEBUG) {
-                true -> "_DEBUG"
-                false -> ""
-            }
-
-    private val defaultDownloadsDir =
-        Uri.fromFile(
-            File(
-                Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator +
-                    defaultFolder,
-                "downloads",
-            ),
-        )
-
-    private val defaultBackupDir =
-        Uri.fromFile(
-            File(
-                Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator +
-                    defaultFolder,
-                "backup",
-            ),
-        )
-
     fun getInt(key: String, default: Int) = this.preferenceStore.getInt(key, default)
 
     fun getStringPref(key: String, default: String = "") =
@@ -81,8 +49,11 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun backReturnsToStart() = this.preferenceStore.getBoolean(Keys.backToStart, true)
 
-    fun hasDeniedA11FilePermission() =
-        this.preferenceStore.getBoolean(Keys.deniedA11FilePermission, false)
+    fun hasShownNotifPermission() =
+        this.preferenceStore.getBoolean("has_shown_notification_permission", false)
+
+    fun hasShownOnboarding() =
+        preferenceStore.getBoolean(Preference.appStateKey("onboarding_complete"), false)
 
     fun nightMode() =
         this.preferenceStore.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
@@ -153,14 +124,18 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun setTrackCredentials(sync: TrackService, username: String, password: String) {
         this.preferenceStore.getString(Keys.trackUsername(sync.id)).set(username)
         this.preferenceStore.getString(Keys.trackPassword(sync.id)).set(password)
+        this.preferenceStore.getBoolean("track_token_expired_${sync.id}").set(false)
     }
 
     fun trackToken(sync: TrackService) = this.preferenceStore.getString(Keys.trackToken(sync.id))
 
-    fun anilistScoreType() = this.preferenceStore.getString("anilist_score_type", "POINT_10")
+    fun trackAuthExpired(tracker: TrackService) =
+        preferenceStore.getBoolean(
+            "track_token_expired_${tracker.id}",
+            false,
+        )
 
-    fun backupsDirectory() =
-        this.preferenceStore.getString(Keys.backupDirectory, defaultBackupDir.toString())
+    fun anilistScoreType() = this.preferenceStore.getString("anilist_score_type", "POINT_10")
 
     fun dateFormat(
         format: String = this.preferenceStore.getString(Keys.dateFormat, "").get()
@@ -170,16 +145,9 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
             else -> SimpleDateFormat(format, Locale.getDefault())
         }
 
-    fun downloadsDirectory() =
-        this.preferenceStore.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
-
     fun downloadOnlyOverWifi() = this.preferenceStore.getBoolean(Keys.downloadOnlyOverWifi, true)
 
     fun folderPerManga() = this.preferenceStore.getBoolean(Keys.folderPerManga, false)
-
-    fun numberOfBackups() = this.preferenceStore.getInt(Keys.numberOfBackups, 2)
-
-    fun backupInterval() = this.preferenceStore.getInt(Keys.backupInterval, 0)
 
     fun removeAfterReadSlots() = this.preferenceStore.getInt(Keys.removeAfterReadSlots, -1)
 
@@ -265,7 +233,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun sideNavMode() = this.preferenceStore.getInt(Keys.sideNavMode, 0)
 
     fun appShouldAutoUpdate() =
-        this.preferenceStore.getInt(Keys.shouldAutoUpdate, AutoAppUpdaterJob.ONLY_ON_UNMETERED)
+        this.preferenceStore.getInt(Keys.shouldAutoUpdate, AppDownloadInstallJob.ONLY_ON_UNMETERED)
 
     fun blockedScanlators() = this.preferenceStore.getStringSet(Keys.blockedScanlators, emptySet())
 

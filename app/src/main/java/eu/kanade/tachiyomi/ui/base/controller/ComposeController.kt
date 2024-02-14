@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.runtime.Composable
-import eu.kanade.tachiyomi.databinding.EmptyComposeControllerBinding
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import org.nekomanga.databinding.EmptyComposeControllerBinding
 import org.nekomanga.presentation.theme.NekoTheme
 
 abstract class BaseComposeController<PS : BaseCoroutinePresenter<*>>(bundle: Bundle? = null) :

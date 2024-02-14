@@ -2,11 +2,11 @@ package eu.kanade.tachiyomi.ui.recents.options
 
 import android.content.Context
 import android.util.AttributeSet
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.RecentsGeneralViewBinding
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.widget.BaseRecentsDisplayView
+import org.nekomanga.R
+import org.nekomanga.databinding.RecentsGeneralViewBinding
 
 class RecentsGeneralView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseRecentsDisplayView<RecentsGeneralViewBinding>(context, attrs) {

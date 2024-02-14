@@ -50,11 +50,11 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.model.markdownColor
 import com.mikepenz.markdown.model.markdownTypography
-import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
+import org.nekomanga.R
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText

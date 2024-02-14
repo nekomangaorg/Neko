@@ -5,13 +5,10 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
-import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -23,7 +20,10 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import kotlinx.coroutines.launch
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -243,7 +243,8 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                                 preferences
                                     .mangadexSyncToLibraryIndexes()
                                     .set(indiciesSelected.toSet())
-                                StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
+                                TimberKt.d { "Starting sync job" }
+                                StatusSyncJob.startNow(context, StatusSyncJob.entireFollowsFromDex)
                             }
                         }
                         .show()
@@ -254,7 +255,7 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                 titleRes = R.string.push_favorites_to_mangadex
                 summaryRes = R.string.push_favorites_to_mangadex_summary
 
-                onClick { StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex) }
+                onClick { StatusSyncJob.startNow(context, StatusSyncJob.entireLibraryToDex) }
             }
 
             switchPreference {
@@ -262,21 +263,6 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                 titleRes = R.string.add_favorites_as_planned_to_read
                 summaryRes = R.string.add_favorites_as_planned_to_read_summary
                 defaultValue = false
-            }
-
-            preference {
-                titleRes = R.string.v5_migration_service
-                summary = context.resources.getString(R.string.v5_migration_desc)
-                onClick {
-                    context
-                        .materialAlertDialog()
-                        .setTitle(R.string.v5_migration_notice)
-                        .setNegativeButton(android.R.string.cancel, null)
-                        .setPositiveButton(android.R.string.ok) { _, _ ->
-                            V5MigrationJob.doWorkNow(activity!!)
-                        }
-                        .show()
-                }
             }
         }
 

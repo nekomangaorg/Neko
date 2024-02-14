@@ -43,9 +43,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
 import org.nekomanga.domain.track.TrackItem
 import org.nekomanga.domain.track.TrackSearchItem
 import org.nekomanga.domain.track.TrackServiceItem

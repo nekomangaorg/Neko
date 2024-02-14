@@ -17,17 +17,17 @@ import androidx.core.view.updatePadding
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.SelectableAdapter
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.LibraryCategoryHeaderItemBinding
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.compatToolTipText
+import org.nekomanga.R
+import org.nekomanga.databinding.LibraryCategoryHeaderItemBinding
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -210,7 +210,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 setRefreshing(false)
                 binding.updateButton.isVisible = false
             }
-            LibraryUpdateService.categoryInQueue(category.id) -> {
+            LibraryUpdateJob.categoryInQueue(category.id) -> {
                 binding.collapseArrow.isVisible = !adapter.isSingleCategory
                 binding.checkbox.isVisible = false
                 binding.updateButton.isVisible = true

@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.widget
 
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPx
 import kotlin.math.min
 import kotlin.math.roundToInt
+import org.nekomanga.R
 
 object EstimatedItemHeight {
     /** gives height of a view holder, or an estimated based on others, or a hard coded estimate */

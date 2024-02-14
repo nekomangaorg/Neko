@@ -24,10 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.domain.track.TrackServiceItem
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size

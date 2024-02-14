@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.recents
 import android.app.Dialog
 import android.os.Bundle
 import com.bluelinelabs.conductor.Controller
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -12,6 +11,7 @@ import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
 import eu.kanade.tachiyomi.util.system.isPromptChecked
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
+import org.nekomanga.R
 
 class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle) where
 T : Controller,

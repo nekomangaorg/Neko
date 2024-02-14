@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityOptions
 import android.app.assist.AssistContent
 import android.content.ClipData
 import android.content.Context
@@ -32,7 +33,6 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.activity.viewModels
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.buildSpannedString
@@ -56,15 +56,13 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
+import com.hippo.unifile.UniFile
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.database.models.uuid
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
@@ -89,7 +87,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.storage.getUriWithAuthority
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -121,7 +119,6 @@ import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.doOnEnd
 import eu.kanade.tachiyomi.widget.doOnStart
-import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -141,8 +138,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.preferences.toggle
+import org.nekomanga.databinding.ReaderActivityBinding
 import org.nekomanga.logging.TimberKt
 
 /**
@@ -194,7 +194,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private var lastCropRes = 0
 
     val isSplitScreen: Boolean
-        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
+        get() = isInMultiWindowMode
 
     var didTransistionFromChapter = false
     var visibleChapterRange = longArrayOf()
@@ -245,7 +245,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             val intent = newIntent(activity, manga, chapter)
             intent.putExtra(TRANSITION_NAME, sharedElement.transitionName)
             val activityOptions =
-                ActivityOptionsCompat.makeSceneTransitionAnimation(
+                ActivityOptions.makeSceneTransitionAnimation(
                     activity,
                     sharedElement,
                     sharedElement.transitionName,
@@ -298,9 +298,18 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
         if (savedInstanceState != null) {
             menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
-            lastShiftDoubleState = savedInstanceState.get(SHIFT_DOUBLE_PAGES) as? Boolean
-            indexPageToShift = savedInstanceState.get(SHIFTED_PAGE_INDEX) as? Int
-            indexChapterToShift = savedInstanceState.get(SHIFTED_CHAP_INDEX) as? Long
+            lastShiftDoubleState =
+                savedInstanceState.getBoolean(SHIFT_DOUBLE_PAGES).takeIf {
+                    savedInstanceState.containsKey(SHIFT_DOUBLE_PAGES)
+                }
+            indexPageToShift =
+                savedInstanceState.getInt(SHIFTED_PAGE_INDEX, Int.MIN_VALUE).takeIf {
+                    it != Int.MIN_VALUE
+                }
+            indexChapterToShift =
+                savedInstanceState.getLong(SHIFTED_CHAP_INDEX, Long.MIN_VALUE).takeIf {
+                    it != Long.MIN_VALUE
+                }
             binding.readerNav.root.isInvisible = !menuVisible
         } else {
             binding.readerNav.root.isInvisible = true
@@ -1544,7 +1553,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
      * Called from the view model when a page is ready to be shared. It shows Android's default
      * sharing tool.
      */
-    fun onShareImageResult(file: File, page: ReaderPage, secondPage: ReaderPage? = null) {
+    fun onShareImageResult(file: UniFile, page: ReaderPage, secondPage: ReaderPage? = null) {
         val manga = viewModel.manga ?: return
         val chapter = page.chapter.chapter
 
@@ -1570,7 +1579,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             )
         }, $pageNumber, <${MdConstants.baseUrl + manga.url}>"
 
-        val stream = file.getUriCompat(this)
+        val stream = file.uri.getUriWithAuthority(this)
         val intent =
             Intent(Intent.ACTION_SEND).apply {
                 putExtra(Intent.EXTRA_TEXT, text)

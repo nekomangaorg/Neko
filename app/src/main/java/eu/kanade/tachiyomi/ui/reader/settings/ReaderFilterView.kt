@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import android.view.Window
 import android.view.WindowManager
 import androidx.annotation.ColorInt
-import eu.kanade.tachiyomi.databinding.ReaderColorFilterBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
@@ -15,6 +14,7 @@ import kotlin.math.max
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import org.nekomanga.databinding.ReaderColorFilterBinding
 
 class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseReaderSettingsView<ReaderColorFilterBinding>(context, attrs) {

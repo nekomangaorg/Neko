@@ -7,8 +7,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.notificationManager
+import org.nekomanga.R
 
 /** Class to manage the basic information of all the notifications used in the app. */
 object Notifications {
@@ -17,10 +17,7 @@ object Notifications {
         const val Status = "status_channel"
         const val Tracking = "tracking_channel"
         const val Updated = "updated_channel"
-        const val v5Migration = "v5_migration_channel"
         const val Installing = "installing_channel"
-        const val ID_V5_MIGRATION_PROGRESS = -901
-        const val ID_V5_MIGRATION_ERROR = -902
     }
 
     object Id {
@@ -39,12 +36,6 @@ object Notifications {
         object Updated {
             const val Installed = -6
         }
-
-        object V5 {
-            const val Progress = -901
-            const val Error = -902
-            const val Complete = -903
-        }
     }
 
     /** Common notification channel and ids used anywhere. */
@@ -58,8 +49,8 @@ object Notifications {
 
     /** Notification channel and ids used by the downloader. */
     private const val GROUP_DOWNLOADER = "group_downloader"
-    const val CHANNEL_DOWNLOADER_PROGRESS = "downloader_progress_channel"
-    const val ID_DOWNLOAD_CHAPTER_PROGRESS = -201
+    const val CHANNEL_DOWNLOADER = "downloader_progress_channel"
+    const val ID_DOWNLOAD_CHAPTER = -201
     const val CHANNEL_DOWNLOADER_ERROR = "downloader_error_channel"
     const val ID_DOWNLOAD_CHAPTER_ERROR = -202
     const val CHANNEL_DOWNLOADER_COMPLETE = "downloader_complete_channel"
@@ -166,7 +157,7 @@ object Notifications {
                         setShowBadge(false)
                     },
                 NotificationChannel(
-                        CHANNEL_DOWNLOADER_PROGRESS,
+                        CHANNEL_DOWNLOADER,
                         context.getString(R.string.downloads),
                         NotificationManager.IMPORTANCE_LOW,
                     )
@@ -238,15 +229,6 @@ object Notifications {
                     context.getString(R.string.status_channel),
                     NotificationManager.IMPORTANCE_HIGH,
                 ),
-                NotificationChannel(
-                        Channel.v5Migration,
-                        context.getString(R.string.v5_migration_service),
-                        NotificationManager.IMPORTANCE_HIGH,
-                    )
-                    .apply {
-                        setShowBadge(true)
-                        setSound(null, null)
-                    },
                 NotificationChannel(
                         CHANNEL_INCOGNITO_MODE,
                         context.getString(R.string.incognito_mode),

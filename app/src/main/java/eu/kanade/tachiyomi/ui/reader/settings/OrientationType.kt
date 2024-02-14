@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.settings
 import android.content.pm.ActivityInfo
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 enum class OrientationType(
     val prefValue: Int,

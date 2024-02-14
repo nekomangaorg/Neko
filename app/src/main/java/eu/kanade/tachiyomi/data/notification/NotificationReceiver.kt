@@ -9,21 +9,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import androidx.work.WorkManager
-import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.backup.BackupRestoreService
+import eu.kanade.tachiyomi.data.backup.BackupRestoreJob
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.updater.AppUpdateService
+import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
-import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -37,6 +33,8 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
+import org.nekomanga.BuildConfig.APPLICATION_ID as ID
+import org.nekomanga.R
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -59,10 +57,9 @@ class NotificationReceiver : BroadcastReceiver() {
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
             // Resume the download service
-            ACTION_RESUME_DOWNLOADS -> DownloadService.start(context)
+            ACTION_RESUME_DOWNLOADS -> DownloadJob.start(context)
             // Pause the download service
             ACTION_PAUSE_DOWNLOADS -> {
-                DownloadService.stop(context)
                 downloadManager.pauseDownloads()
             }
             // Clear the download queue
@@ -76,7 +73,6 @@ class NotificationReceiver : BroadcastReceiver() {
                 )
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
-            ACTION_CANCEL_V5_MIGRATION -> cancelV5Migration(context)
             ACTION_CANCEL_TRACKING_SYNC -> cancelTrackingSync(context)
             ACTION_CANCEL_FOLLOW_SYNC -> cancelFollowSync(context)
             ACTION_CANCEL_UPDATE_DOWNLOAD -> cancelDownloadUpdate(context)
@@ -235,19 +231,7 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param notificationId id of notification
      */
     private fun cancelLibraryUpdate(context: Context) {
-        LibraryUpdateService.stop(context)
-        Handler().post { dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
-    }
-
-    /**
-     * Method called when user wants to stop a library update
-     *
-     * @param context context of application
-     * @param notificationId id of notification
-     */
-    private fun cancelV5Migration(context: Context) {
-        WorkManager.getInstance(context).cancelAllWorkByTag(V5MigrationJob.TAG)
-        Handler().post { dismissNotification(context, Notifications.Id.V5.Progress) }
+        LibraryUpdateJob.stop(context)
     }
 
     private fun cancelTrackingSync(context: Context) {
@@ -256,15 +240,15 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     private fun cancelFollowSync(context: Context) {
-        WorkManager.getInstance(context).cancelAllWorkByTag(StatusSyncJob.TAG)
-        Handler().post { dismissNotification(context, Notifications.Id.Status.Progress) }
+        StatusSyncJob.stop(context)
     }
 
     /** Method called when user wants to mark as read */
     private fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
         val db: DatabaseHelper = Injekt.get()
         val preferences: PreferencesHelper = Injekt.get()
-        val sourceManager: SourceManager = Injekt.get()
+
+        val manga = db.getManga(mangaId).executeAsBlocking() ?: return
 
         val dbChapters =
             chapterUrls.map { chapterUrl ->
@@ -274,8 +258,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 chapter
             }
         if (preferences.removeAfterMarkedAsRead().get()) {
-            val manga = db.getManga(mangaId).executeAsBlocking() ?: return
-            downloadManager.deleteChapters(manga, dbChapters)
+            downloadManager.deleteChapters(dbChapters, manga)
         }
 
         if (preferences.readingSync().get()) {
@@ -289,6 +272,8 @@ class NotificationReceiver : BroadcastReceiver() {
             }
         }
         val newLastChapter = dbChapters.maxByOrNull { it.chapter_number.toInt() }
+        LibraryUpdateJob.updateMutableFlow.tryEmit(manga.id)
+
         updateTrackChapterMarkedAsRead(db, preferences, newLastChapter, mangaId, 0)
     }
 
@@ -298,12 +283,19 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param context context of application
      */
     private fun cancelRestoreUpdate(context: Context) {
-        BackupRestoreService.stop(context)
-        Handler().post { dismissNotification(context, Notifications.ID_RESTORE_PROGRESS) }
+        BackupRestoreJob.stop(context)
     }
 
     private fun cancelDownloadUpdate(context: Context) {
-        AppUpdateService.stop(context)
+        AppDownloadInstallJob.stop(context)
+        dismissNotification(context, Notifications.ID_UPDATER)
+    }
+
+    private fun startAppUpdate(context: Context, intent: Intent) {
+        val url = intent.getStringExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL) ?: return
+        val notifyOnInstall =
+            intent.getBooleanExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, false)
+        AppDownloadInstallJob.start(context, url, notifyOnInstall)
     }
 
     /**
@@ -343,10 +335,9 @@ class NotificationReceiver : BroadcastReceiver() {
         // Called to cancel follow sync update.
         private const val ACTION_CANCEL_FOLLOW_SYNC = "$ID.$NAME.CANCEL_FOLLOW_SYNC"
 
-        // Called to cancel library v5 migration update.
-        private const val ACTION_CANCEL_V5_MIGRATION = "$ID.$NAME.CANCEL_V5_MIGRATION"
-
         private const val ACTION_CANCEL_UPDATE_DOWNLOAD = "$ID.$NAME.CANCEL_UPDATE_DOWNLOAD"
+
+        private const val ACTION_START_APP_UPDATE = "$ID.$NAME.START_APP_UPDATE"
 
         // Called to mark as read
         private const val ACTION_MARK_AS_READ = "$ID.$NAME.MARK_AS_READ"
@@ -673,7 +664,10 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param uri uri of error log file
          * @return [PendingIntent]
          */
-        internal fun openErrorLogPendingActivity(context: Context, uri: Uri?): PendingIntent {
+        internal fun openErrorOrSkippedLogPendingActivity(
+            context: Context,
+            uri: Uri?
+        ): PendingIntent {
             val intent =
                 Intent().apply {
                     action = Intent.ACTION_VIEW
@@ -783,16 +777,16 @@ class NotificationReceiver : BroadcastReceiver() {
             )
         }
 
-        /**
-         * Returns [PendingIntent] that starts a service which stops the library update
-         *
-         * @param context context of application
-         * @return [PendingIntent]
-         */
-        internal fun cancelV5MigrationUpdatePendingBroadcast(context: Context): PendingIntent {
+        internal fun startAppUpdatePendingJob(
+            context: Context,
+            url: String,
+            notifyOnInstall: Boolean = false
+        ): PendingIntent {
             val intent =
                 Intent(context, NotificationReceiver::class.java).apply {
-                    action = ACTION_CANCEL_V5_MIGRATION
+                    action = ACTION_START_APP_UPDATE
+                    putExtra(AppDownloadInstallJob.EXTRA_DOWNLOAD_URL, url)
+                    putExtra(AppDownloadInstallJob.EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
                 }
             return PendingIntent.getBroadcast(
                 context,

@@ -32,8 +32,6 @@ import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
 import androidx.webkit.WebSettingsCompat.setForceDark
 import androidx.webkit.WebSettingsCompat.setForceDarkStrategy
 import androidx.webkit.WebViewFeature
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getPrefTheme
@@ -42,6 +40,8 @@ import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.view.setStyle
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.R
+import org.nekomanga.databinding.WebviewActivityBinding
 import tachiyomi.core.util.system.setDefaultSettings
 
 open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {

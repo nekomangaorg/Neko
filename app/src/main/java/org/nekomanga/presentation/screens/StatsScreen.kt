@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Detailed
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType

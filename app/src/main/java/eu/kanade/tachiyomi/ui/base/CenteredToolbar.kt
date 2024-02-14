@@ -6,10 +6,10 @@ import android.util.AttributeSet
 import android.view.Gravity
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.textview.MaterialTextView
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.R
 
 @SuppressLint("CustomViewStyleable")
 class CenteredToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :

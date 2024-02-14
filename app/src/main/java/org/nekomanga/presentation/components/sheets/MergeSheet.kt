@@ -51,12 +51,12 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.SourceMergeManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.IsMergedManga
 import eu.kanade.tachiyomi.ui.manga.MergeConstants.MergeSearchResult
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
 import org.nekomanga.domain.manga.MergeArtwork
 import org.nekomanga.presentation.components.SearchFooter
 import org.nekomanga.presentation.screens.ThemeColorState

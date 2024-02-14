@@ -11,9 +11,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.isGone
 import androidx.core.widget.TextViewCompat
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.MenuSheetItemBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.R
+import org.nekomanga.databinding.MenuSheetItemBinding
 
 class MenuSheetItemView constructor(context: Context, attrs: AttributeSet?) :
     LinearLayout(context, attrs) {

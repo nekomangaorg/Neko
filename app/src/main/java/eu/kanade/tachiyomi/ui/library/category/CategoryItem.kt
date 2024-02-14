@@ -4,8 +4,8 @@ import android.view.View
 import android.widget.TextView
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
+import org.nekomanga.R
 
 class CategoryItem(val category: Category, val itemCount: Int? = null) :
     AbstractItem<FastAdapter.ViewHolder<CategoryItem>>() {

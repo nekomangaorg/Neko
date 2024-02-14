@@ -28,9 +28,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -92,7 +92,7 @@ fun CrashScreen(
                 text =
                     stringResource(
                         R.string.crash_screen_description,
-                        stringResource(id = R.string.app_name_neko)
+                        stringResource(id = R.string.app_name)
                     ),
                 modifier = Modifier.padding(horizontal = Size.medium),
             )

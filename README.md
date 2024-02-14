@@ -5,6 +5,8 @@
 
 A Free, Open source unofficial manga reader for MangaDex
 
+If you got any questions, [join our Discord server](https://discord.gg/4vmK42QuKG).
+
 ![](https://img.shields.io/github/downloads/nekomangaorg/neko/total?label=downloads&labelColor=27303D&color=0D1117&logo=github&logoColor=FFFFFF&style=flat)
 ![](https://img.shields.io/github/actions/workflow/status/nekomangaorg/neko/ci-draft-release.yml?labelColor=27303D&style=flat)
 ![](https://img.shields.io/github/stars/nekomangaorg/Neko.svg?label=stars&labelColor=27303D&color=0D1117&logo=github&style=flat)
@@ -38,7 +40,7 @@ A Free, Open source unofficial manga reader for MangaDex
 
 ## Disclaimer
 
-The developer(s) of this application does not have any affiliation with the content providers available, and this application hosts zero content.
+The developer(s) of this application do not have any affiliation with the content providers available, and this application hosts zero content.
 
 ## License
 

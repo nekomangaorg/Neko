@@ -13,10 +13,8 @@ import androidx.core.view.updateLayoutParams
 import coil.dispose
 import coil.size.Precision
 import coil.size.Scale
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadManga
-import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -24,6 +22,8 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.setCards
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import org.nekomanga.R
+import org.nekomanga.databinding.MangaGridItemBinding
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title. All

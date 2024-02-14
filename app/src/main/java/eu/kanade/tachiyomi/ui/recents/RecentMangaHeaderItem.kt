@@ -5,10 +5,10 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.RecentsHeaderItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.library.LibraryHeaderItem
+import org.nekomanga.R
+import org.nekomanga.databinding.RecentsHeaderItemBinding
 
 class RecentMangaHeaderItem(val recentsType: Int) :
     AbstractHeaderItem<RecentMangaHeaderItem.Holder>() {

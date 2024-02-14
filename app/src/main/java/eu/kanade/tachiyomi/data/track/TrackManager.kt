@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.track
 
 import android.content.Context
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.data.track.kitsu.Kitsu
@@ -10,6 +9,7 @@ import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdatesHelper.getMangaUp
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import org.nekomanga.R
 import org.nekomanga.domain.track.TrackServiceItem
 
 class TrackManager(private val context: Context) {

@@ -65,7 +65,6 @@ import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.snackbar.Snackbar
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -80,6 +79,7 @@ import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import me.saket.cascade.CascadePopupMenu
+import org.nekomanga.R
 
 /**
  * Returns coordinates of view. Used for animation

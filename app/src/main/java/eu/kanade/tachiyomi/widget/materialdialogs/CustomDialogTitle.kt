@@ -5,7 +5,7 @@ import android.text.Layout
 import android.util.AttributeSet
 import android.util.TypedValue
 import com.google.android.material.textview.MaterialTextView
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 class CustomDialogTitle constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialTextView(context, attrs) {

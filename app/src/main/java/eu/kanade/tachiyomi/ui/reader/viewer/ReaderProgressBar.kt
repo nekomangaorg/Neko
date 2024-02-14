@@ -15,9 +15,9 @@ import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlin.math.min
+import org.nekomanga.R
 
 /**
  * A custom progress bar that always rotates while being determinate. By always rotating we give the

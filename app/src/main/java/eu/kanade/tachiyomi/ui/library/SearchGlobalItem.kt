@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.MaterialTextButtonBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import org.nekomanga.R
+import org.nekomanga.databinding.MaterialTextButtonBinding
 
 class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
 

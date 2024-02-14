@@ -22,10 +22,7 @@ import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
 import com.mikepenz.fastadapter.select.SelectExtension
 import com.mikepenz.fastadapter.select.getSelectExtension
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.ThemeItemBinding
-import eu.kanade.tachiyomi.databinding.ThemesPreferenceBinding
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
@@ -33,6 +30,9 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import kotlin.math.max
+import org.nekomanga.R
+import org.nekomanga.databinding.ThemeItemBinding
+import org.nekomanga.databinding.ThemesPreferenceBinding
 import uy.kohesive.injekt.injectLazy
 
 class ThemePreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :

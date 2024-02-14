@@ -4,9 +4,9 @@ import android.view.View
 import android.view.View.inflate
 import androidx.annotation.IntRange
 import androidx.core.view.isVisible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
+import org.nekomanga.R
 
 class TabbedRecentsOptionsSheet(
     val controller: RecentsController,

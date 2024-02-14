@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.BottomMenuSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -25,6 +23,8 @@ import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import kotlin.math.max
 import kotlin.math.min
+import org.nekomanga.R
+import org.nekomanga.databinding.BottomMenuSheetBinding
 
 class MaterialMenuSheet(
     activity: Activity,

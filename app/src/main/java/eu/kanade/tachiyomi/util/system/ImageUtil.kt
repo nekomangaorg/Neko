@@ -24,7 +24,6 @@ import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
 import com.hippo.unifile.UniFile
-import eu.kanade.tachiyomi.R
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -36,6 +35,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder

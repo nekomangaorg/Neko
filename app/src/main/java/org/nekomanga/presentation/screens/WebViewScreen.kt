@@ -22,8 +22,8 @@ import com.google.accompanist.web.LoadingState
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewNavigator
 import com.google.accompanist.web.rememberWebViewState
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.NekoScaffold

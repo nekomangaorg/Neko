@@ -51,9 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.DownloadAction
@@ -62,9 +60,13 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
+import org.nekomanga.R
+import org.nekomanga.constants.Constants
+import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -364,7 +366,7 @@ private fun ChapterInfo(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (language.isNotNullOrEmpty() && !language.equals("en", true)) {
+                if (!language.isNullOrEmpty() && !language.equals("en", true)) {
                     val iconRes = MdLang.fromIsoCode(language!!)?.iconResId
 
                     when (iconRes == null) {
@@ -400,7 +402,7 @@ private fun ChapterInfo(
                     }
                 }
                 Text(
-                    text = statuses.joinToString(" ? "),
+                    text = statuses.joinToString(Constants.SEPARATOR),
                     style =
                         MaterialTheme.typography.bodyMedium.copy(
                             color = secondaryTextColor,
@@ -410,6 +412,8 @@ private fun ChapterInfo(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+
+                statuses.joinToString(Constants.SEPARATOR)
             }
         }
         DownloadButton(

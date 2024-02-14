@@ -8,10 +8,10 @@ import androidx.core.view.isVisible
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.system.createWithColorRes
+import org.nekomanga.R
 
 class SiteLoginPreference
 @JvmOverloads

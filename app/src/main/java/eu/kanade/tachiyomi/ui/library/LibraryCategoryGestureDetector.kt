@@ -14,9 +14,13 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
     var locked = false
     var cancelled = false
     private val poa = 1.7f
+    private var startingX = 0f
+    private var startingY = 0f
 
     override fun onDown(e: MotionEvent): Boolean {
         locked = false
+        startingX = e.x
+        startingY = e.y
         controller ?: return false
         val startingOnLibraryView =
             listOf(
@@ -37,15 +41,14 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
     }
 
     override fun onScroll(
-        e: MotionEvent?,
+        e1: MotionEvent?,
         e2: MotionEvent,
         distanceX: Float,
-        distanceY: Float
+        distanceY: Float,
     ): Boolean {
         val controller = controller ?: return false
-        val e1 = e ?: return false
-        val distance = e1.rawX - e2.rawX
-        val totalDistanceY = e1.rawY - e2.rawY
+        val distance = startingX - e2.x
+        val totalDistanceY = startingY - e2.y
         controller.binding.libraryGridRecycler.recycler.translationX =
             if (!cancelled) abs(distance / 50).pow(poa) * -sign(distance / 50) else 0f
         if (!locked && abs(distance) > 50 && !cancelled) {
@@ -62,12 +65,11 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
     }
 
     override fun onFling(
-        e: MotionEvent?,
+        e1: MotionEvent?,
         e2: MotionEvent,
         velocityX: Float,
-        velocityY: Float
+        velocityY: Float,
     ): Boolean {
-        val e1 = e ?: return false
         locked = false
         if (cancelled) {
             cancelled = false
@@ -76,8 +78,8 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
         cancelled = false
         val controller = controller ?: return false
         var result = false
-        val diffY = e2.y - e1.y
-        val diffX = e2.x - e1.x
+        val diffY = e2.y - startingY
+        val diffX = e2.x - startingX
         val recycler = controller.binding.libraryGridRecycler.recycler
         var moved = false
         if (

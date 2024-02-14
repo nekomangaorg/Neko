@@ -83,7 +83,7 @@ subprojects {
     }
 }
 
-tasks.register("clean", Delete::class) { delete(rootProject.buildDir) }
+tasks.register("clean", Delete::class) { delete(rootProject.layout.buildDirectory) }
 
 tasks.register<Copy>("installGitHook") {
     from("pre-commit")

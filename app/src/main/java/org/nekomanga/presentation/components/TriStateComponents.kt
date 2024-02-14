@@ -95,6 +95,8 @@ fun TriStateFilterChip(
             ),
         border =
             FilterChipDefaults.filterChipBorder(
+                enabled = true,
+                selected = false,
                 borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
                 selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
             ),

@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -11,13 +10,14 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     private val json: Json by injectLazy()
-    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword().get()) }
+    private val interceptor by lazy { MyAnimeListInterceptor(this) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
     @StringRes override fun nameRes() = R.string.myanimelist
@@ -147,6 +147,14 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         super.logout()
         preferences.trackToken(this).delete()
         interceptor.setAuth(null)
+    }
+
+    fun getIfAuthExpired(): Boolean {
+        return preferences.trackAuthExpired(this).get()
+    }
+
+    fun setAuthExpired() {
+        preferences.trackAuthExpired(this).set(true)
     }
 
     fun saveOAuth(oAuth: OAuth?) {

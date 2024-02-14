@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
@@ -15,6 +14,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.R
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_BATTERY_NOT_LOW
 import org.nekomanga.domain.library.LibraryPreferences.Companion.DEVICE_CHARGING
@@ -26,7 +26,6 @@ import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_DROPPED
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_ON_HOLD
 import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_PLAN_TO_READ
-import org.nekomanga.domain.library.LibraryPreferences.Companion.MANGA_TRACKING_UNFOLLOWED
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -183,7 +182,6 @@ class SettingsLibraryController : SettingsController() {
                             R.string.smart_library_has_unread,
                             R.string.smart_library_has_not_started,
                             R.string.smart_library_status_is_completed,
-                            R.string.smart_library_tracking_is_unfollowed,
                             R.string.smart_library_tracking_is_plan_to_read,
                             R.string.smart_library_tracking_is_dropped,
                             R.string.smart_library_tracking_is_on_hold,
@@ -194,7 +192,6 @@ class SettingsLibraryController : SettingsController() {
                             MANGA_HAS_UNREAD,
                             MANGA_NOT_STARTED,
                             MANGA_NOT_COMPLETED,
-                            MANGA_TRACKING_UNFOLLOWED,
                             MANGA_TRACKING_PLAN_TO_READ,
                             MANGA_TRACKING_DROPPED,
                             MANGA_TRACKING_ON_HOLD,
@@ -206,7 +203,6 @@ class SettingsLibraryController : SettingsController() {
                             MANGA_HAS_UNREAD,
                             MANGA_NOT_STARTED,
                             MANGA_NOT_COMPLETED,
-                            MANGA_TRACKING_UNFOLLOWED,
                             MANGA_TRACKING_PLAN_TO_READ,
                             MANGA_TRACKING_DROPPED,
                             MANGA_TRACKING_ON_HOLD,

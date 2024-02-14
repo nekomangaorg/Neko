@@ -1,22 +1,20 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.googlematerial.OutlinedGoogleMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import org.nekomanga.R
 
 class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
@@ -56,6 +54,16 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                     )
                 titleRes = R.string.library
                 onClick { navigateTo(SettingsLibraryController()) }
+            }
+
+            preference {
+                iconDrawable =
+                    OutlinedGoogleMaterial.Icon.gmo_folder_open.create(
+                        context,
+                        colorAttr = R.attr.colorOnSurface,
+                    )
+                titleRes = R.string.data_storage
+                onClick { navigateTo(SettingsDataController()) }
             }
             preference {
                 iconDrawable =
@@ -106,15 +114,6 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             }
             preference {
                 iconDrawable =
-                    MaterialDesignDx.Icon.gmf_settings_backup_restore.create(
-                        context,
-                        colorAttr = R.attr.colorOnSurface,
-                    )
-                titleRes = R.string.backup_and_restore
-                onClick { navigateTo(SettingsBackupController()) }
-            }
-            preference {
-                iconDrawable =
                     MaterialDesignDx.Icon.gmf_security.create(
                         context,
                         colorAttr = R.attr.colorOnSurface,
@@ -130,18 +129,6 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                     )
                 titleRes = R.string.advanced
                 onClick { navigateTo(SettingsAdvancedController()) }
-            }
-            preference {
-                iconDrawable =
-                    MaterialDesignDx.Icon.gmf_volunteer_activism.create(
-                        context,
-                        colorAttr = R.attr.colorOnSurface,
-                    )
-                titleRes = R.string.dex_loot
-                onClick {
-                    val intent = Intent(Intent.ACTION_VIEW, "https://loot.moe/".toUri())
-                    startActivity(intent)
-                }
             }
             this
         }
