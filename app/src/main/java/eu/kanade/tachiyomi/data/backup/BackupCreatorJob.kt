@@ -14,7 +14,6 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.util.concurrent.TimeUnit
 import org.nekomanga.domain.storage.StorageManager
@@ -26,7 +25,6 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     Worker(context, workerParams) {
 
     override fun doWork(): Result {
-        val preferences = Injekt.get<PreferencesHelper>()
         val notifier = BackupNotifier(context)
         val uri = inputData.getString(LOCATION_URI_KEY)?.toUri() ?: getAutomaticBackupLocation()
         val flags = inputData.getInt(BACKUP_FLAGS_KEY, BackupConst.BACKUP_ALL)
@@ -40,8 +38,10 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
                 notifier.showBackupComplete(UniFile.fromUri(context, location.toUri())!!)
             Result.success()
         } catch (e: Exception) {
-            TimberKt.e(e)
-            if (!isAutoBackup) notifier.showBackupError(e.message)
+            if (e !is NoLibraryManga) {
+                TimberKt.e(e)
+                if (!isAutoBackup) notifier.showBackupError(e.message)
+            }
             Result.failure()
         } finally {
             context.notificationManager.cancel(Notifications.ID_BACKUP_PROGRESS)
@@ -104,6 +104,8 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
         }
     }
 }
+
+class NoLibraryManga : Exception()
 
 private const val TAG_AUTO = "BackupCreator"
 private const val TAG_MANUAL = "$TAG_AUTO:manual"
