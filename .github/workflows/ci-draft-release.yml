@@ -68,7 +68,7 @@ jobs:
           set -e
 
           echo "LAST_TAG=$(curl -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/nekomangaorg/neko/releaes/latest" \
+            "https://api.github.com/repos/nekomangaorg/neko/releases/latest" \
             | jq '.| {tag_name} | .tag_name') >> $GITHUB_ENV"
 
           current_sha=$(git rev-parse --short HEAD)
