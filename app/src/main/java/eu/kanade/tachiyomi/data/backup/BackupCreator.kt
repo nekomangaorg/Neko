@@ -64,6 +64,11 @@ class BackupCreator(val context: Context) {
                     } else {
                         emptyList()
                     }
+
+            if (databaseManga.isEmpty()) {
+                throw NoLibraryManga()
+            }
+
             backup =
                 Backup(
                     backupManga(databaseManga, flags),

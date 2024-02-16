@@ -13,14 +13,28 @@ import org.nekomanga.R
 /** Class to manage the basic information of all the notifications used in the app. */
 object Notifications {
 
+    object Group {
+        const val Download = "group_downloader"
+    }
+
     object Channel {
+        object Downloader {
+            const val Error = "downloader_error_channel"
+            const val Progress = "downloader_progress_channel"
+        }
+
+        const val Installing = "installing_channel"
         const val Status = "status_channel"
         const val Tracking = "tracking_channel"
         const val Updated = "updated_channel"
-        const val Installing = "installing_channel"
     }
 
     object Id {
+        object Download {
+            const val Progress = -201
+            const val Error = -202
+        }
+
         object Status {
             const val Progress = -1001
             const val Complete = -1002
@@ -46,15 +60,6 @@ object Notifications {
     const val CHANNEL_UPDATED = "updated_channel"
     const val ID_INSTALLED = -6
     const val GROUP_APP_UPDATES = "eu.kanade.tachiyomi.APP_UPDATES"
-
-    /** Notification channel and ids used by the downloader. */
-    private const val GROUP_DOWNLOADER = "group_downloader"
-    const val CHANNEL_DOWNLOADER = "downloader_progress_channel"
-    const val ID_DOWNLOAD_CHAPTER = -201
-    const val CHANNEL_DOWNLOADER_ERROR = "downloader_error_channel"
-    const val ID_DOWNLOAD_CHAPTER_ERROR = -202
-    const val CHANNEL_DOWNLOADER_COMPLETE = "downloader_complete_channel"
-    const val ID_DOWNLOAD_CHAPTER_COMPLETE = -203
 
     /** Notification channel and ids used by the library updater. */
     private const val GROUP_LIBRARY = "group_library"
@@ -112,7 +117,7 @@ object Notifications {
                     context.getString(R.string.group_backup_restore),
                 ),
                 NotificationChannelGroup(
-                    GROUP_DOWNLOADER,
+                    Group.Download,
                     context.getString(R.string.group_downloader)
                 ),
                 NotificationChannelGroup(
@@ -157,30 +162,21 @@ object Notifications {
                         setShowBadge(false)
                     },
                 NotificationChannel(
-                        CHANNEL_DOWNLOADER,
+                        Channel.Downloader.Progress,
                         context.getString(R.string.downloads),
                         NotificationManager.IMPORTANCE_LOW,
                     )
                     .apply {
-                        group = GROUP_DOWNLOADER
+                        group = Group.Download
                         setShowBadge(false)
                     },
                 NotificationChannel(
-                        CHANNEL_DOWNLOADER_COMPLETE,
-                        context.getString(R.string.download_complete),
-                        NotificationManager.IMPORTANCE_LOW,
-                    )
-                    .apply {
-                        group = GROUP_DOWNLOADER
-                        setShowBadge(false)
-                    },
-                NotificationChannel(
-                        CHANNEL_DOWNLOADER_ERROR,
+                        Channel.Downloader.Error,
                         context.getString(R.string.download_error),
                         NotificationManager.IMPORTANCE_LOW,
                     )
                     .apply {
-                        group = GROUP_DOWNLOADER
+                        group = Group.Download
                         setShowBadge(false)
                     },
                 NotificationChannel(

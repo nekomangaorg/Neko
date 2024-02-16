@@ -155,8 +155,6 @@
     <string name="onboarding_guides_restore_backup">After onboarding, restore your backup in</string>
     <string name="onboarding_guides_restore_backup_setting_location">Settings -> Storage and Data</string>
 
-    <string name="onboarding_permission_type_required">Required</string>
-    <string name="onboarding_permission_type_optional">Optional but recommended</string>
     <string name="onboarding_permission_install_apps">Install apps permission</string>
     <string name="onboarding_permission_install_apps_description">To install the app on updates.</string>
     <string name="onboarding_permission_notifications">Notification permission</string>

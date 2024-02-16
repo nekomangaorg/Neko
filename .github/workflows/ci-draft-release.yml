@@ -63,18 +63,21 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
+      - name: Get previous release
+        id: last_release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ${{ github.repository }}
+          excludes: prerelease, draft
+
       - name: Prepare build
         run: |
           set -e
 
-          echo "LAST_TAG=$(curl -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/nekomangaorg/neko/releases/latest" \
-            | jq -r '.| {tag_name} | .tag_name') >> $GITHUB_ENV"
-
           current_sha=$(git rev-parse --short HEAD)
           echo "CURRENT_SHA=$current_sha"
           echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
-          prev_release_sha=$(git rev-list -n 1 $LAST_TAG)
+          prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
           echo "PREV_RELEASE_SHA=$prev_release_sha"
           echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
           echo "Url to compare: https://api.github.com/repos/nekomangaorg/neko/compare/$prev_release_sha...$current_sha"

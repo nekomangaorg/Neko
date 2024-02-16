@@ -368,6 +368,18 @@ fun Context.isOnline(): Boolean {
     return (NetworkCapabilities.TRANSPORT_CELLULAR..maxTransport).any(actNw::hasTransport)
 }
 
+fun Context.launchRequestPackageInstallsPermission() {
+    val intent =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                data = Uri.parse("package:$packageName")
+            }
+        } else {
+            Intent(Settings.ACTION_SECURITY_SETTINGS)
+        }
+    startActivity(intent)
+}
+
 fun Context.createFileInCacheDir(name: String): File {
     val file = File(externalCacheDir, name)
     if (file.exists()) {

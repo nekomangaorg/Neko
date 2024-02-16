@@ -29,36 +29,24 @@ internal class DownloadNotifier(private val context: Context) {
 
     /** Notification builder. */
     private val notificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER) {
+        context.notificationBuilder(Notifications.Channel.Downloader.Progress) {
             setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
-        }
-    }
-
-    private val completeNotificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_COMPLETE) {
             setAutoCancel(false)
         }
     }
 
     private val errorNotificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_ERROR) { setAutoCancel(false) }
+        context.notificationBuilder(Notifications.Channel.Downloader.Error) { setAutoCancel(false) }
     }
 
     /** Status of download. Used for correct notification icon. */
     private var isDownloading = false
-
-    /** Updated when error is thrown */
-    var errorThrown = false
-
-    /** Updated when paused */
-    var paused = false
 
     /**
      * Shows a notification from this builder.
      *
      * @param id the id of the notification.
      */
-    @Synchronized
     private fun NotificationCompat.Builder.show(id: Int) {
         context.notificationManager.notify(id, build())
     }
@@ -67,8 +55,8 @@ internal class DownloadNotifier(private val context: Context) {
      * Dismiss the downloader's notification. Downloader error notifications use a different id, so
      * those can only be dismissed by the user.
      */
-    fun dismiss() {
-        context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER)
+    fun dismissProgress() {
+        context.notificationManager.cancel(Notifications.Id.Download.Progress)
     }
 
     fun setPlaceholder(download: Download?): NotificationCompat.Builder {
@@ -78,7 +66,6 @@ internal class DownloadNotifier(private val context: Context) {
                 setSmallIcon(android.R.drawable.stat_sys_download)
                 setAutoCancel(false)
                 clearActions()
-                setOngoing(true)
                 // Open download manager when clicked
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
@@ -109,25 +96,6 @@ internal class DownloadNotifier(private val context: Context) {
             setStyle(null)
         }
         return notificationBuilder
-    }
-
-    /** This function shows a notification to inform download tasks are done. */
-    fun downloadFinished() {
-        // Create notification
-        with(completeNotificationBuilder) {
-            setContentTitle(context.getString(R.string.download_title))
-            setContentText(context.getString(R.string.download_completed))
-            setSmallIcon(android.R.drawable.stat_sys_download_done)
-            clearActions()
-            setAutoCancel(true)
-            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
-            setProgress(0, 0, false)
-            show(Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE)
-        }
-
-        // Reset states to default
-        errorThrown = false
-        isDownloading = false
     }
 
     /**
@@ -175,17 +143,19 @@ internal class DownloadNotifier(private val context: Context) {
             }
             setStyle(null)
             setProgress(download.pages!!.size, download.downloadedImages, false)
-            show(Notifications.ID_DOWNLOAD_CHAPTER)
+            setOngoing(true)
+            show(Notifications.Id.Download.Progress)
         }
     }
 
     /** Show notification when download is paused. */
-    fun onDownloadPaused() {
+    fun onPaused() {
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.paused))
             setContentText(context.getString(R.string.download_paused))
             setSmallIcon(R.drawable.ic_pause_24dp)
             setAutoCancel(false)
+            setOngoing(false)
             setProgress(0, 0, false)
             color = ContextCompat.getColor(context, R.color.iconOutline)
             clearActions()
@@ -203,10 +173,18 @@ internal class DownloadNotifier(private val context: Context) {
                 context.getString(R.string.cancel_all),
                 NotificationReceiver.clearDownloadsPendingBroadcast(context),
             )
-            show(Notifications.ID_DOWNLOAD_CHAPTER)
+            show(Notifications.Id.Download.Progress)
         }
 
         // Reset initial values
+        isDownloading = false
+    }
+
+    /** Resets the state once downloads are completed. */
+    fun onComplete() {
+        dismissProgress()
+
+        // Reset states to default
         isDownloading = false
     }
 
@@ -225,7 +203,7 @@ internal class DownloadNotifier(private val context: Context) {
             clearActions()
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
             setProgress(0, 0, false)
-            show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)
+            show(Notifications.Id.Download.Error)
         }
 
         // Reset download information
@@ -275,11 +253,10 @@ internal class DownloadNotifier(private val context: Context) {
             }
             color = ContextCompat.getColor(context, R.color.iconOutline)
             setProgress(0, 0, false)
-            show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)
+            show(Notifications.Id.Download.Error)
         }
 
         // Reset download information
-        errorThrown = true
         isDownloading = false
     }
 }

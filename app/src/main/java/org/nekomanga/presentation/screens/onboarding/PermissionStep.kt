@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import jp.wasabeef.gap.Gap
+import eu.kanade.tachiyomi.util.system.launchRequestPackageInstallsPermission
 import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
@@ -42,13 +42,14 @@ internal class PermissionStep : OnboardingStep {
 
     private var installGranted by mutableStateOf(false)
 
-    override val isComplete: Boolean
-        get() = installGranted
+    override val isComplete: Boolean = true
 
     @Composable
     override fun Content() {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
+
+        var installGranted by mutableStateOf(false)
 
         var notificationGranted by remember {
             mutableStateOf(
@@ -96,28 +97,12 @@ internal class PermissionStep : OnboardingStep {
         Column(
             modifier = Modifier.padding(vertical = Size.medium),
         ) {
-            SectionHeader(stringResource(R.string.onboarding_permission_type_required))
-
             PermissionItem(
                 title = stringResource(R.string.onboarding_permission_install_apps),
                 subtitle = stringResource(R.string.onboarding_permission_install_apps_description),
                 granted = installGranted,
-                onButtonClick = {
-                    val intent =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                                data = Uri.parse("package:${context.packageName}")
-                            }
-                        } else {
-                            Intent(Settings.ACTION_SECURITY_SETTINGS)
-                        }
-                    context.startActivity(intent)
-                },
+                onButtonClick = { context.launchRequestPackageInstallsPermission() },
             )
-
-            Gap(Size.medium)
-
-            SectionHeader(stringResource(R.string.onboarding_permission_type_optional))
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val permissionRequester =
@@ -151,18 +136,6 @@ internal class PermissionStep : OnboardingStep {
                 },
             )
         }
-    }
-
-    @Composable
-    private fun SectionHeader(
-        text: String,
-        modifier: Modifier = Modifier,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleLarge,
-            modifier = modifier.padding(horizontal = Size.medium),
-        )
     }
 
     @Composable

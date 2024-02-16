@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.download
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
@@ -114,22 +113,8 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             binding.downloadIcon.alpha = 1f
             isAnimating = false
         }
-        binding.downloadIcon.setImageDrawable(
-            if (state == Download.State.CHECKED) {
-                checkDrawable
-            } else {
-                downloadDrawable
-            },
-        )
+        binding.downloadIcon.setImageDrawable(downloadDrawable)
         when (state) {
-            Download.State.CHECKED -> {
-                binding.downloadProgress.isVisible = false
-                binding.downloadBorder.isVisible = true
-                binding.downloadProgressIndeterminate.isVisible = false
-                binding.downloadBorder.setImageDrawable(filledCircle)
-                binding.downloadBorder.drawable.setTint(activeColor)
-                binding.downloadIcon.drawable.setTint(Color.WHITE)
-            }
             Download.State.NOT_DOWNLOADED -> {
                 binding.downloadBorder.isVisible = true
                 binding.downloadProgress.isVisible = false

@@ -102,11 +102,7 @@ class ChapterHolder(
         )
         binding.chapterScanlator.text = statuses.joinToString(Constants.SEPARATOR)
 
-        val status =
-            when {
-                adapter.isSelected(flexibleAdapterPosition) -> Download.State.CHECKED
-                else -> item.status
-            }
+        val status = item.status
 
         notifyStatus(status, item.isLocked, item.progress)
         resetFrontView()

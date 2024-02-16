@@ -56,7 +56,6 @@ import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.Migrations
-import eu.kanade.tachiyomi.data.download.DownloadJob
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -271,7 +270,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         val container: ViewGroup = binding.controllerContainer
 
         val content: ViewGroup = binding.mainContent
-        DownloadJob.downloadFlow.onEach(::downloadStatusChanged).launchIn(lifecycleScope)
+        downloadManager.isDownloaderRunning.onEach(::downloadStatusChanged).launchIn(lifecycleScope)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowCustomEnabled(true)
@@ -745,7 +744,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     override fun onResume() {
         super.onResume()
         checkForAppUpdates()
-        DownloadJob.callListeners()
         showDLQueueTutorial()
         reEnableBackPressedCallBack()
     }
@@ -754,7 +752,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         if (
             router.backstackSize == 1 &&
                 this !is SearchActivity &&
-                downloadManager.hasQueue() &&
+                downloadManager.queueState.value.isNotEmpty() &&
                 !preferences.shownDownloadQueueTutorial().get()
         ) {
             if (!isBindingInitialized) return
@@ -1338,7 +1336,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
     private fun downloadStatusChanged(downloading: Boolean) {
         lifecycleScope.launchUI {
-            val hasQueue = downloading || downloadManager.hasQueue()
+            val hasQueue = downloading || downloadManager.queueState.value.isNotEmpty()
 
             if (hasQueue) {
                 nav.getOrCreateBadge(R.id.nav_feed)

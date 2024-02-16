@@ -17,12 +17,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -126,7 +126,7 @@ fun DownloadButton(
 private fun DlButton(
     buttonColor: Color,
     downloadState: Download.State,
-    downloadProgress: Float,
+    downloadProgress: Int,
     modifier: Modifier = Modifier
 ) {
     var downloadComplete by remember { mutableStateOf(false) }
@@ -155,7 +155,6 @@ private fun DlButton(
         Download.State.QUEUE -> Queued(modifier)
         Download.State.DOWNLOADED -> Downloaded(buttonColor, downloadComplete, modifier)
         Download.State.DOWNLOADING -> Downloading(buttonColor, modifier, downloadProgress)
-        else -> Unit
     }
 }
 
@@ -228,10 +227,10 @@ private fun Queued(modifier: Modifier) {
 }
 
 @Composable
-private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress: Float) {
+private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress: Int) {
     val (bgColor, iconColor, progressColor) =
         when {
-            downloadProgress >= 1f ->
+            downloadProgress >= Download.MaxProgress ->
                 Triple(buttonColor, MaterialTheme.colorScheme.surface, Color.Transparent)
             else ->
                 Triple(
@@ -243,18 +242,20 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
                 )
         }
 
-    val backgroundColor by animateColorAsState(targetValue = bgColor)
+    val backgroundColor by
+        animateColorAsState(targetValue = bgColor, label = "downloadingBackgroundColor")
 
     val animatedProgress =
         animateFloatAsState(
-                targetValue = downloadProgress,
+                targetValue = (downloadProgress / Download.MaxProgress.toFloat()),
                 animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+                label = "downloadingProgress"
             )
             .value
 
     val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
 
-    val infinitePulse = rememberInfiniteTransition()
+    val infinitePulse = rememberInfiniteTransition(label = "downloadPulse")
     val (initialState, finalState) = 0f to NekoColors.disabledAlphaLowContrast
 
     val alpha =
@@ -266,11 +267,12 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
                     tween(1000, easing = EaseInOutCirc),
                     repeatMode = RepeatMode.Reverse
                 ),
+            label = "downloadAlphaPulse"
         )
 
     Background(color = backgroundColor, modifier = modifier) {
         CircularProgressIndicator(
-            progress = animatedProgress,
+            progress = { animatedProgress },
             modifier = Modifier.size(size.dp),
             color = progressColor,
             strokeWidth = borderSize.dp,

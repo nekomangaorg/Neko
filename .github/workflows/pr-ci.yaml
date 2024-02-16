@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  check_wrapper:
+  pr_check_wrapper:
     name: Validate Gradle Wrapper
     runs-on: ubuntu-latest
     steps:
@@ -14,7 +14,7 @@ jobs:
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v2.1.1
 
-  build:
+  pr_build:
     runs-on: ubuntu-latest
     steps:
       - name: clone repo
@@ -27,6 +27,6 @@ jobs:
           java-version: 17
 
       - name: Build app
-        uses: eskatos/gradle-command-action@v3.0.0
+        uses: eskatos/gradle-command-action@v3.1.0
         with:
           arguments: assembleDebug

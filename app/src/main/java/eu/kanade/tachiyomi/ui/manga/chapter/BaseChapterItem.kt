@@ -11,7 +11,7 @@ abstract class BaseChapterItem<T : BaseChapterHolder, H : AbstractHeaderItem<*>>
     header: H? = null,
 ) : AbstractSectionableItem<T, H?>(header), Chapter by chapter {
 
-    private var _status: Download.State = Download.State.default
+    private var _status: Download.State = Download.State.NOT_DOWNLOADED
 
     val progress: Int
         get() {
