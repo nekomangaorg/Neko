@@ -48,15 +48,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import eu.kanade.presentation.components.Divider
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.manga.Artwork
@@ -84,7 +84,8 @@ fun HistoryCard(
     val cardColor: Color by
         animateColorAsState(
             if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-            else MaterialTheme.colorScheme.surface
+            else MaterialTheme.colorScheme.surface,
+            label = "historyCardExpansion"
         )
     val lowContrastColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
@@ -413,14 +414,14 @@ private fun LastReadLine(
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (language.isNotNullOrEmpty() && !language.equals("en", true)) {
+        if (language.isNotEmpty() && !language.equals("en", true)) {
             val iconRes = MdLang.fromIsoCode(language)?.iconResId
 
             when (iconRes == null) {
                 true -> {
                     TimberKt.e { "Missing flag for $language" }
                     Text(
-                        text = "$language • ",
+                        text = "$language${Constants.SEPARATOR}",
                         style =
                             MaterialTheme.typography.bodyMedium.copy(
                                 color = textColor,
@@ -444,7 +445,7 @@ private fun LastReadLine(
             }
         }
         Text(
-            text = statuses.joinToString(" • "),
+            text = statuses.joinToString(Constants.SEPARATOR),
             style =
                 style.copy(
                     color = textColor,

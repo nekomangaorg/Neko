@@ -438,7 +438,7 @@ class RecentsPresenter(
      */
     fun deleteChapter(chapter: Chapter, manga: Manga, update: Boolean = true) {
         presenterScope.launchNonCancellable {
-            downloadManager.deleteChapters(manga, listOf(chapter))
+            downloadManager.deleteChapters(listOf(chapter), manga)
         }
         if (update) {
             val item = recentItems.find { it.chapter.id == chapter.id } ?: return

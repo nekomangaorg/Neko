@@ -8,7 +8,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailController
@@ -74,13 +74,13 @@ class FeedController : BaseComposeController<FeedPresenter>() {
         startActivity(ReaderActivity.newIntent(context, mangaId, chapterId))
     }
 
-    fun updateLibrary(start: Boolean, context: Context) {
-        if (LibraryUpdateService.isRunning() && !start) {
+    private fun updateLibrary(start: Boolean, context: Context) {
+        if (LibraryUpdateJob.isRunning(context) && !start) {
             presenter.refreshing(false)
-            LibraryUpdateService.stop(context)
-        } else if (!LibraryUpdateService.isRunning() && start) {
+            LibraryUpdateJob.stop(context)
+        } else if (!LibraryUpdateJob.isRunning(context) && start) {
             presenter.refreshing(true)
-            LibraryUpdateService.start(context)
+            LibraryUpdateJob.startNow(context)
         }
     }
 

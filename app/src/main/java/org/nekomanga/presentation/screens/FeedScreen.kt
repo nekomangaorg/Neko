@@ -40,7 +40,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedScreenState
@@ -48,6 +47,7 @@ import eu.kanade.tachiyomi.ui.recents.FeedScreenType
 import eu.kanade.tachiyomi.ui.recents.FeedSettingActions
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
 import org.nekomanga.presentation.components.AppBarActions
 import org.nekomanga.presentation.components.FooterFilterChip
@@ -120,7 +120,7 @@ fun FeedScreen(
             sheetState = sheetState,
             sheetShape = RoundedCornerShape(Shapes.sheetRadius),
             sheetContent = {
-                Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
+                Box(modifier = Modifier.defaultMinSize(minHeight = Size.extraExtraTiny)) {
                     FeedBottomSheet(
                         contentPadding = navBarPadding,
                         feedScreenType = feedScreenState.value.feedScreenType,

@@ -39,9 +39,9 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.download.model.Download
-import org.nekomanga.R
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
 import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
@@ -57,7 +57,7 @@ fun DownloadButton(
     modifier: Modifier = Modifier,
     themeColorState: ThemeColorState,
     downloadState: Download.State,
-    downloadProgress: Float,
+    downloadProgress: Int,
     onDownload: (MangaConstants.DownloadAction) -> Unit
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {

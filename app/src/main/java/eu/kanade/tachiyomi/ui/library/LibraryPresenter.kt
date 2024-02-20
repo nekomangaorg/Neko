@@ -1452,7 +1452,7 @@ class LibraryPresenter(
     }
 
     private fun deleteChapters(manga: Manga, chapters: List<Chapter>) {
-        downloadManager.deleteChapters(manga, chapters)
+        downloadManager.deleteChapters(chapters, manga)
     }
 
     companion object {

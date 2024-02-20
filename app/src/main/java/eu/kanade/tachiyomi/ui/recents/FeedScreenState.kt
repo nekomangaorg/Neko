@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.recents
 
+import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
@@ -23,12 +24,13 @@ data class FeedScreenState(
     val incognitoMode: Boolean = false,
     val allFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val searchFeedManga: ImmutableList<FeedManga> = persistentListOf(),
+    val downloads: ImmutableList<Download> = persistentListOf(),
     val searchQuery: String = "",
 )
 
 enum class FeedScreenType {
     History,
-    Updates
+    Updates,
 }
 
 enum class FeedHistoryGroup {

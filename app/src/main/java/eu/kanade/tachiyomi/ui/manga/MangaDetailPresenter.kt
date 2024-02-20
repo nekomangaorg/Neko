@@ -638,7 +638,7 @@ class MangaDetailPresenter(
                     it.isMergedChapterOfType(mergeType)
                 }
 
-            downloadManager.deleteChapters(currentManga(), mergedChapters)
+            downloadManager.deleteChapters(mergedChapters, currentManga())
             db.deleteChapters(mergedChapters).executeOnIO()
             updateAllFlows()
         }

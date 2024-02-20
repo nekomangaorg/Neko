@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
@@ -29,7 +28,6 @@ import uy.kohesive.injekt.api.get
 class FeedRepository(
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
-    private val preferenceHelper: PreferencesHelper = Injekt.get(),
 ) {
 
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -256,10 +254,9 @@ class FeedRepository(
             when {
                 downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga) ->
                     Download.State.DOWNLOADED
-                downloadManager.hasQueue() ->
-                    downloadManager.queue.find { chapter.id == it.chapter.id }?.status
-                        ?: Download.State.default
-                else -> Download.State.default
+                else ->
+                    downloadManager.getQueuedDownloadOrNull(chapter.id)?.status
+                        ?: Download.State.NOT_DOWNLOADED
             }
 
         return ChapterItem(
@@ -267,9 +264,8 @@ class FeedRepository(
             downloadState = downloadState,
             downloadProgress =
                 when (downloadState == Download.State.DOWNLOADING) {
-                    true ->
-                        downloadManager.queue.find { it.chapter.id == chapter.id }!!.progressFloat
-                    false -> 0f
+                    true -> downloadManager.getQueuedDownloadOrNull(chapter.id)?.progress ?: 0
+                    false -> 0
                 },
         )
     }
@@ -288,9 +284,9 @@ class FeedRepository(
             is MangaConstants.DownloadAction.Download ->
                 downloadManager.downloadChapters(dbManga, listOf(dbChapter))
             is MangaConstants.DownloadAction.Remove ->
-                downloadManager.deleteChapters(dbManga, listOf(dbChapter))
+                downloadManager.deleteChapters(listOf(dbChapter), dbManga)
             is MangaConstants.DownloadAction.Cancel ->
-                downloadManager.deleteChapters(dbManga, listOf(dbChapter))
+                downloadManager.deleteChapters(listOf(dbChapter), dbManga)
             else -> Unit
         }
     }

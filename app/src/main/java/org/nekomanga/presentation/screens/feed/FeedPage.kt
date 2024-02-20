@@ -34,13 +34,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.recents.FeedManga
 import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedScreenType
 import java.util.Date
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.R
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors

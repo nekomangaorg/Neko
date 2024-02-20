@@ -60,13 +60,11 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.constants.Constants
-import org.nekomanga.core.util.launchDelayed
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu

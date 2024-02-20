@@ -94,6 +94,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { MangaMappings(app.applicationContext) }
 
+        addSingletonFactory { StorageManager(app, get()) }
+
         addSingleton(FollowsHandler())
 
         addSingleton(ArtworkHandler())
@@ -149,8 +151,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { MangaShortcutManager() }
-
-        addSingletonFactory { StorageManager(app, get()) }
 
         // Asynchronously init expensive components for a faster cold start
         ContextCompat.getMainExecutor(app).execute {
