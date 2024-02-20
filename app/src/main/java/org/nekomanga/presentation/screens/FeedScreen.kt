@@ -29,7 +29,6 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +59,7 @@ import org.nekomanga.presentation.components.dialog.DeleteAllHistoryDialog
 import org.nekomanga.presentation.components.rememberNavBarPadding
 import org.nekomanga.presentation.components.rememberSideBarVisible
 import org.nekomanga.presentation.extensions.conditional
+import org.nekomanga.presentation.screens.download.DownloadScreen
 import org.nekomanga.presentation.screens.feed.FeedBottomSheet
 import org.nekomanga.presentation.screens.feed.FeedPage
 import org.nekomanga.presentation.theme.Shapes
@@ -90,16 +90,11 @@ fun FeedScreen(
 
     val feedScreenType = feedScreenState.value.feedScreenType
 
-    val searchHint by
-        remember(feedScreenType) {
-            when (feedScreenType) {
-                FeedScreenType.History -> {
-                    mutableIntStateOf(R.string.search_history)
-                }
-                FeedScreenType.Updates -> {
-                    mutableIntStateOf(R.string.search_updates)
-                }
-            }
+    val searchHint =
+        when (feedScreenType) {
+            FeedScreenType.History -> stringResource(R.string.search_history)
+            FeedScreenType.Updates -> stringResource(R.string.search_updates)
+            else -> ""
         }
 
     /** Close the bottom sheet on back if its open */
@@ -136,9 +131,12 @@ fun FeedScreen(
             },
         ) {
             NekoScaffold(
-                type = NekoScaffoldType.SearchOutline,
+                type =
+                    if (feedScreenState.value.feedScreenType == FeedScreenType.Downloads)
+                        NekoScaffoldType.Title
+                    else NekoScaffoldType.SearchOutline,
                 incognitoMode = feedScreenState.value.incognitoMode,
-                searchPlaceHolder = stringResource(id = searchHint),
+                searchPlaceHolder = searchHint,
                 isRoot = true,
                 onSearch = feedScreenActions.search,
                 actions = {
@@ -197,20 +195,29 @@ fun FeedScreen(
                                     feedScreenState.value.hasMoreResults
                             }
 
-                        FeedPage(
-                            contentPadding = recyclerContentPadding,
-                            feedMangaList = feedManga,
-                            hasMoreResults = hasMoreResults,
-                            groupedBySeries =
-                                feedScreenState.value.historyGrouping == FeedHistoryGroup.Series,
-                            feedScreenType = feedScreenState.value.feedScreenType,
-                            outlineCovers = feedScreenState.value.outlineCovers,
-                            hideChapterTitles = feedScreenState.value.hideChapterTitles,
-                            updatesFetchSort = feedScreenState.value.updatesSortedByFetch,
-                            feedScreenActions = feedScreenActions,
-                            loadNextPage = loadNextPage,
-                        )
-
+                        when (feedScreenType) {
+                            FeedScreenType.Downloads -> {
+                                DownloadScreen(
+                                    downloads = feedScreenState.value.downloads,
+                                    contentPadding = recyclerContentPadding
+                                )
+                            }
+                            else ->
+                                FeedPage(
+                                    contentPadding = recyclerContentPadding,
+                                    feedMangaList = feedManga,
+                                    hasMoreResults = hasMoreResults,
+                                    groupedBySeries =
+                                        feedScreenState.value.historyGrouping ==
+                                            FeedHistoryGroup.Series,
+                                    feedScreenType = feedScreenState.value.feedScreenType,
+                                    outlineCovers = feedScreenState.value.outlineCovers,
+                                    hideChapterTitles = feedScreenState.value.hideChapterTitles,
+                                    updatesFetchSort = feedScreenState.value.updatesSortedByFetch,
+                                    feedScreenActions = feedScreenActions,
+                                    loadNextPage = loadNextPage,
+                                )
+                        }
                         if (!feedScreenState.value.firstLoad) {
                             ScreenTypeFooter(
                                 screenType = feedScreenType,
@@ -274,6 +281,14 @@ private fun ScreenTypeFooter(
                 selected = screenType == FeedScreenType.Updates,
                 onClick = { screenTypeClick(FeedScreenType.Updates) },
                 name = stringResource(R.string.updates),
+            )
+        }
+
+        item {
+            FooterFilterChip(
+                selected = screenType == FeedScreenType.Downloads,
+                onClick = { screenTypeClick(FeedScreenType.Downloads) },
+                name = stringResource(R.string.downloads),
             )
         }
     }

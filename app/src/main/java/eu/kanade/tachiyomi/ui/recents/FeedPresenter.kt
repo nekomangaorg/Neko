@@ -87,6 +87,11 @@ class FeedPresenter(
     override fun onCreate() {
         super.onCreate()
         LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
+        presenterScope.launchIO {
+            _feedScreenState.update {
+                it.copy(downloads = downloadManager.queueState.value.toImmutableList())
+            }
+        }
         observeDownloads()
 
         if (_feedScreenState.value.firstLoad) {
@@ -402,7 +407,11 @@ class FeedPresenter(
         val mutableList = _feedScreenState.value.downloads.toMutableList()
         val indexOfDownload = mutableList.indexOfFirst { it.chapter.id == download.chapter.id }
         if (indexOfDownload >= 0) {
-            mutableList[indexOfDownload] = download
+            if (download.status == Download.State.DOWNLOADED) {
+                mutableList.removeAt(indexOfDownload)
+            } else {
+                mutableList[indexOfDownload] = download
+            }
             _feedScreenState.update { it.copy(downloads = mutableList.toImmutableList()) }
         }
     }

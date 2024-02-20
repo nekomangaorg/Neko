@@ -31,6 +31,7 @@ data class FeedScreenState(
 enum class FeedScreenType {
     History,
     Updates,
+    Downloads,
 }
 
 enum class FeedHistoryGroup {

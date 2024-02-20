@@ -35,11 +35,11 @@ fun DownloadChapterRow(download: Download) {
                 when (dismissState.dismissDirection) {
                     DismissDirection.EndToStart -> Alignment.CenterEnd
                     DismissDirection.StartToEnd -> Alignment.CenterStart
-                    else -> null
+                    else -> Alignment.Center
                 }
-            Background(alignment!!)
+            Background(alignment)
         },
-        dismissContent = { Text(text = "Hello") },
+        dismissContent = { Text(text = download.chapter.chapter_title) },
     )
     when {
         dismissState.isDismissed(DismissDirection.EndToStart) -> Unit

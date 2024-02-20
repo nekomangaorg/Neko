@@ -165,6 +165,7 @@ fun FeedPage(
                     }
                 }
             }
+            else -> Unit
         }
     }
 }

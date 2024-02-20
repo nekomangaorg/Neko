@@ -212,7 +212,7 @@ class FeedRepository(
 
                         Pair(chapters.isNotEmpty(), chapters)
                     }
-                    else -> throw Exception("Not valid")
+                    else -> Pair(false, persistentListOf())
                 }
             }
             .mapError { err ->

@@ -63,6 +63,7 @@ fun FeedBottomSheet(
                 FeedScreenType.History ->
                     historyContent(historyGrouping, groupHistoryClick, clearHistoryClick)
                 FeedScreenType.Updates -> uploadsContent(sortByFetched, sortClick)
+                FeedScreenType.Downloads -> Unit
             }
         }
     }
