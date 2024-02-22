@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.base.controller
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +31,16 @@ abstract class BaseCoroutineController<VB : ViewBinding, PS : BaseCoroutinePrese
 
     @Suppress("UNCHECKED_CAST")
     private fun <View> BaseCoroutinePresenter<View>.takeView(view: Any) = attachView(view as? View)
+
+    override fun onActivityPaused(activity: Activity) {
+        super.onActivityPaused(activity)
+        presenter.onPause()
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        presenter.onResume()
+    }
 
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)

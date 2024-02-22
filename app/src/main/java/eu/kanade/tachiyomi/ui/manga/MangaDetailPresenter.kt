@@ -121,6 +121,8 @@ class MangaDetailPresenter(
     private val _currentManga = MutableStateFlow<Manga?>(null)
     val manga: StateFlow<Manga?> = _currentManga.asStateFlow()
 
+    val downloadsScope = presenterScope
+
     private fun currentManga(): Manga {
         if (_currentManga.value == null) {
             val dbManga = db.getManga(mangaId).executeAsBlocking()
@@ -1926,19 +1928,20 @@ class MangaDetailPresenter(
     }
 
     /**
-     * This method request updates after the actitivy resumed (usually after a return from the
+     * This method request updates after the activity resumed (usually after a return from the
      * reader)
      */
-    fun resume() {
+    override fun onResume() {
         presenterScope.launch {
             updateMangaFlow()
             updateChapterFlows()
             updateTrackingFlows()
+            observeDownloads()
         }
     }
 
     private fun observeDownloads() {
-        presenterScope.launchIO {
+        pausablePresenterScope.launchIO {
             downloadManager
                 .statusFlow()
                 .filter { it.manga.id == currentManga().id }
@@ -1946,7 +1949,7 @@ class MangaDetailPresenter(
                 .collect { updateDownloadState(it) }
         }
 
-        presenterScope.launchIO {
+        pausablePresenterScope.launchIO {
             downloadManager
                 .progressFlow()
                 .filter { it.manga.id == currentManga().id }

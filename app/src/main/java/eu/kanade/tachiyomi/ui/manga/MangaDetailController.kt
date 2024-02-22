@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -326,11 +325,6 @@ class MangaDetailController(private val mangaId: Long) :
                 controller.search(text)
             }
         }
-    }
-
-    override fun onActivityResumed(activity: Activity) {
-        super.onActivityResumed(activity)
-        presenter.resume()
     }
 
     companion object {
