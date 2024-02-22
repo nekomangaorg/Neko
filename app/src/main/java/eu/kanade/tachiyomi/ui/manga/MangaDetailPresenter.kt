@@ -121,8 +121,6 @@ class MangaDetailPresenter(
     private val _currentManga = MutableStateFlow<Manga?>(null)
     val manga: StateFlow<Manga?> = _currentManga.asStateFlow()
 
-    val downloadsScope = presenterScope
-
     private fun currentManga(): Manga {
         if (_currentManga.value == null) {
             val dbManga = db.getManga(mangaId).executeAsBlocking()
@@ -168,12 +166,9 @@ class MangaDetailPresenter(
             _currentManga.value = dbManga
             val validMergeTypes =
                 when (sourceManager.komga.hasCredentials()) {
-                    true -> MergeType.values().toList().toPersistentList()
+                    true -> MergeType.entries.toPersistentList()
                     false ->
-                        MergeType.values()
-                            .toList()
-                            .filterNot { it == MergeType.Komga }
-                            .toPersistentList()
+                        MergeType.entries.filterNot { it == MergeType.Komga }.toPersistentList()
                 }
             _generalState.value =
                 MangaConstants.MangaScreenGeneralState(
@@ -1908,7 +1903,7 @@ class MangaDetailPresenter(
     }
 
     // This is already filtered before reaching here, so directly update the chapters
-    fun onUpdateManga(mangaId: Long?) {
+    private fun onUpdateManga(mangaId: Long?) {
         updateChapterFlows()
     }
 
@@ -1959,7 +1954,7 @@ class MangaDetailPresenter(
     }
 
     // callback from Downloader
-    fun updateDownloadState(download: Download) {
+    private fun updateDownloadState(download: Download) {
         presenterScope.launchIO {
             val currentChapters = generalState.value.activeChapters
             val index = currentChapters.indexOfFirst { it.chapter.id == download.chapter.id }
@@ -1979,10 +1974,6 @@ class MangaDetailPresenter(
             }
         }
     }
-
-    /*  override fun updateDownloads() {
-        presenterScope.launchIO { updateChapterFlows() }
-    }*/
 
     fun getChapterUrl(chapter: SimpleChapter): String {
         return chapter.getHttpSource(sourceManager).getChapterUrl(chapter)
