@@ -1,9 +1,12 @@
 package org.nekomanga.presentation.screens.download
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
@@ -39,13 +42,25 @@ fun DownloadChapterRow(download: Download) {
                 }
             Background(alignment)
         },
-        dismissContent = { Text(text = download.chapter.chapter_title) },
+        dismissContent = { ChapterRow(download) },
     )
     when {
         dismissState.isDismissed(DismissDirection.EndToStart) -> Unit
         //  Reset(dismissState = dismissState, action = onRead)
         dismissState.isDismissed(DismissDirection.StartToEnd) -> Unit
     //   Reset(dismissState = dismissState, action = onBookmark)
+    }
+}
+
+@Composable
+private fun ChapterRow(download: Download) {
+    Row(
+        modifier =
+            Modifier.fillMaxWidth()
+                .padding(start = Size.small, top = Size.small, bottom = Size.small),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(text = download.chapter.chapter_title)
     }
 }
 

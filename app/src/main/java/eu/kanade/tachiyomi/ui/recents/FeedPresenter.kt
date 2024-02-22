@@ -307,11 +307,11 @@ class FeedPresenter(
 
     private fun onUpdateManga(mangaId: Long?) {
         presenterScope.launchIO {
-            when {
-                mangaId == null -> {
+            when (mangaId) {
+                null -> {
                     _feedScreenState.update { it.copy(isRefreshing = false) }
                 }
-                mangaId == LibraryUpdateJob.STARTING_UPDATE_SOURCE -> {
+                LibraryUpdateJob.STARTING_UPDATE_SOURCE -> {
                     _feedScreenState.update { it.copy(isRefreshing = true) }
                 }
                 else -> {
