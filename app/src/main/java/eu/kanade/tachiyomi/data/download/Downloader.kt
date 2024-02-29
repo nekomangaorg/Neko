@@ -248,7 +248,6 @@ class Downloader(
                 .asSequence()
                 // Filter out those already downloaded.
                 .filter { provider.chapterDirDoesNotExist(it, chapterDirFiles) }
-                .filter { it.scanlator?.contains("Comikey")?.not() ?: true }
                 // Add chapters to queue from the start.
                 .sortedByDescending { it.source_order }
                 // Filter out those already enqueued.
