@@ -3,6 +3,7 @@ accompanist_version = "0.34.0"
 compose_version = "1.6.2"
 compose_material3_version = "1.2.0"
 compose_compiler_version = "1.5.4"
+markdown_version = "0.13.0"
 
 [libraries]
 
@@ -35,9 +36,10 @@ gap = "jp.wasabeef:gap:1.1.0"
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
 date-field = "com.github.nonproto:compose-date-text-field:73c012b665"
-markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.12.0"
+markdown = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdown_version" }
+markdown-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown_version" }
 
 [bundles]
 accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
-compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "material-motion"]
+compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "material-motion"]
 charting = ["charty"]

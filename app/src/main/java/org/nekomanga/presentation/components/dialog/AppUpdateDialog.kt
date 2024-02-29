@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.mikepenz.markdown.compose.Markdown
-import com.mikepenz.markdown.model.markdownColor
-import com.mikepenz.markdown.model.markdownTypography
+import com.mikepenz.markdown.m3.markdownColor
+import com.mikepenz.markdown.m3.markdownTypography
 import eu.kanade.tachiyomi.data.updater.GithubRelease
 import org.nekomanga.R
 
