@@ -6,9 +6,7 @@ import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -20,17 +18,12 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Headers
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import org.nekomanga.core.network.GET
 import org.nekomanga.core.network.interceptor.rateLimit
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -49,19 +42,9 @@ class ComikeyHandler {
         isLenient = true
     }
 
-    suspend fun fetchPageList(externalUrl: String): List<Page> {
+    fun fetchPageList(externalUrl: String): List<Page> {
         val chapterUrl = externalUrl.substringAfter(baseUrl).substringBefore("?utm_source")
         return pageListParse(chapterUrl)
-    }
-
-    fun pageListParse(response: Response): List<Page> {
-        return Json.parseToJsonElement(response.body!!.string())
-            .jsonObject["readingOrder"]!!
-            .jsonArray
-            .mapIndexed { index, element ->
-                val url = element.jsonObject["href"]!!.jsonPrimitive.content
-                Page(index, url, url)
-            }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -86,27 +69,27 @@ class ComikeyHandler {
 
             // Somewhat useful if you need to debug WebView issues. Don't delete.
             //
-            innerWv.webChromeClient =
-                object : WebChromeClient() {
-                    override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                        if (consoleMessage == null) {
-                            return false
-                        }
-                        val logContent =
-                            "wv: ${consoleMessage.message()} (${consoleMessage.sourceId()}, line ${consoleMessage.lineNumber()})"
-                        when (consoleMessage.messageLevel()) {
-                            ConsoleMessage.MessageLevel.ERROR ->
-                                TimberKt.e { "comikey $logContent" }
-                            ConsoleMessage.MessageLevel.LOG -> TimberKt.i { "comikey $logContent" }
-                            ConsoleMessage.MessageLevel.TIP -> TimberKt.i { "comikey $logContent" }
-                            ConsoleMessage.MessageLevel.WARNING ->
-                                TimberKt.w { "comikey $logContent" }
-                            else -> TimberKt.d { "comikey $logContent" }
-                        }
-
-                        return true
+            /* innerWv.webChromeClient =
+            object : WebChromeClient() {
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    if (consoleMessage == null) {
+                        return false
                     }
+                    val logContent =
+                        "wv: ${consoleMessage.message()} (${consoleMessage.sourceId()}, line ${consoleMessage.lineNumber()})"
+                    when (consoleMessage.messageLevel()) {
+                        ConsoleMessage.MessageLevel.ERROR ->
+                            TimberKt.e { "comikey $logContent" }
+                        ConsoleMessage.MessageLevel.LOG -> TimberKt.i { "comikey $logContent" }
+                        ConsoleMessage.MessageLevel.TIP -> TimberKt.i { "comikey $logContent" }
+                        ConsoleMessage.MessageLevel.WARNING ->
+                            TimberKt.w { "comikey $logContent" }
+                        else -> TimberKt.d { "comikey $logContent" }
+                    }
+
+                    return true
                 }
+            }*/
 
             innerWv.webViewClient =
                 object : WebViewClient() {
