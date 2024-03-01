@@ -16,9 +16,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.tryToSetForeground
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
@@ -29,7 +27,7 @@ class TrackingSyncJob(
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
 
-    val trackingSyncService: TrackSyncProcessor by injectLazy()
+    private val trackingSyncService: TrackSyncProcessor by injectLazy()
 
     // List containing failed updates
     private val failedUpdates = mutableMapOf<Manga, String?>()
@@ -76,10 +74,7 @@ class TrackingSyncJob(
             TimberKt.e(e) { "error refreshing tracking metadata" }
             return@coroutineScope Result.failure()
         } finally {
-            launchIO {
-                delay(3.seconds.inWholeMilliseconds)
-                context.notificationManager.cancel(Notifications.Id.Tracking.Complete)
-            }
+            launchIO { context.notificationManager.cancel(Notifications.Id.Tracking.Progress) }
         }
     }
 
