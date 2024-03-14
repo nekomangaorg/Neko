@@ -837,6 +837,7 @@
     <string name="invalid_backup_file">Invalid backup file</string>
     <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
     <string name="file_is_missing_data">File is missing data.</string>
+    <string name="no_backup_directory_selected">No backup directory selected</string>
     <string name="backup_has_no_manga">Backup does not contain any manga.</string>
     <string name="backup_failed">Backup failed</string>
     <string name="empty_backup_error">No library entries to back up</string>

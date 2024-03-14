@@ -184,6 +184,10 @@ class SettingsDataController : SettingsController() {
 
     fun createBackup(flags: Int) {
         backupFlags = flags
+        if (storageManager.getBackupDirectory() == null) {
+            activity?.toast(R.string.no_backup_directory_selected)
+            return
+        }
         try {
             // Use Android's built-in file creator
             val intent =
