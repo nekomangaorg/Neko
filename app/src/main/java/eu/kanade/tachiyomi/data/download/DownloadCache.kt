@@ -165,8 +165,8 @@ class DownloadCache(
 
         val sourceDirs =
             storageManager
-                .getDownloadsDirectory()!!
-                .listFiles()
+                .getDownloadsDirectory()
+                ?.listFiles()
                 .orEmpty()
                 .associate { it.name to SourceDirectory(it) }
                 .mapNotNullKeys { entry ->
