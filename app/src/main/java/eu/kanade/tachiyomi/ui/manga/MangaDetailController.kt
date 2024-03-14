@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
 import org.nekomanga.R
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.injectLazy
@@ -161,7 +162,20 @@ class MangaDetailController(private val mangaId: Long) :
             chapterActions =
                 ChapterActions(
                     mark = presenter::markChapters,
-                    download = presenter::downloadChapters,
+                    download = { chapterItems, downloadAction ->
+                        if (
+                            chapterItems.size == 1 &&
+                                MdConstants.UnsupportedOfficialScanlators.contains(
+                                    chapterItems[0].chapter.scanlator
+                                )
+                        ) {
+                            context.toast(
+                                "${chapterItems[0].chapter.scanlator} not supported, try WebView"
+                            )
+                        } else {
+                            presenter.downloadChapters(chapterItems, downloadAction)
+                        }
+                    },
                     delete = presenter::deleteChapters,
                     clearRemoved = presenter::clearRemovedChapters,
                     openNext = {
@@ -189,7 +203,14 @@ class MangaDetailController(private val mangaId: Long) :
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {
-        startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
+        if (
+            chapter.scanlator != null &&
+                MdConstants.UnsupportedOfficialScanlators.contains(chapter.scanlator)
+        ) {
+            context.toast("${chapter.scanlator} not supported, try WebView")
+        } else {
+            startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))
+        }
     }
 
     /** Generate palette from the drawable */

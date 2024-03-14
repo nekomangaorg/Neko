@@ -72,7 +72,7 @@ class PageHandler {
                         "bilibili comics".equals(chapter.scanlator, true) -> {
                             return@withContext bilibiliHandler.fetchPageList(externalUrl)
                         }
-                        else -> throw Exception("${chapter.scanlator} not supported, try webview")
+                        else -> throw Exception("${chapter.scanlator} not supported, try WebView")
                     }
                 }
 

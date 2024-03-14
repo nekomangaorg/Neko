@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
@@ -41,17 +42,12 @@ class ChapterFilter(
                 notBookmarkEnabled
         ) {
             filteredChapters.filter {
-                if (
-                    readEnabled && !it.read ||
-                        (unreadEnabled && it.read) ||
-                        (bookmarkEnabled && !it.bookmark) ||
-                        (notBookmarkEnabled && it.bookmark) ||
-                        (downloadEnabled && !downloadManager.isChapterDownloaded(it, manga)) ||
-                        (notDownloadEnabled && downloadManager.isChapterDownloaded(it, manga))
-                ) {
-                    return@filter false
-                }
-                return@filter true
+                return@filter !(readEnabled && !it.read ||
+                    (unreadEnabled && it.read) ||
+                    (bookmarkEnabled && !it.bookmark) ||
+                    (notBookmarkEnabled && it.bookmark) ||
+                    (downloadEnabled && !downloadManager.isChapterDownloaded(it, manga)) ||
+                    (notDownloadEnabled && downloadManager.isChapterDownloaded(it, manga)))
             }
         } else {
             filteredChapters
@@ -74,6 +70,12 @@ class ChapterFilter(
                     chp.scanlatorList().none { it in blockedScanlator }
                 }
         }
+
+        // filter out unsupported official scanlators
+        filteredChapters =
+            filteredChapters.filter { chp ->
+                !MdConstants.UnsupportedOfficialScanlators.contains(chp.scanlator)
+            }
 
         // if filter preferences are not enabled don't even filter
         if (
