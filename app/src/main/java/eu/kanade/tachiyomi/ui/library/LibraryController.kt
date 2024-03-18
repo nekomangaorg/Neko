@@ -1002,7 +1002,7 @@ class LibraryController(
                     viewScope.launchUI {
                         NotificationReceiver.dismissNotification(
                             context,
-                            Notifications.ID_LIBRARY_PROGRESS,
+                            Notifications.Id.Library.Progress,
                         )
                     }
                 }
@@ -1821,7 +1821,7 @@ class LibraryController(
                     viewScope.launchUI {
                         NotificationReceiver.dismissNotification(
                             context,
-                            Notifications.ID_LIBRARY_PROGRESS,
+                            Notifications.Id.Library.Progress,
                         )
                     }
                 }
