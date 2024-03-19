@@ -123,7 +123,7 @@ tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
 retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
-retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
+retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.10.0"
 
 
 #test libs
