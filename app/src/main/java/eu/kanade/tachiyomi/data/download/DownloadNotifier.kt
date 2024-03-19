@@ -79,10 +79,10 @@ internal class DownloadNotifier(private val context: Context) {
             }
 
             if (download != null && securityPreferences.hideNotificationContent().get()) {
-                val title = download.manga.title.chop(15)
+                val title = download.mangaItem.title.chop(15)
                 val quotedTitle = Pattern.quote(title)
                 val chapter =
-                    download.chapter.name.replaceFirst(
+                    download.chapterItem.name.replaceFirst(
                         "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
                         "",
                     )
@@ -131,10 +131,10 @@ internal class DownloadNotifier(private val context: Context) {
             if (securityPreferences.hideNotificationContent().get()) {
                 setContentTitle(downloadingProgressText)
             } else {
-                val title = download.manga.title.chop(15)
+                val title = download.mangaItem.title.chop(15)
                 val quotedTitle = Pattern.quote(title)
                 val chapter =
-                    download.chapter.name.replaceFirst(
+                    download.chapterItem.name.replaceFirst(
                         "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
                         "",
                     )

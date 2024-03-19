@@ -121,7 +121,7 @@ constructor(
             if (download != null) {
                 resources.getString(
                     R.string.downloading_,
-                    download.chapter.name,
+                    download.chapterItem.name,
                 )
             } else {
                 ""
@@ -171,7 +171,8 @@ constructor(
      * @return the holder of the download or null if it's not bound.
      */
     private fun getHolder(download: Download): DownloadHolder? {
-        return binding.dlRecycler.findViewHolderForItemId(download.chapter.id!!) as? DownloadHolder
+        return binding.dlRecycler.findViewHolderForItemId(download.chapterItem.id!!)
+            as? DownloadHolder
     }
 
     /** Set information view when queue is empty */
@@ -215,11 +216,11 @@ constructor(
             }
             R.id.newest,
             R.id.oldest -> {
-                reorderQueue({ it.download.chapter.date_upload }, item.itemId == R.id.newest)
+                reorderQueue({ it.download.chapterItem.dateUpload }, item.itemId == R.id.newest)
             }
             R.id.asc,
             R.id.desc -> {
-                reorderQueue({ it.download.chapter.chapter_number }, item.itemId == R.id.desc)
+                reorderQueue({ it.download.chapterItem.chapterNumber }, item.itemId == R.id.desc)
             }
         }
         return true
@@ -333,7 +334,7 @@ constructor(
                             ?.currentItems
                             ?.filterIsInstance<DownloadItem>()
                             ?.map(DownloadItem::download)
-                            ?.partition { item.download.manga.id == it.manga.id }
+                            ?.partition { item.download.mangaItem.id == it.mangaItem.id }
                             ?: Pair(listOf<Download>(), listOf<Download>())
                     presenter.reorder(selectedSeries + otherSeries)
                 }
@@ -342,7 +343,7 @@ constructor(
                         adapter
                             ?.currentItems
                             ?.filterIsInstance<DownloadItem>()
-                            ?.filter { item.download.manga.id == it.download.manga.id }
+                            ?.filter { item.download.mangaItem.id == it.download.mangaItem.id }
                             ?.map(DownloadItem::download)
                     if (!allDownloadsForSeries.isNullOrEmpty()) {
                         presenter.cancelDownloads(allDownloadsForSeries)

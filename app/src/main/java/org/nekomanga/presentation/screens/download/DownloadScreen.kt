@@ -25,7 +25,7 @@ fun DownloadScreen(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Size.small)
     ) {
-        items(downloads, { download -> download.chapter.id!! }) { download ->
+        items(downloads, { download -> download.chapterItem.id }) { download ->
             DownloadChapterRow(download)
         }
     }

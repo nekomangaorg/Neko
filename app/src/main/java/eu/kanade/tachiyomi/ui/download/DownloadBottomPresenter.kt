@@ -83,14 +83,14 @@ class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
                         val oldItemsIds =
                             this@DownloadBottomPresenter.items
                                 .map { header ->
-                                    header.subItems.mapNotNull { it.download.chapter.id }
+                                    header.subItems.mapNotNull { it.download.chapterItem.id }
                                 }
                                 .flatten()
                                 .toLongArray()
                         val newItemsIds =
                             items
                                 .map { header ->
-                                    header.subItems.mapNotNull { it.download.chapter.id }
+                                    header.subItems.mapNotNull { it.download.chapterItem.id }
                                 }
                                 .flatten()
                                 .toLongArray()

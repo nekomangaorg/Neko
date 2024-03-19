@@ -592,7 +592,8 @@ class RecentsPresenter(
                 .statusFlow()
                 .catch { error -> TimberKt.e(error) }
                 .collect { download ->
-                    recentItems.find { it.chapter.id == download.chapter.id }?.download = download
+                    recentItems.find { it.chapter.id == download.chapterItem.id }?.download =
+                        download
                     withUIContext { view?.updateChapterDownload(download) }
                 }
         }
@@ -602,7 +603,8 @@ class RecentsPresenter(
                 .progressFlow()
                 .catch { error -> TimberKt.e(error) }
                 .collect { download ->
-                    recentItems.find { it.chapter.id == download.chapter.id }?.download = download
+                    recentItems.find { it.chapter.id == download.chapterItem.id }?.download =
+                        download
                     withUIContext { view?.updateChapterDownload(download) }
                 }
         }

@@ -587,9 +587,9 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.dlBottomSheet.onUpdateProgress(download)
             binding.downloadBottomSheet.dlBottomSheet.onUpdateDownloadedPages(download)
         }
-        val id = download.chapter.id ?: return
+        val id = download.chapterItem.id ?: return
         val holder = binding.recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
-        holder.notifyStatus(download.status, download.progress, download.chapter.read, true)
+        holder.notifyStatus(download.status, download.progress, download.chapterItem.read, true)
     }
 
     private fun refreshItem(chapterId: Long) {

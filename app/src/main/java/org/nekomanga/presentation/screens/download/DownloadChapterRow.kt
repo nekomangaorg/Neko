@@ -60,7 +60,7 @@ private fun ChapterRow(download: Download) {
                 .padding(start = Size.small, top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(text = download.chapter.chapter_title)
+        Text(text = download.chapterItem.chapterTitle)
     }
 }
 

@@ -15,7 +15,9 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.presentation.screens.FeedScreen
 
 class FeedController : BaseComposeController<FeedPresenter>() {
@@ -52,7 +54,19 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     deleteAllHistoryClick = presenter::deleteAllHistory,
                     deleteHistoryClick = presenter::deleteHistory,
                     search = presenter::search,
-                    downloadClick = presenter::downloadChapter,
+                    downloadClick = { chapterItem, feedManga, downloadAction ->
+                        if (
+                            MdConstants.UnsupportedOfficialScanlators.contains(
+                                chapterItem.chapter.scanlator
+                            )
+                        ) {
+                            context.toast(
+                                "${chapterItem.chapter.scanlator} not supported, try WebView"
+                            )
+                        } else {
+                            presenter.downloadChapter(chapterItem, feedManga, downloadAction)
+                        }
+                    },
                     updateLibrary = { start -> updateLibrary(start, context) },
                 ),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },

@@ -284,11 +284,12 @@ class FeedPresenter(
         feedManga: List<FeedManga>
     ): Pair<Boolean, List<FeedManga>> {
         val mutableFeedManga = feedManga.toMutableList()
-        val indexOfFeedManga = mutableFeedManga.indexOfFirst { it.mangaId == download.manga.id }
+        val indexOfFeedManga =
+            mutableFeedManga.indexOfFirst { it.mangaId == download.chapterItem.mangaId }
         if (indexOfFeedManga >= 0) {
             val mutableChapters = mutableFeedManga[indexOfFeedManga].chapters.toMutableList()
             val indexOfChapter =
-                mutableChapters.indexOfFirst { it.chapter.id == download.chapter.id }
+                mutableChapters.indexOfFirst { it.chapter.id == download.chapterItem.id }
             if (indexOfChapter >= 0) {
                 mutableChapters[indexOfChapter] =
                     mutableChapters[indexOfChapter].copy(
@@ -405,7 +406,8 @@ class FeedPresenter(
 
     private fun updateDownloadQueue(download: Download) {
         val mutableList = _feedScreenState.value.downloads.toMutableList()
-        val indexOfDownload = mutableList.indexOfFirst { it.chapter.id == download.chapter.id }
+        val indexOfDownload =
+            mutableList.indexOfFirst { it.chapterItem.id == download.chapterItem.id }
         if (indexOfDownload >= 0) {
             if (download.status == Download.State.DOWNLOADED) {
                 mutableList.removeAt(indexOfDownload)
