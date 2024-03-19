@@ -16,6 +16,8 @@ object MdConstants {
     const val noCoverUrl = "https://mangadex.org/cover-placeholder.jpg"
     const val chapterSuffix = "/chapter/"
 
+    val UnsupportedOfficialScanlators = arrayOf("Alpha Manga")
+
     object Api {
         const val baseUrl = "https://api.mangadex.org"
         const val manga = "/manga"

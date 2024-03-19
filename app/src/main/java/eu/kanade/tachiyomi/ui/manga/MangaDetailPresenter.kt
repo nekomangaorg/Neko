@@ -166,12 +166,9 @@ class MangaDetailPresenter(
             _currentManga.value = dbManga
             val validMergeTypes =
                 when (sourceManager.komga.hasCredentials()) {
-                    true -> MergeType.values().toList().toPersistentList()
+                    true -> MergeType.entries.toPersistentList()
                     false ->
-                        MergeType.values()
-                            .toList()
-                            .filterNot { it == MergeType.Komga }
-                            .toPersistentList()
+                        MergeType.entries.filterNot { it == MergeType.Komga }.toPersistentList()
                 }
             _generalState.value =
                 MangaConstants.MangaScreenGeneralState(
@@ -1906,7 +1903,7 @@ class MangaDetailPresenter(
     }
 
     // This is already filtered before reaching here, so directly update the chapters
-    fun onUpdateManga(mangaId: Long?) {
+    private fun onUpdateManga(mangaId: Long?) {
         updateChapterFlows()
     }
 
@@ -1926,19 +1923,20 @@ class MangaDetailPresenter(
     }
 
     /**
-     * This method request updates after the actitivy resumed (usually after a return from the
+     * This method request updates after the activity resumed (usually after a return from the
      * reader)
      */
-    fun resume() {
+    override fun onResume() {
         presenterScope.launch {
             updateMangaFlow()
             updateChapterFlows()
             updateTrackingFlows()
+            observeDownloads()
         }
     }
 
     private fun observeDownloads() {
-        presenterScope.launchIO {
+        pausablePresenterScope.launchIO {
             downloadManager
                 .statusFlow()
                 .filter { it.manga.id == currentManga().id }
@@ -1946,7 +1944,7 @@ class MangaDetailPresenter(
                 .collect { updateDownloadState(it) }
         }
 
-        presenterScope.launchIO {
+        pausablePresenterScope.launchIO {
             downloadManager
                 .progressFlow()
                 .filter { it.manga.id == currentManga().id }
@@ -1956,7 +1954,7 @@ class MangaDetailPresenter(
     }
 
     // callback from Downloader
-    fun updateDownloadState(download: Download) {
+    private fun updateDownloadState(download: Download) {
         presenterScope.launchIO {
             val currentChapters = generalState.value.activeChapters
             val index = currentChapters.indexOfFirst { it.chapter.id == download.chapter.id }
@@ -1976,10 +1974,6 @@ class MangaDetailPresenter(
             }
         }
     }
-
-    /*  override fun updateDownloads() {
-        presenterScope.launchIO { updateChapterFlows() }
-    }*/
 
     fun getChapterUrl(chapter: SimpleChapter): String {
         return chapter.getHttpSource(sourceManager).getChapterUrl(chapter)

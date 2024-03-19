@@ -15,12 +15,19 @@ object Notifications {
 
     object Group {
         const val Download = "group_downloader"
+        const val Library = "group_library"
     }
 
     object Channel {
         object Downloader {
             const val Error = "downloader_error_channel"
             const val Progress = "downloader_progress_channel"
+        }
+
+        object Library {
+            const val Progress = "library_progress_channel"
+            const val Error = "library_errors_channel"
+            const val Skipped = "library_skipped_channel"
         }
 
         const val Installing = "installing_channel"
@@ -33,6 +40,12 @@ object Notifications {
         object Download {
             const val Progress = -201
             const val Error = -202
+        }
+
+        object Library {
+            const val Progress = -101
+            const val Error = -102
+            const val Skipped = -103
         }
 
         object Status {
@@ -59,21 +72,12 @@ object Notifications {
     const val ID_INSTALL = 3
     const val CHANNEL_UPDATED = "updated_channel"
     const val ID_INSTALLED = -6
-    const val GROUP_APP_UPDATES = "eu.kanade.tachiyomi.APP_UPDATES"
+    private const val GROUP_APP_UPDATES = "org.nekomanga.APP_UPDATES"
 
     /** Notification channel and ids used by the library updater. */
-    private const val GROUP_LIBRARY = "group_library"
     const val CHANNEL_NEW_CHAPTERS = "new_chapters_channel"
     const val ID_NEW_CHAPTERS = -301
-    const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
-
-    /** Notification channel and ids used by the library updater. */
-    const val CHANNEL_LIBRARY_PROGRESS = "library_progress_channel"
-    const val ID_LIBRARY_PROGRESS = -101
-    const val CHANNEL_LIBRARY_ERROR = "library_errors_channel"
-    const val ID_LIBRARY_ERROR = -102
-    const val CHANNEL_LIBRARY_SKIPPED = "library_skipped_channel"
-    const val ID_LIBRARY_SKIPPED = -103
+    const val GROUP_NEW_CHAPTERS = "org.nekomanga.NEW_CHAPTERS"
 
     /** Notification channel and ids used for backup and restore. */
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
@@ -111,7 +115,7 @@ object Notifications {
                     GROUP_BACKUP_RESTORE,
                     context.getString(R.string.backup_and_restore),
                 ),
-                NotificationChannelGroup(GROUP_LIBRARY, context.getString(R.string.library)),
+                NotificationChannelGroup(Group.Library, context.getString(R.string.library)),
                 NotificationChannelGroup(
                     GROUP_BACKUP_RESTORE,
                     context.getString(R.string.group_backup_restore),
@@ -135,30 +139,30 @@ object Notifications {
                     NotificationManager.IMPORTANCE_LOW,
                 ),
                 NotificationChannel(
-                        CHANNEL_LIBRARY_PROGRESS,
+                        Channel.Library.Progress,
                         context.getString(R.string.updating_library),
                         NotificationManager.IMPORTANCE_LOW,
                     )
                     .apply {
-                        group = GROUP_LIBRARY
+                        group = Group.Library
                         setShowBadge(false)
                     },
                 NotificationChannel(
-                        CHANNEL_LIBRARY_ERROR,
+                        Channel.Library.Error,
                         context.getString(R.string.channel_errors),
                         NotificationManager.IMPORTANCE_LOW,
                     )
                     .apply {
-                        group = GROUP_LIBRARY
+                        group = Group.Library
                         setShowBadge(false)
                     },
                 NotificationChannel(
-                        CHANNEL_LIBRARY_SKIPPED,
+                        Channel.Library.Skipped,
                         context.getString(R.string.channel_skipped),
                         NotificationManager.IMPORTANCE_LOW,
                     )
                     .apply {
-                        group = GROUP_LIBRARY
+                        group = Group.Library
                         setShowBadge(false)
                     },
                 NotificationChannel(
@@ -184,7 +188,7 @@ object Notifications {
                         context.getString(R.string.new_chapters),
                         NotificationManager.IMPORTANCE_DEFAULT,
                     )
-                    .apply { group = GROUP_LIBRARY },
+                    .apply { group = Group.Library },
                 NotificationChannel(
                         CHANNEL_BACKUP_RESTORE_PROGRESS,
                         context.getString(R.string.backup_restore_progress),

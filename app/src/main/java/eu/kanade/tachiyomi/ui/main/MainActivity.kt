@@ -247,7 +247,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                         lifecycleScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
-                                Notifications.ID_LIBRARY_PROGRESS,
+                                Notifications.Id.Library.Progress,
                             )
                         }
                     }

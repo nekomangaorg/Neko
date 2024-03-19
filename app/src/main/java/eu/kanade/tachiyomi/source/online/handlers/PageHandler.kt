@@ -66,13 +66,13 @@ class PageHandler {
                         "mangaplus".equals(chapter.scanlator, true) -> {
                             return@withContext mangaPlusHandler.fetchPageList(externalUrl)
                         }
-                        /*"comikey".equals(chapter.scanlator, true) -> {
+                        "comikey".equals(chapter.scanlator, true) -> {
                             return@withContext comikeyHandler.fetchPageList(externalUrl)
-                        }*/
+                        }
                         "bilibili comics".equals(chapter.scanlator, true) -> {
                             return@withContext bilibiliHandler.fetchPageList(externalUrl)
                         }
-                        else -> throw Exception("${chapter.scanlator} not supported, try webview")
+                        else -> throw Exception("${chapter.scanlator} not supported, try WebView")
                     }
                 }
 

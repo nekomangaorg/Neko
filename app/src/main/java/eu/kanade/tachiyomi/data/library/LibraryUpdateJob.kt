@@ -315,7 +315,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val notification = notifier.progressNotificationBuilder.build()
-        val id = Notifications.ID_LIBRARY_PROGRESS
+        val id = Notifications.Id.Library.Progress
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ForegroundInfo(id, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
         } else {
@@ -646,7 +646,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             skippedUpdates.isNotEmpty() &&
                 Notifications.isNotificationChannelEnabled(
                     context,
-                    Notifications.CHANNEL_LIBRARY_SKIPPED
+                    Notifications.Channel.Library.Skipped
                 )
         ) {
             val skippedFile =
@@ -661,7 +661,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             failedUpdates.isNotEmpty() &&
                 Notifications.isNotificationChannelEnabled(
                     context,
-                    Notifications.CHANNEL_LIBRARY_ERROR
+                    Notifications.Channel.Library.Error
                 )
         ) {
             val errorFile = writeErrorFile(failedUpdates)

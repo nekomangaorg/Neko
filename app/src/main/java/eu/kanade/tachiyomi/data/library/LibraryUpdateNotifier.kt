@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.chop
@@ -34,7 +33,6 @@ import uy.kohesive.injekt.injectLazy
 
 class LibraryUpdateNotifier(private val context: Context) {
 
-    private val preferences: PreferencesHelper by injectLazy()
     private val securityPreferences: SecurityPreferences by injectLazy()
 
     /** Pending intent of action that cancels the library update */
@@ -49,7 +47,7 @@ class LibraryUpdateNotifier(private val context: Context) {
 
     /** Cached progress notification to avoid creating a lot. */
     val progressNotificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_LIBRARY_PROGRESS) {
+        context.notificationBuilder(Notifications.Channel.Library.Progress) {
             setContentTitle(context.getString(R.string.app_name))
             setSmallIcon(R.drawable.ic_refresh_24dp)
             setLargeIcon(notificationBitmap)
@@ -80,7 +78,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             }
 
         context.notificationManager.notify(
-            Notifications.ID_LIBRARY_PROGRESS,
+            Notifications.Id.Library.Progress,
             progressNotificationBuilder
                 .setContentTitle(title)
                 .setProgress(total, current, false)
@@ -102,9 +100,9 @@ class LibraryUpdateNotifier(private val context: Context) {
         val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
 
         context.notificationManager.notify(
-            Notifications.ID_LIBRARY_ERROR,
+            Notifications.Id.Library.Error,
             context
-                .notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
+                .notificationBuilder(Notifications.Channel.Library.Error) {
                     setContentTitle(
                         context.getString(R.string.notification_update_error, errors.size)
                     )
@@ -142,9 +140,9 @@ class LibraryUpdateNotifier(private val context: Context) {
         val pendingIntent = NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
 
         context.notificationManager.notify(
-            Notifications.ID_LIBRARY_ERROR,
+            Notifications.Id.Library.Skipped,
             context
-                .notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
+                .notificationBuilder(Notifications.Channel.Library.Skipped) {
                     setContentTitle(
                         context.getString(R.string.notification_update_skipped, skips.size)
                     )
@@ -306,7 +304,7 @@ class LibraryUpdateNotifier(private val context: Context) {
 
     /** Cancels the progress notification. */
     fun cancelProgressNotification() {
-        context.notificationManager.cancel(Notifications.ID_LIBRARY_PROGRESS)
+        context.notificationManager.cancel(Notifications.Id.Library.Progress)
     }
 
     /** Returns an intent to open the main activity. */

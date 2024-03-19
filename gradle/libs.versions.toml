@@ -1,16 +1,16 @@
 [versions]
-aboutlibVersion = "10.10.0"
+aboutlibVersion = "11.1.0"
 cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
 chuckerVersion = "3.5.2"
-coilVersion = "2.5.0"
+coilVersion = "2.6.0"
 fastAdapterVersion = "5.7.0"
-firebaseBomVersion = "32.7.2"
+firebaseBomVersion = "32.7.4"
 firebasePluginVersion = "2.9.9"
 googleServicesPluginVersion = "4.4.1"
 iconicsVersion = "5.4.0"
 injektCoreVersion = "65b0440"
-kotlinResultVersion = "1.1.18"
+kotlinResultVersion = "1.1.21"
 ktfmtVersion = "0.17.0"
 loadingButtonAndroidVersion = "2.2.0"
 nucleusVersion = "3.0.0"
@@ -19,7 +19,7 @@ photoViewVersion = "2.3.0"
 retrofitVersion = "2.9.0"
 roboelectricVersion = "4.8.1"
 rxbindingVersion = "1.0.1"
-sandwichVersion = "2.0.5"
+sandwichVersion = "2.0.6"
 simpleIconsVersion = "1.0.0"
 sqliteAndroidVersion = "3.39.2"
 sqliteVersion = "2.3.1"
@@ -103,7 +103,7 @@ flexible-adapter-ui = "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c801
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttpVersion" }
 okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttpVersion" }
 okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttpVersion" }
-okio = "com.squareup.okio:okio:3.8.0"
+okio = "com.squareup.okio:okio:3.9.0"
 
 sandwich = { module = "com.github.skydoves:sandwich", version.ref = "sandwichVersion" }
 sandwich-retrofit = { module = "com.github.skydoves:sandwich-retrofit", version.ref = "sandwichVersion" }
@@ -128,8 +128,8 @@ retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
 
 #test libs
 junit = "junit:junit:4.13.2"
-mockk = "io.mockk:mockk:1.13.9"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.8.0"
+mockk = "io.mockk:mockk:1.13.10"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.8.1"
 viewTooltip = { module = "com.github.nonproto:ViewTooltip", version.ref = "viewTooltipVersion" }
 
 [plugins]

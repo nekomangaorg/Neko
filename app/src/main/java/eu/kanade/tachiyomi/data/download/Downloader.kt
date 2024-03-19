@@ -49,6 +49,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import okhttp3.Response
 import org.nekomanga.R
+import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
@@ -248,7 +249,13 @@ class Downloader(
                 .asSequence()
                 // Filter out those already downloaded.
                 .filter { provider.chapterDirDoesNotExist(it, chapterDirFiles) }
-                .filter { it.scanlator?.contains("Comikey")?.not() ?: true }
+                // filter out scanlators that aren't supported if they are official source
+                .filter {
+                    when (it.scanlator) {
+                        null -> true
+                        else -> !MdConstants.UnsupportedOfficialScanlators.contains(it.scanlator!!)
+                    }
+                }
                 // Add chapters to queue from the start.
                 .sortedByDescending { it.source_order }
                 // Filter out those already enqueued.

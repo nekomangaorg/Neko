@@ -679,7 +679,6 @@
     <string name="refresh_tracking">Refresh tracking</string>
     <string name="add_tracking">Add tracking</string>
     <string name="select_an_entry">Select an entry</string>
-    <string name="source_unsupported">Source is not supported</string>
     <string name="no_match_found">No match found</string>
     <string name="remove_tracking">Remove tracking from app</string>
     <string name="cannot_remove_tracking_while_offline">Tracker cannot be removed from %1$s while offline</string>
@@ -856,6 +855,7 @@
     <string name="invalid_backup_file">Invalid backup file</string>
     <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
     <string name="file_is_missing_data">File is missing data.</string>
+    <string name="no_backup_directory_selected">No backup directory selected</string>
     <string name="backup_has_no_manga">Backup does not contain any manga.</string>
     <string name="backup_failed">Backup failed</string>
     <string name="empty_backup_error">No library entries to back up</string>

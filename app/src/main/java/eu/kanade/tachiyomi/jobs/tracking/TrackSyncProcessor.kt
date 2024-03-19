@@ -30,13 +30,13 @@ class TrackSyncProcessor {
         completeNotification: () -> Unit,
     ) {
         var count = 0
-        val librayMangaList = db.getLibraryMangaList().executeAsBlocking()
+        val libraryMangaList = db.getLibraryMangaList().executeAsBlocking()
         val loggedServices = trackManager.services.values.filter { it.isLogged() }
         val autoAddTracker = preferences.autoAddTracker().get()
         val trackingCoordinator: TrackingCoordinator = Injekt.get()
 
-        librayMangaList.forEach { manga ->
-            updateNotification(manga.title, count++, librayMangaList.size)
+        libraryMangaList.forEach { manga ->
+            updateNotification(manga.title, count++, libraryMangaList.size)
 
             val tracks = db.getTracks(manga).executeOnIO()
 

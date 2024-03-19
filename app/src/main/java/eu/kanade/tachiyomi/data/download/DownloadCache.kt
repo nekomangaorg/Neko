@@ -165,8 +165,8 @@ class DownloadCache(
 
         val sourceDirs =
             storageManager
-                .getDownloadsDirectory()!!
-                .listFiles()
+                .getDownloadsDirectory()
+                ?.listFiles()
                 .orEmpty()
                 .associate { it.name to SourceDirectory(it) }
                 .mapNotNullKeys { entry ->
@@ -230,7 +230,7 @@ class DownloadCache(
     /** Searches a manga list and matches the given mangakey and source key */
     private fun findManga(mangaList: List<Manga>, mangaKey: String, sourceKey: Long): Manga? {
         return mangaList.find {
-            DiskUtil.buildValidFilename(it.title).lowercase(Locale.US) ==
+            DiskUtil.buildValidFilename(it.originalTitle).lowercase(Locale.US) ==
                 mangaKey.lowercase(Locale.US) && it.source == sourceKey
         }
     }
