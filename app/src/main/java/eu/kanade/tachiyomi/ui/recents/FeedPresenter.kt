@@ -272,6 +272,12 @@ class FeedPresenter(
     ) {
         presenterScope.launchIO {
             feedRepository.downloadChapter(feedManga, chapterItem, downloadAction)
+            if (
+                downloadAction == MangaConstants.DownloadAction.Cancel ||
+                    downloadAction == MangaConstants.DownloadAction.Remove
+            ) {
+                updateDownloadOnFeed(chapterItem.chapter.id, feedManga.mangaId, null)
+            }
         }
     }
 
@@ -280,22 +286,31 @@ class FeedPresenter(
      * the list. Returning the updated list or false if the chapter didnt exist
      */
     private fun updateChapterDownloadForManga(
-        download: Download,
+        chapterId: Long,
+        mangaId: Long,
+        download: Download?,
         feedManga: List<FeedManga>
     ): Pair<Boolean, List<FeedManga>> {
         val mutableFeedManga = feedManga.toMutableList()
-        val indexOfFeedManga =
-            mutableFeedManga.indexOfFirst { it.mangaId == download.chapterItem.mangaId }
+        val indexOfFeedManga = mutableFeedManga.indexOfFirst { it.mangaId == mangaId }
         if (indexOfFeedManga >= 0) {
             val mutableChapters = mutableFeedManga[indexOfFeedManga].chapters.toMutableList()
-            val indexOfChapter =
-                mutableChapters.indexOfFirst { it.chapter.id == download.chapterItem.id }
+            val indexOfChapter = mutableChapters.indexOfFirst { it.chapter.id == chapterId }
             if (indexOfChapter >= 0) {
                 mutableChapters[indexOfChapter] =
-                    mutableChapters[indexOfChapter].copy(
-                        downloadState = download.status,
-                        downloadProgress = download.progress
-                    )
+                    when (download == null) {
+                        true ->
+                            mutableChapters[indexOfChapter].copy(
+                                downloadState = Download.State.NOT_DOWNLOADED,
+                                downloadProgress = 0
+                            )
+                        false ->
+                            mutableChapters[indexOfChapter].copy(
+                                downloadState = download.status,
+                                downloadProgress = download.progress
+                            )
+                    }
+
                 mutableFeedManga[indexOfFeedManga] =
                     mutableFeedManga[indexOfFeedManga].copy(
                         chapters = mutableChapters.toImmutableList()
@@ -381,10 +396,12 @@ class FeedPresenter(
         }
     }
 
-    private fun updateDownloadOnFeed(download: Download) {
+    private fun updateDownloadOnFeed(chapterId: Long, mangaId: Long, download: Download?) {
 
         val (searchFeedUpdated, searchFeedMangaList) =
             updateChapterDownloadForManga(
+                chapterId,
+                mangaId,
                 download,
                 _feedScreenState.value.searchFeedManga.toMutableList()
             )
@@ -396,6 +413,8 @@ class FeedPresenter(
 
         val (feedUpdated, feedMangaList) =
             updateChapterDownloadForManga(
+                chapterId,
+                mangaId,
                 download,
                 _feedScreenState.value.allFeedManga.toMutableList()
             )
@@ -419,22 +438,29 @@ class FeedPresenter(
     }
 
     private fun observeDownloads() {
-        presenterScope.launchIO {
+
+        pausablePresenterScope.launchIO {
+            downloadManager.queueState.collectLatest { queueDownloads ->
+                _feedScreenState.update { it.copy(downloads = queueDownloads.toImmutableList()) }
+            }
+        }
+
+        pausablePresenterScope.launchIO {
             downloadManager
                 .statusFlow()
                 .catch { error -> TimberKt.e(error) }
                 .collect { download ->
-                    updateDownloadOnFeed(download)
+                    updateDownloadOnFeed(download.chapterItem.id, download.mangaItem.id, download)
                     updateDownloadQueue(download)
                 }
         }
 
-        presenterScope.launchIO {
+        pausablePresenterScope.launchIO {
             downloadManager
                 .progressFlow()
                 .catch { error -> TimberKt.e(error) }
                 .collect { download ->
-                    updateDownloadOnFeed(download)
+                    updateDownloadOnFeed(download.chapterItem.id, download.mangaItem.id, download)
                     updateDownloadQueue(download)
                 }
         }
@@ -442,6 +468,11 @@ class FeedPresenter(
 
     fun refreshing(start: Boolean) {
         presenterScope.launchIO { _feedScreenState.update { it.copy(isRefreshing = start) } }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        observeDownloads()
     }
 
     companion object {
