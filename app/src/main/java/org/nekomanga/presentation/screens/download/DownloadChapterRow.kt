@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.data.download.model.Download
 import org.nekomanga.R
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoSwipeToDismiss
 import org.nekomanga.presentation.theme.Size
 
@@ -34,13 +37,11 @@ fun DownloadChapterRow(download: Download) {
         state = dismissState,
         modifier = Modifier.padding(vertical = Dp(1f)),
         background = {
-            val alignment =
-                when (dismissState.dismissDirection) {
-                    DismissDirection.EndToStart -> Alignment.CenterEnd
-                    DismissDirection.StartToEnd -> Alignment.CenterStart
-                    else -> Alignment.Center
-                }
-            Background(alignment)
+            when (dismissState.dismissDirection) {
+                DismissDirection.EndToStart -> Background(alignment = Alignment.CenterEnd)
+                DismissDirection.StartToEnd -> Background(alignment = Alignment.CenterStart)
+                else -> Unit
+            }
         },
         dismissContent = { ChapterRow(download) },
     )
@@ -57,10 +58,53 @@ private fun ChapterRow(download: Download) {
     Row(
         modifier =
             Modifier.fillMaxWidth()
-                .padding(start = Size.small, top = Size.small, bottom = Size.small),
+                .background(color = MaterialTheme.colorScheme.surface)
+                .padding(top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = download.chapterItem.chapterTitle)
+        Column(
+            modifier =
+                Modifier.align(Alignment.CenterVertically)
+                    .padding(horizontal = Size.medium)
+                    .fillMaxWidth(.9f),
+            verticalArrangement = Arrangement.spacedBy(Size.small)
+        ) {
+            Text(
+                text = download.mangaItem.title,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1
+            )
+            Text(
+                text = download.chapterItem.name,
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        color =
+                            MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = NekoColors.mediumAlphaLowContrast
+                            )
+                    ),
+                maxLines = 1
+            )
+            when (download.status == Download.State.QUEUE) {
+                true ->
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                false ->
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        progress = { download.progress.toFloat() },
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+            }
+        }
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = null,
+            modifier = Modifier.padding(end = Size.medium)
+        )
     }
 }
 
