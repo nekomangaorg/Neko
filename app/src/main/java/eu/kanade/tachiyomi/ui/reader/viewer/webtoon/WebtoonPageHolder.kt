@@ -124,6 +124,7 @@ class WebtoonPageHolder(
         removeDecodeErrorLayout()
         frame.recycle()
         progressBar.setProgress(0)
+        progressContainer.isVisible = true
     }
 
     /**
