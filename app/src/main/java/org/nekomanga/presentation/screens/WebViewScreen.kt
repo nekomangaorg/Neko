@@ -17,11 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import com.google.accompanist.web.AccompanistWebViewClient
-import com.google.accompanist.web.LoadingState
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewNavigator
-import com.google.accompanist.web.rememberWebViewState
+import com.kevinnzou.web.AccompanistWebViewClient
+import com.kevinnzou.web.LoadingState
+import com.kevinnzou.web.WebView
+import com.kevinnzou.web.rememberWebViewNavigator
+import com.kevinnzou.web.rememberWebViewState
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
