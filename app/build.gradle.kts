@@ -66,6 +66,7 @@ android {
         aidl = false
         renderScript = false
         shaders = false
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = compose.versions.compose.compiler.version.get()
