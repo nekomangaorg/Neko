@@ -68,7 +68,7 @@ private fun ChapterRow(download: Download) {
                 Modifier.align(Alignment.CenterVertically)
                     .padding(horizontal = Size.medium)
                     .fillMaxWidth(.9f),
-            verticalArrangement = Arrangement.spacedBy(Size.small)
+            verticalArrangement = Arrangement.spacedBy(Size.tiny)
         ) {
             Text(
                 text = download.mangaItem.title,
