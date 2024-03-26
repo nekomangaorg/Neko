@@ -122,8 +122,8 @@ fuzzysearch = "me.xdrop:fuzzywuzzy:1.4.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
-retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
-retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
+retrofit-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofitVersion" }
+retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofitVersion" }
 
 
 #test libs
