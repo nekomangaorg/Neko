@@ -25,11 +25,14 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
             cursor
                 .getString(cursor.getColumnIndex(MangaTable.COL_UNREAD))
                 .filterChaptersByScanlators(manga)
+
         manga.category = cursor.getInt(cursor.getColumnIndex(MangaTable.COL_CATEGORY))
+
         manga.read =
             cursor
                 .getString(cursor.getColumnIndex(MangaTable.COL_HAS_READ))
                 .filterChaptersByScanlators(manga)
+
         manga.bookmarkCount = cursor.getInt(cursor.getColumnIndex(MangaTable.COL_BOOKMARK_COUNT))
 
         return manga
@@ -41,13 +44,20 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
 
         val blockedScanlators = preferenceHelper.blockedScanlators().get()
 
-        val blockedScanlatorList = list.filter { it !in blockedScanlators }
+        val chapterList = list.filter { it !in blockedScanlators }
 
-        return manga.filtered_scanlators?.let { filteredScanlatorString ->
-            val filteredScanlators = ChapterUtil.getScanlators(filteredScanlatorString)
-            blockedScanlatorList.count {
-                ChapterUtil.getScanlators(it).none { group -> filteredScanlators.contains(group) }
+        return when (manga.filtered_scanlators == null) {
+            true -> chapterList.size
+            false -> {
+                val filteredScanlators = ChapterUtil.getScanlators(manga.filtered_scanlators)
+                chapterList
+                    .filter {
+                        ChapterUtil.getScanlators(it).none { group ->
+                            filteredScanlators.contains(group)
+                        }
+                    }
+                    .size
             }
-        } ?: blockedScanlatorList.size
+        }
     }
 }

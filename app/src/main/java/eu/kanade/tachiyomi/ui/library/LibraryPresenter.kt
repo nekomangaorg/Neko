@@ -63,8 +63,6 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -87,8 +85,6 @@ class LibraryPresenter(
 ) : BaseCoroutinePresenter<LibraryController>() {
 
     private val context: Context by lazy { Injekt.get<Application>().applicationContext }
-    private val viewContext
-        get() = view?.view?.context
 
     private val loggedServices by lazy {
         Injekt.get<TrackManager>().services.values.filter { it.isLogged() || it.isMdList() }
@@ -208,33 +204,7 @@ class LibraryPresenter(
             categories = lastCategories ?: db.getCategories().executeAsBlocking().toMutableList()
         }
         presenterScope.launch {
-            var (library, hiddenItems) = withContext(Dispatchers.IO) { getLibraryFromDB() }
-            val blockedScanlators = preferences.blockedScanlators().get()
-            if (blockedScanlators.isNotEmpty()) {
-                library =
-                    library
-                        .map {
-                            async {
-                                val chapters = db.getChapters(it.manga).executeOnIO()
-                                it.manga.read =
-                                    chapters.count {
-                                        it.read &&
-                                            !it.scanlatorList().any { scanlator ->
-                                                scanlator in blockedScanlators
-                                            }
-                                    }
-                                it.manga.unread =
-                                    chapters.count {
-                                        !it.read &&
-                                            !it.scanlatorList().any { scanlator ->
-                                                scanlator in blockedScanlators
-                                            }
-                                    }
-                                it
-                            }
-                        }
-                        .awaitAll()
-            }
+            val (library, hiddenItems) = withContext(Dispatchers.IO) { getLibraryFromDB() }
             setDownloadCount(library)
             setUnreadBadge(library)
             setDownloadCount(hiddenItems)
