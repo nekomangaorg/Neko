@@ -4,8 +4,8 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.getAll
-import com.github.michaelbull.result.getAllErrors
+import com.github.michaelbull.result.filterErrors
+import com.github.michaelbull.result.filterValues
 import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -100,10 +100,11 @@ class BrowseRepository(
                     Ok(scanlatorImpl!!)
                 }
             }
-        return if (blockedScanlatorUUIDs.getAllErrors().isNotEmpty()) {
-            Err(blockedScanlatorUUIDs.getAllErrors().first())
+
+        return if (blockedScanlatorUUIDs.filterErrors().isNotEmpty()) {
+            Err(blockedScanlatorUUIDs.filterErrors().first())
         } else {
-            val uuids = blockedScanlatorUUIDs.getAll().map { it.uuid }
+            val uuids = blockedScanlatorUUIDs.filterValues().map { it.uuid }
             mangaDex.fetchHomePageInfo(uuids).andThen { listResults ->
                 Ok(
                     listResults.map { listResult ->
