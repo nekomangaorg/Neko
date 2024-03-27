@@ -103,7 +103,7 @@ open class MangaDex : HttpSource() {
                 .andThen { groupListDto ->
                     val groupDto = groupListDto.data.firstOrNull()
                     when (groupDto == null) {
-                        true -> Err("No Results".toResultError())
+                        true -> Err("No Scanlator Group found".toResultError())
                         false -> {
                             Ok(
                                 Scanlator(
