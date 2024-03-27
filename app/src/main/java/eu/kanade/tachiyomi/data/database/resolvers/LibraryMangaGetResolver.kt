@@ -5,9 +5,13 @@ import com.pushtorefresh.storio.sqlite.operations.get.DefaultGetResolver
 import eu.kanade.tachiyomi.data.database.mappers.BaseMangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import uy.kohesive.injekt.injectLazy
 
 class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGetResolver {
+
+    private val preferenceHelper: PreferencesHelper by injectLazy()
 
     companion object {
         val INSTANCE = LibraryMangaGetResolver()
@@ -34,11 +38,16 @@ class LibraryMangaGetResolver : DefaultGetResolver<LibraryManga>(), BaseMangaGet
     private fun String.filterChaptersByScanlators(manga: LibraryManga): Int {
         if (isEmpty()) return 0
         val list = split(" [.] ")
+
+        val blockedScanlators = preferenceHelper.blockedScanlators().get()
+
+        val blockedScanlatorList = list.filter { it !in blockedScanlators }
+
         return manga.filtered_scanlators?.let { filteredScanlatorString ->
             val filteredScanlators = ChapterUtil.getScanlators(filteredScanlatorString)
-            list.count {
+            blockedScanlatorList.count {
                 ChapterUtil.getScanlators(it).none { group -> filteredScanlators.contains(group) }
             }
-        } ?: list.size
+        } ?: blockedScanlatorList.size
     }
 }
