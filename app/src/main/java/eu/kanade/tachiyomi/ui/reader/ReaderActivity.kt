@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.ActivityOptions
 import android.app.assist.AssistContent
 import android.content.ClipData
 import android.content.Context
@@ -230,23 +228,6 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             intent.putExtra("chapter", chapter.id)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
-        }
-
-        fun newIntentWithTransitionOptions(
-            activity: Activity,
-            manga: Manga,
-            chapter: Chapter,
-            sharedElement: View,
-        ): Pair<Intent, Bundle?> {
-            val intent = newIntent(activity, manga, chapter)
-            intent.putExtra(TRANSITION_NAME, sharedElement.transitionName)
-            val activityOptions =
-                ActivityOptions.makeSceneTransitionAnimation(
-                    activity,
-                    sharedElement,
-                    sharedElement.transitionName,
-                )
-            return intent to activityOptions.toBundle()
         }
     }
 

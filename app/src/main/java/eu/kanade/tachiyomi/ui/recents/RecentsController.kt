@@ -666,19 +666,7 @@ class RecentsController(bundle: Bundle? = null) :
                 val activity = activity ?: return false
                 activity.apply {
                     val (manga, chapter) = item.mch.manga to item.chapter
-                    if (view != null) {
-                        val (intent, bundle) =
-                            ReaderActivity.newIntentWithTransitionOptions(
-                                activity,
-                                manga,
-                                chapter,
-                                view
-                            )
-                        startActivity(intent, bundle)
-                    } else {
-                        val intent = ReaderActivity.newIntent(activity, manga, chapter)
-                        startActivity(intent)
-                    }
+                    startActivity(ReaderActivity.newIntent(activity, manga, chapter))
                 }
             }
         } else if (item is RecentMangaHeaderItem) return false
