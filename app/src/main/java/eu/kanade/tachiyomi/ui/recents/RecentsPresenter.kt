@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
@@ -150,7 +151,7 @@ class RecentsPresenter(
 
         val isCustom = customViewType != null
         val isEndless = isUngrouped && !limit
-        val cReading =
+        val tempCReading =
             when {
                 viewType <= VIEW_TYPE_UNGROUP_ALL -> {
                     db.getAllRecentsTypes(
@@ -202,6 +203,20 @@ class RecentsPresenter(
                         }
                 }
                 else -> emptyList()
+            }
+
+        val blockedScanlators = preferences.blockedScanlators().get()
+
+        val cReading =
+            tempCReading.filter {
+                when (it.chapter.scanlator == null) {
+                    true -> true
+                    false -> {
+                        ChapterUtil.getScanlators(it.chapter.scanlator!!).none { scanlator ->
+                            scanlator in blockedScanlators
+                        }
+                    }
+                }
             }
 
         if (cReading.size < ENDLESS_LIMIT) {
