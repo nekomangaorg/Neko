@@ -325,13 +325,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         libraryPreferences.lastUpdateTimestamp().set(Date().time)
 
-        val restrictions = libraryPreferences.autoUpdateMangaRestrictions().get()
-
         mangaToUpdate.addAll(mangaToAdd)
 
         mangaToUpdateMap.putAll(mangaToAdd.groupBy { it.source })
-
-        val isDexUp = sourceManager.mangaDex.checkIfUp()
 
         coroutineScope {
             val results =
@@ -818,6 +814,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             context: Context,
             category: Category? = null,
             mangaToUse: List<LibraryManga>? = null,
+            mangaIdsToUse: List<Long>? = null,
         ): Boolean {
             if (isRunning(context)) {
                 category?.id?.let {
@@ -832,14 +829,18 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 return false
             }
             val builder = Data.Builder()
-            category?.id?.let { id ->
-                builder.putInt(KEY_CATEGORY, id)
-                if (mangaToUse != null) {
-                    builder.putLongArray(
-                        KEY_MANGA_LIST,
-                        mangaToUse.mapNotNull { it.id }.toLongArray(),
-                    )
-                }
+            category?.id?.let { id -> builder.putInt(KEY_CATEGORY, id) }
+
+            if (mangaToUse != null) {
+                builder.putLongArray(
+                    KEY_MANGA_LIST,
+                    mangaToUse.mapNotNull { it.id }.toLongArray(),
+                )
+            } else if (mangaIdsToUse != null) {
+                builder.putLongArray(
+                    KEY_MANGA_LIST,
+                    mangaIdsToUse.toLongArray(),
+                )
             }
             val inputData = builder.build()
             val request =

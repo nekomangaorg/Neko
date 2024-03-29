@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.jobs.follows
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.uuid
@@ -13,7 +12,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.ui.manga.MangaUpdateCoordinator
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import java.util.Date
@@ -31,14 +29,13 @@ class FollowsSyncProcessor {
     val sourceManager: SourceManager by injectLazy()
     val trackManager: TrackManager by injectLazy()
     private val followsHandler: FollowsHandler by injectLazy()
-    private val mangaUpdateCoordinator: MangaUpdateCoordinator by injectLazy()
 
     /** Syncs follows list manga into library based off the preference */
     suspend fun fromMangaDex(
         errorNotification: (String) -> Unit,
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: () -> Unit,
-        updateManga: (List<LibraryManga>) -> Unit,
+        updateManga: (List<Long>) -> Unit,
     ): Int {
         return withContext(Dispatchers.IO) {
             TimberKt.d { "Starting from MangaDex sync" }
@@ -69,50 +66,42 @@ class FollowsSyncProcessor {
                     val defaultCategoryId = preferences.defaultCategory().get()
                     val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-                    val mangaToUpdate =
-                        listManga
-                            .mapNotNull { networkManga ->
-                                updateNotification(
-                                    networkManga.title,
-                                    count.andIncrement,
-                                    listManga.size
-                                )
-                                var newDbMangaSynced = false
-                                var dbManga =
-                                    db.getManga(networkManga.url, sourceManager.mangaDex.id)
-                                        .executeAsBlocking()
-                                if (dbManga == null) {
-                                    dbManga =
-                                        Manga.create(
-                                            networkManga.url,
-                                            networkManga.title,
-                                            sourceManager.mangaDex.id,
-                                        )
-                                    dbManga.date_added = Date().time
-                                    newDbMangaSynced = true
+                    val mangaIdsToUpdate =
+                        listManga.mapNotNull { networkManga ->
+                            updateNotification(
+                                networkManga.title,
+                                count.andIncrement,
+                                listManga.size
+                            )
+                            var dbManga =
+                                db.getManga(networkManga.url, sourceManager.mangaDex.id)
+                                    .executeAsBlocking()
+                            if (dbManga == null) {
+                                dbManga =
+                                    Manga.create(
+                                        networkManga.url,
+                                        networkManga.title,
+                                        sourceManager.mangaDex.id,
+                                    )
+                                dbManga.date_added = Date().time
+                            }
+
+                            // Increment and update if it is not already favorited
+                            if (!dbManga.favorite) {
+                                countOfAdded.incrementAndGet()
+                                dbManga.favorite = true
+                                if (defaultCategory != null) {
+                                    val mc = MangaCategory.create(dbManga, defaultCategory)
+                                    db.setMangaCategories(listOf(mc), listOf(dbManga))
                                 }
 
-                                // Increment and update if it is not already favorited
-                                if (!dbManga.favorite) {
-                                    countOfAdded.incrementAndGet()
-                                    dbManga.favorite = true
-                                    if (defaultCategory != null) {
-                                        val mc = MangaCategory.create(dbManga, defaultCategory)
-                                        db.setMangaCategories(listOf(mc), listOf(dbManga))
-                                    }
-
-                                    db.insertManga(dbManga).executeAsBlocking()
-                                }
-                                when (newDbMangaSynced) {
-                                    true -> dbManga
-                                    false -> null
-                                }
+                                return@mapNotNull db.insertManga(dbManga)
+                                    .executeAsBlocking()
+                                    .insertedId()
                             }
-                            .map {
-                                val libraryManga = LibraryManga().apply { this.title = it.title }
-                                libraryManga
-                            }
-                    updateManga(mangaToUpdate)
+                            return@mapNotNull null
+                        }
+                    updateManga(mangaIdsToUpdate)
                 }
 
             completeNotification()
