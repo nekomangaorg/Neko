@@ -176,6 +176,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
         return withIOContext {
             try {
+                libraryPreferences.lastUpdateTimestamp().set(Date().time)
                 updateMangaJob(filterMangaToUpdate(mangaList))
                 Result.success()
             } catch (e: Exception) {
@@ -322,8 +323,6 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     private suspend fun updateMangaJob(mangaToAdd: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
-
-        libraryPreferences.lastUpdateTimestamp().set(Date().time)
 
         mangaToUpdate.addAll(mangaToAdd)
 
