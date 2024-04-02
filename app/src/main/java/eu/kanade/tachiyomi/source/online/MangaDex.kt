@@ -4,7 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.coroutines.binding.binding
+import com.github.michaelbull.result.coroutines.coroutineBinding
 import eu.kanade.tachiyomi.data.database.models.Scanlator
 import eu.kanade.tachiyomi.data.database.models.SourceArtwork
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -103,7 +103,7 @@ open class MangaDex : HttpSource() {
                 .andThen { groupListDto ->
                     val groupDto = groupListDto.data.firstOrNull()
                     when (groupDto == null) {
-                        true -> Err("No Results".toResultError())
+                        true -> Err("No Scanlator Group found".toResultError())
                         false -> {
                             Ok(
                                 Scanlator(
@@ -142,7 +142,7 @@ open class MangaDex : HttpSource() {
         blockedScanlatorUUIDs: List<String>
     ): Result<List<ListResults>, ResultError> {
         return withIOContext {
-            binding {
+            coroutineBinding {
                 val seasonal = async {
                     fetchList(MdConstants.currentSeasonalId)
                         .andThen { listResults ->

@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
@@ -17,11 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import com.google.accompanist.web.AccompanistWebViewClient
-import com.google.accompanist.web.LoadingState
-import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewNavigator
-import com.google.accompanist.web.rememberWebViewState
+import com.kevinnzou.web.AccompanistWebViewClient
+import com.kevinnzou.web.LoadingState
+import com.kevinnzou.web.WebView
+import com.kevinnzou.web.rememberWebViewNavigator
+import com.kevinnzou.web.rememberWebViewState
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.presentation.components.AppBar
@@ -60,7 +60,7 @@ fun WebViewScreen(
                         if (navigator.canGoBack) {
                             AppBar.Action(
                                 title = UiText.StringResource(R.string.back),
-                                icon = Icons.Filled.ArrowBack,
+                                icon = Icons.AutoMirrored.Filled.ArrowBack,
                                 onClick = { navigator.navigateBack() },
                             )
                         } else {
@@ -71,7 +71,7 @@ fun WebViewScreen(
                             if (navigator.canGoForward) {
                                 AppBar.Action(
                                     title = UiText.StringResource(R.string.forward),
-                                    icon = Icons.Default.ArrowForward,
+                                    icon = Icons.AutoMirrored.Filled.ArrowForward,
                                     onClick = { navigator.navigateForward() },
                                 )
                             } else {
@@ -85,20 +85,22 @@ fun WebViewScreen(
                             ),
                             AppBar.OverflowAction(
                                 title = UiText.StringResource(R.string.share),
-                                onClick = { onShare(state.content.getCurrentUrl()!!) },
+                                onClick = { state.lastLoadedUrl?.let(onShare) },
                             ),
                             AppBar.OverflowAction(
                                 title = UiText.StringResource(R.string.open_in_browser),
-                                onClick = { onOpenInBrowser(state.content.getCurrentUrl()!!) },
+                                onClick = { state.lastLoadedUrl?.let(onOpenInBrowser) },
                             ),
                         ) +
                         listOf(
                             if (
-                                navigator.canGoBack && canOpenInApp(state.content.getCurrentUrl()!!)
+                                navigator.canGoBack &&
+                                    state.lastLoadedUrl != null &&
+                                    canOpenInApp(state.lastLoadedUrl!!)
                             ) {
                                 AppBar.OverflowAction(
                                     title = UiText.StringResource(R.string.open_in_app),
-                                    onClick = { onOpenInApp(state.content.getCurrentUrl()!!) },
+                                    onClick = { state.lastLoadedUrl?.let(onOpenInApp) },
                                 )
                             } else {
                                 AppBar.Empty
@@ -113,7 +115,7 @@ fun WebViewScreen(
             val loadingState = state.loadingState
             if (loadingState is LoadingState.Loading) {
                 LinearProgressIndicator(
-                    progress = loadingState.progress,
+                    progress = { loadingState.progress },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

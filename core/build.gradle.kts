@@ -7,6 +7,9 @@ plugins {
 
 android {
     namespace = "org.nekomanga.core"
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {

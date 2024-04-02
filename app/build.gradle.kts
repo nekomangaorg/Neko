@@ -23,8 +23,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "org.nekomanga.neko"
-        versionCode = 4
-        versionName = "2.16.3"
+        versionCode = 5
+        versionName = "2.16.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -66,6 +66,7 @@ android {
         aidl = false
         renderScript = false
         shaders = false
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = compose.versions.compose.compiler.version.get()

@@ -1,15 +1,14 @@
 [versions]
 accompanist_version = "0.34.0"
-compose_version = "1.6.3"
+compose_version = "1.6.4"
 compose_material3_version = "1.2.1"
-compose_compiler_version = "1.5.4"
+compose_compiler_version = "1.5.11"
 markdown_version = "0.13.0"
 
 [libraries]
 
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist_version" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist_version" }
-accompanist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
 accompanist-themeadapter = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanist_version" }
 
 material3-core = { module = "androidx.compose.material3:material3", version.ref = "compose_material3_version" }
@@ -22,10 +21,11 @@ lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.7.0"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
-material = { module = "androidx.compose.material:material", version = "1.6.3" }
+material = { module = "androidx.compose.material:material", version = "1.6.4" }
 material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose_version" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose_version" }
 
+compose-webview = "io.github.kevinnzou:compose-webview:0.33.6"
 
 material-motion = "io.github.fornewid:material-motion-compose-core:1.1.2"
 
@@ -40,6 +40,6 @@ markdown = { module = "com.mikepenz:multiplatform-markdown-renderer", version.re
 markdown-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown_version" }
 
 [bundles]
-accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-webview", "accompanist-themeadapter"]
-compose = ["activity", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "material-motion"]
+accompanist = ["accompanist-drawablepainter", "accompanist-systemuicontroller", "accompanist-themeadapter"]
+compose = ["activity", "compose-webview", "animations", "material3-core", "material3-windowsize", "lifecycle", "ui", "ui-tooling", "foundation", "material", "material-icons-core", "material-icons-extended", "date-field", "markdown", "markdown-m3", "material-motion"]
 charting = ["charty"]

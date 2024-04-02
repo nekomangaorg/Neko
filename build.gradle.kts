@@ -42,6 +42,13 @@ subprojects {
                         "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
                         "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
                     )
+
+                // https://developer.android.com/jetpack/androidx/releases/compose-compiler#1.5.9
+                kotlinOptions.freeCompilerArgs +=
+                    listOf(
+                        "-P",
+                        "plugin:androidx.compose.compiler.plugins.kotlin:nonSkippingGroupOptimization=true",
+                    )
             }
             this.dependsOn("ktfmtFormat")
         }
@@ -92,7 +99,7 @@ tasks.register<Copy>("installGitHook") {
 }
 
 afterEvaluate {
-// We install the hook at the first occasion
+    // We install the hook at the first occasion
     tasks["clean"].dependsOn(tasks.getByName("installGitHook"))
 }
 

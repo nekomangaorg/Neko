@@ -221,10 +221,10 @@ class BrowsePresenter(
             if (!isOnline()) return@launchIO
             browseRepository
                 .getHomePage()
-                .onFailure {
+                .onFailure { resultError ->
                     _browseScreenState.update { state ->
                         state.copy(
-                            error = UiText.String(it.message()),
+                            error = UiText.String(resultError.message()),
                             initialLoading = false,
                             hideFooterButton = false
                         )

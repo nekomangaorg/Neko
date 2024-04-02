@@ -13,7 +13,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -78,7 +77,7 @@ class StatusSyncJob(
             when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
                 null,
                 "0" -> {
-                    TimberKt.d { "sync to dex" }
+                    TimberKt.d { "sync to MangaDex" }
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
@@ -86,7 +85,7 @@ class StatusSyncJob(
                     )
                 }
                 "1" -> {
-                    TimberKt.d { "sync to dex" }
+                    TimberKt.d { "sync from MangaDex" }
 
                     val total =
                         followsSyncProcessor.fromMangaDex(
@@ -106,6 +105,8 @@ class StatusSyncJob(
                     }
                 }
                 else -> {
+                    TimberKt.d { "sync to MangaDex with given ids" }
+
                     followsSyncProcessor.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
@@ -153,8 +154,10 @@ class StatusSyncJob(
         completeNotification(R.string.sync_to_follows_complete)
     }
 
-    private fun updateManga(libraryMangaList: List<LibraryManga>) {
-        LibraryUpdateJob.startNow(context.applicationContext, mangaToUse = libraryMangaList)
+    private fun updateManga(libraryMangaList: List<Long>) {
+        if (libraryMangaList.isNotEmpty()) {
+            LibraryUpdateJob.startNow(context.applicationContext, mangaIdsToUse = libraryMangaList)
+        }
     }
 
     private fun completeNotification(@StringRes title: Int) {

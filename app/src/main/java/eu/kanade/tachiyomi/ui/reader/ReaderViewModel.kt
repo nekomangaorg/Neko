@@ -500,9 +500,11 @@ class ReaderViewModel(
         val nextChapter = state.value.viewerChapters?.nextChapter?.chapter ?: return
         val chaptersNumberToDownload = preferences.autoDownloadWhileReading().get()
         if (chaptersNumberToDownload == 0 || !manga.favorite) return
-        val isNextChapterDownloaded = downloadManager.isChapterDownloaded(nextChapter, manga)
-        if (isNextChapterDownloaded) {
-            downloadAutoNextChapters(chaptersNumberToDownload, nextChapter.id)
+        scope.launchIO {
+            val isNextChapterDownloaded = downloadManager.isChapterDownloaded(nextChapter, manga)
+            if (isNextChapterDownloaded) {
+                downloadAutoNextChapters(chaptersNumberToDownload, nextChapter.id)
+            }
         }
     }
 

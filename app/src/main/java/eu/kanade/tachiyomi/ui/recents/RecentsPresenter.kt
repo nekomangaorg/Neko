@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNonCancellable
@@ -148,6 +149,8 @@ class RecentsPresenter(
         val groupChaptersUpdates = preferences.groupChaptersUpdates().get()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
 
+        val blockedScanlators = preferences.blockedScanlators().get()
+
         val isCustom = customViewType != null
         val isEndless = isUngrouped && !limit
         val cReading =
@@ -208,6 +211,7 @@ class RecentsPresenter(
         if (query != oldQuery) return
         val mangaList =
             cReading
+                .filterBlockedScanlators(blockedScanlators)
                 .distinctBy {
                     if (
                         query.isEmpty() &&
@@ -368,6 +372,21 @@ class RecentsPresenter(
                     view?.showLists(recentItems, hasNewItems, shouldMoveToTop)
                     isLoading = false
                     shouldMoveToTop = false
+                }
+            }
+        }
+    }
+
+    private fun List<MangaChapterHistory>.filterBlockedScanlators(
+        blockedScanlators: Set<String>
+    ): List<MangaChapterHistory> {
+        return this.filter {
+            when (it.chapter.scanlator == null) {
+                true -> true
+                false -> {
+                    ChapterUtil.getScanlators(it.chapter.scanlator!!).none { scanlator ->
+                        scanlator in blockedScanlators
+                    }
                 }
             }
         }

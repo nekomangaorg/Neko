@@ -1,9 +1,13 @@
 package eu.kanade.tachiyomi.source.online
 
+import android.app.Application
+import android.content.Context
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import java.util.concurrent.TimeUnit
 import okhttp3.FormBody
 import okhttp3.Headers
@@ -20,6 +24,7 @@ class MangaDexLoginHelper {
 
     private val networkHelper: NetworkHelper by lazy { Injekt.get() }
     private val preferences: PreferencesHelper by injectLazy()
+    private val context: Context by lazy { Injekt.get<Application>().applicationContext }
 
     val tag = "||LoginHelper"
 
@@ -41,6 +46,7 @@ class MangaDexLoginHelper {
         val refreshToken = preferences.refreshToken().get()
         if (refreshToken.isEmpty()) {
             TimberKt.i { "$tag refresh token is null can't extend session" }
+            toast("Refresh token null, logged out of MangaDex")
             invalidate()
             return false
         }
@@ -78,6 +84,7 @@ class MangaDexLoginHelper {
             true -> true
             false -> {
                 TimberKt.e(error) { "Error refreshing token" }
+                toast("Unable to refresh token, logged out of MangaDex")
                 invalidate()
                 false
             }
@@ -126,6 +133,10 @@ class MangaDexLoginHelper {
                 false
             }
         }
+    }
+
+    fun toast(msg: String) {
+        launchUI { context.toast(msg) }
     }
 
     suspend fun logout(): Boolean {

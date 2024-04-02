@@ -1,22 +1,22 @@
 [versions]
-aboutlibVersion = "11.1.0"
+aboutlibVersion = "11.1.1"
 cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
 chuckerVersion = "3.5.2"
 coilVersion = "2.6.0"
 fastAdapterVersion = "5.7.0"
-firebaseBomVersion = "32.7.4"
+firebaseBomVersion = "32.8.0"
 firebasePluginVersion = "2.9.9"
 googleServicesPluginVersion = "4.4.1"
 iconicsVersion = "5.4.0"
 injektCoreVersion = "65b0440"
-kotlinResultVersion = "1.1.21"
+kotlinResultVersion = "2.0.0"
 ktfmtVersion = "0.17.0"
 loadingButtonAndroidVersion = "2.2.0"
 nucleusVersion = "3.0.0"
 okhttpVersion = "5.0.0-alpha.11"
 photoViewVersion = "2.3.0"
-retrofitVersion = "2.9.0"
+retrofitVersion = "2.11.0"
 roboelectricVersion = "4.8.1"
 rxbindingVersion = "1.0.1"
 sandwichVersion = "2.0.6"
@@ -122,8 +122,8 @@ fuzzysearch = "me.xdrop:fuzzywuzzy:1.4.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
-retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
-retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
+retrofit-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofitVersion" }
+retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofitVersion" }
 
 
 #test libs

@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
+import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
@@ -318,6 +319,28 @@ class SettingsAdvancedController : SettingsController() {
                         }
                     }
                 }
+
+                preference {
+                    title = "Remove all manga with status on MangaDex"
+                    onClick {
+                        launchIO {
+                            val statusHandler = Injekt.get<StatusHandler>()
+                            val followsHandler = Injekt.get<FollowsHandler>()
+
+                            val results = statusHandler.fetchReadingStatusForAllManga()
+
+                            results.entries.forEach { entry ->
+                                if (entry.value != null) {
+                                    followsHandler.updateFollowStatus(
+                                        entry.key,
+                                        FollowStatus.UNFOLLOWED,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 preference {
                     title = "Clear all Manga"
                     onClick {

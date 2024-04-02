@@ -174,7 +174,6 @@ class NotificationReceiver : BroadcastReceiver() {
         val db = DatabaseHelper(context)
         val manga = db.getManga(mangaId).executeAsBlocking()
         val chapter = db.getChapter(chapterId).executeAsBlocking()
-        context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
         if (manga != null && chapter != null) {
             val intent =
                 ReaderActivity.newIntent(context, manga, chapter).apply {

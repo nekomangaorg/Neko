@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
@@ -21,6 +20,7 @@ import org.nekomanga.core.network.POST
 import org.nekomanga.logging.TimberKt
 import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.Field
