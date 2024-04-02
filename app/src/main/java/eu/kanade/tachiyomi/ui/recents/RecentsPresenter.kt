@@ -149,9 +149,11 @@ class RecentsPresenter(
         val groupChaptersUpdates = preferences.groupChaptersUpdates().get()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
 
+        val blockedScanlators = preferences.blockedScanlators().get()
+
         val isCustom = customViewType != null
         val isEndless = isUngrouped && !limit
-        val tempCReading =
+        val cReading =
             when {
                 viewType <= VIEW_TYPE_UNGROUP_ALL -> {
                     db.getAllRecentsTypes(
@@ -205,20 +207,6 @@ class RecentsPresenter(
                 else -> emptyList()
             }
 
-        val blockedScanlators = preferences.blockedScanlators().get()
-
-        val cReading =
-            tempCReading.filter {
-                when (it.chapter.scanlator == null) {
-                    true -> true
-                    false -> {
-                        ChapterUtil.getScanlators(it.chapter.scanlator!!).none { scanlator ->
-                            scanlator in blockedScanlators
-                        }
-                    }
-                }
-            }
-
         if (cReading.size < ENDLESS_LIMIT) {
             finished = true
         }
@@ -230,6 +218,7 @@ class RecentsPresenter(
         if (query != oldQuery) return
         val mangaList =
             cReading
+                .filterBlockedScanlators(blockedScanlators)
                 .distinctBy {
                     if (
                         query.isEmpty() &&
@@ -390,6 +379,21 @@ class RecentsPresenter(
                     view?.showLists(recentItems, hasNewItems, shouldMoveToTop)
                     isLoading = false
                     shouldMoveToTop = false
+                }
+            }
+        }
+    }
+
+    private fun List<MangaChapterHistory>.filterBlockedScanlators(
+        blockedScanlators: Set<String>
+    ): List<MangaChapterHistory> {
+        return this.filter {
+            when (it.chapter.scanlator == null) {
+                true -> true
+                false -> {
+                    ChapterUtil.getScanlators(it.chapter.scanlator!!).none { scanlator ->
+                        scanlator in blockedScanlators
+                    }
                 }
             }
         }
