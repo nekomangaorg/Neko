@@ -54,10 +54,10 @@ object PrimaryColorRippleTheme : RippleTheme {
     @Composable
     override fun rippleAlpha() =
         RippleAlpha(
-            draggedAlpha = 0.9f,
-            focusedAlpha = 0.9f,
-            hoveredAlpha = 0.9f,
-            pressedAlpha = 0.9f,
+            draggedAlpha = NekoColors.mediumAlphaLowContrast,
+            focusedAlpha = NekoColors.mediumAlphaLowContrast,
+            hoveredAlpha = NekoColors.mediumAlphaLowContrast,
+            pressedAlpha = NekoColors.mediumAlphaLowContrast,
         )
 }
 
@@ -67,10 +67,10 @@ class DynamicRippleTheme(val color: Color) : RippleTheme {
     @Composable
     override fun rippleAlpha() =
         RippleAlpha(
-            draggedAlpha = 0.9f,
-            focusedAlpha = 0.9f,
-            hoveredAlpha = 0.9f,
-            pressedAlpha = 0.9f,
+            draggedAlpha = NekoColors.mediumAlphaLowContrast,
+            focusedAlpha = NekoColors.mediumAlphaLowContrast,
+            hoveredAlpha = NekoColors.mediumAlphaLowContrast,
+            pressedAlpha = NekoColors.mediumAlphaLowContrast,
         )
 }
 
