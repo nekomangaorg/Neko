@@ -6,7 +6,7 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 object MdConstants {
-    const val currentSeasonalId = "1cc30d64-45c6-45a6-8c45-3771e1933b0f"
+    const val currentSeasonalId = "b5a843db-e757-4bec-89ec-5aa72aa61afa"
     const val staffPicksId = "805ba886-dd99-4aa4-b460-4bd7c7b71352"
     const val nekoDevPicksId = "9650e839-1266-4456-860d-c7eee164b451"
     const val baseUrl = "https://mangadex.org"
