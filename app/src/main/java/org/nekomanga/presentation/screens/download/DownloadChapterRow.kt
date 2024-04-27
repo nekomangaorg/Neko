@@ -19,6 +19,9 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -92,12 +95,18 @@ private fun ChapterRow(download: Download) {
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.secondary
                     )
-                false ->
+                false -> {
+                    val currentProgress by
+                        remember(download.progress.toFloat()) {
+                            mutableFloatStateOf(download.progress.toFloat())
+                        }
+
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        progress = { download.progress.toFloat() },
+                        progress = { currentProgress },
                         color = MaterialTheme.colorScheme.secondary
                     )
+                }
             }
         }
         Icon(
