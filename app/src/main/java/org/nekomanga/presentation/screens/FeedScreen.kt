@@ -225,6 +225,7 @@ fun FeedScreen(
                                     Modifier.align(Alignment.BottomStart).conditional(sideNav) {
                                         this.navigationBarsPadding()
                                     },
+                                hasDownloads = feedScreenState.value.downloads.isNotEmpty(),
                                 screenTypeClick = { newScreenType: FeedScreenType ->
                                     scope.launch { sheetState.hide() }
                                     if (feedScreenType != newScreenType) {
@@ -259,6 +260,7 @@ fun FeedScreen(
 private fun ScreenTypeFooter(
     screenType: FeedScreenType,
     modifier: Modifier = Modifier,
+    hasDownloads: Boolean,
     screenTypeClick: (FeedScreenType) -> Unit
 ) {
     LazyRow(
@@ -284,12 +286,14 @@ private fun ScreenTypeFooter(
             )
         }
 
-        item {
-            FooterFilterChip(
-                selected = screenType == FeedScreenType.Downloads,
-                onClick = { screenTypeClick(FeedScreenType.Downloads) },
-                name = stringResource(R.string.downloads),
-            )
+        if (hasDownloads) {
+            item {
+                FooterFilterChip(
+                    selected = screenType == FeedScreenType.Downloads,
+                    onClick = { screenTypeClick(FeedScreenType.Downloads) },
+                    name = stringResource(R.string.downloads),
+                )
+            }
         }
     }
 }
