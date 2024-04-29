@@ -124,6 +124,8 @@ class PageHandler {
 
         imageHandler.updateTokenTracker(chapterId, now)
 
+        pages.forEach { TimberKt.d { "ESCO ${it.url}" } }
+
         return pages
     }
 }

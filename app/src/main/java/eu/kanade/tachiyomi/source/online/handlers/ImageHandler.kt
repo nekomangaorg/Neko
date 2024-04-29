@@ -83,6 +83,7 @@ class ImageHandler {
 
         if (
             (attempt.getError() != null || !attempt.get()!!.isSuccessful) &&
+                attempt.getError() !is CancellationException &&
                 !request.url.toString().startsWith(MdConstants.cdnUrl)
         ) {
             TimberKt.e(attempt.getError()) {
