@@ -4,7 +4,6 @@ import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getError
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onSuccess
-import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -16,7 +15,6 @@ import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.util.getOrResultError
-import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.Date
@@ -129,7 +127,7 @@ class ImageHandler {
     }
 
     private suspend fun reportImageWithResponse(response: Response) {
-        val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
+        val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size.toLong()
         val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
         val cache = response.header("X-Cache", "") == "HIT"
         val atHomeImageReportDto =
@@ -151,9 +149,7 @@ class ImageHandler {
             TimberKt.d { "$tag image is at CDN don't report to md@home node" }
             return
         }
-        networkServices.service.atHomeImageReport(atHomeImageReportDto).onFailure {
-            this.log("trying to post to dex@home")
-        }
+        networkServices.service.atHomeImageReport(atHomeImageReportDto)
     }
 
     private suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
