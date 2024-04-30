@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.util
 
 import kotlin.math.floor
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
 
 data class MissingChapterHolder(
@@ -73,7 +74,7 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
     val estimateChapterString =
         when (estimateChapters.isEmpty()) {
             true -> null
-            false -> estimateChapters.joinToString(" ⋅ ")
+            false -> estimateChapters.joinToString(Constants.SEPARATOR)
         }
 
     return MissingChapterHolder(
