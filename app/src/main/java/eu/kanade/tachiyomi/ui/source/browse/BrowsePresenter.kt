@@ -277,8 +277,9 @@ class BrowsePresenter(
 
     fun retry() {
         presenterScope.launchIO {
+            val initialLoading = _browseScreenState.value.page == 1
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, error = null, page = 1)
+                state.copy(initialLoading = initialLoading, error = null)
             }
             when (browseScreenState.value.screenType) {
                 BrowseScreenType.Homepage -> getHomepage()
