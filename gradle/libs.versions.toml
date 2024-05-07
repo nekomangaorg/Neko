@@ -32,7 +32,7 @@ cascade-compose = { module = "me.saket.cascade:cascade-compose", version.ref = "
 cascade = { module = "me.saket.cascade:cascade", version.ref = "cascadeVersion" }
 injekt-core = { module = "com.github.inorichi.injekt:injekt-core", version.ref = "injektCoreVersion" }
 loadingButtonAndroid = { module = "com.github.leandroBorgesFerreira:LoadingButtonAndroid", version.ref = "loadingButtonAndroidVersion" }
-material = "com.google.android.material:material:1.11.0"
+material = "com.google.android.material:material:1.12.0"
 desugaring = "com.android.tools:desugar_jdk_libs:2.0.4"
 photoView = { module = "com.github.chrisbanes:PhotoView", version.ref = "photoViewVersion" }
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"
