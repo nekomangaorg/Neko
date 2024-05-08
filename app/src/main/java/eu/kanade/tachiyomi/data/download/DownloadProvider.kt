@@ -262,15 +262,10 @@ class DownloadProvider(
      *
      * @param chapter the chapter to query.
      */
-    fun getChapterDirName(chapter: Chapter, useNewId: Boolean = true): String {
-        if (chapter.isMergedChapter()) {
-            return getJ2kChapterName(chapter)
-        } else {
-            if (!useNewId && chapter.old_mangadex_id == null) {
-                return ""
-            }
-            val chapterId = if (useNewId) chapter.mangadex_chapter_id else chapter.old_mangadex_id
-            return DiskUtil.buildValidFilename(chapter.name, " - $chapterId")
+    fun getChapterDirName(chapter: Chapter): String {
+        return when (chapter.isMergedChapter()) {
+            true -> getJ2kChapterName(chapter)
+            false -> DiskUtil.buildValidFilename(chapter.name, " - ${chapter.mangadex_chapter_id}")
         }
     }
 
@@ -291,13 +286,9 @@ class DownloadProvider(
      */
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
         return listOf(
-                getChapterDirName(chapter, true),
+                getChapterDirName(chapter),
                 // chapter names from j2k
                 getJ2kChapterName(chapter),
-                // legacy manga id
-                getChapterDirName(chapter, false),
-                // Legacy chapter directory name used in v0.8.4 and before
-                DiskUtil.buildValidFilename(chapter.name),
             )
             .filter { it.isNotEmpty() }
     }
