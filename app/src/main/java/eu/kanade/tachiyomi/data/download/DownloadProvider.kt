@@ -69,7 +69,7 @@ class DownloadProvider(
      * @param source the source to query.
      */
     fun findSourceDir(): UniFile? {
-        return downloadsDir?.findFile(getSourceDirName(), true)
+        return downloadsDir?.findFile(getSourceDirName())
     }
 
     /**
@@ -80,7 +80,7 @@ class DownloadProvider(
      */
     fun findMangaDir(manga: Manga): UniFile? {
         val sourceDir = findSourceDir()
-        return sourceDir?.findFile(getMangaDirName(manga), true)
+        return sourceDir?.findFile(getMangaDirName(manga))
     }
 
     /**
@@ -94,7 +94,7 @@ class DownloadProvider(
         val mangaDir = findMangaDir(manga)
         return getValidChapterDirNames(chapter)
             .asSequence()
-            .mapNotNull { mangaDir?.findFile(it, true) ?: mangaDir?.findFile("$it.cbz", true) }
+            .mapNotNull { mangaDir?.findFile(it) ?: mangaDir?.findFile("$it.cbz") }
             .firstOrNull()
             ?: mangaDir
                 ?.listFiles { _, filename -> filename.contains(chapter.uuid()) }
