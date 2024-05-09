@@ -129,7 +129,7 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 #test libs
 junit = "junit:junit:4.13.2"
 mockk = "io.mockk:mockk:1.13.10"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.8.1"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.9.0"
 viewTooltip = { module = "com.github.nonproto:ViewTooltip", version.ref = "viewTooltipVersion" }
 
 [plugins]
