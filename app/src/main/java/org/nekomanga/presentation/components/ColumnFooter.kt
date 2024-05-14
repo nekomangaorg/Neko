@@ -33,6 +33,7 @@ import org.nekomanga.presentation.theme.Size
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ColumnScope.SearchFooter(
+    modifier: Modifier = Modifier,
     themeColorState: ThemeColorState,
     title: String,
     labelText: String,
@@ -53,7 +54,8 @@ fun ColumnScope.SearchFooter(
 
     OutlinedTextField(
         modifier =
-            Modifier.fillMaxWidth()
+            modifier
+                .fillMaxWidth()
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .onFocusEvent {
                     if (it.isFocused || it.hasFocus) {

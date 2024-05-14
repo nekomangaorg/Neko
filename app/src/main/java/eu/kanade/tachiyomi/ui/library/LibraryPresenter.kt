@@ -1169,7 +1169,7 @@ class LibraryPresenter(
     /** Returns first unread chapter of a manga */
     fun getFirstUnread(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
-        return ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(chapters, false)
+        return ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(chapters)
     }
 
     /** Update a category's sorting */
