@@ -1707,12 +1707,7 @@ class MangaDetailPresenter(
                         ?.let {
                             kotlin
                                 .runCatching {
-                                    updateTrackChapterMarkedAsRead(
-                                        db,
-                                        preferences,
-                                        it.toDbChapter(),
-                                        mangaId
-                                    ) {
+                                    updateTrackChapterMarkedAsRead(it.toDbChapter(), mangaId) {
                                         updateTrackingFlows()
                                     }
                                 }

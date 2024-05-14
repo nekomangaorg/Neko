@@ -80,9 +80,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun trackMarkedAsRead() = this.preferenceStore.getBoolean(Keys.trackMarkedAsRead, false)
 
-    fun trackingsToAddOnline() =
-        this.preferenceStore.getStringSet(Keys.trackingsToAddOnline, emptySet())
-
     fun lastVersionCode() = this.preferenceStore.getInt("last_version_code", 0)
 
     fun browseAsList() = this.preferenceStore.getBoolean(Keys.catalogueAsList, false)

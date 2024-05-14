@@ -728,12 +728,7 @@ class RecentsController(bundle: Bundle? = null) :
                                     lastChapterId = chapter.id
                                     presenter.deleteChapter(chapter, manga)
                                 }
-                                updateTrackChapterMarkedAsRead(
-                                    db,
-                                    preferences,
-                                    chapter,
-                                    manga.id
-                                ) {}
+                                updateTrackChapterMarkedAsRead(chapter, manga.id) {}
                             }
                         }
                     },

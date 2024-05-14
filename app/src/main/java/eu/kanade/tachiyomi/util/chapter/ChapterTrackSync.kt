@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.util.chapter
 
+import android.content.Context
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -9,127 +10,77 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.jobs.tracking.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
-import kotlinx.coroutines.Job
+import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import kotlinx.coroutines.delay
-import org.nekomanga.logging.TimberKt
+import org.nekomanga.domain.track.store.DelayedTrackingStore
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-
-/**
- * Helper method for syncing a remote track with the local chapters, and back
- *
- * @param db the database.
- * @param chapters a list of chapters from the source.
- * @param remoteTrack the remote Track object.
- * @param service the tracker service.
- */
-fun syncChaptersWithTrackServiceTwoWay(
-    db: DatabaseHelper,
-    chapters: List<Chapter>,
-    remoteTrack: Track,
-    service: TrackService
-) {
-    val sortedChapters = chapters.sortedBy { it.chapter_number }
-    sortedChapters
-        .filter { chapter ->
-            chapter.chapter_number <= remoteTrack.last_chapter_read && !chapter.read
-        }
-        .forEach { it.read = true }
-    db.updateChaptersProgress(sortedChapters).executeAsBlocking()
-
-    // only take into account continuous reading
-    val localLastRead = sortedChapters.takeWhile { it.read }.lastOrNull()?.chapter_number ?: 0F
-
-    // update remote
-    remoteTrack.last_chapter_read = localLastRead
-
-    launchIO {
-        try {
-            service.update(remoteTrack)
-            db.insertTrack(remoteTrack).executeAsBlocking()
-        } catch (e: Throwable) {
-            TimberKt.w(e) { "trying to update remote tracker" }
-        }
-    }
-}
-
-private var trackingJobs = HashMap<Long, Pair<Job?, Float?>>()
 
 /**
  * Starts the service that updates the last chapter read in sync services. This operation will run
  * in a background thread and errors are ignored.
  */
 fun updateTrackChapterMarkedAsRead(
-    db: DatabaseHelper,
-    preferences: PreferencesHelper,
     newLastChapter: Chapter?,
     mangaId: Long?,
     delay: Long = 3000,
     fetchTracks: (suspend () -> Unit)? = null,
 ) {
+    val preferences = Injekt.get<PreferencesHelper>()
     if (!preferences.trackMarkedAsRead().get()) return
     mangaId ?: return
 
     val newChapterRead = newLastChapter?.chapter_number ?: 0f
 
-    // To avoid unnecessary calls if multiple marked as read for same manga
-    if ((trackingJobs[mangaId]?.second ?: 0f) < newChapterRead) {
-        trackingJobs[mangaId]?.first?.cancel()
-
-        // We want these to execute even if the presenter is destroyed
-        trackingJobs[mangaId] =
-            launchIO {
-                delay(delay)
-                updateTrackChapterRead(db, preferences, mangaId, newChapterRead)
-                fetchTracks?.invoke()
-                trackingJobs.remove(mangaId)
-            } to newChapterRead
+    launchIO {
+        withNonCancellableContext {
+            delay(delay)
+            updateTrackChapterRead(mangaId, newChapterRead)
+            fetchTracks?.invoke()
+        }
     }
 }
 
 suspend fun updateTrackChapterRead(
-    db: DatabaseHelper,
-    preferences: PreferencesHelper,
     mangaId: Long?,
     newChapterRead: Float,
     retryWhenOnline: Boolean = false,
-): List<Pair<TrackService, String?>> {
-    val trackManager = Injekt.get<TrackManager>()
-    val trackList = db.getTracks(mangaId).executeAsBlocking()
-    val failures = mutableListOf<Pair<TrackService, String?>>()
-    trackList.map { track ->
-        val service = trackManager.getService(track.sync_id)
-        if (service != null && service.isLogged() && newChapterRead > track.last_chapter_read) {
-            if (retryWhenOnline && !preferences.context.isOnline()) {
-                delayTrackingUpdate(preferences, mangaId, newChapterRead, track)
-            } else if (preferences.context.isOnline()) {
-                try {
-                    track.last_chapter_read = newChapterRead
-                    service.update(track, true)
-                    db.insertTrack(track).executeAsBlocking()
-                } catch (e: Exception) {
-                    TimberKt.w(e) { "Updating track chapter read" }
-                    failures.add(service to e.localizedMessage)
-                    if (retryWhenOnline) {
-                        delayTrackingUpdate(preferences, mangaId, newChapterRead, track)
+    onError: ((TrackService, String?) -> Unit)? = null,
+) {
+    withNonCancellableContext {
+        val preferences = Injekt.get<PreferencesHelper>()
+        val db = Injekt.get<DatabaseHelper>()
+        val trackManager = Injekt.get<TrackManager>()
+
+        val trackList = db.getTracks(mangaId).executeAsBlocking()
+        trackList.map { track ->
+            val service = trackManager.getService(track.sync_id)
+            if (service != null && service.isLogged() && newChapterRead > track.last_chapter_read) {
+                if (retryWhenOnline && !preferences.context.isOnline()) {
+                    delayTrackingUpdate(preferences.context, newChapterRead, track)
+                } else if (preferences.context.isOnline()) {
+                    try {
+                        track.last_chapter_read = newChapterRead
+                        service.update(track, true)
+                        db.insertTrack(track).executeAsBlocking()
+                    } catch (e: Exception) {
+                        onError?.invoke(service, e.localizedMessage)
+                        if (retryWhenOnline) {
+                            delayTrackingUpdate(preferences.context, newChapterRead, track)
+                        }
                     }
                 }
             }
         }
     }
-    return failures
 }
 
 private fun delayTrackingUpdate(
-    preferences: PreferencesHelper,
-    mangaId: Long?,
+    context: Context,
     newChapterRead: Float,
     track: Track,
 ) {
-    val trackings = preferences.trackingsToAddOnline().get().toMutableSet()
-    val currentTracking = trackings.find { it.startsWith("$mangaId:${track.sync_id}:") }
-    trackings.remove(currentTracking)
-    trackings.add("$mangaId:${track.sync_id}:$newChapterRead")
-    preferences.trackingsToAddOnline().set(trackings)
-    DelayedTrackingUpdateJob.setupTask(preferences.context)
+    val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
+    delayedTrackingStore.add(track.id!!, newChapterRead)
+    DelayedTrackingUpdateJob.setupTask(context)
 }

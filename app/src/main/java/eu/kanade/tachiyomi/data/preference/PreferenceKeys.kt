@@ -23,8 +23,6 @@ object PreferenceKeys {
 
     const val trackMarkedAsRead = "track_marked_as_read"
 
-    const val trackingsToAddOnline = "pref_tracking_for_online"
-
     const val catalogueAsList = "pref_display_catalogue_as_list"
 
     const val catalogueShowLibrary = "pref_display_catalogue_already_in_library"

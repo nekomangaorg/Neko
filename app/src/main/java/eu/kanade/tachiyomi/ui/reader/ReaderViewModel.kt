@@ -980,12 +980,18 @@ class ReaderViewModel(
      */
     private fun updateTrackChapterAfterReading(readerChapter: ReaderChapter) {
         if (!preferences.autoUpdateTrack().get()) return
-        viewModelScope.launchNonCancellable {
+        viewModelScope.launchIO {
             val newChapterRead = readerChapter.chapter.chapter_number
-            val errors = updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
-            if (errors.isNotEmpty()) {
-                eventChannel.send(Event.ShareTrackingError(errors))
-            }
+            updateTrackChapterRead(
+                manga?.id,
+                newChapterRead,
+                true,
+                onError = { service, message ->
+                    launchIO {
+                        eventChannel.send(Event.ShareTrackingError(listOf(service to message)))
+                    }
+                }
+            )
         }
     }
 

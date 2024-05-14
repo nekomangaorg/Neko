@@ -12,6 +12,18 @@ import eu.kanade.tachiyomi.data.track.TrackService
 
 interface TrackQueries : DbProvider {
 
+    fun getTrackByTrackId(id: Long) =
+        db.get()
+            .`object`(Track::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(TrackTable.TABLE)
+                    .where("${TrackTable.COL_ID} = ?")
+                    .whereArgs(id)
+                    .build(),
+            )
+            .prepare()
+
     fun getTracks(manga: Manga) = getTracks(manga.id)
 
     fun getTracks(mangaId: Long?) =

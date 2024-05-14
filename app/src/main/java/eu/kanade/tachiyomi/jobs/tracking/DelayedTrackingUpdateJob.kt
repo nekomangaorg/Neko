@@ -10,11 +10,12 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import org.nekomanga.domain.track.store.DelayedTrackingStore
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -32,49 +33,47 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
 
     override suspend fun doWork(): Result {
         TimberKt.d { "Starting Delayed Tracking Update Job" }
-        val preferences = Injekt.get<PreferencesHelper>()
+        if (runAttemptCount > 3) {
+            return Result.failure()
+        }
+
+        val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
         val db = Injekt.get<DatabaseHelper>()
         val trackManager = Injekt.get<TrackManager>()
-        val trackings =
-            preferences
-                .trackingsToAddOnline()
-                .get()
-                .toMutableSet()
+
+        withIOContext {
+            delayedTrackingStore
+                .getItems()
                 .mapNotNull {
-                    val items = it.split(":")
-                    if (items.size != 3) {
-                        TimberKt.e { "items size was not 3 after split for: $it" }
-                        null
-                    } else {
-                        val mangaId = items[0].toLongOrNull() ?: return@mapNotNull null
-                        val syncId = items[1].toIntOrNull() ?: return@mapNotNull null
-                        val chapterNumber = items[2].toFloatOrNull() ?: return@mapNotNull null
-                        DelayedTracking(mangaId, syncId, chapterNumber)
+                    val track = db.getTrackByTrackId(it.trackId).executeOnIO()
+                    if (track == null) {
+                        delayedTrackingStore.remove(it.trackId)
                     }
+                    track?.last_chapter_read = it.lastChapterRead
+                    track
                 }
-                .groupBy { it.mangaId }
-        withContext(Dispatchers.IO) {
-            val trackingsToAdd = mutableSetOf<String>()
-            trackings.forEach { entry ->
-                val mangaId = entry.key
-                val trackList = db.getTracks(mangaId).executeAsBlocking()
-                entry.value.map { delayedTracking ->
-                    val service = trackManager.getService(delayedTracking.syncId)
-                    val track = trackList.find { track -> track.sync_id == delayedTracking.syncId }
-                    if (service != null && track != null) {
-                        try {
-                            track.last_chapter_read = delayedTracking.lastReadChapter
-                            service.update(track, true)
-                            db.insertTrack(track).executeAsBlocking()
-                        } catch (e: Exception) {
-                            trackingsToAdd.add(delayedTracking.print())
-                            TimberKt.e(e) { "Error inserting for delayed tracker" }
+                .forEach { track ->
+                    TimberKt.d {
+                        "Updating delayed track item: ${track.manga_id}, last chapter read: ${track.last_chapter_read}"
+                    }
+                    withNonCancellableContext {
+                        val service = trackManager.getService(track.sync_id)
+                        when (service == null) {
+                            true -> delayedTrackingStore.remove(track.id!!)
+                            false -> {
+                                try {
+                                    service.update(track, true)
+                                    db.insertTrack(track).executeAsBlocking()
+                                } catch (e: Exception) {
+                                    delayedTrackingStore.add(track.id!!, track.last_chapter_read)
+                                    TimberKt.e(e) { "Error inserting for delayed tracker" }
+                                }
+                            }
                         }
                     }
                 }
-            }
-            preferences.trackingsToAddOnline().set(trackingsToAdd)
         }
+
         return Result.success()
     }
 
