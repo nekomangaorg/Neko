@@ -21,7 +21,6 @@ enum class MangaTag(val uuid: String, val prettyPrint: String) : Parcelable {
     DEMONS("39730448-9a5f-48a2-85b0-a70db87b1233", "Demons"),
     DOUJINSHI("b13b2a48-c720-44a9-9c77-39c9979373fb", "Doujinshi"),
     DRAMA("b9af3a63-f058-46de-a9a0-e0c13906197a", "Drama"),
-    ECCHI("fad12b5e-68ba-460e-b933-9ae8318f5b65", "Ecchi"),
     FAN_COLORED("7b2ce280-79ef-4c09-9b58-12b7c23a9b78", "Fan Colored"),
     FANTASY("cdc58593-87dd-415e-bbc0-2ec27bf404cc", "Fantasy"),
     FOUR_KOMA("b11fda93-8f1d-4bef-b2ed-8803d3733170", "4-koma"),
