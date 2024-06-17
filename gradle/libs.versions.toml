@@ -84,7 +84,7 @@ sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqliteVersion" }
 tachi-image-decoder = "com.github.tachiyomiorg:image-decoder:7879b45"
 tachi-source-api = "org.tachiyomi:source-api:1.1"
 tachi-directional-view-pager = "com.github.tachiyomiorg:DirectionalViewPager:1.0.0"
-tachi-unifile = "com.github.tachiyomiorg:unifile:a9de196cc7"
+tachi-unifile = "com.github.tachiyomiorg:unifile:1.0.0"
 
 
 chucker-debug = { module = "com.github.ChuckerTeam.Chucker:library", version.ref = "chuckerVersion" }
