@@ -39,13 +39,16 @@ class AzukiHandler {
             .jsonObject["pages"]!!
             .jsonArray
             .mapIndexed { index, element ->
-                val url =
-                    element.jsonObject["image_wm"]!!
-                        .jsonObject["webp"]!!
-                        .jsonArray[1]
-                        .jsonObject["url"]!!
-                        .jsonPrimitive
-                        .content
+                val array = element.jsonObject["image_wm"]!!.jsonObject["webp"]!!.jsonArray
+
+                val position =
+                    when (array.size) {
+                        3 -> 2
+                        2 -> 1
+                        else -> 0
+                    }
+
+                val url = array[position].jsonObject["url"]!!.jsonPrimitive.content
                 Page(index, url, url)
             }
     }
