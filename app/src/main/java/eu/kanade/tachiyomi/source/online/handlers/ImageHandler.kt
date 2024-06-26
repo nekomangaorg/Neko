@@ -52,7 +52,7 @@ class ImageHandler {
     suspend fun getImage(page: Page, isLogged: Boolean): Response {
         return withIOContext {
             return@withIOContext when {
-                isExternal(page, "mangaplus") ->
+                isExternal(page, "mangaplus") || isExternal(page, "jumpg-assets") ->
                     getImageResponse(mangaPlusHandler.client, mangaPlusHandler.headers, page)
                 isExternal(page, "comikey") ->
                     getImageResponse(comikeyHandler.client, comikeyHandler.headers, page)
@@ -204,6 +204,7 @@ class ImageHandler {
     }
 
     private fun isExternal(page: Page, scanlatorName: String): Boolean {
+        TimberKt.d { "PAGE IMAGE URL: ${page.imageUrl}" }
         return page.imageUrl?.contains(scanlatorName, true) ?: false
     }
 
