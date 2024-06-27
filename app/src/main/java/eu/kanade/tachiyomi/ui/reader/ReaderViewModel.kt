@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader
 
+import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import android.app.Application
 import android.graphics.BitmapFactory
 import androidx.annotation.ColorInt
@@ -72,7 +73,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.security.SecurityPreferences
-import org.nekomanga.domain.chapter.ChapterItem as DomainChapterItem
 import org.nekomanga.domain.chapter.toSimpleChapter
 import org.nekomanga.domain.network.message
 import org.nekomanga.domain.reader.ReaderPreferences
@@ -829,15 +829,15 @@ class ReaderViewModel(
         val notifier = SaveImageNotifier(context)
         notifier.onClear()
 
-        var directory = storageManager.getPagesDirectory()!!
-
-        if (preferences.folderPerManga().get()) {
-            directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
-        }
-
         // Copy file in background.
         viewModelScope.launchNonCancellable {
             try {
+                var directory = storageManager.getPagesDirectory()
+
+                if (preferences.folderPerManga().get() && directory != null) {
+                    directory =
+                        directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
+                }
                 directory ?: throw Exception("Error creating directory to save page")
 
                 val file = saveImage(page, directory, manga)
