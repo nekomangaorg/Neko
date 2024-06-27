@@ -858,9 +858,9 @@ class ReaderViewModel(
         @ColorInt bg: Int
     ) {
         viewModelScope.launchNonCancellable {
-            if (firstPage.status != Page.State.READY) return@launch
-            if (secondPage.status != Page.State.READY) return@launch
-            val manga = manga ?: return@launch
+            if (firstPage.status != Page.State.READY) return@launchNonCancellable
+            if (secondPage.status != Page.State.READY) return@launchNonCancellable
+            val manga = manga ?: return@launchNonCancellable
             val context = Injekt.get<Application>()
 
             val notifier = SaveImageNotifier(context)
