@@ -119,4 +119,13 @@
     <methods>;
 }
 
+
+#Remove after lifecyle 2.8.3
+-if public class androidx.compose.ui.platform.AndroidCompositionLocals_androidKt {
+    public static *** getLocalLifecycleOwner();
+}
+-keep public class androidx.compose.ui.platform.AndroidCompositionLocals_androidKt {
+    public static *** getLocalLifecycleOwner();
+}
+
 ##---------------End: proguard configuration for kotlinx.serialization  ----------
