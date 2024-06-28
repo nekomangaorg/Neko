@@ -28,7 +28,7 @@ lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-com
 
 
 [bundles]
-androidx = ["appcompat", "cardview", "webkit", "recyclerview", "preferencektx", "annotation", "browser", "biometric", "palette", "core-ktx", "constraintlayout", "multidex", "lifecycle-process", "lifecycle-runtime-ktx", "lifecycle-viewmodel-ktx", "work"]
+androidx = ["appcompat", "cardview", "webkit", "recyclerview", "preferencektx", "annotation", "browser", "biometric", "palette", "core-ktx", "constraintlayout", "multidex", "lifecycle-process", "lifecycle-runtime-ktx", "lifecycle-viewmodel-ktx", "lifecycle-runtime-compose", "work"]
 
 
 [plugins]
