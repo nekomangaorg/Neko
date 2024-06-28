@@ -1,6 +1,6 @@
 [versions]
 agp_version = "8.2.2"
-lifecycle_version = "2.7.0"
+lifecycle_version = "2.8.3"
 
 [libraries]
 
@@ -24,6 +24,7 @@ work = "androidx.work:work-runtime-ktx:2.9.0"
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle_version" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle_version" }
 lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle_version" }
+lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle_version" }
 
 
 [bundles]
