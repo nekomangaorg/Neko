@@ -155,7 +155,22 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         instance = WeakReference(this)
 
         val selectedScheme = libraryPreferences.updatePrioritization().get()
-        val savedMangaList = inputData.getLongArray(KEY_MANGA_LIST)?.asList()
+
+        val savedMangaList =
+            when (inputData.getBoolean(KEY_MANGA_LIST, false)) {
+                true -> {
+                    val set =
+                        libraryPreferences
+                            .libraryUpdateIds()
+                            .get()
+                            .splitToSequence("||")
+                            .map { it.toLong() }
+                            .toSet()
+                    libraryPreferences.libraryUpdateIds().delete()
+                    set
+                }
+                false -> null
+            }
 
         val mangaList =
             (if (savedMangaList != null) {
@@ -830,16 +845,17 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val builder = Data.Builder()
             category?.id?.let { id -> builder.putInt(KEY_CATEGORY, id) }
 
+            val libraryPreferences = Injekt.injectLazy<LibraryPreferences>()
             if (mangaToUse != null) {
-                builder.putLongArray(
-                    KEY_MANGA_LIST,
-                    mangaToUse.mapNotNull { it.id }.toLongArray(),
-                )
+                builder.putBoolean(KEY_MANGA_LIST, true)
+                libraryPreferences.value
+                    .libraryUpdateIds()
+                    .set(mangaToUse.mapNotNull { it.id }.toLongArray().joinToString("||"))
             } else if (mangaIdsToUse != null) {
-                builder.putLongArray(
-                    KEY_MANGA_LIST,
-                    mangaIdsToUse.toLongArray(),
-                )
+                builder.putBoolean(KEY_MANGA_LIST, true)
+                libraryPreferences.value
+                    .libraryUpdateIds()
+                    .set(mangaIdsToUse.toLongArray().joinToString("||"))
             }
             val inputData = builder.build()
             val request =
