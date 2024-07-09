@@ -3,7 +3,7 @@ accompanist_version = "0.34.0"
 compose_version = "1.6.8"
 compose_material3_version = "1.2.1"
 compose_compiler_version = "1.5.11"
-markdown_version = "0.22.0"
+markdown_version = "0.23.0"
 
 [libraries]
 
@@ -17,7 +17,7 @@ material3-windowsize = { module = "androidx.compose.material3:material3-window-s
 activity = "androidx.activity:activity-compose:1.9.0"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
 
-lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.8.2"
+lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.8.3"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
