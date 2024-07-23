@@ -57,7 +57,7 @@ iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconicsV
 iconics-compose = { module = "com.mikepenz:iconics-compose", version.ref = "iconicsVersion" }
 
 
-jsoup = "org.jsoup:jsoup:1.17.2"
+jsoup = "org.jsoup:jsoup:1.18.1"
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResultVersion" }
 kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlinResultVersion" }
