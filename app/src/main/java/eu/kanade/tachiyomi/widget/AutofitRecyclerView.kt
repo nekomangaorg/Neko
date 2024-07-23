@@ -173,13 +173,11 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     private fun setSpan(force: Boolean = false) {
-        if (
-            (spanCount == 0 ||
-                force ||
-                // Add 100dp check to make sure we dont update span for sidenav changes
-                (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)) &&
-                columnWidth > 0
-        ) {
+        if ((spanCount == 0 ||
+            force ||
+            // Add 100dp check to make sure we dont update span for sidenav changes
+            (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)) &&
+            columnWidth > 0) {
             val dpWidth = (width.pxToDp / 100f).roundToInt()
             val count = max(1, (dpWidth / columnWidth).roundToInt())
             spanCount = count

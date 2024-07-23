@@ -110,10 +110,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (notificationId > -1) {
                     dismissNotification(
-                        context,
-                        notificationId,
-                        intent.getIntExtra(EXTRA_GROUP_ID, 0)
-                    )
+                        context, notificationId, intent.getIntExtra(EXTRA_GROUP_ID, 0))
                 }
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
@@ -652,8 +649,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 manga.id.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
         /**
@@ -687,8 +683,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 0,
                 toLaunch,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
         /**

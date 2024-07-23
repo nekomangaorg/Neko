@@ -59,10 +59,8 @@ class MangaCoverFetcher(
                     url = url,
                     inLibrary = inLibrary,
                     originalArtwork = originalThumbnailUrl,
-                    mangaId = mangaId
-                ),
-                options
-            )
+                    mangaId = mangaId),
+                options)
     }
 
     val fileScope = CoroutineScope(Job() + Dispatchers.IO)
@@ -84,8 +82,7 @@ class MangaCoverFetcher(
                     mangaId = mangaId,
                     inLibrary = inLibrary,
                     originalThumbnail = originalThumbnailUrl,
-                    ogFile = File(url.substringAfter("file://"))
-                )
+                    ogFile = File(url.substringAfter("file://")))
                 fileLoader(File(url.substringAfter("file://")))
             }
             null -> error("Invalid image")
@@ -105,8 +102,7 @@ class MangaCoverFetcher(
                     mangaId = mangaId,
                     inLibrary = inLibrary,
                     originalThumbnail = originalThumbnailUrl,
-                    ogFile = customCoverFile
-                )
+                    ogFile = customCoverFile)
                 return fileLoader(customCoverFile)
             }
         }
@@ -119,8 +115,7 @@ class MangaCoverFetcher(
                 mangaId = mangaId,
                 inLibrary = inLibrary,
                 originalThumbnail = originalThumbnailUrl,
-                ogFile = coverFile
-            )
+                ogFile = coverFile)
             return fileLoader(coverFile)
         }
         var snapshot = readFromDiskCache()
@@ -134,8 +129,7 @@ class MangaCoverFetcher(
                         mangaId = mangaId,
                         inLibrary = inLibrary,
                         originalThumbnail = originalThumbnailUrl,
-                        ogFile = snapshotCoverCache
-                    )
+                        ogFile = snapshotCoverCache)
                     return fileLoader(snapshotCoverCache)
                 }
 
@@ -143,8 +137,7 @@ class MangaCoverFetcher(
                 setRatioAndColorsInScope(
                     mangaId = mangaId,
                     inLibrary = inLibrary,
-                    originalThumbnail = originalThumbnailUrl
-                )
+                    originalThumbnail = originalThumbnailUrl)
                 return SourceResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
@@ -161,8 +154,7 @@ class MangaCoverFetcher(
                 setRatioAndColorsInScope(
                     mangaId = mangaId,
                     inLibrary = inLibrary,
-                    originalThumbnail = originalThumbnailUrl
-                )
+                    originalThumbnail = originalThumbnailUrl)
                 if (responseCoverCache != null) {
                     return fileLoader(responseCoverCache)
                 }
@@ -215,8 +207,7 @@ class MangaCoverFetcher(
                     sourceLazy.value.headers
                         .newBuilder()
                         .add("x-request-id", "Neko-" + UUID.randomUUID())
-                        .build()
-                )
+                        .build())
                 // Support attaching custom data to the network request.
                 .tag(Parameters::class.java, options.parameters)
 
@@ -309,12 +300,7 @@ class MangaCoverFetcher(
     ) {
         fileScope.launch {
             MangaCoverMetadata.setRatioAndColors(
-                mangaId,
-                originalThumbnail,
-                inLibrary,
-                ogFile,
-                force
-            )
+                mangaId, originalThumbnail, inLibrary, ogFile, force)
         }
     }
 

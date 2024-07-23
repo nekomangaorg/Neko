@@ -93,11 +93,9 @@ fun WebViewScreen(
                             ),
                         ) +
                         listOf(
-                            if (
-                                navigator.canGoBack &&
-                                    state.lastLoadedUrl != null &&
-                                    canOpenInApp(state.lastLoadedUrl!!)
-                            ) {
+                            if (navigator.canGoBack &&
+                                state.lastLoadedUrl != null &&
+                                canOpenInApp(state.lastLoadedUrl!!)) {
                                 AppBar.OverflowAction(
                                     title = UiText.StringResource(R.string.open_in_app),
                                     onClick = { state.lastLoadedUrl?.let(onOpenInApp) },
@@ -139,10 +137,8 @@ fun WebViewScreen(
                     webView.setDefaultSettings()
 
                     // Debug mode (chrome://inspect/#devices)
-                    if (
-                        BuildConfig.DEBUG &&
-                            0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
-                    ) {
+                    if (BuildConfig.DEBUG &&
+                        0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) {
                         WebView.setWebContentsDebuggingEnabled(true)
                     }
 

@@ -62,8 +62,7 @@ class AboutPresenter : BaseCoroutinePresenter<AboutPresenter>() {
                 }
                 is AppUpdateResult.NoNewUpdate -> {
                     _snackbarState.emit(
-                        SnackbarState(messageRes = R.string.no_new_updates_available)
-                    )
+                        SnackbarState(messageRes = R.string.no_new_updates_available))
                 }
                 is AppUpdateResult.NewUpdate -> {
                     _aboutScreenState.update {
@@ -87,9 +86,7 @@ class AboutPresenter : BaseCoroutinePresenter<AboutPresenter>() {
                 _snackbarState.emit(
                     SnackbarState(
                         messageRes = R.string._copied_to_clipboard,
-                        fieldRes = R.string.build_information
-                    )
-                )
+                        fieldRes = R.string.build_information))
             }
         }
     }

@@ -568,11 +568,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     }
 
     override fun finishAfterTransition() {
-        if (
-            didTransistionFromChapter &&
-                visibleChapterRange.isNotEmpty() &&
-                MainActivity.chapterIdToExitTo !in visibleChapterRange
-        ) {
+        if (didTransistionFromChapter &&
+            visibleChapterRange.isNotEmpty() &&
+            MainActivity.chapterIdToExitTo !in visibleChapterRange) {
             finish()
         } else {
             viewModel.onBackPressed()
@@ -772,20 +770,16 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     if (event?.action == MotionEvent.ACTION_UP) {
                         if (!result) {
                             val sheetBehavior = binding.chaptersSheet.root.sheetBehavior
-                            if (
-                                sheetBehavior?.state != BottomSheetBehavior.STATE_SETTLING &&
-                                    !sheetBehavior.isCollapsed()
-                            ) {
+                            if (sheetBehavior?.state != BottomSheetBehavior.STATE_SETTLING &&
+                                !sheetBehavior.isCollapsed()) {
                                 sheetBehavior?.collapse()
                             }
                         }
                         if (readerNavGestureDetector.lockVertical) {
                             return@setOnTouchListener true
                         }
-                    } else if (
-                        (event?.action != MotionEvent.ACTION_UP ||
-                            event.action != MotionEvent.ACTION_DOWN) && result
-                    ) {
+                    } else if ((event?.action != MotionEvent.ACTION_UP ||
+                        event.action != MotionEvent.ACTION_DOWN) && result) {
                         event.action = MotionEvent.ACTION_CANCEL
                         return@setOnTouchListener false
                     }
@@ -804,13 +798,10 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 val prevValue = (viewer as? PagerViewer)?.pager?.currentItem ?: -1
                 moveToPageIndex(value.roundToInt())
                 val newValue = (viewer as? PagerViewer)?.pager?.currentItem ?: -1
-                if (
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 &&
-                        ((prevValue > -1 && newValue != prevValue) || viewer !is PagerViewer)
-                ) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 &&
+                    ((prevValue > -1 && newValue != prevValue) || viewer !is PagerViewer)) {
                     binding.readerNav.pageSeekbar.performHapticFeedback(
-                        HapticFeedbackConstants.TEXT_HANDLE_MOVE
-                    )
+                        HapticFeedbackConstants.TEXT_HANDLE_MOVE)
                 }
             }
         }
@@ -822,9 +813,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     if (it.hasExtraPage(value.roundToInt(), viewModel.getCurrentChapter())) {
                         val invertDoublePage =
                             (viewer as? PagerViewer)?.config?.invertDoublePages ?: false
-                        return@setLabelFormatter if (
-                            !binding.readerNav.pageSeekbar.isRTL.xor(invertDoublePage)
-                        ) {
+                        return@setLabelFormatter if (!binding.readerNav.pageSeekbar.isRTL.xor(
+                            invertDoublePage)) {
                             "$pageNumber-${pageNumber + 1}"
                         } else {
                             "${pageNumber + 1}-$pageNumber"
@@ -868,8 +858,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 topMargin = systemInsets.top
             }
             binding.chaptersSheet.chaptersBottomSheet.updateLayoutParams<
-                ViewGroup.MarginLayoutParams
-            > {
+                ViewGroup.MarginLayoutParams> {
                 leftMargin = systemInsets.left
                 rightMargin = systemInsets.right
                 height = 280.dpToPx + systemInsets.bottom
@@ -891,8 +880,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         )
                     }
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(
-                bottom = systemInsets.bottom
-            )
+                bottom = systemInsets.bottom)
             binding.viewerContainer.requestLayout()
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
@@ -1044,10 +1032,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = false
             }
-            if (
-                !binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded() &&
-                    sheetManageNavColor
-            ) {
+            if (!binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded() &&
+                sheetManageNavColor) {
                 window.navigationBarColor = Color.TRANSPARENT
             }
             if (animate && oldVisibility != menuVisible) {
@@ -1055,8 +1041,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                     toolbarAnimation.doOnStart {
                         window.addFlags(
-                            WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-                        )
+                            WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                     }
                     binding.appBar.startAnimation(toolbarAnimation)
                 }
@@ -1101,11 +1086,9 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 else -> R2LPagerViewer(this)
             }
 
-        if (
-            noDefault &&
-                viewModel.manga?.readingModeType!! > 0 &&
-                viewModel.manga?.readingModeType!! != readerPreferences.defaultReadingMode().get()
-        ) {
+        if (noDefault &&
+            viewModel.manga?.readingModeType!! > 0 &&
+            viewModel.manga?.readingModeType!! != readerPreferences.defaultReadingMode().get()) {
             snackbar =
                 binding.readerLayout.snack(
                     getString(
@@ -1256,8 +1239,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             if (viewModel.manga!!.hideChapterTitle(mangaDetailsPreferences)) {
                 val number =
                     decimalFormat.format(
-                        viewerChapters.currChapter.chapter.chapter_number.toDouble()
-                    )
+                        viewerChapters.currChapter.chapter.chapter_number.toDouble())
                 getString(R.string.chapter_, number)
             } else {
                 viewerChapters.currChapter.chapter.name
@@ -1365,9 +1347,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             binding.readerNav.leftPageText.text = currentPage
             binding.readerNav.rightPageText.text = totalPages
         }
-        if (
-            binding.chaptersSheet.chaptersBottomSheet.selectedChapterId != page.chapter.chapter.id
-        ) {
+        if (binding.chaptersSheet.chaptersBottomSheet.selectedChapterId !=
+            page.chapter.chapter.id) {
             binding.chaptersSheet.chaptersBottomSheet.refreshList()
         }
         // Set seekbar progress
@@ -1461,10 +1442,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                 val isLTR =
                                     (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
                                 val bg =
-                                    if (
-                                        viewer.config.readerTheme >= 2 ||
-                                            viewer.config.readerTheme == 0
-                                    ) {
+                                    if (viewer.config.readerTheme >= 2 ||
+                                        viewer.config.readerTheme == 0) {
                                         Color.WHITE
                                     } else {
                                         Color.BLACK
@@ -1654,8 +1633,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             if (errors.size > 1) {
                 getString(
                     R.string.failed_to_update_,
-                    errors.joinToString(", ") { getString(it.first.nameRes()) }
-                )
+                    errors.joinToString(", ") { getString(it.first.nameRes()) })
             } else {
                 val (service, errorMessage) = errors.first()
                 buildSpannedString {
@@ -1665,8 +1643,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                 val size =
                                     resources.getDimension(
                                         com.google.android.material.R.dimen
-                                            .design_snackbar_text_size
-                                    )
+                                            .design_snackbar_text_size)
                                 val dRatio = intrinsicWidth / intrinsicHeight.toFloat()
                                 setBounds(0, 0, (size * dRatio).roundToInt(), size.roundToInt())
                             } ?: return
@@ -1828,8 +1805,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
             merge(
                     readerPreferences.grayscale().changes(),
-                    readerPreferences.invertedColors().changes()
-                )
+                    readerPreferences.invertedColors().changes())
                 .onEach {
                     setLayerPaint(
                         readerPreferences.grayscale().get(),
@@ -1857,8 +1833,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 .onEach {
                     val isPaused =
                         !this@ReaderActivity.lifecycle.currentState.isAtLeast(
-                            Lifecycle.State.RESUMED
-                        )
+                            Lifecycle.State.RESUMED)
                     if (isPaused) {
                         (viewer as? PagerViewer)?.config?.let { config ->
                             reloadChapters(config.doublePages, true)

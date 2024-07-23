@@ -43,10 +43,7 @@ class SearchHandler {
                 val sourceManga =
                     persistentListOf(
                         mangaDto.data.toSourceManga(
-                            preferencesHelper.thumbnailQuality().get(),
-                            false
-                        )
-                    )
+                            preferencesHelper.thumbnailQuality().get(), false))
                 Ok(MangaListPage(sourceManga = sourceManga, hasNextPage = false))
             }
     }
@@ -195,8 +192,7 @@ class SearchHandler {
                                 mangaListDto.data
                                     .distinctBy { it.id }
                                     .map { it.toSourceManga(thumbQuality) }
-                                    .toImmutableList()
-                        ),
+                                    .toImmutableList()),
                     )
                 }
         }
@@ -231,9 +227,7 @@ class SearchHandler {
                                 mangaListDto.data
                                     .mapIndexed { index, dto ->
                                         dto.toSourceManga(
-                                            thumbQuality,
-                                            displayText = "No. ${offset + index + 1}"
-                                        )
+                                            thumbQuality, displayText = "No. ${offset + index + 1}")
                                     }
                                     .toImmutableList(),
                         ),

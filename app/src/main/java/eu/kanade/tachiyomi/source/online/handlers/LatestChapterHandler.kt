@@ -104,17 +104,13 @@ class LatestChapterHandler {
                                     val chapterName =
                                         result[it.id]?.firstOrNull()?.buildChapterName() ?: ""
                                     it.toSourceManga(
-                                        coverQuality = thumbQuality,
-                                        displayText = chapterName
-                                    )
+                                        coverQuality = thumbQuality, displayText = chapterName)
                                 }
 
                         Ok(
                             MangaListPage(
                                 sourceManga = mangaList.toPersistentList(),
-                                hasNextPage = hasMoreResults
-                            )
-                        )
+                                hasNextPage = hasMoreResults))
                     }
             }
             .getOrElse { e ->

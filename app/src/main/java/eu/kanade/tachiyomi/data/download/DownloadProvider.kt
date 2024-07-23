@@ -56,10 +56,7 @@ class DownloadProvider(
 
             throw Exception(
                 context.getString(
-                    R.string.invalid_download_location,
-                    downloadsDir?.displayablePath ?: ""
-                )
-            )
+                    R.string.invalid_download_location, downloadsDir?.displayablePath ?: ""))
         }
     }
 

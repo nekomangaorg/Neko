@@ -122,14 +122,12 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 put(
                     "query",
                     if (manga.anilist_id != null && !wasPreviouslyTracked) findQuery()
-                    else searchQuery()
-                )
+                    else searchQuery())
                 putJsonObject("variables") {
                     put(
                         "query",
                         if (manga.anilist_id != null && !wasPreviouslyTracked) manga.anilist_id
-                        else search
-                    )
+                        else search)
                 }
             }
             with(json) {

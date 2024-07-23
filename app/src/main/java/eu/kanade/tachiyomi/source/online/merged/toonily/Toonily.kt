@@ -68,8 +68,7 @@ class Toonily : ReducedHttpSource() {
             .add("Referer", baseUrl)
             .add(
                 "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0$userAgentRandomizer"
-            )
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0$userAgentRandomizer")
             .build()
 
     private val searchHeaders =
@@ -82,9 +81,7 @@ class Toonily : ReducedHttpSource() {
                     POST(
                         "$baseUrl/wp-admin/admin-ajax.php",
                         searchHeaders,
-                        searchFormBuilder(query).build()
-                    )
-                )
+                        searchFormBuilder(query).build()))
                 .await()
         if (!response.isSuccessful) {
             response.close()
@@ -206,8 +203,7 @@ class Toonily : ReducedHttpSource() {
                             parseChapterDate(it)
                         }
                         ?: parseChapterDate(
-                            element.select("span.chapter-release-date").firstOrNull()?.text()
-                        )
+                            element.select("span.chapter-release-date").firstOrNull()?.text())
 
                 chapter
             }
@@ -220,8 +216,7 @@ class Toonily : ReducedHttpSource() {
         response.closeQuietly()
         return document
             .select(
-                "div.page-break, li.blocks-gallery-item, .reading-content .text-left:not(:has(.blocks-gallery-item)) img"
-            )
+                "div.page-break, li.blocks-gallery-item, .reading-content .text-left:not(:has(.blocks-gallery-item)) img")
             .mapIndexed { index, element ->
                 Page(
                     index,

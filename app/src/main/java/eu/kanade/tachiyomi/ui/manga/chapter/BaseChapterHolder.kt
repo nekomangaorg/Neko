@@ -20,10 +20,8 @@ open class BaseChapterHolder(
         val chapter = adapter.getItem(flexibleAdapterPosition) as? BaseChapterItem<*, *> ?: return
         val downloadButton = itemView.findViewById<View>(R.id.download_button) ?: return
 
-        if (
-            chapter.status == Download.State.NOT_DOWNLOADED ||
-                chapter.status == Download.State.ERROR
-        ) {
+        if (chapter.status == Download.State.NOT_DOWNLOADED ||
+            chapter.status == Download.State.ERROR) {
             adapter.baseDelegate?.downloadChapter(flexibleAdapterPosition)
         } else {
             downloadButton.post {

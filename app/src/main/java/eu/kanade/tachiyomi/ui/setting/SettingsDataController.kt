@@ -198,8 +198,7 @@ class SettingsDataController : SettingsController() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         putExtra(
                             DocumentsContract.EXTRA_INITIAL_URI,
-                            storageManager.getBackupDirectory()!!.uri
-                        )
+                            storageManager.getBackupDirectory()!!.uri)
                     }
                 }
 

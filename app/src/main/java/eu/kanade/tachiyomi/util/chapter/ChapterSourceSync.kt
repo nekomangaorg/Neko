@@ -74,13 +74,11 @@ fun syncChaptersWithSource(
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
-                if (
-                    dbChapter.name != sourceChapter.name &&
-                        downloadManager.isChapterDownloaded(
-                            dbChapter,
-                            manga,
-                        )
-                ) {
+                if (dbChapter.name != sourceChapter.name &&
+                    downloadManager.isChapterDownloaded(
+                        dbChapter,
+                        manga,
+                    )) {
                     downloadManager.renameChapter(manga, dbChapter, sourceChapter)
                 }
                 dbChapter.scanlator = sourceChapter.scanlator

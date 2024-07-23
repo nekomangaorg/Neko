@@ -105,8 +105,7 @@ fun NekoScaffold(
                             actions,
                             incognitoMode,
                             isRoot,
-                            scrollBehavior
-                        )
+                            scrollBehavior)
                     NekoScaffoldType.NoTitle ->
                         NoTitleTopAppBar(
                             color,
@@ -114,8 +113,7 @@ fun NekoScaffold(
                             navigationIcon,
                             onNavigationIconClicked,
                             actions,
-                            scrollBehavior
-                        )
+                            scrollBehavior)
                     NekoScaffoldType.TitleAndSubtitle ->
                         TitleAndSubtitleTopAppBar(
                             color,
@@ -125,8 +123,7 @@ fun NekoScaffold(
                             navigationIcon,
                             onNavigationIconClicked,
                             actions,
-                            scrollBehavior
-                        )
+                            scrollBehavior)
                     NekoScaffoldType.Search ->
                         NoTitleSearchTopAppBar(
                             onSearch,
@@ -136,8 +133,7 @@ fun NekoScaffold(
                             navigationIcon,
                             onNavigationIconClicked,
                             actions,
-                            scrollBehavior
-                        )
+                            scrollBehavior)
                 }
             }
         },
@@ -255,68 +251,69 @@ private fun NoTitleSearchTopAppBar(
             AnimatedVisibility(
                 visible = showTextField,
                 enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically()
-            ) {
-                // research on configuration change
+                exit = fadeOut() + slideOutVertically()) {
+                    // research on configuration change
 
-                OutlinedTextField(
-                    modifier =
-                        Modifier.weight(1f)
-                            .padding(top = Size.small, bottom = Size.small, start = Size.extraLarge)
-                            .focusRequester(focusRequester),
-                    value = searchText,
-                    placeholder = { Text(text = stringResource(id = R.string.search_chapters)) },
-                    onValueChange = {
-                        searchText = it
-                        onSearchText(it)
-                    },
-                    colors =
-                        TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            cursorColor =
-                                LocalContentColor.current.copy(alpha = LocalContentAlpha.current),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                        ),
-                    trailingIcon = {
-                        AnimatedVisibility(
-                            visible = searchText.isNotBlank(),
-                            enter = fadeIn(),
-                            exit = fadeOut()
-                        ) {
-                            ToolTipButton(
-                                toolTipLabel = stringResource(id = R.string.clear),
-                                icon = Icons.Filled.Close,
-                                buttonClicked = {
-                                    onSearchText("")
-                                    searchText = ""
-                                },
-                            )
+                    OutlinedTextField(
+                        modifier =
+                            Modifier.weight(1f)
+                                .padding(
+                                    top = Size.small, bottom = Size.small, start = Size.extraLarge)
+                                .focusRequester(focusRequester),
+                        value = searchText,
+                        placeholder = {
+                            Text(text = stringResource(id = R.string.search_chapters))
+                        },
+                        onValueChange = {
+                            searchText = it
+                            onSearchText(it)
+                        },
+                        colors =
+                            TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent,
+                                cursorColor =
+                                    LocalContentColor.current.copy(
+                                        alpha = LocalContentAlpha.current),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            ),
+                        trailingIcon = {
+                            AnimatedVisibility(
+                                visible = searchText.isNotBlank(),
+                                enter = fadeIn(),
+                                exit = fadeOut()) {
+                                    ToolTipButton(
+                                        toolTipLabel = stringResource(id = R.string.clear),
+                                        icon = Icons.Filled.Close,
+                                        buttonClicked = {
+                                            onSearchText("")
+                                            searchText = ""
+                                        },
+                                    )
+                                }
+                        },
+                        maxLines = 1,
+                        singleLine = true,
+                        keyboardOptions =
+                            KeyboardOptions.Default.copy(
+                                imeAction = androidx.compose.ui.text.input.ImeAction.Search),
+                        keyboardActions =
+                            KeyboardActions(
+                                onSearch = { onSearchText(searchText) },
+                            ),
+                    )
+                    LaunchedEffect(Unit) {
+                        if (!alreadyRequestedFocus) {
+                            focusRequester.requestFocus()
+                            alreadyRequestedFocus = true
                         }
-                    },
-                    maxLines = 1,
-                    singleLine = true,
-                    keyboardOptions =
-                        KeyboardOptions.Default.copy(
-                            imeAction = androidx.compose.ui.text.input.ImeAction.Search
-                        ),
-                    keyboardActions =
-                        KeyboardActions(
-                            onSearch = { onSearchText(searchText) },
-                        ),
-                )
-                LaunchedEffect(Unit) {
-                    if (!alreadyRequestedFocus) {
-                        focusRequester.requestFocus()
-                        alreadyRequestedFocus = true
-                    }
-                    if (searchText.isNotBlank()) {
-                        onSearchText(searchText)
+                        if (searchText.isNotBlank()) {
+                            onSearchText(searchText)
+                        }
                     }
                 }
-            }
             val icon =
                 when (showTextField) {
                     true -> Icons.Filled.SearchOff
@@ -365,8 +362,7 @@ private fun TitleOnlyTopAppBar(
         title = {
             AutoSizeText(
                 text = title,
-                style = MaterialTheme.typography.titleLarge.copy(letterSpacing = (-.6).sp)
-            )
+                style = MaterialTheme.typography.titleLarge.copy(letterSpacing = (-.6).sp))
         },
         navigationIcon = {
             if (incognitoMode) {

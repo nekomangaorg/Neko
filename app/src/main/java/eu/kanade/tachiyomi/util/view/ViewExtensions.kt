@@ -459,20 +459,16 @@ fun Dialog.blurBehindWindow(
     onCancel: DialogInterface.OnCancelListener? = null,
 ) {
     var supportsBlur = false
-    if (
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            window?.windowManager?.isCrossWindowBlurEnabled == true
-    ) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+        window?.windowManager?.isCrossWindowBlurEnabled == true) {
         supportsBlur = true
     }
     var registered = true
     val powerSaverChangeReceiver: BroadcastReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                if (
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                        window?.windowManager?.isCrossWindowBlurEnabled == true
-                ) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    window?.windowManager?.isCrossWindowBlurEnabled == true) {
                     return
                 }
                 val canBlur =

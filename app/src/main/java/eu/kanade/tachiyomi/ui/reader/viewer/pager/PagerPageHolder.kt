@@ -130,11 +130,9 @@ class PagerPageHolder(
     override fun onImageLoaded() {
         super.onImageLoaded()
         (pageView as? SubsamplingScaleImageView)?.apply {
-            if (
-                this@PagerPageHolder.extraPage == null &&
-                    this@PagerPageHolder.page.longPage == null &&
-                    sHeight < sWidth
-            ) {
+            if (this@PagerPageHolder.extraPage == null &&
+                this@PagerPageHolder.page.longPage == null &&
+                sHeight < sWidth) {
                 this@PagerPageHolder.page.longPage = true
             }
         }
@@ -201,8 +199,7 @@ class PagerPageHolder(
                         progressBar.setProgress(progress)
                     } else {
                         progressBar.setProgress(
-                            ((progress + extraProgress) / 2 * 0.95f).roundToInt()
-                        )
+                            ((progress + extraProgress) / 2 * 0.95f).roundToInt())
                     }
                 }
             }
@@ -293,13 +290,10 @@ class PagerPageHolder(
 
     private fun SubsamplingScaleImageView.landscapeZoom(forward: Boolean?) {
         forward ?: return
-        if (
-            viewer.config.landscapeZoom &&
-                viewer.config.imageScaleType ==
-                    SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE &&
-                sWidth > sHeight &&
-                scale == minScale
-        ) {
+        if (viewer.config.landscapeZoom &&
+            viewer.config.imageScaleType == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE &&
+            sWidth > sHeight &&
+            scale == minScale) {
             handler.postDelayed(
                 {
                     val point =
@@ -463,11 +457,9 @@ class PagerPageHolder(
 
                     val stream2 = streamFn2?.invoke()?.buffered(16)
                     openStream =
-                        when (
-                            viewer.config.doublePageRotate &&
-                                stream2 == null &&
-                                ImageUtil.isWideImage(stream)
-                        ) {
+                        when (viewer.config.doublePageRotate &&
+                            stream2 == null &&
+                            ImageUtil.isWideImage(stream)) {
                             true -> {
                                 val rotation =
                                     if (viewer.config.doublePageRotateReverse) -90f else 90f
@@ -484,12 +476,10 @@ class PagerPageHolder(
                 .doOnNext { isAnimated ->
                     if (!isAnimated) {
                         if (viewer.config.readerTheme >= 2) {
-                            if (
-                                page.bg != null &&
-                                    page.bgType ==
-                                        getBGType(viewer.config.readerTheme, context) +
-                                            item.hashCode()
-                            ) {
+                            if (page.bg != null &&
+                                page.bgType ==
+                                    getBGType(viewer.config.readerTheme, context) +
+                                        item.hashCode()) {
                                 setImage(openStream!!, false, imageConfig)
                                 pageView?.background = page.bg
                             }
@@ -843,20 +833,15 @@ class PagerPageHolder(
         imageStream.close()
         imageStream2.close()
         return ImageUtil.mergeBitmaps(
-            imageBitmap,
-            imageBitmap2,
-            isLTR,
-            bg,
-            viewer.config.doublePageGap
-        ) {
-            scope.launchUI {
-                if (it == 100) {
-                    progressBar.completeAndFadeOut()
-                } else {
-                    progressBar.setProgress(it)
+            imageBitmap, imageBitmap2, isLTR, bg, viewer.config.doublePageGap) {
+                scope.launchUI {
+                    if (it == 100) {
+                        progressBar.completeAndFadeOut()
+                    } else {
+                        progressBar.setProgress(it)
+                    }
                 }
             }
-        }
     }
 
     private fun splitDoublePages() {

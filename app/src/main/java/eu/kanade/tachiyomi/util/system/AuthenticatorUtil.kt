@@ -46,8 +46,7 @@ object AuthenticatorUtil {
                 .setSubtitle(subtitle)
                 .setAllowedAuthenticators(
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL or
-                        BiometricManager.Authenticators.BIOMETRIC_WEAK
-                )
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK)
                 .setConfirmationRequired(confirmationRequired)
                 .build()
 

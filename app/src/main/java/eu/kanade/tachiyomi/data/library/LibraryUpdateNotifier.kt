@@ -104,8 +104,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             context
                 .notificationBuilder(Notifications.Channel.Library.Error) {
                     setContentTitle(
-                        context.getString(R.string.notification_update_error, errors.size)
-                    )
+                        context.getString(R.string.notification_update_error, errors.size))
                     setContentText(context.getString(R.string.tap_to_see_details))
                     setStyle(
                         NotificationCompat.BigTextStyle()
@@ -144,8 +143,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             context
                 .notificationBuilder(Notifications.Channel.Library.Skipped) {
                     setContentTitle(
-                        context.getString(R.string.notification_update_skipped, skips.size)
-                    )
+                        context.getString(R.string.notification_update_skipped, skips.size))
                     setContentText(context.getString(R.string.tap_to_see_details))
                     setStyle(
                         NotificationCompat.BigTextStyle()

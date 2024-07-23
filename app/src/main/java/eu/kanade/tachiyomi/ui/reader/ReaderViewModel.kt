@@ -234,12 +234,7 @@ class ReaderViewModel(
                     val context = Injekt.get<Application>()
                     loader =
                         ChapterLoader(
-                            context,
-                            downloadManager,
-                            downloadProvider,
-                            manga,
-                            sourceManager
-                        )
+                            context, downloadManager, downloadProvider, manga, sourceManager)
 
                     loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
                     Result.success(true)
@@ -420,9 +415,8 @@ class ReaderViewModel(
             }
         }
 
-        if (
-            chapter.state != ReaderChapter.State.Wait && chapter.state !is ReaderChapter.State.Error
-        ) {
+        if (chapter.state != ReaderChapter.State.Wait &&
+            chapter.state !is ReaderChapter.State.Error) {
             return
         }
 
@@ -467,12 +461,10 @@ class ReaderViewModel(
             !securityPreferences.incognitoMode().get() ||
                 hasTrackers ||
                 preferences.readingSync().get()
-        if (
-            shouldTrack &&
-                // For double pages, check if the second to last page is doubled up
-                ((selectedChapter.pages?.lastIndex == page.index && page.firstHalf != true) ||
-                    (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index))
-        ) {
+        if (shouldTrack &&
+            // For double pages, check if the second to last page is doubled up
+            ((selectedChapter.pages?.lastIndex == page.index && page.firstHalf != true) ||
+                (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index))) {
             if (!securityPreferences.incognitoMode().get()) {
                 selectedChapter.chapter.read = true
                 updateTrackChapterAfterReading(selectedChapter)
@@ -534,9 +526,7 @@ class ReaderViewModel(
      */
     private fun downloadChapters(chapters: List<DomainChapterItem>) {
         downloadManager.downloadChapters(
-            manga!!,
-            chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() }
-        )
+            manga!!, chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
     }
 
     /**
@@ -567,11 +557,9 @@ class ReaderViewModel(
             chapterToDownload = null
         }
         // Check if deleting option is enabled and chapter exists
-        if (
-            removeAfterReadSlots != -1 &&
-                chapterToDelete != null &&
-                !currentChapter.chapter.bookmark
-        ) {
+        if (removeAfterReadSlots != -1 &&
+            chapterToDelete != null &&
+            !currentChapter.chapter.bookmark) {
             enqueueDeleteReadChapters(chapterToDelete)
         }
     }
@@ -968,9 +956,7 @@ class ReaderViewModel(
         if (!preferences.readingSync().get() && !readerChapter.chapter.isMergedChapter()) return
         scope.launchIO {
             statusHandler.marksChaptersStatus(
-                manga!!.uuid(),
-                listOf(readerChapter.chapter.mangadex_chapter_id)
-            )
+                manga!!.uuid(), listOf(readerChapter.chapter.mangadex_chapter_id))
         }
     }
 
@@ -990,8 +976,7 @@ class ReaderViewModel(
                     launchIO {
                         eventChannel.send(Event.ShareTrackingError(listOf(service to message)))
                     }
-                }
-            )
+                })
         }
     }
 

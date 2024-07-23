@@ -60,15 +60,11 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun lightTheme() =
         this.preferenceStore.getEnum(
-            Keys.lightTheme,
-            if (supportsDynamic) Themes.MONET else Themes.DEFAULT
-        )
+            Keys.lightTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
 
     fun darkTheme() =
         this.preferenceStore.getEnum(
-            Keys.darkTheme,
-            if (supportsDynamic) Themes.MONET else Themes.DEFAULT
-        )
+            Keys.darkTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
 
     fun showNavigationOverlayNewUser() =
         this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUser, true)
@@ -208,8 +204,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun hideBottomNavOnScroll() =
         this.preferenceStore.getBoolean(
-            "false_key"
-        ) // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
+            "false_key") // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
 
     fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
 
@@ -242,8 +237,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun contentRatingSelections() =
         this.preferenceStore.getStringSet(
             Keys.contentRating,
-            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
-        )
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive))
 
     fun autoTrackContentRatingSelections() =
         this.preferenceStore.getStringSet(
@@ -252,15 +246,12 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
                 MdConstants.ContentRating.safe,
                 MdConstants.ContentRating.suggestive,
                 MdConstants.ContentRating.erotica,
-                MdConstants.ContentRating.pornographic
-            ),
+                MdConstants.ContentRating.pornographic),
         )
 
     fun autoAddTracker() =
         this.preferenceStore.getStringSet(
-            Keys.autoAddTracker,
-            setOf(TrackManager.MDLIST.toString())
-        )
+            Keys.autoAddTracker, setOf(TrackManager.MDLIST.toString()))
 
     fun setAutoAddTracker(trackersToAutoAdd: Set<String>) {
         autoAddTracker().set(trackersToAutoAdd)

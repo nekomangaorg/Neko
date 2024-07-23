@@ -180,8 +180,7 @@ class RecentsController(bundle: Bundle? = null) :
                     bottom = activityBinding?.bottomNav?.height ?: systemInsets.bottom,
                 )
                 binding.downloadBottomSheet.sheetLayout.updateLayoutParams<
-                    ViewGroup.MarginLayoutParams
-                > {
+                    ViewGroup.MarginLayoutParams> {
                     height = appBarHeight + systemInsets.top
                 }
                 val bigToolbarHeight = fullAppBarHeight ?: 0
@@ -294,10 +293,8 @@ class RecentsController(bundle: Bundle? = null) :
 
                 override fun onStateChanged(p0: View, state: Int) {
                     if (this@RecentsController.view == null) return
-                    if (
-                        state == BottomSheetBehavior.STATE_EXPANDED ||
-                            state == BottomSheetBehavior.STATE_COLLAPSED
-                    ) {
+                    if (state == BottomSheetBehavior.STATE_EXPANDED ||
+                        state == BottomSheetBehavior.STATE_COLLAPSED) {
                         showingDownloads = state == BottomSheetBehavior.STATE_EXPANDED
                         updateTitleAndMenu()
                     }
@@ -342,8 +339,7 @@ class RecentsController(bundle: Bundle? = null) :
                     binding.downloadBottomSheet.sheetLayout.isFocusable =
                         state == BottomSheetBehavior.STATE_COLLAPSED
                     setPadding(
-                        binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true
-                    )
+                        binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
                 }
             },
         )
@@ -398,8 +394,7 @@ class RecentsController(bundle: Bundle? = null) :
         binding.downloadBottomSheet.sheetToolbar.title =
             view?.context?.getString(R.string.download_queue)
         binding.downloadBottomSheet.sheetToolbar.overflowIcon?.setTint(
-            view?.context?.getResourceColor(R.attr.actionBarTintColor) ?: Color.BLACK
-        )
+            view?.context?.getResourceColor(R.attr.actionBarTintColor) ?: Color.BLACK)
         binding.downloadBottomSheet.sheetToolbar.setOnMenuItemClickListener { item ->
             return@setOnMenuItemClickListener binding.downloadBottomSheet.dlBottomSheet
                 .onOptionsItemSelected(item)
@@ -536,11 +531,9 @@ class RecentsController(bundle: Bundle? = null) :
         if (isControllerVisible) {
             activityBinding?.appBar?.lockYPos = false
         }
-        if (
-            !hasNewItems ||
-                presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL ||
-                recents.isEmpty()
-        ) {
+        if (!hasNewItems ||
+            presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL ||
+            recents.isEmpty()) {
             loadNoMore()
         } else if (hasNewItems && presenter.viewType != RecentsPresenter.VIEW_TYPE_GROUP_ALL) {
             resetProgressItem()
@@ -805,9 +798,7 @@ class RecentsController(bundle: Bundle? = null) :
             val lastController = router.backstack.lastOrNull()?.controller
             if (lastController !is DialogController) {
                 (activity as? MainActivity)?.showTabBar(
-                    show = false,
-                    animate = lastController !is SmallToolbarInterface
-                )
+                    show = false, animate = lastController !is SmallToolbarInterface)
             }
             snack?.dismiss()
         }
@@ -828,10 +819,8 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun showSheet() {
         if (!isBindingInitialized) return
-        if (
-            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == false ||
-                hasQueue()
-        ) {
+        if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == false ||
+            hasQueue()) {
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
         }
     }
@@ -879,11 +868,9 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onLoadMore(lastPosition: Int, currentPage: Int) {
         val view = view ?: return
-        if (
-            presenter.finished ||
-                BackupRestoreJob.isRunning(view.context.applicationContext) ||
-                (presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL && !isSearching())
-        ) {
+        if (presenter.finished ||
+            BackupRestoreJob.isRunning(view.context.applicationContext) ||
+            (presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL && !isSearching())) {
             loadNoMore()
             return
         }

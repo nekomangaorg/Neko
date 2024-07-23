@@ -142,8 +142,8 @@ class StatsPresenter(
                                                 .map { category -> category.name }
                                                 .takeUnless { it.isEmpty() }
                                                 ?: listOf(
-                                                    prefs.context.getString(R.string.default_value)
-                                                ))
+                                                    prefs.context.getString(
+                                                        R.string.default_value)))
                                             .sorted()
                                             .toImmutableList(),
                                 )
@@ -190,8 +190,7 @@ class StatsPresenter(
                             StatsConstants.DetailedTagState(
                                 totalReadDuration = totalDuration,
                                 totalChapters = totalCount,
-                                sortedTagPairs = sortedSeries
-                            ),
+                                sortedTagPairs = sortedSeries),
                     )
                 }
             }

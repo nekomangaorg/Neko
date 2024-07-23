@@ -98,17 +98,14 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     }
                     if (!selected) {
                         preferences.nightMode().set(nightMode)
-                    } else if (
-                        preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                    ) {
+                    } else if (preferences.nightMode().get() !=
+                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
                         preferences.nightMode().set(nightMode)
                     }
-                    if (
-                        (preferences.nightMode().get() ==
-                            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
-                            nightMode != context.appDelegateNightMode()) ||
-                            (!selected && nightMode == context.appDelegateNightMode())
-                    ) {
+                    if ((preferences.nightMode().get() ==
+                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                        nightMode != context.appDelegateNightMode()) ||
+                        (!selected && nightMode == context.appDelegateNightMode())) {
                         fastAdapterLight.notifyDataSetChanged()
                         fastAdapterDark.notifyDataSetChanged()
                     } else {

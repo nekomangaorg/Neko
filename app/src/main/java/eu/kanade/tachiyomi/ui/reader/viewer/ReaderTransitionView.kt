@@ -153,8 +153,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(contex
             resources.getQuantityString(
                 R.plurals.missing_chapters_warning,
                 chapterDifference.toInt(),
-                chapterDifference.toInt()
-            )
+                chapterDifference.toInt())
         binding.warning.isVisible = true
     }
 }

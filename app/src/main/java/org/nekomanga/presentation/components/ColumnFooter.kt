@@ -72,15 +72,13 @@ fun ColumnScope.SearchFooter(
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
-                )
+                    tint = MaterialTheme.colorScheme.error)
             } else if (title.isNotEmpty()) {
                 IconButton(onClick = { textChanged("") }) {
                     Icon(
                         imageVector = Icons.Default.Cancel,
                         contentDescription = null,
-                        tint = themeColorState.buttonColor
-                    )
+                        tint = themeColorState.buttonColor)
                 }
             }
         },

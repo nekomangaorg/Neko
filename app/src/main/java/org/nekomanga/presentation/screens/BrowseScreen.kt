@@ -175,10 +175,8 @@ fun BrowseScreen(
                 actions = {
                     AppBarActions(
                         actions =
-                            when (
-                                browseScreenType != BrowseScreenType.Homepage &&
-                                    browseScreenType != BrowseScreenType.Other
-                            ) {
+                            when (browseScreenType != BrowseScreenType.Homepage &&
+                                browseScreenType != BrowseScreenType.Other) {
                                 true ->
                                     listOf(
                                         listGridAppBarAction(
@@ -421,8 +419,7 @@ private fun FooterFilterChip(
         label = {
             Text(
                 text = name,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)
-            )
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium))
         },
         colors =
             FilterChipDefaults.filterChipColors(

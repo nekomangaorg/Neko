@@ -85,16 +85,12 @@ internal class StorageStep : OnboardingStep {
 
             Text(
                 stringResource(
-                    R.string.onboarding_storage_help_info,
-                    stringResource(R.string.app_name)
-                )
-            )
+                    R.string.onboarding_storage_help_info, stringResource(R.string.app_name)))
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     handler.openUri(
-                        "https://mihon.app/docs/faq/storage#migrating-from-tachiyomi-v0-14-x-or-earlier"
-                    )
+                        "https://mihon.app/docs/faq/storage#migrating-from-tachiyomi-v0-14-x-or-earlier")
                 },
             ) {
                 Text(stringResource(R.string.onboarding_storage_help_action))

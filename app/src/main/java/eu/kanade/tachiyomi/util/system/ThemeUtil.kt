@@ -71,11 +71,9 @@ fun AppCompatActivity.setThemeByPref(preferences: PreferencesHelper) {
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
     // Using a try catch in case I start to remove themes
     return try {
-        (if (
-                (applicationContext.isInNightMode() ||
-                    preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
-                    preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
-            ) {
+        (if ((applicationContext.isInNightMode() ||
+                preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
+                preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO) {
                 preferences.darkTheme()
             } else {
                 preferences.lightTheme()

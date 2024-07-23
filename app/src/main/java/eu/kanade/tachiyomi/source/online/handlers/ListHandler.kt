@@ -60,9 +60,7 @@ class ListHandler {
                                     ListResults(
                                         displayScreenType =
                                             DisplayScreenType.List(
-                                                listDto.data.attributes.name ?: "",
-                                                listUUID
-                                            ),
+                                                listDto.data.attributes.name ?: "", listUUID),
                                         sourceManga =
                                             mangaListDto.data
                                                 .map { it.toSourceManga(coverQuality) }

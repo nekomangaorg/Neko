@@ -27,10 +27,8 @@ class AppUpdateChecker {
         doExtrasAfterNewUpdate: Boolean = true,
     ): AppUpdateResult {
         // Limit checks to once a day at most
-        if (
-            !isUserPrompt &&
-                Date().time < preferences.lastAppCheck().get() + TimeUnit.DAYS.toMillis(1)
-        ) {
+        if (!isUserPrompt &&
+            Date().time < preferences.lastAppCheck().get() + TimeUnit.DAYS.toMillis(1)) {
             return AppUpdateResult.NoNewUpdate
         }
 
@@ -53,10 +51,8 @@ class AppUpdateChecker {
                         }
                 }
             if (doExtrasAfterNewUpdate && result is AppUpdateResult.NewUpdate) {
-                if (
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                        preferences.appShouldAutoUpdate().get() != AppDownloadInstallJob.NEVER
-                ) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    preferences.appShouldAutoUpdate().get() != AppDownloadInstallJob.NEVER) {
                     AppDownloadInstallJob.start(context, null, false, waitUntilIdle = true)
                 }
                 AppUpdateNotifier(context)

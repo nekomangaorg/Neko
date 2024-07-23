@@ -35,8 +35,7 @@ fun Chip(
                     .background(Color.Transparent),
             color =
                 MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                    alpha = NekoColors.mediumAlphaHighContrast
-                ),
+                    alpha = NekoColors.mediumAlphaHighContrast),
         )
     }
 }

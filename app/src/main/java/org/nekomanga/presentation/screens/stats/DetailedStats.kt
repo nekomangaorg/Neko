@@ -127,8 +127,7 @@ fun DetailedStats(
                     colors,
                     contentPadding,
                     viewType,
-                    sortChipClick
-                )
+                    sortChipClick)
             }
             Filter.Status -> {
                 StatusView(
@@ -138,28 +137,15 @@ fun DetailedStats(
                     colors,
                     contentPadding,
                     viewType,
-                    sortChipClick
-                )
+                    sortChipClick)
             }
             Filter.ContentRating -> {
                 ContentRatingView(
-                    sortType,
-                    detailedStats,
-                    colors,
-                    contentPadding,
-                    viewType,
-                    sortChipClick
-                )
+                    sortType, detailedStats, colors, contentPadding, viewType, sortChipClick)
             }
             Filter.Category -> {
                 CategoryView(
-                    sortType,
-                    detailedStats,
-                    colors,
-                    contentPadding,
-                    viewType,
-                    sortChipClick
-                )
+                    sortType, detailedStats, colors, contentPadding, viewType, sortChipClick)
             }
             Filter.Tag -> {
                 TagView(sortType, detailedStats, colors, contentPadding, viewType, sortChipClick)
@@ -175,40 +161,39 @@ fun DetailedStats(
 private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> Unit) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Size.tiny)
-    ) {
-        item { Gap(Size.tiny) }
-        CustomChip(
-            isSelected = filterState == Filter.Type,
-            onClick = { filterStateClick(Filter.Type) },
-            label = R.string.series_type,
-        )
-        CustomChip(
-            isSelected = filterState == Filter.Status,
-            onClick = { filterStateClick(Filter.Status) },
-            label = R.string.status,
-        )
-        CustomChip(
-            isSelected = filterState == Filter.ContentRating,
-            onClick = { filterStateClick(Filter.ContentRating) },
-            label = R.string.content_rating_distribution,
-        )
-        CustomChip(
-            isSelected = filterState == Filter.Category,
-            onClick = { filterStateClick(Filter.Category) },
-            label = R.string.categories,
-        )
-        CustomChip(
-            isSelected = filterState == Filter.Tag,
-            onClick = { filterStateClick(Filter.Tag) },
-            label = R.string.tag,
-        )
-        /*  CustomChip(
-            isSelected = filterState == Filter.StartYear,
-            onClick = { filterStateClick(Filter.StartYear) },
-            label = R.string.start_year,
-        )*/
-    }
+        horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
+            item { Gap(Size.tiny) }
+            CustomChip(
+                isSelected = filterState == Filter.Type,
+                onClick = { filterStateClick(Filter.Type) },
+                label = R.string.series_type,
+            )
+            CustomChip(
+                isSelected = filterState == Filter.Status,
+                onClick = { filterStateClick(Filter.Status) },
+                label = R.string.status,
+            )
+            CustomChip(
+                isSelected = filterState == Filter.ContentRating,
+                onClick = { filterStateClick(Filter.ContentRating) },
+                label = R.string.content_rating_distribution,
+            )
+            CustomChip(
+                isSelected = filterState == Filter.Category,
+                onClick = { filterStateClick(Filter.Category) },
+                label = R.string.categories,
+            )
+            CustomChip(
+                isSelected = filterState == Filter.Tag,
+                onClick = { filterStateClick(Filter.Tag) },
+                label = R.string.tag,
+            )
+            /*  CustomChip(
+                isSelected = filterState == Filter.StartYear,
+                onClick = { filterStateClick(Filter.StartYear) },
+                label = R.string.start_year,
+            )*/
+        }
 }
 
 @Composable
@@ -379,8 +364,7 @@ private fun StartYearView(
             lineData = lineData,
             chartWidth = chartWidth,
             modifier = modifier,
-            color = MaterialTheme.colorScheme.secondary
-        )
+            color = MaterialTheme.colorScheme.secondary)
     }
 }
 
@@ -484,55 +468,55 @@ private fun DefaultView(
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())
-    ) {
-        if (showSortChip) {
-            item { SortChip(sortType = sortType, onClick = sortChipClick) }
-        }
+        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())) {
+            if (showSortChip) {
+                item { SortChip(sortType = sortType, onClick = sortChipClick) }
+            }
 
-        if (viewType == ViewType.Split) {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    graph(chartWidth = chartWidth, modifier = Modifier)
-                    Column(
-                        Modifier.fillMaxWidth(.9f).padding(16.dp),
+            if (viewType == ViewType.Split) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        sortedSeries.forEach { entry ->
-                            StatCard(
-                                header = entry.key,
-                                headerColor = colorMap[entry.key]!!,
-                                count = entry.value.size,
-                                totalCount = totalCount,
-                                readChapters = entry.value.sumOf { stat -> stat.readChapters },
-                                totalChapters = entry.value.sumOf { stat -> stat.totalChapters },
-                                readDuration = entry.value.sumOf { stat -> stat.readDuration },
-                                totalReadDuration = totalDuration,
-                            )
+                        graph(chartWidth = chartWidth, modifier = Modifier)
+                        Column(
+                            Modifier.fillMaxWidth(.9f).padding(16.dp),
+                        ) {
+                            sortedSeries.forEach { entry ->
+                                StatCard(
+                                    header = entry.key,
+                                    headerColor = colorMap[entry.key]!!,
+                                    count = entry.value.size,
+                                    totalCount = totalCount,
+                                    readChapters = entry.value.sumOf { stat -> stat.readChapters },
+                                    totalChapters =
+                                        entry.value.sumOf { stat -> stat.totalChapters },
+                                    readDuration = entry.value.sumOf { stat -> stat.readDuration },
+                                    totalReadDuration = totalDuration,
+                                )
+                            }
                         }
                     }
                 }
-            }
-        } else {
-            item { graph(chartWidth = chartWidth, modifier = Modifier.fillMaxWidth()) }
-            item { Gap(Size.small) }
-            items(sortedSeries, key = { it.key }) { entry ->
-                StatCard(
-                    header = entry.key,
-                    headerColor = colorMap[entry.key]!!,
-                    count = entry.value.size,
-                    totalCount = totalCount,
-                    readChapters = entry.value.sumOf { stat -> stat.readChapters },
-                    totalChapters = entry.value.sumOf { stat -> stat.totalChapters },
-                    readDuration = entry.value.sumOf { stat -> stat.readDuration },
-                    totalReadDuration = totalDuration,
-                )
+            } else {
+                item { graph(chartWidth = chartWidth, modifier = Modifier.fillMaxWidth()) }
+                item { Gap(Size.small) }
+                items(sortedSeries, key = { it.key }) { entry ->
+                    StatCard(
+                        header = entry.key,
+                        headerColor = colorMap[entry.key]!!,
+                        count = entry.value.size,
+                        totalCount = totalCount,
+                        readChapters = entry.value.sumOf { stat -> stat.readChapters },
+                        totalChapters = entry.value.sumOf { stat -> stat.totalChapters },
+                        readDuration = entry.value.sumOf { stat -> stat.readDuration },
+                        totalReadDuration = totalDuration,
+                    )
+                }
             }
         }
-    }
 }
 
 @Composable
@@ -573,41 +557,39 @@ private fun StatCardView(
             contentPadding = contentPadding,
             showSortChip = showSortChip,
             sortType = sortType,
-            sortChipClick = sortChipClick
-        ) {
-            items(sortedSeries, key = { it.first }) { entry ->
-                StatCard(
-                    header = entry.first.capitalizeWords(),
-                    headerColor = color,
-                    count = entry.second.size,
-                    totalCount = totalCount,
-                    readChapters = entry.second.sumOf { stat -> stat.readChapters },
-                    totalChapters = entry.second.sumOf { stat -> stat.totalChapters },
-                    readDuration = entry.second.sumOf { stat -> stat.readDuration },
-                    totalReadDuration = totalReadDuration,
-                )
+            sortChipClick = sortChipClick) {
+                items(sortedSeries, key = { it.first }) { entry ->
+                    StatCard(
+                        header = entry.first.capitalizeWords(),
+                        headerColor = color,
+                        count = entry.second.size,
+                        totalCount = totalCount,
+                        readChapters = entry.second.sumOf { stat -> stat.readChapters },
+                        totalChapters = entry.second.sumOf { stat -> stat.totalChapters },
+                        readDuration = entry.second.sumOf { stat -> stat.readDuration },
+                        totalReadDuration = totalReadDuration,
+                    )
+                }
             }
-        }
     } else {
         LazyListWrapper(
             contentPadding = contentPadding,
             showSortChip = showSortChip,
             sortType = sortType,
-            sortChipClick = sortChipClick
-        ) {
-            items(sortedSeries, key = { it.first }) { entry ->
-                StatCard(
-                    header = entry.first.capitalizeWords(),
-                    headerColor = color,
-                    count = entry.second.size,
-                    totalCount = totalCount,
-                    readChapters = entry.second.sumOf { stat -> stat.readChapters },
-                    totalChapters = entry.second.sumOf { stat -> stat.totalChapters },
-                    readDuration = entry.second.sumOf { stat -> stat.readDuration },
-                    totalReadDuration = totalReadDuration,
-                )
+            sortChipClick = sortChipClick) {
+                items(sortedSeries, key = { it.first }) { entry ->
+                    StatCard(
+                        header = entry.first.capitalizeWords(),
+                        headerColor = color,
+                        count = entry.second.size,
+                        totalCount = totalCount,
+                        readChapters = entry.second.sumOf { stat -> stat.readChapters },
+                        totalChapters = entry.second.sumOf { stat -> stat.totalChapters },
+                        readDuration = entry.second.sumOf { stat -> stat.readDuration },
+                        totalReadDuration = totalReadDuration,
+                    )
+                }
             }
-        }
     }
 }
 
@@ -621,15 +603,14 @@ private fun LazyGridWrapper(
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(400.dp),
-        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())
-    ) {
-        if (showSortChip) {
-            item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                SortChip(sortType = sortType, onClick = sortChipClick)
+        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())) {
+            if (showSortChip) {
+                item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                    SortChip(sortType = sortType, onClick = sortChipClick)
+                }
             }
+            content()
         }
-        content()
-    }
 }
 
 @Composable
@@ -642,13 +623,12 @@ private fun LazyListWrapper(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())
-    ) {
-        if (showSortChip) {
-            item { SortChip(sortType = sortType, onClick = sortChipClick) }
+        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())) {
+            if (showSortChip) {
+                item { SortChip(sortType = sortType, onClick = sortChipClick) }
+            }
+            content()
         }
-        content()
-    }
 }
 
 @Composable
@@ -697,20 +677,17 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
             Text(
                 text = manga.title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+                color = MaterialTheme.colorScheme.primary)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Line(
                     stringResource(id = R.string.typeNoSemi),
-                    stringResource(id = manga.type.typeRes)
-                )
+                    stringResource(id = manga.type.typeRes))
                 Line(
                     stringResource(id = R.string.status),
-                    stringResource(id = manga.status.statusRes)
-                )
+                    stringResource(id = manga.status.statusRes))
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -718,21 +695,17 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
             ) {
                 Line(
                     stringResource(id = R.string.read_duration),
-                    manga.readDuration.getReadDuration(stringResource(id = R.string.none))
-                )
+                    manga.readDuration.getReadDuration(stringResource(id = R.string.none)))
                 Line(
                     stringResource(id = R.string.start_year),
-                    manga.startYear?.toString() ?: stringResource(id = R.string.n_a)
-                )
+                    manga.startYear?.toString() ?: stringResource(id = R.string.n_a))
             }
             Line(
                 stringResource(id = R.string.read_chapter_count),
-                manga.readChapters.toString() + " / " + manga.totalChapters.toString()
-            )
+                manga.readChapters.toString() + " / " + manga.totalChapters.toString())
             Line(
                 stringResource(id = R.string.chapters_bookmarked),
-                manga.bookmarkedChapters.toString()
-            )
+                manga.bookmarkedChapters.toString())
 
             Line(stringResource(id = R.string.categories), manga.categories.joinToString(", "))
         }
@@ -743,21 +716,18 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
 private fun Line(label: String, value: String) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(Size.small),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "$label:",
-            style =
-                MaterialTheme.typography.bodySmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color =
-                        MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = NekoColors.mediumAlphaHighContrast
-                        )
-                ),
-        )
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
-    }
+        verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "$label:",
+                style =
+                    MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color =
+                            MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = NekoColors.mediumAlphaHighContrast)),
+            )
+            Text(text = value, style = MaterialTheme.typography.bodyMedium)
+        }
 }
 
 @Composable
@@ -844,52 +814,46 @@ private fun StatCard(
                 fontWeight = FontWeight.SemiBold,
                 color =
                     MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = NekoColors.mediumAlphaHighContrast
-                    )
-            )
+                        alpha = NekoColors.mediumAlphaHighContrast))
         val valueStyle = MaterialTheme.typography.bodyMedium
         val headerStyle =
             MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = headerColor
-            )
+                fontWeight = FontWeight.Bold, color = headerColor)
 
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = Size.small)) {
             Text(text = header, style = headerStyle, modifier = Modifier.fillMaxWidth())
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(id = R.string.count),
-                        style = labelStyle,
-                    )
-                    Text(text = count.toString(), style = valueStyle)
-                    Text(text = percentage(count, totalCount), style = valueStyle)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(id = R.string.chapters_read),
-                        style = labelStyle,
-                    )
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(id = R.string.count),
+                            style = labelStyle,
+                        )
+                        Text(text = count.toString(), style = valueStyle)
+                        Text(text = percentage(count, totalCount), style = valueStyle)
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(id = R.string.chapters_read),
+                            style = labelStyle,
+                        )
 
-                    Text(text = "$readChapters / $totalChapters", style = valueStyle)
-                    Text(text = percentage(readChapters, totalChapters), style = valueStyle)
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(id = R.string.read_duration),
-                        style = labelStyle,
-                    )
+                        Text(text = "$readChapters / $totalChapters", style = valueStyle)
+                        Text(text = percentage(readChapters, totalChapters), style = valueStyle)
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = stringResource(id = R.string.read_duration),
+                            style = labelStyle,
+                        )
 
-                    Text(
-                        text = readDuration.getReadDuration(stringResource(id = R.string.none)),
-                        style = valueStyle
-                    )
-                    Text(text = percentage(readDuration, totalReadDuration), style = valueStyle)
+                        Text(
+                            text = readDuration.getReadDuration(stringResource(id = R.string.none)),
+                            style = valueStyle)
+                        Text(text = percentage(readDuration, totalReadDuration), style = valueStyle)
+                    }
                 }
-            }
         }
     }
 }

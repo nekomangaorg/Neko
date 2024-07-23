@@ -85,13 +85,11 @@ private fun NotDownloaded(buttonColor: Color, modifier: Modifier) {
     Background(
         color = Color.Transparent,
         borderStroke = BorderStroke(borderSize.dp, buttonColor),
-        modifier = modifier
-    ) {
-        DownloadIcon(
-            color = buttonColor,
-            icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
-        )
-    }
+        modifier = modifier) {
+            DownloadIcon(
+                color = buttonColor,
+                icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward))
+        }
 }
 
 @Composable
@@ -129,9 +127,7 @@ private fun Queued(modifier: Modifier) {
             targetValue = finalState,
             animationSpec =
                 infiniteRepeatable(
-                    tween(1000, easing = EaseInOutCirc),
-                    repeatMode = RepeatMode.Reverse
-                ),
+                    tween(1000, easing = EaseInOutCirc), repeatMode = RepeatMode.Reverse),
         )
 
     Background(color = Color.Transparent, modifier = modifier) {
@@ -143,8 +139,7 @@ private fun Queued(modifier: Modifier) {
         DownloadIcon(
             color = disabledColor,
             icon = rememberVectorPainter(image = Icons.Filled.ArrowDownward),
-            alpha = alpha.value
-        )
+            alpha = alpha.value)
     }
 }
 
@@ -158,10 +153,8 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
                 Triple(
                     Color.Transparent,
                     MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = NekoColors.disabledAlphaHighContrast
-                    ),
-                    buttonColor
-                )
+                        alpha = NekoColors.disabledAlphaHighContrast),
+                    buttonColor)
         }
 
     val backgroundColor by
@@ -171,8 +164,7 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
         animateFloatAsState(
                 targetValue = (downloadProgress / Download.MaxProgress.toFloat()),
                 animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-                label = "downloadingProgress"
-            )
+                label = "downloadingProgress")
             .value
 
     val iconPainter = rememberVectorPainter(image = Icons.Filled.ArrowDownward)
@@ -186,11 +178,8 @@ private fun Downloading(buttonColor: Color, modifier: Modifier, downloadProgress
             targetValue = finalState,
             animationSpec =
                 infiniteRepeatable(
-                    tween(1000, easing = EaseInOutCirc),
-                    repeatMode = RepeatMode.Reverse
-                ),
-            label = "downloadAlphaPulse"
-        )
+                    tween(1000, easing = EaseInOutCirc), repeatMode = RepeatMode.Reverse),
+            label = "downloadAlphaPulse")
 
     Background(color = backgroundColor, modifier = modifier) {
         CircularProgressIndicator(

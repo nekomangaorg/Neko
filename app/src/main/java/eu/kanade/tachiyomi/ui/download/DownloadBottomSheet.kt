@@ -203,8 +203,7 @@ constructor(
         binding.downloadFab.text =
             context.getString(if (isRunning) R.string.pause else R.string.resume)
         binding.downloadFab.setIconResource(
-            if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp
-        )
+            if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp)
     }
 
     fun onOptionsItemSelected(item: MenuItem): Boolean {

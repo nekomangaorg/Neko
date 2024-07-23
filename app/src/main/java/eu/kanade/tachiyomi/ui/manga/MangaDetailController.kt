@@ -140,8 +140,7 @@ class MangaDetailController(private val mangaId: Long) :
                 ),
             similarClick = {
                 router.pushController(
-                    SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction()
-                )
+                    SimilarController(presenter.manga.value!!.uuid()).withFadeTransaction())
             },
             shareClick = { shareManga(context) },
             coverActions =
@@ -163,15 +162,11 @@ class MangaDetailController(private val mangaId: Long) :
                 ChapterActions(
                     mark = presenter::markChapters,
                     download = { chapterItems, downloadAction ->
-                        if (
-                            chapterItems.size == 1 &&
-                                MdConstants.UnsupportedOfficialScanlators.contains(
-                                    chapterItems[0].chapter.scanlator
-                                )
-                        ) {
+                        if (chapterItems.size == 1 &&
+                            MdConstants.UnsupportedOfficialScanlators.contains(
+                                chapterItems[0].chapter.scanlator)) {
                             context.toast(
-                                "${chapterItems[0].chapter.scanlator} not supported, try WebView"
-                            )
+                                "${chapterItems[0].chapter.scanlator} not supported, try WebView")
                         } else {
                             presenter.downloadChapters(chapterItems, downloadAction)
                         }
@@ -203,10 +198,8 @@ class MangaDetailController(private val mangaId: Long) :
     }
 
     private fun openChapter(context: Context, chapter: Chapter) {
-        if (
-            chapter.scanlator != null &&
-                MdConstants.UnsupportedOfficialScanlators.contains(chapter.scanlator)
-        ) {
+        if (chapter.scanlator != null &&
+            MdConstants.UnsupportedOfficialScanlators.contains(chapter.scanlator)) {
             context.toast("${chapter.scanlator} not supported, try WebView")
         } else {
             startActivity(ReaderActivity.newIntent(context, presenter.manga.value!!, chapter))

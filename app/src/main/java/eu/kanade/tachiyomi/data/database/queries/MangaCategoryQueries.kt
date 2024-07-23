@@ -22,8 +22,7 @@ interface MangaCategoryQueries : DbProvider {
                 DeleteQuery.builder()
                     .table(MangaCategoryTable.TABLE)
                     .where(
-                        "${MangaCategoryTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaList.size)})"
-                    )
+                        "${MangaCategoryTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaList.size)})")
                     .whereArgs(*mangaList.map { it.id }.toTypedArray())
                     .build(),
             )

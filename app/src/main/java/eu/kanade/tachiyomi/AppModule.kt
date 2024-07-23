@@ -177,8 +177,7 @@ class PreferenceModule(val application: Application) : InjektModule {
             StoragePreferences(
                 context = application,
                 folderProvider = get<AndroidStorageFolderProvider>(),
-                preferenceStore = get()
-            )
+                preferenceStore = get())
         }
 
         addSingletonFactory { BackupPreferences(get()) }

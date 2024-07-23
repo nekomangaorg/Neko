@@ -33,10 +33,9 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 controller?.presenter?.getLibrary()
             }
             showEmptyCatsFiltering.bindToPreference(
-                libraryPreferences.showEmptyCategoriesWhileFiltering()
-            ) {
-                controller?.presenter?.requestFilterUpdate()
-            }
+                libraryPreferences.showEmptyCategoriesWhileFiltering()) {
+                    controller?.presenter?.requestFilterUpdate()
+                }
             val hideHopper =
                 min(
                     2,

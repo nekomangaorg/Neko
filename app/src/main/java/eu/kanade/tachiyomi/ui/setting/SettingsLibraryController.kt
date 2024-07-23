@@ -57,10 +57,7 @@ class SettingsLibraryController : SettingsController() {
                         if (it) {
                             launchIO {
                                 LibraryPresenter.setSearchSuggestion(
-                                    libraryPreferences,
-                                    db,
-                                    Injekt.get()
-                                )
+                                    libraryPreferences, db, Injekt.get())
                             }
                         } else {
                             DelayedLibrarySuggestionsJob.setupTask(context, false)

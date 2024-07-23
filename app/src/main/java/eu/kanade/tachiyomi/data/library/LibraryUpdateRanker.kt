@@ -27,9 +27,7 @@ object LibraryUpdateRanker {
         return Comparator { mangaFirst: Manga, mangaSecond: Manga,
                 ->
                 compareValues(
-                    abs(mangaSecond.next_update - time),
-                    abs(mangaFirst.next_update - time)
-                )
+                    abs(mangaSecond.next_update - time), abs(mangaFirst.next_update - time))
             }
             .reversed()
     }

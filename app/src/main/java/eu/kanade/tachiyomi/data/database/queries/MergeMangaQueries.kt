@@ -40,8 +40,7 @@ interface MergeMangaQueries : DbProvider {
                 DeleteQuery.builder()
                     .table(MergeMangaTable.TABLE)
                     .where(
-                        "${MergeMangaTable.COL_MANGA_ID} = ? AND ${MergeMangaTable.COL_MERGE_TYPE} = ?"
-                    )
+                        "${MergeMangaTable.COL_MANGA_ID} = ? AND ${MergeMangaTable.COL_MERGE_TYPE} = ?")
                     .whereArgs(mangaId, mergeType.id)
                     .build(),
             )

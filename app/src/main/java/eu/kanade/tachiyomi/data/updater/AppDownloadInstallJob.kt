@@ -74,16 +74,12 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
         val idleRun = inputData.getBoolean(IDLE_RUN, false)
         val url: String
         if (idleRun) {
-            if (
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-                    !context.packageManager.canRequestPackageInstalls()
-            ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                !context.packageManager.canRequestPackageInstalls()) {
                 return Result.failure()
             }
-            if (
-                preferences.appShouldAutoUpdate().get() == ONLY_ON_UNMETERED &&
-                    context.connectivityManager.isActiveNetworkMetered
-            ) {
+            if (preferences.appShouldAutoUpdate().get() == ONLY_ON_UNMETERED &&
+                context.connectivityManager.isActiveNetworkMetered) {
                 return Result.retry()
             }
 
@@ -164,11 +160,9 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             }
         } catch (error: Exception) {
             TimberKt.e(error)
-            if (
-                error is CancellationException ||
-                    isStopped ||
-                    (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
-            ) {
+            if (error is CancellationException ||
+                isStopped ||
+                (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)) {
                 notifier.cancel()
             } else {
                 notifier.onDownloadError(url)
@@ -209,8 +203,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                     context,
                     -10053,
                     newIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                )
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             notifier.onInstalling()

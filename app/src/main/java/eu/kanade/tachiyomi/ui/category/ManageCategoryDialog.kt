@@ -77,11 +77,9 @@ class ManageCategoryDialog(bundle: Bundle? = null) : DialogController(bundle) {
         val categoryExists = categoryExists(text)
         val category = this.category ?: Category.create(text)
         if (category.id != 0) {
-            if (
-                text.isNotBlank() &&
-                    !categoryExists &&
-                    !text.equals(this.category?.name ?: "", true)
-            ) {
+            if (text.isNotBlank() &&
+                !categoryExists &&
+                !text.equals(this.category?.name ?: "", true)) {
                 category.name = text
                 if (this.category == null) {
                     val categories = db.getCategories().executeAsBlocking()
@@ -103,25 +101,21 @@ class ManageCategoryDialog(bundle: Bundle? = null) : DialogController(bundle) {
                 return false
             }
         }
-        when (
-            updatePref(
-                preferences.downloadNewChaptersInCategories(),
-                preferences.excludeCategoriesInDownloadNew(),
-                binding.downloadNew,
-            )
-        ) {
+        when (updatePref(
+            preferences.downloadNewChaptersInCategories(),
+            preferences.excludeCategoriesInDownloadNew(),
+            binding.downloadNew,
+        )) {
             true -> preferences.downloadNewChapters().set(true)
             false -> preferences.downloadNewChapters().set(false)
             else -> Unit
         }
-        if (
-            libraryPreferences.updateInterval().get() > 0 &&
-                updatePref(
-                    libraryPreferences.whichCategoriesToUpdate(),
-                    libraryPreferences.whichCategoriesToExclude(),
-                    binding.includeGlobal,
-                ) == false
-        ) {
+        if (libraryPreferences.updateInterval().get() > 0 &&
+            updatePref(
+                libraryPreferences.whichCategoriesToUpdate(),
+                libraryPreferences.whichCategoriesToExclude(),
+                binding.includeGlobal,
+            ) == false) {
             libraryPreferences.updateInterval().set(0)
             LibraryUpdateJob.setupTask(preferences.context, 0)
         }

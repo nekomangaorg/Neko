@@ -109,8 +109,7 @@ abstract class SettingsController : PreferenceController() {
         ValueAnimator.ofObject(
                 ArgbEvaluator(),
                 Color.TRANSPARENT,
-                view.context.getResourceColor(R.attr.colorControlHighlight)
-            )
+                view.context.getResourceColor(R.attr.colorControlHighlight))
             .apply {
                 duration = 500L
                 repeatCount = 2

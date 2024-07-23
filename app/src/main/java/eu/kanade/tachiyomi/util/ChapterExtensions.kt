@@ -47,11 +47,9 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
 
             chapterNumberArray.forEachIndexed { index, chpNum ->
                 val lastIndex = index - 1
-                if (
-                    lastIndex >= 0 &&
-                        (chpNum - 1) > chapterNumberArray[lastIndex] &&
-                        chapterNumberArray[lastIndex] > 0
-                ) {
+                if (lastIndex >= 0 &&
+                    (chpNum - 1) > chapterNumberArray[lastIndex] &&
+                    chapterNumberArray[lastIndex] > 0) {
                     count += (chpNum - chapterNumberArray[lastIndex]) - 1
                     val beginningChp = (chapterNumberArray[lastIndex] + 1)
                     val endChap = chpNum - 1

@@ -117,9 +117,8 @@ fun SimilarScreen(
                     mangaClick = mangaClick,
                     mangaLongClick = { displayManga: DisplayManga ->
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        if (
-                            !displayManga.inLibrary && similarScreenState.value.promptForCategories
-                        ) {
+                        if (!displayManga.inLibrary &&
+                            similarScreenState.value.promptForCategories) {
                             scope.launch {
                                 longClickedMangaId = displayManga.mangaId
                                 sheetState.show()

@@ -78,8 +78,7 @@ class PageHandler {
 
                 if (chapterDateNewer) {
                     throw Exception(
-                        "This chapter has no pages, it might not be release yet, try refreshing"
-                    )
+                        "This chapter has no pages, it might not be release yet, try refreshing")
                 }
 
                 val atHomeDto =

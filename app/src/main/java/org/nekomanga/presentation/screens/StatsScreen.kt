@@ -91,10 +91,8 @@ fun StatsScreen(
             }
         },
     ) { incomingPaddingValues ->
-        if (
-            statsState.value.screenState is Loading ||
-                (statsState.value.screenState is Detailed && detailedState.value.isLoading)
-        ) {
+        if (statsState.value.screenState is Loading ||
+            (statsState.value.screenState is Detailed && detailedState.value.isLoading)) {
             LoadingScreen(incomingPaddingValues)
         } else if (statsState.value.screenState is StatsConstants.ScreenState.NoResults) {
             Box(
@@ -103,30 +101,26 @@ fun StatsScreen(
                         .padding(
                             top = incomingPaddingValues.calculateTopPadding(),
                             start = 16.dp,
-                            end = 16.dp
-                        ),
+                            end = 16.dp),
                 contentAlignment = Alignment.BottomCenter,
             ) {
                 EmptyScreen(
                     iconicImage = CommunityMaterial.Icon2.cmd_heart_off,
                     iconSize = 128.dp,
-                    message = stringResource(id = R.string.unable_to_generate_stats)
-                )
+                    message = stringResource(id = R.string.unable_to_generate_stats))
             }
         } else {
             if (isSimple) {
                 SimpleStats(
                     statsState = statsState.value,
                     contentPadding = incomingPaddingValues,
-                    windowSizeClass = windowSizeClass
-                )
+                    windowSizeClass = windowSizeClass)
             } else {
                 DetailedStats(
                     detailedStats = detailedState.value,
                     colors = colors,
                     contentPadding = incomingPaddingValues,
-                    windowSizeClass = windowSizeClass
-                )
+                    windowSizeClass = windowSizeClass)
             }
         }
     }

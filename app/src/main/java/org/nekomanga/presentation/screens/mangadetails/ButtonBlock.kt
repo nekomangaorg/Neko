@@ -85,8 +85,7 @@ fun ButtonBlock(
                 Triple(
                     PaddingValues(horizontal = 12.dp, vertical = Size.small),
                     PaddingValues(horizontal = 12.dp, vertical = Size.tiny),
-                    Modifier.height(Size.huge)
-                )
+                    Modifier.height(Size.huge))
         }
 
     Row(
@@ -103,15 +102,13 @@ fun ButtonBlock(
                         icon = Icons.Filled.Favorite,
                         buttonColors = checkedButtonColors,
                         borderStroke = checkedBorderStroke,
-                        text = stringResource(R.string.in_library)
-                    )
+                        text = stringResource(R.string.in_library))
                 false ->
                     ButtonConfig(
                         icon = Icons.Filled.FavoriteBorder,
                         buttonColors = uncheckedButtonColors,
                         borderStroke = uncheckedBorderStroke,
-                        text = stringResource(R.string.add_to_library)
-                    )
+                        text = stringResource(R.string.add_to_library))
             }
 
         OutlinedButton(
@@ -126,8 +123,7 @@ fun ButtonBlock(
                 imageVector = favConfig.icon!!,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = themeColorState.buttonColor
-            )
+                tint = themeColorState.buttonColor)
         }
 
         if (loggedIntoTrackersProvider()) {
@@ -147,8 +143,7 @@ fun ButtonBlock(
                             icon = Icons.Filled.Sync,
                             buttonColors = uncheckedButtonColors,
                             borderStroke = uncheckedBorderStroke,
-                            text = stringResource(R.string.tracking)
-                        )
+                            text = stringResource(R.string.tracking))
                 }
 
             OutlinedButton(
@@ -180,8 +175,7 @@ fun ButtonBlock(
                         trackerConfig.icon!!,
                         color = themeColorState.buttonColor,
                         hideText = hideButtonTextProvider(),
-                        text = trackerConfig.text
-                    )
+                        text = trackerConfig.text)
                 }
             }
         }
@@ -217,8 +211,7 @@ fun ButtonBlock(
                 Icons.Filled.AccountTree,
                 color = themeColorState.buttonColor,
                 hideText = hideButtonTextProvider(),
-                text = stringResource(R.string.similar_work)
-            )
+                text = stringResource(R.string.similar_work))
         }
 
         Gap(gapBetweenButtons)
@@ -254,8 +247,7 @@ fun ButtonBlock(
                 color = themeColorState.buttonColor,
                 hideText = hideButtonTextProvider(),
                 text = mergeConfig.text,
-                iconicsSize = 28.dp
-            )
+                iconicsSize = 28.dp)
         }
 
         Gap(gapBetweenButtons)
@@ -271,8 +263,7 @@ fun ButtonBlock(
                 icon = Icons.Filled.OpenInBrowser,
                 color = themeColorState.buttonColor,
                 hideText = hideButtonTextProvider(),
-                text = stringResource(R.string.links)
-            )
+                text = stringResource(R.string.links))
         }
 
         Gap(gapBetweenButtons)
@@ -288,8 +279,7 @@ fun ButtonBlock(
                 icon = Icons.Filled.Share,
                 color = themeColorState.buttonColor,
                 hideText = hideButtonTextProvider(),
-                text = stringResource(R.string.share)
-            )
+                text = stringResource(R.string.share))
         }
     }
 }
@@ -306,8 +296,7 @@ private fun RowScope.IconicsButtonContent(
         asset = iIcon,
         contentDescription = null,
         modifier = Modifier.size(iconicsSize),
-        colorFilter = ColorFilter.tint(color = color)
-    )
+        colorFilter = ColorFilter.tint(color = color))
     if (!hideText) {
         ButtonText(text = text, color = color)
     }
@@ -324,8 +313,7 @@ private fun RowScope.ButtonContent(
         imageVector = icon,
         contentDescription = null,
         modifier = Modifier.size(24.dp),
-        tint = color
-    )
+        tint = color)
     if (!hideText) {
         ButtonText(text = text, color = color)
     }
@@ -341,9 +329,7 @@ private fun RowScope.ButtonText(text: String, color: Color) {
                 MaterialTheme.typography.bodyLarge.copy(
                     color = color.copy(alpha = .8f),
                     letterSpacing = (-.5).sp,
-                    fontWeight = FontWeight.Medium
-                )
-        )
+                    fontWeight = FontWeight.Medium))
     }
 }
 

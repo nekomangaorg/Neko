@@ -96,10 +96,7 @@ class MangaHandler {
                 .await()
                 .andThen { mangaDto ->
                     apiMangaParser.mangaDetailsParse(
-                        mangaDto.data,
-                        stats.await(),
-                        simpleChapters.await()
-                    )
+                        mangaDto.data, stats.await(), simpleChapters.await())
                 }
                 .andThen { sManga -> Ok(sManga to artworks.await()) }
         }
@@ -181,8 +178,7 @@ class MangaHandler {
                                         mangaUUID,
                                         langs,
                                         chapterListDto.limit,
-                                        chapterListDto.total
-                                    )
+                                        chapterListDto.total)
                             false -> chapterListDto.data
                         },
                     )

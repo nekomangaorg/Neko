@@ -193,8 +193,7 @@ fun DisplayScreen(
                             modifier =
                                 Modifier.padding(
                                         bottom =
-                                            contentPadding.calculateBottomPadding() + Size.small
-                                    )
+                                            contentPadding.calculateBottomPadding() + Size.small)
                                     .align(Alignment.BottomCenter)
                                     .fillMaxWidth(),
                         )

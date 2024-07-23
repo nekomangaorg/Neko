@@ -50,12 +50,7 @@ internal fun InLibraryBadge(outline: Boolean, offset: Dp = (-2).dp) {
             Modifier.offset(x = offset, y = offset)
                 .clip(
                     RoundedCornerShape(
-                        topStartPercent = 50,
-                        25,
-                        bottomStartPercent = 25,
-                        bottomEndPercent = 50
-                    )
-                )
+                        topStartPercent = 50, 25, bottomStartPercent = 25, bottomEndPercent = 50))
                 .background(color = MaterialTheme.colorScheme.secondary)
                 .conditional(outline) {
                     this.border(
@@ -66,17 +61,14 @@ internal fun InLibraryBadge(outline: Boolean, offset: Dp = (-2).dp) {
                                 topStartPercent = 50,
                                 25,
                                 bottomStartPercent = 25,
-                                bottomEndPercent = 50
-                            )
-                    )
+                                bottomEndPercent = 50))
                 },
     ) {
         AutoSizeText(
             text = stringResource(id = R.string.in_library),
             style =
                 MaterialTheme.typography.labelLarge.copy(
-                    color = MaterialTheme.colorScheme.onSecondary
-                ),
+                    color = MaterialTheme.colorScheme.onSecondary),
             modifier = Modifier.padding(horizontal = Size.tiny, vertical = Size.extraTiny),
         )
     }

@@ -15,38 +15,32 @@ enum class OrientationType(
         0,
         ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED,
         R.string.default_value,
-        R.drawable.ic_screen_rotation_24dp
-    ),
+        R.drawable.ic_screen_rotation_24dp),
     FREE(
         1,
         ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED,
         R.string.free,
-        R.drawable.ic_screen_rotation_24dp
-    ),
+        R.drawable.ic_screen_rotation_24dp),
     PORTRAIT(
         2,
         ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT,
         R.string.portrait,
-        R.drawable.ic_stay_current_portrait_24dp
-    ),
+        R.drawable.ic_stay_current_portrait_24dp),
     LANDSCAPE(
         3,
         ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE,
         R.string.landscape,
-        R.drawable.ic_stay_current_landscape_24dp
-    ),
+        R.drawable.ic_stay_current_landscape_24dp),
     LOCKED_PORTRAIT(
         4,
         ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,
         R.string.locked_portrait,
-        R.drawable.ic_screen_lock_portrait_24dp
-    ),
+        R.drawable.ic_screen_lock_portrait_24dp),
     LOCKED_LANDSCAPE(
         5,
         ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE,
         R.string.locked_landscape,
-        R.drawable.ic_screen_lock_landscape_24dp
-    ),
+        R.drawable.ic_screen_lock_landscape_24dp),
     ;
 
     @Suppress("RemoveRedundantQualifierName") val flagValue = prefValue shl OrientationType.SHIFT

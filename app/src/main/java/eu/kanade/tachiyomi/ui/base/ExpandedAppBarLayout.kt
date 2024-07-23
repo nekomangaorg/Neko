@@ -144,9 +144,8 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
     private val minTabletHeight: Int
         get() {
             val tabHeight = if (tabsFrameLayout?.isVisible == true) 48.dpToPx else 0
-            return if (
-                context.isTablet() || (compactSearchMode && toolbarMode == ToolbarState.EXPANDED)
-            ) {
+            return if (context.isTablet() ||
+                (compactSearchMode && toolbarMode == ToolbarState.EXPANDED)) {
                 (mainToolbar?.height ?: 0) + paddingTop + tabHeight
             } else {
                 0
@@ -395,15 +394,13 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
         val mainActivity = mainActivity ?: return
         val useSearchToolbar = mainToolbar.alpha <= 0.025f
         val idle = RecyclerView.SCROLL_STATE_IDLE
-        if (
-            if (useSearchToolbar) {
-                -y >= height ||
-                    (recyclerView is RecyclerView && recyclerView.scrollState <= idle) ||
-                    context.isTablet()
-            } else {
-                mainActivity.currentToolbar == searchToolbar
-            }
-        ) {
+        if (if (useSearchToolbar) {
+            -y >= height ||
+                (recyclerView is RecyclerView && recyclerView.scrollState <= idle) ||
+                context.isTablet()
+        } else {
+            mainActivity.currentToolbar == searchToolbar
+        }) {
             useSearchToolbarForMenu(useSearchToolbar)
         }
     }
@@ -466,9 +463,8 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
     fun useSearchToolbarForMenu(showCardTB: Boolean) {
         val mainActivity = mainActivity ?: return
         if (lockYPos) return
-        if (
-            (showCardTB || toolbarMode == ToolbarState.SEARCH_ONLY) && cardFrame?.isVisible == true
-        ) {
+        if ((showCardTB || toolbarMode == ToolbarState.SEARCH_ONLY) &&
+            cardFrame?.isVisible == true) {
             if (mainActivity.currentToolbar != searchToolbar) {
                 mainActivity.setFloatingToolbar(true, showSearchAnyway = true)
             } else {

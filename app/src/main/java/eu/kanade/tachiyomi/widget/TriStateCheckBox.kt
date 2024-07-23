@@ -88,8 +88,7 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
         ColorStateList.valueOf(
             ColorUtils.setAlphaComponent(
                 context.getResourceColor(R.attr.colorControlNormal),
-                (disabledAlpha * 255).roundToInt()
-            ),
+                (disabledAlpha * 255).roundToInt()),
         )
 
     init {

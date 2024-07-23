@@ -92,8 +92,7 @@ class StatusSyncJob(
                             ::errorNotification,
                             ::updateNotificationProgress,
                             ::completeNotificationFromDex,
-                            ::updateManga
-                        )
+                            ::updateManga)
                     withUIContext {
                         applicationContext.toast(
                             applicationContext.getString(
@@ -178,8 +177,7 @@ class StatusSyncJob(
         val notification =
             progressNotification
                 .setContentTitle(
-                    errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync)
-                )
+                    errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync))
                 .setAutoCancel(true)
                 .build()
         context.notificationManager.notify(

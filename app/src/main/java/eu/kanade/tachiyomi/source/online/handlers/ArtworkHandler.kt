@@ -35,10 +35,7 @@ class ArtworkHandler {
                         true ->
                             artwork +
                                 fetchRestOfArtwork(
-                                    mangaUUID,
-                                    relationshipDtoList.limit,
-                                    relationshipDtoList.total
-                                )
+                                    mangaUUID, relationshipDtoList.limit, relationshipDtoList.total)
                         false -> artwork
                     }.map {
                         SourceArtwork(

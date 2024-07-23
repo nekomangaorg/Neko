@@ -168,9 +168,8 @@ class SimilarHandler {
         val idPairs =
             similarDto.matches
                 .mapNotNull {
-                    when (
-                        it.languages.isEmpty() || it.languages.any { lang -> lang in activeLangs }
-                    ) {
+                    when (it.languages.isEmpty() ||
+                        it.languages.any { lang -> lang in activeLangs }) {
                         true -> {
                             val id = it.id
                             val text = String.format("%.2f", 100.0 * it.score) + "% match"
@@ -218,10 +217,8 @@ class SimilarHandler {
                     .onFailure {
                         val type = "trying to get Anilist recommendations"
                         this.log(type)
-                        if (
-                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
-                                this is ApiResponse.Failure.Exception
-                        ) {
+                        if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                            this is ApiResponse.Failure.Exception) {
                             this.throws(type)
                         }
                     }
@@ -291,10 +288,8 @@ class SimilarHandler {
                     .onFailure {
                         val type = "trying to get MAL similar manga"
                         this.log(type)
-                        if (
-                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
-                                this is ApiResponse.Failure.Exception
-                        ) {
+                        if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                            this is ApiResponse.Failure.Exception) {
                             this.throws(type)
                         }
                     }
@@ -359,10 +354,8 @@ class SimilarHandler {
                     .onFailure {
                         val type = "trying to get MU similar manga"
                         this.log(type)
-                        if (
-                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
-                                this is ApiResponse.Failure.Exception
-                        ) {
+                        if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                            this is ApiResponse.Failure.Exception) {
                             this.throws(type)
                         }
                     }
@@ -438,8 +431,7 @@ class SimilarHandler {
                         MdConstants.ContentRating.safe,
                         MdConstants.ContentRating.suggestive,
                         MdConstants.ContentRating.erotica,
-                        MdConstants.ContentRating.pornographic
-                    ),
+                        MdConstants.ContentRating.pornographic),
             )
         val responseBody =
             networkServices.service
@@ -454,8 +446,7 @@ class SimilarHandler {
         if (strictMatch && responseBody.data.size != mangaIds.size) {
             TimberKt.d { "manga returned doesn't match number of manga expected" }
             throw Exception(
-                "Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned"
-            )
+                "Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned")
         }
         return responseBody
     }

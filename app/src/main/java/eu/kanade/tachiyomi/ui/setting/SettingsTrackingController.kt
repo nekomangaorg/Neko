@@ -65,16 +65,14 @@ class SettingsTrackingController :
                         MdConstants.ContentRating.safe,
                         MdConstants.ContentRating.suggestive,
                         MdConstants.ContentRating.erotica,
-                        MdConstants.ContentRating.pornographic
-                    )
+                        MdConstants.ContentRating.pornographic)
 
                 defaultValue =
                     listOf(
                         MdConstants.ContentRating.safe,
                         MdConstants.ContentRating.suggestive,
                         MdConstants.ContentRating.erotica,
-                        MdConstants.ContentRating.pornographic
-                    )
+                        MdConstants.ContentRating.pornographic)
             }
 
             preference {
