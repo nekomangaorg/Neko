@@ -22,7 +22,7 @@ If you got any questions, [join our Discord server](https://discord.gg/4vmK42QuK
 - [MangaDex](https://mangadex.org/) manga reader for Android 7+
 - Offline reading Supports native login to MangaDex
 - MDList support
-- Tracker support: <a target="_blank" href="https://myanimelist.net/">MyAnimeList</a>, <a target="_blank" href="https://anilist.co/">AniList</a>, <a target="_blank" href="https://kitsu.io/">
+- Tracker support: <a target="_blank" href="https://myanimelist.net/">MyAnimeList</a>, <a target="_blank" href="https://anilist.co/">AniList</a>, <a target="_blank" href="https://kitsu.app/">
   Kitsu</a>, <a target="_blank" href="https://mangaupdates.com">MangaUpdates</a>
 - Custom computer generated similar manga recommendations, as well as user recommendations from MyAnimeList, MangaUpdates, AniList
 - Syncing manga, and read statuses to and from MangaDex and Neko
