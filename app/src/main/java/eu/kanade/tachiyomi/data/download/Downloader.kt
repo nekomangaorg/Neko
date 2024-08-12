@@ -416,14 +416,8 @@ class Downloader(
                 }
 
             // When the page is ready, set page path, progress (just in case) and status
-            val success = splitTallImageIfNeeded(page, tmpDir)
-            if (!success) {
-                notifier.onError(
-                    context.getString(R.string.download_notifier_split_failed),
-                    download.chapter.name,
-                    download.manga.title,
-                )
-            }
+            splitTallImageIfNeeded(page, tmpDir)
+
             page.uri = file.uri
             page.progress = 100
             page.status = Page.State.READY
@@ -515,27 +509,23 @@ class Downloader(
         return ImageUtil.getExtensionFromMimeType(mime)
     }
 
-    private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile): Boolean {
-        if (!readerPreferences.splitTallImages().get()) return true
+    private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile) {
+        if (!readerPreferences.splitTallImages().get()) return
 
-        val filename = String.format("%03d", page.number)
-        val imageFile =
-            tmpDir.listFiles()?.find { it.name!!.startsWith(filename) }
-                ?: throw Error(
-                    context.getString(R.string.download_notifier_split_page_not_found, page.number))
-        val imageFilePath =
-            imageFile.filePath
-                ?: throw Error(
-                    context.getString(R.string.download_notifier_split_page_not_found, page.number))
+        try {
+            val fileName = "%03d".format(Locale.ENGLISH, page.number)
+            val imageFile =
+                tmpDir.listFiles()?.firstOrNull { it.name.orEmpty().startsWith(fileName) }
+                    ?: throw Error(
+                        context.getString(
+                            R.string.download_notifier_split_page_not_found, page.number))
 
-        // check if the original page was previously split before then skip.
-        if (imageFile.name!!.contains("__")) return true
+            // Check if the original page was previously split before then skip.
+            if (imageFile.name.orEmpty().startsWith("${fileName}__")) return
 
-        return try {
-            ImageUtil.splitTallImage(imageFile, imageFilePath)
+            ImageUtil.splitTallImage(tmpDir, imageFile, fileName)
         } catch (e: Exception) {
-            TimberKt.e(e) { "Error splitting tall image" }
-            false
+            TimberKt.e(e) { "Failed to split downloaded image" }
         }
     }
 

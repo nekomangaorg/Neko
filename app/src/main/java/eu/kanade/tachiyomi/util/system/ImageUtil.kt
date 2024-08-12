@@ -27,10 +27,9 @@ import com.hippo.unifile.UniFile
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URLConnection
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -558,7 +557,7 @@ object ImageUtil {
     }
 
     /** Splits tall images to improve performance of reader */
-    fun splitTallImage(imageFile: UniFile, imageFilePath: String): Boolean {
+    fun splitTallImage(tmpDir: UniFile, imageFile: UniFile, fileName: String): Boolean {
         if (isAnimatedAndSupported(imageFile.openInputStream()) ||
             !isTallImage(imageFile.openInputStream())) {
             return true
@@ -585,12 +584,17 @@ object ImageUtil {
 
         return try {
             splitDataList.forEach { splitData ->
-                val splitPath = splitImagePath(imageFilePath, splitData.index)
+                val splitImageName = splitImageName(fileName, splitData.index)
+                // Remove pre-existing split if exists (this split shouldn't exist under normal
+                // circumstances)
+                tmpDir.findFile(splitImageName)?.delete()
+
+                val splitFile = tmpDir.createFile(splitImageName)!!
 
                 val region =
                     Rect(0, splitData.topOffset, splitData.splitWidth, splitData.bottomOffset)
 
-                FileOutputStream(splitPath).use { outputStream ->
+                splitFile.openOutputStream().use { outputStream ->
                     val splitBitmap = bitmapRegionDecoder.decodeRegion(region, options)
                     splitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                     splitBitmap.recycle()
@@ -604,8 +608,8 @@ object ImageUtil {
         } catch (e: Exception) {
             // Image splits were not successfully saved so delete them and keep the original image
             splitDataList
-                .map { splitImagePath(imageFilePath, it.index) }
-                .forEach { File(it).delete() }
+                .map { splitImageName(fileName, it.index) }
+                .forEach { tmpDir.findFile(it)?.delete() }
             TimberKt.e(e) { "Error splitting image" }
             false
         } finally {
@@ -613,15 +617,15 @@ object ImageUtil {
         }
     }
 
-    private fun splitImagePath(imageFilePath: String, index: Int) =
-        imageFilePath.substringBeforeLast(".") + "__${"%03d".format(index + 1)}.jpg"
+    private fun splitImageName(fileName: String, index: Int) =
+        "${fileName}__${"%03d".format(Locale.ENGLISH, index + 1)}.jpg"
 
     private val BitmapFactory.Options.splitData
         get(): List<SplitData> {
             val imageHeight = outHeight
             val imageWidth = outWidth
 
-            val optimalImageHeight = displayMaxHeightInPx * 2
+            val optimalImageHeight = displayMaxHeightInPx * 4
 
             // -1 so it doesn't try to split when imageHeight = optimalImageHeight
             val partCount = (imageHeight - 1) / optimalImageHeight + 1
