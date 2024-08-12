@@ -28,9 +28,11 @@ object Migrations {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 
             // Always set up background tasks to ensure they're running
-            if (BuildConfig.INCLUDE_UPDATER) {
-                AppUpdateJob.setupTask(context)
+            when (BuildConfig.INCLUDE_UPDATER) {
+                true -> AppUpdateJob.setupTask(context)
+                false -> AppUpdateJob.cancelTask(context)
             }
+
             LibraryUpdateJob.setupTask(context)
             BackupCreatorJob.setupTask(context, 12)
 
