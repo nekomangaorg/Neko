@@ -196,8 +196,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             libraryRecyler?.updatePaddingRelative(
-                bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight
-            )
+                bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -225,8 +224,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             libraryRecyler?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
         } else {
             libraryRecyler?.updatePaddingRelative(
-                bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight
-            )
+                bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
         }
     }
 
@@ -525,9 +523,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
         androidx.transition.TransitionManager.beginDelayedTransition(
-            binding.filterLayout,
-            transition
-        )
+            binding.filterLayout, transition)
         reorderFilters()
         filterItems.forEach { it.reset() }
         trackers?.let { filterItems.remove(it) }

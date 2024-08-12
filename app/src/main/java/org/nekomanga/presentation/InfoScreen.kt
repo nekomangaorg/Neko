@@ -131,14 +131,12 @@ fun InfoScreen(
                 modifier = Modifier.fillMaxWidth(),
                 text = headingText,
                 style = MaterialTheme.typography.headlineLarge,
-                textAlign = TextAlign.Center
-            )
+                textAlign = TextAlign.Center)
             Text(
                 text = subtitleText,
                 modifier = Modifier.padding(vertical = Size.small),
                 style = MaterialTheme.typography.titleSmall,
-                textAlign = TextAlign.Center
-            )
+                textAlign = TextAlign.Center)
 
             content()
         }

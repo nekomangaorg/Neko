@@ -66,8 +66,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         runningDrawable.centerRadius = 6f.dpToPx
         runningDrawable.strokeWidth = 2f.dpToPx
         runningDrawable.setColorSchemeColors(
-            itemView.context.getResourceColor(R.attr.colorSecondary)
-        )
+            itemView.context.getResourceColor(R.attr.colorSecondary))
 
         binding.endRefresh.setImageDrawable(progressDrawableEnd)
         binding.startRefresh.setImageDrawable(progressDrawableStart)
@@ -328,9 +327,8 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 }
             } else {
                 val sortingMode = LibrarySort.valueOf(menuId) ?: LibrarySort.Title
-                if (
-                    sortingMode != LibrarySort.DragAndDrop && sortingMode == category.sortingMode()
-                ) {
+                if (sortingMode != LibrarySort.DragAndDrop &&
+                    sortingMode == category.sortingMode()) {
                     onCatSortClicked(category, null)
                     return
                 }

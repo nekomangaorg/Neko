@@ -70,20 +70,14 @@ class SaveImageNotifier(private val context: Context) {
                 R.drawable.ic_share_24dp,
                 context.getString(R.string.share),
                 NotificationReceiver.shareImagePendingBroadcast(
-                    context,
-                    file.uri.path ?: "",
-                    notificationId
-                ),
+                    context, file.uri.path ?: "", notificationId),
             )
             // Delete action
             addAction(
                 R.drawable.ic_delete_24dp,
                 context.getString(R.string.delete),
                 NotificationReceiver.deleteImagePendingBroadcast(
-                    context,
-                    file.uri.path ?: "",
-                    notificationId
-                ),
+                    context, file.uri.path ?: "", notificationId),
             )
 
             updateNotification()

@@ -55,9 +55,7 @@ fun ChapterHeader(
                         MaterialTheme.typography.bodyMedium.copy(
                             color =
                                 MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = NekoColors.disabledAlphaHighContrast
-                                )
-                        ),
+                                    alpha = NekoColors.disabledAlphaHighContrast)),
                     modifier =
                         Modifier.requiredWidthIn(Size.none, 200.dp)
                             .align(Alignment.CenterVertically)
@@ -81,10 +79,7 @@ private fun ChapterText(numberOfChapters: Int, modifier: Modifier = Modifier) {
     Text(
         text =
             resources.getQuantityString(
-                R.plurals.chapters_plural,
-                numberOfChapters,
-                numberOfChapters
-            ),
+                R.plurals.chapters_plural, numberOfChapters, numberOfChapters),
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast),
         modifier = modifier,

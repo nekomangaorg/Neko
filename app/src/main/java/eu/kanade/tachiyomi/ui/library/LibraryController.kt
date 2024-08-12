@@ -252,10 +252,8 @@ class LibraryController(
     override fun getSearchTitle(): String? {
         setSubtitle()
         return searchTitle(
-            if (
-                libraryPreferences.showSearchSuggestions().get() &&
-                    libraryPreferences.searchSuggestions().get().isNotBlank()
-            ) {
+            if (libraryPreferences.showSearchSuggestions().get() &&
+                libraryPreferences.searchSuggestions().get().isNotBlank()) {
                 "\"${libraryPreferences.searchSuggestions().get()}\""
             } else {
                 view?.context?.getString(R.string.your_library)?.lowercase(Locale.ROOT)
@@ -317,12 +315,10 @@ class LibraryController(
                 val currentCategory = getHeader()?.category ?: return
                 if (currentCategory.order != activeCategory) {
                     saveActiveCategory(currentCategory)
-                    if (
-                        !showCategoryInTitle &&
-                            presenter.categories.size > 1 &&
-                            dy != 0 &&
-                            recyclerView.translationY == 0f
-                    ) {
+                    if (!showCategoryInTitle &&
+                        presenter.categories.size > 1 &&
+                        dy != 0 &&
+                        recyclerView.translationY == 0f) {
                         showCategoryText(currentCategory.name)
                     }
                 }
@@ -450,14 +446,12 @@ class LibraryController(
     }
 
     private fun setSubtitle() {
-        if (
-            isBindingInitialized &&
-                !singleCategory &&
-                presenter.showAllCategories &&
-                !binding.headerTitle.text.isNullOrBlank() &&
-                !binding.recyclerCover.isClickable &&
-                isControllerVisible
-        ) {
+        if (isBindingInitialized &&
+            !singleCategory &&
+            presenter.showAllCategories &&
+            !binding.headerTitle.text.isNullOrBlank() &&
+            !binding.recyclerCover.isClickable &&
+            isControllerVisible) {
             activityBinding?.searchToolbar?.subtitle = binding.headerTitle.text.toString()
         } else {
             activityBinding?.searchToolbar?.subtitle = null
@@ -751,10 +745,8 @@ class LibraryController(
                         category.order,
                         text =
                             category.name +
-                                if (
-                                    adapter.showNumber &&
-                                        adapter.itemsPerCategory[category.id] != null
-                                ) {
+                                if (adapter.showNumber &&
+                                    adapter.itemsPerCategory[category.id] != null) {
                                     " (${adapter.itemsPerCategory[category.id]})"
                                 } else {
                                     ""
@@ -916,21 +908,18 @@ class LibraryController(
                 true
             } else {
                 binding.libraryGridRecycler.recycler.scrollToPosition(
-                    if (next) adapter.itemCount - 1 else 0
-                )
+                    if (next) adapter.itemCount - 1 else 0)
                 true
             }
         } else {
             val newOffset =
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
-            if (
-                if (!next) {
-                    newOffset > -1
-                } else {
-                    newOffset < presenter.categories.size
-                }
-            ) {
+            if (if (!next) {
+                newOffset > -1
+            } else {
+                newOffset < presenter.categories.size
+            }) {
                 val newCategory = presenter.categories[newOffset]
                 val newOrder = newCategory.order
                 scrollToHeader(newOrder)
@@ -1035,11 +1024,9 @@ class LibraryController(
                     override fun getSpanSize(position: Int): Int {
                         if (libraryLayout == LibraryItem.LAYOUT_LIST) return managerSpanCount
                         val item = this@LibraryController.mAdapter?.getItem(position)
-                        return if (
-                            item is LibraryHeaderItem ||
-                                item is SearchGlobalItem ||
-                                (item is LibraryItem && item.manga.isBlank())
-                        ) {
+                        return if (item is LibraryHeaderItem ||
+                            item is SearchGlobalItem ||
+                            (item is LibraryItem && item.manga.isBlank())) {
                             managerSpanCount
                         } else {
                             1
@@ -1084,10 +1071,8 @@ class LibraryController(
             binding.recyclerCover.isFocusable = false
             singleCategory = presenter.categories.size <= 1
 
-            if (
-                binding.libraryGridRecycler.recycler.manager is StaggeredGridLayoutManager &&
-                    staggeredBundle != null
-            ) {
+            if (binding.libraryGridRecycler.recycler.manager is StaggeredGridLayoutManager &&
+                staggeredBundle != null) {
                 binding.libraryGridRecycler.recycler.manager.onRestoreInstanceState(staggeredBundle)
                 staggeredBundle = null
             }
@@ -1151,8 +1136,7 @@ class LibraryController(
                     listOf(
                         EmptyView.Action(R.string.getting_started_guide) {
                             activity?.openInBrowser(
-                                "https://tachiyomi.org/help/guides/getting-started/#installing-an-extension"
-                            )
+                                "https://tachiyomi.org/help/guides/getting-started/#installing-an-extension")
                         },
                     )
                 } else {
@@ -1196,10 +1180,8 @@ class LibraryController(
                 }
             }
 
-            if (
-                binding.libraryGridRecycler.recycler.manager is StaggeredGridLayoutManager &&
-                    isControllerVisible
-            ) {
+            if (binding.libraryGridRecycler.recycler.manager is StaggeredGridLayoutManager &&
+                isControllerVisible) {
                 staggeredObserver =
                     ViewTreeObserver.OnGlobalLayoutListener {
                         binding.libraryGridRecycler.recycler.postOnAnimation {
@@ -1215,8 +1197,7 @@ class LibraryController(
                         }
                     }
                 binding.libraryGridRecycler.recycler.viewTreeObserver.addOnGlobalLayoutListener(
-                    staggeredObserver
-                )
+                    staggeredObserver)
                 viewScope.launchUI {
                     delay(500)
                     removeStaggeredObserver()
@@ -1337,12 +1318,10 @@ class LibraryController(
                     binding.appBar.y = 0f
                     binding.appBar.updateAppBarAfterY(mainRecycler)
                 }
-            } else if (
-                !show &&
-                    binding.appBar.compactSearchMode &&
-                    binding.appBar.useLargeToolbar &&
-                    resources.configuration.screenHeightDp >= 600
-            ) {
+            } else if (!show &&
+                binding.appBar.compactSearchMode &&
+                binding.appBar.useLargeToolbar &&
+                resources.configuration.screenHeightDp >= 600) {
                 binding.appBar.compactSearchMode = false
                 mainRecycler.requestApplyInsets()
             }
@@ -1637,8 +1616,7 @@ class LibraryController(
         (activity as? MainActivity)?.let {
             (it.binding.bottomNav ?: it.binding.sideNav!!).selectedItemId = R.id.nav_browse
             router.setRoot(
-                BrowseController(query).withFadeTransaction().tag(R.id.nav_browse.toString())
-            )
+                BrowseController(query).withFadeTransaction().tag(R.id.nav_browse.toString()))
         }
     }
 
@@ -1646,11 +1624,9 @@ class LibraryController(
         val position = viewHolder?.bindingAdapterPosition ?: return
         binding.swipeRefresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_DRAG
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-            if (
-                lastItemPosition != null &&
-                    position != lastItemPosition &&
-                    lastItem == adapter.getItem(position)
-            ) {
+            if (lastItemPosition != null &&
+                position != lastItemPosition &&
+                lastItem == adapter.getItem(position)) {
                 // because for whatever reason you can repeatedly tap on a currently dragging manga
                 adapter.removeSelection(position)
                 (binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(position)
@@ -1686,10 +1662,8 @@ class LibraryController(
         // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
         val fromItem = adapter.getItem(fromPosition)
         val toItem = adapter.getItem(toPosition)
-        if (
-            binding.libraryGridRecycler.recycler.layoutManager !is StaggeredGridLayoutManager &&
-                ((fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null)
-        ) {
+        if (binding.libraryGridRecycler.recycler.layoutManager !is StaggeredGridLayoutManager &&
+            ((fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null)) {
             binding.libraryGridRecycler.recycler.scrollBy(
                 0,
                 binding.libraryGridRecycler.recycler.paddingTop,
@@ -1933,6 +1907,7 @@ class LibraryController(
         }
         return false
     }
+
     // endregion
 
     // region Toolbar options methods
@@ -1963,8 +1938,7 @@ class LibraryController(
                             context.getResourceDrawable(R.attr.selectableItemBackgroundBorderless)
                         imageTintList =
                             ColorStateList.valueOf(
-                                context.getResourceColor(R.attr.actionBarTintColor)
-                            )
+                                context.getResourceColor(R.attr.actionBarTintColor))
                         compatToolTipText = resources?.getText(R.string.show_all_categories)
                     }
                 }!!
@@ -1991,12 +1965,10 @@ class LibraryController(
     }
 
     override fun onActionViewExpand(item: MenuItem?) {
-        if (
-            !binding.recyclerCover.isClickable &&
-                query.isBlank() &&
-                !singleCategory &&
-                presenter.showAllCategories
-        ) {
+        if (!binding.recyclerCover.isClickable &&
+            query.isBlank() &&
+            !singleCategory &&
+            presenter.showAllCategories) {
             showCategories(true)
         }
     }
@@ -2031,6 +2003,7 @@ class LibraryController(
         }
         return true
     }
+
     // endregion
 
     // region Action Mode Methods
@@ -2081,6 +2054,7 @@ class LibraryController(
         }
         return false
     }
+
     // endregion
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {

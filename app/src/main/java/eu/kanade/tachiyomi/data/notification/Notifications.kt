@@ -121,13 +121,9 @@ object Notifications {
                     context.getString(R.string.group_backup_restore),
                 ),
                 NotificationChannelGroup(
-                    Group.Download,
-                    context.getString(R.string.group_downloader)
-                ),
+                    Group.Download, context.getString(R.string.group_downloader)),
                 NotificationChannelGroup(
-                    GROUP_APP_UPDATES,
-                    context.getString(R.string.app_updates)
-                ),
+                    GROUP_APP_UPDATES, context.getString(R.string.app_updates)),
             )
             .forEach(context.notificationManager::createNotificationChannelGroup)
 

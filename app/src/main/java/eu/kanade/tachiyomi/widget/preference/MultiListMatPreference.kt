@@ -100,8 +100,7 @@ constructor(
             var value =
                 pos.mapNotNull {
                         entryValues.getOrNull(
-                            it - if (allSelectionRes != null && !showAllLast) 1 else 0
-                        )
+                            it - if (allSelectionRes != null && !showAllLast) 1 else 0)
                     }
                     .toSet()
             if (allSelectionRes != null && !allIsAlwaysSelected && selected[allPos])

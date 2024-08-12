@@ -55,8 +55,7 @@ fun TriStateCheckboxRow(
             color =
                 if (!disabled) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
-            style = rowTextStyle
-        )
+            style = rowTextStyle)
     }
 }
 

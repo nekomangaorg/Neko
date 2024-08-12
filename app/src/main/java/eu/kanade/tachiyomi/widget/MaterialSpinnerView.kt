@@ -263,11 +263,9 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private fun updateOriginalPositionMenu() {
         popup ?: return
         val originalPosition = originalPosition ?: return
-        if (
-            originalPosition != selectedPosition &&
-                originalPosition >= 0 &&
-                originalPosition < (popup?.menu?.size() ?: 0)
-        ) {
+        if (originalPosition != selectedPosition &&
+            originalPosition >= 0 &&
+            originalPosition < (popup?.menu?.size() ?: 0)) {
             popup?.menu?.getItem(originalPosition)?.let { menuItem ->
                 menuItem.icon = tintedOG()
                 menuItem

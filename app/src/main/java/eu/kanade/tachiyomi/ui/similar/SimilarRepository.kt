@@ -112,12 +112,7 @@ class SimilarRepository {
             }
 
             listOfNotNull(
-                related.await(),
-                similar.await(),
-                mu.await(),
-                anilist.await(),
-                mal.await()
-            )
+                related.await(), similar.await(), mu.await(), anilist.await(), mal.await())
         }
     }
 

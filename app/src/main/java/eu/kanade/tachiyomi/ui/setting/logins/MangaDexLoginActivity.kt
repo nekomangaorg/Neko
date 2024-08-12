@@ -17,8 +17,7 @@ class MangaDexLoginActivity : BaseOAuthLoginActivity() {
                         Toast.makeText(
                                 this@MangaDexLoginActivity.applicationContext,
                                 R.string.could_not_log_in,
-                                Toast.LENGTH_SHORT
-                            )
+                                Toast.LENGTH_SHORT)
                             .show()
                     }
                 }

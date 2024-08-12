@@ -102,12 +102,9 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         activity.window.navigationBarColor =
                             lerpColor(
                                 ColorUtils.setAlphaComponent(
-                                    navPrimary,
-                                    if (hasLightNav) 0 else 179
-                                ),
+                                    navPrimary, if (hasLightNav) 0 else 179),
                                 navPrimary,
-                                trueProgress
-                            )
+                                trueProgress)
                     }
                 }
 
@@ -118,8 +115,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         (binding.chapterRecycler.layoutManager as LinearLayoutManager)
                             .scrollToPositionWithOffset(
                                 adapter?.getPosition(
-                                    viewModel.getCurrentChapter()?.chapter?.id ?: 0L
-                                ) ?: 0,
+                                    viewModel.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
                                 binding.chapterRecycler.height / 2 - 30.dpToPx,
                             )
                         if (canShowNav) {
@@ -127,10 +123,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         }
                         activity.binding.readerNav.root.alpha = 1f
                     }
-                    if (
-                        state == BottomSheetBehavior.STATE_DRAGGING ||
-                            state == BottomSheetBehavior.STATE_SETTLING
-                    ) {
+                    if (state == BottomSheetBehavior.STATE_DRAGGING ||
+                        state == BottomSheetBehavior.STATE_SETTLING) {
                         if (canShowNav) {
                             activity.binding.readerNav.root.isVisible = true
                         }
@@ -222,10 +216,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
-                    if (
-                        newState == RecyclerView.SCROLL_STATE_IDLE ||
-                            newState == RecyclerView.SCROLL_STATE_SETTLING
-                    ) {
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE ||
+                        newState == RecyclerView.SCROLL_STATE_SETTLING) {
                         sheetBehavior?.isDraggable = true
                     } else {
                         sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)

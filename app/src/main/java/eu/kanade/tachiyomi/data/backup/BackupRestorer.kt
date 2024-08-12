@@ -127,10 +127,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
         restoreProgress += 1
         totalAmount += 1
         restoreHelper.showProgressNotification(
-            restoreProgress,
-            totalAmount,
-            context.getString(R.string.categories)
-        )
+            restoreProgress, totalAmount, context.getString(R.string.categories))
     }
 
     private fun restoreManga(

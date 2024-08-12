@@ -32,10 +32,7 @@ fun SimpleDropdownMenu(
         Modifier.background(
             color =
                 MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                    themeColorState.buttonColor,
-                    8.dp
-                )
-        )
+                    themeColorState.buttonColor, 8.dp))
     CascadeDropdownMenu(
         expanded = expanded,
         offset = DpOffset(Size.small, Size.small),
@@ -46,9 +43,7 @@ fun SimpleDropdownMenu(
     ) {
         val style =
             MaterialTheme.typography.bodyLarge.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                letterSpacing = (-.5).sp
-            )
+                color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
         dropDownItems.forEach { item ->
             Row(modifier = background, item = item, style = style, onDismiss = onDismiss)
         }
@@ -96,8 +91,7 @@ private fun CascadeColumnScope.Row(
                 text = item.text.asString(),
                 style = style,
                 onClick = item.onClick,
-                onDismiss = onDismiss
-            )
+                onDismiss = onDismiss)
         }
     }
 }

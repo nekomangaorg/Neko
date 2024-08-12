@@ -98,8 +98,7 @@ fun TrackingDateSheet(
                     ),
                 style =
                     MaterialTheme.typography.titleLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
+                        color = MaterialTheme.colorScheme.onSurface),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().align(Alignment.CenterStart),
             )
@@ -114,15 +113,12 @@ fun TrackingDateSheet(
                 text =
                     stringResource(
                         id = R.string.current_date_,
-                        trackingDate.dateFormat.format(trackingDate.currentDate)
-                    ),
+                        trackingDate.dateFormat.format(trackingDate.currentDate)),
                 style =
                     MaterialTheme.typography.titleSmall.copy(
                         color =
                             MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = NekoColors.mediumAlphaHighContrast
-                            )
-                    ),
+                                alpha = NekoColors.mediumAlphaHighContrast)),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -130,17 +126,15 @@ fun TrackingDateSheet(
             TextButton(
                 onClick = {
                     trackDateChanged(RemoveTrackingDate(trackingDate.readingDate, trackAndService))
+                }) {
+                    Text(
+                        text = stringResource(id = R.string.remove),
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(
+                                color = themeColorState.buttonColor),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
-            ) {
-                Text(
-                    text = stringResource(id = R.string.remove),
-                    style =
-                        MaterialTheme.typography.titleMedium.copy(
-                            color = themeColorState.buttonColor
-                        ),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
         } else {
             showDateField = true
         }
@@ -154,15 +148,11 @@ fun TrackingDateSheet(
         if (suggestedDateEpoch != null && suggestedDateEpoch != 0L) {
             val suggestedDate =
                 LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(suggestedDateEpoch),
-                        ZoneId.systemDefault()
-                    )
+                        Instant.ofEpochMilli(suggestedDateEpoch), ZoneId.systemDefault())
                     .toLocalDate()
             val currentDate =
                 LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(trackingDate.currentDate),
-                        ZoneId.systemDefault()
-                    )
+                        Instant.ofEpochMilli(trackingDate.currentDate), ZoneId.systemDefault())
                     .toLocalDate()
 
             if ((suggestedDate.atStartOfDay() != currentDate.atStartOfDay())) {
@@ -171,26 +161,19 @@ fun TrackingDateSheet(
                     onClick = {
                         trackDateChanged(
                             EditTrackingDate(
-                                trackingDate.readingDate,
-                                suggestedDate,
-                                trackAndService
-                            )
+                                trackingDate.readingDate, suggestedDate, trackAndService))
+                    }) {
+                        Text(
+                            text =
+                                stringResource(
+                                    id = R.string.use_suggested_date_of_,
+                                    suggestedDate.format(dateTimeFormatter)),
+                            style =
+                                MaterialTheme.typography.titleMedium.copy(
+                                    color = themeColorState.buttonColor),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
-                ) {
-                    Text(
-                        text =
-                            stringResource(
-                                id = R.string.use_suggested_date_of_,
-                                suggestedDate.format(dateTimeFormatter)
-                            ),
-                        style =
-                            MaterialTheme.typography.titleMedium.copy(
-                                color = themeColorState.buttonColor
-                            ),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
             }
         }
 
@@ -201,8 +184,7 @@ fun TrackingDateSheet(
                     text = stringResource(id = R.string.edit),
                     style =
                         MaterialTheme.typography.titleMedium.copy(
-                            color = themeColorState.buttonColor
-                        ),
+                            color = themeColorState.buttonColor),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -228,29 +210,24 @@ fun TrackingDateSheet(
                     maxDate = LocalDate.now(),
                     textStyle =
                         MaterialTheme.typography.headlineSmall.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
+                            color = MaterialTheme.colorScheme.onSurface),
                     cursorBrush = SolidColor(themeColorState.buttonColor),
                     hintTextStyle =
                         MaterialTheme.typography.headlineSmall.copy(
                             color =
                                 MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = NekoColors.disabledAlphaHighContrast
-                                )
-                        ),
+                                    alpha = NekoColors.disabledAlphaHighContrast)),
                     delimiterSpacing = Size.extraExtraTiny,
                 )
                 ElevatedButton(
                     onClick = {
                         trackDateChanged(
-                            EditTrackingDate(trackingDate.readingDate, newDate!!, trackAndService)
-                        )
+                            EditTrackingDate(trackingDate.readingDate, newDate!!, trackAndService))
                     },
                     colors =
                         ButtonDefaults.elevatedButtonColors(
                             containerColor = themeColorState.buttonColor,
-                            contentColor = MaterialTheme.colorScheme.surface
-                        ),
+                            contentColor = MaterialTheme.colorScheme.surface),
                     enabled = newDate != null,
                 ) {
                     Text(text = stringResource(id = android.R.string.ok))

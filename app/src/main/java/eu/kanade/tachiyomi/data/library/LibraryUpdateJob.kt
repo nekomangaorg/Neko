@@ -138,10 +138,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
     override suspend fun doWork(): Result {
         if (WORK_NAME_AUTO in tags) {
-            if (
-                DEVICE_ONLY_ON_WIFI in libraryPreferences.autoUpdateDeviceRestrictions().get() &&
-                    !context.isConnectedToWifi()
-            ) {
+            if (DEVICE_ONLY_ON_WIFI in libraryPreferences.autoUpdateDeviceRestrictions().get() &&
+                !context.isConnectedToWifi()) {
                 return Result.failure()
             }
             // Find a running manual worker. If exists, try again later
@@ -155,7 +153,22 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         instance = WeakReference(this)
 
         val selectedScheme = libraryPreferences.updatePrioritization().get()
-        val savedMangaList = inputData.getLongArray(KEY_MANGA_LIST)?.asList()
+
+        val savedMangaList =
+            when (inputData.getBoolean(KEY_MANGA_LIST, false)) {
+                true -> {
+                    val set =
+                        libraryPreferences
+                            .libraryUpdateIds()
+                            .get()
+                            .splitToSequence("||")
+                            .map { it.toLong() }
+                            .toSet()
+                    libraryPreferences.libraryUpdateIds().delete()
+                    set
+                }
+                false -> null
+            }
 
         val mangaList =
             (if (savedMangaList != null) {
@@ -228,36 +241,28 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 }
                 LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ in restrictions &&
                     hasTrackWithGivenStatus(
-                        libraryManga,
-                        context.getString(R.string.follows_plan_to_read)
-                    ) -> {
+                        libraryManga, context.getString(R.string.follows_plan_to_read)) -> {
                     skippedUpdates[libraryManga] =
                         context.getString(R.string.skipped_reason_tracking_plan_to_read)
                     return@filter false
                 }
                 LibraryPreferences.MANGA_TRACKING_DROPPED in restrictions &&
                     hasTrackWithGivenStatus(
-                        libraryManga,
-                        context.getString(R.string.follows_dropped)
-                    ) -> {
+                        libraryManga, context.getString(R.string.follows_dropped)) -> {
                     skippedUpdates[libraryManga] =
                         context.getString(R.string.skipped_reason_tracking_dropped)
                     return@filter false
                 }
                 LibraryPreferences.MANGA_TRACKING_ON_HOLD in restrictions &&
                     hasTrackWithGivenStatus(
-                        libraryManga,
-                        context.getString(R.string.follows_on_hold)
-                    ) -> {
+                        libraryManga, context.getString(R.string.follows_on_hold)) -> {
                     skippedUpdates[libraryManga] =
                         context.getString(R.string.skipped_reason_tracking_on_hold)
                     return@filter false
                 }
                 LibraryPreferences.MANGA_TRACKING_COMPLETED in restrictions &&
                     hasTrackWithGivenStatus(
-                        libraryManga,
-                        context.getString(R.string.follows_completed)
-                    ) -> {
+                        libraryManga, context.getString(R.string.follows_completed)) -> {
                     skippedUpdates[libraryManga] =
                         context.getString(R.string.skipped_reason_tracking_completed)
                     return@filter false
@@ -293,8 +298,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     libraryManga.filter { it.category in categoriesToUpdate }.distinctBy { it.id }
                 } else {
                     categoryIds.addAll(
-                        db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0
-                    )
+                        db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0)
                     libraryManga.distinctBy { it.id }
                 }
             }
@@ -404,8 +408,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         MangaDetailChapterInformation(
                             null,
                             emptyList(),
-                            source.fetchChapterList(manga).getOrThrow { Exception(it.message()) }
-                        )
+                            source.fetchChapterList(manga).getOrThrow { Exception(it.message()) })
                     } else {
                         source.fetchMangaAndChapterDetails(manga, true).getOrThrow {
                             Exception(it.message())
@@ -454,9 +457,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
 
                     withIOContext {
                         // dont refresh covers while using cached source
-                        if (
-                            manga.thumbnail_url != null && libraryPreferences.updateCovers().get()
-                        ) {
+                        if (manga.thumbnail_url != null &&
+                            libraryPreferences.updateCovers().get()) {
                             coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                             // load new covers in background
                             val request =
@@ -484,9 +486,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     withIOContext {
                         val tracks = db.getTracks(manga).executeOnIO().toMutableList()
 
-                        if (
-                            tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }
-                        ) {
+                        if (tracks.isEmpty() ||
+                            !tracks.any { it.sync_id == trackManager.mdList.id }) {
                             val track = trackManager.mdList.createInitialTracker(manga)
                             db.insertTrack(track).executeAsBlocking()
                             if (mangaDexLoginHelper.isLoggedIn()) {
@@ -634,13 +635,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             }
         }
         newUpdates.clear()
-        if (
-            skippedUpdates.isNotEmpty() &&
-                Notifications.isNotificationChannelEnabled(
-                    context,
-                    Notifications.Channel.Library.Skipped
-                )
-        ) {
+        if (skippedUpdates.isNotEmpty() &&
+            Notifications.isNotificationChannelEnabled(
+                context, Notifications.Channel.Library.Skipped)) {
             val skippedFile =
                 writeErrorFile(
                         skippedUpdates,
@@ -649,13 +646,9 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                     .getUriCompat(context)
             notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
         }
-        if (
-            failedUpdates.isNotEmpty() &&
-                Notifications.isNotificationChannelEnabled(
-                    context,
-                    Notifications.Channel.Library.Error
-                )
-        ) {
+        if (failedUpdates.isNotEmpty() &&
+            Notifications.isNotificationChannelEnabled(
+                context, Notifications.Channel.Library.Error)) {
             val errorFile = writeErrorFile(failedUpdates)
             notifier.showUpdateErrorNotification(
                 failedUpdates.map { it.key.title },
@@ -830,16 +823,17 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val builder = Data.Builder()
             category?.id?.let { id -> builder.putInt(KEY_CATEGORY, id) }
 
+            val libraryPreferences = Injekt.injectLazy<LibraryPreferences>()
             if (mangaToUse != null) {
-                builder.putLongArray(
-                    KEY_MANGA_LIST,
-                    mangaToUse.mapNotNull { it.id }.toLongArray(),
-                )
+                builder.putBoolean(KEY_MANGA_LIST, true)
+                libraryPreferences.value
+                    .libraryUpdateIds()
+                    .set(mangaToUse.mapNotNull { it.id }.toLongArray().joinToString("||"))
             } else if (mangaIdsToUse != null) {
-                builder.putLongArray(
-                    KEY_MANGA_LIST,
-                    mangaIdsToUse.toLongArray(),
-                )
+                builder.putBoolean(KEY_MANGA_LIST, true)
+                libraryPreferences.value
+                    .libraryUpdateIds()
+                    .set(mangaIdsToUse.toLongArray().joinToString("||"))
             }
             val inputData = builder.build()
             val request =

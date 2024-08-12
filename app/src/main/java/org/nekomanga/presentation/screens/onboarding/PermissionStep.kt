@@ -58,16 +58,14 @@ internal class PermissionStep : OnboardingStep {
                         PackageManager.PERMISSION_GRANTED
                 } else {
                     true
-                }
-            )
+                })
         }
 
         var batteryGranted by remember {
             mutableStateOf(
                 context
                     .getSystemService<PowerManager>()!!
-                    .isIgnoringBatteryOptimizations(context.packageName)
-            )
+                    .isIgnoringBatteryOptimizations(context.packageName))
         }
 
         DisposableEffect(lifecycleOwner.lifecycle) {
@@ -79,9 +77,8 @@ internal class PermissionStep : OnboardingStep {
                         } else {
                             @Suppress("DEPRECATION")
                             Settings.Secure.getInt(
-                                context.contentResolver,
-                                Settings.Secure.INSTALL_NON_MARKET_APPS
-                            ) != 0
+                                context.contentResolver, Settings.Secure.INSTALL_NON_MARKET_APPS) !=
+                                0
                         }
                     batteryGranted =
                         context

@@ -50,8 +50,7 @@ enum class MangaCover(val ratio: Float) {
                     this.border(
                         width = Outline.thickness,
                         color = Outline.color,
-                        shape = RoundedCornerShape(Shapes.coverRadius)
-                    )
+                        shape = RoundedCornerShape(Shapes.coverRadius))
                 },
         )
     }

@@ -33,14 +33,12 @@ class ChapterFilter(
 
         // if none of the filters are enabled skip the filtering of them
         val filteredChapters = filterChaptersByScanlators(chapters, manga)
-        return if (
-            readEnabled ||
-                unreadEnabled ||
-                downloadEnabled ||
-                notDownloadEnabled ||
-                bookmarkEnabled ||
-                notBookmarkEnabled
-        ) {
+        return if (readEnabled ||
+            unreadEnabled ||
+            downloadEnabled ||
+            notDownloadEnabled ||
+            bookmarkEnabled ||
+            notBookmarkEnabled) {
             filteredChapters.filter {
                 return@filter !(readEnabled && !it.read ||
                     (unreadEnabled && it.read) ||
@@ -78,11 +76,9 @@ class ChapterFilter(
             }
 
         // if filter preferences are not enabled don't even filter
-        if (
-            !readerPreferences.skipRead().get() &&
-                !readerPreferences.skipFiltered().get() &&
-                !readerPreferences.skipDuplicates().get()
-        ) {
+        if (!readerPreferences.skipRead().get() &&
+            !readerPreferences.skipFiltered().get() &&
+            !readerPreferences.skipDuplicates().get()) {
             return filteredChapters
         }
 

@@ -40,71 +40,69 @@ fun AddCategoryDialog(
 
     CompositionLocalProvider(
         LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors
-    ) {
-        LaunchedEffect(categoryText, currentCategories) {
-            if (categoryText.isEmpty()) {
-                saveEnabled = false
-                errorMessage = ""
-            } else if (currentCategories.any { it.name.equals(categoryText, true) }) {
-                saveEnabled = false
-                errorMessage = context.getString(R.string.category_with_name_exists)
-            } else {
-                saveEnabled = true
-                errorMessage = ""
+        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+            LaunchedEffect(categoryText, currentCategories) {
+                if (categoryText.isEmpty()) {
+                    saveEnabled = false
+                    errorMessage = ""
+                } else if (currentCategories.any { it.name.equals(categoryText, true) }) {
+                    saveEnabled = false
+                    errorMessage = context.getString(R.string.category_with_name_exists)
+                } else {
+                    saveEnabled = true
+                    errorMessage = ""
+                }
             }
-        }
 
-        AlertDialog(
-            title = { Text(text = stringResource(id = R.string.new_category)) },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = categoryText,
-                        onValueChange = { categoryText = it },
-                        label = { Text(text = stringResource(id = R.string.category)) },
-                        singleLine = true,
-                        maxLines = 1,
+            AlertDialog(
+                title = { Text(text = stringResource(id = R.string.new_category)) },
+                text = {
+                    Column {
+                        OutlinedTextField(
+                            value = categoryText,
+                            onValueChange = { categoryText = it },
+                            label = { Text(text = stringResource(id = R.string.category)) },
+                            singleLine = true,
+                            maxLines = 1,
+                            colors =
+                                TextFieldDefaults.outlinedTextFieldColors(
+                                    cursorColor = themeColorState.buttonColor,
+                                    focusedLabelColor = themeColorState.buttonColor,
+                                    focusedBorderColor = themeColorState.buttonColor,
+                                ),
+                        )
+                        Gap(Size.extraTiny)
+                        Text(
+                            text = errorMessage,
+                            style =
+                                MaterialTheme.typography.labelSmall.copy(
+                                    color = MaterialTheme.colorScheme.error))
+                    }
+                },
+                onDismissRequest = onDismiss,
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            onConfirm(categoryText)
+                            onDismiss()
+                        },
+                        enabled = saveEnabled,
                         colors =
-                            TextFieldDefaults.outlinedTextFieldColors(
-                                cursorColor = themeColorState.buttonColor,
-                                focusedLabelColor = themeColorState.buttonColor,
-                                focusedBorderColor = themeColorState.buttonColor,
-                            ),
-                    )
-                    Gap(Size.extraTiny)
-                    Text(
-                        text = errorMessage,
-                        style =
-                            MaterialTheme.typography.labelSmall.copy(
-                                color = MaterialTheme.colorScheme.error
-                            )
-                    )
-                }
-            },
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onConfirm(categoryText)
-                        onDismiss()
-                    },
-                    enabled = saveEnabled,
-                    colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
-                ) {
-                    Text(text = stringResource(id = R.string.save))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = onDismiss,
-                    colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
-                ) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-            },
-        )
-    }
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor),
+                    ) {
+                        Text(text = stringResource(id = R.string.save))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = onDismiss,
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor)) {
+                            Text(text = stringResource(id = R.string.cancel))
+                        }
+                },
+            )
+        }
 }

@@ -55,16 +55,14 @@ fun SortRow(
                     imageVector = Icons.Filled.ArrowUpward,
                     contentDescription = null,
                     tint = tintColor,
-                    modifier = Modifier.size(24.dp)
-                )
+                    modifier = Modifier.size(24.dp))
             }
             MangaConstants.SortState.Descending -> {
                 Icon(
                     imageVector = Icons.Filled.ArrowDownward,
                     contentDescription = null,
                     tint = tintColor,
-                    modifier = Modifier.size(24.dp)
-                )
+                    modifier = Modifier.size(24.dp))
             }
             MangaConstants.SortState.None -> {
                 Gap(24.dp)

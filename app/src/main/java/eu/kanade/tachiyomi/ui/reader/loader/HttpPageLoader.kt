@@ -102,11 +102,9 @@ class HttpPageLoader(
             val imageUrl = page.imageUrl
 
             // Check if the image has been deleted
-            if (
-                page.status == Page.State.READY &&
-                    imageUrl != null &&
-                    !chapterCache.isImageInCache(imageUrl)
-            ) {
+            if (page.status == Page.State.READY &&
+                imageUrl != null &&
+                !chapterCache.isImageInCache(imageUrl)) {
                 page.status = Page.State.QUEUE
             }
 

@@ -145,8 +145,7 @@ interface HistoryQueries : DbProvider {
                 .rawQuery(
                     RawQuery.builder()
                         .query(
-                            "SELECT SUM(${HistoryTable.COL_TIME_READ}) FROM ${HistoryTable.TABLE}"
-                        )
+                            "SELECT SUM(${HistoryTable.COL_TIME_READ}) FROM ${HistoryTable.TABLE}")
                         .observesTables(HistoryTable.TABLE)
                         .build(),
                 )

@@ -45,11 +45,9 @@ class SearchActivity : MainActivity() {
         binding.toolbar.setNavigationOnClickListener { popToRoot() }
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
-            if (
-                (rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)) &&
-                    rootSearchController !is SmallToolbarInterface
-            ) {
+            if ((rootSearchController is RootSearchInterface ||
+                (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)) &&
+                rootSearchController !is SmallToolbarInterface) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
             } else {
                 popToRoot()
@@ -216,10 +214,8 @@ class SearchActivity : MainActivity() {
             SHORTCUT_MANGA,
             SHORTCUT_MANGA_BACK -> {
                 val extras = intent.extras ?: return false
-                if (
-                    intent.action == SHORTCUT_MANGA_BACK &&
-                        preferences.openChapterInShortcuts().get()
-                ) {
+                if (intent.action == SHORTCUT_MANGA_BACK &&
+                    preferences.openChapterInShortcuts().get()) {
                     val mangaId = extras.getLong(MangaDetailController.MANGA_EXTRA)
                     if (mangaId != 0L) {
                         val db = Injekt.get<DatabaseHelper>()

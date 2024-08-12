@@ -234,12 +234,7 @@ class ReaderViewModel(
                     val context = Injekt.get<Application>()
                     loader =
                         ChapterLoader(
-                            context,
-                            downloadManager,
-                            downloadProvider,
-                            manga,
-                            sourceManager
-                        )
+                            context, downloadManager, downloadProvider, manga, sourceManager)
 
                     loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
                     Result.success(true)
@@ -420,9 +415,8 @@ class ReaderViewModel(
             }
         }
 
-        if (
-            chapter.state != ReaderChapter.State.Wait && chapter.state !is ReaderChapter.State.Error
-        ) {
+        if (chapter.state != ReaderChapter.State.Wait &&
+            chapter.state !is ReaderChapter.State.Error) {
             return
         }
 
@@ -467,12 +461,10 @@ class ReaderViewModel(
             !securityPreferences.incognitoMode().get() ||
                 hasTrackers ||
                 preferences.readingSync().get()
-        if (
-            shouldTrack &&
-                // For double pages, check if the second to last page is doubled up
-                ((selectedChapter.pages?.lastIndex == page.index && page.firstHalf != true) ||
-                    (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index))
-        ) {
+        if (shouldTrack &&
+            // For double pages, check if the second to last page is doubled up
+            ((selectedChapter.pages?.lastIndex == page.index && page.firstHalf != true) ||
+                (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index))) {
             if (!securityPreferences.incognitoMode().get()) {
                 selectedChapter.chapter.read = true
                 updateTrackChapterAfterReading(selectedChapter)
@@ -534,9 +526,7 @@ class ReaderViewModel(
      */
     private fun downloadChapters(chapters: List<DomainChapterItem>) {
         downloadManager.downloadChapters(
-            manga!!,
-            chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() }
-        )
+            manga!!, chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
     }
 
     /**
@@ -567,11 +557,9 @@ class ReaderViewModel(
             chapterToDownload = null
         }
         // Check if deleting option is enabled and chapter exists
-        if (
-            removeAfterReadSlots != -1 &&
-                chapterToDelete != null &&
-                !currentChapter.chapter.bookmark
-        ) {
+        if (removeAfterReadSlots != -1 &&
+            chapterToDelete != null &&
+            !currentChapter.chapter.bookmark) {
             enqueueDeleteReadChapters(chapterToDelete)
         }
     }
@@ -829,15 +817,15 @@ class ReaderViewModel(
         val notifier = SaveImageNotifier(context)
         notifier.onClear()
 
-        var directory = storageManager.getPagesDirectory()!!
-
-        if (preferences.folderPerManga().get()) {
-            directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
-        }
-
         // Copy file in background.
         viewModelScope.launchNonCancellable {
             try {
+                var directory = storageManager.getPagesDirectory()
+
+                if (preferences.folderPerManga().get() && directory != null) {
+                    directory =
+                        directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
+                }
                 directory ?: throw Exception("Error creating directory to save page")
 
                 val file = saveImage(page, directory, manga)
@@ -857,22 +845,22 @@ class ReaderViewModel(
         isLTR: Boolean,
         @ColorInt bg: Int
     ) {
-        scope.launch {
-            if (firstPage.status != Page.State.READY) return@launch
-            if (secondPage.status != Page.State.READY) return@launch
-            val manga = manga ?: return@launch
+        viewModelScope.launchNonCancellable {
+            if (firstPage.status != Page.State.READY) return@launchNonCancellable
+            if (secondPage.status != Page.State.READY) return@launchNonCancellable
+            val manga = manga ?: return@launchNonCancellable
             val context = Injekt.get<Application>()
 
             val notifier = SaveImageNotifier(context)
             notifier.onClear()
 
-            var directory = storageManager.getPagesDirectory()!!
-
-            if (preferences.folderPerManga().get()) {
-                directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
-            }
-
             try {
+                var directory = storageManager.getPagesDirectory()!!
+
+                if (preferences.folderPerManga().get()) {
+                    directory =
+                        directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
+                }
                 val file = saveImages(firstPage, secondPage, isLTR, bg, directory, manga)
                 DiskUtil.scanMedia(context, file.uri)
                 notifier.onComplete(file)
@@ -968,9 +956,7 @@ class ReaderViewModel(
         if (!preferences.readingSync().get() && !readerChapter.chapter.isMergedChapter()) return
         scope.launchIO {
             statusHandler.marksChaptersStatus(
-                manga!!.uuid(),
-                listOf(readerChapter.chapter.mangadex_chapter_id)
-            )
+                manga!!.uuid(), listOf(readerChapter.chapter.mangadex_chapter_id))
         }
     }
 
@@ -990,8 +976,7 @@ class ReaderViewModel(
                     launchIO {
                         eventChannel.send(Event.ShareTrackingError(listOf(service to message)))
                     }
-                }
-            )
+                })
         }
     }
 

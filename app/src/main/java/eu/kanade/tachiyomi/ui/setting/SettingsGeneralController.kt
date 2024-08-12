@@ -131,8 +131,7 @@ class SettingsGeneralController : SettingsController() {
                             arrayOf(
                                 R.string.over_any_network,
                                 R.string.over_wifi_only,
-                                R.string.dont_auto_update
-                            )
+                                R.string.dont_auto_update)
                         defaultValue = AppDownloadInstallJob.ONLY_ON_UNMETERED
                     }
                 }

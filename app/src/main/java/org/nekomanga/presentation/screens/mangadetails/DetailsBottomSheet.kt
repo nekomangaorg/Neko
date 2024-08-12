@@ -104,8 +104,7 @@ fun DetailsBottomSheet(
                         DetailsBottomSheetScreen.TrackingDateSheet(
                             trackAndService,
                             trackingDate,
-                            generalState.value.trackingSuggestedDates
-                        ),
+                            generalState.value.trackingSuggestedDates),
                     )
                 },
                 trackingFinishDateClick = { trackAndService, trackingDate ->
@@ -114,8 +113,7 @@ fun DetailsBottomSheet(
                         DetailsBottomSheetScreen.TrackingDateSheet(
                             trackAndService,
                             trackingDate,
-                            generalState.value.trackingSuggestedDates
-                        ),
+                            generalState.value.trackingSuggestedDates),
                     )
                 },
             )
@@ -145,10 +143,7 @@ fun DetailsBottomSheet(
                     closeSheet()
                     trackActions.searchItemClick(
                         TrackingConstants.TrackAndService(
-                            trackSearch.trackItem,
-                            currentScreen.trackingService
-                        )
-                    )
+                            trackSearch.trackItem, currentScreen.trackingService))
                     openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
             )

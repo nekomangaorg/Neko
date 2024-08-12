@@ -87,20 +87,19 @@ fun MangaListWithHeader(
                 mangaList,
                 key = { _, displayManga ->
                     Objects.hash(displayManga.title, displayManga.mangaId, stringRes)
+                }) { _, displayManga ->
+                    MangaRow(
+                        displayManga = displayManga,
+                        shouldOutlineCover,
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .wrapContentHeight()
+                                .combinedClickable(
+                                    onClick = { onClick(displayManga.mangaId) },
+                                    onLongClick = { onLongClick(displayManga) },
+                                ),
+                    )
                 }
-            ) { _, displayManga ->
-                MangaRow(
-                    displayManga = displayManga,
-                    shouldOutlineCover,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .wrapContentHeight()
-                            .combinedClickable(
-                                onClick = { onClick(displayManga.mangaId) },
-                                onLongClick = { onLongClick(displayManga) },
-                            ),
-                )
-            }
         }
     }
 }
@@ -125,9 +124,7 @@ private fun MangaRow(
 
             MangaListTitle(title = displayManga.title, maxLines = titleLineCount)
             MangaListSubtitle(
-                text = displayManga.displayText,
-                textRes = displayManga.displayTextRes
-            )
+                text = displayManga.displayText, textRes = displayManga.displayTextRes)
         }
     }
 }

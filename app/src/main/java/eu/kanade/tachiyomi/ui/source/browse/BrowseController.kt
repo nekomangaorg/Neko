@@ -59,8 +59,7 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
             aboutClick = { (this.activity as? MainActivity)?.showAbout() },
             helpClick = {
                 (this.activity as? MainActivity)?.openInBrowser(
-                    "https://tachiyomi.org/docs/guides/troubleshooting/"
-                )
+                    "https://tachiyomi.org/docs/guides/troubleshooting/")
             },
         )
     }

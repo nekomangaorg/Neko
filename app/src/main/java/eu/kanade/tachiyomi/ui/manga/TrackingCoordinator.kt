@@ -31,10 +31,8 @@ class TrackingCoordinator {
         var track =
             trackAndService.track.copy(status = trackAndService.service.statusList[statusIndex])
 
-        if (
-            trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) &&
-                track.totalChapters > 0
-        ) {
+        if (trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) &&
+            track.totalChapters > 0) {
             track = track.copy(lastChapterRead = track.totalChapters.toFloat())
         }
         return updateTrackingService(track, trackAndService.service)
@@ -165,8 +163,7 @@ class TrackingCoordinator {
                         true -> TrackingConstants.TrackSearchResult.NoResult
                         false ->
                             TrackingConstants.TrackSearchResult.Success(
-                                results.map { it.toTrackSearchItem() }.toImmutableList()
-                            )
+                                results.map { it.toTrackSearchItem() }.toImmutableList())
                     },
                 )
             }
@@ -174,10 +171,7 @@ class TrackingCoordinator {
                 TimberKt.e(it) { "error searching tracker" }
                 emit(
                     TrackingConstants.TrackSearchResult.Error(
-                        it.message ?: "Error searching tracker",
-                        service.nameRes
-                    )
-                )
+                        it.message ?: "Error searching tracker", service.nameRes))
             }
 
     /** Search Tracker */
@@ -195,16 +189,13 @@ class TrackingCoordinator {
                     true -> TrackingConstants.TrackSearchResult.NoResult
                     false ->
                         TrackingConstants.TrackSearchResult.Success(
-                            results.map { it.toTrackSearchItem() }.toImmutableList()
-                        )
+                            results.map { it.toTrackSearchItem() }.toImmutableList())
                 }
             }
             .getOrElse {
                 TimberKt.e(it) { "error searching tracker" }
                 TrackingConstants.TrackSearchResult.Error(
-                    it.message ?: "Error searching tracker",
-                    service.nameRes
-                )
+                    it.message ?: "Error searching tracker", service.nameRes)
             }
     }
 }

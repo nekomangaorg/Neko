@@ -277,10 +277,7 @@ class WebtoonPageHolder(
         }
 
         return ImageUtil.splitAndStackBitmap(
-            imageStream,
-            viewer.config.invertDoublePages,
-            viewer.hasMargins
-        )
+            imageStream, viewer.config.invertDoublePages, viewer.hasMargins)
     }
 
     /** Called when the page has an error. */

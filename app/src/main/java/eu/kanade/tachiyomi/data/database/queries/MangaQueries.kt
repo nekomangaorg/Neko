@@ -103,8 +103,7 @@ interface MangaQueries : DbProvider {
         db.put()
             .`object`(manga)
             .withPutResolver(
-                MangaFlagsPutResolver(MangaTable.COL_CHAPTER_FLAGS, Manga::chapter_flags)
-            )
+                MangaFlagsPutResolver(MangaTable.COL_CHAPTER_FLAGS, Manga::chapter_flags))
             .prepare()
 
     fun updateChapterFlags(manga: List<Manga>) =
@@ -129,8 +128,7 @@ interface MangaQueries : DbProvider {
         db.put()
             .objects(manga)
             .withPutResolver(
-                MangaFlagsPutResolver(MangaTable.COL_VIEWER, Manga::viewer_flags, true)
-            )
+                MangaFlagsPutResolver(MangaTable.COL_VIEWER, Manga::viewer_flags, true))
             .prepare()
 
     fun updateScanlatorFilterFlag(manga: Manga) =

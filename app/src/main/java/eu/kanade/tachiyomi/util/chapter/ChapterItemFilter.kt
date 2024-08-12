@@ -32,26 +32,22 @@ class ChapterItemFilter(
         // if none of the filters are enabled skip the filtering of them
         val filteredChapters =
             filterChaptersByLanguage(filterChaptersByScanlators(chapters, manga), manga)
-        return if (
-            readEnabled ||
-                unreadEnabled ||
-                downloadEnabled ||
-                notDownloadEnabled ||
-                bookmarkEnabled ||
-                notBookmarkEnabled
-        ) {
+        return if (readEnabled ||
+            unreadEnabled ||
+            downloadEnabled ||
+            notDownloadEnabled ||
+            bookmarkEnabled ||
+            notBookmarkEnabled) {
             filteredChapters.filter { chapterItem ->
                 val chapter = chapterItem.chapter
-                if (
-                    readEnabled && !chapter.read ||
-                        (unreadEnabled && chapter.read) ||
-                        (bookmarkEnabled && !chapter.bookmark) ||
-                        (notBookmarkEnabled && chapter.bookmark) ||
-                        (downloadEnabled &&
-                            !downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga)) ||
-                        (notDownloadEnabled &&
-                            downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga))
-                ) {
+                if (readEnabled && !chapter.read ||
+                    (unreadEnabled && chapter.read) ||
+                    (bookmarkEnabled && !chapter.bookmark) ||
+                    (notBookmarkEnabled && chapter.bookmark) ||
+                    (downloadEnabled &&
+                        !downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga)) ||
+                    (notDownloadEnabled &&
+                        downloadManager.isChapterDownloaded(chapter.toDbChapter(), manga))) {
                     return@filter false
                 }
                 return@filter true

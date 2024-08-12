@@ -81,11 +81,9 @@ class ImageHandler {
                     withNonCancellableContext { reportImageWithResponse(response) }
                 }
 
-        if (
-            (attempt.getError() != null || !attempt.get()!!.isSuccessful) &&
-                attempt.getError() !is CancellationException &&
-                !request.url.toString().startsWith(MdConstants.cdnUrl)
-        ) {
+        if ((attempt.getError() != null || !attempt.get()!!.isSuccessful) &&
+            attempt.getError() !is CancellationException &&
+            !request.url.toString().startsWith(MdConstants.cdnUrl)) {
             TimberKt.e(attempt.getError()) {
                 "$tag error getting image from at home node falling back to cdn"
             }
@@ -158,11 +156,9 @@ class ImageHandler {
         val currentTime = Date().time
 
         val mdAtHomeServerUrl =
-            when (
-                tokenTracker[page.mangaDexChapterId] != null &&
-                    (currentTime - tokenTracker[page.mangaDexChapterId]!!) <
-                        MdConstants.mdAtHomeTokenLifespan
-            ) {
+            when (tokenTracker[page.mangaDexChapterId] != null &&
+                (currentTime - tokenTracker[page.mangaDexChapterId]!!) <
+                    MdConstants.mdAtHomeTokenLifespan) {
                 true -> data[0]
                 false -> {
                     TimberKt.d { "$tag Time has expired get new at home url isLogged $isLogged" }

@@ -6,16 +6,23 @@ import android.os.Build
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import eu.kanade.tachiyomi.util.system.withUIContext
+import java.io.FileOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import okio.buffer
+import okio.sink
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
+import org.nekomanga.domain.storage.StorageManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class CrashLogUtil(private val context: Context) {
@@ -29,15 +36,39 @@ class CrashLogUtil(private val context: Context) {
 
     suspend fun dumpLogs(exception: Throwable? = null) = withNonCancellableContext {
         try {
+            val storageManager: StorageManager = Injekt.get<StorageManager>()
+
             val file = context.createFileInCacheDir("neko_crash_logs.txt")
-            file.appendText(getDebugInfo() + "\n")
-
-            if (exception != null) {
-                file.appendText(getExceptionBlock(exception))
-            }
-
             Runtime.getRuntime().exec("logcat *:D -d -f ${file.absolutePath}").waitFor()
-            showNotification(file.getUriCompat(context))
+
+            val uniFile =
+                storageManager
+                    .getCrashLogDirectory()
+                    ?.createFile(
+                        "neko_crash_log-${SimpleDateFormat("yyyyMMddHHmm").format(Date())}.txt")
+                    ?: return@withNonCancellableContext
+
+            uniFile
+                .openOutputStream()
+                .also {
+                    // Force overwrite old file
+                    (it as? FileOutputStream)?.channel?.truncate(0)
+                }
+                .sink()
+                .buffer()
+                .use { bufferedSink ->
+                    bufferedSink.writeUtf8(getDebugInfo())
+                    if (exception != null) {
+                        bufferedSink.writeUtf8(getExceptionBlock(exception))
+                        bufferedSink.writeUtf8("\n")
+                    }
+                    file.readLines().forEach { line ->
+                        bufferedSink.writeUtf8(line)
+                        bufferedSink.writeUtf8("\n")
+                    }
+                }
+
+            showNotification(uniFile.uri)
         } catch (e: IOException) {
             withUIContext { context.toast("Failed to get logs") }
         }
@@ -90,7 +121,7 @@ class CrashLogUtil(private val context: Context) {
                 NotificationReceiver.shareCrashLogPendingBroadcast(
                     context,
                     uri,
-                    Notifications.ID_CRASH_LOGS
+                    Notifications.ID_CRASH_LOGS,
                 ),
             )
 

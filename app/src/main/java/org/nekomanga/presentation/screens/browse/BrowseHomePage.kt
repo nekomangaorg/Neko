@@ -54,8 +54,7 @@ fun BrowseHomePage(
     val coverSize =
         (maxOf(
                 LocalConfiguration.current.screenHeightDp,
-                LocalConfiguration.current.screenWidthDp
-            ) / 5)
+                LocalConfiguration.current.screenWidthDp) / 5)
             .dp
 
     LazyColumn(
@@ -86,16 +85,14 @@ fun BrowseHomePage(
                         text = headerText,
                         style =
                             MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
+                                color = MaterialTheme.colorScheme.onSurface),
                     )
                     Gap(Size.tiny)
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
+                        tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
             Gap(Size.tiny)
@@ -150,16 +147,14 @@ fun BrowseHomePage(
                         text = stringResource(id = R.string.random_manga),
                         style =
                             MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            ),
+                                color = MaterialTheme.colorScheme.onSurface),
                     )
                     Gap(Size.tiny)
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
+                        tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }

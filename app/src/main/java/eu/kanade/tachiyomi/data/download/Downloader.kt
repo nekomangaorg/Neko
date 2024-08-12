@@ -136,6 +136,7 @@ class Downloader(
 
         DownloadJob.stop(context)
     }
+
     /** Pauses the downloader */
     fun pause() {
         cancelDownloaderJob()
@@ -410,10 +411,7 @@ class Downloader(
                         page.imageUrl!!,
                     ) ->
                         copyImageFromCache(
-                            chapterCache.getImageFile(page.imageUrl!!),
-                            tmpDir,
-                            filename
-                        )
+                            chapterCache.getImageFile(page.imageUrl!!), tmpDir, filename)
                     else -> downloadImage(page, download.source, tmpDir, filename)
                 }
 
@@ -524,13 +522,11 @@ class Downloader(
         val imageFile =
             tmpDir.listFiles()?.find { it.name!!.startsWith(filename) }
                 ?: throw Error(
-                    context.getString(R.string.download_notifier_split_page_not_found, page.number)
-                )
+                    context.getString(R.string.download_notifier_split_page_not_found, page.number))
         val imageFilePath =
             imageFile.filePath
                 ?: throw Error(
-                    context.getString(R.string.download_notifier_split_page_not_found, page.number)
-                )
+                    context.getString(R.string.download_notifier_split_page_not_found, page.number))
 
         // check if the original page was previously split before then skip.
         if (imageFile.name!!.contains("__")) return true
@@ -623,10 +619,8 @@ class Downloader(
     private fun removeFromQueue(download: Download) {
         _queueState.update {
             store.remove(download)
-            if (
-                download.status == Download.State.DOWNLOADING ||
-                    download.status == Download.State.QUEUE
-            ) {
+            if (download.status == Download.State.DOWNLOADING ||
+                download.status == Download.State.QUEUE) {
                 download.status = Download.State.NOT_DOWNLOADED
             }
             it - download
@@ -638,10 +632,8 @@ class Downloader(
             val downloads = queue.filter { predicate(it) }
             store.removeAll(downloads)
             downloads.forEach { download ->
-                if (
-                    download.status == Download.State.DOWNLOADING ||
-                        download.status == Download.State.QUEUE
-                ) {
+                if (download.status == Download.State.DOWNLOADING ||
+                    download.status == Download.State.QUEUE) {
                     download.status = Download.State.NOT_DOWNLOADED
                 }
             }
@@ -661,10 +653,8 @@ class Downloader(
     private fun clearQueueState() {
         _queueState.update {
             it.forEach { download ->
-                if (
-                    download.status == Download.State.DOWNLOADING ||
-                        download.status == Download.State.QUEUE
-                ) {
+                if (download.status == Download.State.DOWNLOADING ||
+                    download.status == Download.State.QUEUE) {
                     download.status = Download.State.NOT_DOWNLOADED
                 }
             }

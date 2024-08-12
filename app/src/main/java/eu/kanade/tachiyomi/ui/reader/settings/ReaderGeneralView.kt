@@ -20,10 +20,8 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             (context as ReaderActivity).viewModel.setMangaReadingMode(readingModeType.flagValue)
 
             val mangaViewer = activity.viewModel.getMangaReadingMode()
-            if (
-                mangaViewer == ReadingModeType.WEBTOON.flagValue ||
-                    mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue
-            ) {
+            if (mangaViewer == ReadingModeType.WEBTOON.flagValue ||
+                mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue) {
                 initWebtoonPreferences()
             } else {
                 initPagerPreferences()
@@ -49,8 +47,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.fullscreen.bindToPreference(readerPreferences.fullscreen())
         binding.keepscreen.bindToPreference(readerPreferences.keepScreenOn())
         binding.alwaysShowChapterTransition.bindToPreference(
-            readerPreferences.alwaysShowChapterTransition()
-        )
+            readerPreferences.alwaysShowChapterTransition())
     }
 
     /** Init the preferences for the webtoon reader. */

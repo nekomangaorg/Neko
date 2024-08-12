@@ -206,8 +206,7 @@ fun BoxScope.CompactGridItem(
                                 listOf(
                                     Color.Transparent,
                                     Color.Black.copy(NekoColors.veryLowContrast),
-                                    Color.Black.copy(NekoColors.highAlphaLowContrast)
-                                ),
+                                    Color.Black.copy(NekoColors.highAlphaLowContrast)),
                         ),
                     shape =
                         RoundedCornerShape(

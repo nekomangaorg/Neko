@@ -76,10 +76,8 @@ class MangaShortcutManager(
                             )
                             .setIcon(
                                 if (bitmap != null)
-                                    if (
-                                        android.os.Build.VERSION.SDK_INT >=
-                                            android.os.Build.VERSION_CODES.O
-                                    ) {
+                                    if (android.os.Build.VERSION.SDK_INT >=
+                                        android.os.Build.VERSION_CODES.O) {
                                         Icon.createWithAdaptiveBitmap(bitmap.toSquare())
                                     } else {
                                         Icon.createWithBitmap(bitmap)
@@ -92,8 +90,7 @@ class MangaShortcutManager(
                                 SearchActivity.openMangaIntent(context, item.id, true)
                                     .addFlags(
                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                                            Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                    ),
+                                            Intent.FLAG_ACTIVITY_SINGLE_TOP),
                             )
                             .build()
                     }

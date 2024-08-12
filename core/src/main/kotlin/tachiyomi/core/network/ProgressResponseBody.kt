@@ -38,10 +38,7 @@ class ProgressResponseBody(
                 // read() returns the number of bytes read, or -1 if this source is exhausted.
                 totalBytesRead += if (bytesRead != -1L) bytesRead else 0
                 progressListener.update(
-                    totalBytesRead,
-                    responseBody.contentLength(),
-                    bytesRead == -1L
-                )
+                    totalBytesRead, responseBody.contentLength(), bytesRead == -1L)
                 return bytesRead
             }
         }

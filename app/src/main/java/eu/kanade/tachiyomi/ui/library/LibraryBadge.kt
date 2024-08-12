@@ -84,8 +84,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                     MaterialShapeDrawable(makeShapeCorners(topStart = radius)).apply {
                         this.fillColor =
                             ColorStateList.valueOf(
-                                context.getResourceColor(R.attr.colorDownloadBadge)
-                            )
+                                context.getResourceColor(R.attr.colorDownloadBadge))
                     }
                 binding.unreadText.background =
                     MaterialShapeDrawable(makeShapeCorners(bottomEnd = radius)).apply {
@@ -104,8 +103,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                     MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
                         this.fillColor =
                             ColorStateList.valueOf(
-                                context.getResourceColor(R.attr.colorDownloadBadge)
-                            )
+                                context.getResourceColor(R.attr.colorDownloadBadge))
                     }
             }
         }

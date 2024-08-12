@@ -56,11 +56,9 @@ class KomgaLoginDialog(bundle: Bundle? = null) :
                 startAnimation()
             }
 
-            if (
-                binding.username.text.isNullOrBlank() ||
-                    binding.password.text.isNullOrBlank() ||
-                    binding.url.text.isNullOrBlank()
-            ) {
+            if (binding.username.text.isNullOrBlank() ||
+                binding.password.text.isNullOrBlank() ||
+                binding.url.text.isNullOrBlank()) {
                 errorResult()
                 context.toast(R.string.fields_cannot_be_blank)
                 return

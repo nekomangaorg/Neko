@@ -244,9 +244,8 @@ class DownloadManager(val context: Context) {
                 launchIO {
                     chapterDirs.forEach { it.delete() }
 
-                    if (
-                        cache.getDownloadCount(manga, true) == 0
-                    ) { // Delete manga directory if empty
+                    if (cache.getDownloadCount(manga, true) ==
+                        0) { // Delete manga directory if empty
                         chapterDirs.firstOrNull()?.parentFile?.delete()
                     }
 

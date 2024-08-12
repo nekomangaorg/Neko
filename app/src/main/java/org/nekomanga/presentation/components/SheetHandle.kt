@@ -24,10 +24,8 @@ fun ColumnScope.sheetHandle() {
                 .background(
                     color =
                         MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = NekoColors.disabledAlphaLowContrast
-                        ),
-                    CircleShape
-                )
+                            alpha = NekoColors.disabledAlphaLowContrast),
+                    CircleShape)
                 .align(Alignment.CenterHorizontally),
     )
 }

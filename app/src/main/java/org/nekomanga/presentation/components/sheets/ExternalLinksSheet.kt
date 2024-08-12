@@ -69,8 +69,7 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -
                 text = externalLink.name,
                 style =
                     MaterialTheme.typography.bodyMedium.copy(
-                        color = Color(externalLink.onLogoColor)
-                    ),
+                        color = Color(externalLink.onLogoColor)),
             )
             Gap(12.dp)
         }

@@ -61,8 +61,7 @@ fun ToolTipButton(
                 Text(
                     modifier = Modifier.padding(Size.tiny),
                     style = MaterialTheme.typography.bodyLarge,
-                    text = toolTipLabel
-                )
+                    text = toolTipLabel)
             }
         },
     ) {
@@ -117,8 +116,7 @@ fun CombinedClickableIconButton(
                 enabledTint
             } else {
                 MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = NekoColors.disabledAlphaLowContrast
-                )
+                    alpha = NekoColors.disabledAlphaLowContrast)
             }
         CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
     }

@@ -29,32 +29,27 @@ class FirstStep : OnboardingStep {
                 text =
                     stringResource(
                         R.string.onboarding_guides_returning_user,
-                        stringResource(R.string.app_name)
-                    ),
+                        stringResource(R.string.app_name)),
                 style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center
-            )
+                textAlign = TextAlign.Center)
             Gap(Size.medium)
 
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.onboarding_guides_new_version),
-                textAlign = TextAlign.Center
-            )
+                textAlign = TextAlign.Center)
 
             Gap(Size.medium)
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.onboarding_guides_restore_backup),
-                textAlign = TextAlign.Center
-            )
+                textAlign = TextAlign.Center)
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
                 text = stringResource(R.string.onboarding_guides_restore_backup_setting_location),
-                textAlign = TextAlign.Center
-            )
+                textAlign = TextAlign.Center)
         }
     }
 }

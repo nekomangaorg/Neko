@@ -87,10 +87,8 @@ fun AboutScreen(
             }
         }
 
-        if (
-            aboutScreenState.value.shouldShowUpdateDialog &&
-                aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate
-        ) {
+        if (aboutScreenState.value.shouldShowUpdateDialog &&
+            aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate) {
             AppUpdateDialog(
                 release =
                     (aboutScreenState.value.updateResult as AppUpdateResult.NewUpdate).release,

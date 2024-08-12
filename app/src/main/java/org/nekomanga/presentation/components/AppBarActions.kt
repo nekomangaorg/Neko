@@ -31,15 +31,13 @@ fun listGridAppBarAction(
                 title = UiText.StringResource(resourceId = R.string.display_as_grid),
                 icon = Icons.Filled.ViewModule,
                 onClick = onClick,
-                isEnabled = isEnabled
-            )
+                isEnabled = isEnabled)
         false ->
             AppBar.Action(
                 title = UiText.StringResource(resourceId = R.string.display_as_list),
                 icon = Icons.Filled.ViewList,
                 onClick = onClick,
-                isEnabled = isEnabled
-            )
+                isEnabled = isEnabled)
     }
 }
 
@@ -49,14 +47,12 @@ fun showLibraryEntriesAction(showEntries: Boolean, onClick: () -> Unit): AppBar.
             AppBar.Action(
                 title = UiText.StringResource(R.string.hide_library_manga),
                 icon = Icons.Filled.VisibilityOff,
-                onClick = onClick
-            )
+                onClick = onClick)
         false ->
             AppBar.Action(
                 title = UiText.StringResource(R.string.show_library_manga),
                 icon = Icons.Filled.Visibility,
-                onClick = onClick
-            )
+                onClick = onClick)
     }
 }
 

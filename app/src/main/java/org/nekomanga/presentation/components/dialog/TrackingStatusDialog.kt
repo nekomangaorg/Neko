@@ -42,66 +42,62 @@ fun TrackingStatusDialog(
 ) {
     CompositionLocalProvider(
         LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors
-    ) {
-        var selectedStatus by remember { mutableStateOf(initialStatus) }
-        val scope = rememberCoroutineScope()
-        AlertDialog(
-            title = {
-                Text(
-                    text = stringResource(id = R.string.status),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            text = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    service.statusList.forEachIndexed { index, status ->
-                        val clicked = {
-                            selectedStatus = status
-                            scope.launch {
-                                delay(100L)
-                                trackStatusChange(index)
-                                onDismiss()
+        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+            var selectedStatus by remember { mutableStateOf(initialStatus) }
+            val scope = rememberCoroutineScope()
+            AlertDialog(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.status),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth())
+                },
+                text = {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        service.statusList.forEachIndexed { index, status ->
+                            val clicked = {
+                                selectedStatus = status
+                                scope.launch {
+                                    delay(100L)
+                                    trackStatusChange(index)
+                                    onDismiss()
+                                }
+                            }
+
+                            Row(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .selectable(
+                                            selected = (status == selectedStatus),
+                                            onClick = { clicked() },
+                                        ),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(
+                                    selected = (status == selectedStatus),
+                                    onClick = { clicked() },
+                                    colors =
+                                        RadioButtonDefaults.colors(
+                                            selectedColor = themeColorState.buttonColor),
+                                )
+                                Gap(Size.small)
+                                Text(
+                                    text = service.status(status),
+                                    style = MaterialTheme.typography.titleMedium)
                             }
                         }
-
-                        Row(
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .selectable(
-                                        selected = (status == selectedStatus),
-                                        onClick = { clicked() },
-                                    ),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(
-                                selected = (status == selectedStatus),
-                                onClick = { clicked() },
-                                colors =
-                                    RadioButtonDefaults.colors(
-                                        selectedColor = themeColorState.buttonColor
-                                    ),
-                            )
-                            Gap(Size.small)
-                            Text(
-                                text = service.status(status),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
                     }
-                }
-            },
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(
-                    onClick = onDismiss,
-                    colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
-                ) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-            },
-        )
-    }
+                },
+                onDismissRequest = onDismiss,
+                confirmButton = {
+                    TextButton(
+                        onClick = onDismiss,
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor)) {
+                            Text(text = stringResource(id = R.string.cancel))
+                        }
+                },
+            )
+        }
 }

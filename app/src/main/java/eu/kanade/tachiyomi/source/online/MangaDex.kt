@@ -72,17 +72,13 @@ open class MangaDex : HttpSource() {
         return withIOContext {
             val response =
                 networkServices.service.randomManga(
-                    preferences.contentRatingSelections().get().toList()
-                )
+                    preferences.contentRatingSelections().get().toList())
 
             val result =
                 response.getOrResultError("trying to get random Manga").andThen {
                     Ok(
                         it.data.toSourceManga(
-                            preferences.thumbnailQuality().get(),
-                            useNoCoverUrl = false
-                        )
-                    )
+                            preferences.thumbnailQuality().get(), useNoCoverUrl = false))
                 }
 
             return@withIOContext result
@@ -149,9 +145,7 @@ open class MangaDex : HttpSource() {
                             Ok(
                                 listResults.copy(
                                     sourceManga =
-                                        listResults.sourceManga.shuffled().toImmutableList()
-                                )
-                            )
+                                        listResults.sourceManga.shuffled().toImmutableList()))
                         }
                         .bind()
                 }
@@ -162,9 +156,7 @@ open class MangaDex : HttpSource() {
                             Ok(
                                 listResults.copy(
                                     sourceManga =
-                                        listResults.sourceManga.shuffled().toImmutableList()
-                                )
-                            )
+                                        listResults.sourceManga.shuffled().toImmutableList()))
                         }
                         .bind()
                 }
@@ -175,9 +167,7 @@ open class MangaDex : HttpSource() {
                             Ok(
                                 listResults.copy(
                                     sourceManga =
-                                        listResults.sourceManga.shuffled().toImmutableList()
-                                )
-                            )
+                                        listResults.sourceManga.shuffled().toImmutableList()))
                         }
                         .bind()
                 }
@@ -190,9 +180,7 @@ open class MangaDex : HttpSource() {
                                 ListResults(
                                     displayScreenType = DisplayScreenType.PopularNewTitles(),
                                     sourceManga =
-                                        mangaListPage.sourceManga.shuffled().toImmutableList()
-                                )
-                            )
+                                        mangaListPage.sourceManga.shuffled().toImmutableList()))
                         }
                         .bind()
                 }
@@ -201,15 +189,12 @@ open class MangaDex : HttpSource() {
                     latestChapterHandler
                         .getPage(
                             blockedScanlatorUUIDs = blockedScanlatorUUIDs,
-                            limit = MdConstants.Limits.latestSmaller
-                        )
+                            limit = MdConstants.Limits.latestSmaller)
                         .andThen { mangaListPage ->
                             Ok(
                                 ListResults(
                                     displayScreenType = DisplayScreenType.LatestChapters(),
-                                    sourceManga = mangaListPage.sourceManga
-                                )
-                            )
+                                    sourceManga = mangaListPage.sourceManga))
                         }
                         .bind()
                 }
@@ -221,9 +206,7 @@ open class MangaDex : HttpSource() {
                             Ok(
                                 ListResults(
                                     displayScreenType = DisplayScreenType.RecentlyAdded(),
-                                    sourceManga = mangaListPage.sourceManga
-                                )
-                            )
+                                    sourceManga = mangaListPage.sourceManga))
                         }
                         .bind()
                 }
@@ -234,8 +217,7 @@ open class MangaDex : HttpSource() {
                     seasonal.await(),
                     staffPick.await(),
                     nekoDevPicks.await(),
-                    recentlyAdded.await()
-                )
+                    recentlyAdded.await())
             }
         }
     }

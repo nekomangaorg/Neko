@@ -17,13 +17,6 @@ import tachiyomi.core.util.storage.DiskUtil
 
 class StorageManager(private val context: Context, storagePreferences: StoragePreferences) {
 
-    private val BACKUP_DIR = "backup"
-    private val AUTOMATIC_DIR = "automatic"
-    private val COVER_DIR = "covers"
-    private val PAGES_DIR = "pages"
-    private val SAVED_DIR = "saved"
-    private val DOWNLOADS_DIR = "downloads"
-
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private var baseDir: UniFile? = getBaseDir(storagePreferences.baseStorageDirectory().get())
@@ -80,5 +73,19 @@ class StorageManager(private val context: Context, storagePreferences: StoragePr
 
     fun getPagesDirectory(): UniFile? {
         return getSavedDir()?.createDirectory(PAGES_DIR)
+    }
+
+    fun getCrashLogDirectory(): UniFile? {
+        return baseDir?.createDirectory(CRASH_LOG_DIR)
+    }
+
+    companion object {
+        const val BACKUP_DIR = "backup"
+        const val AUTOMATIC_DIR = "automatic"
+        const val COVER_DIR = "covers"
+        const val PAGES_DIR = "pages"
+        const val SAVED_DIR = "saved"
+        const val DOWNLOADS_DIR = "downloads"
+        const val CRASH_LOG_DIR = "crash-logs"
     }
 }

@@ -49,12 +49,10 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) :
         val diffY = e2.y - startingY
         val diffX = e2.x - startingX
         val sheetBehavior = activity.binding.chaptersSheet.root.sheetBehavior
-        if (
-            !hasScrollHorizontal &&
-                abs(diffX) < abs(diffY) &&
-                (abs(diffY) > SWIPE_THRESHOLD || abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) &&
-                diffY <= 0
-        ) {
+        if (!hasScrollHorizontal &&
+            abs(diffX) < abs(diffY) &&
+            (abs(diffY) > SWIPE_THRESHOLD || abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) &&
+            diffY <= 0) {
             lockVertical = true
             sheetBehavior?.expand()
             result = true

@@ -1,17 +1,17 @@
 [versions]
-aboutlibVersion = "11.2.1"
+aboutlibVersion = "11.2.2"
 cascadeComposeVersion = "2.3.0"
 cascadeVersion = "2.3.0"
 chuckerVersion = "3.5.2"
-coilVersion = "2.6.0"
+coilVersion = "2.7.0"
 fastAdapterVersion = "5.7.0"
-firebaseBomVersion = "33.1.1"
-firebasePluginVersion = "3.0.1"
+firebaseBomVersion = "33.1.2"
+firebasePluginVersion = "3.0.2"
 googleServicesPluginVersion = "4.4.2"
 iconicsVersion = "5.4.0"
 injektCoreVersion = "65b0440"
 kotlinResultVersion = "2.0.0"
-ktfmtVersion = "0.18.0"
+ktfmtVersion = "0.19.0"
 loadingButtonAndroidVersion = "2.2.0"
 nucleusVersion = "3.0.0"
 okhttpVersion = "5.0.0-alpha.11"
@@ -57,7 +57,7 @@ iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconicsV
 iconics-compose = { module = "com.mikepenz:iconics-compose", version.ref = "iconicsVersion" }
 
 
-jsoup = "org.jsoup:jsoup:1.17.2"
+jsoup = "org.jsoup:jsoup:1.18.1"
 
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResultVersion" }
 kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlinResultVersion" }
@@ -128,7 +128,7 @@ retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", versio
 
 #test libs
 junit = "junit:junit:4.13.2"
-mockk = "io.mockk:mockk:1.13.11"
+mockk = "io.mockk:mockk:1.13.12"
 kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.9.1"
 viewTooltip = { module = "com.github.nonproto:ViewTooltip", version.ref = "viewTooltipVersion" }
 

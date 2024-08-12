@@ -86,8 +86,7 @@ class BilibiliHandler {
 
         if (result.message.contains("need buy episode")) {
             throw Exception(
-                "Chapter is unavailable, requires reading and/or purchasing on BililBili"
-            )
+                "Chapter is unavailable, requires reading and/or purchasing on BililBili")
         }
         if (result.code != 0) {
             return emptyList()

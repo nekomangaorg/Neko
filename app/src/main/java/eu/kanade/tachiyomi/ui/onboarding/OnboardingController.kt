@@ -53,8 +53,7 @@ class OnboardingController : BasicComposeController() {
                 if (currentStep > 0) {
                     currentStep--
                 }
-            }
-        )
+            })
 
         InfoScreen(
             headingText = stringResource(R.string.onboarding_heading),
@@ -76,28 +75,27 @@ class OnboardingController : BasicComposeController() {
                     }
                     false -> currentStep++
                 }
-            }
-        ) {
-            Box(
-                modifier =
-                    Modifier.padding(vertical = Size.small)
-                        .clip(MaterialTheme.shapes.small)
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-            ) {
-                AnimatedContent(
-                    targetState = currentStep,
-                    transitionSpec = {
-                        materialSharedAxisX(
-                            forward = targetState > initialState,
-                            slideDistance = slideDistance,
-                        )
-                    },
-                    label = "stepContent",
-                ) { step ->
-                    steps[step].Content()
+            }) {
+                Box(
+                    modifier =
+                        Modifier.padding(vertical = Size.small)
+                            .clip(MaterialTheme.shapes.small)
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
+                    AnimatedContent(
+                        targetState = currentStep,
+                        transitionSpec = {
+                            materialSharedAxisX(
+                                forward = targetState > initialState,
+                                slideDistance = slideDistance,
+                            )
+                        },
+                        label = "stepContent",
+                    ) { step ->
+                        steps[step].Content()
+                    }
                 }
             }
-        }
     }
 }

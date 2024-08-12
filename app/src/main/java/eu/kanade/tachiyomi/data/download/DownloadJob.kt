@@ -86,8 +86,7 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
             !noWifi
         } else {
             downloadManager.downloaderStop(
-                applicationContext.getString(R.string.no_network_connection)
-            )
+                applicationContext.getString(R.string.no_network_connection))
             false
         }
     }

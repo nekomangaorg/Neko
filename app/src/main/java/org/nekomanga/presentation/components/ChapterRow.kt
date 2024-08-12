@@ -110,9 +110,7 @@ fun ChapterRow(
                         null -> MaterialTheme.colorScheme.surface
                         else ->
                             MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                                themeColor.buttonColor,
-                                8.dp
-                            )
+                                themeColor.buttonColor, 8.dp)
                     }
 
                 when (dismissState.dismissDirection) {
@@ -127,8 +125,7 @@ fun ChapterRow(
                             Alignment.CenterEnd,
                             color,
                             stringResource(id = text),
-                            themeColor.buttonColor
-                        )
+                            themeColor.buttonColor)
                     }
                     DismissDirection.StartToEnd -> {
                         val (icon, text) =
@@ -141,8 +138,7 @@ fun ChapterRow(
                             Alignment.CenterStart,
                             color,
                             stringResource(id = text),
-                            themeColor.buttonColor
-                        )
+                            themeColor.buttonColor)
                     }
                     else -> Unit
                 }
@@ -270,8 +266,7 @@ private fun ChapterInfo(
             false ->
                 MaterialTheme.colorScheme.onSurface to
                     MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = NekoColors.mediumAlphaLowContrast
-                    )
+                        alpha = NekoColors.mediumAlphaLowContrast)
         }
 
     val rowColor =
@@ -338,8 +333,7 @@ private fun ChapterInfo(
                         MaterialTheme.typography.bodyLarge.copy(
                             color = textColor,
                             fontWeight = FontWeight.Medium,
-                            letterSpacing = (-.6).sp
-                        ),
+                            letterSpacing = (-.6).sp),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -388,10 +382,7 @@ private fun ChapterInfo(
                                 rememberDrawablePainter(
                                     drawable =
                                         AppCompatResources.getDrawable(
-                                            LocalContext.current,
-                                            iconRes
-                                        )
-                                )
+                                            LocalContext.current, iconRes))
                             Image(
                                 painter = painter,
                                 modifier =
@@ -419,61 +410,65 @@ private fun ChapterInfo(
         }
         Box(
             modifier = Modifier.align(Alignment.CenterVertically),
-            contentAlignment = Alignment.Center
-        ) {
-            DownloadButton(
-                themeColorState.buttonColor,
-                downloadState,
-                downloadProgress,
-                Modifier.combinedClickable(
-                    onClick = {
-                        when (downloadState) {
-                            Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
-                            else -> chapterDropdown = true
-                        }
-                    },
-                    onLongClick = {},
-                ),
-            )
+            contentAlignment = Alignment.Center) {
+                DownloadButton(
+                    themeColorState.buttonColor,
+                    downloadState,
+                    downloadProgress,
+                    Modifier.combinedClickable(
+                        onClick = {
+                            when (downloadState) {
+                                Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
+                                else -> chapterDropdown = true
+                            }
+                        },
+                        onLongClick = {},
+                    ),
+                )
 
-            val scope = rememberCoroutineScope()
-            SimpleDropdownMenu(
-                expanded = chapterDropdown,
-                themeColorState = themeColorState,
-                onDismiss = { chapterDropdown = false },
-                dropDownItems =
-                    when (downloadState) {
-                        Download.State.DOWNLOADED -> {
-                            persistentListOf(
-                                SimpleDropDownItem.Action(
-                                    text = UiText.StringResource(R.string.remove),
-                                    onClick = {
-                                        scope.launchDelayed { onDownload(DownloadAction.Remove) }
-                                    },
-                                ),
-                            )
-                        }
-                        else -> {
-                            persistentListOf(
-                                SimpleDropDownItem.Action(
-                                    text = UiText.StringResource(R.string.start_downloading_now),
-                                    onClick = {
-                                        scope.launchDelayed {
-                                            onDownload(DownloadAction.ImmediateDownload)
-                                        }
-                                    },
-                                ),
-                                SimpleDropDownItem.Action(
-                                    text = UiText.StringResource(R.string.cancel),
-                                    onClick = {
-                                        scope.launchDelayed { onDownload(DownloadAction.Cancel) }
-                                    },
-                                ),
-                            )
-                        }
-                    },
-            )
-        }
+                val scope = rememberCoroutineScope()
+                SimpleDropdownMenu(
+                    expanded = chapterDropdown,
+                    themeColorState = themeColorState,
+                    onDismiss = { chapterDropdown = false },
+                    dropDownItems =
+                        when (downloadState) {
+                            Download.State.DOWNLOADED -> {
+                                persistentListOf(
+                                    SimpleDropDownItem.Action(
+                                        text = UiText.StringResource(R.string.remove),
+                                        onClick = {
+                                            scope.launchDelayed {
+                                                onDownload(DownloadAction.Remove)
+                                            }
+                                        },
+                                    ),
+                                )
+                            }
+                            else -> {
+                                persistentListOf(
+                                    SimpleDropDownItem.Action(
+                                        text =
+                                            UiText.StringResource(R.string.start_downloading_now),
+                                        onClick = {
+                                            scope.launchDelayed {
+                                                onDownload(DownloadAction.ImmediateDownload)
+                                            }
+                                        },
+                                    ),
+                                    SimpleDropDownItem.Action(
+                                        text = UiText.StringResource(R.string.cancel),
+                                        onClick = {
+                                            scope.launchDelayed {
+                                                onDownload(DownloadAction.Cancel)
+                                            }
+                                        },
+                                    ),
+                                )
+                            }
+                        },
+                )
+            }
     }
 }
 

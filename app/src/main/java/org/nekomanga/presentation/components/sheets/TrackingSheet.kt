@@ -132,8 +132,7 @@ fun TrackingSheet(
                 TrackingDate(
                     readingDate = ReadingDate.Start,
                     currentDate = trackAndService.track.startedReadingDate,
-                    dateFormat = dateFormat
-                ),
+                    dateFormat = dateFormat),
             )
         } else if (calendarFinishedTrackDialog is ShowDialog) {
             val trackAndService = (calendarFinishedTrackDialog as ShowDialog).trackAndService
@@ -142,58 +141,57 @@ fun TrackingSheet(
                 TrackingDate(
                     readingDate = ReadingDate.Finish,
                     trackAndService.track.finishedReadingDate,
-                    dateFormat = dateFormat
-                )
-            )
+                    dateFormat = dateFormat))
         }
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(Size.small)
-        ) {
-            items(servicesProvider()) { service ->
-                val track = tracksProvider().firstOrNull { it.trackServiceId == service.id }
+            verticalArrangement = Arrangement.spacedBy(Size.small)) {
+                items(servicesProvider()) { service ->
+                    val track = tracksProvider().firstOrNull { it.trackServiceId == service.id }
 
-                val trackAndService =
-                    when (track != null) {
-                        true -> TrackAndService(track, service)
-                        false -> null
-                    }
-                TrackingServiceItem(
-                    themeColor = themeColor,
-                    inLibrary = inLibrary,
-                    service = service,
-                    trackAndService = trackAndService,
-                    dateFormat = dateFormat,
-                    onLogoClick = onLogoClick,
-                    onSearchTrackClick = { clickTracked ->
-                        onSearchTrackClick(service, clickTracked)
-                    },
-                    onRemoveTrackClick = {
-                        trackAndService?.run { removeTrackDialog = ShowDialog(trackAndService) }
-                    },
-                    statusClick = {
-                        trackAndService?.run { statusDialog = ShowDialog(trackAndService) }
-                    },
-                    scoreClick = {
-                        trackAndService?.run { scoreDialog = ShowDialog(trackAndService) }
-                    },
-                    chapterClick = {
-                        trackAndService?.run { chapterTrackDialog = ShowDialog(trackAndService) }
-                    },
-                    startDateClick = {
-                        trackAndService?.run {
-                            calendarStartTrackDialog = ShowDialog(trackAndService)
+                    val trackAndService =
+                        when (track != null) {
+                            true -> TrackAndService(track, service)
+                            false -> null
                         }
-                    },
-                    finishDateClick = {
-                        trackAndService?.run {
-                            calendarFinishedTrackDialog = ShowDialog(trackAndService)
-                        }
-                    },
-                )
+                    TrackingServiceItem(
+                        themeColor = themeColor,
+                        inLibrary = inLibrary,
+                        service = service,
+                        trackAndService = trackAndService,
+                        dateFormat = dateFormat,
+                        onLogoClick = onLogoClick,
+                        onSearchTrackClick = { clickTracked ->
+                            onSearchTrackClick(service, clickTracked)
+                        },
+                        onRemoveTrackClick = {
+                            trackAndService?.run { removeTrackDialog = ShowDialog(trackAndService) }
+                        },
+                        statusClick = {
+                            trackAndService?.run { statusDialog = ShowDialog(trackAndService) }
+                        },
+                        scoreClick = {
+                            trackAndService?.run { scoreDialog = ShowDialog(trackAndService) }
+                        },
+                        chapterClick = {
+                            trackAndService?.run {
+                                chapterTrackDialog = ShowDialog(trackAndService)
+                            }
+                        },
+                        startDateClick = {
+                            trackAndService?.run {
+                                calendarStartTrackDialog = ShowDialog(trackAndService)
+                            }
+                        },
+                        finishDateClick = {
+                            trackAndService?.run {
+                                calendarFinishedTrackDialog = ShowDialog(trackAndService)
+                            }
+                        },
+                    )
+                }
             }
-        }
     }
 }
 
@@ -225,9 +223,7 @@ private fun TrackingServiceItem(
             BorderStroke(
                 1.dp,
                 MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = NekoColors.disabledAlphaLowContrast
-                )
-            ),
+                    alpha = NekoColors.disabledAlphaLowContrast)),
         modifier = Modifier.padding(horizontal = Size.small),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -251,16 +247,14 @@ private fun TrackingServiceItem(
                     service = trackAndService.service,
                     statusClick,
                     scoreClick,
-                    chapterClick
-                )
+                    chapterClick)
                 if (service.supportsReadingDates) {
                     Divider()
                     TrackRowThree(
                         track = trackAndService.track,
                         dateFormat = dateFormat,
                         startDateClick = startDateClick,
-                        finishDateClick = finishDateClick
-                    )
+                        finishDateClick = finishDateClick)
                 }
             }
         }
@@ -284,8 +278,7 @@ private fun NoTrack(
             text = stringResource(id = R.string.add_tracking),
             color = themeColor.buttonColor,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
+            modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -386,8 +379,7 @@ private fun TrackRowTwo(
                 Text(
                     text = chapterText,
                     style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-.3f).sp),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                    color = MaterialTheme.colorScheme.onSurface)
             }
             VerticalDivider()
         }
@@ -400,8 +392,7 @@ private fun TrackRowTwo(
                             stringResource(id = R.string.score),
                             color =
                                 MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = NekoColors.disabledAlphaHighContrast
-                                ),
+                                    alpha = NekoColors.disabledAlphaHighContrast),
                             style = MaterialTheme.typography.bodyMedium,
                         )
                         Icon(
@@ -410,8 +401,7 @@ private fun TrackRowTwo(
                             modifier = Modifier.size(12.dp),
                             tint =
                                 MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = NekoColors.disabledAlphaHighContrast
-                                ),
+                                    alpha = NekoColors.disabledAlphaHighContrast),
                         )
                     }
                 }
@@ -443,8 +433,7 @@ fun TrackRowThree(
                     false ->
                         stringResource(id = R.string.started_reading_date) to
                             MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = NekoColors.disabledAlphaHighContrast
-                            )
+                                alpha = NekoColors.disabledAlphaHighContrast)
                 }
             Text(text = startText, color = startColor, style = MaterialTheme.typography.bodyMedium)
         }
@@ -460,8 +449,7 @@ fun TrackRowThree(
                     false ->
                         stringResource(id = R.string.finished_reading_date) to
                             MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = NekoColors.disabledAlphaHighContrast
-                            )
+                                alpha = NekoColors.disabledAlphaHighContrast)
                 }
             Text(text = endText, color = endColor, style = MaterialTheme.typography.bodyMedium)
         }
@@ -483,8 +471,7 @@ private fun Logo(service: TrackServiceItem, track: TrackItem?, onClick: (String,
         Image(
             painter = painterResource(id = service.logoRes),
             contentDescription = null,
-            modifier = Modifier.align(Alignment.Center)
-        )
+            modifier = Modifier.align(Alignment.Center))
     }
 }
 

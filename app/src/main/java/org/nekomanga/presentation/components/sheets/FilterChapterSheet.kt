@@ -66,17 +66,11 @@ fun FilterChapterSheet(
 
                 item {
                     Scanlator(
-                        themeColorState = themeColorState,
-                        scanlatorFilter,
-                        changeScanlatorFilter
-                    )
+                        themeColorState = themeColorState, scanlatorFilter, changeScanlatorFilter)
                 }
                 item {
                     Language(
-                        themeColorState = themeColorState,
-                        languageFilter,
-                        changeLanguageFilter
-                    )
+                        themeColorState = themeColorState, languageFilter, changeLanguageFilter)
                 }
             }
         }
@@ -102,22 +96,19 @@ private fun Sort(
                 modifier = Modifier.padding(vertical = 16.dp),
                 text = stringResource(id = R.string.sort),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+                color = MaterialTheme.colorScheme.onSurface)
             if (!sortFilter.matchesGlobalDefaults) {
                 TextButton(onClick = setGlobal) {
                     Text(
                         text = stringResource(id = R.string.set_as_default),
                         style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor
-                    )
+                        color = themeColorState.buttonColor)
                 }
                 TextButton(onClick = { changeSort(null) }) {
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor
-                    )
+                        color = themeColorState.buttonColor)
                 }
             }
         }
@@ -126,20 +117,17 @@ private fun Sort(
             themeColorState,
             SortOption(sortFilter.sourceOrderSort, SourceOrder),
             stringResource(id = R.string.by_source_order),
-            changeSort
-        )
+            changeSort)
         SortLine(
             themeColorState,
             SortOption(sortFilter.chapterNumberSort, ChapterNumber),
             stringResource(id = R.string.by_chapter_number),
-            changeSort
-        )
+            changeSort)
         SortLine(
             themeColorState,
             SortOption(sortFilter.uploadDateSort, UploadDate),
             stringResource(id = R.string.by_update_date),
-            changeSort
-        )
+            changeSort)
     }
 }
 
@@ -186,15 +174,13 @@ private fun Filter(
                     Text(
                         text = stringResource(id = R.string.set_as_default),
                         style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor
-                    )
+                        color = themeColorState.buttonColor)
                 }
                 TextButton(onClick = { changeFilter(null) }) {
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor
-                    )
+                        color = themeColorState.buttonColor)
                 }
             }
         }
@@ -207,9 +193,7 @@ private fun Filter(
                 changeFilter(
                     MangaConstants.ChapterDisplayOptions(
                         displayType = MangaConstants.ChapterDisplayType.All,
-                        displayState = ToggleableState(!filter.showAll)
-                    )
-                )
+                        displayState = ToggleableState(!filter.showAll)))
             },
         )
         FilterLine(
@@ -217,8 +201,7 @@ private fun Filter(
             state =
                 MangaConstants.ChapterDisplayOptions(
                     displayType = MangaConstants.ChapterDisplayType.Unread,
-                    displayState = filter.unread
-                ),
+                    displayState = filter.unread),
             text = stringResource(id = R.string.show_unread_chapters),
             changeFilter = changeFilter,
         )
@@ -227,8 +210,7 @@ private fun Filter(
             state =
                 MangaConstants.ChapterDisplayOptions(
                     displayType = MangaConstants.ChapterDisplayType.Downloaded,
-                    displayState = filter.downloaded
-                ),
+                    displayState = filter.downloaded),
             text = stringResource(id = R.string.show_downloaded_chapters),
             changeFilter = changeFilter,
         )
@@ -237,8 +219,7 @@ private fun Filter(
             state =
                 MangaConstants.ChapterDisplayOptions(
                     displayType = MangaConstants.ChapterDisplayType.Bookmarked,
-                    displayState = filter.bookmarked
-                ),
+                    displayState = filter.bookmarked),
             text = stringResource(id = R.string.show_bookmarked_chapters),
             changeFilter = changeFilter,
         )
@@ -293,8 +274,7 @@ private fun CheckboxLine(
         checkedChange = { onChecked() },
         rowText = text,
         themeColorState = themeColorState,
-        disabled = disabledOnChecked && checked
-    )
+        disabled = disabledOnChecked && checked)
 }
 
 @Composable
@@ -322,8 +302,7 @@ private fun Scanlator(
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor
-                    )
+                        color = themeColorState.buttonColor)
                 }
             }
         }
@@ -385,8 +364,7 @@ private fun Language(
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor
-                    )
+                        color = themeColorState.buttonColor)
                 }
             }
         }

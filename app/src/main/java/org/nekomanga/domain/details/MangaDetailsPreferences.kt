@@ -15,9 +15,7 @@ class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
 
     fun sortChapterOrder() =
         this.preferenceStore.getInt(
-            "default_chapter_sort_by_source_or_number",
-            Manga.CHAPTER_SORTING_SOURCE
-        )
+            "default_chapter_sort_by_source_or_number", Manga.CHAPTER_SORTING_SOURCE)
 
     fun hideChapterTitlesByDefault() = this.preferenceStore.getBoolean("hide_chapter_titles")
 

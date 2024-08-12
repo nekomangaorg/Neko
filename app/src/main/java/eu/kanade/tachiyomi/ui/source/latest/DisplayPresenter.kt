@@ -116,8 +116,7 @@ class DisplayPresenter(
                     it.copy(
                         showLibraryEntries = show,
                         filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toImmutableList()
-                    )
+                            it.allDisplayManga.filterVisibility(preferences).toImmutableList())
                 }
             }
         }
@@ -194,8 +193,7 @@ class DisplayPresenter(
                 _displayScreenState.update {
                     it.copy(
                         filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toImmutableList()
-                    )
+                            it.allDisplayManga.filterVisibility(preferences).toImmutableList())
                 }
             }
         }
@@ -212,8 +210,7 @@ class DisplayPresenter(
                         db.getCategories()
                             .executeAsBlocking()
                             .map { category -> category.toCategoryItem() }
-                            .toImmutableList()
-                )
+                            .toImmutableList())
             }
         }
     }
@@ -234,8 +231,7 @@ class DisplayPresenter(
                 it.copy(
                     allDisplayManga = newDisplayManga,
                     filteredDisplayManga =
-                        newDisplayManga.filterVisibility(preferences).toImmutableList()
-                )
+                        newDisplayManga.filterVisibility(preferences).toImmutableList())
             }
         }
     }

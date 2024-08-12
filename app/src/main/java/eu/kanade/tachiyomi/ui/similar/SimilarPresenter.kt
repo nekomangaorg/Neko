@@ -90,8 +90,7 @@ class SimilarPresenter(
                         displayManga =
                             list
                                 .associate { group -> group.type to group.manga.toImmutableList() }
-                                .toImmutableMap()
-                    )
+                                .toImmutableMap())
                 }
             }
         }
@@ -174,8 +173,7 @@ class SimilarPresenter(
                         db.getCategories()
                             .executeAsBlocking()
                             .map { category -> category.toCategoryItem() }
-                            .toImmutableList()
-                )
+                            .toImmutableList())
             }
         }
     }
@@ -199,9 +197,8 @@ class SimilarPresenter(
                                             it.currentArtwork.copy(
                                                 url = dbManga.user_cover ?: "",
                                                 originalArtwork =
-                                                    dbManga.thumbnail_url ?: MdConstants.noCoverUrl
-                                            )
-                                    )
+                                                    dbManga.thumbnail_url
+                                                        ?: MdConstants.noCoverUrl))
                                 }
                                 .toImmutableList(),
                         )

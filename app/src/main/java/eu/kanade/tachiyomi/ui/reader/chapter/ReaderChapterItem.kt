@@ -78,13 +78,11 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 binding.chapterSubtitle.setTypeface(null, Typeface.NORMAL)
             }
 
-            if (
-                item.chapter.language.isNullOrBlank() ||
-                    item.chapter.language.equals(
-                        "english",
-                        true,
-                    )
-            ) {
+            if (item.chapter.language.isNullOrBlank() ||
+                item.chapter.language.equals(
+                    "english",
+                    true,
+                )) {
                 binding.chapterLanguage.isVisible = false
             } else {
                 binding.chapterLanguage.isVisible = true

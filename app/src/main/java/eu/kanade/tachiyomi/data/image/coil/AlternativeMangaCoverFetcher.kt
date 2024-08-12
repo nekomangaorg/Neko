@@ -46,8 +46,7 @@ class AlternativeMangaCoverFetcher(
         ArtworkKeyer()
             .key(
                 Artwork(url = url, inLibrary = false, originalArtwork = "", mangaId = mangaId),
-                options
-            )
+                options)
     }
 
     val fileScope = CoroutineScope(Job() + Dispatchers.IO)
@@ -151,8 +150,7 @@ class AlternativeMangaCoverFetcher(
                     sourceLazy.value.headers
                         .newBuilder()
                         .add("x-request-id", "Neko-" + UUID.randomUUID())
-                        .build()
-                )
+                        .build())
                 // Support attaching custom data to the network request.
                 .tag(Parameters::class.java, options.parameters)
 

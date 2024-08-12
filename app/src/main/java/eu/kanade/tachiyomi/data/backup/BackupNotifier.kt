@@ -111,9 +111,7 @@ class BackupNotifier(private val context: Context) {
                     R.drawable.ic_close_24dp,
                     context.getString(R.string.stop),
                     NotificationReceiver.cancelRestorePendingBroadcast(
-                        context,
-                        Notifications.ID_RESTORE_PROGRESS
-                    ),
+                        context, Notifications.ID_RESTORE_PROGRESS),
                 )
             }
 
