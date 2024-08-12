@@ -38,15 +38,10 @@ import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.withContext
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
+import kotlinx.coroutines.delay
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
@@ -342,6 +337,7 @@ fun Context.isInNightMode(): Boolean {
 suspend fun CoroutineWorker.tryToSetForeground() {
     try {
         setForeground(getForegroundInfo())
+        delay(500)
     } catch (e: IllegalStateException) {
         TimberKt.e(e) { "Not allowed to set foreground job" }
     }
@@ -435,13 +431,6 @@ fun Context.iconicsDrawable(
                 attributeColor -> getResourceColor(color)
                 else -> contextCompatColor(color)
             }
-
-suspend fun CoroutineWorker.tryToSetForeground() {
-    try {
-        setForeground(getForegroundInfo())
-        delay(500)
-    } catch (e: IllegalStateException) {
-        TimberKt.e(e) { "Not allowed to set foreground job" }
     }
 }
 
