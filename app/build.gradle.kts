@@ -75,7 +75,27 @@ android {
     productFlavors { create("standard") { buildConfigField("Boolean", "INCLUDE_UPDATER", "true") } }
 }
 
-composeCompiler { enableStrongSkippingMode = true }
+composeCompiler {
+    // Enable experimental compiler opts
+    // https://developer.android.com/jetpack/androidx/releases/compose-compiler#1.5.9
+    enableNonSkippingGroupOptimization.set(true)
+
+    val enableMetrics =
+        project.providers.gradleProperty("enableComposeCompilerMetrics").orNull.toBoolean()
+    val enableReports =
+        project.providers.gradleProperty("enableComposeCompilerReports").orNull.toBoolean()
+
+    val rootProjectDir = rootProject.layout.buildDirectory.asFile.get()
+    val relativePath = projectDir.relativeTo(rootDir)
+    if (enableMetrics) {
+        val buildDirPath = rootProjectDir.resolve("compose-metrics").resolve(relativePath)
+        metricsDestination.set(buildDirPath)
+    }
+    if (enableReports) {
+        val buildDirPath = rootProjectDir.resolve("compose-reports").resolve(relativePath)
+        reportsDestination.set(buildDirPath)
+    }
+}
 
 dependencies {
     implementation(projects.constants)
