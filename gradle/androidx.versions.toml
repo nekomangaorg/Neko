@@ -19,7 +19,7 @@ palette = "androidx.palette:palette:1.0.0"
 core-ktx = "androidx.core:core-ktx:1.13.1"
 constraintlayout = "androidx.constraintlayout:constraintlayout:2.1.4"
 multidex = "androidx.multidex:multidex:2.0.1"
-work = "androidx.work:work-runtime-ktx:2.9.0"
+work = "androidx.work:work-runtime-ktx:2.9.1"
 
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle_version" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle_version" }
