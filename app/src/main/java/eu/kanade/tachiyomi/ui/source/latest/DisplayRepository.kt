@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
-import okhttp3.internal.toImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt

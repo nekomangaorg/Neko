@@ -97,7 +97,7 @@ class SettingsSearchController :
         binding.recycler.adapter = adapter
 
         // load all search results
-        SettingsSearchHelper.initPreferenceSearchResultCollection(presenter.preferences.context)
+        SettingsSearchHelper.initPreferenceSearchResultCollection(view.context)
     }
 
     override fun onDestroyView(view: View) {

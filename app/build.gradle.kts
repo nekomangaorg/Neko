@@ -23,8 +23,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "org.nekomanga.neko"
-        versionCode = 11
-        versionName = "2.16.10"
+        versionCode = 12
+        versionName = "2.16.11"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -81,8 +81,6 @@ dependencies {
     implementation(projects.constants)
     implementation(projects.core)
 
-    implementation("com.github.akshaaatt:Onboarding:1.1.3")
-
     implementation(kotlinx.bundles.kotlin)
 
     coreLibraryDesugaring(libs.desugaring)
@@ -129,9 +127,6 @@ dependencies {
     implementation(libs.sqlite)
     implementation(libs.sqlite.android)
 
-    // Model View Presenter
-    implementation(libs.bundles.nucleus)
-
     // Dependency injection
     implementation(libs.injekt.core)
 
@@ -175,7 +170,7 @@ dependencies {
     implementation(libs.tokenbucket)
     implementation(libs.bundles.sandwich)
     implementation(libs.aboutLibraries.compose)
-    // debugImplementation(libs.leakcanary)
+    debugImplementation(libs.leakcanary)
 
     implementation(libs.bundles.results)
 
