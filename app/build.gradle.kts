@@ -25,7 +25,7 @@ android {
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "org.nekomanga.neko"
         versionCode = 12
-        versionName = "2.16.11"
+        versionName = "2.17.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
