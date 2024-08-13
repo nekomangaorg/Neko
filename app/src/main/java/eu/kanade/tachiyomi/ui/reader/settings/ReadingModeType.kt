@@ -8,7 +8,8 @@ import org.nekomanga.R
 enum class ReadingModeType(
     val prefValue: Int,
     @StringRes val stringRes: Int,
-    @DrawableRes val iconRes: Int
+    @DrawableRes val iconRes: Int,
+    val flagValue: Int = prefValue shl ReadingModeType.SHIFT,
 ) {
     DEFAULT(0, R.string.default_value, R.drawable.ic_reader_default_24dp),
     LEFT_TO_RIGHT(1, R.string.left_to_right_viewer, R.drawable.ic_reader_ltr_24dp),
@@ -19,11 +20,9 @@ enum class ReadingModeType(
         5, R.string.continuous_vertical, R.drawable.ic_reader_continuous_vertical_24dp),
     ;
 
-    @Suppress("RemoveRedundantQualifierName") val flagValue = prefValue shl ReadingModeType.SHIFT
-
     companion object {
         fun fromPreference(preference: Int): ReadingModeType =
-            values().find { it.flagValue == preference } ?: DEFAULT
+            entries.find { it.flagValue == preference } ?: DEFAULT
 
         private const val SHIFT = 0x00000000
         const val MASK = 7 shl SHIFT
@@ -44,6 +43,6 @@ enum class ReadingModeType(
         }
 
         fun fromSpinner(position: Int?) =
-            values().find { value -> value.prefValue == position } ?: DEFAULT
+            entries.find { value -> value.prefValue == position } ?: DEFAULT
     }
 }

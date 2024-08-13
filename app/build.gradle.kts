@@ -4,6 +4,7 @@ plugins {
     id(kotlinx.plugins.parcelize.get().pluginId)
     alias(libs.plugins.about.libraries)
     alias(kotlinx.plugins.serialization)
+    alias(kotlinx.plugins.compose.compiler)
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase) apply false
 }
@@ -68,14 +69,13 @@ android {
         shaders = false
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.compose.compiler.version.get()
-    }
 
     flavorDimensions.add("default")
 
     productFlavors { create("standard") { buildConfigField("Boolean", "INCLUDE_UPDATER", "true") } }
 }
+
+composeCompiler { enableStrongSkippingMode = true }
 
 dependencies {
     implementation(projects.constants)

@@ -9,7 +9,8 @@ enum class OrientationType(
     val prefValue: Int,
     val flag: Int,
     @StringRes val stringRes: Int,
-    @DrawableRes val iconRes: Int
+    @DrawableRes val iconRes: Int,
+    val flagValue: Int = prefValue shl OrientationType.SHIFT,
 ) {
     DEFAULT(
         0,
@@ -43,16 +44,14 @@ enum class OrientationType(
         R.drawable.ic_screen_lock_landscape_24dp),
     ;
 
-    @Suppress("RemoveRedundantQualifierName") val flagValue = prefValue shl OrientationType.SHIFT
-
     companion object {
         private const val SHIFT = 0x00000003
         const val MASK = 7 shl SHIFT
 
         fun fromPreference(preference: Int): OrientationType =
-            values().find { it.flagValue == preference } ?: FREE
+            entries.find { it.flagValue == preference } ?: FREE
 
         fun fromSpinner(position: Int?) =
-            values().find { value -> value.prefValue == position } ?: DEFAULT
+            entries.find { value -> value.prefValue == position } ?: DEFAULT
     }
 }

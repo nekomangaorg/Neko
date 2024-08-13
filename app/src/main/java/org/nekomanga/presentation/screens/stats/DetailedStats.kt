@@ -480,7 +480,7 @@ private fun DefaultView(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        graph(chartWidth = chartWidth, modifier = Modifier)
+                        graph(Modifier, chartWidth)
                         Column(
                             Modifier.fillMaxWidth(.9f).padding(16.dp),
                         ) {
@@ -501,7 +501,7 @@ private fun DefaultView(
                     }
                 }
             } else {
-                item { graph(chartWidth = chartWidth, modifier = Modifier.fillMaxWidth()) }
+                item { graph(Modifier.fillMaxWidth(), chartWidth) }
                 item { Gap(Size.small) }
                 items(sortedSeries, key = { it.key }) { entry ->
                     StatCard(

@@ -1,7 +1,7 @@
 [versions]
 coroutinesVersion = "1.8.1"
-kotlinVersion = "1.9.23"
-serializationVersion = "1.6.3"
+kotlinVersion = "2.0.10"
+serializationVersion = "1.7.1"
 
 [libraries]
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinVersion" }
@@ -25,8 +25,8 @@ kotlin = ["stdlib", "reflect", "coroutines-core", "coroutines-android", "seriali
 [plugins]
 
 android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinVersion" }
 jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlinVersion" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinVersion" }
 parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinVersion" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinVersion" }
 
