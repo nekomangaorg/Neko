@@ -36,7 +36,8 @@ object StatsConstants {
     data class DetailedTagState(
         val totalReadDuration: Long = 0L,
         val totalChapters: Int = 0,
-        val sortedTagPairs: ImmutableList<Pair<String, ImmutableList<DetailedStatManga>>> = persistentListOf(),
+        val sortedTagPairs: ImmutableList<Pair<String, ImmutableList<DetailedStatManga>>> =
+            persistentListOf(),
     )
 
     data class DetailedStatManga(
@@ -59,8 +60,11 @@ object StatsConstants {
 
     sealed class ScreenState {
         object Loading : ScreenState()
+
         object Simple : ScreenState()
+
         object Detailed : ScreenState()
+
         object NoResults : ScreenState()
     }
 

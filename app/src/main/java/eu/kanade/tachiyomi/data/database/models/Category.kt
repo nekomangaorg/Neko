@@ -2,9 +2,9 @@ package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import java.io.Serializable
+import org.nekomanga.R
 
 interface Category : Serializable {
 
@@ -35,14 +35,13 @@ interface Category : Serializable {
         return ((mangaSort?.minus('a') ?: 0) % 2) != 1
     }
 
-    fun sortingMode(nullAsDND: Boolean = false): LibrarySort? = LibrarySort.valueOf(mangaSort)
-        ?: if (nullAsDND && !isDynamic) LibrarySort.DragAndDrop else null
+    fun sortingMode(nullAsDND: Boolean = false): LibrarySort? =
+        LibrarySort.valueOf(mangaSort)
+            ?: if (nullAsDND && !isDynamic) LibrarySort.DragAndDrop else null
 
     val isDragAndDrop
-        get() = (
-            mangaSort == null ||
-                mangaSort == LibrarySort.DragAndDrop.categoryValue
-            ) && !isDynamic
+        get() =
+            (mangaSort == null || mangaSort == LibrarySort.DragAndDrop.categoryValue) && !isDynamic
 
     @StringRes
     fun sortRes(): Int =
@@ -53,14 +52,10 @@ interface Category : Serializable {
     }
 
     companion object {
-        fun create(name: String): Category = CategoryImpl().apply {
-            this.name = name
-        }
+        fun create(name: String): Category = CategoryImpl().apply { this.name = name }
 
         fun createDefault(context: Context): Category =
-            create(context.getString(R.string.default_value)).apply {
-                id = 0
-            }
+            create(context.getString(R.string.default_value)).apply { id = 0 }
 
         fun createCustom(name: String, libSort: Int, ascending: Boolean): Category =
             create(name).apply {

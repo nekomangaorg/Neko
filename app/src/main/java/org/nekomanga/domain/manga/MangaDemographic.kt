@@ -1,6 +1,6 @@
 package org.nekomanga.domain.manga
 
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 
 enum class MangaDemographic(val key: String, val nameRes: Int) {
@@ -9,7 +9,6 @@ enum class MangaDemographic(val key: String, val nameRes: Int) {
     Shoujo(MdConstants.Demographic.shoujo, R.string.shoujo),
     Seinen(MdConstants.Demographic.seinen, R.string.seinen),
     Josei(MdConstants.Demographic.josei, R.string.josei),
-
     ;
 
     companion object {

@@ -5,23 +5,26 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
+import org.nekomanga.R
+import org.nekomanga.databinding.PrefAccountLoginBinding
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = bundle, showUrl = true) {
+class KomgaLoginDialog(bundle: Bundle? = null) :
+    LoginDialogPreference(bundle = bundle, showUrl = true) {
 
     val source: Komga by lazy { Injekt.get<SourceManager>().komga }
 
-    constructor(source: Komga) : this(
+    constructor(
+        source: Komga
+    ) : this(
         Bundle().apply {
             putLong(
                 "key",
@@ -32,20 +35,19 @@ class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = 
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         binding = PrefAccountLoginBinding.inflate(activity!!.layoutInflater)
-        val dialog = activity!!.materialAlertDialog().apply {
-            setView(binding.root)
-        }
+        val dialog = activity!!.materialAlertDialog().apply { setView(binding.root) }
         onViewCreated(binding.root)
 
         return dialog.create()
     }
 
-    override fun setCredentialsOnView(view: View) = with(view) {
-        binding.dialogTitle.text = context.getString(R.string.log_in_to_, source.name)
-        binding.username.setText(preferences.sourceUsername(source).get())
-        binding.password.setText(preferences.sourcePassword(source).get())
-        binding.url.setText(preferences.sourceUrl(source).get())
-    }
+    override fun setCredentialsOnView(view: View) =
+        with(view) {
+            binding.dialogTitle.text = context.getString(R.string.log_in_to_, source.name)
+            binding.username.setText(preferences.sourceUsername(source).get())
+            binding.password.setText(preferences.sourcePassword(source).get())
+            binding.url.setText(preferences.sourceUrl(source).get())
+        }
 
     override fun checkLogin() {
         v?.apply {
@@ -54,7 +56,9 @@ class KomgaLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = 
                 startAnimation()
             }
 
-            if (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank() || binding.url.text.isNullOrBlank()) {
+            if (binding.username.text.isNullOrBlank() ||
+                binding.password.text.isNullOrBlank() ||
+                binding.url.text.isNullOrBlank()) {
                 errorResult()
                 context.toast(R.string.fields_cannot_be_blank)
                 return

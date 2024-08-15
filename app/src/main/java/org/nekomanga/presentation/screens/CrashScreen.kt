@@ -28,9 +28,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
 @Composable
@@ -45,24 +45,20 @@ fun CrashScreen(
             val strokeWidth = Dp.Hairline
             val borderColor = MaterialTheme.colorScheme.outline
             Column(
-                modifier = Modifier
-                    .drawBehind {
-                        drawLine(
-                            borderColor,
-                            Offset(0f, 0f),
-                            Offset(size.width, 0f),
-                            strokeWidth.value,
-                        )
-                    }
-                    .padding(horizontal = Size.medium, vertical = Size.small),
+                modifier =
+                    Modifier.drawBehind {
+                            drawLine(
+                                borderColor,
+                                Offset(0f, 0f),
+                                Offset(size.width, 0f),
+                                strokeWidth.value,
+                            )
+                        }
+                        .padding(horizontal = Size.medium, vertical = Size.small),
                 verticalArrangement = Arrangement.spacedBy(Size.small),
             ) {
                 Button(
-                    onClick = {
-                        scope.launch {
-                            CrashLogUtil(context).dumpLogs(exception)
-                        }
-                    },
+                    onClick = { scope.launch { CrashLogUtil(context).dumpLogs(exception) } },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(text = stringResource(id = R.string.pref_dump_crash_logs))
@@ -77,32 +73,33 @@ fun CrashScreen(
         },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(horizontal = Size.medium)
-                .verticalScroll(rememberScrollState()),
+            modifier =
+                Modifier.padding(paddingValues)
+                    .padding(horizontal = Size.medium)
+                    .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 imageVector = Icons.Outlined.BugReport,
                 contentDescription = null,
-                modifier = Modifier
-                    .size(64.dp),
+                modifier = Modifier.size(64.dp),
             )
             Text(
                 text = stringResource(R.string.crash_screen_title),
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(
-                text = stringResource(R.string.crash_screen_description, stringResource(id = R.string.app_name_neko)),
+                text =
+                    stringResource(
+                        R.string.crash_screen_description, stringResource(id = R.string.app_name)),
                 modifier = Modifier.padding(horizontal = Size.medium),
             )
             Box(
-                modifier = Modifier
-                    .padding(vertical = Size.small)
-                    .clip(MaterialTheme.shapes.small)
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                modifier =
+                    Modifier.padding(vertical = Size.small)
+                        .clip(MaterialTheme.shapes.small)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
             ) {
                 Text(
                     text = exception.toString(),

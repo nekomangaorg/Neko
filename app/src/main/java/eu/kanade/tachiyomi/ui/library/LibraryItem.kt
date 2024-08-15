@@ -14,13 +14,13 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.flexibleadapter.items.IFilterable
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
-import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import org.nekomanga.R
+import org.nekomanga.databinding.MangaGridItemBinding
 import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -29,8 +29,7 @@ class LibraryItem(
     val manga: LibraryManga,
     header: LibraryHeaderItem,
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
-) :
-    AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
+) : AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
 
     var downloadCount = -1
     var unreadType = 2
@@ -53,7 +52,10 @@ class LibraryItem(
         }
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             val libraryLayout = libraryLayout
@@ -75,10 +77,11 @@ class LibraryItem(
                         )
                     }
                     if (isFixedSize) {
-                        binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                        )
+                        binding.constraintLayout.layoutParams =
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                            )
                         binding.coverThumbnail.maxHeight = Int.MAX_VALUE
                         binding.coverThumbnail.minimumHeight = 0
                         binding.constraintLayout.minHeight = 0
@@ -101,12 +104,13 @@ class LibraryItem(
                     }
                     binding.setBGAndFG(libraryLayout)
                 }
-                val gridHolder = LibraryGridHolder(
-                    view,
-                    adapter as LibraryCategoryAdapter,
-                    libraryLayout == LAYOUT_COMPACT_GRID,
-                    isFixedSize,
-                )
+                val gridHolder =
+                    LibraryGridHolder(
+                        view,
+                        adapter as LibraryCategoryAdapter,
+                        libraryLayout == LAYOUT_COMPACT_GRID,
+                        isFixedSize,
+                    )
                 if (!isFixedSize) {
                     gridHolder.setFreeformCoverRatio(manga, parent)
                 }
@@ -135,9 +139,7 @@ class LibraryItem(
         }
     }
 
-    /**
-     * Returns true if this item is draggable.
-     */
+    /** Returns true if this item is draggable. */
     override fun isDraggable(): Boolean {
         return !manga.isBlank() && header.category.isDragAndDrop
     }
@@ -176,13 +178,9 @@ class LibraryItem(
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         if (tag.trim().isEmpty()) return true
         return if (tag.startsWith("-")) {
-            genres?.find {
-                it.trim().equals(tag.substringAfter("-"), ignoreCase = true)
-            } == null
+            genres?.find { it.trim().equals(tag.substringAfter("-"), ignoreCase = true) } == null
         } else {
-            genres?.find {
-                it.trim().equals(tag, ignoreCase = true)
-            } != null
+            genres?.find { it.trim().equals(tag, ignoreCase = true) } != null
         }
     }
 

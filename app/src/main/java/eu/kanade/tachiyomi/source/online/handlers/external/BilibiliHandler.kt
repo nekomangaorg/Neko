@@ -27,14 +27,18 @@ import uy.kohesive.injekt.injectLazy
 
 class BilibiliHandler {
     val baseUrl = "https://www.bilibilicomics.com"
-    val headers = Headers.Builder()
-        .add("Accept", ACCEPT_JSON)
-        .add("Origin", baseUrl)
-        .add("Referer", "$baseUrl/")
-        .build()
+    val headers =
+        Headers.Builder()
+            .add("Accept", ACCEPT_JSON)
+            .add("Origin", baseUrl)
+            .add("Referer", "$baseUrl/")
+            .build()
 
-    private val bucket = TokenBuckets.builder().withCapacity(1)
-        .withFixedIntervalRefillStrategy(1, 1, TimeUnit.SECONDS).build()
+    private val bucket =
+        TokenBuckets.builder()
+            .withCapacity(1)
+            .withFixedIntervalRefillStrategy(1, 1, TimeUnit.SECONDS)
+            .build()
 
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
@@ -42,19 +46,18 @@ class BilibiliHandler {
     }
 
     val client: OkHttpClient by lazy {
-        Injekt.get<NetworkHelper>().cloudFlareClient.newBuilder()
-            .addInterceptor(rateLimitInterceptor).build()
+        Injekt.get<NetworkHelper>()
+            .cloudFlareClient
+            .newBuilder()
+            .addInterceptor(rateLimitInterceptor)
+            .build()
     }
 
     private val json: Json by injectLazy()
 
     private fun getChapterUrl(externalUrl: String): String {
-        val comicId = externalUrl.substringAfterLast("/mc")
-            .substringBefore('/')
-            .toInt()
-        val episodeId = externalUrl.substringAfterLast('/')
-            .substringBefore('?')
-            .toInt()
+        val comicId = externalUrl.substringAfterLast("/mc").substringBefore('/').toInt()
+        val episodeId = externalUrl.substringAfterLast('/').substringBefore('?').toInt()
         return "/mc$comicId/$episodeId"
     }
 
@@ -69,10 +72,7 @@ class BilibiliHandler {
         val jsonPayload = buildJsonObject { put("ep_id", chapterId) }
         val requestBody = jsonPayload.toString().toRequestBody(JSON_MEDIA_TYPE)
 
-        val newHeaders = headers
-            .newBuilder()
-            .set("Referer", baseUrl + chapterUrl)
-            .build()
+        val newHeaders = headers.newBuilder().set("Referer", baseUrl + chapterUrl).build()
 
         return POST(
             "$baseUrl/$BASE_API_ENDPOINT/GetImageIndex?device=pc&platform=web",
@@ -85,7 +85,8 @@ class BilibiliHandler {
         val result = with(json) { response.parseAs<BilibiliResultDto<BilibiliReader>>() }
 
         if (result.message.contains("need buy episode")) {
-            throw Exception("Chapter is unavailable, requires reading and/or purchasing on BililBili")
+            throw Exception(
+                "Chapter is unavailable, requires reading and/or purchasing on BililBili")
         }
         if (result.code != 0) {
             return emptyList()
@@ -108,17 +109,17 @@ class BilibiliHandler {
         val jsonPayload = buildJsonObject {
             put(
                 "urls",
-                buildJsonArray {
-                    baseUrls.forEach { add(it) }
-                }.toString(),
+                buildJsonArray { baseUrls.forEach { add(it) } }.toString(),
             )
         }
         val requestBody = jsonPayload.toString().toRequestBody(JSON_MEDIA_TYPE)
 
-        val newHeaders = headers.newBuilder()
-            .add("Content-Length", requestBody.contentLength().toString())
-            .add("Content-Type", requestBody.contentType().toString())
-            .build()
+        val newHeaders =
+            headers
+                .newBuilder()
+                .add("Content-Length", requestBody.contentLength().toString())
+                .add("Content-Type", requestBody.contentType().toString())
+                .build()
 
         return POST(
             "$baseUrl/$BASE_API_ENDPOINT/ImageToken?device=pc&platform=web",

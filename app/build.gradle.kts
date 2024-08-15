@@ -1,12 +1,12 @@
 plugins {
-    id("com.android.application")
-    kotlin("android")
-    kotlin("plugin.serialization")
-    id("kotlin-parcelize")
-    id("com.mikepenz.aboutlibraries.plugin")
-    id("com.google.gms.google-services") apply false
-    id("com.google.firebase.crashlytics") apply false
-
+    id(androidx.plugins.application.get().pluginId)
+    id(kotlinx.plugins.android.get().pluginId)
+    id(kotlinx.plugins.parcelize.get().pluginId)
+    alias(libs.plugins.about.libraries)
+    alias(kotlinx.plugins.serialization)
+    alias(kotlinx.plugins.compose.compiler)
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase) apply false
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
@@ -16,18 +16,16 @@ if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
 
 val supportedAbis = setOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
 
-
-
 android {
     compileSdk = AndroidConfig.compileSdkVersion
-    namespace = "eu.kanade.tachiyomi"
+    namespace = "org.nekomanga"
 
     defaultConfig {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
-        applicationId = "tachiyomi.mangadex"
-        versionCode = 194
-        versionName = "2.14.2"
+        applicationId = "org.nekomanga.neko"
+        versionCode = 12
+        versionName = "2.17.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -36,9 +34,7 @@ android {
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
 
-        ndk {
-            abiFilters += supportedAbis
-        }
+        ndk { abiFilters += supportedAbis }
     }
 
     splits {
@@ -62,7 +58,6 @@ android {
             manifestPlaceholders["mangadexAuthRedirectUri"] = "mangadex-auth"
             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
-
     }
 
     buildFeatures {
@@ -72,54 +67,60 @@ android {
         aidl = false
         renderScript = false
         shaders = false
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.compose.compiler.version.get()
+        buildConfig = true
     }
 
     flavorDimensions.add("default")
 
-    productFlavors {
-        create("standard") {
-            buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
-        }
-        create("dev") {
-            resourceConfigurations.add("en")
-        }
-    }
+    productFlavors { create("standard") { buildConfigField("Boolean", "INCLUDE_UPDATER", "true") } }
+}
 
-    /* lint {
-         disable("MissingTranslation")
-         isAbortOnError = false
-         isCheckReleaseBuilds = false
-     }*/
+composeCompiler {
+    // Enable experimental compiler opts
+    // https://developer.android.com/jetpack/androidx/releases/compose-compiler#1.5.9
+    enableNonSkippingGroupOptimization.set(true)
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
+    val enableMetrics =
+        project.providers.gradleProperty("enableComposeCompilerMetrics").orNull.toBoolean()
+    val enableReports =
+        project.providers.gradleProperty("enableComposeCompilerReports").orNull.toBoolean()
+
+    val rootProjectDir = rootProject.layout.buildDirectory.asFile.get()
+    val relativePath = projectDir.relativeTo(rootDir)
+    if (enableMetrics) {
+        val buildDirPath = rootProjectDir.resolve("compose-metrics").resolve(relativePath)
+        metricsDestination.set(buildDirPath)
     }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    if (enableReports) {
+        val buildDirPath = rootProjectDir.resolve("compose-reports").resolve(relativePath)
+        reportsDestination.set(buildDirPath)
     }
 }
 
 dependencies {
-    implementation(project(":constants"))
-    implementation(project(":core"))
+    implementation(projects.constants)
+    implementation(projects.core)
+
     implementation(kotlinx.bundles.kotlin)
 
     coreLibraryDesugaring(libs.desugaring)
 
-    // Modified dependencies
-    implementation(libs.j2k.subsample) {
-        exclude(module = "image-decoder")
-    }
+    implementation(kotlinx.coroutines.core)
+    implementation(kotlinx.serialization.json)
+    implementation(kotlinx.serialization.okio)
+    implementation(libs.bundles.ok)
+    implementation(libs.tokenbucket)
+    implementation(libs.timber)
+    implementation(libs.rx.java)
+    implementation(libs.tachi.unifile)
 
+    // Modified dependencies
+    implementation(libs.j2k.subsample) { exclude(module = "image-decoder") }
 
     implementation(libs.bundles.tachiyomi)
     implementation(androidx.bundles.androidx)
     implementation(libs.bundles.google)
+    implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
     implementation(libs.bundles.rx)
     implementation(libs.bundles.ok)
@@ -140,24 +141,14 @@ dependencies {
 
     // Icons
     implementation(libs.bundles.iconics)
-    implementation("br.com.devsrsouza.compose.icons.android:simple-icons:1.0.0")
-
-    //required outside bundle cause toml doesnt work with aar
-    implementation("com.mikepenz:community-material-typeface:7.0.96.0-kotlin@aar")
-    implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
-    implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
+    implementation(libs.simple.icons)
 
     // Database
-    implementation("androidx.sqlite:sqlite:2.3.1")
-    implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
-    implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.github.requery:sqlite-android:3.39.2")
-
-    // Model View Presenter
-    implementation(libs.bundles.nucleus)
+    implementation(libs.sqlite)
+    implementation(libs.sqlite.android)
 
     // Dependency injection
-    implementation("com.github.inorichi.injekt:injekt-core:65b0440")
+    implementation(libs.injekt.core)
 
     // Image library
     implementation(libs.bundles.coil)
@@ -165,20 +156,26 @@ dependencies {
     // Logging
     implementation(libs.timber)
 
+    // Required outsde of version catalog cause aar
+    implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
+    implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
+    implementation("com.mikepenz:community-material-typeface:7.0.96.1-kotlin@aar")
+    implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.3-kotlin@aar")
+    implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.2-kotlin@aar")
+
     // UI
     implementation(libs.bundles.fastadapter)
-    implementation("com.github.leandroBorgesFerreira:LoadingButtonAndroid:2.2.0")
-
+    implementation(libs.loadingButtonAndroid)
 
     implementation(libs.bundles.flexibleadapter)
 
-    implementation("com.github.chrisbanes:PhotoView:2.3.0")
-    implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
-    implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
-    implementation("me.saket.cascade:cascade:2.3.0")
-    implementation("me.saket.cascade:cascade-compose:2.3.0")
+    implementation(libs.photoView)
+    implementation(libs.viewTooltip)
+    implementation(libs.taptargetview)
+    implementation(libs.cascade)
+    implementation(libs.cascade.compose)
 
-    //Compose
+    // Compose
     implementation(compose.bundles.compose)
     implementation(compose.gap)
     implementation(compose.bundles.accompanist)
@@ -186,13 +183,11 @@ dependencies {
 
     implementation(compose.bundles.charting)
 
-
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
     implementation(libs.fuzzysearch)
     implementation(libs.versioncompare)
     implementation(libs.tokenbucket)
-    implementation(libs.bundles.kahelpers)
     implementation(libs.bundles.sandwich)
     implementation(libs.aboutLibraries.compose)
     debugImplementation(libs.leakcanary)
@@ -200,45 +195,4 @@ dependencies {
     implementation(libs.bundles.results)
 
     testImplementation(libs.bundles.tests)
-
 }
-
-tasks {
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.freeCompilerArgs += listOf(
-            "-Xcontext-receivers",
-            "-opt-in=kotlin.Experimental",
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
-            "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
-            "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
-            "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
-            "-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi",
-            "-opt-in=kotlin.time.ExperimentalTime",
-            "-opt-in=kotlinx.coroutines.DelicateCoroutinesApi",
-            "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-            "-opt-in=coil.annotation.ExperimentalCoilApi",
-            "-opt-in=kotlin.ExperimentalStdlibApi",
-            "-opt-in=kotlinx.coroutines.FlowPreview",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
-            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-        )
-
-        /*kotlinOptions.freeCompilerArgs += listOf(
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" + project.buildDir.absolutePath + "/compose_metrics",
-        )
-
-        kotlinOptions.freeCompilerArgs += listOf(
-            "-P",
-            "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" + project.buildDir.absolutePath + "/compose_metrics",
-        )*/
-
-    }
-
-    preBuild {
-        // dependsOn(formatKotlin)
-    }
-}
-

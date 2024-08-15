@@ -3,17 +3,16 @@ package eu.kanade.tachiyomi.ui.base
 import android.view.View
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.MenuSheetItemBinding
+import org.nekomanga.R
+import org.nekomanga.databinding.MenuSheetItemBinding
 
-class MaterialMenuSheetItem(val sheetItem: MaterialMenuSheet.MenuSheetItem) : AbstractItem<MaterialMenuSheetItem.ViewHolder>() {
+class MaterialMenuSheetItem(val sheetItem: MaterialMenuSheet.MenuSheetItem) :
+    AbstractItem<MaterialMenuSheetItem.ViewHolder>() {
 
     /** defines the type defining this item. must be unique. preferably an id */
     override val type: Int = R.id.item_text_view
 
-    /**
-     * Returns the layout resource for this item.
-     */
+    /** Returns the layout resource for this item. */
     override val layoutRes: Int = R.layout.menu_sheet_item
     override var identifier = sheetItem.id.toLong()
 
@@ -24,6 +23,7 @@ class MaterialMenuSheetItem(val sheetItem: MaterialMenuSheet.MenuSheetItem) : Ab
     class ViewHolder(view: View) : FastAdapter.ViewHolder<MaterialMenuSheetItem>(view) {
 
         private val binding = MenuSheetItemBinding.bind(view)
+
         override fun bindView(item: MaterialMenuSheetItem, payloads: List<Any>) {
             val sheetItem = item.sheetItem
             with(binding.root) {
@@ -44,7 +44,6 @@ class MaterialMenuSheetItem(val sheetItem: MaterialMenuSheet.MenuSheetItem) : Ab
             }
         }
 
-        override fun unbindView(item: MaterialMenuSheetItem) {
-        }
+        override fun unbindView(item: MaterialMenuSheetItem) {}
     }
 }

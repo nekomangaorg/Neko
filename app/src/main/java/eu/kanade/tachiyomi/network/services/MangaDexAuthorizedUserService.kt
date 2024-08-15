@@ -83,7 +83,9 @@ interface MangaDexAuthorizedUserService : CommonListFunctions {
     ): ApiResponse<ResultDto>
 
     @GET(MdConstants.Api.readingStatusForAllManga)
-    suspend fun readingStatusAllManga(@Header("Cache-Control") cacheControl: String = "no-cache"): ApiResponse<ReadingStatusMapDto>
+    suspend fun readingStatusAllManga(
+        @Header("Cache-Control") cacheControl: String = "no-cache"
+    ): ApiResponse<ReadingStatusMapDto>
 
     @GET(MdConstants.Api.readingStatusForAllManga)
     suspend fun readingStatusByType(

@@ -27,21 +27,20 @@ fun NoRippleText(
     val noRippleInteraction = remember { MutableInteractionSource() }
     Text(
         text = text,
-        modifier = Modifier
-            .indication(indication = null, interactionSource = noRippleInteraction)
-            .combinedClickable(
-                interactionSource = noRippleInteraction,
-                indication = null,
-                onLongClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onLongClick(text)
-                },
-                onClick = { onClick(text) },
-            ),
+        modifier =
+            Modifier.indication(indication = null, interactionSource = noRippleInteraction)
+                .combinedClickable(
+                    interactionSource = noRippleInteraction,
+                    indication = null,
+                    onLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onLongClick(text)
+                    },
+                    onClick = { onClick(text) },
+                ),
         maxLines = maxLines,
         color = color,
         style = style,
         overflow = TextOverflow.Ellipsis,
-
     )
 }

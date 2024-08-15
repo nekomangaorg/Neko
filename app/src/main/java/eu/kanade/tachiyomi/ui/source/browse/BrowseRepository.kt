@@ -4,8 +4,8 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
-import com.github.michaelbull.result.getAll
-import com.github.michaelbull.result.getAllErrors
+import com.github.michaelbull.result.filterErrors
+import com.github.michaelbull.result.filterValues
 import com.github.michaelbull.result.map
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -42,14 +42,17 @@ class BrowseRepository(
         }
     }
 
-    suspend fun getSearchPage(page: Int, filters: DexFilters): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
-        return mangaDex.search(page, filters)
-            .andThen { mangaListPage ->
-                val displayMangaList = mangaListPage.sourceManga.map { sourceManga ->
+    suspend fun getSearchPage(
+        page: Int,
+        filters: DexFilters
+    ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        return mangaDex.search(page, filters).andThen { mangaListPage ->
+            val displayMangaList =
+                mangaListPage.sourceManga.map { sourceManga ->
                     sourceManga.toDisplayManga(db, mangaDex.id)
                 }
-                Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
-            }
+            Ok(Pair(mangaListPage.hasNextPage, displayMangaList))
+        }
     }
 
     suspend fun getDeepLinkManga(uuid: String): Result<DisplayManga, ResultError> {
@@ -88,37 +91,43 @@ class BrowseRepository(
     }
 
     suspend fun getHomePage(): Result<List<HomePageManga>, ResultError> {
-        val blockedScanlatorUUIDs = preferenceHelper.blockedScanlators().get().map {
-            var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
-            if (scanlatorImpl == null) {
-                mangaDex.getScanlator(scanlator = it).map { scanlator ->
-                    scanlatorImpl = scanlator.toScanlatorImpl()
-                    db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
-                    scanlatorImpl!!
+        val blockedScanlatorUUIDs =
+            preferenceHelper.blockedScanlators().get().map {
+                var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
+                if (scanlatorImpl == null) {
+                    mangaDex.getScanlator(scanlator = it).map { scanlator ->
+                        scanlatorImpl = scanlator.toScanlatorImpl()
+                        db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
+                        scanlatorImpl!!
+                    }
+                } else {
+                    Ok(scanlatorImpl!!)
                 }
-            } else {
-                Ok(scanlatorImpl!!)
             }
-        }
-        return if (blockedScanlatorUUIDs.getAllErrors().isNotEmpty()) {
-            Err(blockedScanlatorUUIDs.getAllErrors().first())
+
+        return if (blockedScanlatorUUIDs.filterErrors().isNotEmpty()) {
+            Err(blockedScanlatorUUIDs.filterErrors().first())
         } else {
             val uuids = blockedScanlatorUUIDs.getAll().map { it.uuid }
             mangaDex.fetchHomePageInfo(uuids, isLoggedIn())
                 .andThen { listResults ->
-                    Ok(
+                Ok(
                         listResults.mapNotNull { listResult ->
                             if (listResult.sourceManga.isEmpty() && listResult.displayScreenType is DisplayScreenType.SubscriptionFeed) {
                                 null
                             } else {
-                                HomePageManga(
-                                    displayScreenType = listResult.displayScreenType,
-                                displayManga = listResult.sourceManga.map { it.toDisplayManga(db, mangaDex.id) }.distinctBy { it.url }.toPersistentList(),
-                                )
+                        HomePageManga(
+                            displayScreenType = listResult.displayScreenType,
+                            displayManga =
+                                listResult.sourceManga
+                                    .map { it.toDisplayManga(db, mangaDex.id) }
+                                    .distinctBy { it.url }
+                                    .toPersistentList(),
+                        )
                             }
-                        },
-                    )
-                }
+                    },
+                )
+            }
         }
     }
 }

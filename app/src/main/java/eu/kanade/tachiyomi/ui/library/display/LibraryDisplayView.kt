@@ -7,8 +7,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.slider.Slider
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.LibraryDisplayLayoutBinding
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.library.filter.ManageFilterItem
 import eu.kanade.tachiyomi.util.bindToPreference
@@ -24,25 +22,31 @@ import eu.kanade.tachiyomi.util.view.numberOfRowsForValue
 import eu.kanade.tachiyomi.util.view.rowsForValue
 import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
 import kotlin.math.roundToInt
+import org.nekomanga.R
+import org.nekomanga.databinding.LibraryDisplayLayoutBinding
 
 class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseLibraryDisplayView<LibraryDisplayLayoutBinding>(context, attrs) {
 
     var mainView: View? = null
+
     override fun inflateBinding() = LibraryDisplayLayoutBinding.bind(this)
+
     override fun initGeneralPreferences() {
         binding.displayGroup.bindToPreference(libraryPreferences.layout())
         binding.uniformGrid.bindToPreference(libraryPreferences.uniformGrid()) {
             binding.staggeredGrid.isEnabled = !it
         }
         binding.outlineOnCovers.bindToPreference(libraryPreferences.outlineOnCovers())
-        binding.staggeredGrid.text = context.getString(R.string.use_staggered_grid).addBetaTag(context, R.attr.colorSecondary)
+        binding.staggeredGrid.text =
+            context
+                .getString(R.string.use_staggered_grid)
+                .addBetaTag(context, R.attr.colorSecondary)
         binding.staggeredGrid.isEnabled = !libraryPreferences.uniformGrid().get()
         binding.staggeredGrid.bindToPreference(libraryPreferences.staggeredGrid())
-        binding.gridSeekbar.value = ((libraryPreferences.gridSize().get() + .5f) * 2f).roundToInt().toFloat()
-        binding.resetGridSize.setOnClickListener {
-            binding.gridSeekbar.value = 3f
-        }
+        binding.gridSeekbar.value =
+            ((libraryPreferences.gridSize().get() + .5f) * 2f).roundToInt().toFloat()
+        binding.resetGridSize.setOnClickListener { binding.gridSeekbar.value = 3f }
 
         binding.reorderFiltersButton.setOnClickListener {
             val recycler = RecyclerView(context)
@@ -50,22 +54,27 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
             if (filterOrder.count() != 6) {
                 filterOrder = FilterBottomSheet.Filters.DEFAULT_ORDER
             }
-            val adapter = FlexibleAdapter(
-                filterOrder.toCharArray().map {
-                    if (FilterBottomSheet.Filters.filterOf(it) != null) {
-                        ManageFilterItem(it)
-                    } else {
-                        null
-                    }
-                }.filterNotNull(),
-                this,
-                true,
-            )
+            val adapter =
+                FlexibleAdapter(
+                    filterOrder
+                        .toCharArray()
+                        .map {
+                            if (FilterBottomSheet.Filters.filterOf(it) != null) {
+                                ManageFilterItem(it)
+                            } else {
+                                null
+                            }
+                        }
+                        .filterNotNull(),
+                    this,
+                    true,
+                )
             recycler.layoutManager = LinearLayoutManager(context)
             recycler.adapter = adapter
             adapter.isHandleDragEnabled = true
             adapter.isLongPressDragEnabled = true
-            context.materialAlertDialog()
+            context
+                .materialAlertDialog()
                 .setTitle(R.string.reorder_filters)
                 .setView(recycler)
                 .setNegativeButton(android.R.string.cancel, null)
@@ -78,33 +87,35 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         binding.gridSeekbar.setLabelFormatter {
-            val view = controller?.activity?.window?.decorView ?: mainView ?: this@LibraryDisplayView
+            val view =
+                controller?.activity?.window?.decorView ?: mainView ?: this@LibraryDisplayView
             val mainText = (mainView ?: this@LibraryDisplayView).rowsForValue(it).toString()
-            val mainOrientation = context.getString(
-                if (context.isLandscape()) {
-                    R.string.landscape
-                } else {
-                    R.string.portrait
-                },
-            )
-            val alt = (
-                if (view.measuredHeight >= 720.dpToPx) {
+            val mainOrientation =
+                context.getString(
+                    if (context.isLandscape()) {
+                        R.string.landscape
+                    } else {
+                        R.string.portrait
+                    },
+                )
+            val alt =
+                (if (view.measuredHeight >= 720.dpToPx) {
                     view.measuredHeight - 72.dpToPx
                 } else {
                     view.measuredHeight
-                }
-                ) -
-                (view.rootWindowInsets?.topCutoutInset() ?: 0) -
-                (view.rootWindowInsets?.bottomCutoutInset() ?: 0)
+                }) -
+                    (view.rootWindowInsets?.topCutoutInset() ?: 0) -
+                    (view.rootWindowInsets?.bottomCutoutInset() ?: 0)
             val altText = alt.numberOfRowsForValue(it).toString()
-            val altOrientation = context.getString(
-                if (context.isLandscape()) {
-                    R.string.portrait
-                } else {
-                    R.string.landscape
-                },
-            )
-            "$mainOrientation: $mainText • $altOrientation: $altText"
+            val altOrientation =
+                context.getString(
+                    if (context.isLandscape()) {
+                        R.string.portrait
+                    } else {
+                        R.string.landscape
+                    },
+                )
+            "$mainOrientation: $mainText ? $altOrientation: $altText"
         }
         binding.gridSeekbar.addOnChangeListener { _, value, fromUser ->
             if (!fromUser) {
@@ -126,9 +137,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        checkHeightThen {
-            setGridText(binding.gridSeekbar.value)
-        }
+        checkHeightThen { setGridText(binding.gridSeekbar.value) }
     }
 
     private fun setGridText(progress: Float) {

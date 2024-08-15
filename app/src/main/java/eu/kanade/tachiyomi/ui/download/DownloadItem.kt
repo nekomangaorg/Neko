@@ -5,22 +5,18 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
+import org.nekomanga.R
 
 class DownloadItem(
     val download: Download,
     header: DownloadHeaderItem,
 ) : AbstractSectionableItem<DownloadHolder, DownloadHeaderItem>(header) {
 
-    /**
-     * Whether this item is currently selected.
-     */
+    /** Whether this item is currently selected. */
     var isSelected = false
 
-    /**
-     * Returns the layout resource for this item.
-     */
+    /** Returns the layout resource for this item. */
     override fun getLayoutRes(): Int {
         return R.layout.download_item
     }
@@ -33,8 +29,12 @@ class DownloadItem(
      */
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView
-                .ViewHolder,>,>,
+        adapter:
+            FlexibleAdapter<
+                IFlexible<
+                    RecyclerView.ViewHolder,
+                >,
+            >,
     ): DownloadHolder {
         return DownloadHolder(view, adapter as DownloadAdapter)
     }
@@ -56,9 +56,7 @@ class DownloadItem(
         holder.bind(download)
     }
 
-    /**
-     * Returns true if this item is draggable.
-     */
+    /** Returns true if this item is draggable. */
     override fun isDraggable(): Boolean {
         return true
     }

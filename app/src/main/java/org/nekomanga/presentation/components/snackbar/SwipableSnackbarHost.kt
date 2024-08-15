@@ -37,20 +37,20 @@ fun SwipeableSnackbarHost(
 
     var size by remember { mutableStateOf(Size.Zero) }
     val swipeableState = rememberSwipeableState(SwipeDirection.Initial)
-    val width = remember(size) {
-        if (size.width == 0f) {
-            1f
-        } else {
-            size.width
+    val width =
+        remember(size) {
+            if (size.width == 0f) {
+                1f
+            } else {
+                size.width
+            }
         }
-    }
     if (swipeableState.isAnimationRunning) {
         DisposableEffect(Unit) {
             onDispose {
                 when (swipeableState.currentValue) {
                     SwipeDirection.Right,
-                    SwipeDirection.Left,
-                    -> {
+                    SwipeDirection.Left, -> {
                         hostState.currentSnackbarData?.dismiss()
                     }
                     else -> {
@@ -60,23 +60,22 @@ fun SwipeableSnackbarHost(
             }
         }
     }
-    val offset = with(LocalDensity.current) {
-        swipeableState.offset.value.toDp()
-    }
+    val offset = with(LocalDensity.current) { swipeableState.offset.value.toDp() }
     SnackbarHost(
         hostState,
         snackbar = { snackbarData -> snackbar(snackbarData, Modifier.offset(x = offset)) },
-        modifier = Modifier
-            .onSizeChanged { size = Size(it.width.toFloat(), it.height.toFloat()) }
-            .swipeable(
-                state = swipeableState,
-                anchors = mapOf(
-                    -width to SwipeDirection.Left,
-                    0f to SwipeDirection.Initial,
-                    width to SwipeDirection.Right,
+        modifier =
+            Modifier.onSizeChanged { size = Size(it.width.toFloat(), it.height.toFloat()) }
+                .swipeable(
+                    state = swipeableState,
+                    anchors =
+                        mapOf(
+                            -width to SwipeDirection.Left,
+                            0f to SwipeDirection.Initial,
+                            width to SwipeDirection.Right,
+                        ),
+                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                    orientation = Orientation.Horizontal,
                 ),
-                thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                orientation = Orientation.Horizontal,
-            ),
     )
 }

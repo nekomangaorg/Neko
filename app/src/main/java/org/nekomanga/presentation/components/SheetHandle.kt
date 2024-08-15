@@ -18,10 +18,14 @@ import org.nekomanga.presentation.theme.Size
 fun ColumnScope.sheetHandle() {
     Gap(16.dp)
     Box(
-        modifier = Modifier
-            .width(50.dp)
-            .height(Size.tiny)
-            .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast), CircleShape)
-            .align(Alignment.CenterHorizontally),
+        modifier =
+            Modifier.width(50.dp)
+                .height(Size.tiny)
+                .background(
+                    color =
+                        MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = NekoColors.disabledAlphaLowContrast),
+                    CircleShape)
+                .align(Alignment.CenterHorizontally),
     )
 }

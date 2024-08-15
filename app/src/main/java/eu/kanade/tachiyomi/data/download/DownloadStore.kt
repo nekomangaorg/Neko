@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uy.kohesive.injekt.injectLazy
@@ -23,17 +22,13 @@ class DownloadStore(
     private val sourceManager: SourceManager,
 ) {
 
-    /**
-     * Preference file where active downloads are stored.
-     */
+    /** Preference file where active downloads are stored. */
     private val preferences = context.getSharedPreferences("active_downloads", Context.MODE_PRIVATE)
 
     private val json: Json by injectLazy()
     private val db: DatabaseHelper by injectLazy()
 
-    /**
-     * Counter used to keep the queue order.
-     */
+    /** Counter used to keep the queue order. */
     private var counter = 0
 
     /**
@@ -42,9 +37,7 @@ class DownloadStore(
      * @param downloads the list of downloads to add.
      */
     fun addAll(downloads: List<Download>) {
-        preferences.edit {
-            downloads.forEach { putString(getKey(it), serialize(it)) }
-        }
+        preferences.edit { downloads.forEach { putString(getKey(it), serialize(it)) } }
     }
 
     /**
@@ -53,18 +46,21 @@ class DownloadStore(
      * @param download the download to remove.
      */
     fun remove(download: Download) {
-        preferences.edit {
-            remove(getKey(download))
-        }
+        preferences.edit { remove(getKey(download)) }
     }
 
     /**
-     * Removes all the downloads from the store.
+     * Removes a list of downloads from the store.
+     *
+     * @param downloads the download to remove.
      */
+    fun removeAll(downloads: List<Download>) {
+        preferences.edit { downloads.forEach { remove(getKey(it)) } }
+    }
+
+    /** Removes all the downloads from the store. */
     fun clear() {
-        preferences.edit {
-            clear()
-        }
+        preferences.edit { clear() }
     }
 
     /**
@@ -76,22 +72,21 @@ class DownloadStore(
         return download.chapter.id!!.toString()
     }
 
-    /**
-     * Returns the list of downloads to restore. It should be called in a background thread.
-     */
+    /** Returns the list of downloads to restore. It should be called in a background thread. */
     fun restore(): List<Download> {
-        val objs = preferences.all
-            .mapNotNull { it.value as? String }
-            .mapNotNull { deserialize(it) }
-            .sortedBy { it.order }
+        val objs =
+            preferences.all
+                .mapNotNull { it.value as? String }
+                .mapNotNull { deserialize(it) }
+                .sortedBy { it.order }
 
         val downloads = mutableListOf<Download>()
         if (objs.isNotEmpty()) {
             val cachedManga = mutableMapOf<Long, Manga?>()
             for ((mangaId, chapterId) in objs) {
-                val manga = cachedManga.getOrPut(mangaId) {
-                    db.getManga(mangaId).executeAsBlocking()
-                } ?: continue
+                val manga =
+                    cachedManga.getOrPut(mangaId) { db.getManga(mangaId).executeAsBlocking() }
+                        ?: continue
                 val chapter = db.getChapter(chapterId).executeAsBlocking() ?: continue
                 val source = chapter.getHttpSource(sourceManager)
                 downloads.add(Download(source, manga, chapter))
@@ -133,6 +128,5 @@ class DownloadStore(
      * @param chapterId the id of the chapter.
      * @param order the order of the download in the queue.
      */
-    @Serializable
-    data class DownloadObject(val mangaId: Long, val chapterId: Long, val order: Int)
+    @Serializable data class DownloadObject(val mangaId: Long, val chapterId: Long, val order: Int)
 }

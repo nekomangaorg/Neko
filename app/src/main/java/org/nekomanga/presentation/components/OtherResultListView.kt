@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.domain.DisplayResult
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun ResultList(
@@ -27,12 +28,10 @@ fun ResultList(
     val scrollState = rememberLazyListState()
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
         state = scrollState,
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         items(results) { displayResult ->
             ResultRow(
@@ -50,13 +49,10 @@ private fun ResultRow(
 ) {
     ElevatedCard(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
         ) {
             Text(
                 text = displayResult.title,
@@ -69,7 +65,9 @@ private fun ResultRow(
                 Text(
                     text = displayResult.information,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+                    color =
+                        MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = NekoColors.mediumAlphaLowContrast),
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis,
                 )

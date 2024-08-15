@@ -5,9 +5,10 @@ import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.viewholders.ExpandableViewHolder
-import eu.kanade.tachiyomi.databinding.DownloadHeaderBinding
+import org.nekomanga.databinding.DownloadHeaderBinding
 
-class DownloadHeaderHolder(view: View, adapter: FlexibleAdapter<*>) : ExpandableViewHolder(view, adapter) {
+class DownloadHeaderHolder(view: View, adapter: FlexibleAdapter<*>) :
+    ExpandableViewHolder(view, adapter) {
 
     private val binding = DownloadHeaderBinding.bind(view)
 

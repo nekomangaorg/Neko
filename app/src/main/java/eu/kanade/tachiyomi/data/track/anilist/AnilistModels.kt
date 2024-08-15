@@ -19,24 +19,26 @@ data class ALManga(
     val total_chapters: Int,
 ) {
 
-    fun toTrack() = TrackSearch.create(TrackManager.ANILIST).apply {
-        media_id = this@ALManga.media_id
-        title = title_user_pref
-        total_chapters = this@ALManga.total_chapters
-        cover_url = image_url_lge
-        summary = description ?: ""
-        tracking_url = AnilistApi.mangaUrl(media_id)
-        publishing_status = this@ALManga.publishing_status
-        publishing_type = format
-        if (start_date_fuzzy != 0L) {
-            start_date = try {
-                val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                outputDf.format(start_date_fuzzy)
-            } catch (e: Exception) {
-                ""
+    fun toTrack() =
+        TrackSearch.create(TrackManager.ANILIST).apply {
+            media_id = this@ALManga.media_id
+            title = title_user_pref
+            total_chapters = this@ALManga.total_chapters
+            cover_url = image_url_lge
+            summary = description ?: ""
+            tracking_url = AnilistApi.mangaUrl(media_id)
+            publishing_status = this@ALManga.publishing_status
+            publishing_type = format
+            if (start_date_fuzzy != 0L) {
+                start_date =
+                    try {
+                        val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                        outputDf.format(start_date_fuzzy)
+                    } catch (e: Exception) {
+                        ""
+                    }
             }
         }
-    }
 }
 
 data class ALUserManga(
@@ -49,63 +51,69 @@ data class ALUserManga(
     val manga: ALManga,
 ) {
 
-    fun toTrack() = Track.create(TrackManager.ANILIST).apply {
-        media_id = manga.media_id
-        title = manga.title_user_pref
-        status = toTrackStatus()
-        score = score_raw.toFloat()
-        started_reading_date = start_date_fuzzy
-        finished_reading_date = completed_date_fuzzy
-        last_chapter_read = chapters_read.toFloat()
-        library_id = this@ALUserManga.library_id
-        total_chapters = manga.total_chapters
-    }
+    fun toTrack() =
+        Track.create(TrackManager.ANILIST).apply {
+            media_id = manga.media_id
+            title = manga.title_user_pref
+            status = toTrackStatus()
+            score = score_raw.toFloat()
+            started_reading_date = start_date_fuzzy
+            finished_reading_date = completed_date_fuzzy
+            last_chapter_read = chapters_read.toFloat()
+            library_id = this@ALUserManga.library_id
+            total_chapters = manga.total_chapters
+        }
 
-    private fun toTrackStatus() = when (list_status) {
-        "CURRENT" -> Anilist.READING
-        "COMPLETED" -> Anilist.COMPLETED
-        "PAUSED" -> Anilist.PAUSED
-        "DROPPED" -> Anilist.DROPPED
-        "PLANNING" -> Anilist.PLAN_TO_READ
-        "REPEATING" -> Anilist.REREADING
-        else -> Anilist.READING
-    }
+    private fun toTrackStatus() =
+        when (list_status) {
+            "CURRENT" -> Anilist.READING
+            "COMPLETED" -> Anilist.COMPLETED
+            "PAUSED" -> Anilist.PAUSED
+            "DROPPED" -> Anilist.DROPPED
+            "PLANNING" -> Anilist.PLAN_TO_READ
+            "REPEATING" -> Anilist.REREADING
+            else -> Anilist.READING
+        }
 }
 
-fun Track.toAnilistStatus() = when (status) {
-    Anilist.READING -> "CURRENT"
-    Anilist.COMPLETED -> "COMPLETED"
-    Anilist.PAUSED -> "PAUSED"
-    Anilist.DROPPED -> "DROPPED"
-    Anilist.PLAN_TO_READ -> "PLANNING"
-    Anilist.REREADING -> "REPEATING"
-    else -> "CURRENT"
-}
+fun Track.toAnilistStatus() =
+    when (status) {
+        Anilist.READING -> "CURRENT"
+        Anilist.COMPLETED -> "COMPLETED"
+        Anilist.PAUSED -> "PAUSED"
+        Anilist.DROPPED -> "DROPPED"
+        Anilist.PLAN_TO_READ -> "PLANNING"
+        Anilist.REREADING -> "REPEATING"
+        else -> "CURRENT"
+    }
 
 private val preferences: PreferencesHelper by injectLazy()
 
-fun Track.toAnilistScore(): String = when (preferences.anilistScoreType().get()) {
-// 10 point
-    "POINT_10" -> (score.toInt() / 10).toString()
-// 100 point
-    "POINT_100" -> score.toInt().toString()
-// 5 stars
-    "POINT_5" -> when {
-        score == 0f -> "0"
-        score < 30 -> "1"
-        score < 50 -> "2"
-        score < 70 -> "3"
-        score < 90 -> "4"
-        else -> "5"
+fun Track.toAnilistScore(): String =
+    when (preferences.anilistScoreType().get()) {
+        // 10 point
+        "POINT_10" -> (score.toInt() / 10).toString()
+        // 100 point
+        "POINT_100" -> score.toInt().toString()
+        // 5 stars
+        "POINT_5" ->
+            when {
+                score == 0f -> "0"
+                score < 30 -> "1"
+                score < 50 -> "2"
+                score < 70 -> "3"
+                score < 90 -> "4"
+                else -> "5"
+            }
+        // Smiley
+        "POINT_3" ->
+            when {
+                score == 0f -> "0"
+                score <= 35 -> ":("
+                score <= 60 -> ":|"
+                else -> ":)"
+            }
+        // 10 point decimal
+        "POINT_10_DECIMAL" -> (score / 10).toString()
+        else -> throw Exception("Unknown score type")
     }
-// Smiley
-    "POINT_3" -> when {
-        score == 0f -> "0"
-        score <= 35 -> ":("
-        score <= 60 -> ":|"
-        else -> ":)"
-    }
-// 10 point decimal
-    "POINT_10_DECIMAL" -> (score / 10).toString()
-    else -> throw Exception("Unknown score type")
-}

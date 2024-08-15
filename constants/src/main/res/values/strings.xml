@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name_neko" translatable="false">Neko</string>
-
-    <string name="all_files_permission_required">File permissions required</string>
-    <string name="external_storage_permission_notice">Neko requires access to all files in Android 11 to download chapters, and create automatic backups. \n\nOn the next screen, enable \"Allow access to manage all files.\"</string>
-    <string name="external_storage_download_notice">Neko requires access to all files to download chapters. Tap here, then enable \"Allow access to manage all files.\"</string>
+    <string name="app_name" translatable="false">Neko</string>
 
     <!--Models-->
 
@@ -139,6 +135,34 @@
 
     <!-- Main Screens -->
 
+    <!-- Onboarding -->
+
+    <string name="onboarding_heading">Welcome to Neko</string>
+    <string name="onboarding_description">Let\'s pick some defaults. You can always change these things later in the settings.</string>
+
+    <string name="onboarding_action_next">Next</string>
+    <string name="onboarding_action_finish">Get started</string>
+    <string name="onboarding_action_skip">Skip</string>
+    <string name="onboarding_storage_info">Select a folder where %1$s will store chapter downloads, backups, and more.\n\nA dedicated folder is recommended.\n\nSelected folder: %2$s</string>
+    <string name="onboarding_storage_action_select">Select a folder</string>
+    <string name="onboarding_storage_selection_required">A folder must be selected</string>
+    <string name="no_location_set">No storage location set</string>
+    <string name="invalid_location">Invalid location: %s</string>
+    <string name="onboarding_storage_help_info">Updating from an older version and not sure what to select? Refer to the Tachiyomi upgrade section on the Mihon storage guide for more information.</string>
+    <string name="onboarding_storage_help_action">Storage guide</string>
+    <string name="onboarding_guides_returning_user">Already used Neko before?</string>
+    <string name="onboarding_guides_new_version">This version of the app is a completely new install. So make a backup from a previous version if you have one installed. Put that backup in a safe location, and uninstall the old version. Once done come back here.</string>
+    <string name="onboarding_guides_restore_backup">After onboarding, restore your backup in</string>
+    <string name="onboarding_guides_restore_backup_setting_location">Settings -> Storage and Data</string>
+
+    <string name="onboarding_permission_install_apps">Install apps permission</string>
+    <string name="onboarding_permission_install_apps_description">To install the app on updates.</string>
+    <string name="onboarding_permission_notifications">Notification permission</string>
+    <string name="onboarding_permission_notifications_description">Get notified for library updates and more.</string>
+    <string name="onboarding_permission_ignore_battery_opts">Background battery usage</string>
+    <string name="onboarding_permission_ignore_battery_opts_description">Avoid interruptions to long-running library updates, downloads, and backup restores.</string>
+    <string name="onboarding_permission_action_grant">Grant</string>
+
     <!-- Library -->
     <string name="library">Library</string>
     <string name="your_library">Your library</string>
@@ -223,6 +247,7 @@
     <string name="shift_double_pages">Shift double pages</string>
 
     <!-- Library update service notifications -->
+    <string name="allow_notifications_recommended">Allowing notifications is recommended to keep your library and app up to date.</string>
     <string name="checking_for_new_chapters">Checking for new chapters</string>
     <string name="new_chapters_found">New chapters found</string>
     <plurals name="for_n_titles">
@@ -235,8 +260,14 @@
     </plurals>
     <string name="notification_update_error">%1$d update(s) failed</string>
     <string name="notification_update_skipped">%1$d update(s) skipped</string>
+    <string name="skipped_reason_has_unread">Skipped because series has unread chapters</string>
+    <string name="skipped_reason_not_started">Skipped because series is not started</string>
     <string name="skipped_reason_completed">Skipped because series is complete</string>
-    <string name="skipped_reason_track_status">Skipped because at least one tracker was not in a reading status</string>
+    <string name="skipped_reason_tracking_unfollowed">Skipped because at least one tracker has status of "Unfollowed"</string>
+    <string name="skipped_reason_tracking_plan_to_read">Skipped because at least one tracker has status of "Plan to read"</string>
+    <string name="skipped_reason_tracking_dropped">Skipped because at least one tracker has status of "Dropped"</string>
+    <string name="skipped_reason_tracking_on_hold">Skipped because at least one tracker has status of "On hold"</string>
+    <string name="skipped_reason_tracking_completed">Skipped because at least one tracker has status of "Completed"</string>
 
     <plurals name="notification_update_failed">
         <item quantity="one">1 update failed</item>
@@ -250,11 +281,19 @@
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
     <string name="library_update_order">Library update order</string>
-    <string name="library_update_restriction">Library update restrictions</string>
-    <string name="library_update_restriction_summary">Update only when the conditions are met</string>
+    <string name="library_update_device_restriction">Library device update restrictions</string>
+    <string name="library_update__device_restriction_summary">Update only when the conditions are met</string>
     <string name="restrictions_">Restrictions: %1$s</string>
-    <string name="only_update_ongoing">Only update ongoing manga</string>
-    <string name="only_update_based_on_tracking">Only update manga with tracking status\'s of Reading, Re Reading, Unfollowed</string>
+    <string name="smart_library_update_restrictions">Smart library update restrictions</string>
+    <string name="smart_library_has_unread">Skip manga with unread chapter(s)</string>
+    <string name="smart_library_has_not_started">Skip unstarted manga</string>
+    <string name="smart_library_status_is_completed">Skip manga with "Completed" status</string>
+    <string name="smart_library_tracking_is_on_hold">Skip manga with tracking status "On hold"</string>
+    <string name="smart_library_tracking_is_completed">Skip manga with tracking status "Completed"</string>
+    <string name="smart_library_tracking_is_dropped">Skip manga with tracking status "Dropped"</string>
+    <string name="smart_library_tracking_is_plan_to_read">Skip manga with tracking status "Plan to read"</string>
+
+
     <string name="faster_library_update">Update library faster.  Skips updating manga metadata etc</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
@@ -626,7 +665,6 @@
     <string name="refresh_tracking">Refresh tracking</string>
     <string name="add_tracking">Add tracking</string>
     <string name="select_an_entry">Select an entry</string>
-    <string name="source_unsupported">Source is not supported</string>
     <string name="no_match_found">No match found</string>
     <string name="remove_tracking">Remove tracking from app</string>
     <string name="cannot_remove_tracking_while_offline">Tracker cannot be removed from %1$s while offline</string>
@@ -783,12 +821,16 @@
     <string name="series_opens_new_chapters">Series shortcuts opens new chapters</string>
     <string name="no_new_chapters_open_details">When there\'s no new chapters, the series\' details will open instead</string>
 
-    <!-- Backup -->
+    <!-- Data and Storage -->
+    <string name="data_storage">Data and Storage</string>
+    <string name="storage_location">Storage location</string>
+    <string name="storage_location_info">Used for automatic backups, saved images and chapter downloads.</string>
     <string name="backup">Backup</string>
     <string name="backup_and_restore">Backup and restore</string>
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
     <string name="restore_backup">Restore backup</string>
+    <string name="restore_neko">Data from the backup file will be restored.</string>
     <string name="restore_from_backup_file">Restore library from backup file</string>
     <string name="restore_in_progress">Restore already in progress</string>
     <string name="backup_in_progress">Backup already in progress</string>
@@ -799,6 +841,7 @@
     <string name="invalid_backup_file">Invalid backup file</string>
     <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
     <string name="file_is_missing_data">File is missing data.</string>
+    <string name="no_backup_directory_selected">No backup directory selected</string>
     <string name="backup_has_no_manga">Backup does not contain any manga.</string>
     <string name="backup_failed">Backup failed</string>
     <string name="empty_backup_error">No library entries to back up</string>
@@ -812,7 +855,7 @@
     <string name="restoring_backup_canceled">Canceled restore</string>
     <string name="backup_restore_invalid_uri">Error: empty URI</string>
     <string name="creating_backup">Creating backup</string>
-    <string name="backup_info">Automatic backups are highly recommended. You should keep copies in other places as well.</string>
+    <string name="backup_info">Automatic backups are enabled by default. A backup is created every 24 hours, up to 6 backups will saved. For best results  You should manually keep copies in other places as well.</string>
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restore_duration">%02d min, %02d sec</string>
@@ -906,7 +949,6 @@
     <string name="whats_new">What\'s new</string>
     <string name="whats_new_this_release">What\'s new in this release</string>
     <string name="website">Website</string>
-    <string name="dex_loot">Buy loot from MangaDex</string>
     <string name="open_source_licenses">Open source licenses</string>
     <string name="privacy_policy">Privacy policy</string>
 
@@ -944,7 +986,7 @@
     <string name="remove_download">Remove download</string>
     <string name="remove_downloads">Remove downloads</string>
     <string name="downloading_progress">Downloading (%1$d/%2$d)</string>
-    <string name="invalid_download_location">Invalid download location</string>
+    <string name="invalid_download_location">Invalid download location: %s</string>
     <string name="download_paused">Download paused</string>
     <string name="download_title">Downloads</string>
     <string name="download_completed">All Downloads complete</string>
@@ -965,11 +1007,9 @@
     <string name="no_network_connection">No network connection available</string>
 
     <!-- Downloads settings -->
-    <string name="download_location">Download location</string>
     <string name="only_download_over_wifi">Only download over Wi-Fi</string>
     <string name="remove_when_marked_as_read">Remove when marked as read</string>
     <string name="remove_after_read">Remove after read</string>
-    <string name="custom_location">Custom location</string>
     <string name="last_read_chapter">Last read chapter</string>
     <string name="second_to_last">Second to last chapter</string>
     <string name="third_to_last">Third to last chapter</string>
@@ -990,6 +1030,7 @@
     <string name="save_chapters_as_cbz">Save as CBZ archive</string>
     <string name="split_tall_images">Split tall images</string>
     <string name="split_tall_images_summary">Improves reader performance</string>
+
 
     <!-- Stats -->
     <string name="stat">Stat</string>
@@ -1047,6 +1088,7 @@
 
     <!-- Time -->
     <string name="manual">Manual</string>
+    <string name="off">Off</string>
     <string name="hourly">Hourly</string>
     <string name="every_6_hours">Every 6 hours</string>
     <string name="every_12_hours">Every 12 hours</string>
@@ -1208,6 +1250,7 @@
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>
     <string name="view">View</string>
+    <string name="warning">Warning</string>
     <string name="wifi">Wi-Fi</string>
 
 
@@ -1386,16 +1429,13 @@
     <string name="failed_to_delete_list">Failed to delete MDList</string>
 
 
-    <!-- Backup Settings -->
-    <string name="restore_neko">Data from the backup file will be restored.\n\n If this a pre v5 backup you will need to v5 migrate after you restore.</string>
-
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>
     <string name="verbose_logging">Verbose Logging</string>
     <string name="verbose_logging_summary">Print verbose logs to system log (reduces app performance)</string>
 
     <string name="force_download_cache_refresh">Refresh the download cache</string>
-    <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use after you migrated to v5 or if you copied downloads outside of this app</string>
+    <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use this if  you copied downloads outside of this app using your file explorer.</string>
 
 
     <!-- Login dialog -->
@@ -1414,10 +1454,4 @@
     <string name="pref_dump_crash_logs">Dump crash logs</string>
     <string name="pref_dump_crash_logs_summary">Saves error logs to a file for sharing with the developers</string>
     <string name="channel_crash_logs">Crash logs</string>
-
-    <!-- v5 migration -->
-    <string name="v5_migration_service">V5 Migration</string>
-    <string name="v5_migration_complete">V5 Migration Complete</string>
-    <string name="v5_migration_notice">This will start legacy id migration (Note: This uses data)</string>
-    <string name="v5_migration_desc">Perform migration from old MangaDex to V5 site.  For real though why you still need this?</string>
 </resources>

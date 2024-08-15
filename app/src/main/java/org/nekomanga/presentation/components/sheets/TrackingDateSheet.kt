@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.lanars.compose.datetextfield.DateTextField
 import com.lanars.compose.datetextfield.Format
 import eu.kanade.presentation.components.Divider
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
@@ -46,8 +45,10 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import jp.wasabeef.gap.Gap
+import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -65,125 +66,168 @@ fun TrackingDateSheet(
 
     val dateTimePattern = (trackingDate.dateFormat as SimpleDateFormat).toPattern()
 
-    val dateTimeFormatter = if (dateTimePattern.isEmpty()) {
-        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
-    } else {
-        DateTimeFormatter.ofPattern(dateTimePattern)
-    }
+    val dateTimeFormatter =
+        if (dateTimePattern.isEmpty()) {
+            DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+        } else {
+            DateTimeFormatter.ofPattern(dateTimePattern)
+        }
 
     val currentDateExists = trackingDate.currentDate > 0L
 
     BaseSheet(themeColor = themeColorState) {
         Box(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
         ) {
             IconButton(onClick = { onDismiss() }) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(28.dp),
+                    modifier = Modifier.size(28.dp),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
             Text(
-                text = stringResource(
-                    id = when (trackingDate.readingDate) {
-                        ReadingDate.Start -> R.string.started_reading_date
-                        ReadingDate.Finish -> R.string.finished_reading_date
-                    },
-                ),
-                style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                text =
+                    stringResource(
+                        id =
+                            when (trackingDate.readingDate) {
+                                ReadingDate.Start -> R.string.started_reading_date
+                                ReadingDate.Finish -> R.string.finished_reading_date
+                            },
+                    ),
+                style =
+                    MaterialTheme.typography.titleLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface),
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterStart),
+                modifier = Modifier.fillMaxWidth().align(Alignment.CenterStart),
             )
         }
 
-        Gap(8.dp)
+        Gap(Size.tiny)
         Divider()
 
         if (currentDateExists) {
-            Gap(8.dp)
+            Gap(Size.tiny)
             Text(
-                text = stringResource(id = R.string.current_date_, trackingDate.dateFormat.format(trackingDate.currentDate)),
-                style = MaterialTheme.typography.titleSmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaHighContrast)),
+                text =
+                    stringResource(
+                        id = R.string.current_date_,
+                        trackingDate.dateFormat.format(trackingDate.currentDate)),
+                style =
+                    MaterialTheme.typography.titleSmall.copy(
+                        color =
+                            MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = NekoColors.mediumAlphaHighContrast)),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Gap(8.dp)
-            TextButton(onClick = { trackDateChanged(RemoveTrackingDate(trackingDate.readingDate, trackAndService)) }) {
-                Text(
-                    text = stringResource(id = R.string.remove),
-                    style = MaterialTheme.typography.titleMedium.copy(color = themeColorState.buttonColor),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            Gap(Size.tiny)
+            TextButton(
+                onClick = {
+                    trackDateChanged(RemoveTrackingDate(trackingDate.readingDate, trackAndService))
+                }) {
+                    Text(
+                        text = stringResource(id = R.string.remove),
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(
+                                color = themeColorState.buttonColor),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
         } else {
             showDateField = true
         }
 
-        val suggestedDateEpoch = when (trackingDate.readingDate) {
-            ReadingDate.Start -> trackSuggestedDates?.startDate
-            ReadingDate.Finish -> trackSuggestedDates?.finishedDate
-        }
+        val suggestedDateEpoch =
+            when (trackingDate.readingDate) {
+                ReadingDate.Start -> trackSuggestedDates?.startDate
+                ReadingDate.Finish -> trackSuggestedDates?.finishedDate
+            }
 
         if (suggestedDateEpoch != null && suggestedDateEpoch != 0L) {
-            val suggestedDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(suggestedDateEpoch), ZoneId.systemDefault()).toLocalDate()
-            val currentDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(trackingDate.currentDate), ZoneId.systemDefault()).toLocalDate()
+            val suggestedDate =
+                LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(suggestedDateEpoch), ZoneId.systemDefault())
+                    .toLocalDate()
+            val currentDate =
+                LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(trackingDate.currentDate), ZoneId.systemDefault())
+                    .toLocalDate()
 
             if ((suggestedDate.atStartOfDay() != currentDate.atStartOfDay())) {
-                Gap(8.dp)
-                TextButton(onClick = { trackDateChanged(EditTrackingDate(trackingDate.readingDate, suggestedDate, trackAndService)) }) {
-                    Text(
-                        text = stringResource(id = R.string.use_suggested_date_of_, suggestedDate.format(dateTimeFormatter)),
-                        style = MaterialTheme.typography.titleMedium.copy(color = themeColorState.buttonColor),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+                Gap(Size.tiny)
+                TextButton(
+                    onClick = {
+                        trackDateChanged(
+                            EditTrackingDate(
+                                trackingDate.readingDate, suggestedDate, trackAndService))
+                    }) {
+                        Text(
+                            text =
+                                stringResource(
+                                    id = R.string.use_suggested_date_of_,
+                                    suggestedDate.format(dateTimeFormatter)),
+                            style =
+                                MaterialTheme.typography.titleMedium.copy(
+                                    color = themeColorState.buttonColor),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
             }
         }
 
         if (!showDateField && currentDateExists) {
-            Gap(8.dp)
+            Gap(Size.tiny)
             TextButton(onClick = { showDateField = !showDateField }) {
                 Text(
                     text = stringResource(id = R.string.edit),
-                    style = MaterialTheme.typography.titleMedium.copy(color = themeColorState.buttonColor),
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
+                            color = themeColorState.buttonColor),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
 
         if (showDateField) {
-            Gap(8.dp)
-            val format = when {
-                dateTimePattern.startsWith("MM", true) -> Format.MMDDYYYY
-                dateTimePattern.startsWith("YY", true) -> Format.YYYYMMDD
-                dateTimePattern.startsWith("DD", true) -> Format.DDMMYYYY
-                else -> Format.YYYYMMDD
-            }
+            Gap(Size.tiny)
+            val format =
+                when {
+                    dateTimePattern.startsWith("MM", true) -> Format.MMDDYYYY
+                    dateTimePattern.startsWith("YY", true) -> Format.YYYYMMDD
+                    dateTimePattern.startsWith("DD", true) -> Format.DDMMYYYY
+                    else -> Format.YYYYMMDD
+                }
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
                 Arrangement.SpaceBetween,
             ) {
                 DateTextField(
-                    onEditingComplete = { currentDate -> newDate = currentDate },
+                    onValueChanged = { currentDate -> newDate = currentDate },
                     format = format,
                     maxDate = LocalDate.now(),
-                    contentTextStyle = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
+                    textStyle =
+                        MaterialTheme.typography.headlineSmall.copy(
+                            color = MaterialTheme.colorScheme.onSurface),
                     cursorBrush = SolidColor(themeColorState.buttonColor),
-                    hintTextStyle = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)),
+                    hintTextStyle =
+                        MaterialTheme.typography.headlineSmall.copy(
+                            color =
+                                MaterialTheme.colorScheme.onSurface.copy(
+                                    alpha = NekoColors.disabledAlphaHighContrast)),
+                    delimiterSpacing = Size.extraExtraTiny,
                 )
                 ElevatedButton(
-                    onClick = { trackDateChanged(EditTrackingDate(trackingDate.readingDate, newDate!!, trackAndService)) },
-                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor, contentColor = MaterialTheme.colorScheme.surface),
+                    onClick = {
+                        trackDateChanged(
+                            EditTrackingDate(trackingDate.readingDate, newDate!!, trackAndService))
+                    },
+                    colors =
+                        ButtonDefaults.elevatedButtonColors(
+                            containerColor = themeColorState.buttonColor,
+                            contentColor = MaterialTheme.colorScheme.surface),
                     enabled = newDate != null,
                 ) {
                     Text(text = stringResource(id = android.R.string.ok))

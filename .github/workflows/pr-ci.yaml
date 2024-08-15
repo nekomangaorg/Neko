@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  check_wrapper:
+  pr_check_wrapper:
     name: Validate Gradle Wrapper
     runs-on: ubuntu-latest
     steps:
@@ -12,9 +12,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1.1.0
+        uses: gradle/wrapper-validation-action@v3.4.2
 
-  build:
+  pr_build:
     runs-on: ubuntu-latest
     steps:
       - name: clone repo
@@ -26,12 +26,7 @@ jobs:
           distribution: adopt
           java-version: 17
 
-      - name: Copy ci gradle.properties
-        run: |
-          mkdir -p ~/.gradle
-          cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
-
       - name: Build app
-        uses: eskatos/gradle-command-action@v2.11.1
+        uses: eskatos/gradle-command-action@v3.4.2
         with:
           arguments: assembleDebug

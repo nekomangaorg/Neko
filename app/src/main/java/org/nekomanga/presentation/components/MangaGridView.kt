@@ -53,15 +53,12 @@ fun MangaGridWithHeader(
         contentPadding = contentPadding,
     ) {
         groupedManga.forEach { (stringRes, allGrids) ->
-            stickyHeader {
-                HeaderCard(stringResource(id = stringRes))
-            }
+            stickyHeader { HeaderCard(stringResource(id = stringRes)) }
             gridItems(
                 items = allGrids,
                 columns = columns,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = Size.small),
+                horizontalArrangement = Arrangement.spacedBy(Size.small),
             ) { displayManga ->
                 MangaGridItem(
                     displayManga = displayManga,
@@ -94,15 +91,12 @@ fun MangaGrid(
     LazyVerticalGrid(
         columns = cells,
         state = scrollState,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Size.tiny),
+        modifier = Modifier.fillMaxSize().padding(Size.tiny),
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Size.tiny),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         itemsIndexed(mangaList, key = { _, display -> display.mangaId }) { index, displayManga ->
-
             LaunchedEffect(scrollState) {
                 if (!lastPage && index >= mangaList.size - 1) {
                     loadNextItems()
@@ -131,18 +125,19 @@ fun MangaGridItem(
 ) {
     Box(modifier = modifier) {
         Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(Shapes.coverRadius))
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                )
-                .padding(2.dp),
+            modifier =
+                Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
+                    .combinedClickable(
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                    )
+                    .padding(Size.extraTiny),
         ) {
-            val subtitleText = when (displayManga.displayTextRes) {
-                null -> displayManga.displayText
-                else -> stringResource(displayManga.displayTextRes)
-            }
+            val subtitleText =
+                when (displayManga.displayTextRes) {
+                    null -> displayManga.displayText
+                    else -> stringResource(displayManga.displayTextRes)
+                }
 
             if (isComfortable) {
                 Column {
@@ -184,8 +179,7 @@ fun ColumnScope.ComfortableGridItem(
     MangaGridTitle(
         title = manga.title,
         hasSubtitle = subtitleText.isNotBlank(),
-
-        )
+    )
 
     MangaGridSubtitle(subtitleText = subtitleText)
 }
@@ -204,22 +198,26 @@ fun BoxScope.CompactGridItem(
     )
 
     Box(
-        modifier = Modifier
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(Color.Transparent, Color.Black.copy(NekoColors.veryLowContrast), Color.Black.copy(NekoColors.highAlphaLowContrast)),
-                ),
-                shape = RoundedCornerShape(
-                    bottomStart = Shapes.coverRadius,
-                    bottomEnd = Shapes.coverRadius,
-                ),
-            )
-            .matchParentSize(),
+        modifier =
+            Modifier.background(
+                    brush =
+                        Brush.verticalGradient(
+                            colors =
+                                listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(NekoColors.veryLowContrast),
+                                    Color.Black.copy(NekoColors.highAlphaLowContrast)),
+                        ),
+                    shape =
+                        RoundedCornerShape(
+                            bottomStart = Shapes.coverRadius,
+                            bottomEnd = Shapes.coverRadius,
+                        ),
+                )
+                .matchParentSize(),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomStart),
+            modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
         ) {
             MangaGridTitle(
                 title = manga.title,
@@ -243,17 +241,20 @@ fun MangaGridTitle(
 ) {
     Text(
         text = title,
-        style = if (isComfortable) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
+        style =
+            if (isComfortable) MaterialTheme.typography.bodySmall
+            else MaterialTheme.typography.bodyMedium,
         color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White,
         fontWeight = FontWeight.Medium,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.padding(
-            top = Size.tiny,
-            bottom = if (hasSubtitle) Size.none else Size.tiny,
-            start = 6.dp,
-            end = 6.dp,
-        ),
+        modifier =
+            Modifier.padding(
+                top = Size.tiny,
+                bottom = if (hasSubtitle) Size.none else Size.tiny,
+                start = 6.dp,
+                end = 6.dp,
+            ),
     )
 }
 
@@ -264,11 +265,13 @@ fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
             text = subtitleText,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
-            color = if (isComfortable) MaterialTheme.colorScheme.onSurface else Color.White.copy(alpha = NekoColors.mediumAlphaLowContrast),
+            color =
+                if (isComfortable) MaterialTheme.colorScheme.onSurface
+                else Color.White.copy(alpha = NekoColors.mediumAlphaLowContrast),
             fontWeight = if (isComfortable) FontWeight.Normal else FontWeight.SemiBold,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .padding(
+            modifier =
+                Modifier.padding(
                     top = Size.none,
                     bottom = Size.tiny,
                     start = 6.dp,

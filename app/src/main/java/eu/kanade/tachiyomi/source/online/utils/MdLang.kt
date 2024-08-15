@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.source.online.utils
 
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int) {
     ALBANIAN("sq", "Albanian", R.drawable.ic_flag_sq),
@@ -54,9 +54,6 @@ enum class MdLang(val lang: String, val prettyPrint: String, val iconResId: Int)
     ;
 
     companion object {
-        fun fromIsoCode(isoCode: String): MdLang? =
-            values().firstOrNull {
-                it.lang == isoCode
-            }
+        fun fromIsoCode(isoCode: String): MdLang? = values().firstOrNull { it.lang == isoCode }
     }
 }

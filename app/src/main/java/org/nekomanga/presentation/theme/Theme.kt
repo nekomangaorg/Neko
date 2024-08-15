@@ -13,12 +13,13 @@ fun NekoTheme(
 ) {
     val context = LocalContext.current
 
-    val (colorScheme) = createMdc3Theme(
-        context = context,
-        layoutDirection = LayoutDirection.Ltr,
-        setTextColors = true,
-        readTypography = false,
-    )
+    val (colorScheme) =
+        createMdc3Theme(
+            context = context,
+            layoutDirection = LayoutDirection.Ltr,
+            setTextColors = true,
+            readTypography = false,
+        )
 
     MaterialTheme(
         colorScheme = colorScheme!!,

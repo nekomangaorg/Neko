@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
 import android.content.Context
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
@@ -9,11 +8,10 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.util.system.withIOContext
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 
-/**
- * Loader used to retrieve the [PageLoader] for a given chapter.
- */
+/** Loader used to retrieve the [PageLoader] for a given chapter. */
 class ChapterLoader(
     private val context: Context,
     private val downloadManager: DownloadManager,
@@ -38,8 +36,7 @@ class ChapterLoader(
                 val loader = getPageLoader(chapter)
                 chapter.pageLoader = loader
 
-                val pages = loader.getPages()
-                    .onEach { it.chapter = chapter }
+                val pages = loader.getPages().onEach { it.chapter = chapter }
 
                 if (pages.isEmpty()) {
                     throw Exception(context.getString(R.string.no_pages_found))
@@ -59,21 +56,18 @@ class ChapterLoader(
         }
     }
 
-    /**
-     * Checks [chapter] to be loaded based on present pages and loader in addition to state.
-     */
+    /** Checks [chapter] to be loaded based on present pages and loader in addition to state. */
     private fun chapterIsReady(chapter: ReaderChapter): Boolean {
         return chapter.state is ReaderChapter.State.Loaded && chapter.pageLoader != null
     }
 
-    /**
-     * Returns the page loader to use for this [chapter].
-     */
+    /** Returns the page loader to use for this [chapter]. */
     private fun getPageLoader(chapter: ReaderChapter): PageLoader {
         val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
         val source = chapter.chapter.getHttpSource(sourceManager)
         return when {
-            isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager, downloadProvider)
+            isDownloaded ->
+                DownloadPageLoader(chapter, manga, source, downloadManager, downloadProvider)
             else -> HttpPageLoader(chapter, source)
         }
     }

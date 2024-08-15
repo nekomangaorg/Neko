@@ -30,27 +30,39 @@ fun SortRow(
     rowTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
-    val (tintColor, textColor) = when (disabled) {
-        true -> MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast) to MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast)
-        false -> themeColorState.buttonColor to MaterialTheme.colorScheme.onSurface
-    }
+    val (tintColor, textColor) =
+        when (disabled) {
+            true ->
+                MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast) to
+                    MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast)
+            false -> themeColorState.buttonColor to MaterialTheme.colorScheme.onSurface
+        }
 
     Row(
-        modifier = modifier
-            .clickable {
-                if (!disabled) {
-                    changeSortState(sortState, sortChanged)
+        modifier =
+            modifier
+                .clickable {
+                    if (!disabled) {
+                        changeSortState(sortState, sortChanged)
+                    }
                 }
-            }
-            .padding(horizontal = 12.dp, vertical = 16.dp),
+                .padding(horizontal = 12.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         when (sortState) {
             MangaConstants.SortState.Ascending -> {
-                Icon(imageVector = Icons.Filled.ArrowUpward, contentDescription = null, tint = tintColor, modifier = Modifier.size(24.dp))
+                Icon(
+                    imageVector = Icons.Filled.ArrowUpward,
+                    contentDescription = null,
+                    tint = tintColor,
+                    modifier = Modifier.size(24.dp))
             }
             MangaConstants.SortState.Descending -> {
-                Icon(imageVector = Icons.Filled.ArrowDownward, contentDescription = null, tint = tintColor, modifier = Modifier.size(24.dp))
+                Icon(
+                    imageVector = Icons.Filled.ArrowDownward,
+                    contentDescription = null,
+                    tint = tintColor,
+                    modifier = Modifier.size(24.dp))
             }
             MangaConstants.SortState.None -> {
                 Gap(24.dp)
@@ -61,11 +73,15 @@ fun SortRow(
     }
 }
 
-private fun changeSortState(sortState: MangaConstants.SortState, sortChanged: (MangaConstants.SortState) -> Unit) {
-    val newState = when (sortState) {
-        MangaConstants.SortState.Ascending -> MangaConstants.SortState.Descending
-        MangaConstants.SortState.Descending -> MangaConstants.SortState.Ascending
-        MangaConstants.SortState.None -> MangaConstants.SortState.Descending
-    }
+private fun changeSortState(
+    sortState: MangaConstants.SortState,
+    sortChanged: (MangaConstants.SortState) -> Unit
+) {
+    val newState =
+        when (sortState) {
+            MangaConstants.SortState.Ascending -> MangaConstants.SortState.Descending
+            MangaConstants.SortState.Descending -> MangaConstants.SortState.Ascending
+            MangaConstants.SortState.None -> MangaConstants.SortState.Descending
+        }
     sortChanged(newState)
 }

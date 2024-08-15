@@ -39,11 +39,16 @@ class PageHandler {
             TimberKt.d { "fetching page list" }
 
             try {
-                val chapterAttributesDto = networkServices.service.viewChapter(chapter.mangadex_chapter_id)
-                    .onFailure {
-                        this.log("trying to fetch page list")
-                        throw Exception("error returned from chapterResponse")
-                    }.getOrThrow().data.attributes
+                val chapterAttributesDto =
+                    networkServices.service
+                        .viewChapter(chapter.mangadex_chapter_id)
+                        .onFailure {
+                            this.log("trying to fetch page list")
+                            throw Exception("error returned from chapterResponse")
+                        }
+                        .getOrThrow()
+                        .data
+                        .attributes
 
                 val externalUrl = chapterAttributesDto.externalUrl
                 val currentDate = System.currentTimeMillis()
@@ -55,34 +60,35 @@ class PageHandler {
                         "azuki manga".equals(chapter.scanlator, true) -> {
                             return@withContext azukiHandler.fetchPageList(externalUrl)
                         }
-
                         "mangahot".equals(chapter.scanlator, true) -> {
                             return@withContext mangaHotHandler.fetchPageList(externalUrl)
                         }
-
                         "mangaplus".equals(chapter.scanlator, true) -> {
                             return@withContext mangaPlusHandler.fetchPageList(externalUrl)
                         }
-                        /*"comikey".equals(chapter.scanlator, true) -> {
+                        "comikey".equals(chapter.scanlator, true) -> {
                             return@withContext comikeyHandler.fetchPageList(externalUrl)
-                        }*/
+                        }
                         "bilibili comics".equals(chapter.scanlator, true) -> {
                             return@withContext bilibiliHandler.fetchPageList(externalUrl)
                         }
-
-                        else -> throw Exception("${chapter.scanlator} not supported, try webview")
+                        else -> throw Exception("${chapter.scanlator} not supported, try WebView")
                     }
                 }
 
                 if (chapterDateNewer) {
-                    throw Exception("This chapter has no pages, it might not be release yet, try refreshing")
+                    throw Exception(
+                        "This chapter has no pages, it might not be release yet, try refreshing")
                 }
 
-                val atHomeDto = networkServices.atHomeService.getAtHomeServer(
-                    chapter.mangadex_chapter_id,
-                    preferences.usePort443Only().get(),
-                ).getOrResultError("trying to get at home response")
-                    .getOrThrow { Exception(it.message()) }
+                val atHomeDto =
+                    networkServices.atHomeService
+                        .getAtHomeServer(
+                            chapter.mangadex_chapter_id,
+                            preferences.usePort443Only().get(),
+                        )
+                        .getOrResultError("trying to get at home response")
+                        .getOrThrow { Exception(it.message()) }
 
                 return@withContext pageListParse(
                     chapter.mangadex_chapter_id,
@@ -102,16 +108,18 @@ class PageHandler {
         dataSaver: Boolean,
     ): List<Page> {
         val hash = atHomeDto.chapter.hash
-        val pageArray = if (dataSaver) {
-            atHomeDto.chapter.dataSaver.map { "/data-saver/$hash/$it" }
-        } else {
-            atHomeDto.chapter.data.map { "/data/$hash/$it" }
-        }
+        val pageArray =
+            if (dataSaver) {
+                atHomeDto.chapter.dataSaver.map { "/data-saver/$hash/$it" }
+            } else {
+                atHomeDto.chapter.data.map { "/data/$hash/$it" }
+            }
         val now = Date().time
 
-        val pages = pageArray.mapIndexed { pos, imgUrl ->
-            Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterId)
-        }
+        val pages =
+            pageArray.mapIndexed { pos, imgUrl ->
+                Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterId)
+            }
 
         imageHandler.updateTokenTracker(chapterId, now)
 

@@ -12,24 +12,19 @@ class MdUtil {
 
     companion object {
 
-        /**
-         * Get the manga offset pages are 1 based, so subtract 1
-         */
+        /** Get the manga offset pages are 1 based, so subtract 1 */
         fun getMangaListOffset(page: Int): Int = (MdConstants.Limits.manga * (page - 1))
 
-        /**
-         * Get the latest chapter  offset pages are 1 based, so subtract 1
-         */
+        /** Get the latest chapter offset pages are 1 based, so subtract 1 */
         fun getLatestChapterListOffset(page: Int): Int = (MdConstants.Limits.latest * (page - 1))
 
-        val jsonParser =
-            Json {
-                isLenient = true
-                ignoreUnknownKeys = true
-                allowSpecialFloatingPointValues = true
-                useArrayPolymorphism = true
-                prettyPrint = true
-            }
+        val jsonParser = Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+            allowSpecialFloatingPointValues = true
+            useArrayPolymorphism = true
+            prettyPrint = true
+        }
 
         // Get the ID from the manga url
         fun getMangaUUID(url: String): String {
@@ -42,27 +37,33 @@ class MdUtil {
             return Parser.unescapeEntities(dirtyString, false)
         }
 
-        val apiDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-            .apply { timeZone = TimeZone.getTimeZone("UTC") }
+        val apiDateFormat =
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
 
-        val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
-            .apply { timeZone = TimeZone.getTimeZone("UTC") }
+        val dateFormatter =
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US).apply {
+                timeZone = TimeZone.getTimeZone("UTC")
+            }
 
-        fun parseDate(dateAsString: String): Long =
-            dateFormatter.parse(dateAsString)?.time ?: 0
+        fun parseDate(dateAsString: String): Long = dateFormatter.parse(dateAsString)?.time ?: 0
 
         fun cdnCoverUrl(dexId: String, fileName: String, quality: Int): String {
-            val coverQualitySuffix = when (quality) {
-                1 -> ".512.jpg"
-                2 -> ".256.jpg"
-                else -> ""
-            }
+            val coverQualitySuffix =
+                when (quality) {
+                    1 -> ".512.jpg"
+                    2 -> ".256.jpg"
+                    else -> ""
+                }
             return "${MdConstants.cdnUrl}/covers/$dexId/$fileName$coverQualitySuffix"
         }
 
         fun getLangsToShow(preferences: PreferencesHelper) =
-            //this prevents langauges that don't exist anymore from causing a parse exception
-            preferences.langsToShow().get().split(",").filter { MdLang.values().firstOrNull { mdLang -> it == mdLang.lang } != null }
+            // this prevents langauges that don't exist anymore from causing a parse exception
+            preferences.langsToShow().get().split(",").filter {
+                MdLang.values().firstOrNull { mdLang -> it == mdLang.lang } != null
+            }
 
         fun getTitle(
             titleMap: Map<String, String?>,
@@ -77,7 +78,8 @@ class MdUtil {
                 ?: titleMap["${MdLang.KOREAN.lang}-ro"]
                 ?: titleMap[MdLang.CHINESE_TRAD.lang]
                 ?: titleMap[MdLang.CHINESE_SIMPLIFIED.lang]
-                ?: titleMap.entries.firstOrNull()?.value ?: ""
+                ?: titleMap.entries.firstOrNull()?.value
+                ?: ""
         }
     }
 }

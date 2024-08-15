@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.recents
 import android.app.Dialog
 import android.os.Bundle
 import com.bluelinelabs.conductor.Controller
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -12,9 +11,11 @@ import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
 import eu.kanade.tachiyomi.util.system.isPromptChecked
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
+import org.nekomanga.R
 
-class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T : RemoveHistoryDialog.Listener {
+class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle) where
+T : Controller,
+T : RemoveHistoryDialog.Listener {
 
     private var manga: Manga? = null
 
@@ -32,7 +33,8 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val activity = activity!!
 
-        return activity.materialAlertDialog()
+        return activity
+            .materialAlertDialog()
             .setCustomTitleAndMessage(
                 R.string.reset_chapter_question,
                 if (chapter?.name != null) {
@@ -51,9 +53,7 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
                 ),
             )
             .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton(R.string.reset) { dialog, _ ->
-                onPositive(dialog.isPromptChecked)
-            }
+            .setPositiveButton(R.string.reset) { dialog, _ -> onPositive(dialog.isPromptChecked) }
             .create()
     }
 

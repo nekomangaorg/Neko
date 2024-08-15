@@ -26,7 +26,8 @@ class GLUtil private constructor() {
 
                 // Query actual list configurations
                 val configurationsList = arrayOfNulls<EGLConfig>(totalConfigurations[0])
-                egl.eglGetConfigs(display, configurationsList, totalConfigurations[0], totalConfigurations)
+                egl.eglGetConfigs(
+                    display, configurationsList, totalConfigurations[0], totalConfigurations)
 
                 val textureSize = IntArray(1)
                 var maximumTextureSize = 0
@@ -34,7 +35,8 @@ class GLUtil private constructor() {
                 // Iterate through all the configurations to located the maximum texture size
                 for (i in 0 until totalConfigurations[0]) {
                     // Only need to check for width since opengl textures are always squared
-                    egl.eglGetConfigAttrib(display, configurationsList[i], EGL10.EGL_MAX_PBUFFER_WIDTH, textureSize)
+                    egl.eglGetConfigAttrib(
+                        display, configurationsList[i], EGL10.EGL_MAX_PBUFFER_WIDTH, textureSize)
 
                     // Keep track of the maximum texture size
                     if (maximumTextureSize < textureSize[0]) maximumTextureSize = textureSize[0]

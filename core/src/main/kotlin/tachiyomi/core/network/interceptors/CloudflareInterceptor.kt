@@ -31,12 +31,15 @@ class CloudflareInterceptor(
         return response.code in ERROR_CODES && response.header("Server") in SERVER_CHECK
     }
 
-    override fun intercept(chain: Interceptor.Chain, request: Request, response: Response): Response {
+    override fun intercept(
+        chain: Interceptor.Chain,
+        request: Request,
+        response: Response
+    ): Response {
         try {
             response.close()
             cookieManager.remove(request.url, COOKIE_NAMES, 0)
-            val oldCookie = cookieManager.get(request.url)
-                .firstOrNull { it.name == "cf_clearance" }
+            val oldCookie = cookieManager.get(request.url).firstOrNull { it.name == "cf_clearance" }
             resolveWithWebView(request, oldCookie)
 
             return chain.proceed(request)
@@ -68,43 +71,45 @@ class CloudflareInterceptor(
         executor.execute {
             webview = createWebView(originalRequest)
 
-            webview?.webViewClient = object : WebViewClientCompat() {
-                override fun onPageFinished(view: WebView, url: String) {
-                    fun isCloudFlareBypassed(): Boolean {
-                        return cookieManager.get(origRequestUrl.toHttpUrl())
-                            .firstOrNull { it.name == "cf_clearance" }
-                            .let { it != null && it != oldCookie }
-                    }
+            webview?.webViewClient =
+                object : WebViewClientCompat() {
+                    override fun onPageFinished(view: WebView, url: String) {
+                        fun isCloudFlareBypassed(): Boolean {
+                            return cookieManager
+                                .get(origRequestUrl.toHttpUrl())
+                                .firstOrNull { it.name == "cf_clearance" }
+                                .let { it != null && it != oldCookie }
+                        }
 
-                    if (isCloudFlareBypassed()) {
-                        cloudflareBypassed = true
-                        latch.countDown()
-                    }
+                        if (isCloudFlareBypassed()) {
+                            cloudflareBypassed = true
+                            latch.countDown()
+                        }
 
-                    if (url == origRequestUrl && !challengeFound) {
-                        // The first request didn't return the challenge, abort.
-                        latch.countDown()
-                    }
-                }
-
-                override fun onReceivedErrorCompat(
-                    view: WebView,
-                    errorCode: Int,
-                    description: String?,
-                    failingUrl: String,
-                    isMainFrame: Boolean,
-                ) {
-                    if (isMainFrame) {
-                        if (errorCode in ERROR_CODES) {
-                            // Found the Cloudflare challenge page.
-                            challengeFound = true
-                        } else {
-                            // Unlock thread, the challenge wasn't found.
+                        if (url == origRequestUrl && !challengeFound) {
+                            // The first request didn't return the challenge, abort.
                             latch.countDown()
                         }
                     }
+
+                    override fun onReceivedErrorCompat(
+                        view: WebView,
+                        errorCode: Int,
+                        description: String?,
+                        failingUrl: String,
+                        isMainFrame: Boolean,
+                    ) {
+                        if (isMainFrame) {
+                            if (errorCode in ERROR_CODES) {
+                                // Found the Cloudflare challenge page.
+                                challengeFound = true
+                            } else {
+                                // Unlock thread, the challenge wasn't found.
+                                latch.countDown()
+                            }
+                        }
+                    }
                 }
-            }
 
             webview?.loadUrl(origRequestUrl, headers)
         }

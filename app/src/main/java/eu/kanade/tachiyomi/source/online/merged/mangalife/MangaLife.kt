@@ -31,17 +31,17 @@ class MangaLife : ReducedHttpSource() {
     override val name = MangaLife.name
     override val baseUrl = "https://manga4life.com"
 
-    override val client: OkHttpClient = network.cloudFlareClient.newBuilder()
-        .connectTimeout(1, TimeUnit.MINUTES)
-        .readTimeout(1, TimeUnit.MINUTES)
-        .writeTimeout(1, TimeUnit.MINUTES)
-        .rateLimit(2)
-        .build()
+    override val client: OkHttpClient =
+        network.cloudFlareClient
+            .newBuilder()
+            .connectTimeout(1, TimeUnit.MINUTES)
+            .readTimeout(1, TimeUnit.MINUTES)
+            .writeTimeout(1, TimeUnit.MINUTES)
+            .rateLimit(2)
+            .build()
 
-    override val headers = Headers.Builder()
-        .add("Referer", baseUrl)
-        .add("User-Agent", userAgent)
-        .build()
+    override val headers =
+        Headers.Builder().add("Referer", baseUrl).add("User-Agent", userAgent).build()
 
     lateinit var directory: Map<String, MangaLifeMangaDto>
 
@@ -57,13 +57,18 @@ class MangaLife : ReducedHttpSource() {
                 val response = client.newCall(GET("$baseUrl/search/", headers)).await()
                 val document = response.asJsoup()
                 directory = directoryFromDocument(document).associateBy { it.name }
-                thumbnailUrl = document.select(".SearchResult > .SearchResultCover img").first()!!.attr("ng-src")
+                thumbnailUrl =
+                    document
+                        .select(".SearchResult > .SearchResultCover img")
+                        .first()!!
+                        .attr("ng-src")
             }
 
             // val searchResults =
-            val results = FuzzySearch.extractSorted(query, directory.keys, 88).mapNotNull {
-                directory[it.string]
-            }
+            val results =
+                FuzzySearch.extractSorted(query, directory.keys, 88).mapNotNull {
+                    directory[it.string]
+                }
 
             parseMangaList(results)
         }
@@ -81,86 +86,102 @@ class MangaLife : ReducedHttpSource() {
 
     override suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
-            com.github.michaelbull.result.runCatching {
-                val response = client.newCall(GET("$baseUrl$mangaUrl", headers)).await()
-                val vmChapters =
-                    response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
-                        .substringAfter("vm.Chapters = ").substringBefore(";")
+            com.github.michaelbull.result
+                .runCatching {
+                    val response = client.newCall(GET("$baseUrl$mangaUrl", headers)).await()
+                    val vmChapters =
+                        response
+                            .asJsoup()
+                            .select("script:containsData(MainFunction)")
+                            .first()!!
+                            .data()
+                            .substringAfter("vm.Chapters = ")
+                            .substringBefore(";")
 
-                val mangaLifeChapters = json.decodeFromString<List<MangaLifeChapterDto>>(vmChapters)
-                val uniqueTypes = arrayOf("Volume", "Special")
-                mangaLifeChapters.map { chp ->
-                    SChapter.create().apply {
-                        val chapterName = mutableListOf<String>()
-                        // Build chapter name
-                        if (chp.type in uniqueTypes) {
-                            this.vol = calculateChapterNumber(chp.chapter, true)
-                            val prefix = when (chp.type != "Volume") {
-                                true -> "${chp.type} "
-                                false -> "Vol."
-                            }
-                            chapterName.add("$prefix${this.vol}")
-                        } else {
-                            // The old logic would apply the name from either the "ChapterName" or Type + chapterNumber
-                            // To match dex more this doesn't use name as it doesnt seem used often see Gantz (which doesnt make it here anyways cause its
-                            // a manga)) and the text the extension shows for that would be ex. Special Osaka 1 vs Neko Special 1 - Special Osaka 1
-                            // get volume
-                            var volResult = chp.type.substringBefore(" -", "")
-                            if (volResult.startsWith("S")) {
-                                volResult = volResult.substringAfter("S")
+                    val mangaLifeChapters =
+                        json.decodeFromString<List<MangaLifeChapterDto>>(vmChapters)
+                    val uniqueTypes = arrayOf("Volume", "Special")
+                    mangaLifeChapters.map { chp ->
+                        SChapter.create().apply {
+                            val chapterName = mutableListOf<String>()
+                            // Build chapter name
+                            if (chp.type in uniqueTypes) {
+                                this.vol = calculateChapterNumber(chp.chapter, true)
+                                val prefix =
+                                    when (chp.type != "Volume") {
+                                        true -> "${chp.type} "
+                                        false -> "Vol."
+                                    }
+                                chapterName.add("$prefix${this.vol}")
                             } else {
-                                volResult = volResult.substringAfter(" ")
-                            }
-                            if (volResult.isNotEmpty()) {
-                                this.vol = volResult
-                                chapterName.add("Vol.$volResult")
+                                // The old logic would apply the name from either the "ChapterName"
+                                // or Type + chapterNumber
+                                // To match dex more this doesn't use name as it doesnt seem used
+                                // often see Gantz (which doesnt make it here anyways cause its
+                                // a manga)) and the text the extension shows for that would be ex.
+                                // Special Osaka 1 vs Neko Special 1 - Special Osaka 1
+                                // get volume
+                                var volResult = chp.type.substringBefore(" -", "")
+                                if (volResult.startsWith("S")) {
+                                    volResult = volResult.substringAfter("S")
+                                } else {
+                                    volResult = volResult.substringAfter(" ")
+                                }
+                                if (volResult.isNotEmpty()) {
+                                    this.vol = volResult
+                                    chapterName.add("Vol.$volResult")
+                                }
+
+                                // get chapter
+                                this.chapter_txt = chp.chapterString()
+                                chapterName.add(this.chapter_txt)
                             }
 
-                            // get chapter
-                            this.chapter_txt = chp.chapterString()
-                            chapterName.add(this.chapter_txt)
+                            // get text
+                            if (chp.chapterName?.isNotEmpty() == true) {
+                                if (chapterName.isNotEmpty()) {
+                                    chapterName.add("-")
+                                }
+                                chapterName.add(chp.chapterName)
+                            }
+
+                            this.name = chapterName.joinToString(" ")
+
+                            url =
+                                "/read-online/" +
+                                    response.request.url.toString().substringAfter("/manga/") +
+                                    chapterURLEncode(chp.chapter)
+                            mangadex_chapter_id = url.substringAfter("/read-online/")
+                            date_upload =
+                                runCatching {
+                                        when (chp.date.isEmpty()) {
+                                            true -> 0L
+                                            false -> dateFormat.parse("${chp.date} +0600")?.time!!
+                                        }
+                                    }
+                                    .onFailure { TimberKt.e(it) }
+                                    .getOrElse { 0L }
+
+                            scanlator = this@MangaLife.name
                         }
-
-                        // get text
-                        if (chp.chapterName?.isNotEmpty() == true) {
-                            if (chapterName.isNotEmpty()) {
-                                chapterName.add("-")
-                            }
-                            chapterName.add(chp.chapterName)
-                        }
-
-                        this.name = chapterName.joinToString(" ")
-
-                        url = "/read-online/" + response.request.url.toString()
-                            .substringAfter("/manga/") + chapterURLEncode(chp.chapter)
-                        mangadex_chapter_id = url.substringAfter("/read-online/")
-                        date_upload = runCatching {
-                            when (chp.date.isEmpty()) {
-                                true -> 0L
-                                false -> dateFormat.parse("${chp.date} +0600")?.time!!
-                            }
-                        }.onFailure {
-                            TimberKt.e(it)
-                        }.getOrElse { 0L }
-
-                        scanlator = this@MangaLife.name
                     }
                 }
-            }.mapError {
-                TimberKt.e(it) { "Error merging with manga life" }
-                "Unknown Exception with merge".toResultError()
-            }
+                .mapError {
+                    TimberKt.e(it) { "Error merging with manga life" }
+                    "Unknown Exception with merge".toResultError()
+                }
         }
     }
 
-    private fun MangaLifeChapterDto.chapterString(): String = "Ch.${calculateChapterNumber(this.chapter, true)}"
+    private fun MangaLifeChapterDto.chapterString(): String =
+        "Ch.${calculateChapterNumber(this.chapter, true)}"
 
     /**
      * Returns an observable with the page list for a chapter.
      *
      * @param chapter the chapter whose page list has to be fetched.
      */
-    override suspend fun fetchPageList(chapter: SChapter): List<Page> {
+    override suspend fun getPageList(chapter: SChapter): List<Page> {
         val response = client.newCall(GET("$baseUrl${chapter.url}", headers)).await()
         return pageListParse(response)
     }
@@ -168,18 +189,18 @@ class MangaLife : ReducedHttpSource() {
     private fun pageListParse(response: Response): List<Page> {
         val document = response.asJsoup()
         val script = document.select("script:containsData(MainFunction)").first()!!.data()
-        val chapterJson = script.substringAfter("vm.CurChapter = ")
-            .substringBefore(";")
+        val chapterJson = script.substringAfter("vm.CurChapter = ").substringBefore(";")
         val curChapter = json.decodeFromString<MangaLifeChapterDto>(chapterJson)
 
         val host = "https://" + script.substringAfter("vm.CurPathName = \"").substringBefore("\"")
 
         val titleURI = script.substringAfter("vm.IndexName = \"").substringBefore("\"")
 
-        val seasonURI = when (curChapter.directory.isNullOrBlank()) {
-            true -> ""
-            false -> "${curChapter.directory}/"
-        }
+        val seasonURI =
+            when (curChapter.directory.isNullOrBlank()) {
+                true -> ""
+                false -> "${curChapter.directory}/"
+            }
 
         val path = "$host/manga/$titleURI/$seasonURI"
 
@@ -191,13 +212,17 @@ class MangaLife : ReducedHttpSource() {
         }
     }
 
-    /**
-     * Get the entire manga life results from the json and store in memory
-     */
+    /** Get the entire manga life results from the json and store in memory */
     private fun directoryFromDocument(document: Document): List<MangaLifeMangaDto> {
-        val jsonValue = document.select("script:containsData(MainFunction)").first()!!.data()
-            .substringAfter("vm.Directory = ").substringBefore("vm.GetIntValue").trim()
-            .replace(";", " ")
+        val jsonValue =
+            document
+                .select("script:containsData(MainFunction)")
+                .first()!!
+                .data()
+                .substringAfter("vm.Directory = ")
+                .substringBefore("vm.GetIntValue")
+                .trim()
+                .replace(";", " ")
 
         return json.decodeFromString(jsonValue)
     }
@@ -205,8 +230,12 @@ class MangaLife : ReducedHttpSource() {
     private val chapterImageRegex = Regex("""^0+""")
 
     private fun calculateChapterNumber(e: String, cleanString: Boolean = false): String {
-        // cleanString will result in an empty string if chapter number is 0, hence the else if below
-        val a = e.substring(1, e.length - 1).let { if (cleanString) it.replace(chapterImageRegex, "") else it }
+        // cleanString will result in an empty string if chapter number is 0, hence the else if
+        // below
+        val a =
+            e.substring(1, e.length - 1).let {
+                if (cleanString) it.replace(chapterImageRegex, "") else it
+            }
         // If b is not zero, indicates chapter has decimal numbering
         val b = e.substring(e.length - 1).toInt()
         return if (b == 0 && a.isNotEmpty()) {
@@ -224,12 +253,13 @@ class MangaLife : ReducedHttpSource() {
         if (1 != t) {
             index = "-index-$t"
         }
-        val dgt = when {
-            e.toInt() < 100100 -> 4
-            e.toInt() < 101000 -> 3
-            e.toInt() < 110000 -> 2
-            else -> 1
-        }
+        val dgt =
+            when {
+                e.toInt() < 100100 -> 4
+                e.toInt() < 101000 -> 3
+                e.toInt() < 110000 -> 2
+                else -> 1
+            }
         val n = e.substring(dgt, e.length - 1)
         var suffix = ""
         val path = e.substring(e.length - 1).toInt()
@@ -244,8 +274,7 @@ class MangaLife : ReducedHttpSource() {
     }
 
     companion object {
-        @Deprecated("deprecated")
-        const val oldName = "Merged Chapter"
+        @Deprecated("deprecated") const val oldName = "Merged Chapter"
         const val name = "MangaLife"
     }
 }

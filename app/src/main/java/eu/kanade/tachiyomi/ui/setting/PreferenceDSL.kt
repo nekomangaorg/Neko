@@ -19,7 +19,6 @@ import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.mikepenz.iconics.IconicsDrawable
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.startAuthentication
@@ -29,12 +28,13 @@ import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
 import eu.kanade.tachiyomi.widget.preference.TriStateListPreference
+import org.nekomanga.R
 
-@DslMarker
-@Target(AnnotationTarget.TYPE)
-annotation class DSL
+@DslMarker @Target(AnnotationTarget.TYPE) annotation class DSL
 
-inline fun PreferenceManager.newScreen(block: (@DSL PreferenceScreen).() -> Unit): PreferenceScreen {
+inline fun PreferenceManager.newScreen(
+    block: (@DSL PreferenceScreen).() -> Unit
+): PreferenceScreen {
     return createPreferenceScreen(context).also { it.block() }
 }
 
@@ -42,30 +42,39 @@ inline fun PreferenceGroup.preference(block: (@DSL Preference).() -> Unit): Pref
     return initThenAdd(Preference(context), block)
 }
 
-inline fun PreferenceGroup.themePreference(block: (@DSL ThemePreference).() -> Unit): ThemePreference {
+inline fun PreferenceGroup.themePreference(
+    block: (@DSL ThemePreference).() -> Unit
+): ThemePreference {
     return initThenAdd(ThemePreference(context), block)
 }
 
-inline fun PreferenceGroup.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {
+inline fun PreferenceGroup.switchPreference(
+    block: (@DSL SwitchPreferenceCompat).() -> Unit
+): SwitchPreferenceCompat {
     return initThenAdd(SwitchPreferenceCompat(context), block)
 }
 
-inline fun PreferenceGroup.checkBoxPreference(block: (@DSL CheckBoxPreference).() -> Unit): CheckBoxPreference {
+inline fun PreferenceGroup.checkBoxPreference(
+    block: (@DSL CheckBoxPreference).() -> Unit
+): CheckBoxPreference {
     return initThenAdd(CheckBoxPreference(context), block)
 }
 
-inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).() -> Unit): EditTextPreference {
+inline fun PreferenceGroup.editTextPreference(
+    block: (@DSL EditTextPreference).() -> Unit
+): EditTextPreference {
     return initThenAdd(EditTextPreference(context), block).also(::initDialog)
 }
 
-inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).() -> Unit): DropDownPreference {
+inline fun PreferenceGroup.dropDownPreference(
+    block: (@DSL DropDownPreference).() -> Unit
+): DropDownPreference {
     return initThenAdd(DropDownPreference(context), block).also(::initDialog)
 }
 
 inline fun PreferenceGroup.listPreference(
     activity: Activity?,
-    block: (@DSL ListMatPreference).()
-    -> Unit,
+    block: (@DSL ListMatPreference).() -> Unit,
 ): ListMatPreference {
     return initThenAdd(ListMatPreference(activity, context), block)
 }
@@ -91,16 +100,18 @@ inline fun PreferenceGroup.triStateListPreference(
     return initThenAdd(TriStateListPreference(activity, context), block)
 }
 
-inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).() -> Unit): PreferenceCategory {
+inline fun PreferenceScreen.preferenceCategory(
+    block: (@DSL PreferenceCategory).() -> Unit
+): PreferenceCategory {
     return addThenInit(
-        PreferenceCategory(context).apply {
-            isIconSpaceReserved = false
-        },
+        PreferenceCategory(context).apply { isIconSpaceReserved = false },
         block,
     )
 }
 
-inline fun PreferenceScreen.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {
+inline fun PreferenceScreen.switchPreference(
+    block: (@DSL SwitchPreferenceCompat).() -> Unit
+): SwitchPreferenceCompat {
     return initThenAdd(SwitchPreferenceCompat(context), block)
 }
 
@@ -116,7 +127,9 @@ fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
     )
 }
 
-inline fun PreferenceScreen.preferenceScreen(block: (@DSL PreferenceScreen).() -> Unit): PreferenceScreen {
+inline fun PreferenceScreen.preferenceScreen(
+    block: (@DSL PreferenceScreen).() -> Unit
+): PreferenceScreen {
     return addThenInit(preferenceManager.createPreferenceScreen(context), block)
 }
 
@@ -155,7 +168,10 @@ inline fun <P : Preference> PreferenceGroup.addThenInit(p: P, block: P.() -> Uni
 }
 
 inline fun Preference.onClick(crossinline block: () -> Unit) {
-    setOnPreferenceClickListener { block(); true }
+    setOnPreferenceClickListener {
+        block()
+        true
+    }
 }
 
 inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
@@ -207,30 +223,37 @@ fun SwitchPreferenceCompat.requireAuthentication(
     subtitle: String? = null,
     confirmationRequired: Boolean = true,
 ) {
-    onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-        newValue as Boolean
-        if (activity != null && context.isAuthenticationSupported()) {
-            activity.startAuthentication(
-                title,
-                subtitle,
-                confirmationRequired,
-                callback = object : AuthenticatorUtil.AuthenticationCallback() {
-                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                        super.onAuthenticationSucceeded(result)
-                        isChecked = newValue
-                    }
+    onPreferenceChangeListener =
+        Preference.OnPreferenceChangeListener { _, newValue ->
+            newValue as Boolean
+            if (activity != null && context.isAuthenticationSupported()) {
+                activity.startAuthentication(
+                    title,
+                    subtitle,
+                    confirmationRequired,
+                    callback =
+                        object : AuthenticatorUtil.AuthenticationCallback() {
+                            override fun onAuthenticationSucceeded(
+                                result: BiometricPrompt.AuthenticationResult
+                            ) {
+                                super.onAuthenticationSucceeded(result)
+                                isChecked = newValue
+                            }
 
-                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                        super.onAuthenticationError(errorCode, errString)
-                        activity.toast(errString.toString())
-                    }
-                },
-            )
-            false
-        } else {
-            true
+                            override fun onAuthenticationError(
+                                errorCode: Int,
+                                errString: CharSequence
+                            ) {
+                                super.onAuthenticationError(errorCode, errString)
+                                activity.toast(errString.toString())
+                            }
+                        },
+                )
+                false
+            } else {
+                true
+            }
         }
-    }
 }
 
 var Preference.defaultValue: Any?

@@ -1,7 +1,7 @@
 package org.nekomanga.presentation.components.dropdown
 
-import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.foundation.background
+import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,19 +19,31 @@ import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
+import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: ImmutableList<SimpleDropDownItem>, themeColorState: ThemeColorState = defaultThemeColorState()) {
-    val background = Modifier.background(color = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 8.dp))
+fun SimpleDropdownMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    dropDownItems: ImmutableList<SimpleDropDownItem>,
+    themeColorState: ThemeColorState = defaultThemeColorState()
+) {
+    val background =
+        Modifier.background(
+            color =
+                MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+                    themeColorState.buttonColor, 8.dp))
     CascadeDropdownMenu(
         expanded = expanded,
-        offset = DpOffset(8.dp, 8.dp),
+        offset = DpOffset(Size.small, Size.small),
         fixedWidth = 225.dp,
         modifier = background,
         properties = PopupProperties(),
         onDismissRequest = onDismiss,
     ) {
-        val style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
+        val style =
+            MaterialTheme.typography.bodyLarge.copy(
+                color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
         dropDownItems.forEach { item ->
             Row(modifier = background, item = item, style = style, onDismiss = onDismiss)
         }
@@ -39,7 +51,12 @@ fun SimpleDropdownMenu(expanded: Boolean, onDismiss: () -> Unit, dropDownItems: 
 }
 
 @Composable
-private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem, style: TextStyle, onDismiss: () -> Unit) {
+private fun CascadeColumnScope.Row(
+    modifier: Modifier,
+    item: SimpleDropDownItem,
+    style: TextStyle,
+    onDismiss: () -> Unit
+) {
     when (item) {
         is SimpleDropDownItem.Parent -> {
             DropdownMenuItem(
@@ -68,15 +85,25 @@ private fun CascadeColumnScope.Row(modifier: Modifier, item: SimpleDropDownItem,
                 },
             )
         }
-
         is SimpleDropDownItem.Action -> {
-            Item(modifier = modifier, text = item.text.asString(), style = style, onClick = item.onClick, onDismiss = onDismiss)
+            Item(
+                modifier = modifier,
+                text = item.text.asString(),
+                style = style,
+                onClick = item.onClick,
+                onDismiss = onDismiss)
         }
     }
 }
 
 @Composable
-private fun Item(modifier: Modifier, text: String, style: TextStyle, onClick: () -> Unit, onDismiss: () -> Unit) {
+private fun Item(
+    modifier: Modifier,
+    text: String,
+    style: TextStyle,
+    onClick: () -> Unit,
+    onDismiss: () -> Unit
+) {
     MaterialDropdownMenuItem(
         modifier = modifier,
         text = {
@@ -95,5 +122,7 @@ private fun Item(modifier: Modifier, text: String, style: TextStyle, onClick: ()
 @Immutable
 sealed class SimpleDropDownItem {
     data class Action(val text: UiText, val onClick: () -> Unit) : SimpleDropDownItem()
-    data class Parent(val text: UiText, val children: List<SimpleDropDownItem>) : SimpleDropDownItem()
+
+    data class Parent(val text: UiText, val children: List<SimpleDropDownItem>) :
+        SimpleDropDownItem()
 }

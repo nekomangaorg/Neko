@@ -6,19 +6,13 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import okhttp3.Response
 
-/**
- * A basic interface for creating a source. It could be an online source, a local source, etc...
- */
+/** A basic interface for creating a source. It could be an online source, a local source, etc... */
 interface Source {
 
-    /**
-     * Id for the source. Must be unique.
-     */
+    /** Id for the source. Must be unique. */
     val id: Long
 
-    /**
-     * Name of the source.
-     */
+    /** Name of the source. */
     val name: String
 
     /**
@@ -26,9 +20,9 @@ interface Source {
      *
      * @param chapter the chapter.
      */
-    suspend fun fetchPageList(chapter: SChapter): List<Page>
+    suspend fun getPageList(chapter: SChapter): List<Page>
 
-    suspend fun fetchImage(page: Page): Response
+    suspend fun getImage(page: Page): Response
 }
 
 data class MangaDetailChapterInformation(

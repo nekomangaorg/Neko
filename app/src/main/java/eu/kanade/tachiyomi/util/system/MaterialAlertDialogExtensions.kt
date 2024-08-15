@@ -12,11 +12,11 @@ import androidx.appcompat.widget.AppCompatCheckedTextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.databinding.CustomDialogTitleMessageBinding
-import eu.kanade.tachiyomi.databinding.DialogQuadstateBinding
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import eu.kanade.tachiyomi.widget.materialdialogs.TriStateMultiChoiceDialogAdapter
 import eu.kanade.tachiyomi.widget.materialdialogs.TriStateMultiChoiceListener
+import org.nekomanga.databinding.CustomDialogTitleMessageBinding
+import org.nekomanga.databinding.DialogQuadstateBinding
 
 fun Context.materialAlertDialog() = MaterialAlertDialogBuilder(withOriginalWidth())
 
@@ -60,22 +60,25 @@ fun AlertDialog.disableItems(items: Array<String>) {
     )
 }
 
-fun MaterialAlertDialogBuilder.setCustomTitleAndMessage(title: Int, message: String): MaterialAlertDialogBuilder {
+fun MaterialAlertDialogBuilder.setCustomTitleAndMessage(
+    title: Int,
+    message: String
+): MaterialAlertDialogBuilder {
     return setCustomTitle(
-        (CustomDialogTitleMessageBinding.inflate(LayoutInflater.from(context))).apply {
-            if (title != 0) {
-                alertTitle.text = context.getString(title)
-            } else {
-                alertTitle.isVisible = false
+        (CustomDialogTitleMessageBinding.inflate(LayoutInflater.from(context)))
+            .apply {
+                if (title != 0) {
+                    alertTitle.text = context.getString(title)
+                } else {
+                    alertTitle.isVisible = false
+                }
+                this.message.text = message
             }
-            this.message.text = message
-        }.root,
+            .root,
     )
 }
 
-/**
- * A variant of listItemsMultiChoice that allows for checkboxes that supports 3 states instead.
- */
+/** A variant of listItemsMultiChoice that allows for checkboxes that supports 3 states instead. */
 @CheckResult
 internal fun MaterialAlertDialogBuilder.setTriStateItems(
     message: String? = null,
@@ -87,24 +90,21 @@ internal fun MaterialAlertDialogBuilder.setTriStateItems(
 ): MaterialAlertDialogBuilder {
     val binding = DialogQuadstateBinding.inflate(LayoutInflater.from(context))
     binding.list.layoutManager = LinearLayoutManager(context)
-    binding.list.adapter = TriStateMultiChoiceDialogAdapter(
-        dialog = this,
-        items = items,
-        disabledItems = disabledIndices,
-        initialSelection = initialSelection,
-        skipChecked = skipChecked,
-        listener = selection,
-    )
+    binding.list.adapter =
+        TriStateMultiChoiceDialogAdapter(
+            dialog = this,
+            items = items,
+            disabledItems = disabledIndices,
+            initialSelection = initialSelection,
+            skipChecked = skipChecked,
+            listener = selection,
+        )
     val updateScrollIndicators = {
         binding.scrollIndicatorUp.isVisible = binding.list.canScrollVertically(-1)
         binding.scrollIndicatorDown.isVisible = binding.list.canScrollVertically(1)
     }
-    binding.list.setOnScrollChangeListener { _, _, _, _, _ ->
-        updateScrollIndicators()
-    }
-    binding.list.post {
-        updateScrollIndicators()
-    }
+    binding.list.setOnScrollChangeListener { _, _, _, _, _ -> updateScrollIndicators() }
+    binding.list.post { updateScrollIndicators() }
 
     if (message != null) {
         binding.message.text = message
@@ -120,14 +120,16 @@ internal fun MaterialAlertDialogBuilder.setNegativeStateItems(
 ): MaterialAlertDialogBuilder {
     return setTriStateItems(
         items = items,
-        initialSelection = initialSelection.map {
-            if (it) {
-                TriStateCheckBox.State.IGNORE.ordinal
-            } else {
-                TriStateCheckBox.State.UNCHECKED.ordinal
-            }
-        }
-            .toIntArray(),
+        initialSelection =
+            initialSelection
+                .map {
+                    if (it) {
+                        TriStateCheckBox.State.IGNORE.ordinal
+                    } else {
+                        TriStateCheckBox.State.UNCHECKED.ordinal
+                    }
+                }
+                .toIntArray(),
         skipChecked = true,
     ) { _, _, _, index, state ->
         listener.onClick(null, index, state == TriStateCheckBox.State.IGNORE.ordinal)

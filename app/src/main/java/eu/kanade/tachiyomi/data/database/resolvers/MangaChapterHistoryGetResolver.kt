@@ -16,24 +16,16 @@ class MangaChapterHistoryGetResolver : DefaultGetResolver<MangaChapterHistory>()
         val INSTANCE = MangaChapterHistoryGetResolver()
     }
 
-    /**
-     * Manga get resolver
-     */
+    /** Manga get resolver */
     private val mangaGetResolver = MangaGetResolver()
 
-    /**
-     * Chapter get resolver
-     */
+    /** Chapter get resolver */
     private val chapterResolver = ChapterGetResolver()
 
-    /**
-     * History get resolver
-     */
+    /** History get resolver */
     private val historyGetResolver = HistoryGetResolver()
 
-    /**
-     * Map correct objects from cursor result
-     */
+    /** Map correct objects from cursor result */
     override fun mapFromCursor(cursor: Cursor): MangaChapterHistory {
         // Get manga object
         val manga = mangaGetResolver.mapFromCursor(cursor)
@@ -52,11 +44,12 @@ class MangaChapterHistoryGetResolver : DefaultGetResolver<MangaChapterHistory>()
                 historyGetResolver.mapFromCursor(cursor)
             } else {
                 HistoryImpl().apply {
-                    last_read = try {
-                        cursor.getLong(cursor.getColumnIndex(HistoryTable.COL_LAST_READ))
-                    } catch (e: Exception) {
-                        0L
-                    }
+                    last_read =
+                        try {
+                            cursor.getLong(cursor.getColumnIndex(HistoryTable.COL_LAST_READ))
+                        } catch (e: Exception) {
+                            0L
+                        }
                 }
             }
 

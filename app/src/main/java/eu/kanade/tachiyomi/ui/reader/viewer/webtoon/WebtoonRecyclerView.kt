@@ -13,10 +13,10 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.ui.reader.viewer.GestureDetectorWithLongTap
 import kotlin.math.abs
 
-/**
- * Implementation of a [RecyclerView] used by the webtoon reader.
- */
-open class WebtoonRecyclerView @JvmOverloads constructor(
+/** Implementation of a [RecyclerView] used by the webtoon reader. */
+open class WebtoonRecyclerView
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0,
@@ -68,7 +68,8 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
         super.onScrolled(dx, dy)
         val layoutManager = layoutManager
         lastVisibleItemPosition =
-            (layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findLastVisibleItemPosition()
+            (layoutManager as androidx.recyclerview.widget.LinearLayoutManager)
+                .findLastVisibleItemPosition()
         firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
     }
 
@@ -123,19 +124,16 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
         animatorSet.start()
         animatorSet.addListener(
             object : Animator.AnimatorListener {
-                override fun onAnimationStart(animation: Animator) {
-                }
+                override fun onAnimationStart(animation: Animator) {}
 
                 override fun onAnimationEnd(animation: Animator) {
                     isZooming = false
                     currentScale = toRate
                 }
 
-                override fun onAnimationCancel(animation: Animator) {
-                }
+                override fun onAnimationCancel(animation: Animator) {}
 
-                override fun onAnimationRepeat(animation: Animator) {
-                }
+                override fun onAnimationRepeat(animation: Animator) {}
             },
         )
     }
@@ -184,14 +182,20 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
 
     fun onScale(scaleFactor: Float) {
         currentScale *= scaleFactor
-        currentScale = currentScale.coerceIn(
-            minRate,
-            MAX_SCALE_RATE,
-        )
+        currentScale =
+            currentScale.coerceIn(
+                minRate,
+                MAX_SCALE_RATE,
+            )
 
         setScaleRate(currentScale)
 
-        layoutParams.height = if (currentScale < 1) { (originalHeight / currentScale).toInt() } else { originalHeight }
+        layoutParams.height =
+            if (currentScale < 1) {
+                (originalHeight / currentScale).toInt()
+            } else {
+                originalHeight
+            }
         halfHeight = layoutParams.height / 2
 
         if (currentScale != DEFAULT_RATE) {

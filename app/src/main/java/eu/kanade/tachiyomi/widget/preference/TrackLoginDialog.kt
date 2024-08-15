@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
 import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -21,15 +21,18 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
 
     override var canLogout = true
 
-    constructor(service: TrackService, @StringRes usernameLabelRes: Int?) :
-        this(usernameLabelRes, Bundle().apply { putInt("key", service.id) })
+    constructor(
+        service: TrackService,
+        @StringRes usernameLabelRes: Int?
+    ) : this(usernameLabelRes, Bundle().apply { putInt("key", service.id) })
 
-    override fun setCredentialsOnView(view: View) = with(view) {
-        val serviceName = context.getString(service.nameRes())
-        binding.dialogTitle.text = context.getString(R.string.log_in_to_, serviceName)
-        binding.username.setText(service.getUsername().get())
-        binding.password.setText(service.getPassword().get())
-    }
+    override fun setCredentialsOnView(view: View) =
+        with(view) {
+            val serviceName = context.getString(service.nameRes())
+            binding.dialogTitle.text = context.getString(R.string.log_in_to_, serviceName)
+            binding.username.setText(service.getUsername().get())
+            binding.password.setText(service.getPassword().get())
+        }
 
     override fun checkLogin() {
         v?.apply {
@@ -49,9 +52,7 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
             val pass = binding.password.text.toString()
             scope.launch {
                 try {
-                    val result = withContext(Dispatchers.IO) {
-                        service.login(user, pass)
-                    }
+                    val result = withContext(Dispatchers.IO) { service.login(user, pass) }
                     if (result) {
                         dialog?.dismiss()
 

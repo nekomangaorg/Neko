@@ -10,15 +10,15 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import java.util.Locale
+import org.nekomanga.R
+import org.nekomanga.databinding.CategoriesItemBinding
 
 /**
  * Holder used to display category items.
@@ -26,14 +26,13 @@ import java.util.Locale
  * @param view The view used by category items.
  * @param adapter The adapter containing this holder.
  */
-class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleViewHolder(view, adapter) {
+class CategoryHolder(view: View, val adapter: CategoryAdapter) :
+    BaseFlexibleViewHolder(view, adapter) {
 
     private val binding = CategoriesItemBinding.bind(view)
 
     init {
-        binding.editButton.setOnClickListener {
-            submitChanges()
-        }
+        binding.editButton.setOnClickListener { submitChanges() }
     }
 
     var createCategory = false
@@ -55,7 +54,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         }
         createCategory = category.order == CREATE_CATEGORY_ORDER
         if (createCategory) {
-            binding.title.setTextColor(ContextCompat.getColor(itemView.context, R.color.material_on_background_disabled))
+            binding.title.setTextColor(
+                ContextCompat.getColor(itemView.context, R.color.material_on_background_disabled))
             regularDrawable = itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_add)
             binding.image.isVisible = false
             binding.editButton.setImageDrawable(null)
@@ -63,7 +63,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             binding.editText.hint = binding.title.text
         } else {
             binding.title.setTextColor(itemView.context.getResourceColor(R.attr.colorOnBackground))
-            regularDrawable = itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_drag_handle)
+            regularDrawable =
+                itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_drag_handle)
             binding.image.isVisible = true
             binding.editText.setText(binding.title.text)
         }
@@ -77,11 +78,15 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         if (editing) {
             binding.editText.requestFocus()
             binding.editText.selectAll()
-            binding.editButton.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp))
-            binding.editButton.drawable.mutate().setTint(itemView.context.getResourceColor(R.attr.colorSecondary))
+            binding.editButton.setImageDrawable(
+                ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp))
+            binding.editButton.drawable
+                .mutate()
+                .setTint(itemView.context.getResourceColor(R.attr.colorSecondary))
             showKeyboard()
             if (!createCategory) {
-                binding.reorder.setImageDrawable(itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_delete))
+                binding.reorder.setImageDrawable(
+                    itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_delete))
                 binding.reorder.setOnClickListener {
                     adapter.categoryItemListener.onItemDelete(flexibleAdapterPosition)
                 }
@@ -89,28 +94,29 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         } else {
             if (!createCategory) {
                 setDragHandleView(binding.reorder)
-                binding.editButton.setImageDrawable(itemView.context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_edit))
+                binding.editButton.setImageDrawable(
+                    itemView.context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_edit))
             } else {
                 binding.editButton.setImageDrawable(null)
                 binding.reorder.setOnTouchListener { _, _ -> true }
             }
             binding.editText.clearFocus()
-            binding.editButton.drawable?.mutate()?.setTint(
-                ContextCompat.getColor(
-                    itemView.context,
-                    R
-                        .color.gray_button,
-                ),
-            )
+            binding.editButton.drawable
+                ?.mutate()
+                ?.setTint(
+                    ContextCompat.getColor(
+                        itemView.context,
+                        R.color.gray_button,
+                    ),
+                )
             binding.reorder.setImageDrawable(regularDrawable)
         }
     }
 
     private fun submitChanges() {
         if (binding.editText.visibility == View.VISIBLE) {
-            if (adapter.categoryItemListener
-                .onCategoryRename(flexibleAdapterPosition, binding.editText.text.toString())
-            ) {
+            if (adapter.categoryItemListener.onCategoryRename(
+                flexibleAdapterPosition, binding.editText.text.toString())) {
                 isEditing(false)
                 if (!createCategory) {
                     binding.title.text = binding.editText.text.toString()
@@ -126,8 +132,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.showSoftInput(
             binding.editText,
-            WindowManager.LayoutParams
-                .SOFT_INPUT_ADJUST_PAN,
+            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN,
         )
     }
 

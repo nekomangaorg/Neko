@@ -48,13 +48,13 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.compose.Markdown
-import com.mikepenz.markdown.model.markdownColor
-import com.mikepenz.markdown.model.markdownTypography
-import eu.kanade.tachiyomi.R
+import com.mikepenz.markdown.m3.markdownColor
+import com.mikepenz.markdown.m3.markdownTypography
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
+import org.nekomanga.R
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.UiText
@@ -65,9 +65,7 @@ import org.nekomanga.presentation.extensions.surfaceColorAtElevationCustomColor
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
-/**
- * Genre, alt titles, description
- */
+/** Genre, alt titles, description */
 @Composable
 fun DescriptionBlock(
     windowSizeClass: WindowSizeClass,
@@ -87,62 +85,69 @@ fun DescriptionBlock(
 ) {
     if (!isInitializedProvider()) return
 
-    val tagColor = MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(themeColorState.buttonColor, 16.dp)
+    val tagColor =
+        MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
+            themeColorState.buttonColor, 16.dp)
 
     val interactionSource = remember { MutableInteractionSource() }
 
-    val clickable = Modifier.conditional(windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
-        this.clickable(
-            interactionSource = interactionSource,
-            indication = null,
-            onClick = expandCollapseClick,
-        )
-    }
+    val clickable =
+        Modifier.conditional(windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
+            this.clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = expandCollapseClick,
+            )
+        }
 
     Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .then(clickable),
+        modifier = Modifier.padding(horizontal = 16.dp).then(clickable),
         // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
     ) {
         if (!isExpanded) {
             val text = descriptionProvider().split("\n").take(2).joinToString("\n")
 
-            val lineHeight = with(LocalDensity.current) {
-                MaterialTheme.typography.bodyLarge.fontSize.toDp() + 8.dp
-            }
+            val lineHeight =
+                with(LocalDensity.current) {
+                    MaterialTheme.typography.bodyLarge.fontSize.toDp() + Size.small
+                }
 
-            val descriptionHeight = with(LocalDensity.current) {
-                MaterialTheme.typography.bodyLarge.fontSize.toDp() * 3
-            }
+            val descriptionHeight =
+                with(LocalDensity.current) {
+                    MaterialTheme.typography.bodyLarge.fontSize.toDp() * 3
+                }
 
             Box {
-
                 Markdown(
                     content = text,
                     colors = nekoMarkdownColors(),
                     typography = nekoMarkdownTypography(),
                     flavour = CommonMarkFlavourDescriptor(),
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .fillMaxWidth()
-                        .heightIn(Size.none, descriptionHeight)
-                        .then(clickable),
+                    modifier =
+                        Modifier.align(Alignment.TopStart)
+                            .fillMaxWidth()
+                            .heightIn(Size.none, descriptionHeight)
+                            .then(clickable),
                 )
 
                 Box(
-                    modifier = Modifier
-                        .height(lineHeight)
-                        .align(Alignment.BottomEnd)
-                        .width(175.dp)
-                        .then(clickable)
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface.copy(alpha = .8f), MaterialTheme.colorScheme.surface),
+                    modifier =
+                        Modifier.height(lineHeight)
+                            .align(Alignment.BottomEnd)
+                            .width(175.dp)
+                            .then(clickable)
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors =
+                                        listOf(
+                                            Color.Transparent,
+                                            MaterialTheme.colorScheme.surface.copy(alpha = .8f),
+                                            MaterialTheme.colorScheme.surface),
+                                ),
                             ),
-                        ),
                 ) {
-                    MoreLessButton(themeColorState.buttonColor, true, Modifier.align(Alignment.TopEnd))
+                    MoreLessButton(
+                        themeColorState.buttonColor, true, Modifier.align(Alignment.TopEnd))
                 }
             }
         } else {
@@ -156,7 +161,7 @@ fun DescriptionBlock(
                     resetClick = altTitleResetClick,
                     shouldWrap = wrapAltTitles,
                 )
-                Gap(8.dp)
+                Gap(Size.tiny)
                 Genres(genresProvider(), tagColor, themeColorState, genreSearch, genreSearchLibrary)
                 Gap(16.dp)
             }
@@ -173,7 +178,7 @@ fun DescriptionBlock(
             }
 
             if (windowSizeClass.widthSizeClass != WindowWidthSizeClass.Expanded) {
-                Gap(8.dp)
+                Gap(Size.tiny)
                 AltTitles(
                     altTitles = altTitlesProvider(),
                     currentTitle = titleProvider(),
@@ -189,39 +194,41 @@ fun DescriptionBlock(
                 MoreLessButton(
                     buttonColor = themeColorState.buttonColor,
                     isMore = false,
-                    clickable
-                        .align(Alignment.End),
+                    clickable.align(Alignment.End),
                 )
             }
         }
     }
 }
 
-/**
- * Composable for the expand more and expand less button
- */
+/** Composable for the expand more and expand less button */
 @Composable
 private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifier = Modifier) {
-    val (text, icon) = when (isMore) {
-        true -> R.string.more to Icons.Filled.ExpandMore
-        false -> R.string.less to Icons.Filled.ExpandLess
-    }
+    val (text, icon) =
+        when (isMore) {
+            true -> R.string.more to Icons.Filled.ExpandMore
+            false -> R.string.less to Icons.Filled.ExpandLess
+        }
 
     Row(
         modifier = modifier,
     ) {
         Text(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(start = 8.dp),
+            modifier =
+                Modifier.background(MaterialTheme.colorScheme.surface).padding(start = Size.small),
             text = stringResource(text),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Medium,
-                color = buttonColor,
-            ),
+            style =
+                MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = buttonColor,
+                ),
         )
         Gap(Size.tiny)
-        Icon(modifier = Modifier.align(Alignment.CenterVertically), imageVector = icon, contentDescription = null, tint = buttonColor)
+        Icon(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            imageVector = icon,
+            contentDescription = null,
+            tint = buttonColor)
     }
 }
 
@@ -237,12 +244,15 @@ private fun AltTitles(
 ) {
     if (altTitles.isNotEmpty()) {
         val isCustomTitle = altTitles.contains(currentTitle)
-        val onChipColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = NekoColors.mediumAlphaHighContrast)
+        val onChipColor =
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                alpha = NekoColors.mediumAlphaHighContrast)
 
         Text(
             text = "Alt Titles:",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+            color =
+                MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
         )
         if (shouldWrap) {
             FlowableAltTitles(
@@ -281,38 +291,47 @@ private fun FlowableAltTitles(
     resetClick: () -> Unit,
     onChipColor: Color,
 ) {
-    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Size.small)) {
-        if (isCustomTitle) {
-            TextButton(onClick = resetClick) {
-                Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Size.small)) {
+            if (isCustomTitle) {
+                TextButton(onClick = resetClick) {
+                    Text(
+                        text = stringResource(id = R.string.reset),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = themeColorState.buttonColor)
+                }
+            }
+            altTitles.forEach { title ->
+                val currentlySelected = isCustomTitle && title == currentTitle
+                AssistChip(
+                    onClick = {
+                        if (!currentlySelected) {
+                            altTitleClick(title)
+                        }
+                    },
+                    colors =
+                        AssistChipDefaults.assistChipColors(
+                            containerColor = tagColor, labelColor = onChipColor),
+                    border = null,
+                    leadingIcon = {
+                        if (currentlySelected) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                tint = onChipColor)
+                        }
+                    },
+                    label = {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(Size.none),
+                        )
+                    },
+                )
             }
         }
-        altTitles.forEach { title ->
-            val currentlySelected = isCustomTitle && title == currentTitle
-            AssistChip(
-                onClick = {
-                    if (!currentlySelected) {
-                        altTitleClick(title)
-                    }
-                },
-                colors = AssistChipDefaults.assistChipColors(containerColor = tagColor, labelColor = onChipColor),
-                border = null,
-                leadingIcon = {
-                    if (currentlySelected) {
-                        Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = onChipColor)
-                    }
-                },
-                label = {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier
-                            .padding(Size.none),
-                    )
-                },
-            )
-        }
-    }
 }
 
 @Composable
@@ -327,18 +346,16 @@ private fun ScrollableAltTitles(
     onChipColor: Color,
 ) {
     LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .layout { measurable, constraints ->
-                val placeable = measurable.measure(
-                    constraints.copy(
-                        minWidth = constraints.maxWidth + Size.medium.roundToPx(),
-                        maxWidth = constraints.maxWidth + Size.medium.roundToPx(),
-                    ),
-                )
-                layout(placeable.width, placeable.height) {
-                    placeable.place(0, 0)
-                }
+        modifier =
+            Modifier.fillMaxWidth().layout { measurable, constraints ->
+                val placeable =
+                    measurable.measure(
+                        constraints.copy(
+                            minWidth = constraints.maxWidth + Size.medium.roundToPx(),
+                            maxWidth = constraints.maxWidth + Size.medium.roundToPx(),
+                        ),
+                    )
+                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
             },
         horizontalArrangement = Arrangement.spacedBy(Size.tiny),
         verticalAlignment = Alignment.CenterVertically,
@@ -346,7 +363,10 @@ private fun ScrollableAltTitles(
         if (isCustomTitle) {
             item {
                 TextButton(onClick = resetClick) {
-                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.labelMedium, color = themeColorState.buttonColor)
+                    Text(
+                        text = stringResource(id = R.string.reset),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = themeColorState.buttonColor)
                 }
             }
         }
@@ -360,29 +380,39 @@ private fun ScrollableAltTitles(
                         altTitleClick(title)
                     }
                 },
-                colors = AssistChipDefaults.assistChipColors(containerColor = tagColor, labelColor = onChipColor),
+                colors =
+                    AssistChipDefaults.assistChipColors(
+                        containerColor = tagColor, labelColor = onChipColor),
                 border = null,
                 leadingIcon = {
                     if (currentlySelected) {
-                        Icon(imageVector = Icons.Filled.Check, contentDescription = null, tint = onChipColor)
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = onChipColor)
                     }
                 },
                 label = {
                     Text(
                         text = title,
                         style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier
-                            .padding(Size.none),
+                        modifier = Modifier.padding(Size.none),
                     )
                 },
             )
         }
-        item { Gap(8.dp) }
+        item { Gap(Size.tiny) }
     }
 }
 
 @Composable
-private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, themeColorState: ThemeColorState, genreSearch: (String) -> Unit, genreLibrarySearch: (String) -> Unit) {
+private fun ColumnScope.Genres(
+    genres: ImmutableList<String>,
+    tagColor: Color,
+    themeColorState: ThemeColorState,
+    genreSearch: (String) -> Unit,
+    genreLibrarySearch: (String) -> Unit
+) {
     if (genres.isEmpty()) return
 
     Text(
@@ -390,19 +420,19 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, t
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
     )
-    Gap(8.dp)
+    Gap(Size.tiny)
     FlowRow(
-        modifier = Modifier.layout { measurable, constraints ->
-            val placeable = measurable.measure(
-                constraints.copy(
-                    minWidth = constraints.maxWidth + 16.dp.roundToPx(),
-                    maxWidth = constraints.maxWidth + 16.dp.roundToPx(),
-                ),
-            )
-            layout(placeable.width, placeable.height) {
-                placeable.place(0, 0)
-            }
-        },
+        modifier =
+            Modifier.layout { measurable, constraints ->
+                val placeable =
+                    measurable.measure(
+                        constraints.copy(
+                            minWidth = constraints.maxWidth + 16.dp.roundToPx(),
+                            maxWidth = constraints.maxWidth + 16.dp.roundToPx(),
+                        ),
+                    )
+                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+            },
         horizontalArrangement = Arrangement.spacedBy(Size.smedium, Alignment.Start),
         verticalArrangement = Arrangement.spacedBy(Size.smedium),
     ) {
@@ -413,54 +443,58 @@ private fun ColumnScope.Genres(genres: ImmutableList<String>, tagColor: Color, t
             Chip(
                 label = genre,
                 containerColor = tagColor,
-                modifier = Modifier.clickable {
-                    genrePosition = index
-                    genreExpanded = !genreExpanded
-                },
+                modifier =
+                    Modifier.clickable {
+                        genrePosition = index
+                        genreExpanded = !genreExpanded
+                    },
             )
         }
         SimpleDropdownMenu(
-            expanded = genreExpanded, onDismiss = { genreExpanded = false },
+            expanded = genreExpanded,
+            onDismiss = { genreExpanded = false },
             themeColorState = themeColorState,
             dropDownItems =
-            listOf(
-                SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
-                    genreExpanded = false
-                    genreSearch(genres[genrePosition])
-                },
-                SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search_library)) {
-                    genreExpanded = false
-                    genreLibrarySearch(genres[genrePosition])
-                },
-            ).toPersistentList(),
+                listOf(
+                        SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
+                            genreExpanded = false
+                            genreSearch(genres[genrePosition])
+                        },
+                        SimpleDropDownItem.Action(
+                            text = UiText.StringResource(R.string.search_library)) {
+                                genreExpanded = false
+                                genreLibrarySearch(genres[genrePosition])
+                            },
+                    )
+                    .toPersistentList(),
         )
-
     }
 }
 
 @Composable
-private fun nekoMarkdownColors() = markdownColor(
-    text = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-    codeText = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
-    codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-)
+private fun nekoMarkdownColors() =
+    markdownColor(
+        text = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+        codeText =
+            MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast),
+        codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+    )
 
 @Composable
-private fun nekoMarkdownTypography() = markdownTypography(
-    h1 = MaterialTheme.typography.headlineMedium,
-    h2 = MaterialTheme.typography.headlineSmall,
-    h3 = MaterialTheme.typography.titleLarge,
-    h4 = MaterialTheme.typography.titleMedium,
-    h5 = MaterialTheme.typography.titleSmall,
-    h6 = MaterialTheme.typography.bodyLarge,
-    paragraph = MaterialTheme.typography.bodyLarge,
-    text = MaterialTheme.typography.bodyLarge,
-    ordered = MaterialTheme.typography.bodyLarge,
-    bullet = MaterialTheme.typography.bodyLarge,
-    quote = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-    list = MaterialTheme.typography.bodyLarge,
-)
+private fun nekoMarkdownTypography() =
+    markdownTypography(
+        h1 = MaterialTheme.typography.headlineMedium,
+        h2 = MaterialTheme.typography.headlineSmall,
+        h3 = MaterialTheme.typography.titleLarge,
+        h4 = MaterialTheme.typography.titleMedium,
+        h5 = MaterialTheme.typography.titleSmall,
+        h6 = MaterialTheme.typography.bodyLarge,
+        paragraph = MaterialTheme.typography.bodyLarge,
+        text = MaterialTheme.typography.bodyLarge,
+        ordered = MaterialTheme.typography.bodyLarge,
+        bullet = MaterialTheme.typography.bodyLarge,
+        quote = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+        list = MaterialTheme.typography.bodyLarge,
+    )
 
-fun TimeInterpolator.toEasing() = Easing { x ->
-    getInterpolation(x)
-}
+fun TimeInterpolator.toEasing() = Easing { x -> getInterpolation(x) }

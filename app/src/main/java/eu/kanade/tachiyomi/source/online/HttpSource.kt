@@ -16,31 +16,24 @@ import okhttp3.Request
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.GET
 import org.nekomanga.domain.chapter.SimpleChapter
-import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
-/**
- * A simple implementation for sources from a website.
- */
+/** A simple implementation for sources from a website. */
 abstract class HttpSource : Source {
 
-    /**
-     * Network service.
-     */
+    /** Network service. */
     protected val network: NetworkHelper by injectLazy()
 
     protected val networkServices: NetworkServices by injectLazy()
 
-//    /**
-//     * Preferences that a source may need.
-//     */
-//    val preferences: SharedPreferences by lazy {
-//        Injekt.get<Application>().getSharedPreferences("source_$id", Context.MODE_PRIVATE)
-//    }
+    //    /**
+    //     * Preferences that a source may need.
+    //     */
+    //    val preferences: SharedPreferences by lazy {
+    //        Injekt.get<Application>().getSharedPreferences("source_$id", Context.MODE_PRIVATE)
+    //    }
 
-    /**
-     * Base url of the website without the trailing slash, like: http://mysite.com
-     */
+    /** Base url of the website without the trailing slash, like: http://mysite.com */
     open val baseUrl = MdConstants.baseUrl
 
     override val name = "MangaDex"
@@ -53,44 +46,28 @@ abstract class HttpSource : Source {
 
     /**
      * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
-     * of the MD5 of the string: sourcename/language/versionId
-     * Note the generated id sets the sign bit to 0.
+     * of the MD5 of the string: sourcename/language/versionId Note the generated id sets the sign
+     * bit to 0.
      */
     override val id by lazy {
         val key = "${name.lowercase(Locale.getDefault())}/en/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
-        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
-            .reduce(Long::or) and Long.MAX_VALUE
+        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and
+            Long.MAX_VALUE
     }
 
-    /**
-     * Headers used for requests.
-     */
+    /** Headers used for requests. */
     abstract val headers: Headers
 
-    /**
-     * Default network client for doing requests.
-     */
+    /** Default network client for doing requests. */
     open val client: OkHttpClient = network.client
 
-    /**
-     * Visible name of the source.
-     */
+    /** Visible name of the source. */
     override fun toString() = name
 
     // used to get the manga url instead of the api manga url
     open fun mangaDetailsRequest(manga: SManga): Request {
         return GET(baseUrl + manga.url, headers)
-    }
-
-    /**
-     * Returns an observable with the page containing the source url of the image. If there's any
-     * error, it will return null instead of throwing an exception.
-     *
-     * @param page the page whose source image has to be fetched.
-     */
-    open fun fetchImageUrl(page: Page): Observable<String> {
-        return Observable.just("")
     }
 
     protected open fun imageRequest(page: Page): Request {
@@ -141,6 +118,7 @@ abstract class HttpSource : Source {
     abstract fun getChapterUrl(simpleChapter: SimpleChapter): String
 
     companion object {
-        const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0"
+        const val USER_AGENT =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0"
     }
 }

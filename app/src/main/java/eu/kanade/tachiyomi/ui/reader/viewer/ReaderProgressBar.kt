@@ -15,16 +15,18 @@ import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlin.math.min
+import org.nekomanga.R
 
 /**
- * A custom progress bar that always rotates while being determinate. By always rotating we give
- * the feedback to the user that the application isn't 'stuck', and by making it determinate the
- * user also approximately knows how much the operation will take.
+ * A custom progress bar that always rotates while being determinate. By always rotating we give the
+ * feedback to the user that the application isn't 'stuck', and by making it determinate the user
+ * also approximately knows how much the operation will take.
  */
-class ReaderProgressBar @JvmOverloads constructor(
+class ReaderProgressBar
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
@@ -36,14 +38,10 @@ class ReaderProgressBar @JvmOverloads constructor(
      */
     private var sweepAngle = 10f
 
-    /**
-     * Whether the parent views are also visible.
-     */
+    /** Whether the parent views are also visible. */
     private var aggregatedIsVisible = false
 
-    /**
-     * The paint to use to draw the progress bar.
-     */
+    /** The paint to use to draw the progress bar. */
     private var paint = setPaint()
 
     override fun setForegroundTintList(tint: ColorStateList?) {
@@ -53,7 +51,8 @@ class ReaderProgressBar @JvmOverloads constructor(
 
     private fun setPaint(): Paint {
         return Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = foregroundTintList?.defaultColor ?: context.getResourceColor(R.attr.colorSecondary)
+            color =
+                foregroundTintList?.defaultColor ?: context.getResourceColor(R.attr.colorSecondary)
             isAntiAlias = true
             strokeCap = Paint.Cap.ROUND
             style = Paint.Style.STROKE
@@ -66,22 +65,21 @@ class ReaderProgressBar @JvmOverloads constructor(
      */
     private val ovalRect = RectF()
 
-    /**
-     * The rotation animation to use while the progress bar is visible.
-     */
+    /** The rotation animation to use while the progress bar is visible. */
     private val rotationAnimation by lazy {
         RotateAnimation(
-            0f,
-            360f,
-            Animation.RELATIVE_TO_SELF,
-            0.5f,
-            Animation.RELATIVE_TO_SELF,
-            0.5f,
-        ).apply {
-            interpolator = LinearInterpolator()
-            repeatCount = Animation.INFINITE
-            duration = 4000
-        }
+                0f,
+                360f,
+                Animation.RELATIVE_TO_SELF,
+                0.5f,
+                Animation.RELATIVE_TO_SELF,
+                0.5f,
+            )
+            .apply {
+                interpolator = LinearInterpolator()
+                repeatCount = Animation.INFINITE
+                duration = 4000
+            }
     }
 
     /**
@@ -107,32 +105,24 @@ class ReaderProgressBar @JvmOverloads constructor(
         canvas.drawArc(ovalRect, -90f, sweepAngle, false, paint)
     }
 
-    /**
-     * Calculates the sweep angle to use from the progress.
-     */
+    /** Calculates the sweep angle to use from the progress. */
     private fun calcSweepAngleFromProgress(progress: Int): Float {
         return 360f / 100 * progress
     }
 
-    /**
-     * Called when this view is attached to window. It starts the rotation animation.
-     */
+    /** Called when this view is attached to window. It starts the rotation animation. */
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         startAnimation()
     }
 
-    /**
-     * Called when this view is detached to window. It stops the rotation animation.
-     */
+    /** Called when this view is detached to window. It stops the rotation animation. */
     override fun onDetachedFromWindow() {
         stopAnimation()
         super.onDetachedFromWindow()
     }
 
-    /**
-     * Called when the visibility of this view changes.
-     */
+    /** Called when the visibility of this view changes. */
     override fun setVisibility(visibility: Int) {
         super.setVisibility(visibility)
         val isVisible = visibility == View.VISIBLE
@@ -143,9 +133,7 @@ class ReaderProgressBar @JvmOverloads constructor(
         }
     }
 
-    /**
-     * Starts the rotation animation if needed.
-     */
+    /** Starts the rotation animation if needed. */
     private fun startAnimation() {
         if (visibility != View.VISIBLE || windowVisibility != View.VISIBLE || animation != null) {
             return
@@ -155,16 +143,12 @@ class ReaderProgressBar @JvmOverloads constructor(
         animation.start()
     }
 
-    /**
-     * Stops the rotation animation if needed.
-     */
+    /** Stops the rotation animation if needed. */
     private fun stopAnimation() {
         clearAnimation()
     }
 
-    /**
-     * Hides this progress bar with an optional fade out if [animate] is true.
-     */
+    /** Hides this progress bar with an optional fade out if [animate] is true. */
     fun hide(animate: Boolean = false) {
         if (visibility == GONE) return
 
@@ -191,9 +175,7 @@ class ReaderProgressBar @JvmOverloads constructor(
         }
     }
 
-    /**
-     * Completes this progress bar and fades out the view.
-     */
+    /** Completes this progress bar and fades out the view. */
     fun completeAndFadeOut() {
         setRealProgress(100)
         hide(true)
@@ -210,9 +192,8 @@ class ReaderProgressBar @JvmOverloads constructor(
     }
 
     /**
-     * Sets the real progress of the circular progress bar. Note that if this progres is 0 or
-     * 100, the rotation animation won't be noticed by the user because nothing changes in the
-     * canvas.
+     * Sets the real progress of the circular progress bar. Note that if this progres is 0 or 100,
+     * the rotation animation won't be noticed by the user because nothing changes in the canvas.
      */
     private fun setRealProgress(progress: Int) {
         ValueAnimator.ofFloat(sweepAngle, calcSweepAngleFromProgress(progress)).apply {

@@ -1,42 +1,28 @@
 plugins {
-    id("com.android.library")
-    kotlin("android")
-    kotlin("plugin.serialization")
+    id(androidx.plugins.library.get().pluginId)
+    id(kotlinx.plugins.android.get().pluginId)
+    alias(kotlinx.plugins.serialization)
+
 }
 
 android {
     namespace = "org.nekomanga.core"
-    compileSdk = AndroidConfig.compileSdkVersion
-
-    defaultConfig {
-        minSdk = AndroidConfig.minSdkVersion
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-        freeCompilerArgs += listOf(
-            "-Xcontext-receivers",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
-        )
+    buildFeatures {
+        buildConfig = true
     }
 }
 
 dependencies {
-    implementation(project(":constants"))
-    api(androidx.preferencektx)
-    api(kotlinx.coroutines.core)
-    api(kotlinx.serialization.json)
-    api(kotlinx.serialization.okio)
-    api(libs.bundles.ok)
-    api(libs.tokenbucket)
+    implementation(projects.constants)
+    implementation(androidx.preferencektx)
+    implementation(kotlinx.coroutines.core)
+    implementation(kotlinx.serialization.json)
+    implementation(kotlinx.serialization.okio)
+    implementation(libs.bundles.ok)
+    implementation(libs.tokenbucket)
     implementation(libs.timber)
-    api(libs.rx.java)
-    api(libs.tachi.unifile)
-    api(libs.firebase.crashlytics)
+    implementation(libs.rx.java)
+    implementation(libs.tachi.unifile)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.bundles.firebase)
 }

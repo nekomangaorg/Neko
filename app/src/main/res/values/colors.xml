@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Colors -->
+    <color name="iconColor">#2A2121</color>
+    <color name="iconOutline">#ff124a</color>
+    <color name="iconBackground">#ffffff</color>
+
     <color name="primaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="primaryTachiyomi">@color/neko_primary</color>
     <color name="onPrimaryTachiyomi">@color/md_white_1000</color>
     <color name="primaryInverseTachiyomi">@color/neko_primary</color>
-    <color name="splashBackground">@color/primaryTachiyomi</color>
+    <color name="splashBackground">#ff124a</color>
     <color name="secondaryTachiyomi">@color/neko_accent</color>
     <color name="rippleColorTachiyomi">@color/md_black_1000_54</color>
     <color name="secondaryVariantTachiyomi">@color/neko_primary</color>
@@ -131,8 +135,6 @@
     <color name="neko_green_darker">#20aa5e</color>
     <color name="gold">#D4AF37</color>
 
-    <color name="splash_background">#FF6784</color>
-
 
     <color name="neko_miami_primary">#41B6E6</color>
     <color name="neko_miami_primary_variant">#000000</color>
@@ -168,7 +170,5 @@
 
     <!-- MangaDex Theme -->
     <color name="secondaryMangaDex">#FF6740</color>
-
-    <color name="new_neko_accent">#FF6784</color>
 
 </resources>

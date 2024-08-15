@@ -3,15 +3,12 @@ on:
   push:
     tags:
       - '*'
-
 jobs:
-  auto_close_issues:
+  close_isssues:
+    name: Close old issues
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: weekly-issue-closure
-        uses: bdougie/close-issues-based-on-label@master
+      - uses: nonproto/auto-closer@1.0.0
         env:
-          LABEL: staged for next release
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AC_LABEL: "staged for next release"

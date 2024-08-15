@@ -20,16 +20,17 @@ class ChapterItemSort(
         filterForReader: Boolean = false,
         currentChapter: T? = null,
     ): List<T> {
-        val chapters = when {
-            filterForReader -> chapterFilter.filterChaptersForReader(
-                rawChapters,
-                manga,
-                currentChapter,
-            )
-
-            andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
-            else -> rawChapters
-        }
+        val chapters =
+            when {
+                filterForReader ->
+                    chapterFilter.filterChaptersForReader(
+                        rawChapters,
+                        manga,
+                        currentChapter,
+                    )
+                andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
+                else -> rawChapters
+            }
 
         return chapters.sortedWith(sortComparator(manga))
     }
@@ -39,10 +40,11 @@ class ChapterItemSort(
         rawChapters: List<T>,
         andFiltered: Boolean = true,
     ): T? {
-        val chapters = when {
-            andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
-            else -> rawChapters
-        }
+        val chapters =
+            when {
+                andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
+                else -> rawChapters
+            }
         return chapters.sortedWith(sortComparator(manga, true)).find { !it.chapter.read }
     }
 
@@ -50,21 +52,31 @@ class ChapterItemSort(
         val sortDescending = !ignoreAsc && manga.sortDescending(mangaDetailsPreferences)
         val sortFunction: (T, T) -> Int =
             when (manga.chapterOrder(mangaDetailsPreferences)) {
-                Manga.CHAPTER_SORTING_SOURCE -> when (sortDescending) {
-                    true -> { c1, c2 -> c1.chapter.sourceOrder.compareTo(c2.chapter.sourceOrder) }
-                    false -> { c1, c2 -> c2.chapter.sourceOrder.compareTo(c1.chapter.sourceOrder) }
-                }
-
-                Manga.CHAPTER_SORTING_NUMBER -> when (sortDescending) {
-                    true -> { c1, c2 -> c2.chapter.chapterNumber.compareTo(c1.chapter.chapterNumber) }
-                    false -> { c1, c2 -> c1.chapter.chapterNumber.compareTo(c2.chapter.chapterNumber) }
-                }
-
-                Manga.CHAPTER_SORTING_UPLOAD_DATE -> when (sortDescending) {
-                    true -> { c1, c2 -> c2.chapter.dateUpload.compareTo(c1.chapter.dateUpload) }
-                    false -> { c1, c2 -> c1.chapter.dateUpload.compareTo(c2.chapter.dateUpload) }
-                }
-
+                Manga.CHAPTER_SORTING_SOURCE ->
+                    when (sortDescending) {
+                        true -> { c1, c2 ->
+                                c1.chapter.sourceOrder.compareTo(c2.chapter.sourceOrder)
+                            }
+                        false -> { c1, c2 ->
+                                c2.chapter.sourceOrder.compareTo(c1.chapter.sourceOrder)
+                            }
+                    }
+                Manga.CHAPTER_SORTING_NUMBER ->
+                    when (sortDescending) {
+                        true -> { c1, c2 ->
+                                c2.chapter.chapterNumber.compareTo(c1.chapter.chapterNumber)
+                            }
+                        false -> { c1, c2 ->
+                                c1.chapter.chapterNumber.compareTo(c2.chapter.chapterNumber)
+                            }
+                    }
+                Manga.CHAPTER_SORTING_UPLOAD_DATE ->
+                    when (sortDescending) {
+                        true -> { c1, c2 -> c2.chapter.dateUpload.compareTo(c1.chapter.dateUpload) }
+                        false -> { c1, c2 ->
+                                c1.chapter.dateUpload.compareTo(c2.chapter.dateUpload)
+                            }
+                    }
                 else -> { c1, c2 -> c1.chapter.sourceOrder.compareTo(c2.chapter.sourceOrder) }
             }
         return Comparator(sortFunction)

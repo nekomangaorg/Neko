@@ -1,7 +1,7 @@
 package org.nekomanga.domain.manga
 
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 
 enum class MangaContentRating(val key: String, val nameRes: Int) {

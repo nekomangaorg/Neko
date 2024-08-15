@@ -1,26 +1,14 @@
 plugins {
-    id("com.android.library")
-    kotlin("android")
+    id(androidx.plugins.library.get().pluginId)
+    id(kotlinx.plugins.android.get().pluginId)
 }
 
-android {
-    namespace = "org.nekomanga.constants"
-    compileSdk = AndroidConfig.compileSdkVersion
-
-    defaultConfig {
-        minSdk = AndroidConfig.minSdkVersion
+android { namespace = "org.nekomanga.constants"
+    buildFeatures {
+        buildConfig = true
     }
+}
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
-    dependencies {
-        api(androidx.core.kts)
-    }
+dependencies {
+    implementation(androidx.core.ktx)
 }

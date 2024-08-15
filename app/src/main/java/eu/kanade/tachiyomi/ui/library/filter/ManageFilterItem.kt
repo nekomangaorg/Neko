@@ -6,18 +6,14 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import org.nekomanga.R
+import org.nekomanga.databinding.CategoriesItemBinding
 
-/**
- * Category item for a recycler view.
- */
+/** Category item for a recycler view. */
 class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.Holder>() {
 
-    /**
-     * Returns the layout resource for this item.
-     */
+    /** Returns the layout resource for this item. */
     override fun getLayoutRes(): Int {
         return R.layout.categories_item
     }
@@ -52,9 +48,7 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
         holder.bind(char)
     }
 
-    /**
-     * Returns true if this item is draggable.
-     */
+    /** Returns true if this item is draggable. */
     override fun isDraggable(): Boolean {
         return true
     }
@@ -75,6 +69,7 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
         BaseFlexibleViewHolder(view, adapter, true) {
 
         private val binding = CategoriesItemBinding.bind(view)
+
         init {
             binding.image.isVisible = false
             binding.editButton.isVisible = false

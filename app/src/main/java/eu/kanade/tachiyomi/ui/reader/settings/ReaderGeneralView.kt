@@ -2,23 +2,26 @@ package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.content.Context
 import android.util.AttributeSet
-import eu.kanade.tachiyomi.databinding.ReaderGeneralLayoutBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
+import org.nekomanga.databinding.ReaderGeneralLayoutBinding
 
 class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseReaderSettingsView<ReaderGeneralLayoutBinding>(context, attrs) {
 
     lateinit var sheet: TabbedReaderSettingsSheet
+
     override fun inflateBinding() = ReaderGeneralLayoutBinding.bind(this)
+
     override fun initGeneralPreferences() {
         binding.viewerSeries.onItemSelectedListener = { position ->
             val readingModeType = ReadingModeType.fromSpinner(position)
             (context as ReaderActivity).viewModel.setMangaReadingMode(readingModeType.flagValue)
 
             val mangaViewer = activity.viewModel.getMangaReadingMode()
-            if (mangaViewer == ReadingModeType.WEBTOON.flagValue || mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue) {
+            if (mangaViewer == ReadingModeType.WEBTOON.flagValue ||
+                mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue) {
                 initWebtoonPreferences()
             } else {
                 initPagerPreferences()
@@ -43,12 +46,11 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.showPageNumber.bindToPreference(readerPreferences.showPageNumber())
         binding.fullscreen.bindToPreference(readerPreferences.fullscreen())
         binding.keepscreen.bindToPreference(readerPreferences.keepScreenOn())
-        binding.alwaysShowChapterTransition.bindToPreference(readerPreferences.alwaysShowChapterTransition())
+        binding.alwaysShowChapterTransition.bindToPreference(
+            readerPreferences.alwaysShowChapterTransition())
     }
 
-    /**
-     * Init the preferences for the webtoon reader.
-     */
+    /** Init the preferences for the webtoon reader. */
     private fun initWebtoonPreferences() {
         sheet.updateTabs(true)
     }

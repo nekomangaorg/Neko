@@ -22,62 +22,80 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.ListItemPicker
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
+import org.nekomanga.R
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun TrackingScoreDialog(themeColorState: ThemeColorState, trackAndService: TrackingConstants.TrackAndService, onDismiss: () -> Unit, trackScoreChange: (Int) -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-        val displayedScore = trackAndService.service.displayScore(trackAndService.track)
-        val index = when {
-            displayedScore == "-" -> 0
-            trackAndService.service.scoreList.indexOf(displayedScore) != -1 -> trackAndService.service.scoreList.indexOf(displayedScore)
-            else -> 0
-        }
+fun TrackingScoreDialog(
+    themeColorState: ThemeColorState,
+    trackAndService: TrackingConstants.TrackAndService,
+    onDismiss: () -> Unit,
+    trackScoreChange: (Int) -> Unit
+) {
+    CompositionLocalProvider(
+        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+            val displayedScore = trackAndService.service.displayScore(trackAndService.track)
+            val index =
+                when {
+                    displayedScore == "-" -> 0
+                    trackAndService.service.scoreList.indexOf(displayedScore) != -1 ->
+                        trackAndService.service.scoreList.indexOf(displayedScore)
+                    else -> 0
+                }
 
-        var currentIndex by remember { mutableStateOf(index) }
+            var currentIndex by remember { mutableStateOf(index) }
 
-        AlertDialog(
-            title = {
-                Text(text = stringResource(id = R.string.score), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            },
-            text = {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                ) {
-                    ListItemPicker(
-                        modifier = Modifier.fillMaxWidth(.4f),
-                        value = trackAndService.service.scoreList[currentIndex],
-                        onValueChange = { newScore ->
-                            currentIndex = trackAndService.service.scoreList.indexOf(newScore)
+            AlertDialog(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.score),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth())
+                },
+                text = {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    ) {
+                        ListItemPicker(
+                            modifier = Modifier.fillMaxWidth(.4f),
+                            value = trackAndService.service.scoreList[currentIndex],
+                            onValueChange = { newScore ->
+                                currentIndex = trackAndService.service.scoreList.indexOf(newScore)
+                            },
+                            list = trackAndService.service.scoreList,
+                            dividersColor = themeColorState.buttonColor,
+                            textStyle =
+                                MaterialTheme.typography.titleMedium.copy(
+                                    color = MaterialTheme.colorScheme.onSurface),
+                        )
+                    }
+                },
+                onDismissRequest = onDismiss,
+                dismissButton = {
+                    TextButton(
+                        onClick = onDismiss,
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor)) {
+                            Text(text = stringResource(id = R.string.cancel))
+                        }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            trackScoreChange(currentIndex)
+                            onDismiss()
                         },
-                        list = trackAndService.service.scoreList,
-                        dividersColor = themeColorState.buttonColor,
-                        textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                    )
-                }
-            },
-            onDismissRequest = onDismiss,
-            dismissButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        trackScoreChange(currentIndex)
-                        onDismiss()
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
-                ) {
-                    Text(text = stringResource(id = android.R.string.ok))
-                }
-            },
-        )
-    }
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor),
+                    ) {
+                        Text(text = stringResource(id = android.R.string.ok))
+                    }
+                },
+            )
+        }
 }

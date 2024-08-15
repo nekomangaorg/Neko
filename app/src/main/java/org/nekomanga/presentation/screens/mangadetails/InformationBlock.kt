@@ -29,12 +29,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.text.NumberFormat
@@ -42,6 +39,8 @@ import java.util.Locale
 import jp.wasabeef.gap.Gap
 import kotlin.math.roundToInt
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.R
+import org.nekomanga.constants.Constants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
@@ -70,21 +69,22 @@ fun InformationBlock(
     creatorCopyClick: (String) -> Unit = {},
     creatorSearchClick: (String) -> Unit = {},
 ) {
-    val highAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast)
-    val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
+    val highAlpha =
+        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast)
+    val mediumAlpha =
+        MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(horizontal = 8.dp),
+        modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small),
     ) {
-        if (titleProvider().isNotNullOrEmpty()) {
+        if (!titleProvider().isNullOrEmpty()) {
             NoRippleText(
                 text = titleProvider(),
                 maxLines = if (isExpandedProvider()) Integer.MAX_VALUE else 4,
                 onLongClick = titleLongClick,
-                style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium),
+                style =
+                    MaterialTheme.typography.headlineSmall.copy(
+                        letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium),
                 color = highAlpha,
             )
         }
@@ -95,7 +95,7 @@ fun InformationBlock(
                     true -> authorProvider().trim()
                     false -> {
                         listOfNotNull(authorProvider().trim(), artistProvider().trim())
-                            .joinToString(" • ")
+                            .joinToString(Constants.SEPARATOR)
                     }
                 }
 
@@ -109,40 +109,47 @@ fun InformationBlock(
                 style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
-            val creators = creator.split(" • ").map { it.trim() }
+            val creators = creator.split(Constants.SEPARATOR).map { it.trim() }
             SimpleDropdownMenu(
-                expanded = creatorExpanded, onDismiss = { creatorExpanded = false },
+                expanded = creatorExpanded,
+                onDismiss = { creatorExpanded = false },
                 themeColorState = themeColorState,
                 dropDownItems =
-                creators.map { individualCreator ->
-                    SimpleDropDownItem.Parent(
-                        text = UiText.String(individualCreator),
-                        children = listOf(
-                            SimpleDropDownItem.Action(text = UiText.StringResource(R.string.copy)) {
-                                creatorExpanded = false
-                                creatorCopyClick(individualCreator)
-                            },
-                            SimpleDropDownItem.Action(text = UiText.StringResource(R.string.search)) {
-                                creatorExpanded = false
-                                creatorSearchClick(individualCreator)
-                            },
-                        ),
-                    )
-                }.toPersistentList(),
+                    creators
+                        .map { individualCreator ->
+                            SimpleDropDownItem.Parent(
+                                text = UiText.String(individualCreator),
+                                children =
+                                    listOf(
+                                        SimpleDropDownItem.Action(
+                                            text = UiText.StringResource(R.string.copy)) {
+                                                creatorExpanded = false
+                                                creatorCopyClick(individualCreator)
+                                            },
+                                        SimpleDropDownItem.Action(
+                                            text = UiText.StringResource(R.string.search)) {
+                                                creatorExpanded = false
+                                                creatorSearchClick(individualCreator)
+                                            },
+                                    ),
+                            )
+                        }
+                        .toPersistentList(),
             )
         }
 
         if (statusProvider() != 0) {
             Gap(Size.tiny)
-            val statusRes = when (statusProvider()) {
-                SManga.ONGOING -> R.string.ongoing
-                SManga.COMPLETED -> R.string.completed
-                SManga.LICENSED -> R.string.licensed
-                SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
-                SManga.HIATUS -> R.string.hiatus
-                SManga.CANCELLED -> R.string.cancelled
-                else -> R.string.unknown
-            }
+            val statusRes =
+                when (statusProvider()) {
+                    SManga.ONGOING -> R.string.ongoing
+                    SManga.COMPLETED -> R.string.completed
+                    SManga.LICENSED -> R.string.licensed
+                    SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
+                    SManga.HIATUS -> R.string.hiatus
+                    SManga.CANCELLED -> R.string.cancelled
+                    else -> R.string.unknown
+                }
 
             NoRippleText(
                 text = stringResource(id = statusRes),
@@ -151,11 +158,10 @@ fun InformationBlock(
             )
         }
         if (statsProvider() != null || langFlagProvider() != null) {
-            Gap(8.dp)
+            Gap(Size.tiny)
         }
         FlowRow(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -163,10 +169,11 @@ fun InformationBlock(
                 val flag = MdLang.fromIsoCode(langFlagProvider()!!.lowercase(Locale.US))?.iconResId
                 if (flag != null) {
                     Image(
-                        painter = rememberDrawablePainter(drawable = AppCompatResources.getDrawable(LocalContext.current, flag)),
-                        modifier = Modifier
-                            .height(Size.large)
-                            .clip(RoundedCornerShape(Size.tiny)),
+                        painter =
+                            rememberDrawablePainter(
+                                drawable =
+                                    AppCompatResources.getDrawable(LocalContext.current, flag)),
+                        modifier = Modifier.height(Size.large).clip(RoundedCornerShape(Size.tiny)),
                         contentDescription = "flag",
                     )
                 }
@@ -176,16 +183,21 @@ fun InformationBlock(
                 Gap(Size.small)
                 Image(
                     imageVector = Icons.Outlined._18UpRating,
-                    contentDescription = null, colorFilter = ColorFilter.tint(Color.Red),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(Color.Red),
                 )
             }
 
             statsProvider()?.let { stats ->
                 stats.rating?.let { rating ->
-                    val formattedRating = ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
+                    val formattedRating =
+                        ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
 
-                    Gap(8.dp)
-                    Image(imageVector = Icons.Filled.HotelClass, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                    Gap(Size.tiny)
+                    Image(
+                        imageVector = Icons.Filled.HotelClass,
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(mediumAlpha))
                     Gap(Size.tiny)
                     NoRippleText(
                         text = formattedRating,
@@ -195,12 +207,19 @@ fun InformationBlock(
                 }
 
                 stats.follows?.let { unformattedNumberOfUsers ->
-                    val numberOfUsers = runCatching {
-                        NumberFormat.getNumberInstance(Locale.US).format(unformattedNumberOfUsers.toInt())
-                    }.getOrDefault(0).toString()
+                    val numberOfUsers =
+                        runCatching {
+                                NumberFormat.getNumberInstance(Locale.US)
+                                    .format(unformattedNumberOfUsers.toInt())
+                            }
+                            .getOrDefault(0)
+                            .toString()
 
-                    Gap(8.dp)
-                    Image(imageVector = Icons.Filled.Bookmarks, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                    Gap(Size.tiny)
+                    Image(
+                        imageVector = Icons.Filled.Bookmarks,
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(mediumAlpha))
                     Gap(Size.tiny)
                     NoRippleText(
                         text = numberOfUsers,
@@ -211,12 +230,19 @@ fun InformationBlock(
 
                 if (stats.threadId != null) {
 
-                    val numberOfComments = runCatching {
-                        NumberFormat.getNumberInstance(Locale.US).format(stats.repliesCount?.toInt())
-                    }.getOrDefault(0).toString()
+                    val numberOfComments =
+                        runCatching {
+                                NumberFormat.getNumberInstance(Locale.US)
+                                    .format(stats.repliesCount?.toInt())
+                            }
+                            .getOrDefault(0)
+                            .toString()
 
-                    Gap(8.dp)
-                    Image(imageVector = Icons.Filled.Comment, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                    Gap(Size.tiny)
+                    Image(
+                        imageVector = Icons.Filled.Comment,
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(mediumAlpha))
                     Gap(Size.tiny)
                     NoRippleText(
                         text = numberOfComments,
@@ -224,14 +250,13 @@ fun InformationBlock(
                         color = mediumAlpha,
                     )
                 }
-
             }
 
-
-
             if (showMergedIconProvider()) {
-                Gap(8.dp)
-                com.mikepenz.iconics.compose.Image(asset = CommunityMaterial.Icon.cmd_check_decagram, colorFilter = ColorFilter.tint(mediumAlpha))
+                Gap(Size.tiny)
+                com.mikepenz.iconics.compose.Image(
+                    asset = CommunityMaterial.Icon.cmd_check_decagram,
+                    colorFilter = ColorFilter.tint(mediumAlpha))
             }
         }
 
@@ -258,9 +283,7 @@ fun InformationBlock(
                         color = mediumAlpha,
                     )
                 }
-
             }
         }
-
     }
 }

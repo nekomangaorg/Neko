@@ -37,11 +37,11 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         updateDataSet(items)
     }
 
-    val decimalFormat = DecimalFormat(
-        "#.###",
-        DecimalFormatSymbols()
-            .apply { decimalSeparator = '.' },
-    )
+    val decimalFormat =
+        DecimalFormat(
+            "#.###",
+            DecimalFormatSymbols().apply { decimalSeparator = '.' },
+        )
 
     init {
         setDisplayHeadersAtStartUp(true)
@@ -53,11 +53,16 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
         preferences.showUpdatedTime().register { showUpdatedTime = it }
         libraryPreferences.uniformGrid().register { uniformCovers = it }
-        preferences.sortFetchedTime().changes().onEach { sortByFetched = it }.launchIn(delegate.scope())
+        preferences
+            .sortFetchedTime()
+            .changes()
+            .onEach { sortByFetched = it }
+            .launchIn(delegate.scope())
         libraryPreferences.outlineOnCovers().register(false) {
             showOutline = it
             (0 until itemCount).forEach { i ->
-                (recyclerView.findViewHolderForAdapterPosition(i) as? RecentMangaHolder)?.updateCards()
+                (recyclerView.findViewHolderForAdapterPosition(i) as? RecentMangaHolder)
+                    ?.updateCards()
             }
         }
     }
@@ -78,10 +83,15 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
 
     interface RecentMangaInterface {
         fun onCoverClick(position: Int)
+
         fun onRemoveHistoryClicked(position: Int)
+
         fun markAsRead(position: Int)
+
         fun isSearching(): Boolean
+
         fun scope(): CoroutineScope
+
         fun getViewType(): Int
     }
 

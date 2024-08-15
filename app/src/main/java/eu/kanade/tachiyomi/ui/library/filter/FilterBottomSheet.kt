@@ -12,10 +12,8 @@ import androidx.core.view.isVisible
 import androidx.core.view.updatePaddingRelative
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.databinding.FilterBottomSheetBinding
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -39,18 +37,17 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
+import org.nekomanga.databinding.FilterBottomSheetBinding
 import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    LinearLayout(context, attrs),
-    FilterTagGroupListener {
+    LinearLayout(context, attrs), FilterTagGroupListener {
 
-    /**
-     * Preferences helper.
-     */
+    /** Preferences helper. */
     private val libraryPreferences: LibraryPreferences by injectLazy()
 
     private lateinit var binding: FilterBottomSheetBinding
@@ -121,8 +118,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         libraryRecyler?.post {
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
-                    ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom
-                        ?: 0
+                    ?: controller.activityBinding
+                        ?.root
+                        ?.rootWindowInsetsCompat
+                        ?.getInsets(systemBars())
+                        ?.bottom
+                    ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -134,22 +135,17 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
                 override fun onStateChanged(p0: View, state: Int) {
                     this@FilterBottomSheet.controller?.updateFilterSheetY()
-                    (this@FilterBottomSheet.controller?.activity as? MainActivity)?.reEnableBackPressedCallBack()
+                    (this@FilterBottomSheet.controller?.activity as? MainActivity)
+                        ?.reEnableBackPressedCallBack()
                     stateChanged(state)
                 }
             },
         )
 
         sheetBehavior?.hide()
-        binding.expandCategories.setOnClickListener {
-            onGroupClicked(ACTION_EXPAND_COLLAPSE_ALL)
-        }
-        binding.groupBy.setOnClickListener {
-            onGroupClicked(ACTION_GROUP_BY)
-        }
-        binding.viewOptions.setOnClickListener {
-            onGroupClicked(ACTION_DISPLAY)
-        }
+        binding.expandCategories.setOnClickListener { onGroupClicked(ACTION_EXPAND_COLLAPSE_ALL) }
+        binding.groupBy.setOnClickListener { onGroupClicked(ACTION_GROUP_BY) }
+        binding.viewOptions.setOnClickListener { onGroupClicked(ACTION_DISPLAY) }
 
         sheetBehavior?.isGestureInsetBottomIgnored = true
 
@@ -185,7 +181,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         setExpandText(controller.canCollapseOrExpandCategory(), false)
 
         clearButton.compatToolTipText = context.getString(R.string.clear_filters)
-        libraryPreferences.filterOrder().changes()
+        libraryPreferences
+            .filterOrder()
+            .changes()
             .drop(1)
             .onEach {
                 filterOrder = it
@@ -197,7 +195,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private fun stateChanged(state: Int) {
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(
+                bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -218,14 +217,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     fun updateRootPadding(progress: Float? = null) {
         val minHeight = sheetBehavior?.peekHeight ?: 0
         val maxHeight = height
-        val trueProgress = progress
-            ?: if (sheetBehavior.isExpanded()) 1f else 0f
+        val trueProgress = progress ?: if (sheetBehavior.isExpanded()) 1f else 0f
         val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
         if (trueProgress >= 0) {
             libraryRecyler?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
         } else {
-            libraryRecyler?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(
+                bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
         }
     }
 
@@ -240,14 +239,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             },
         )
         if (animated) {
-            binding.expandCategories.icon = AnimatedVectorDrawableCompat.create(
-                binding.expandCategories.context,
-                if (!allExpanded) {
-                    R.drawable.anim_expand_less_to_more
-                } else {
-                    R.drawable.anim_expand_more_to_less
-                },
-            )
+            binding.expandCategories.icon =
+                AnimatedVectorDrawableCompat.create(
+                    binding.expandCategories.context,
+                    if (!allExpanded) {
+                        R.drawable.anim_expand_less_to_more
+                    } else {
+                        R.drawable.anim_expand_more_to_less
+                    },
+                )
             (binding.expandCategories.icon as? AnimatedVectorDrawableCompat)?.start()
         } else {
             binding.expandCategories.setIconResource(
@@ -303,12 +303,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         reSortViews()
 
-        controller?.viewScope?.launch {
-            setFilterStates()
-        }
+        controller?.viewScope?.launch { setFilterStates() }
     }
 
     var checked = false
+
     suspend fun checkForManhwa() {
         if (checked) return
         withIOContext {
@@ -322,8 +321,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
             checked = true
             val types = mutableListOf<Int>()
-            if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
-            if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
+            if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_MANHWA })
+                types.add(R.string.manhwa)
+            if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_MANHUA })
+                types.add(R.string.manhua)
             if (types.isNotEmpty()) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_tag_group) as FilterTagGroup
@@ -356,7 +357,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
 
             if (filterItems.contains(tracked)) {
-                val loggedServices = Injekt.get<TrackManager>().services.values.filter { it.isLogged() }
+                val loggedServices =
+                    Injekt.get<TrackManager>().services.values.filter { it.isLogged() }
                 if (loggedServices.isNotEmpty()) {
                     val serviceNames = loggedServices.map { context.getString(it.nameRes()) }
                     withUIContext {
@@ -402,21 +404,19 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val array = filterOrder.toCharArray().distinct()
         filterItems.clear()
         for (c in array) {
-            mapOfFilters(c)?.let {
-                filterItems.add(it)
-            }
+            mapOfFilters(c)?.let { filterItems.add(it) }
         }
         listOfNotNull(
-            unreadProgress,
-            unread,
-            downloaded,
-            completed,
-            mangaType,
-            bookmarked,
-            tracked,
-            missingChapters,
-            merged,
-        )
+                unreadProgress,
+                unread,
+                downloaded,
+                completed,
+                mangaType,
+                bookmarked,
+                tracked,
+                missingChapters,
+                merged,
+            )
             .forEach {
                 if (!filterItems.contains(it)) {
                     filterItems.add(it)
@@ -450,23 +450,22 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     FILTER_TRACKER = view.nameOf(index) ?: ""
                     null
                 }
-
                 unreadProgress -> {
                     unread.reset()
-                    libraryPreferences.filterUnread().set(
-                        when (index) {
-                            in 0..1 -> index + 3
-                            else -> 0
-                        },
-                    )
+                    libraryPreferences
+                        .filterUnread()
+                        .set(
+                            when (index) {
+                                in 0..1 -> index + 3
+                                else -> 0
+                            },
+                        )
                     null
                 }
-
                 unread -> {
                     unreadProgress.reset()
                     libraryPreferences.filterUnread()
                 }
-
                 downloaded -> libraryPreferences.filterDownloaded()
                 completed -> libraryPreferences.filterCompleted()
                 bookmarked -> libraryPreferences.filterBookmarked()
@@ -474,17 +473,17 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 merged -> libraryPreferences.filterMerged()
                 missingChapters -> libraryPreferences.filterMissingChapters()
                 mangaType -> {
-                    val newIndex = when (view.nameOf(index)) {
-                        context.getString(R.string.manga) -> Manga.TYPE_MANGA
-                        context.getString(R.string.manhua) -> Manga.TYPE_MANHUA
-                        context.getString(R.string.manhwa) -> Manga.TYPE_MANHWA
-                        context.getString(R.string.comic) -> Manga.TYPE_COMIC
-                        else -> 0
-                    }
+                    val newIndex =
+                        when (view.nameOf(index)) {
+                            context.getString(R.string.manga) -> Manga.TYPE_MANGA
+                            context.getString(R.string.manhua) -> Manga.TYPE_MANHUA
+                            context.getString(R.string.manhwa) -> Manga.TYPE_MANHWA
+                            context.getString(R.string.comic) -> Manga.TYPE_COMIC
+                            else -> 0
+                        }
                     libraryPreferences.filterMangaType().set(newIndex)
                     null
                 }
-
                 else -> null
             }?.set(index + 1)
             onGroupClicked(ACTION_FILTER)
@@ -523,14 +522,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
-        androidx.transition.TransitionManager.beginDelayedTransition(binding.filterLayout, transition)
+        androidx.transition.TransitionManager.beginDelayedTransition(
+            binding.filterLayout, transition)
         reorderFilters()
-        filterItems.forEach {
-            it.reset()
-        }
-        trackers?.let {
-            filterItems.remove(it)
-        }
+        filterItems.forEach { it.reset() }
+        trackers?.let { filterItems.remove(it) }
         reSortViews()
         onGroupClicked(ACTION_FILTER)
     }
@@ -540,12 +536,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         if (filterItems.any { it.isActivated }) {
             binding.filterLayout.addView(clearButton)
         }
-        filterItems.filter { it.isActivated }.forEach {
-            binding.filterLayout.addView(it)
-        }
-        filterItems.filterNot { it.isActivated }.forEach {
-            binding.filterLayout.addView(it)
-        }
+        filterItems.filter { it.isActivated }.forEach { binding.filterLayout.addView(it) }
+        filterItems.filterNot { it.isActivated }.forEach { binding.filterLayout.addView(it) }
         binding.filterScroll.scrollTo(0, 0)
     }
 
@@ -578,17 +570,19 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         ;
 
         companion object {
-            val DEFAULT_ORDER = listOf(
-                UnreadProgress,
-                Unread,
-                Downloaded,
-                Completed,
-                SeriesType,
-                Bookmarked,
-                MissingChapters,
-                Merged,
-                Tracked,
-            ).joinToString("") { it.value.toString() }
+            val DEFAULT_ORDER =
+                listOf(
+                        UnreadProgress,
+                        Unread,
+                        Downloaded,
+                        Completed,
+                        SeriesType,
+                        Bookmarked,
+                        MissingChapters,
+                        Merged,
+                        Tracked,
+                    )
+                    .joinToString("") { it.value.toString() }
 
             fun filterOf(char: Char) = values().find { it.value == char }
         }

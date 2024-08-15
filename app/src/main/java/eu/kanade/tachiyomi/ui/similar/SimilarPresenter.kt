@@ -26,9 +26,7 @@ import org.nekomanga.domain.library.LibraryPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/**
- * Presenter of [SimilarController]
- */
+/** Presenter of [SimilarController] */
 class SimilarPresenter(
     private val mangaUUID: String,
     private val repo: SimilarRepository = Injekt.get(),
@@ -37,14 +35,15 @@ class SimilarPresenter(
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
 ) : BaseCoroutinePresenter<SimilarController>() {
 
-    private val _similarScreenState = MutableStateFlow(
-        SimilarScreenState(
-            isList = preferences.browseAsList().get(),
-            outlineCovers = libraryPreferences.outlineOnCovers().get(),
-            isComfortableGrid = libraryPreferences.layout().get() == 2,
-            rawColumnCount = libraryPreferences.gridSize().get(),
-        ),
-    )
+    private val _similarScreenState =
+        MutableStateFlow(
+            SimilarScreenState(
+                isList = preferences.browseAsList().get(),
+                outlineCovers = libraryPreferences.outlineOnCovers().get(),
+                isComfortableGrid = libraryPreferences.layout().get() == 2,
+                rawColumnCount = libraryPreferences.gridSize().get(),
+            ),
+        )
 
     val similarScreenState: StateFlow<SimilarScreenState> = _similarScreenState.asStateFlow()
 
@@ -53,19 +52,22 @@ class SimilarPresenter(
         getSimilarManga()
 
         presenterScope.launch {
-            val categories = db.getCategories().executeAsBlocking().map { category -> category.toCategoryItem() }.toImmutableList()
+            val categories =
+                db.getCategories()
+                    .executeAsBlocking()
+                    .map { category -> category.toCategoryItem() }
+                    .toImmutableList()
             _similarScreenState.update {
                 it.copy(
                     categories = categories,
-                    promptForCategories = CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
+                    promptForCategories =
+                        CategoryUtil.shouldShowCategoryPrompt(preferences, categories),
                 )
             }
         }
         presenterScope.launch {
             preferences.browseAsList().changes().collectLatest {
-                _similarScreenState.update { state ->
-                    state.copy(isList = it)
-                }
+                _similarScreenState.update { state -> state.copy(isList = it) }
             }
         }
     }
@@ -83,7 +85,12 @@ class SimilarPresenter(
 
                 val list = repo.fetchSimilar(mangaUUID, forceRefresh)
                 _similarScreenState.update {
-                    it.copy(isRefreshing = false, displayManga = list.associate { group -> group.type to group.manga.toImmutableList() }.toImmutableMap())
+                    it.copy(
+                        isRefreshing = false,
+                        displayManga =
+                            list
+                                .associate { group -> group.type to group.manga.toImmutableList() }
+                                .toImmutableMap())
                 }
             }
         }
@@ -94,10 +101,11 @@ class SimilarPresenter(
             val editManga = db.getManga(mangaId).executeAsBlocking()!!
             editManga.apply {
                 favorite = !favorite
-                date_added = when (favorite) {
-                    true -> Date().time
-                    false -> 0
-                }
+                date_added =
+                    when (favorite) {
+                        true -> Date().time
+                        false -> 0
+                    }
             }
             db.insertManga(editManga).executeAsBlocking()
 
@@ -107,14 +115,16 @@ class SimilarPresenter(
                 val defaultCategory = preferences.defaultCategory().get()
 
                 if (categoryItems.isEmpty() && defaultCategory != -1) {
-                    _similarScreenState.value.categories.firstOrNull {
-                        defaultCategory == it.id
-                    }?.let {
-                        val categories = listOf(MangaCategory.create(editManga, it.toDbCategory()))
-                        db.setMangaCategories(categories, listOf(editManga))
-                    }
+                    _similarScreenState.value.categories
+                        .firstOrNull { defaultCategory == it.id }
+                        ?.let {
+                            val categories =
+                                listOf(MangaCategory.create(editManga, it.toDbCategory()))
+                            db.setMangaCategories(categories, listOf(editManga))
+                        }
                 } else if (categoryItems.isNotEmpty()) {
-                    val categories = categoryItems.map { MangaCategory.create(editManga, it.toDbCategory()) }
+                    val categories =
+                        categoryItems.map { MangaCategory.create(editManga, it.toDbCategory()) }
                     db.setMangaCategories(categories, listOf(editManga))
                 }
             }
@@ -123,13 +133,14 @@ class SimilarPresenter(
 
     private fun updateDisplayManga(mangaId: Long, favorite: Boolean) {
         presenterScope.launch {
-            val listOfKeyIndex = _similarScreenState.value.displayManga.mapNotNull { entry ->
-                val tempListIndex = entry.value.indexOfFirst { it.mangaId == mangaId }
-                when (tempListIndex == -1) {
-                    true -> null
-                    false -> entry.key to tempListIndex
+            val listOfKeyIndex =
+                _similarScreenState.value.displayManga.mapNotNull { entry ->
+                    val tempListIndex = entry.value.indexOfFirst { it.mangaId == mangaId }
+                    when (tempListIndex == -1) {
+                        true -> null
+                        false -> entry.key to tempListIndex
+                    }
                 }
-            }
 
             val tempMap = _similarScreenState.value.displayManga.toMutableMap()
 
@@ -151,15 +162,18 @@ class SimilarPresenter(
         }
     }
 
-    /**
-     * Add New Category
-     */
+    /** Add New Category */
     fun addNewCategory(newCategory: String) {
         presenterScope.launchIO {
             val category = Category.create(newCategory)
             db.insertCategory(category).executeAsBlocking()
             _similarScreenState.update {
-                it.copy(categories = db.getCategories().executeAsBlocking().map { category -> category.toCategoryItem() }.toImmutableList())
+                it.copy(
+                    categories =
+                        db.getCategories()
+                            .executeAsBlocking()
+                            .map { category -> category.toCategoryItem() }
+                            .toImmutableList())
             }
         }
     }
@@ -170,18 +184,28 @@ class SimilarPresenter(
 
     fun updateCovers() {
         presenterScope.launch {
-            val newDisplayManga = _similarScreenState.value.displayManga.map { entry ->
-                Pair(
-                    entry.key,
-                    entry.value.map {
-                        val dbManga = db.getManga(it.mangaId).executeOnIO()!!
-                        it.copy(currentArtwork = it.currentArtwork.copy(url = dbManga.user_cover ?: "", originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
-                    }.toImmutableList(),
-                )
-            }.toMap().toImmutableMap()
-            _similarScreenState.update {
-                it.copy(displayManga = newDisplayManga)
-            }
+            val newDisplayManga =
+                _similarScreenState.value.displayManga
+                    .map { entry ->
+                        Pair(
+                            entry.key,
+                            entry.value
+                                .map {
+                                    val dbManga = db.getManga(it.mangaId).executeOnIO()!!
+                                    it.copy(
+                                        currentArtwork =
+                                            it.currentArtwork.copy(
+                                                url = dbManga.user_cover ?: "",
+                                                originalArtwork =
+                                                    dbManga.thumbnail_url
+                                                        ?: MdConstants.noCoverUrl))
+                                }
+                                .toImmutableList(),
+                        )
+                    }
+                    .toMap()
+                    .toImmutableMap()
+            _similarScreenState.update { it.copy(displayManga = newDisplayManga) }
         }
     }
 }

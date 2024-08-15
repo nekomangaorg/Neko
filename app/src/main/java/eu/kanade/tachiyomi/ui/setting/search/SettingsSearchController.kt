@@ -8,50 +8,39 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.SettingsSearchControllerBinding
 import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import org.nekomanga.R
+import org.nekomanga.databinding.SettingsSearchControllerBinding
 
 /**
  * This controller shows and manages the different search result in settings search.
  * [SettingsSearchAdapter.OnTitleClickListener] called when preference is clicked in settings search
  */
 class SettingsSearchController :
-    NucleusController<SettingsSearchControllerBinding, SettingsSearchPresenter>(),
+    BaseController<SettingsSearchControllerBinding>(),
     FloatingSearchInterface,
     SmallToolbarInterface,
     SettingsSearchAdapter.OnTitleClickListener {
 
-    /**
-     * Adapter containing search results grouped by lang.
-     */
+    /** Adapter containing search results grouped by lang. */
     private var adapter: SettingsSearchAdapter? = null
     private var searchView: SearchView? = null
+    var query: String = ""
 
     init {
         setHasOptionsMenu(true)
     }
 
-    override fun createBinding(inflater: LayoutInflater) = SettingsSearchControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        SettingsSearchControllerBinding.inflate(inflater)
 
-    override fun getTitle(): String {
-        return presenter.query
-    }
-
-    /**
-     * Create the [SettingsSearchPresenter] used in controller.
-     *
-     * @return instance of [SettingsSearchPresenter]
-     */
-    override fun createPresenter(): SettingsSearchPresenter {
-        return SettingsSearchPresenter()
-    }
+    override fun getTitle(): String = query
 
     /**
      * Adds items to the options menu.
@@ -66,7 +55,9 @@ class SettingsSearchController :
         val searchItem = activityBinding?.searchToolbar?.searchItem
         searchView = activityBinding?.searchToolbar?.searchView
 
-        activityBinding?.searchToolbar?.setQueryHint(applicationContext?.getString(R.string.search_settings), false)
+        activityBinding
+            ?.searchToolbar
+            ?.setQueryHint(applicationContext?.getString(R.string.search_settings), false)
 
         searchItem?.expandActionView()
         setItems(getResultSet())
@@ -80,7 +71,7 @@ class SettingsSearchController :
 
                 override fun onQueryTextChange(newText: String?): Boolean {
                     if (!newText.isNullOrBlank()) {
-                        lastSearch = newText
+                        query = newText
                     }
                     setItems(getResultSet(newText))
                     return false
@@ -88,7 +79,7 @@ class SettingsSearchController :
             },
         )
 
-        searchView?.setQuery(lastSearch, true)
+        searchView?.setQuery(query, true)
     }
 
     override fun onActionViewCollapse(item: MenuItem?) {
@@ -106,7 +97,7 @@ class SettingsSearchController :
         binding.recycler.adapter = adapter
 
         // load all search results
-        SettingsSearchHelper.initPreferenceSearchResultCollection(presenter.preferences.context)
+        SettingsSearchHelper.initPreferenceSearchResultCollection(view.context)
     }
 
     override fun onDestroyView(view: View) {
@@ -125,13 +116,14 @@ class SettingsSearchController :
     }
 
     /**
-     * returns a list of `SettingsSearchItem` to be shown as search results
-     * Future update: should we add a minimum length to the query before displaying results? Consider other languages.
+     * returns a list of `SettingsSearchItem` to be shown as search results Future update: should we
+     * add a minimum length to the query before displaying results? Consider other languages.
      */
     fun getResultSet(query: String? = null): List<SettingsSearchItem> {
         if (!query.isNullOrBlank()) {
-            return SettingsSearchHelper.getFilteredResults(query)
-                .map { SettingsSearchItem(it, null, query) }
+            return SettingsSearchHelper.getFilteredResults(query).map {
+                SettingsSearchItem(it, null, query)
+            }
         }
 
         return mutableListOf()
@@ -146,13 +138,9 @@ class SettingsSearchController :
         adapter?.updateDataSet(searchResult)
     }
 
-    /**
-     * Opens a catalogue with the given search.
-     */
+    /** Opens a catalogue with the given search. */
     override fun onTitleClick(ctrl: SettingsController) {
-        searchView?.query.let {
-            lastSearch = it.toString()
-        }
+        searchView?.query.let { query = it.toString() }
 
         router.pushController(ctrl.withFadeTransaction())
     }

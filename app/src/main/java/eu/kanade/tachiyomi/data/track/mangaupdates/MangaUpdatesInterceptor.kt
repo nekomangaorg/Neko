@@ -16,9 +16,8 @@ class MangaUpdatesInterceptor(
         val token = token ?: throw IOException("Not authenticated with MangaUpdates")
 
         // Add the authorization header to the original request.
-        val authRequest = originalRequest.newBuilder()
-            .addHeader("Authorization", "Bearer $token")
-            .build()
+        val authRequest =
+            originalRequest.newBuilder().addHeader("Authorization", "Bearer $token").build()
 
         return chain.proceed(authRequest)
     }

@@ -16,21 +16,42 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun lastUpdateTimestamp() = this.preferenceStore.getLong("library_update_last_timestamp")
 
-    fun updateRestrictions() = this.preferenceStore.getStringSet("library_update_restriction")
+    fun libraryUpdateIds() = this.preferenceStore.getString("library_update_ids")
+
+    fun autoUpdateDeviceRestrictions() =
+        this.preferenceStore.getStringSet("library_update_restriction")
+
+    fun autoUpdateMangaRestrictions() =
+        this.preferenceStore.getStringSet(
+            "library_update_manga_restrictions",
+            setOf(
+                MANGA_HAS_UNREAD,
+                MANGA_NOT_STARTED,
+                MANGA_NOT_COMPLETED,
+                MANGA_TRACKING_PLAN_TO_READ,
+                MANGA_TRACKING_DROPPED,
+                MANGA_TRACKING_ON_HOLD,
+                MANGA_TRACKING_COMPLETED,
+            ),
+        )
 
     fun whichCategoriesToUpdate() = this.preferenceStore.getStringSet("library_update_categories")
 
-    fun whichCategoriesToExclude() = this.preferenceStore.getStringSet("library_update_categories_exclude")
+    fun whichCategoriesToExclude() =
+        this.preferenceStore.getStringSet("library_update_categories_exclude")
 
     fun updatePrioritization() = this.preferenceStore.getInt("library_update_prioritization")
 
-    fun layout() = this.preferenceStore.getInt("pref_display_library_layout", LibraryItem.LAYOUT_COMFORTABLE_GRID)
+    fun layout() =
+        this.preferenceStore.getInt(
+            "pref_display_library_layout", LibraryItem.LAYOUT_COMFORTABLE_GRID)
 
     fun sortingMode() = this.preferenceStore.getInt("library_sorting_mode")
 
     fun sortAscending() = this.preferenceStore.getBoolean("library_sorting_ascending", true)
 
-    fun collapsedCategories() = this.preferenceStore.getStringSet("collapsed_categories", mutableSetOf())
+    fun collapsedCategories() =
+        this.preferenceStore.getStringSet("collapsed_categories", mutableSetOf())
 
     fun collapsedDynamicCategories() =
         this.preferenceStore.getStringSet("collapsed_dynamic_categories")
@@ -43,13 +64,15 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun showAllCategories() = this.preferenceStore.getBoolean("show_all_categories", true)
 
-    fun showAllCategoriesWhenSearchingSingleCategory() = this.preferenceStore.getBoolean("show_all_categories_when_searching_single_category")
+    fun showAllCategoriesWhenSearchingSingleCategory() =
+        this.preferenceStore.getBoolean("show_all_categories_when_searching_single_category")
 
     fun lastUsedCategory() = this.preferenceStore.getInt("last_used_category")
 
     fun hopperGravity() = this.preferenceStore.getInt("hopper_gravity", 1)
 
-    fun filterOrder() = this.preferenceStore.getString("filter_order", FilterBottomSheet.Filters.DEFAULT_ORDER)
+    fun filterOrder() =
+        this.preferenceStore.getString("filter_order", FilterBottomSheet.Filters.DEFAULT_ORDER)
 
     fun hopperLongPressAction() = this.preferenceStore.getInt("hopper_long_press")
 
@@ -60,10 +83,6 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun groupBy() = this.preferenceStore.getInt("group_library_by")
 
     fun showCategoryInTitle() = this.preferenceStore.getBoolean("category_in_title")
-
-    fun updateOnlyNonCompleted() = this.preferenceStore.getBoolean("pref_update_only_non_completed_key")
-
-    fun updateOnlyWhenTrackingIsNotFinished() = this.preferenceStore.getBoolean("pref_update_only_tracking_not_finished_key")
 
     fun updateFaster() = this.preferenceStore.getBoolean("faster_library_updates")
 
@@ -105,4 +124,20 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun removeArticles() = this.preferenceStore.getBoolean("remove_articles")
 
     fun whatToUpdateOnRefresh() = this.preferenceStore.getInt("update_on_refresh", -1)
+
+    companion object {
+
+        const val MANGA_NOT_COMPLETED = "manga_status_not_completed"
+        const val MANGA_HAS_UNREAD = "manga_fully_read"
+        const val MANGA_NOT_STARTED = "manga_not_started"
+        const val MANGA_TRACKING_COMPLETED = "manga_tracking_completed"
+        const val MANGA_TRACKING_DROPPED = "manga_tracking_dropped"
+        const val MANGA_TRACKING_ON_HOLD = "manga_tracking_on_hold"
+        const val MANGA_TRACKING_PLAN_TO_READ = "manga_tracking_plan_to_read"
+
+        // Device
+        const val DEVICE_ONLY_ON_WIFI = "wifi"
+        const val DEVICE_CHARGING = "ac"
+        const val DEVICE_BATTERY_NOT_LOW = "battery_not_low"
+    }
 }

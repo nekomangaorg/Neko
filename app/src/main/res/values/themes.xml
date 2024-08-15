@@ -12,7 +12,7 @@
         <item name="android:layoutDirection">ltr</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowSplashScreenBackground" tools:targetApi="31">
-            @color/splash_background
+            @color/ic_launcher_background
         </item>
         <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">
             @drawable/ic_launcher_foreground
@@ -253,8 +253,8 @@
     <!--===============-->
     <style name="Theme.Splash" parent="Theme.Tachiyomi">
         <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">@color/splash_background</item>
-        <item name="android:navigationBarColor">@color/splash_background</item>
+        <item name="android:statusBarColor">@color/ic_launcher_background</item>
+        <item name="android:navigationBarColor">@color/ic_launcher_background</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>

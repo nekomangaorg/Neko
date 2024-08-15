@@ -33,7 +33,8 @@ abstract class WebViewInterceptor(
         // Crashes on some devices. We skip this in some cases since the only impact is slower
         // WebView init in those rare cases.
         // See https://bugs.chromium.org/p/chromium/issues/detail?id=1279562
-        if (DeviceUtil.isMiui || Build.VERSION.SDK_INT == Build.VERSION_CODES.S && DeviceUtil.isSamsung) {
+        if (DeviceUtil.isMiui ||
+            Build.VERSION.SDK_INT == Build.VERSION_CODES.S && DeviceUtil.isSamsung) {
             return@lazy
         }
 
@@ -56,9 +57,7 @@ abstract class WebViewInterceptor(
         }
 
         if (!WebViewUtil.supportsWebView(context)) {
-            launchUI {
-                context.toast(R.string.information_webview_required, Toast.LENGTH_LONG)
-            }
+            launchUI { context.toast(R.string.information_webview_required, Toast.LENGTH_LONG) }
             return response
         }
         initWebView
@@ -69,9 +68,7 @@ abstract class WebViewInterceptor(
     fun parseHeaders(headers: Headers): Map<String, String> {
         return headers
             // Keeping unsafe header makes webview throw [net::ERR_INVALID_ARGUMENT]
-            .filter { (name, value) ->
-                isRequestHeaderSafe(name, value)
-            }
+            .filter { (name, value) -> isRequestHeaderSafe(name, value) }
             .groupBy(keySelector = { (name, _) -> name }) { (_, value) -> value }
             .mapValues { it.value.getOrNull(0).orEmpty() }
     }
@@ -89,7 +86,8 @@ abstract class WebViewInterceptor(
     }
 }
 
-// Based on [IsRequestHeaderSafe] in https://source.chromium.org/chromium/chromium/src/+/main:services/network/public/cpp/header_util.cc
+// Based on [IsRequestHeaderSafe] in
+// https://source.chromium.org/chromium/chromium/src/+/main:services/network/public/cpp/header_util.cc
 private fun isRequestHeaderSafe(_name: String, _value: String): Boolean {
     val name = _name.lowercase(Locale.ENGLISH)
     val value = _value.lowercase(Locale.ENGLISH)
@@ -98,4 +96,14 @@ private fun isRequestHeaderSafe(_name: String, _value: String): Boolean {
     return true
 }
 
-private val unsafeHeaderNames = listOf("content-length", "host", "trailer", "te", "upgrade", "cookie2", "keep-alive", "transfer-encoding", "set-cookie")
+private val unsafeHeaderNames =
+    listOf(
+        "content-length",
+        "host",
+        "trailer",
+        "te",
+        "upgrade",
+        "cookie2",
+        "keep-alive",
+        "transfer-encoding",
+        "set-cookie")

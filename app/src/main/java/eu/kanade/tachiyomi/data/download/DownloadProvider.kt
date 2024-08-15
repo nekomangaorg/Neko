@@ -1,60 +1,41 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.uuid
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.util.lang.isUUID
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import org.nekomanga.R
+import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.util.storage.DiskUtil
+import tachiyomi.core.util.storage.displayablePath
+import tachiyomi.core.util.storage.nameWithoutExtension
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 /**
- * This class is used to provide the directories where the downloads should be saved.
- * It uses the following path scheme: /<root downloads dir>/<source name>/<manga>/<chapter>
+ * This class is used to provide the directories where the downloads should be saved. It uses the
+ * following path scheme: /<root downloads dir>/<source name>/<manga>/<chapter>
  *
  * @param context the application context.
  */
-class DownloadProvider(private val context: Context) {
+class DownloadProvider(
+    private val context: Context,
+    private val storageManager: StorageManager = Injekt.get()
+) {
 
-    /**
-     * Preferences helper.
-     */
-    private val preferences: PreferencesHelper by injectLazy()
+    /** Preferences helper. */
     private val source = Injekt.get<SourceManager>().mangaDex
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    /**
-     * The root directory for downloads.
-     */
-    private var downloadsDir = preferences.downloadsDirectory().get().let {
-        val dir = UniFile.fromUri(context, it.toUri())
-        DiskUtil.createNoMediaFile(dir, context)
-        dir
-    }
-
-    init {
-        preferences.downloadsDirectory().changes().drop(1).onEach {
-            downloadsDir = UniFile.fromUri(context, it.toUri())
-        }.launchIn(scope)
-    }
+    /** The root directory for downloads. */
+    private val downloadsDir: UniFile?
+        get() = storageManager.getDownloadsDirectory()
 
     /**
      * Returns the download directory for a manga. For internal use only.
@@ -67,12 +48,15 @@ class DownloadProvider(private val context: Context) {
         try {
             val mangaDirName = getMangaDirName(manga)
             val sourceDirName = getSourceDirName()
+            DiskUtil.createNoMediaFile(downloadsDir, context)
             TimberKt.d { "creating directory for $sourceDirName : $mangaDirName" }
-            return downloadsDir.createDirectory(sourceDirName)
-                .createDirectory(mangaDirName)
+            return downloadsDir!!.createDirectory(sourceDirName)!!.createDirectory(mangaDirName)!!
         } catch (e: Exception) {
             TimberKt.e(e) { "error getting download folder for ${manga.title}" }
-            throw Exception(context.getString(R.string.invalid_download_location))
+
+            throw Exception(
+                context.getString(
+                    R.string.invalid_download_location, downloadsDir?.displayablePath ?: ""))
         }
     }
 
@@ -82,7 +66,7 @@ class DownloadProvider(private val context: Context) {
      * @param source the source to query.
      */
     fun findSourceDir(): UniFile? {
-        return downloadsDir.findFile(getSourceDirName(), true)
+        return downloadsDir?.findFile(getSourceDirName())
     }
 
     /**
@@ -93,7 +77,7 @@ class DownloadProvider(private val context: Context) {
      */
     fun findMangaDir(manga: Manga): UniFile? {
         val sourceDir = findSourceDir()
-        return sourceDir?.findFile(getMangaDirName(manga), true)
+        return sourceDir?.findFile(getMangaDirName(manga))
     }
 
     /**
@@ -105,14 +89,31 @@ class DownloadProvider(private val context: Context) {
      */
     fun findChapterDir(chapter: Chapter, manga: Manga): UniFile? {
         val mangaDir = findMangaDir(manga)
-        return getValidChapterDirNames(chapter).asSequence()
-            .mapNotNull {
-                mangaDir?.findFile(it, true)
-                    ?: mangaDir?.findFile("$it.cbz", true)
-            }.firstOrNull()
-            ?: mangaDir?.listFiles { _, filename ->
-                filename.contains(chapter.uuid())
-            }?.firstOrNull()
+        return getValidChapterDirNames(chapter)
+            .asSequence()
+            .mapNotNull { mangaDir?.findFile(it) ?: mangaDir?.findFile("$it.cbz") }
+            .firstOrNull()
+            ?: mangaDir
+                ?.listFiles { _, filename -> filename.contains(chapter.uuid()) }
+                ?.firstOrNull()
+    }
+
+    fun chapterDirDoesNotExist(chapter: Chapter, chapterDirs: List<UniFile>): Boolean {
+        var exists =
+            getValidChapterDirNames(chapter).none { chapterDir ->
+                chapterDirs.none { uniFile ->
+                    uniFile.nameWithoutExtension!!.equals(chapterDir, true)
+                }
+            }
+
+        if (!exists) {
+            exists =
+                chapterDirs.none { uniFile ->
+                    uniFile.nameWithoutExtension!!.contains(chapter.uuid())
+                }
+        }
+
+        return exists
     }
 
     /**
@@ -147,9 +148,10 @@ class DownloadProvider(private val context: Context) {
                         return@filter true
                     }
                     val afterScanlatorCheck = fileName.substringAfter("_")
-                    return@filter chapterNameHashSet.contains(fileName) || chapterNameHashSet.contains(
-                        afterScanlatorCheck,
-                    )
+                    return@filter chapterNameHashSet.contains(fileName) ||
+                        chapterNameHashSet.contains(
+                            afterScanlatorCheck,
+                        )
                 }
             }
             return@filter false
@@ -190,9 +192,10 @@ class DownloadProvider(private val context: Context) {
                     }
 
                     val afterScanlatorCheck = fileName.substringAfter("_")
-                    return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(
-                        afterScanlatorCheck,
-                    )
+                    return@filter !chapterNameHashSet.contains(fileName) &&
+                        !chapterNameHashSet.contains(
+                            afterScanlatorCheck,
+                        )
                 }
             }
             // everything else is considered true
@@ -209,10 +212,13 @@ class DownloadProvider(private val context: Context) {
 
     fun renameChapterFoldersForLegacyMerged(manga: Manga) {
         val mangaDir = findMangaDir(manga) ?: return
-        mangaDir.listFiles()?.filter { file -> file.name != null && file.name!!.startsWith(MangaLife.oldName) }?.forEach { file ->
-            val newFileName = file.name!!.replace(MangaLife.oldName, MangaLife.name)
-            file.renameTo(newFileName)
-        }
+        mangaDir
+            .listFiles()
+            ?.filter { file -> file.name != null && file.name!!.startsWith(MangaLife.oldName) }
+            ?.forEach { file ->
+                val newFileName = file.name!!.replace(MangaLife.oldName, MangaLife.name)
+                file.renameTo(newFileName)
+            }
     }
 
     /**
@@ -224,11 +230,14 @@ class DownloadProvider(private val context: Context) {
      */
     fun findTempChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
         val mangaDir = findMangaDir(manga) ?: return emptyList()
-        return chapters.mapNotNull { mangaDir.findFile("${getChapterDirName(it)}${Downloader.TMP_DIR_SUFFIX}") }
+        return chapters.mapNotNull {
+            mangaDir.findFile("${getChapterDirName(it)}${Downloader.TMP_DIR_SUFFIX}")
+        }
     }
 
     /**
-     * Returns the download directory name for a source always english to not break with other forks or current neko
+     * Returns the download directory name for a source always english to not break with other forks
+     * or current neko
      *
      * @param source the source to query.
      */
@@ -250,15 +259,10 @@ class DownloadProvider(private val context: Context) {
      *
      * @param chapter the chapter to query.
      */
-    fun getChapterDirName(chapter: Chapter, useNewId: Boolean = true): String {
-        if (chapter.isMergedChapter()) {
-            return getJ2kChapterName(chapter)
-        } else {
-            if (!useNewId && chapter.old_mangadex_id == null) {
-                return ""
-            }
-            val chapterId = if (useNewId) chapter.mangadex_chapter_id else chapter.old_mangadex_id
-            return DiskUtil.buildValidFilename(chapter.name, " - $chapterId")
+    fun getChapterDirName(chapter: Chapter): String {
+        return when (chapter.isMergedChapter()) {
+            true -> getJ2kChapterName(chapter)
+            false -> DiskUtil.buildValidFilename(chapter.name, " - ${chapter.mangadex_chapter_id}")
         }
     }
 
@@ -279,13 +283,10 @@ class DownloadProvider(private val context: Context) {
      */
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
         return listOf(
-            getChapterDirName(chapter, true),
-            // chapter names from j2k
-            getJ2kChapterName(chapter),
-            // legacy manga id
-            getChapterDirName(chapter, false),
-            // Legacy chapter directory name used in v0.8.4 and before
-            DiskUtil.buildValidFilename(chapter.name),
-        ).filter { it.isNotEmpty() }
+                getChapterDirName(chapter),
+                // chapter names from j2k
+                getJ2kChapterName(chapter),
+            )
+            .filter { it.isNotEmpty() }
     }
 }

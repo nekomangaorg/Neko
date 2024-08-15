@@ -41,9 +41,7 @@ sealed class AndroidPreference<T>(
     }
 
     override fun delete() {
-        preferences.edit {
-            remove(key)
-        }
+        preferences.edit { remove(key) }
     }
 
     override fun defaultValue(): T {
@@ -68,7 +66,11 @@ sealed class AndroidPreference<T>(
         key: String,
         defaultValue: String,
     ) : AndroidPreference<String>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: String): String {
+        override fun read(
+            preferences: SharedPreferences,
+            key: String,
+            defaultValue: String
+        ): String {
             return preferences.getString(key, defaultValue) ?: defaultValue
         }
 
@@ -87,9 +89,7 @@ sealed class AndroidPreference<T>(
             return preferences.getLong(key, defaultValue)
         }
 
-        override fun write(key: String, value: Long): Editor.() -> Unit = {
-            putLong(key, value)
-        }
+        override fun write(key: String, value: Long): Editor.() -> Unit = { putLong(key, value) }
     }
 
     class IntPrimitive(
@@ -102,9 +102,7 @@ sealed class AndroidPreference<T>(
             return preferences.getInt(key, defaultValue)
         }
 
-        override fun write(key: String, value: Int): Editor.() -> Unit = {
-            putInt(key, value)
-        }
+        override fun write(key: String, value: Int): Editor.() -> Unit = { putInt(key, value) }
     }
 
     class FloatPrimitive(
@@ -117,9 +115,7 @@ sealed class AndroidPreference<T>(
             return preferences.getFloat(key, defaultValue)
         }
 
-        override fun write(key: String, value: Float): Editor.() -> Unit = {
-            putFloat(key, value)
-        }
+        override fun write(key: String, value: Float): Editor.() -> Unit = { putFloat(key, value) }
     }
 
     class BooleanPrimitive(
@@ -128,7 +124,11 @@ sealed class AndroidPreference<T>(
         key: String,
         defaultValue: Boolean,
     ) : AndroidPreference<Boolean>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: Boolean): Boolean {
+        override fun read(
+            preferences: SharedPreferences,
+            key: String,
+            defaultValue: Boolean
+        ): Boolean {
             return preferences.getBoolean(key, defaultValue)
         }
 
@@ -143,7 +143,11 @@ sealed class AndroidPreference<T>(
         key: String,
         defaultValue: Set<String>,
     ) : AndroidPreference<Set<String>>(preferences, keyFlow, key, defaultValue) {
-        override fun read(preferences: SharedPreferences, key: String, defaultValue: Set<String>): Set<String> {
+        override fun read(
+            preferences: SharedPreferences,
+            key: String,
+            defaultValue: Set<String>
+        ): Set<String> {
             return preferences.getStringSet(key, defaultValue) ?: defaultValue
         }
 

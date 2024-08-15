@@ -14,10 +14,17 @@ class NekoColors {
         const val highAlphaLowContrast = .87f
         const val mediumAlphaHighContrast = .74f
         const val mediumAlphaLowContrast = .6f
+        const val halfAlpha = .5f
         const val disabledAlphaHighContrast = .38f
         const val disabledAlphaLowContrast = .38f
         const val veryLowContrast = .1f
     }
+}
+
+object IconColors {
+    val icon = Color(0xFF2A2121)
+    val outline = Color(0xFFff124a)
+    val background = Color(0xFFffffff)
 }
 
 object Outline {
@@ -42,32 +49,33 @@ object ChartColors {
 
 object PrimaryColorRippleTheme : RippleTheme {
 
-    @Composable
-    override fun defaultColor(): Color = MaterialTheme.colorScheme.primary
+    @Composable override fun defaultColor(): Color = MaterialTheme.colorScheme.primary
 
     @Composable
-    override fun rippleAlpha() = RippleAlpha(
-        draggedAlpha = 0.9f,
-        focusedAlpha = 0.9f,
-        hoveredAlpha = 0.9f,
-        pressedAlpha = 0.9f,
-    )
+    override fun rippleAlpha() =
+        RippleAlpha(
+            draggedAlpha = NekoColors.mediumAlphaLowContrast,
+            focusedAlpha = NekoColors.mediumAlphaLowContrast,
+            hoveredAlpha = NekoColors.mediumAlphaLowContrast,
+            pressedAlpha = NekoColors.mediumAlphaLowContrast,
+        )
 }
 
 class DynamicRippleTheme(val color: Color) : RippleTheme {
-    @Composable
-    override fun defaultColor(): Color = color
+    @Composable override fun defaultColor(): Color = color
 
     @Composable
-    override fun rippleAlpha() = RippleAlpha(
-        draggedAlpha = 0.9f,
-        focusedAlpha = 0.9f,
-        hoveredAlpha = 0.9f,
-        pressedAlpha = 0.9f,
-    )
+    override fun rippleAlpha() =
+        RippleAlpha(
+            draggedAlpha = NekoColors.mediumAlphaLowContrast,
+            focusedAlpha = NekoColors.mediumAlphaLowContrast,
+            hoveredAlpha = NekoColors.mediumAlphaLowContrast,
+            pressedAlpha = NekoColors.mediumAlphaLowContrast,
+        )
 }
 
-fun dynamicTextSelectionColor(color: Color) = TextSelectionColors(
-    handleColor = color,
-    backgroundColor = color.copy(alpha = NekoColors.disabledAlphaHighContrast),
-)
+fun dynamicTextSelectionColor(color: Color) =
+    TextSelectionColors(
+        handleColor = color,
+        backgroundColor = color.copy(alpha = NekoColors.disabledAlphaHighContrast),
+    )

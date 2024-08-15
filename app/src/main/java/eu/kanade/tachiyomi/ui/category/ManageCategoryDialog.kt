@@ -7,23 +7,22 @@ import android.os.Bundle
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import org.nekomanga.R
+import org.nekomanga.databinding.MangaCategoryDialogBinding
 import org.nekomanga.domain.library.LibraryPreferences
 import tachiyomi.core.preference.Preference
 import uy.kohesive.injekt.injectLazy
 
-class ManageCategoryDialog(bundle: Bundle? = null) :
-    DialogController(bundle) {
+class ManageCategoryDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
     constructor(category: Category?, updateLibrary: ((Int?) -> Unit)) : this() {
         this.updateLibrary = updateLibrary
@@ -69,9 +68,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     fun show(activity: Activity) {
         val dialog = dialog(activity).create()
         onViewCreated()
-        dialog.setOnShowListener {
-            binding.title.requestFocus()
-        }
+        dialog.setOnShowListener { binding.title.requestFocus() }
         dialog.show()
     }
 
@@ -80,9 +77,9 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         val categoryExists = categoryExists(text)
         val category = this.category ?: Category.create(text)
         if (category.id != 0) {
-            if (text.isNotBlank() && !categoryExists &&
-                !text.equals(this.category?.name ?: "", true)
-            ) {
+            if (text.isNotBlank() &&
+                !categoryExists &&
+                !text.equals(this.category?.name ?: "", true)) {
                 category.name = text
                 if (this.category == null) {
                     val categories = db.getCategories().executeAsBlocking()
@@ -104,13 +101,11 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
                 return false
             }
         }
-        when (
-            updatePref(
-                preferences.downloadNewChaptersInCategories(),
-                preferences.excludeCategoriesInDownloadNew(),
-                binding.downloadNew,
-            )
-        ) {
+        when (updatePref(
+            preferences.downloadNewChaptersInCategories(),
+            preferences.excludeCategoriesInDownloadNew(),
+            binding.downloadNew,
+        )) {
             true -> preferences.downloadNewChapters().set(true)
             false -> preferences.downloadNewChapters().set(false)
             else -> Unit
@@ -120,8 +115,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
                 libraryPreferences.whichCategoriesToUpdate(),
                 libraryPreferences.whichCategoriesToExclude(),
                 binding.includeGlobal,
-            ) == false
-        ) {
+            ) == false) {
             libraryPreferences.updateInterval().set(0)
             LibraryUpdateJob.setupTask(preferences.context, 0)
         }
@@ -129,9 +123,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         return true
     }
 
-    /**
-     * Returns true if a category with the given name already exists.
-     */
+    /** Returns true if a category with the given name already exists. */
     private fun categoryExists(name: String): Boolean {
         return db.getCategories().executeAsBlocking().any {
             it.name.equals(name, true) && category?.id != it.id
@@ -147,9 +139,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             router.popCurrentController()
             router.pushController(CategoryController().withFadeTransaction())
         }
-        binding.title.addTextChangedListener {
-            binding.categoryTextLayout.error = null
-        }
+        binding.title.addTextChangedListener { binding.categoryTextLayout.error = null }
         binding.title.hint =
             category?.name ?: binding.editCategories.context.getString(R.string.category)
         binding.title.append(category?.name ?: "")
@@ -191,12 +181,10 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
                 updateCategories.add(categoryId.toString())
                 excludeUpdateCategories.remove(categoryId.toString())
             }
-
             TriStateCheckBox.State.IGNORE -> {
                 updateCategories.remove(categoryId.toString())
                 excludeUpdateCategories.add(categoryId.toString())
             }
-
             TriStateCheckBox.State.UNCHECKED -> {
                 updateCategories.remove(categoryId.toString())
                 excludeUpdateCategories.remove(categoryId.toString())
@@ -215,13 +203,17 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     ) {
         val updateCategories = categories.get()
         val excludeUpdateCategories = excludeCategories.get()
-        box.isVisible = (updateCategories.isNotEmpty() || excludeUpdateCategories.isNotEmpty()) && shouldShow
+        box.isVisible =
+            (updateCategories.isNotEmpty() || excludeUpdateCategories.isNotEmpty()) && shouldShow
         if (shouldShow) {
-            box.state = when {
-                updateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.CHECKED
-                excludeUpdateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.IGNORE
-                else -> TriStateCheckBox.State.UNCHECKED
-            }
+            box.state =
+                when {
+                    updateCategories.any { category?.id == it.toIntOrNull() } ->
+                        TriStateCheckBox.State.CHECKED
+                    excludeUpdateCategories.any { category?.id == it.toIntOrNull() } ->
+                        TriStateCheckBox.State.IGNORE
+                    else -> TriStateCheckBox.State.UNCHECKED
+                }
         }
     }
 }

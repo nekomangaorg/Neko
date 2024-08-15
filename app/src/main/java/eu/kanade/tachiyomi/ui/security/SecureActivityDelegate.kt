@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.security
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.view.Window
 import android.view.WindowManager
 import androidx.biometric.BiometricManager
@@ -19,11 +20,12 @@ object SecureActivityDelegate {
 
     fun setSecure(activity: Activity?) {
         val incognitoMode = securityPreferences.incognitoMode().get()
-        val enabled = when (securityPreferences.secureScreen().get()) {
-            SecurityPreferences.SecureScreenMode.ALWAYS -> true
-            SecurityPreferences.SecureScreenMode.INCOGNITO -> incognitoMode
-            else -> false
-        }
+        val enabled =
+            when (securityPreferences.secureScreen().get()) {
+                SecurityPreferences.SecureScreenMode.ALWAYS -> true
+                SecurityPreferences.SecureScreenMode.INCOGNITO -> incognitoMode
+                else -> false
+            }
         activity?.window?.setSecureScreen(enabled)
     }
 
@@ -38,14 +40,21 @@ object SecureActivityDelegate {
     fun promptLockIfNeeded(activity: Activity?, requireSuccess: Boolean = false) {
         if (activity == null || AuthenticatorUtil.isAuthenticating) return
         val lockApp = securityPreferences.useBiometrics().get()
-        if (lockApp && BiometricManager.from(activity)
-                .canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS
-        ) {
+        if (lockApp &&
+            BiometricManager.from(activity)
+                .canAuthenticate(
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL or
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
+                BiometricManager.BIOMETRIC_SUCCESS) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
                 intent.putExtra("fromSearch", (activity is SearchActivity) && !requireSuccess)
                 activity.startActivity(intent)
-                activity.overridePendingTransition(0, 0)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    activity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0)
+                } else {
+                    activity.overridePendingTransition(0, 0)
+                }
             }
         } else if (lockApp) {
             securityPreferences.useBiometrics().set(false)
@@ -60,10 +69,9 @@ object SecureActivityDelegate {
 
     private fun isAppLocked(): Boolean {
         return locked &&
-            (
-                securityPreferences.lockAfter().get() <= 0 ||
-                    Date().time >= securityPreferences.lastUnlock().get() + 60 * 1000 * securityPreferences
-                    .lockAfter().get()
-                )
+            (securityPreferences.lockAfter().get() <= 0 ||
+                Date().time >=
+                    securityPreferences.lastUnlock().get() +
+                        60 * 1000 * securityPreferences.lockAfter().get())
     }
 }

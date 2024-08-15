@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.widget
 
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPx
 import kotlin.math.min
 import kotlin.math.roundToInt
+import org.nekomanga.R
 
 object EstimatedItemHeight {
     /** gives height of a view holder, or an estimated based on others, or a hard coded estimate */
@@ -22,12 +22,11 @@ object EstimatedItemHeight {
             val type = childTypeMap.getOrPut(pos) { itemViewType ?: 0 }
             when {
                 childTypeEstimateMap[type] != null -> childTypeEstimateMap[type] ?: 0
-                childAvgHeightMap[type] == null && !childTypeHeightMap[type]?.values.isNullOrEmpty() -> {
+                childAvgHeightMap[type] == null &&
+                    !childTypeHeightMap[type]?.values.isNullOrEmpty() -> {
                     val array = (childTypeHeightMap[type]?.values ?: mutableListOf(0)).toIntArray()
-                    childAvgHeightMap[type] = array
-                        .copyOfRange(0, min(array.size, 10))
-                        .average()
-                        .roundToInt()
+                    childAvgHeightMap[type] =
+                        array.copyOfRange(0, min(array.size, 10)).average().roundToInt()
                     if (array.size >= 10) {
                         childTypeEstimateMap[type] = childAvgHeightMap[type]!!
                     }
@@ -41,9 +40,9 @@ object EstimatedItemHeight {
     /**
      * Used for estimates of heights of recycler view holders
      *
-     * Only needed to provide in cases where a layout type only shows up when scroll
-     * (for example: R.layout.chapters_item might not show until scrolling if
-     * R.layout.manga_header_item is too tall
+     * Only needed to provide in cases where a layout type only shows up when scroll (for example:
+     * R.layout.chapters_item might not show until scrolling if R.layout.manga_header_item is too
+     * tall
      */
     private fun estimatedHeight(id: Int): Int {
         return when (id) {

@@ -29,10 +29,11 @@ class DelayedLibrarySuggestionsJob(context: Context, workerParams: WorkerParamet
 
         fun setupTask(context: Context, enabled: Boolean) {
             if (enabled) {
-                val request = OneTimeWorkRequestBuilder<DelayedLibrarySuggestionsJob>()
-                    .setInitialDelay(1, TimeUnit.DAYS)
-                    .addTag(TAG)
-                    .build()
+                val request =
+                    OneTimeWorkRequestBuilder<DelayedLibrarySuggestionsJob>()
+                        .setInitialDelay(1, TimeUnit.DAYS)
+                        .addTag(TAG)
+                        .build()
 
                 WorkManager.getInstance(context)
                     .enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)

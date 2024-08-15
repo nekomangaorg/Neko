@@ -13,13 +13,19 @@ object ThemeUtil {
 
     /** Migration method */
     fun convertNewThemes(preferences: PreferencesHelper, theme: Int) {
-        preferences.nightMode().set(
-            when (theme) {
-                0, 1 -> AppCompatDelegate.MODE_NIGHT_NO
-                2, 3, 4, 9 -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            },
-        )
+        preferences
+            .nightMode()
+            .set(
+                when (theme) {
+                    0,
+                    1 -> AppCompatDelegate.MODE_NIGHT_NO
+                    2,
+                    3,
+                    4,
+                    9 -> AppCompatDelegate.MODE_NIGHT_YES
+                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                },
+            )
         preferences.lightTheme().set(Themes.DEFAULT)
         preferences.darkTheme().set(Themes.DEFAULT)
     }
@@ -65,15 +71,14 @@ fun AppCompatActivity.setThemeByPref(preferences: PreferencesHelper) {
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
     // Using a try catch in case I start to remove themes
     return try {
-        (
-            if ((applicationContext.isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
-                preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
-            ) {
+        (if ((applicationContext.isInNightMode() ||
+                preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
+                preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO) {
                 preferences.darkTheme()
             } else {
                 preferences.lightTheme()
-            }
-            ).get()
+            })
+            .get()
     } catch (e: Exception) {
         ThemeUtil.convertNewThemes(preferences.context)
         getPrefTheme(preferences)

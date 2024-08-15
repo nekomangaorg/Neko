@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.settings
 
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 enum class PageLayout(
     val value: Int,
@@ -13,11 +13,9 @@ enum class PageLayout(
     DOUBLE_PAGES(1, 2, R.string.double_pages),
     AUTOMATIC(2, 3, R.string.automatic, R.string.automatic_orientation),
     SPLIT_PAGES(3, 1, R.string.split_double_pages),
-
     ;
 
-    @StringRes
-    val fullStringRes = _fullStringRes ?: stringRes
+    @StringRes val fullStringRes = _fullStringRes ?: stringRes
 
     companion object {
         fun fromPreference(preference: Int): PageLayout =

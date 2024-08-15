@@ -4,10 +4,14 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
-class StaggeredGridLayoutManagerAccurateOffset(context: Context?, attr: AttributeSet?, spanCount: Int, orientation: Int) :
-    StaggeredGridLayoutManager(context, attr, spanCount, orientation) {
+class StaggeredGridLayoutManagerAccurateOffset(
+    context: Context?,
+    attr: AttributeSet?,
+    spanCount: Int,
+    orientation: Int
+) : StaggeredGridLayoutManager(context, attr, spanCount, orientation) {
 
     var rView: RecyclerView? = null
 
@@ -34,10 +38,13 @@ class StaggeredGridLayoutManagerAccurateOffset(context: Context?, attr: Attribut
             return 0
         }
         rView ?: return super.computeVerticalScrollOffset(state)
-        val firstChild = (0 until childCount)
-            .mapNotNull { getChildAt(it) }
-            .mapNotNull { pos -> (pos to getPosition(pos)).takeIf { it.second != RecyclerView.NO_POSITION } }
-            .minByOrNull { it.second } ?: return 0
+        val firstChild =
+            (0 until childCount)
+                .mapNotNull { getChildAt(it) }
+                .mapNotNull { pos ->
+                    (pos to getPosition(pos)).takeIf { it.second != RecyclerView.NO_POSITION }
+                }
+                .minByOrNull { it.second } ?: return 0
         val scrolledY: Int = -firstChild.first.y.toInt()
         return if (firstChild.second == 0) {
             scrolledY + paddingTop

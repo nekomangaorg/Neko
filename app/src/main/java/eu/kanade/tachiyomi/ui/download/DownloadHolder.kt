@@ -1,19 +1,18 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.view.View
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
+import org.nekomanga.R
+import org.nekomanga.databinding.DownloadItemBinding
 
 /**
- * Class used to hold the data of a download.
- * All the elements from the layout file "download_item" are available in this class.
+ * Class used to hold the data of a download. All the elements from the layout file "download_item"
+ * are available in this class.
  *
  * @param view the inflated view for this holder.
  * @constructor creates a new download holder.
@@ -50,7 +49,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             binding.downloadProgress.max = 1
             binding.downloadProgressText.text = ""
         } else {
-            binding.downloadProgress.max = pages.size * 100
+            binding.downloadProgress.max = Download.MaxProgress
             notifyProgress()
             notifyDownloadedPages()
         }
@@ -61,20 +60,15 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         )
     }
 
-    /**
-     * Updates the progress bar of the download.
-     */
+    /** Updates the progress bar of the download. */
     fun notifyProgress() {
-        val pages = download.pages ?: return
         if (binding.downloadProgress.max == 1) {
-            binding.downloadProgress.max = pages.size * 100
+            binding.downloadProgress.max = 100
         }
-        binding.downloadProgress.progress = download.pageProgress
+        binding.downloadProgress.progress = download.progress
     }
 
-    /**
-     * Updates the text field of the number of downloaded pages.
-     */
+    /** Updates the text field of the number of downloaded pages. */
     fun notifyDownloadedPages() {
         val pages = download.pages ?: return
         binding.downloadProgressText.text = "${download.downloadedImages}/${pages.size}"
@@ -104,8 +98,8 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         popup.inflate(R.menu.download_single)
 
         popup.menu.findItem(R.id.move_to_top).isVisible = flexibleAdapterPosition != 0
-        popup.menu.findItem(R.id.move_to_bottom).isVisible = flexibleAdapterPosition != adapter
-            .itemCount - 1
+        popup.menu.findItem(R.id.move_to_bottom).isVisible =
+            flexibleAdapterPosition != adapter.itemCount - 1
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->

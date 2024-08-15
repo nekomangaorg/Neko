@@ -14,11 +14,14 @@ import org.nekomanga.domain.manga.MangaStatus
 data class DexFilters(
     val queryMode: QueryType = QueryType.Title,
     val query: Filter.Query = Filter.Query("", QueryType.Title),
-    val originalLanguage: List<Filter.OriginalLanguage> = MdLang.values().map { Filter.OriginalLanguage(it, false) },
+    val originalLanguage: List<Filter.OriginalLanguage> =
+        MdLang.values().map { Filter.OriginalLanguage(it, false) },
     val contentRatings: List<Filter.ContentRating>,
     val contentRatingVisible: Boolean = true,
-    val publicationDemographics: List<Filter.PublicationDemographic> = MangaDemographic.getOrdered().map { Filter.PublicationDemographic(it, false) },
-    val statuses: List<Filter.Status> = MangaStatus.getMangaDexStatus().map { Filter.Status(it, false) },
+    val publicationDemographics: List<Filter.PublicationDemographic> =
+        MangaDemographic.getOrdered().map { Filter.PublicationDemographic(it, false) },
+    val statuses: List<Filter.Status> =
+        MangaStatus.getMangaDexStatus().map { Filter.Status(it, false) },
     val tags: List<Filter.Tag> = MangaTag.values().map { Filter.Tag(it, ToggleableState.Off) },
     val sort: List<Filter.Sort> = Filter.Sort.getSortList(),
     val hasAvailableChapters: Filter.HasAvailableChapters = Filter.HasAvailableChapters(),
@@ -45,7 +48,8 @@ sealed class Filter {
     data class ContentRating(val rating: MangaContentRating, val state: Boolean) : Filter()
 
     @kotlinx.serialization.Serializable
-    data class PublicationDemographic(val demographic: MangaDemographic, val state: Boolean) : Filter()
+    data class PublicationDemographic(val demographic: MangaDemographic, val state: Boolean) :
+        Filter()
 
     @kotlinx.serialization.Serializable
     data class Status(val status: MangaStatus, val state: Boolean) : Filter()
@@ -79,7 +83,8 @@ sealed class Filter {
     @kotlinx.serialization.Serializable
     data class Sort(val sort: MdSort, val state: Boolean) : Filter() {
         companion object {
-            fun getSortList(mdSortToEnable: MdSort = MdSort.Best) = MdSort.values().map { Sort(it, it == mdSortToEnable) }
+            fun getSortList(mdSortToEnable: MdSort = MdSort.Best) =
+                MdSort.values().map { Sort(it, it == mdSortToEnable) }
         }
     }
 }

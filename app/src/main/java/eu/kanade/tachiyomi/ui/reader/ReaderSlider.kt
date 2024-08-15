@@ -6,22 +6,21 @@ import android.os.Build
 import android.util.AttributeSet
 import com.google.android.material.slider.Slider
 
-/**
- * Seekbar to show current chapter progress.
- */
-class ReaderSlider @JvmOverloads constructor(
+/** Seekbar to show current chapter progress. */
+class ReaderSlider
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : Slider(context, attrs) {
 
-    /**
-     * Whether the seekbar should draw from right to left.
-     */
+    /** Whether the seekbar should draw from right to left. */
     var isRTL: Boolean
         set(value) {
             layoutDirection = if (value) LAYOUT_DIRECTION_RTL else LAYOUT_DIRECTION_LTR
         }
         get() = layoutDirection == LAYOUT_DIRECTION_RTL
+
     private val boundingBox: Rect = Rect()
     private val exclusions = listOf(boundingBox)
 

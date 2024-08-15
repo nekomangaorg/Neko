@@ -9,6 +9,7 @@ import kotlinx.coroutines.isActive
 
 open class BaseCoroutinePresenter<T> {
     var presenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    var pausablePresenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var weakView: WeakReference<T>? = null
     protected val view: T?
         get() = weakView?.get()
@@ -23,13 +24,24 @@ open class BaseCoroutinePresenter<T> {
         if (!presenterScope.isActive) {
             presenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         }
+        if (!pausablePresenterScope.isActive) {
+            pausablePresenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        }
     }
 
-    open fun onCreate() {
+    open fun onCreate() {}
+
+    open fun onPause() {
+        pausablePresenterScope.cancel()
+    }
+
+    open fun onResume() {
+        pausablePresenterScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     }
 
     open fun onDestroy() {
         presenterScope.cancel()
+        pausablePresenterScope.cancel()
         weakView = null
     }
 }

@@ -7,19 +7,13 @@ import com.google.android.material.tabs.TabLayout
 
 class TabsAnimator(val tabs: TabLayout) {
 
-    /**
-     * The default height of the tab layout. It's unknown until the view is layout.
-     */
+    /** The default height of the tab layout. It's unknown until the view is layout. */
     private var tabsHeight = 0
 
-    /**
-     * Whether the last state of the tab layout is shown or hidden.
-     */
+    /** Whether the last state of the tab layout is shown or hidden. */
     private var isLastStateShown = true
 
-    /**
-     * Animation used to expand and collapse the tab layout.
-     */
+    /** Animation used to expand and collapse the tab layout. */
     private val animation by lazy {
         ObjectAnimator.ofInt(this, "height", tabsHeight).apply {
             duration = 300L
@@ -67,9 +61,7 @@ class TabsAnimator(val tabs: TabLayout) {
         return tabs.layoutParams.height
     }
 
-    /**
-     * Expands the tab layout with an animation.
-     */
+    /** Expands the tab layout with an animation. */
     fun expand() {
         if (isMeasured) {
             if (getHeight() != tabsHeight) {
@@ -82,9 +74,7 @@ class TabsAnimator(val tabs: TabLayout) {
         isLastStateShown = true
     }
 
-    /**
-     * Collapse the tab layout with an animation.
-     */
+    /** Collapse the tab layout with an animation. */
     fun collapse() {
         if (isMeasured) {
             if (getHeight() != 0) {
@@ -97,9 +87,7 @@ class TabsAnimator(val tabs: TabLayout) {
         isLastStateShown = false
     }
 
-    /**
-     * Returns whether the tab layout has a known height.
-     */
+    /** Returns whether the tab layout has a known height. */
     private val isMeasured: Boolean
         get() = tabsHeight > 0
 }

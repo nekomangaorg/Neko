@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.util.system
 
-/**Generate a unique hash code*/
+/** Generate a unique hash code */
 class HashCode {
     companion object {
         fun <T> generate(vararg thingsToHash: T): Int {

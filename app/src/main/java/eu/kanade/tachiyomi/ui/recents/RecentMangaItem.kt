@@ -5,19 +5,18 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterItem
+import org.nekomanga.R
 
 class RecentMangaItem(
     val mch: MangaChapterHistory = MangaChapterHistory.createBlank(),
     chapter: Chapter = ChapterImpl(),
     header: AbstractHeaderItem<*>?,
-) :
-    BaseChapterItem<BaseChapterHolder, AbstractHeaderItem<*>>(chapter, header) {
+) : BaseChapterItem<BaseChapterHolder, AbstractHeaderItem<*>>(chapter, header) {
 
     override fun getLayoutRes(): Int {
         return if (mch.manga.id == null) {
@@ -70,7 +69,8 @@ class RecentMangaItem(
         payloads: MutableList<Any?>?,
     ) {
         if (mch.manga.id == null) {
-            (holder as? RecentMangaFooterHolder)?.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
+            (holder as? RecentMangaFooterHolder)?.bind(
+                (header as? RecentMangaHeaderItem)?.recentsType ?: 0)
         } else if (chapter.id != null) (holder as? RecentMangaHolder)?.bind(this)
     }
 }

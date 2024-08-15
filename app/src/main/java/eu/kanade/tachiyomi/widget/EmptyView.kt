@@ -9,10 +9,10 @@ import androidx.annotation.StringRes
 import androidx.core.view.isVisible
 import com.google.android.material.button.MaterialButton
 import com.mikepenz.iconics.typeface.IIcon
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import org.nekomanga.R
+import org.nekomanga.databinding.CommonViewEmptyBinding
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     RelativeLayout(context, attrs) {
@@ -20,15 +20,14 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     private val binding: CommonViewEmptyBinding =
         CommonViewEmptyBinding.inflate(LayoutInflater.from(context), this, true)
 
-    /**
-     * Hide the information view
-     */
+    /** Hide the information view */
     fun hide() {
         this.isVisible = false
     }
 
     /**
      * Show the information view
+     *
      * @param textResource text of information view
      */
     fun show(
@@ -41,6 +40,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     /**
      * Show the information view
+     *
      * @param drawable icon of information view
      * @param textResource text of information view
      */
@@ -67,6 +67,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     /**
      * Show the information view
+     *
      * @param textResource text of information view
      */
     fun show(icon: IIcon, @StringRes textResource: Int, actions: List<Action>? = null) {
@@ -75,10 +76,10 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     /**
      * Show the information view
+     *
      * @param drawable icon of information view
      * @param textResource text of information view
      */
-
     fun showMedium(icon: IIcon, message: String, actions: List<Action>? = null) {
         binding.imageView.setImageDrawable(
             icon.create(
@@ -107,16 +108,17 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         binding.actionsContainer.removeAllViews()
         if (!actions.isNullOrEmpty()) {
             actions.forEach {
-                val button = (
-                    inflate(
-                        context,
-                        R.layout.material_text_button,
-                        null,
-                    ) as MaterialButton
-                    ).apply {
-                    setText(it.resId)
-                    setOnClickListener(it.listener)
-                }
+                val button =
+                    (inflate(
+                            context,
+                            R.layout.material_text_button,
+                            null,
+                        )
+                            as MaterialButton)
+                        .apply {
+                            setText(it.resId)
+                            setOnClickListener(it.listener)
+                        }
 
                 binding.actionsContainer.addView(button)
             }

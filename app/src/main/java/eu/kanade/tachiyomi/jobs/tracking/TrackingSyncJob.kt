@@ -1,35 +1,33 @@
 package eu.kanade.tachiyomi.jobs.tracking
 
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
-import eu.kanade.tachiyomi.util.system.withUIContext
-import kotlin.time.Duration.Companion.seconds
+import eu.kanade.tachiyomi.util.system.tryToSetForeground
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
-/**
- * WorkManager job that syncs tracking from trackers to Neko
- */
+/** WorkManager job that syncs tracking from trackers to Neko */
 class TrackingSyncJob(
     val context: Context,
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
 
-    val trackingSyncService: TrackingSyncService by injectLazy()
+    private val trackingSyncService: TrackSyncProcessor by injectLazy()
 
     // List containing failed updates
     private val failedUpdates = mutableMapOf<Manga, String?>()
@@ -52,13 +50,18 @@ class TrackingSyncJob(
             setSmallIcon(R.drawable.ic_neko_notification)
         }
 
-    override suspend fun doWork(): Result = coroutineScope {
-        withUIContext {
-            failedUpdates.clear()
-            val notification = progressNotification.build()
-            val foregroundInfo = ForegroundInfo(Notifications.Id.Tracking.Progress, notification)
-            setForeground(foregroundInfo)
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        val notification = progressNotification.build()
+        val id = Notifications.ID_RESTORE_PROGRESS
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(id, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(id, notification)
         }
+    }
+
+    override suspend fun doWork(): Result = coroutineScope {
+        tryToSetForeground()
 
         try {
             trackingSyncService.process(
@@ -71,18 +74,13 @@ class TrackingSyncJob(
             TimberKt.e(e) { "error refreshing tracking metadata" }
             return@coroutineScope Result.failure()
         } finally {
-            launchIO {
-                delay(3.seconds.inWholeMilliseconds)
-                context.notificationManager.cancel(Notifications.Id.Tracking.Complete)
-            }
+            launchIO { context.notificationManager.cancel(Notifications.Id.Tracking.Progress) }
         }
     }
 
     private fun updateNotificationProgress(title: String, progress: Int, total: Int) {
-        val notification = progressNotification
-            .setContentText(title)
-            .setProgress(total, progress, false)
-            .build()
+        val notification =
+            progressNotification.setContentText(title).setProgress(total, progress, false).build()
         applicationContext.notificationManager.notify(
             Notifications.Id.Tracking.Progress,
             notification,
@@ -90,8 +88,7 @@ class TrackingSyncJob(
     }
 
     private fun completeNotification() {
-        val notification = completeNotification
-            .build()
+        val notification = completeNotification.build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Tracking.Complete,
             notification,
@@ -107,9 +104,7 @@ class TrackingSyncJob(
         val TAG = "tracking_sync_job"
 
         fun doWorkNow(context: Context) {
-            val request = OneTimeWorkRequestBuilder<TrackingSyncJob>()
-                .addTag(TAG)
-                .build()
+            val request = OneTimeWorkRequestBuilder<TrackingSyncJob>().addTag(TAG).build()
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)

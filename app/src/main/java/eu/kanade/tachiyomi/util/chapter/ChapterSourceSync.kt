@@ -34,14 +34,17 @@ fun syncChaptersWithSource(
     // no need to handle cache in dedupe because rawsource already has the correct chapters
     val sortedChapters = reorderChapters(rawSourceChapters, manga)
 
-    val sourceChapters = sortedChapters.mapIndexed { i, sChapter ->
-        Chapter.create().apply {
-            copyFrom(sChapter)
-            TimberKt.d { "ChapterSourceSync ${this.scanlator} ${this.chapter_txt} sourceOrder=${i}" }
-            manga_id = manga.id
-            source_order = i
+    val sourceChapters =
+        sortedChapters.mapIndexed { i, sChapter ->
+            Chapter.create().apply {
+                copyFrom(sChapter)
+                TimberKt.d {
+                    "ChapterSourceSync ${this.scanlator} ${this.chapter_txt} sourceOrder=${i}"
+                }
+                manga_id = manga.id
+                source_order = i
+            }
         }
-    }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
@@ -50,16 +53,18 @@ fun syncChaptersWithSource(
     val toChange = mutableListOf<Chapter>()
 
     for (sourceChapter in sourceChapters) {
-        val dbChapter = dbChapters.find {
-            if (sourceChapter.isMergedChapter() && it.isMergedChapter()) {
-                it.url == sourceChapter.url
-            } else if (!sourceChapter.isMergedChapter() && !it.isMergedChapter()) {
-                (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
-                    MdUtil.getChapterUUID(it.url) == sourceChapter.mangadex_chapter_id
-            } else {
-                false
+        val dbChapter =
+            dbChapters.find {
+                if (sourceChapter.isMergedChapter() && it.isMergedChapter()) {
+                    it.url == sourceChapter.url
+                } else if (!sourceChapter.isMergedChapter() && !it.isMergedChapter()) {
+                    (it.mangadex_chapter_id.isNotBlank() &&
+                        it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
+                        MdUtil.getChapterUUID(it.url) == sourceChapter.mangadex_chapter_id
+                } else {
+                    false
+                }
             }
-        }
 
         // Add the chapter if not in db already, or update if the metadata changed.
 
@@ -69,11 +74,11 @@ fun syncChaptersWithSource(
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
-                if (dbChapter.name != sourceChapter.name && downloadManager.isChapterDownloaded(
+                if (dbChapter.name != sourceChapter.name &&
+                    downloadManager.isChapterDownloaded(
                         dbChapter,
                         manga,
-                    )
-                ) {
+                    )) {
                     downloadManager.renameChapter(manga, dbChapter, sourceChapter)
                 }
                 dbChapter.scanlator = sourceChapter.scanlator
@@ -92,25 +97,27 @@ fun syncChaptersWithSource(
     }
 
     // Recognize number for new chapters.
-    toAdd.forEach {
-        ChapterRecognition.parseChapterNumber(it, manga)
-    }
+    toAdd.forEach { ChapterRecognition.parseChapterNumber(it, manga) }
 
     // Chapters from the db not in the source.
-    var toDelete = dbChapters.filterNot { dbChapter ->
-        // ignore to delete when there is a site error
-        if (dbChapter.isMergedChapter() && errorFromMerged) {
-            true
-        } else {
-            sourceChapters.any { sourceChapter ->
-                dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
+    var toDelete =
+        dbChapters.filterNot { dbChapter ->
+            // ignore to delete when there is a site error
+            if (dbChapter.isMergedChapter() && errorFromMerged) {
+                true
+            } else {
+                sourceChapters.any { sourceChapter ->
+                    dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
+                }
             }
         }
-    }
 
-    val dupes = dbChapters.groupBy { it.url }.filter { entry -> entry.value.size > 1 }.map { entry ->
-        entry.value.firstOrNull { !it.read } ?: entry.value.first()
-    }.toMutableList()
+    val dupes =
+        dbChapters
+            .groupBy { it.url }
+            .filter { entry -> entry.value.size > 1 }
+            .map { entry -> entry.value.firstOrNull { !it.read } ?: entry.value.first() }
+            .toMutableList()
     if (dupes.isNotEmpty()) {
         dupes.addAll(toDelete)
         toDelete = dupes.toList()
@@ -168,10 +175,10 @@ fun syncChaptersWithSource(
                         chapter.read = true
                     }
                     // Try to to use the fetch date it originally had to not pollute 'Updates' tab
-                    toDelete.filter { it.chapter_number == chapter.chapter_number }
-                        .minByOrNull { it.date_fetch }?.let {
-                            chapter.date_fetch = it.date_fetch
-                        }
+                    toDelete
+                        .filter { it.chapter_number == chapter.chapter_number }
+                        .minByOrNull { it.date_fetch }
+                        ?.let { chapter.date_fetch = it.date_fetch }
 
                     readded.add(chapter)
                 }
@@ -185,8 +192,8 @@ fun syncChaptersWithSource(
         if (toChange.isNotEmpty()) {
             db.insertChapters(toChange).executeAsBlocking()
         }
-        val topChapters = db.getChapters(manga).executeAsBlocking()
-            .sortedByDescending { it.date_upload }.take(4)
+        val topChapters =
+            db.getChapters(manga).executeAsBlocking().sortedByDescending { it.date_upload }.take(4)
         // Recalculate next update since chapters were changed
         if (topChapters.size > 1) {
             var delta = 0L

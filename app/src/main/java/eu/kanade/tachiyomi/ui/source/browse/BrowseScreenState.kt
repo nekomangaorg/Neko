@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
 import org.nekomanga.domain.DisplayResult
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.filter.DexFilters
@@ -44,7 +44,10 @@ data class BrowseScreenState(
     val categories: ImmutableList<CategoryItem> = persistentListOf(),
 )
 
-data class HomePageManga(val displayScreenType: DisplayScreenType, val displayManga: ImmutableList<DisplayManga> = persistentListOf())
+data class HomePageManga(
+    val displayScreenType: DisplayScreenType,
+    val displayManga: ImmutableList<DisplayManga> = persistentListOf()
+)
 
 data class DisplayMangaHolder(
     val resultType: BrowseScreenType = BrowseScreenType.None,

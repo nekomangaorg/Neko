@@ -27,19 +27,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.HomePageManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import java.util.Objects
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.InLibraryBadge
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.MangaGridSubtitle
 import org.nekomanga.presentation.components.MangaGridTitle
-import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun BrowseHomePage(
@@ -51,11 +51,14 @@ fun BrowseHomePage(
     randomClick: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(),
 ) {
-    val coverSize = (maxOf(LocalConfiguration.current.screenHeightDp, LocalConfiguration.current.screenWidthDp) / 5).dp
+    val coverSize =
+        (maxOf(
+                LocalConfiguration.current.screenHeightDp,
+                LocalConfiguration.current.screenWidthDp) / 5)
+            .dp
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
     ) {
         items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga) }) { homePageManga ->
@@ -63,44 +66,50 @@ fun BrowseHomePage(
                 is DisplayScreenType.LatestChapters -> stringResource(homePageManga.displayScreenType.titleRes)
                 is DisplayScreenType.RecentlyAdded -> stringResource(homePageManga.displayScreenType.titleRes)
                 is DisplayScreenType.SubscriptionFeed -> stringResource(homePageManga.displayScreenType.titleRes)
-                is DisplayScreenType.List -> homePageManga.displayScreenType.title
-                is DisplayScreenType.PopularNewTitles -> stringResource(id = homePageManga.displayScreenType.titleRes)
-            }
+                    is DisplayScreenType.List -> homePageManga.displayScreenType.title
+                    is DisplayScreenType.PopularNewTitles ->
+                        stringResource(id = homePageManga.displayScreenType.titleRes)
+                }
             TextButton(
                 onClick = { titleClick(homePageManga.displayScreenType) },
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = headerText,
-                        style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                        style =
+                            MaterialTheme.typography.titleLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface),
                     )
-                    Gap(8.dp)
-                    Icon(imageVector = Icons.Default.ArrowForward, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                    Gap(Size.tiny)
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        modifier = Modifier.size(24.dp),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
             Gap(Size.tiny)
             LazyRow(
-                modifier = Modifier
-                    .requiredHeight(coverSize + 60.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.requiredHeight(coverSize + 60.dp),
+                horizontalArrangement = Arrangement.spacedBy(Size.small),
             ) {
                 item { Gap(Size.small) }
 
-                items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) { displayManga ->
+                items(homePageManga.displayManga, key = { displayManga -> displayManga.mangaId }) {
+                    displayManga ->
                     if (displayManga.isVisible) {
                         Box {
                             Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(Shapes.coverRadius))
-                                    .combinedClickable(
-                                        onClick = { onClick(displayManga.mangaId) },
-                                        onLongClick = { onLongClick(displayManga) },
-                                    ),
+                                modifier =
+                                    Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
+                                        .combinedClickable(
+                                            onClick = { onClick(displayManga.mangaId) },
+                                            onLongClick = { onLongClick(displayManga) },
+                                        ),
                             ) {
                                 Column(modifier = Modifier.width(coverSize)) {
                                     MangaCover.Square.invoke(
@@ -127,17 +136,22 @@ fun BrowseHomePage(
                 onClick = randomClick,
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = stringResource(id = R.string.random_manga),
-                        style = MaterialTheme.typography.titleLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+                        style =
+                            MaterialTheme.typography.titleLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface),
                     )
-                    Gap(8.dp)
-                    Icon(imageVector = Icons.Default.ArrowForward, modifier = Modifier.size(24.dp), contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                    Gap(Size.tiny)
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        modifier = Modifier.size(24.dp),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }

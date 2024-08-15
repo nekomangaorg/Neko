@@ -4,13 +4,18 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import tachiyomi.core.preference.PreferenceStore
 
 class MangaDetailsPreferences(private val preferenceStore: PreferenceStore) {
-    fun filterChapterByRead() = this.preferenceStore.getInt("default_chapter_filter_by_read", Manga.SHOW_ALL)
+    fun filterChapterByRead() =
+        this.preferenceStore.getInt("default_chapter_filter_by_read", Manga.SHOW_ALL)
 
-    fun filterChapterByDownloaded() = this.preferenceStore.getInt("default_chapter_filter_by_downloaded", Manga.SHOW_ALL)
+    fun filterChapterByDownloaded() =
+        this.preferenceStore.getInt("default_chapter_filter_by_downloaded", Manga.SHOW_ALL)
 
-    fun filterChapterByBookmarked() = this.preferenceStore.getInt("default_chapter_filter_by_bookmarked", Manga.SHOW_ALL)
+    fun filterChapterByBookmarked() =
+        this.preferenceStore.getInt("default_chapter_filter_by_bookmarked", Manga.SHOW_ALL)
 
-    fun sortChapterOrder() = this.preferenceStore.getInt("default_chapter_sort_by_source_or_number", Manga.CHAPTER_SORTING_SOURCE)
+    fun sortChapterOrder() =
+        this.preferenceStore.getInt(
+            "default_chapter_sort_by_source_or_number", Manga.CHAPTER_SORTING_SOURCE)
 
     fun hideChapterTitlesByDefault() = this.preferenceStore.getBoolean("hide_chapter_titles")
 

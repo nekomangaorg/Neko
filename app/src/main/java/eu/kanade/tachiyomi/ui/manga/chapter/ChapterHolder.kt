@@ -7,14 +7,15 @@ import androidx.core.animation.doOnEnd
 import androidx.core.animation.doOnStart
 import androidx.core.view.isVisible
 import coil.load
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.databinding.ChaptersItemBinding
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import org.nekomanga.R
+import org.nekomanga.constants.Constants
+import org.nekomanga.databinding.ChaptersItemBinding
 
 class ChapterHolder(
     view: View,
@@ -35,12 +36,13 @@ class ChapterHolder(
         val chapter = item.chapter
         val isLocked = item.isLocked
         itemView.transitionName = "details chapter ${chapter.id ?: 0L} transition"
-        binding.chapterTitle.text = if (manga.hideChapterTitle(adapter.mangaDetailsPreferences)) {
-            val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-            itemView.context.getString(R.string.chapter_, number)
-        } else {
-            chapter.name
-        }
+        binding.chapterTitle.text =
+            if (manga.hideChapterTitle(adapter.mangaDetailsPreferences)) {
+                val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
+                itemView.context.getString(R.string.chapter_, number)
+            } else {
+                chapter.name
+            }
 
         ChapterUtil.setTextViewForChapter(binding.chapterTitle, item, hideStatus = isLocked)
 
@@ -98,12 +100,9 @@ class ChapterHolder(
             showBookmark = false,
             hideStatus = isLocked,
         )
-        binding.chapterScanlator.text = statuses.joinToString(" • ")
+        binding.chapterScanlator.text = statuses.joinToString(Constants.SEPARATOR)
 
-        val status = when {
-            adapter.isSelected(flexibleAdapterPosition) -> Download.State.CHECKED
-            else -> item.status
-        }
+        val status = item.status
 
         notifyStatus(status, item.isLocked, item.progress)
         resetFrontView()
@@ -160,23 +159,29 @@ class ChapterHolder(
         }
     }
 
-    fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
-        /* adapter.delegate.accentColor()?.let {
-             binding.startView.backgroundTintList = ColorStateList.valueOf(it)
-             binding.bookmark.imageTintList = ColorStateList.valueOf(
-                 context.getResourceColor(android.R.attr.textColorPrimaryInverse),
-             )
-             TextViewCompat.setCompoundDrawableTintList(
-                 binding.chapterTitle,
-                 ColorStateList.valueOf(it),
-             )
-             colorSecondary = it
-         }*/
-        if (locked) {
-            isVisible = false
-            return
+    fun notifyStatus(
+        status: Download.State,
+        locked: Boolean,
+        progress: Int,
+        animated: Boolean = false
+    ) =
+        with(binding.downloadButton.downloadButton) {
+            /* adapter.delegate.accentColor()?.let {
+                binding.startView.backgroundTintList = ColorStateList.valueOf(it)
+                binding.bookmark.imageTintList = ColorStateList.valueOf(
+                    context.getResourceColor(android.R.attr.textColorPrimaryInverse),
+                )
+                TextViewCompat.setCompoundDrawableTintList(
+                    binding.chapterTitle,
+                    ColorStateList.valueOf(it),
+                )
+                colorSecondary = it
+            }*/
+            if (locked) {
+                isVisible = false
+                return
+            }
+            isVisible = !localSource
+            setDownloadStatus(status, progress, animated)
         }
-        isVisible = !localSource
-        setDownloadStatus(status, progress, animated)
-    }
 }

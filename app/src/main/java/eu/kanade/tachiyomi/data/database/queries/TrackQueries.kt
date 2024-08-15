@@ -12,40 +12,55 @@ import eu.kanade.tachiyomi.data.track.TrackService
 
 interface TrackQueries : DbProvider {
 
+    fun getTrackByTrackId(id: Long) =
+        db.get()
+            .`object`(Track::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(TrackTable.TABLE)
+                    .where("${TrackTable.COL_ID} = ?")
+                    .whereArgs(id)
+                    .build(),
+            )
+            .prepare()
+
     fun getTracks(manga: Manga) = getTracks(manga.id)
 
-    fun getTracks(mangaId: Long?) = db.get()
-        .listOfObjects(Track::class.java)
-        .withQuery(
-            Query.builder()
-                .table(TrackTable.TABLE)
-                .where("${TrackTable.COL_MANGA_ID} = ?")
-                .whereArgs(mangaId)
-                .build(),
-        )
-        .prepare()
+    fun getTracks(mangaId: Long?) =
+        db.get()
+            .listOfObjects(Track::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(TrackTable.TABLE)
+                    .where("${TrackTable.COL_MANGA_ID} = ?")
+                    .whereArgs(mangaId)
+                    .build(),
+            )
+            .prepare()
 
-    fun getTracks(mangaIds: List<Long>) = db.get()
-        .listOfObjects(Track::class.java)
-        .withQuery(
-            Query.builder()
-                .table(TrackTable.TABLE)
-                .where("${TrackTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})")
-                .whereArgs(*mangaIds.toTypedArray())
-                .build(),
-        )
-        .prepare()
+    fun getTracks(mangaIds: List<Long>) =
+        db.get()
+            .listOfObjects(Track::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(TrackTable.TABLE)
+                    .where("${TrackTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})")
+                    .whereArgs(*mangaIds.toTypedArray())
+                    .build(),
+            )
+            .prepare()
 
-    fun getMDList(manga: Manga) = db.get()
-        .`object`(Track::class.java)
-        .withQuery(
-            Query.builder()
-                .table(TrackTable.TABLE)
-                .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
-                .whereArgs(manga.id, TrackManager.MDLIST)
-                .build(),
-        )
-        .prepare()
+    fun getMDList(manga: Manga) =
+        db.get()
+            .`object`(Track::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(TrackTable.TABLE)
+                    .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
+                    .whereArgs(manga.id, TrackManager.MDLIST)
+                    .build(),
+            )
+            .prepare()
 
     fun insertTrack(track: Track) = db.put().`object`(track).prepare()
 
@@ -53,21 +68,21 @@ interface TrackQueries : DbProvider {
 
     fun deleteTrackForManga(manga: Manga, sync: TrackService) = deleteTrackForManga(manga.id, sync)
 
-    fun deleteTrackForManga(mangaId: Long?, sync: TrackService) = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(TrackTable.TABLE)
-                .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
-                .whereArgs(mangaId, sync.id)
-                .build(),
-        )
-        .prepare()
+    fun deleteTrackForManga(mangaId: Long?, sync: TrackService) =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(TrackTable.TABLE)
+                    .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
+                    .whereArgs(mangaId, sync.id)
+                    .build(),
+            )
+            .prepare()
 
-    fun deleteTracks() = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(TrackTable.TABLE)
-                .build(),
-        )
-        .prepare()
+    fun deleteTracks() =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder().table(TrackTable.TABLE).build(),
+            )
+            .prepare()
 }

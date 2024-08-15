@@ -8,7 +8,8 @@ import android.view.View
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isLTR
 
-class RecentMangaDivider(context: Context) : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
+class RecentMangaDivider(context: Context) :
+    androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
 
     private val divider: Drawable
 
@@ -18,21 +19,27 @@ class RecentMangaDivider(context: Context) : androidx.recyclerview.widget.Recycl
         a.recycle()
     }
 
-    override fun onDraw(c: Canvas, parent: androidx.recyclerview.widget.RecyclerView, state: androidx.recyclerview.widget.RecyclerView.State) {
+    override fun onDraw(
+        c: Canvas,
+        parent: androidx.recyclerview.widget.RecyclerView,
+        state: androidx.recyclerview.widget.RecyclerView.State
+    ) {
         val childCount = parent.childCount
         for (i in 0 until childCount - 1) {
             val child = parent.getChildAt(i)
             val holder = parent.getChildViewHolder(child)
             if (holder is RecentMangaHolder &&
-                parent.getChildViewHolder(parent.getChildAt(i + 1)) is RecentMangaHolder
-            ) {
+                parent.getChildViewHolder(parent.getChildAt(i + 1)) is RecentMangaHolder) {
                 val params =
                     child.layoutParams as androidx.recyclerview.widget.RecyclerView.LayoutParams
                 val top = child.bottom + params.bottomMargin
                 val bottom = top + divider.intrinsicHeight
-                val left = parent.paddingStart + if (parent.context.resources.isLTR) 12.dpToPx else 0
+                val left =
+                    parent.paddingStart + if (parent.context.resources.isLTR) 12.dpToPx else 0
                 val right =
-                    parent.width - parent.paddingEnd - if (!parent.context.resources.isLTR) 12.dpToPx else 0
+                    parent.width -
+                        parent.paddingEnd -
+                        if (!parent.context.resources.isLTR) 12.dpToPx else 0
 
                 divider.setBounds(left, top, right, bottom)
                 divider.draw(c)

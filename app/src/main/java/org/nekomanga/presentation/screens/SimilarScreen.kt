@@ -29,10 +29,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.similar.SimilarScreenState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.launch
+import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.presentation.components.AppBarActions
@@ -66,12 +66,8 @@ fun SimilarScreen(
         )
     var longClickedMangaId by remember { mutableStateOf<Long?>(null) }
 
-    /**
-     * Close the bottom sheet on back if its open
-     */
-    BackHandler(enabled = sheetState.isVisible) {
-        scope.launch { sheetState.hide() }
-    }
+    /** Close the bottom sheet on back if its open */
+    BackHandler(enabled = sheetState.isVisible) { scope.launch { sheetState.hide() } }
 
     ModalBottomSheetLayout(
         sheetState = sheetState,
@@ -85,9 +81,7 @@ fun SimilarScreen(
                     addNewCategory = addNewCategory,
                     confirmClicked = { selectedCategories ->
                         scope.launch { sheetState.hide() }
-                        longClickedMangaId?.let {
-                            toggleFavorite(it, selectedCategories)
-                        }
+                        longClickedMangaId?.let { toggleFavorite(it, selectedCategories) }
                     },
                 )
             }
@@ -100,22 +94,20 @@ fun SimilarScreen(
             actions = {
                 AppBarActions(
                     actions =
-                    listOf(
-                        listGridAppBarAction(
-                            isList = similarScreenState.value.isList,
-                            onClick = switchDisplayClick,
+                        listOf(
+                            listGridAppBarAction(
+                                isList = similarScreenState.value.isList,
+                                onClick = switchDisplayClick,
+                            ),
                         ),
-                    ),
                 )
             },
         ) { incomingPaddingValues ->
-
             PullRefresh(
                 refreshing = similarScreenState.value.isRefreshing,
                 onRefresh = onRefresh,
                 indicatorOffset = (incomingPaddingValues.calculateTopPadding() + Size.huge),
-            )
-            {
+            ) {
                 val haptic = LocalHapticFeedback.current
 
                 SimilarContent(
@@ -125,7 +117,8 @@ fun SimilarScreen(
                     mangaClick = mangaClick,
                     mangaLongClick = { displayManga: DisplayManga ->
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        if (!displayManga.inLibrary && similarScreenState.value.promptForCategories) {
+                        if (!displayManga.inLibrary &&
+                            similarScreenState.value.promptForCategories) {
                             scope.launch {
                                 longClickedMangaId = displayManga.mangaId
                                 sheetState.show()
@@ -160,11 +153,15 @@ private fun SimilarContent(
             )
         }
     } else {
-        val contentPadding = PaddingValues(
-            bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                .asPaddingValues().calculateBottomPadding(),
-            top = paddingValues.calculateTopPadding(),
-        )
+        val contentPadding =
+            PaddingValues(
+                bottom =
+                    WindowInsets.navigationBars
+                        .only(WindowInsetsSides.Bottom)
+                        .asPaddingValues()
+                        .calculateBottomPadding(),
+                top = paddingValues.calculateTopPadding(),
+            )
 
         if (similarScreenState.value.isList) {
             MangaListWithHeader(

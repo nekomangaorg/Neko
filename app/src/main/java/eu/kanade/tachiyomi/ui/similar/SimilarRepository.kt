@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.similar
 
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
@@ -11,6 +10,7 @@ import eu.kanade.tachiyomi.util.toDisplayManga
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.logging.TimberKt
@@ -30,81 +30,89 @@ class SimilarRepository {
     ): List<SimilarMangaGroup> {
         return withContext(Dispatchers.IO) {
             val similarDbEntry = db.getSimilar(dexId).executeAsBlocking()
-            val actualRefresh = when (similarDbEntry == null) {
-                true -> true
-                false -> forceRefresh
-            }
+            val actualRefresh =
+                when (similarDbEntry == null) {
+                    true -> true
+                    false -> forceRefresh
+                }
 
             val related = async {
-                kotlin.runCatching {
-                    logTimeTaken(" Related Rec:") {
-                        createGroup(
-                            R.string.related_type,
-                            similarHandler.fetchRelated(dexId, actualRefresh),
-                        )
+                kotlin
+                    .runCatching {
+                        logTimeTaken(" Related Rec:") {
+                            createGroup(
+                                R.string.related_type,
+                                similarHandler.fetchRelated(dexId, actualRefresh),
+                            )
+                        }
                     }
-                }.onFailure { TimberKt.e(it) { "Failed to get related" } }
+                    .onFailure { TimberKt.e(it) { "Failed to get related" } }
                     .getOrNull()
             }
 
             val similar = async {
                 runCatching {
-                    logTimeTaken("Similar Recs:") {
-                        createGroup(
-                            R.string.similar_type,
-                            similarHandler.fetchSimilar(dexId, actualRefresh),
-                        )
+                        logTimeTaken("Similar Recs:") {
+                            createGroup(
+                                R.string.similar_type,
+                                similarHandler.fetchSimilar(dexId, actualRefresh),
+                            )
+                        }
                     }
-                }.onFailure { TimberKt.e(it) { "Failed to get similar" } }
+                    .onFailure { TimberKt.e(it) { "Failed to get similar" } }
                     .getOrNull()
             }
 
             val mu = async {
                 runCatching {
-                    logTimeTaken("MU Recs:") {
-                        createGroup(
-                            R.string.manga_updates,
-                            similarHandler.fetchSimilarExternalMUManga(
-                                dexId,
-                                actualRefresh,
-                            ),
-                        )
+                        logTimeTaken("MU Recs:") {
+                            createGroup(
+                                R.string.manga_updates,
+                                similarHandler.fetchSimilarExternalMUManga(
+                                    dexId,
+                                    actualRefresh,
+                                ),
+                            )
+                        }
                     }
-                }.onFailure { TimberKt.e(it) { "Failed to get MU recs" } }
+                    .onFailure { TimberKt.e(it) { "Failed to get MU recs" } }
                     .getOrNull()
             }
 
             val anilist = async {
                 runCatching {
-                    logTimeTaken("Anilist Recs:") {
-                        createGroup(
-                            R.string.anilist,
-                            similarHandler.fetchAnilist(
-                                dexId,
-                                actualRefresh,
-                            ),
-                        )
+                        logTimeTaken("Anilist Recs:") {
+                            createGroup(
+                                R.string.anilist,
+                                similarHandler.fetchAnilist(
+                                    dexId,
+                                    actualRefresh,
+                                ),
+                            )
+                        }
                     }
-                }.onFailure { TimberKt.e(it) { "Failed to get anilist recs" } }
+                    .onFailure { TimberKt.e(it) { "Failed to get anilist recs" } }
                     .getOrNull()
             }
 
             val mal = async {
                 runCatching {
-                    logTimeTaken("Mal Recs:") {
-                        createGroup(
-                            R.string.myanimelist,
-                            similarHandler.fetchSimilarExternalMalManga(
-                                dexId,
-                                actualRefresh,
-                            ),
-                        )
+                        logTimeTaken("Mal Recs:") {
+                            createGroup(
+                                R.string.myanimelist,
+                                similarHandler.fetchSimilarExternalMalManga(
+                                    dexId,
+                                    actualRefresh,
+                                ),
+                            )
+                        }
                     }
-                }.onFailure { TimberKt.e(it) { "Failed to get mal recs" } }
+                    .onFailure { TimberKt.e(it) { "Failed to get mal recs" } }
                     .getOrNull()
             }
 
-            listOfNotNull(related.await(), similar.await(), mu.await(), anilist.await(), mal.await())
+            listOfNotNull(
+                related.await(), similar.await(), mu.await(), anilist.await(), mal.await())
         }
     }
 
@@ -114,9 +122,7 @@ class SimilarRepository {
         } else {
             SimilarMangaGroup(
                 id,
-                manga.map {
-                    it.toDisplayManga(db, mangaDex.id)
-                },
+                manga.map { it.toDisplayManga(db, mangaDex.id) },
             )
         }
     }

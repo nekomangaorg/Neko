@@ -42,7 +42,12 @@ class AlternativeMangaCoverFetcher(
     private val diskCacheLazy: Lazy<DiskCache>,
 ) : Fetcher {
 
-    private val diskCacheKey: String? by lazy { ArtworkKeyer().key(Artwork(url = url, inLibrary = false, originalArtwork = "", mangaId = mangaId), options) }
+    private val diskCacheKey: String? by lazy {
+        ArtworkKeyer()
+            .key(
+                Artwork(url = url, inLibrary = false, originalArtwork = "", mangaId = mangaId),
+                options)
+    }
 
     val fileScope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -52,7 +57,6 @@ class AlternativeMangaCoverFetcher(
             Type.File -> {
                 fileLoader(File(url.substringAfter("file://")))
             }
-
             null -> error("Invalid image")
         }
     }
@@ -111,7 +115,8 @@ class AlternativeMangaCoverFetcher(
                 return SourceResult(
                     source = ImageSource(source = responseBody.source(), context = options.context),
                     mimeType = "image/*",
-                    dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
+                    dataSource =
+                        if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
                 )
             } catch (e: Exception) {
                 responseBody.close()
@@ -138,18 +143,22 @@ class AlternativeMangaCoverFetcher(
 
     private fun newRequest(): Request {
 
-        val request = Request.Builder()
-            .url(url)
-            .headers(sourceLazy.value.headers.newBuilder().add("x-request-id", "Neko-" + UUID.randomUUID()).build())
-            // Support attaching custom data to the network request.
-            .tag(Parameters::class.java, options.parameters)
+        val request =
+            Request.Builder()
+                .url(url)
+                .headers(
+                    sourceLazy.value.headers
+                        .newBuilder()
+                        .add("x-request-id", "Neko-" + UUID.randomUUID())
+                        .build())
+                // Support attaching custom data to the network request.
+                .tag(Parameters::class.java, options.parameters)
 
         when {
             options.networkCachePolicy.readEnabled -> {
                 // don't take up okhttp cache
                 request.cacheControl(CACHE_CONTROL_NO_STORE)
             }
-
             else -> {
                 // This causes the request to fail with a 504 Unsatisfiable Request.
                 request.cacheControl(CACHE_CONTROL_NO_NETWORK_NO_CACHE)
@@ -192,9 +201,7 @@ class AlternativeMangaCoverFetcher(
         cacheFile.parentFile?.mkdirs()
         cacheFile.delete()
         try {
-            cacheFile.sink().buffer().use { output ->
-                output.writeAll(input)
-            }
+            cacheFile.sink().buffer().use { output -> output.writeAll(input) }
         } catch (e: Exception) {
             cacheFile.delete()
             throw e
@@ -202,7 +209,9 @@ class AlternativeMangaCoverFetcher(
     }
 
     private fun readFromDiskCache(): DiskCache.Snapshot? {
-        return if (options.diskCachePolicy.readEnabled) diskCacheLazy.value.openSnapshot(diskCacheKey!!) else null
+        return if (options.diskCachePolicy.readEnabled)
+            diskCacheLazy.value.openSnapshot(diskCacheKey!!)
+        else null
     }
 
     private fun writeToDiskCache(
@@ -217,8 +226,7 @@ class AlternativeMangaCoverFetcher(
         } catch (e: Exception) {
             try {
                 editor.abort()
-            } catch (ignored: Exception) {
-            }
+            } catch (ignored: Exception) {}
             throw e
         }
     }
@@ -245,10 +253,12 @@ class AlternativeMangaCoverFetcher(
     }
 
     private enum class Type {
-        File, URL;
+        File,
+        URL
     }
 
     companion object {
-        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE = CacheControl.Builder().noCache().onlyIfCached().build()
+        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE =
+            CacheControl.Builder().noCache().onlyIfCached().build()
     }
 }

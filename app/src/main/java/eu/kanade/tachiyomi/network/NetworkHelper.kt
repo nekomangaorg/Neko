@@ -4,7 +4,6 @@ import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.google.common.net.HttpHeaders
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import java.io.File
@@ -13,6 +12,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Cache
 import okhttp3.Headers
 import okhttp3.OkHttpClient
+import org.nekomanga.BuildConfig
 import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.NetworkPreferences
@@ -63,61 +63,73 @@ class NetworkHelper(val context: Context) {
 
     private val baseClientBuilder: OkHttpClient.Builder
         get() {
-            val builder = OkHttpClient.Builder()
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(15, TimeUnit.SECONDS)
-                .callTimeout(1, TimeUnit.MINUTES)
-                .cache(Cache(cacheDir, cacheSize))
-                .cookieJar(cookieManager)
-                .apply {
-                    if (BuildConfig.DEBUG) {
-                        addInterceptor(
-                            ChuckerInterceptor.Builder(context)
-                                .collector(ChuckerCollector(context))
-                                .maxContentLength(250000L)
-                                .redactHeaders(emptySet())
-                                .alwaysReadResponseBody(false)
-                                .build(),
-                        )
+            val builder =
+                OkHttpClient.Builder()
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(15, TimeUnit.SECONDS)
+                    .callTimeout(1, TimeUnit.MINUTES)
+                    .cache(Cache(cacheDir, cacheSize))
+                    .cookieJar(cookieManager)
+                    .apply {
+                        if (BuildConfig.DEBUG) {
+                            addInterceptor(
+                                ChuckerInterceptor.Builder(context)
+                                    .collector(ChuckerCollector(context))
+                                    .maxContentLength(250000L)
+                                    .redactHeaders(emptySet())
+                                    .alwaysReadResponseBody(false)
+                                    .build(),
+                            )
+                        }
+                        when (networkPreferences.dohProvider().get()) {
+                            PREF_DOH_CLOUDFLARE -> dohCloudflare()
+                            PREF_DOH_GOOGLE -> dohGoogle()
+                            PREF_DOH_ADGUARD -> dohAdGuard()
+                            PREF_DOH_QUAD9 -> dohQuad9()
+                            PREF_DOH_ALIDNS -> dohAliDNS()
+                            PREF_DOH_DNSPOD -> dohDNSPod()
+                            PREF_DOH_360 -> doh360()
+                            PREF_DOH_QUAD101 -> dohQuad101()
+                            PREF_DOH_MULLVAD -> dohMullvad()
+                            PREF_DOH_CONTROLD -> dohControlD()
+                            PREF_DOH_NJALLA -> dohNajalla()
+                            PREF_DOH_SHECAN -> dohShecan()
+                        }
                     }
-                    when (networkPreferences.dohProvider().get()) {
-                        PREF_DOH_CLOUDFLARE -> dohCloudflare()
-                        PREF_DOH_GOOGLE -> dohGoogle()
-                        PREF_DOH_ADGUARD -> dohAdGuard()
-                        PREF_DOH_QUAD9 -> dohQuad9()
-                        PREF_DOH_ALIDNS -> dohAliDNS()
-                        PREF_DOH_DNSPOD -> dohDNSPod()
-                        PREF_DOH_360 -> doh360()
-                        PREF_DOH_QUAD101 -> dohQuad101()
-                        PREF_DOH_MULLVAD -> dohMullvad()
-                        PREF_DOH_CONTROLD -> dohControlD()
-                        PREF_DOH_NJALLA -> dohNajalla()
-                        PREF_DOH_SHECAN -> dohShecan()
-                    }
-
-                }
             return builder
         }
 
     private fun buildRateLimitedClient(): OkHttpClient {
-        return baseClientBuilder.rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES).addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json)).build()
+        return baseClientBuilder
+            .rateLimit(permits = 300, period = 1, unit = TimeUnit.MINUTES)
+            .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json))
+            .build()
     }
 
     private fun buildAtHomeRateLimitedClient(): OkHttpClient {
-        return baseClientBuilder.rateLimit(permits = 40, period = 1, unit = TimeUnit.MINUTES).addInterceptor(HeadersInterceptor(MdConstants.baseUrl))
-            .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json)).build()
+        return baseClientBuilder
+            .rateLimit(permits = 40, period = 1, unit = TimeUnit.MINUTES)
+            .addInterceptor(HeadersInterceptor(MdConstants.baseUrl))
+            .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json))
+            .build()
     }
 
     private fun buildCdnRateLimitedClient(): OkHttpClient {
-        return baseClientBuilder.rateLimit(20).addInterceptor(HeadersInterceptor(MdConstants.baseUrl)).addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json)).build()
+        return baseClientBuilder
+            .rateLimit(20)
+            .addInterceptor(HeadersInterceptor(MdConstants.baseUrl))
+            .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json))
+            .build()
     }
 
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
-        return buildRateLimitedClient().newBuilder()
+        return buildRateLimitedClient()
+            .newBuilder()
             .addNetworkInterceptor(authInterceptor { preferences.sessionToken().get() })
             .authenticator(MangaDexTokenAuthenticator(mangaDexLoginHelper))
             .addInterceptor(HeadersInterceptor(MdConstants.baseUrl))
-            .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json)).build()
+            .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json))
+            .build()
     }
 
     private fun buildCloudFlareClient(): OkHttpClient {
@@ -132,7 +144,12 @@ class NetworkHelper(val context: Context) {
 
     val client = buildRateLimitedClient()
 
-    val mangadexClient = client.newBuilder().addInterceptor(HeadersInterceptor(MdConstants.baseUrl)).addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json)).build()
+    val mangadexClient =
+        client
+            .newBuilder()
+            .addInterceptor(HeadersInterceptor(MdConstants.baseUrl))
+            .addInterceptor(loggingInterceptor({ networkPreferences.verboseLogging().get() }, json))
+            .build()
 
     val cdnClient = buildCdnRateLimitedClient()
 
@@ -140,9 +157,14 @@ class NetworkHelper(val context: Context) {
 
     val authClient = buildRateLimitedAuthenticatedClient()
 
-    val headers = Headers.Builder().apply {
-        add(HttpHeaders.USER_AGENT, "Neko ${BuildConfig.VERSION_NAME}" + System.getProperty("http.agent"))
-        add(HttpHeaders.REFERER, MdConstants.baseUrl)
-        add(HttpHeaders.CONTENT_TYPE, "application/json")
-    }.build()
+    val headers =
+        Headers.Builder()
+            .apply {
+                add(
+                    HttpHeaders.USER_AGENT,
+                    "Neko ${BuildConfig.VERSION_NAME}" + System.getProperty("http.agent"))
+                add(HttpHeaders.REFERER, MdConstants.baseUrl)
+                add(HttpHeaders.CONTENT_TYPE, "application/json")
+            }
+            .build()
 }

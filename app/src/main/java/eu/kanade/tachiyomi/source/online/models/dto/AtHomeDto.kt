@@ -19,7 +19,7 @@ data class AtHomeChapterDto(
 data class AtHomeImageReportDto(
     val url: String,
     val success: Boolean,
-    val bytes: Int? = null,
+    val bytes: Long = 0,
     val cached: Boolean? = null,
     val duration: Long,
 )

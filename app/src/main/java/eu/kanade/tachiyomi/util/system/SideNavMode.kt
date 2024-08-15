@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 enum class SideNavMode(val prefValue: Int, @StringRes val stringRes: Int) {
     DEFAULT(0, R.string.default_behavior),

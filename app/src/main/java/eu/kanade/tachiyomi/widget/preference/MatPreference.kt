@@ -12,13 +12,13 @@ import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-open class MatPreference @JvmOverloads constructor(
+open class MatPreference
+@JvmOverloads
+constructor(
     val activity: Activity?,
     context: Context,
-    attrs: AttributeSet? =
-        null,
-) :
-    Preference(context, attrs) {
+    attrs: AttributeSet? = null,
+) : Preference(context, attrs) {
 
     val prefs: PreferencesHelper = Injekt.get()
 
@@ -28,25 +28,26 @@ open class MatPreference @JvmOverloads constructor(
             field = value
             notifyChanged()
         }
+
     private var isShowing = false
 
-    @StringRes
-    var dialogTitleRes: Int? = null
+    @StringRes var dialogTitleRes: Int? = null
 
     override fun onClick() {
         if (!isShowing) {
-            val dialog = dialog().apply {
-                setOnDismissListener { this@MatPreference.isShowing = false }
-            }.create()
-//            dialog.setOnShowListener {
+            val dialog =
+                dialog()
+                    .apply { setOnDismissListener { this@MatPreference.isShowing = false } }
+                    .create()
+            //            dialog.setOnShowListener {
             onShow(dialog)
-//            }
+            //            }
             dialog.show()
         }
         isShowing = true
     }
 
-    protected open fun onShow(dialog: AlertDialog) { }
+    protected open fun onShow(dialog: AlertDialog) {}
 
     protected open var customSummaryProvider: SummaryProvider<MatPreference>? = null
         set(value) {

@@ -1,11 +1,10 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.app.Activity
 import androidx.preference.Preference
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
-import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
@@ -19,202 +18,244 @@ import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.TrackerPreference
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import uy.kohesive.injekt.injectLazy
 
 class SettingsTrackingController :
-    SettingsController(),
-    TrackLoginDialog.Listener,
-    TrackLogoutDialog.Listener {
+    SettingsController(), TrackLoginDialog.Listener, TrackLogoutDialog.Listener {
 
     private val trackManager: TrackManager by injectLazy()
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
-        titleRes = R.string.tracking
+    override fun setupPreferenceScreen(screen: PreferenceScreen) =
+        screen.apply {
+            titleRes = R.string.tracking
 
-        switchPreference {
-            key = Keys.autoUpdateTrack
-            titleRes = R.string.update_tracking_after_reading
-            defaultValue = true
-        }
-        switchPreference {
-            key = Keys.trackMarkedAsRead
-            titleRes = R.string.update_tracking_marked_read
-            defaultValue = false
-        }
-        multiSelectListPreferenceMat(activity) {
-            key = eu.kanade.tachiyomi.data.preference.PreferenceKeys.autoTrackContentRating
-            titleRes = R.string.auto_track_content_rating_title
-            summaryRes = R.string.auto_track_content_rating_summary
-            entriesRes = arrayOf(
-                R.string.content_rating_safe,
-                R.string.content_rating_suggestive,
-                R.string.content_rating_erotica,
-                R.string.content_rating_pornographic,
-            )
-            entryValues = listOf(
-                MdConstants.ContentRating.safe,
-                MdConstants.ContentRating.suggestive,
-                MdConstants.ContentRating.erotica,
-                MdConstants.ContentRating.pornographic,
-            )
-
-            defValue = setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic)
-
-            defaultValue = listOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive, MdConstants.ContentRating.erotica, MdConstants.ContentRating.pornographic)
-        }
-
-        preference {
-            key = "refresh_tracking_meta"
-            titleRes = R.string.refresh_tracking_metadata
-            summaryRes = R.string.updates_tracking_details
-
-            onClick {
-                TrackingSyncJob.doWorkNow(context)
-            }
-        }
-
-        preferenceCategory {
-            titleRes = R.string.services
-
-            trackPreference(trackManager.myAnimeList) {
-                activity?.openInBrowser(MyAnimeListApi.authUrl())
+            switchPreference {
+                key = Keys.autoUpdateTrack
+                titleRes = R.string.update_tracking_after_reading
+                defaultValue = true
             }
             switchPreference {
-                isPersistent = true
-                isIconSpaceReserved = true
-                title = context.getString(
-                    R.string.auto_track,
-                )
-
-                preferences.getStringPref(Keys.trackUsername(trackManager.myAnimeList.id))
-                    .changes().onEach {
-                        isVisible = it.isNotEmpty()
-                    }.launchIn(viewScope)
-
-                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.MYANIMELIST.toString())
-
-                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-                    updateAutoAddTracker(newValue as Boolean, TrackManager.MYANIMELIST)
-                }
+                key = Keys.trackMarkedAsRead
+                titleRes = R.string.update_tracking_marked_read
+                defaultValue = false
             }
-            trackPreference(trackManager.aniList) {
-                activity?.openInBrowser(AnilistApi.authUrl())
+            multiSelectListPreferenceMat(activity) {
+                key = eu.kanade.tachiyomi.data.preference.PreferenceKeys.autoTrackContentRating
+                titleRes = R.string.auto_track_content_rating_title
+                summaryRes = R.string.auto_track_content_rating_summary
+                entriesRes =
+                    arrayOf(
+                        R.string.content_rating_safe,
+                        R.string.content_rating_suggestive,
+                        R.string.content_rating_erotica,
+                        R.string.content_rating_pornographic,
+                    )
+                entryValues =
+                    listOf(
+                        MdConstants.ContentRating.safe,
+                        MdConstants.ContentRating.suggestive,
+                        MdConstants.ContentRating.erotica,
+                        MdConstants.ContentRating.pornographic,
+                    )
+
+                defValue =
+                    setOf(
+                        MdConstants.ContentRating.safe,
+                        MdConstants.ContentRating.suggestive,
+                        MdConstants.ContentRating.erotica,
+                        MdConstants.ContentRating.pornographic)
+
+                defaultValue =
+                    listOf(
+                        MdConstants.ContentRating.safe,
+                        MdConstants.ContentRating.suggestive,
+                        MdConstants.ContentRating.erotica,
+                        MdConstants.ContentRating.pornographic)
             }
+
             preference {
-                key = "update_anilist_scoring"
-                isPersistent = true
-                isIconSpaceReserved = true
-                title = context.getString(
-                    R.string.update_tracking_scoring_type,
-                    context.getString(R.string.anilist),
-                )
+                key = "refresh_tracking_meta"
+                titleRes = R.string.refresh_tracking_metadata
+                summaryRes = R.string.updates_tracking_details
 
-                preferences.getStringPref(Keys.trackUsername(trackManager.aniList.id))
-                    .changes().onEach {
-                        isVisible = it.isNotEmpty()
-                    }.launchIn(viewScope)
+                onClick { TrackingSyncJob.doWorkNow(context) }
+            }
 
-                onClick {
-                    viewScope.launchIO {
-                        val (result, error) = trackManager.aniList.updatingScoring()
-                        if (result) {
-                            view?.snack(R.string.scoring_type_updated)
-                        } else {
-                            view?.snack(
-                                context.getString(
-                                    R.string.could_not_update_scoring_,
-                                    error?.localizedMessage.orEmpty(),
-                                ),
-                            )
+            preferenceCategory {
+                titleRes = R.string.services
+
+                trackPreference(trackManager.myAnimeList) {
+                    activity?.openInBrowser(MyAnimeListApi.authUrl())
+                }
+                switchPreference {
+                    isPersistent = true
+                    isIconSpaceReserved = true
+                    title =
+                        context.getString(
+                            R.string.auto_track,
+                        )
+
+                    preferences
+                        .getStringPref(Keys.trackUsername(trackManager.myAnimeList.id))
+                        .changes()
+                        .onEach { isVisible = it.isNotEmpty() }
+                        .launchIn(viewScope)
+
+                    this.defaultValue =
+                        preferences
+                            .autoAddTracker()
+                            .get()
+                            .contains(TrackManager.MYANIMELIST.toString())
+
+                    this.onPreferenceChangeListener =
+                        Preference.OnPreferenceChangeListener { _, newValue ->
+                            updateAutoAddTracker(newValue as Boolean, TrackManager.MYANIMELIST)
+                        }
+                }
+                trackPreference(trackManager.aniList) {
+                    activity?.openInBrowser(AnilistApi.authUrl())
+                }
+                preference {
+                    key = "update_anilist_scoring"
+                    isPersistent = true
+                    isIconSpaceReserved = true
+                    title =
+                        context.getString(
+                            R.string.update_tracking_scoring_type,
+                            context.getString(R.string.anilist),
+                        )
+
+                    preferences
+                        .getStringPref(Keys.trackUsername(trackManager.aniList.id))
+                        .changes()
+                        .onEach { isVisible = it.isNotEmpty() }
+                        .launchIn(viewScope)
+
+                    onClick {
+                        viewScope.launchIO {
+                            val (result, error) = trackManager.aniList.updatingScoring()
+                            if (result) {
+                                view?.snack(R.string.scoring_type_updated)
+                            } else {
+                                view?.snack(
+                                    context.getString(
+                                        R.string.could_not_update_scoring_,
+                                        error?.localizedMessage.orEmpty(),
+                                    ),
+                                )
+                            }
                         }
                     }
                 }
-            }
-            switchPreference {
-                isPersistent = true
-                isIconSpaceReserved = true
-                title = context.getString(
-                    R.string.auto_track,
-                )
+                switchPreference {
+                    isPersistent = true
+                    isIconSpaceReserved = true
+                    title =
+                        context.getString(
+                            R.string.auto_track,
+                        )
 
-                preferences.getStringPref(Keys.trackUsername(trackManager.aniList.id))
-                    .changes().onEach {
-                        isVisible = it.isNotEmpty()
-                    }.launchIn(viewScope)
+                    preferences
+                        .getStringPref(Keys.trackUsername(trackManager.aniList.id))
+                        .changes()
+                        .onEach { isVisible = it.isNotEmpty() }
+                        .launchIn(viewScope)
 
-                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.ANILIST.toString())
+                    this.defaultValue =
+                        preferences.autoAddTracker().get().contains(TrackManager.ANILIST.toString())
 
-                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-                    updateAutoAddTracker(newValue as Boolean, TrackManager.ANILIST)
+                    this.onPreferenceChangeListener =
+                        Preference.OnPreferenceChangeListener { _, newValue ->
+                            updateAutoAddTracker(newValue as Boolean, TrackManager.ANILIST)
+                        }
                 }
-            }
-            trackPreference(trackManager.kitsu) {
-                val dialog = TrackLoginDialog(trackManager.kitsu, R.string.email)
-                dialog.targetController = this@SettingsTrackingController
-                dialog.showDialog(router)
-            }
-            switchPreference {
-                key = "auto_add_kitsu"
-                isPersistent = true
-                isIconSpaceReserved = true
-                title = context.getString(
-                    R.string.auto_track,
-                )
-
-                preferences.getStringPref(Keys.trackUsername(trackManager.kitsu.id))
-                    .changes().onEach {
-                        isVisible = it.isNotEmpty()
-                    }.launchIn(viewScope)
-
-                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.KITSU.toString())
-
-                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-                    updateAutoAddTracker(newValue as Boolean, TrackManager.KITSU)
+                trackPreference(trackManager.kitsu) {
+                    val dialog = TrackLoginDialog(trackManager.kitsu, R.string.email)
+                    dialog.targetController = this@SettingsTrackingController
+                    dialog.showDialog(router)
                 }
-            }
+                switchPreference {
+                    key = "auto_add_kitsu"
+                    isPersistent = true
+                    isIconSpaceReserved = true
+                    title =
+                        context.getString(
+                            R.string.auto_track,
+                        )
 
-            trackPreference(trackManager.mangaUpdates) {
-                val dialog = TrackLoginDialog(trackManager.mangaUpdates, R.string.username)
-                dialog.targetController = this@SettingsTrackingController
-                dialog.showDialog(router)
-            }
+                    preferences
+                        .getStringPref(Keys.trackUsername(trackManager.kitsu.id))
+                        .changes()
+                        .onEach { isVisible = it.isNotEmpty() }
+                        .launchIn(viewScope)
 
-            switchPreference {
-                key = "auto_add_mangaupdates"
-                isPersistent = true
-                isIconSpaceReserved = true
-                title = context.getString(
-                    R.string.auto_track,
-                )
+                    this.defaultValue =
+                        preferences.autoAddTracker().get().contains(TrackManager.KITSU.toString())
 
-                preferences.getStringPref(Keys.trackUsername(trackManager.mangaUpdates.id))
-                    .changes().onEach {
-                        isVisible = it.isNotEmpty()
-                    }.launchIn(viewScope)
+                    this.onPreferenceChangeListener =
+                        Preference.OnPreferenceChangeListener { _, newValue ->
+                            updateAutoAddTracker(newValue as Boolean, TrackManager.KITSU)
+                        }
+                }
 
-                this.defaultValue = preferences.autoAddTracker().get().contains(TrackManager.MANGA_UPDATES.toString())
+                trackPreference(trackManager.mangaUpdates) {
+                    val dialog = TrackLoginDialog(trackManager.mangaUpdates, R.string.username)
+                    dialog.targetController = this@SettingsTrackingController
+                    dialog.showDialog(router)
+                }
 
-                this.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
-                    updateAutoAddTracker(newValue as Boolean, TrackManager.MANGA_UPDATES)
+                switchPreference {
+                    key = "auto_add_mangaupdates"
+                    isPersistent = true
+                    isIconSpaceReserved = true
+                    title =
+                        context.getString(
+                            R.string.auto_track,
+                        )
+
+                    preferences
+                        .getStringPref(Keys.trackUsername(trackManager.mangaUpdates.id))
+                        .changes()
+                        .onEach { isVisible = it.isNotEmpty() }
+                        .launchIn(viewScope)
+
+                    this.defaultValue =
+                        preferences
+                            .autoAddTracker()
+                            .get()
+                            .contains(TrackManager.MANGA_UPDATES.toString())
+
+                    this.onPreferenceChangeListener =
+                        Preference.OnPreferenceChangeListener { _, newValue ->
+                            updateAutoAddTracker(newValue as Boolean, TrackManager.MANGA_UPDATES)
+                        }
                 }
             }
         }
-    }
 
     private fun updateAutoAddTracker(newValue: Boolean, trackId: Int): Boolean {
         if (newValue) {
-            preferences.autoAddTracker().changes().onEach {
-                val mutableSet = it.toMutableSet()
-                mutableSet.add(trackId.toString())
-                preferences.setAutoAddTracker(mutableSet)
-            }.launchIn(viewScope)
+            preferences
+                .autoAddTracker()
+                .changes()
+                .onEach {
+                    val mutableSet = it.toMutableSet()
+                    mutableSet.add(trackId.toString())
+                    preferences.setAutoAddTracker(mutableSet)
+                }
+                .launchIn(viewScope)
         } else {
-            preferences.autoAddTracker().changes().onEach {
-                val mutableSet = it.toMutableSet()
-                mutableSet.remove(trackId.toString())
-                preferences.setAutoAddTracker(mutableSet)
-            }.launchIn(viewScope)
+            preferences
+                .autoAddTracker()
+                .changes()
+                .onEach {
+                    val mutableSet = it.toMutableSet()
+                    mutableSet.remove(trackId.toString())
+                    preferences.setAutoAddTracker(mutableSet)
+                }
+                .launchIn(viewScope)
         }
 
         return true

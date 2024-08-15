@@ -10,12 +10,10 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import java.io.File
+import tachiyomi.core.util.storage.toTempFile
 import uy.kohesive.injekt.injectLazy
 
-/**
- * Loader used to load a chapter from the downloaded chapters.
- */
+/** Loader used to load a chapter from the downloaded chapters. */
 class DownloadPageLoader(
     private val chapter: ReaderChapter,
     private val manga: Manga,
@@ -34,9 +32,7 @@ class DownloadPageLoader(
         zipPageLoader?.recycle()
     }
 
-    /**
-     * Returns the pages found on this downloaded chapter.
-     */
+    /** Returns the pages found on this downloaded chapter. */
     override suspend fun getPages(): List<ReaderPage> {
         val dbChapter = chapter.chapter
         val chapterPath = downloadProvider.findChapterDir(dbChapter, manga)
@@ -48,7 +44,7 @@ class DownloadPageLoader(
     }
 
     private suspend fun getPagesFromArchive(chapterPath: UniFile): List<ReaderPage> {
-        val loader = ZipPageLoader(File(chapterPath.filePath!!)).also { zipPageLoader = it }
+        val loader = ZipPageLoader(chapterPath.toTempFile(context)).also { zipPageLoader = it }
         return loader.getPages()
     }
 
@@ -56,13 +52,13 @@ class DownloadPageLoader(
         val pages = downloadManager.buildPageList(manga, chapter.chapter)
         return pages.map { page ->
             ReaderPage(
-                page.index, page.url, page.imageUrl, page.mangaDexChapterId,
-                stream = {
-                    context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!!
-                },
-            ).apply {
-                status = Page.State.READY
-            }
+                    page.index,
+                    page.url,
+                    page.imageUrl,
+                    page.mangaDexChapterId,
+                    stream = { context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!! },
+                )
+                .apply { status = Page.State.READY }
         }
     }
 

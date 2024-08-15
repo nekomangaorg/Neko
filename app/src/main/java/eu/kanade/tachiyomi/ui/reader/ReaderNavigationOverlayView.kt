@@ -14,7 +14,8 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.DisabledNavigation
 import kotlin.math.abs
 
-class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
+class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) :
+    View(context, attributeSet) {
 
     private var viewPropertyAnimator: ViewPropertyAnimator? = null
 
@@ -40,33 +41,32 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
 
         if (isVisible || navigation is DisabledNavigation) return
 
-        viewPropertyAnimator = animate()
-            .alpha(1f)
-            .setDuration(FADE_DURATION)
-            .withStartAction {
-                isVisible = true
-            }
-            .withEndAction {
-                viewPropertyAnimator = null
-            }
+        viewPropertyAnimator =
+            animate()
+                .alpha(1f)
+                .setDuration(FADE_DURATION)
+                .withStartAction { isVisible = true }
+                .withEndAction { viewPropertyAnimator = null }
         viewPropertyAnimator?.start()
     }
 
     private val regionPaint = Paint()
 
-    private val textPaint = Paint().apply {
-        textAlign = Paint.Align.CENTER
-        color = Color.WHITE
-        textSize = 64f
-    }
+    private val textPaint =
+        Paint().apply {
+            textAlign = Paint.Align.CENTER
+            color = Color.WHITE
+            textSize = 64f
+        }
 
-    private val textBorderPaint = Paint().apply {
-        textAlign = Paint.Align.CENTER
-        color = Color.BLACK
-        textSize = 64f
-        style = Paint.Style.STROKE
-        strokeWidth = 8f
-    }
+    private val textBorderPaint =
+        Paint().apply {
+            textAlign = Paint.Align.CENTER
+            color = Color.BLACK
+            textSize = 64f
+            style = Paint.Style.STROKE
+            strokeWidth = 8f
+        }
 
     override fun onDraw(canvas: Canvas) {
         if (navigation == null) return
@@ -107,10 +107,8 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
         super.performClick()
 
         if (viewPropertyAnimator == null && isVisible) {
-            viewPropertyAnimator = animate()
-                .alpha(0f)
-                .setDuration(FADE_DURATION)
-                .withEndAction {
+            viewPropertyAnimator =
+                animate().alpha(0f).setDuration(FADE_DURATION).withEndAction {
                     isVisible = false
                     viewPropertyAnimator = null
                 }

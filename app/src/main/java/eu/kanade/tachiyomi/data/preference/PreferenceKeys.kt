@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.data.preference
 
-/**
- * This class stores the keys for the preferences in the application.
- */
+/** This class stores the keys for the preferences in the application. */
 object PreferenceKeys {
 
     const val theme = "pref_theme_key"
@@ -25,23 +23,13 @@ object PreferenceKeys {
 
     const val trackMarkedAsRead = "track_marked_as_read"
 
-    const val trackingsToAddOnline = "pref_tracking_for_online"
-
     const val catalogueAsList = "pref_display_catalogue_as_list"
 
     const val catalogueShowLibrary = "pref_display_catalogue_already_in_library"
 
-    const val backupDirectory = "backup_directory"
-
-    const val downloadsDirectory = "download_directory"
-
     const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
 
     const val folderPerManga = "create_folder_per_manga"
-
-    const val numberOfBackups = "backup_slots"
-
-    const val backupInterval = "backup_interval"
 
     const val removeAfterReadSlots = "remove_after_read_slots"
 

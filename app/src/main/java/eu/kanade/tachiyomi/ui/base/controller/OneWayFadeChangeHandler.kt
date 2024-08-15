@@ -8,19 +8,24 @@ import android.view.ViewGroup
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 
-/**
- * A variation of [FadeChangeHandler] that only fades in.
- */
+/** A variation of [FadeChangeHandler] that only fades in. */
 class OneWayFadeChangeHandler : FadeChangeHandler {
     constructor()
+
     constructor(removesFromViewOnPush: Boolean) : super(removesFromViewOnPush)
+
     constructor(duration: Long) : super(duration)
-    constructor(duration: Long, removesFromViewOnPush: Boolean) : super(
+
+    constructor(
+        duration: Long,
+        removesFromViewOnPush: Boolean
+    ) : super(
         duration,
         removesFromViewOnPush,
     )
 
     var fadeOut = true
+
     override fun getAnimator(
         container: ViewGroup,
         from: View?,

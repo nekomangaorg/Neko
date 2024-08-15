@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Detailed
 import eu.kanade.tachiyomi.ui.more.stats.StatsConstants.ScreenState.Loading
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
 import org.nekomanga.presentation.components.ChartColors
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
@@ -53,20 +53,29 @@ fun StatsScreen(
         )
     }
 
-    val isSimple = rememberSaveable(statsState.value.screenState) { statsState.value.screenState is StatsConstants.ScreenState.Simple }
-    val hideAction = rememberSaveable(statsState.value.screenState) { statsState.value.screenState is StatsConstants.ScreenState.NoResults || statsState.value.screenState is Loading }
-
-    val (actionText, titleText) = rememberSaveable(isSimple) {
-        when (isSimple) {
-            true -> Pair(R.string.view_detailed_statistics, R.string.simple_stats)
-            false -> Pair(R.string.view_simple_statistics, R.string.detailed_stats)
+    val isSimple =
+        rememberSaveable(statsState.value.screenState) {
+            statsState.value.screenState is StatsConstants.ScreenState.Simple
         }
-    }
+    val hideAction =
+        rememberSaveable(statsState.value.screenState) {
+            statsState.value.screenState is StatsConstants.ScreenState.NoResults ||
+                statsState.value.screenState is Loading
+        }
 
-    val actionIcon = when (titleText == R.string.simple_stats) {
-        true -> Icons.Default.ZoomInMap
-        false -> Icons.Default.ZoomOutMap
-    }
+    val (actionText, titleText) =
+        rememberSaveable(isSimple) {
+            when (isSimple) {
+                true -> Pair(R.string.view_detailed_statistics, R.string.simple_stats)
+                false -> Pair(R.string.view_simple_statistics, R.string.detailed_stats)
+            }
+        }
+
+    val actionIcon =
+        when (titleText == R.string.simple_stats) {
+            true -> Icons.Default.ZoomInMap
+            false -> Icons.Default.ZoomOutMap
+        }
 
     NekoScaffold(
         title = stringResource(id = titleText),
@@ -82,23 +91,36 @@ fun StatsScreen(
             }
         },
     ) { incomingPaddingValues ->
-
-        if (statsState.value.screenState is Loading || (statsState.value.screenState is Detailed && detailedState.value.isLoading)) {
+        if (statsState.value.screenState is Loading ||
+            (statsState.value.screenState is Detailed && detailedState.value.isLoading)) {
             LoadingScreen(incomingPaddingValues)
         } else if (statsState.value.screenState is StatsConstants.ScreenState.NoResults) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = incomingPaddingValues.calculateTopPadding(), start = 16.dp, end = 16.dp),
+                modifier =
+                    Modifier.fillMaxSize()
+                        .padding(
+                            top = incomingPaddingValues.calculateTopPadding(),
+                            start = 16.dp,
+                            end = 16.dp),
                 contentAlignment = Alignment.BottomCenter,
             ) {
-                EmptyScreen(iconicImage = CommunityMaterial.Icon2.cmd_heart_off, iconSize = 128.dp, message = stringResource(id = R.string.unable_to_generate_stats))
+                EmptyScreen(
+                    iconicImage = CommunityMaterial.Icon2.cmd_heart_off,
+                    iconSize = 128.dp,
+                    message = stringResource(id = R.string.unable_to_generate_stats))
             }
         } else {
             if (isSimple) {
-                SimpleStats(statsState = statsState.value, contentPadding = incomingPaddingValues, windowSizeClass = windowSizeClass)
+                SimpleStats(
+                    statsState = statsState.value,
+                    contentPadding = incomingPaddingValues,
+                    windowSizeClass = windowSizeClass)
             } else {
-                DetailedStats(detailedStats = detailedState.value, colors = colors, contentPadding = incomingPaddingValues, windowSizeClass = windowSizeClass)
+                DetailedStats(
+                    detailedStats = detailedState.value,
+                    colors = colors,
+                    contentPadding = incomingPaddingValues,
+                    windowSizeClass = windowSizeClass)
             }
         }
     }

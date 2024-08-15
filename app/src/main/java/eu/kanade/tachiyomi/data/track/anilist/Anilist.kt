@@ -3,19 +3,18 @@ package eu.kanade.tachiyomi.data.track.anilist
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackStatusService
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
 
-    @StringRes
-    override fun nameRes() = R.string.anilist
+    @StringRes override fun nameRes() = R.string.anilist
 
     private val json: Json by injectLazy()
 
@@ -41,37 +40,42 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
 
     override fun getLogoColor() = Color.rgb(18, 25, 35)
 
-    override fun getStatusList() = listOf(READING, PLAN_TO_READ, COMPLETED, REREADING, PAUSED, DROPPED)
+    override fun getStatusList() =
+        listOf(READING, PLAN_TO_READ, COMPLETED, REREADING, PAUSED, DROPPED)
 
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
     override fun completedStatus() = COMPLETED
+
     override fun readingStatus() = READING
+
     override fun planningStatus() = PLAN_TO_READ
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.reading)
-            PLAN_TO_READ -> getString(R.string.plan_to_read)
-            COMPLETED -> getString(R.string.completed)
-            PAUSED -> getString(R.string.paused)
-            DROPPED -> getString(R.string.dropped)
-            REREADING -> getString(R.string.rereading)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.reading)
+                PLAN_TO_READ -> getString(R.string.plan_to_read)
+                COMPLETED -> getString(R.string.completed)
+                PAUSED -> getString(R.string.paused)
+                DROPPED -> getString(R.string.dropped)
+                REREADING -> getString(R.string.rereading)
+                else -> ""
+            }
         }
-    }
 
-    override fun getGlobalStatus(status: Int): String = with(context) {
-        when (status) {
+    override fun getGlobalStatus(status: Int): String =
+        with(context) {
+            when (status) {
             READING -> getString(R.string.global_tracker_status_reading)
             PLAN_TO_READ -> getString(R.string.global_tracker_status_plan_to_read)
             COMPLETED -> getString(R.string.global_tracker_status_completed)
             PAUSED -> getString(R.string.global_tracker_status_on_hold)
             DROPPED -> getString(R.string.global_tracker_status_dropped)
             REREADING -> getString(R.string.global_tracker_status_re_reading)
-            else -> ""
+                else -> ""
+            }
         }
-    }
 
     override fun getScoreList(): List<String> {
         return when (scorePreference.get()) {
@@ -80,9 +84,9 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
             // 100 point
             POINT_100 -> IntRange(0, 100).map(Int::toString)
             // 5 stars
-            POINT_5 -> IntRange(0, 5).map { "$it ★" }
+            POINT_5 -> IntRange(0, 5).map { "$it ?" }
             // Smiley
-            POINT_3 -> listOf("-", "😦", "😐", "😊")
+            POINT_3 -> listOf("-", "?", "?", "?")
             // 10 point decimal
             POINT_10_DECIMAL -> IntRange(0, 100).map { (it / 10f).toString() }
             else -> throw Exception("Unknown score type")
@@ -96,15 +100,17 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
             // 100 point
             POINT_100 -> index.toFloat()
             // 5 stars
-            POINT_5 -> when (index) {
-                0 -> 0f
-                else -> index * 20f - 10f
-            }
+            POINT_5 ->
+                when (index) {
+                    0 -> 0f
+                    else -> index * 20f - 10f
+                }
             // Smiley
-            POINT_3 -> when (index) {
-                0 -> 0f
-                else -> index * 25f + 10f
-            }
+            POINT_3 ->
+                when (index) {
+                    0 -> 0f
+                    else -> index * 25f + 10f
+                }
             // 10 point decimal
             POINT_10_DECIMAL -> index.toFloat()
             else -> throw Exception("Unknown score type")
@@ -117,18 +123,18 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
         val score = track.score
 
         return when (scorePreference.get()) {
-            POINT_5 -> when (score) {
-                0f -> "0 ★"
-                else -> "${((score + 10) / 20).toInt()} ★"
-            }
-
-            POINT_3 -> when {
-                score == 0f -> "0"
-                score <= 35 -> "😦"
-                score <= 60 -> "😐"
-                else -> "😊"
-            }
-
+            POINT_5 ->
+                when (score) {
+                    0f -> "0 ?"
+                    else -> "${((score + 10) / 20).toInt()} ?"
+                }
+            POINT_3 ->
+                when {
+                    score == 0f -> "0"
+                    score <= 35 -> "?"
+                    score <= 60 -> "?"
+                    else -> "?"
+                }
             else -> track.toAnilistScore()
         }
     }
@@ -144,8 +150,9 @@ class Anilist(private val context: Context, id: Int) : TrackStatusService(id) {
         updateTrackStatus(track, setToRead, setToComplete = true, mustReadToComplete = true)
         // If user was using API v1 fetch library_id
         if (track.library_id == null || track.library_id!! == 0L) {
-            val libManga = api.findLibManga(track, getUsername().get().toInt())
-                ?: throw Exception("$track not found on user library")
+            val libManga =
+                api.findLibManga(track, getUsername().get().toInt())
+                    ?: throw Exception("$track not found on user library")
             track.library_id = libManga.library_id
         }
 

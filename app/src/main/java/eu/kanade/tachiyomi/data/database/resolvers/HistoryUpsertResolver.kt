@@ -11,19 +11,19 @@ import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 
 class HistoryUpsertResolver : HistoryPutResolver() {
 
-    /**
-     * Updates last_read time of chapter
-     */
+    /** Updates last_read time of chapter */
     override fun performPut(db: StorIOSQLite, history: History): PutResult {
         val updateQuery = mapToUpdateQuery(history)
 
-        val cursor = db.lowLevel().query(
-            Query.builder()
-                .table(updateQuery.table())
-                .where(updateQuery.where())
-                .whereArgs(updateQuery.whereArgs())
-                .build(),
-        )
+        val cursor =
+            db.lowLevel()
+                .query(
+                    Query.builder()
+                        .table(updateQuery.table())
+                        .where(updateQuery.where())
+                        .whereArgs(updateQuery.whereArgs())
+                        .build(),
+                )
 
         return cursor.use { putCursor ->
             if (putCursor.count == 0) {
@@ -31,17 +31,19 @@ class HistoryUpsertResolver : HistoryPutResolver() {
                 val insertedId = db.lowLevel().insert(insertQuery, mapToContentValues(history))
                 PutResult.newInsertResult(insertedId, insertQuery.table())
             } else {
-                val numberOfRowsUpdated = db.lowLevel().update(updateQuery, mapToUpdateContentValues(history))
+                val numberOfRowsUpdated =
+                    db.lowLevel().update(updateQuery, mapToUpdateContentValues(history))
                 PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
             }
         }
     }
 
-    override fun mapToUpdateQuery(obj: History) = UpdateQuery.builder()
-        .table(HistoryTable.TABLE)
-        .where("${HistoryTable.COL_CHAPTER_ID} = ?")
-        .whereArgs(obj.chapter_id)
-        .build()
+    override fun mapToUpdateQuery(obj: History) =
+        UpdateQuery.builder()
+            .table(HistoryTable.TABLE)
+            .where("${HistoryTable.COL_CHAPTER_ID} = ?")
+            .whereArgs(obj.chapter_id)
+            .build()
 
     private fun mapToUpdateContentValues(history: History) =
         contentValuesOf(

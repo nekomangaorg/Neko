@@ -6,8 +6,8 @@ import android.util.AttributeSet
 import android.widget.EditText
 import android.widget.NumberPicker
 import androidx.core.view.doOnLayout
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.view.findDescendant
+import org.nekomanga.R
 
 class MinMaxNumberPicker @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     NumberPicker(context, attrs) {
@@ -33,8 +33,6 @@ class MinMaxNumberPicker @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-        doOnLayout {
-            findDescendant<EditText>()?.setRawInputType(InputType.TYPE_CLASS_NUMBER)
-        }
+        doOnLayout { findDescendant<EditText>()?.setRawInputType(InputType.TYPE_CLASS_NUMBER) }
     }
 }

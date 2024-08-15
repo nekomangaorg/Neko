@@ -5,15 +5,13 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.DownloadSwipeTutItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import org.nekomanga.R
+import org.nekomanga.databinding.DownloadSwipeTutItemBinding
 
 class DownloadSwipeTutorialItem : AbstractFlexibleItem<DownloadSwipeTutorialItem.Holder>() {
 
-    /**
-     * Returns the layout resource for this item.
-     */
+    /** Returns the layout resource for this item. */
     override fun getLayoutRes(): Int {
         return R.layout.download_swipe_tut_item
     }
@@ -44,12 +42,9 @@ class DownloadSwipeTutorialItem : AbstractFlexibleItem<DownloadSwipeTutorialItem
         holder: Holder,
         position: Int,
         payloads: MutableList<Any>,
-    ) {
-    }
+    ) {}
 
-    /**
-     * Returns true if this item is draggable.
-     */
+    /** Returns true if this item is draggable. */
     override fun isDraggable(): Boolean {
         return true
     }

@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.source.latest
 
 import android.os.Parcelable
-import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
+import org.nekomanga.R
 import org.nekomanga.domain.category.CategoryItem
 import org.nekomanga.domain.manga.DisplayManga
 
@@ -28,8 +28,7 @@ data class DisplayScreenState(
 
 @Parcelize
 sealed interface DisplayScreenType : Parcelable {
-    @Parcelize
-    data class LatestChapters(val titleRes: Int = R.string.latest) : DisplayScreenType
+    @Parcelize data class LatestChapters(val titleRes: Int = R.string.latest) : DisplayScreenType
 
     @Parcelize
     data class SubscriptionFeed(val titleRes: Int = R.string.subscription_feed) : DisplayScreenType

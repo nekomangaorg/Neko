@@ -33,4 +33,3 @@ class CrashActivity : AppCompatActivity() {
         }
     }
 }
-

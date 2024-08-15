@@ -52,7 +52,16 @@ class MangaCoverFetcher(
 ) : Fetcher {
 
     // For non-custom cover
-    private val diskCacheKey: String? by lazy { ArtworkKeyer().key(Artwork(url = url, inLibrary = inLibrary, originalArtwork = originalThumbnailUrl, mangaId = mangaId), options) }
+    private val diskCacheKey: String? by lazy {
+        ArtworkKeyer()
+            .key(
+                Artwork(
+                    url = url,
+                    inLibrary = inLibrary,
+                    originalArtwork = originalThumbnailUrl,
+                    mangaId = mangaId),
+                options)
+    }
 
     val fileScope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -60,18 +69,22 @@ class MangaCoverFetcher(
 
     override suspend fun fetch(): FetchResult {
         // diskCacheKey is thumbnail_url
-        url = when (altUrl.isBlank()) {
-            true -> originalThumbnailUrl
-            false -> url
-        }
+        url =
+            when (altUrl.isBlank()) {
+                true -> originalThumbnailUrl
+                false -> url
+            }
 
         return when (getResourceType(url)) {
             Type.URL -> httpLoader()
             Type.File -> {
-                setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = File(url.substringAfter("file://")))
+                setRatioAndColorsInScope(
+                    mangaId = mangaId,
+                    inLibrary = inLibrary,
+                    originalThumbnail = originalThumbnailUrl,
+                    ogFile = File(url.substringAfter("file://")))
                 fileLoader(File(url.substringAfter("file://")))
             }
-
             null -> error("Invalid image")
         }
     }
@@ -85,7 +98,11 @@ class MangaCoverFetcher(
         if (!shouldFetchRemotely) {
             val customCoverFile by lazy { coverCache.getCustomCoverFile(mangaId) }
             if (customCoverFile.exists()) {
-                setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = customCoverFile)
+                setRatioAndColorsInScope(
+                    mangaId = mangaId,
+                    inLibrary = inLibrary,
+                    originalThumbnail = originalThumbnailUrl,
+                    ogFile = customCoverFile)
                 return fileLoader(customCoverFile)
             }
         }
@@ -94,7 +111,11 @@ class MangaCoverFetcher(
             if (!inLibrary) {
                 coverFile.setLastModified(Date().time)
             }
-            setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = coverFile)
+            setRatioAndColorsInScope(
+                mangaId = mangaId,
+                inLibrary = inLibrary,
+                originalThumbnail = originalThumbnailUrl,
+                ogFile = coverFile)
             return fileLoader(coverFile)
         }
         var snapshot = readFromDiskCache()
@@ -104,12 +125,19 @@ class MangaCoverFetcher(
                 val snapshotCoverCache = moveSnapshotToCoverCache(snapshot, coverFile)
                 if (snapshotCoverCache != null) {
                     // Read from cover cache after added to library
-                    setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = snapshotCoverCache)
+                    setRatioAndColorsInScope(
+                        mangaId = mangaId,
+                        inLibrary = inLibrary,
+                        originalThumbnail = originalThumbnailUrl,
+                        ogFile = snapshotCoverCache)
                     return fileLoader(snapshotCoverCache)
                 }
 
                 // Read from snapshot
-                setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl)
+                setRatioAndColorsInScope(
+                    mangaId = mangaId,
+                    inLibrary = inLibrary,
+                    originalThumbnail = originalThumbnailUrl)
                 return SourceResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
@@ -123,7 +151,10 @@ class MangaCoverFetcher(
             try {
                 // Read from cover cache after library manga cover updated
                 val responseCoverCache = writeResponseToCoverCache(response, coverFile)
-                setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl)
+                setRatioAndColorsInScope(
+                    mangaId = mangaId,
+                    inLibrary = inLibrary,
+                    originalThumbnail = originalThumbnailUrl)
                 if (responseCoverCache != null) {
                     return fileLoader(responseCoverCache)
                 }
@@ -142,7 +173,8 @@ class MangaCoverFetcher(
                 return SourceResult(
                     source = ImageSource(source = responseBody.source(), context = options.context),
                     mimeType = "image/*",
-                    dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
+                    dataSource =
+                        if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK,
                 )
             } catch (e: Exception) {
                 responseBody.close()
@@ -168,18 +200,22 @@ class MangaCoverFetcher(
     }
 
     private fun newRequest(): Request {
-        val request = Request.Builder()
-            .url(url)
-            .headers(sourceLazy.value.headers.newBuilder().add("x-request-id", "Neko-" + UUID.randomUUID()).build())
-            // Support attaching custom data to the network request.
-            .tag(Parameters::class.java, options.parameters)
+        val request =
+            Request.Builder()
+                .url(url)
+                .headers(
+                    sourceLazy.value.headers
+                        .newBuilder()
+                        .add("x-request-id", "Neko-" + UUID.randomUUID())
+                        .build())
+                // Support attaching custom data to the network request.
+                .tag(Parameters::class.java, options.parameters)
 
         when {
             options.networkCachePolicy.readEnabled -> {
                 // don't take up okhttp cache
                 request.cacheControl(CACHE_CONTROL_NO_STORE)
             }
-
             else -> {
                 // This causes the request to fail with a 504 Unsatisfiable Request.
                 request.cacheControl(CACHE_CONTROL_NO_NETWORK_NO_CACHE)
@@ -222,9 +258,7 @@ class MangaCoverFetcher(
         cacheFile.parentFile?.mkdirs()
         cacheFile.delete()
         try {
-            cacheFile.sink().buffer().use { output ->
-                output.writeAll(input)
-            }
+            cacheFile.sink().buffer().use { output -> output.writeAll(input) }
         } catch (e: Exception) {
             cacheFile.delete()
             throw e
@@ -232,7 +266,8 @@ class MangaCoverFetcher(
     }
 
     private fun readFromDiskCache(): DiskCache.Snapshot? {
-        return if (options.diskCachePolicy.readEnabled) diskCacheLazy.value[diskCacheKey!!] else null
+        return if (options.diskCachePolicy.readEnabled) diskCacheLazy.value[diskCacheKey!!]
+        else null
     }
 
     private fun writeToDiskCache(
@@ -247,8 +282,7 @@ class MangaCoverFetcher(
         } catch (e: Exception) {
             try {
                 editor.abort()
-            } catch (ignored: Exception) {
-            }
+            } catch (ignored: Exception) {}
             throw e
         }
     }
@@ -257,23 +291,33 @@ class MangaCoverFetcher(
         return ImageSource(file = data, diskCacheKey = diskCacheKey, closeable = this)
     }
 
-    private fun setRatioAndColorsInScope(mangaId: Long, originalThumbnail: String, inLibrary: Boolean, ogFile: File? = null, force: Boolean = false) {
+    private fun setRatioAndColorsInScope(
+        mangaId: Long,
+        originalThumbnail: String,
+        inLibrary: Boolean,
+        ogFile: File? = null,
+        force: Boolean = false
+    ) {
         fileScope.launch {
-            MangaCoverMetadata.setRatioAndColors(mangaId, originalThumbnail, inLibrary, ogFile, force)
+            MangaCoverMetadata.setRatioAndColors(
+                mangaId, originalThumbnail, inLibrary, ogFile, force)
         }
     }
 
-    /** Modified from [MimeTypeMap.getFileExtensionFromUrl] to be more permissive with special characters. */
+    /**
+     * Modified from [MimeTypeMap.getFileExtensionFromUrl] to be more permissive with special
+     * characters.
+     */
     private fun MimeTypeMap.getMimeTypeFromUrl(url: String?): String? {
         if (url.isNullOrBlank()) {
             return null
         }
 
-        val extension = url
-            .substringBeforeLast('#') // Strip the fragment.
-            .substringBeforeLast('?') // Strip the query.
-            .substringAfterLast('/') // Get the last path segment.
-            .substringAfterLast('.', missingDelimiterValue = "") // Get the file extension.
+        val extension =
+            url.substringBeforeLast('#') // Strip the fragment.
+                .substringBeforeLast('?') // Strip the query.
+                .substringAfterLast('/') // Get the last path segment.
+                .substringAfterLast('.', missingDelimiterValue = "") // Get the file extension.
 
         return getMimeTypeFromExtension(extension)
     }
@@ -319,10 +363,12 @@ class MangaCoverFetcher(
     }
 
     private enum class Type {
-        File, URL;
+        File,
+        URL
     }
 
     companion object {
-        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE = CacheControl.Builder().noCache().onlyIfCached().build()
+        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE =
+            CacheControl.Builder().noCache().onlyIfCached().build()
     }
 }

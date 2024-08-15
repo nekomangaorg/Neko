@@ -18,14 +18,10 @@ open class Pager(
     isHorizontal: Boolean = true,
 ) : DirectionalViewPager(context, isHorizontal) {
 
-    /**
-     * Tap listener function to execute when a tap is detected.
-     */
+    /** Tap listener function to execute when a tap is detected. */
     var tapListener: ((MotionEvent) -> Unit)? = null
 
-    /**
-     * Long tap listener function to execute when a long tap is detected.
-     */
+    /** Long tap listener function to execute when a long tap is detected. */
     var longTapListener: ((MotionEvent) -> Boolean)? = null
 
     var isRestoring = false
@@ -38,36 +34,29 @@ open class Pager(
         isRestoring = false
     }
 
-    /**
-     * Gesture listener that implements tap and long tap events.
-     */
-    private val gestureListener = object : GestureDetectorWithLongTap.Listener() {
-        override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
-            tapListener?.invoke(ev)
-            return true
-        }
+    /** Gesture listener that implements tap and long tap events. */
+    private val gestureListener =
+        object : GestureDetectorWithLongTap.Listener() {
+            override fun onSingleTapConfirmed(ev: MotionEvent): Boolean {
+                tapListener?.invoke(ev)
+                return true
+            }
 
-        override fun onLongTapConfirmed(ev: MotionEvent) {
-            val listener = longTapListener
-            if (listener != null && listener.invoke(ev)) {
-                performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            override fun onLongTapConfirmed(ev: MotionEvent) {
+                val listener = longTapListener
+                if (listener != null && listener.invoke(ev)) {
+                    performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                }
             }
         }
-    }
 
-    /**
-     * Gesture detector which handles motion events.
-     */
+    /** Gesture detector which handles motion events. */
     private val gestureDetector = GestureDetectorWithLongTap(context, gestureListener)
 
-    /**
-     * Whether the gesture detector is currently enabled.
-     */
+    /** Whether the gesture detector is currently enabled. */
     private var isGestureDetectorEnabled = true
 
-    /**
-     * Dispatches a touch event.
-     */
+    /** Dispatches a touch event. */
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         val handled = super.dispatchTouchEvent(ev)
         if (isGestureDetectorEnabled) {
@@ -77,8 +66,8 @@ open class Pager(
     }
 
     /**
-     * Whether the given [ev] should be intercepted. Only used to prevent crashes when child
-     * views manipulate [requestDisallowInterceptTouchEvent].
+     * Whether the given [ev] should be intercepted. Only used to prevent crashes when child views
+     * manipulate [requestDisallowInterceptTouchEvent].
      */
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return try {
@@ -109,9 +98,7 @@ open class Pager(
         return false
     }
 
-    /**
-     * Enables or disables the gesture detector.
-     */
+    /** Enables or disables the gesture detector. */
     fun setGestureDetectorEnabled(enabled: Boolean) {
         isGestureDetectorEnabled = enabled
     }

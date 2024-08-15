@@ -17,8 +17,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.ReaderChaptersSheetBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderViewModel
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -29,11 +27,13 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
+import org.nekomanga.R
+import org.nekomanga.databinding.ReaderChaptersSheetBinding
 
 class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     LinearLayout(context, attrs) {
@@ -58,15 +58,17 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
         val primary = ColorUtils.setAlphaComponent(fullPrimary, 200)
 
-        val hasLightNav = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || activity.isInNightMode()
-        val navPrimary = ColorUtils.setAlphaComponent(
-            if (hasLightNav) {
-                fullPrimary
-            } else {
-                Color.BLACK
-            },
-            200,
-        )
+        val hasLightNav =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || activity.isInNightMode()
+        val navPrimary =
+            ColorUtils.setAlphaComponent(
+                if (hasLightNav) {
+                    fullPrimary
+                } else {
+                    Color.BLACK
+                },
+                200,
+            )
         sheetBehavior = BottomSheetBehavior.from(this)
         binding.chaptersButton.setOnClickListener {
             if (sheetBehavior.isExpanded()) {
@@ -98,7 +100,11 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     binding.chapterRecycler.alpha = trueProgress
                     if (activity.sheetManageNavColor && progress > 0f) {
                         activity.window.navigationBarColor =
-                            lerpColor(ColorUtils.setAlphaComponent(navPrimary, if (hasLightNav) 0 else 179), navPrimary, trueProgress)
+                            lerpColor(
+                                ColorUtils.setAlphaComponent(
+                                    navPrimary, if (hasLightNav) 0 else 179),
+                                navPrimary,
+                                trueProgress)
                     }
                 }
 
@@ -106,16 +112,19 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     val canShowNav = (viewModel.getCurrentChapter()?.pages?.size ?: 1) > 1
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         sheetBehavior?.isHideable = false
-                        (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                            adapter?.getPosition(viewModel.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
-                            binding.chapterRecycler.height / 2 - 30.dpToPx,
-                        )
+                        (binding.chapterRecycler.layoutManager as LinearLayoutManager)
+                            .scrollToPositionWithOffset(
+                                adapter?.getPosition(
+                                    viewModel.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
+                                binding.chapterRecycler.height / 2 - 30.dpToPx,
+                            )
                         if (canShowNav) {
                             activity.binding.readerNav.root.isVisible = true
                         }
                         activity.binding.readerNav.root.alpha = 1f
                     }
-                    if (state == BottomSheetBehavior.STATE_DRAGGING || state == BottomSheetBehavior.STATE_SETTLING) {
+                    if (state == BottomSheetBehavior.STATE_DRAGGING ||
+                        state == BottomSheetBehavior.STATE_SETTLING) {
                         if (canShowNav) {
                             activity.binding.readerNav.root.isVisible = true
                         }
@@ -126,7 +135,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         }
                         activity.binding.readerNav.root.alpha = 0f
                         binding.chapterRecycler.alpha = 1f
-                        if (activity.sheetManageNavColor) activity.window.navigationBarColor = navPrimary
+                        if (activity.sheetManageNavColor)
+                            activity.window.navigationBarColor = navPrimary
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN) {
                         activity.binding.readerNav.root.alpha = 0f
@@ -137,8 +147,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     } else if (binding.root.isVisible) {
                         binding.root.isVisible = true
                     }
-                    binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
-                    binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
+                    binding.chapterRecycler.isClickable =
+                        state == BottomSheetBehavior.STATE_EXPANDED
+                    binding.chapterRecycler.isFocusable =
+                        state == BottomSheetBehavior.STATE_EXPANDED
                     activity.reEnableBackPressedCallBack()
                 }
             },
@@ -156,12 +168,13 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     activity.isScrollingThroughPagesOrChapters = true
 
                     loadingPos = position
-                    val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(position) as? ReaderChapterItem.ViewHolder)?.binding
+                    val itemView =
+                        (binding.chapterRecycler.findViewHolderForAdapterPosition(position)
+                                as? ReaderChapterItem.ViewHolder)
+                            ?.binding
                     itemView?.bookmarkImage?.isVisible = false
                     itemView?.progress?.isVisible = true
-                    activity.lifecycleScope.launch {
-                        activity.loadChapter(item.chapter)
-                    }
+                    activity.lifecycleScope.launch { activity.loadChapter(item.chapter) }
                 }
                 true
             }
@@ -190,21 +203,21 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             },
         )
 
-        backgroundTintList = ColorStateList.valueOf(
-            if (!sheetBehavior.isExpanded()) {
-                primary
-            } else {
-                fullPrimary
-            },
-        )
+        backgroundTintList =
+            ColorStateList.valueOf(
+                if (!sheetBehavior.isExpanded()) {
+                    primary
+                } else {
+                    fullPrimary
+                },
+            )
 
         binding.chapterRecycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
                     if (newState == RecyclerView.SCROLL_STATE_IDLE ||
-                        newState == RecyclerView.SCROLL_STATE_SETTLING
-                    ) {
+                        newState == RecyclerView.SCROLL_STATE_SETTLING) {
                         sheetBehavior?.isDraggable = true
                     } else {
                         sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
@@ -218,7 +231,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun resetChapter() {
-        val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(loadingPos) as? ReaderChapterItem.ViewHolder)?.binding
+        val itemView =
+            (binding.chapterRecycler.findViewHolderForAdapterPosition(loadingPos)
+                    as? ReaderChapterItem.ViewHolder)
+                ?.binding
         itemView?.bookmarkImage?.isVisible = true
         itemView?.progress?.isVisible = false
     }
@@ -231,10 +247,11 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             itemAdapter.clear()
             itemAdapter.add(chapters)
 
-            (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                adapter?.getPosition(viewModel.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
-                binding.chapterRecycler.height / 2 - 30.dpToPx,
-            )
+            (binding.chapterRecycler.layoutManager as LinearLayoutManager)
+                .scrollToPositionWithOffset(
+                    adapter?.getPosition(viewModel.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
+                    binding.chapterRecycler.height / 2 - 30.dpToPx,
+                )
         }
     }
 
@@ -249,11 +266,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun lerpColorCalc(colorStart: Int, colorEnd: Int, percent: Int): Int {
-        return (
-            min(colorStart, colorEnd) * (100 - percent) + max(
+        return (min(colorStart, colorEnd) * (100 - percent) +
+            max(
                 colorStart,
                 colorEnd,
-            ) * percent
-            ) / 100
+            ) * percent) / 100
     }
 }

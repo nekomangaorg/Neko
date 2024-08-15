@@ -6,17 +6,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <!-- Storage -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission
-        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" />
-
     <!-- For background jobs -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
 
     <!-- Install App automatically -->
@@ -30,8 +25,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
 
-    <!-- Allows opening in browser-->
+    <!-- Allows opening in browser -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+
 
     <!-- Remove permission from Firebase dependency -->
     <uses-permission
@@ -39,15 +35,13 @@
         tools:node="remove" />
 
     <application
-        android:name=".App"
+        android:name="org.nekomanga.App"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
-        android:preserveLegacyExternalStorage="true"
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="Neko"
@@ -55,7 +49,7 @@
         android:theme="@style/Theme.Tachiyomi"
         android:networkSecurityConfig="@xml/network_security_config">
         <activity
-            android:name=".ui.main.MainActivity"
+            android:name="eu.kanade.tachiyomi.ui.main.MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Splash">
@@ -68,7 +62,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".ui.reader.ReaderActivity"
+            android:name="eu.kanade.tachiyomi.ui.reader.ReaderActivity"
             android:exported="true"
             android:theme="@style/Theme.Splash">
             <intent-filter android:autoVerify="true">
@@ -90,17 +84,19 @@
             <meta-data
                 android:name="com.samsung.android.support.REMOTE_ACTION"
                 android:resource="@xml/s_pen_actions" />
+
+
         </activity>
         <activity
-            android:name=".ui.webview.WebViewActivity"
+            android:name="eu.kanade.tachiyomi.ui.webview.WebViewActivity"
             android:exported="true"
             android:configChanges="uiMode|orientation|screenSize" />
 
         <activity
-            android:name=".ui.security.BiometricActivity"
+            android:name="eu.kanade.tachiyomi.ui.security.BiometricActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.setting.logins.MyAnimeListLoginActivity"
+            android:name="eu.kanade.tachiyomi.ui.setting.logins.MyAnimeListLoginActivity"
             android:label="MyAnimeList"
             android:exported="true">
             <intent-filter>
@@ -109,13 +105,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="myanimelist-auth"
-                    android:scheme="neko" />
+                <data android:scheme="neko" />
+                <data android:host="myanimelist-auth" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.setting.logins.AnilistLoginActivity"
+            android:name="eu.kanade.tachiyomi.ui.setting.logins.AnilistLoginActivity"
             android:label="Anilist"
             android:exported="true">
             <intent-filter>
@@ -124,13 +119,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="anilist-auth"
-                    android:scheme="neko" />
+                <data android:scheme="neko" />
+                <data android:host="anilist-auth" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.setting.logins.MangaDexLoginActivity"
+            android:name="eu.kanade.tachiyomi.ui.setting.logins.MangaDexLoginActivity"
             android:label="MangaDexLogin"
             android:exported="true">
             <intent-filter>
@@ -139,17 +133,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="${mangadexAuthRedirectUri}"
-                    android:scheme="neko" />
+                <data android:scheme="neko" />
+                <data android:host="${mangadexAuthRedirectUri}" />
             </intent-filter>
         </activity>
         <activity
             android:process=":error_handler"
-            android:name=".crash.CrashActivity"
+            android:name="eu.kanade.tachiyomi.crash.CrashActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.main.DeepLinkActivity"
+            android:name="eu.kanade.tachiyomi.ui.main.DeepLinkActivity"
             android:launchMode="singleTask"
             android:theme="@android:style/Theme.NoDisplay"
             android:exported="true">
@@ -159,7 +152,7 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
 
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -170,7 +163,7 @@
                     android:host="mangadex.org"
                     android:pathPattern="/manga/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -181,7 +174,7 @@
                     android:host="mangadex.org"
                     android:pathPattern="/title/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -192,7 +185,7 @@
                     android:host="mangadex.org"
                     android:pathPattern="/group/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -203,7 +196,7 @@
                     android:host="mangadex.org"
                     android:pathPattern="/list/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -214,43 +207,40 @@
                     android:host="mangadex.org"
                     android:pathPattern="/author/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="https"
-                    android:host="anilist.co"
-                    android:pathPattern="/manga/..*" />
+                <data android:scheme="https" />
+                <data android:host="anilist.co" />
+                <data android:pathPattern="/manga/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="https"
-                    android:host="myanimelist.net"
-                    android:pathPattern="/manga/..*" />
+                <data android:scheme="https" />
+                <data android:host="myanimelist.net" />
+                <data android:pathPattern="/manga/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="https"
-                    android:host="www.mangaupdates.com"
-                    android:pathPattern="/series/..*" />
+                <data android:scheme="https" />
+                <data android:host="www.mangaupdates.com" />
+                <data android:pathPattern="/series/..*" />
             </intent-filter>
         </activity>
 
         <activity
-            android:name=".ui.main.SearchActivity"
+            android:name="eu.kanade.tachiyomi.ui.main.SearchActivity"
             android:theme="@style/Theme.Tachiyomi" />
 
         <provider
@@ -264,32 +254,16 @@
         </provider>
 
         <receiver
-            android:name=".data.notification.NotificationReceiver"
+            android:name="eu.kanade.tachiyomi.data.notification.NotificationReceiver"
             android:exported="false" />
 
         <receiver
-            android:name=".data.updater.AppUpdateBroadcast"
+            android:name="eu.kanade.tachiyomi.data.updater.AppUpdateBroadcast"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
-
-        <service
-            android:name=".data.library.LibraryUpdateService"
-            android:exported="false" />
-
-        <service
-            android:name=".data.download.DownloadService"
-            android:exported="false" />
-
-        <service
-            android:name=".data.updater.AppUpdateService"
-            android:exported="false" />
-
-        <service
-            android:name=".data.backup.BackupRestoreService"
-            android:exported="false" />
 
         <meta-data
             android:name="android.webkit.WebView.EnableSafeBrowsing"
@@ -303,6 +277,11 @@
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
+
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
 
     </application>
 

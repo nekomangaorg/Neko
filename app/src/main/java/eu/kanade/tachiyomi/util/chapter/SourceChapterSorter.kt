@@ -6,19 +6,22 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import kotlin.math.floor
 
-/**This attempts to create a smart source order used when a manga is merged
- */
+/** This attempts to create a smart source order used when a manga is merged */
 fun reorderChapters(sourceChapters: List<SChapter>, manga: Manga): List<SChapter> {
     if (sourceChapters.all { !it.isMergedChapter() }) {
         return sourceChapters
     }
 
     // mangalife tends to not include a volume number for manga
-    val sorter = if (manga.lang_flag != null && MdLang.fromIsoCode(manga.lang_flag!!) == MdLang.JAPANESE) {
-        compareByDescending<SChapter> { getChapterNum(it) == null }.thenByDescending { getChapterNum(it) }
-    } else {
-        compareByDescending<SChapter> { getVolumeNum(it) == null }.thenByDescending { getVolumeNum(it) }.thenByDescending { getChapterNum(it) }
-    }
+    val sorter =
+        if (manga.lang_flag != null && MdLang.fromIsoCode(manga.lang_flag!!) == MdLang.JAPANESE) {
+            compareByDescending<SChapter> { getChapterNum(it) == null }
+                .thenByDescending { getChapterNum(it) }
+        } else {
+            compareByDescending<SChapter> { getVolumeNum(it) == null }
+                .thenByDescending { getVolumeNum(it) }
+                .thenByDescending { getChapterNum(it) }
+        }
 
     return sourceChapters.sortedWith(sorter)
 }
@@ -28,7 +31,9 @@ fun getChapterNum(chapter: SChapter): Float? {
         true -> 0f
         false -> {
             val txt = chapter.chapter_txt
-            txt.subStringfloatOrNull("Ch.") ?: txt.subStringfloatOrNull("Chp.") ?: txt.subStringfloatOrNull("Chapter")
+            txt.subStringfloatOrNull("Ch.")
+                ?: txt.subStringfloatOrNull("Chp.")
+                ?: txt.subStringfloatOrNull("Chapter")
         }
     }
 }

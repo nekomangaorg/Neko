@@ -6,10 +6,10 @@ import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncService
-import eu.kanade.tachiyomi.jobs.migrate.V5MigrationService
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncService
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -41,13 +41,20 @@ import eu.kanade.tachiyomi.util.chapter.ChapterItemFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.serialization.json.Json
+import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
+import org.nekomanga.domain.backup.BackupPreferences
+import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
+import org.nekomanga.domain.storage.StorageManager
+import org.nekomanga.domain.storage.StoragePreferences
+import org.nekomanga.domain.track.store.DelayedTrackingStore
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
+import tachiyomi.core.util.storage.AndroidStorageFolderProvider
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
@@ -122,11 +129,9 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(StatusHandler())
 
-        addSingleton(CustomListSyncService())
+        addSingleton(CustomListSyncProcessor())
 
-        addSingleton(V5MigrationService())
-
-        addSingleton(TrackingSyncService())
+        addSingleton(DelayedTrackingStore(app))
 
         addSingleton(SimilarRepository())
 
@@ -144,9 +149,10 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { MangaShortcutManager() }
 
+        addSingletonFactory { StorageManager(app, get()) }
+
         // Asynchronously init expensive components for a faster cold start
         ContextCompat.getMainExecutor(app).execute {
-
             get<NetworkHelper>()
 
             get<SourceManager>()
@@ -160,29 +166,30 @@ class AppModule(val app: Application) : InjektModule {
 
 class PreferenceModule(val application: Application) : InjektModule {
     override fun InjektRegistrar.registerInjectables() {
-        addSingletonFactory<PreferenceStore> {
-            AndroidPreferenceStore(application)
-        }
+        addSingletonFactory<PreferenceStore> { AndroidPreferenceStore(application) }
+
+        addSingletonFactory { DownloadProvider(get()) }
+
+        addSingletonFactory { AndroidStorageFolderProvider(application) }
 
         addSingletonFactory {
-            SecurityPreferences(get())
+            StoragePreferences(
+                context = application,
+                folderProvider = get<AndroidStorageFolderProvider>(),
+                preferenceStore = get())
         }
 
-        addSingletonFactory {
-            LibraryPreferences(get())
-        }
+        addSingletonFactory { BackupPreferences(get()) }
 
-        addSingletonFactory {
-            ReaderPreferences(get())
-        }
+        addSingletonFactory { SecurityPreferences(get()) }
 
-        addSingletonFactory {
-            NetworkPreferences(get(), BuildConfig.DEBUG)
-        }
+        addSingletonFactory { LibraryPreferences(get()) }
 
-        addSingletonFactory {
-            MangaDetailsPreferences(get())
-        }
+        addSingletonFactory { ReaderPreferences(get()) }
+
+        addSingletonFactory { NetworkPreferences(get(), BuildConfig.DEBUG) }
+
+        addSingletonFactory { MangaDetailsPreferences(get()) }
 
         addSingletonFactory {
             PreferencesHelper(

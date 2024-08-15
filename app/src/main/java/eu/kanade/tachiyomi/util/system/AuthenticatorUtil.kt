@@ -21,7 +21,8 @@ object AuthenticatorUtil {
      *
      * @param title String title that will be shown on the prompt
      * @param subtitle Optional string subtitle that will be shown on the prompt
-     * @param confirmationRequired Whether require explicit user confirmation after passive biometric is recognized
+     * @param confirmationRequired Whether require explicit user confirmation after passive
+     *   biometric is recognized
      * @param callback Callback object to handle the authentication events
      */
     fun FragmentActivity.startAuthentication(
@@ -32,28 +33,33 @@ object AuthenticatorUtil {
     ) {
         isAuthenticating = true
         val executor: Executor = ContextCompat.getMainExecutor(this)
-        val biometricPrompt = BiometricPrompt(
-            this,
-            executor,
-            callback,
-        )
+        val biometricPrompt =
+            BiometricPrompt(
+                this,
+                executor,
+                callback,
+            )
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(title)
-            .setSubtitle(subtitle)
-            .setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK)
-            .setConfirmationRequired(confirmationRequired)
-            .build()
+        val promptInfo =
+            BiometricPrompt.PromptInfo.Builder()
+                .setTitle(title)
+                .setSubtitle(subtitle)
+                .setAllowedAuthenticators(
+                    BiometricManager.Authenticators.DEVICE_CREDENTIAL or
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                .setConfirmationRequired(confirmationRequired)
+                .build()
 
         biometricPrompt.authenticate(promptInfo)
     }
 
-    /**
-     * Returns true if Class 2 biometric or credential lock is set and available to use
-     */
+    /** Returns true if Class 2 biometric or credential lock is set and available to use */
     fun Context.isAuthenticationSupported(): Boolean {
-        val authenticators = BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL
-        return BiometricManager.from(this).canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS
+        val authenticators =
+            BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        return BiometricManager.from(this).canAuthenticate(authenticators) ==
+            BiometricManager.BIOMETRIC_SUCCESS
     }
 
     /**

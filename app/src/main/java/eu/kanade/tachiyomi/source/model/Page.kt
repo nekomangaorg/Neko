@@ -19,22 +19,18 @@ open class Page(
     val number: Int
         get() = index + 1
 
-    @Transient
-    private val _statusFlow = MutableStateFlow(State.QUEUE)
+    @Transient private val _statusFlow = MutableStateFlow(State.QUEUE)
 
-    @Transient
-    val statusFlow = _statusFlow.asStateFlow()
+    @Transient val statusFlow = _statusFlow.asStateFlow()
     var status: State
         get() = _statusFlow.value
         set(value) {
             _statusFlow.value = value
         }
 
-    @Transient
-    private val _progressFlow = MutableStateFlow(0)
+    @Transient private val _progressFlow = MutableStateFlow(0)
 
-    @Transient
-    val progressFlow = _progressFlow.asStateFlow()
+    @Transient val progressFlow = _progressFlow.asStateFlow()
     var progress: Int
         get() = _progressFlow.value
         set(value) {
@@ -42,11 +38,12 @@ open class Page(
         }
 
     override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-        progress = if (contentLength > 0) {
-            (100 * bytesRead / contentLength).toInt()
-        } else {
-            -1
-        }
+        progress =
+            if (contentLength > 0) {
+                (100 * bytesRead / contentLength).toInt()
+            } else {
+                -1
+            }
     }
 
     enum class State {

@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.onEach
 import org.nekomanga.domain.reader.ReaderPreferences
 import tachiyomi.core.preference.Preference
 
-/**
- * Common configuration for all viewers.
- */
-abstract class ViewerConfig(preferences: PreferencesHelper, readerPreferences: ReaderPreferences, protected val scope: CoroutineScope) {
+/** Common configuration for all viewers. */
+abstract class ViewerConfig(
+    preferences: PreferencesHelper,
+    readerPreferences: ReaderPreferences,
+    protected val scope: CoroutineScope
+) {
 
     var imagePropertyChangedListener: (() -> Unit)? = null
     var reloadChapterListener: ((Boolean) -> Unit)? = null
@@ -39,19 +41,16 @@ abstract class ViewerConfig(preferences: PreferencesHelper, readerPreferences: R
         protected set
 
     init {
-        readerPreferences.readWithLongTap()
-            .register({ longTapEnabled = it })
+        readerPreferences.readWithLongTap().register({ longTapEnabled = it })
 
-        readerPreferences.doubleTapAnimSpeed()
-            .register({ doubleTapAnimDuration = it })
+        readerPreferences.doubleTapAnimSpeed().register({ doubleTapAnimDuration = it })
 
-        readerPreferences.readWithVolumeKeys()
-            .register({ volumeKeysEnabled = it })
+        readerPreferences.readWithVolumeKeys().register({ volumeKeysEnabled = it })
 
-        readerPreferences.readWithVolumeKeysInverted()
-            .register({ volumeKeysInverted = it })
+        readerPreferences.readWithVolumeKeysInverted().register({ volumeKeysInverted = it })
 
-        readerPreferences.alwaysShowChapterTransition()
+        readerPreferences
+            .alwaysShowChapterTransition()
             .register({ alwaysShowChapterTransition = it })
     }
 

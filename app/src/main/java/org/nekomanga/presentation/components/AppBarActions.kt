@@ -14,23 +14,45 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.toPersistentList
+import org.nekomanga.R
 import org.nekomanga.presentation.components.dropdown.MainDropdownMenu
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 
-fun listGridAppBarAction(isList: Boolean, isEnabled: Boolean = true, onClick: () -> Unit): AppBar.Action {
+fun listGridAppBarAction(
+    isList: Boolean,
+    isEnabled: Boolean = true,
+    onClick: () -> Unit
+): AppBar.Action {
     return when (isList) {
-        true -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_grid), icon = Icons.Filled.ViewModule, onClick = onClick, isEnabled = isEnabled)
-        false -> AppBar.Action(title = UiText.StringResource(resourceId = R.string.display_as_list), icon = Icons.Filled.ViewList, onClick = onClick, isEnabled = isEnabled)
+        true ->
+            AppBar.Action(
+                title = UiText.StringResource(resourceId = R.string.display_as_grid),
+                icon = Icons.Filled.ViewModule,
+                onClick = onClick,
+                isEnabled = isEnabled)
+        false ->
+            AppBar.Action(
+                title = UiText.StringResource(resourceId = R.string.display_as_list),
+                icon = Icons.Filled.ViewList,
+                onClick = onClick,
+                isEnabled = isEnabled)
     }
 }
 
 fun showLibraryEntriesAction(showEntries: Boolean, onClick: () -> Unit): AppBar.Action {
     return when (showEntries) {
-        true -> AppBar.Action(title = UiText.StringResource(R.string.hide_library_manga), icon = Icons.Filled.VisibilityOff, onClick = onClick)
-        false -> AppBar.Action(title = UiText.StringResource(R.string.show_library_manga), icon = Icons.Filled.Visibility, onClick = onClick)
+        true ->
+            AppBar.Action(
+                title = UiText.StringResource(R.string.hide_library_manga),
+                icon = Icons.Filled.VisibilityOff,
+                onClick = onClick)
+        false ->
+            AppBar.Action(
+                title = UiText.StringResource(R.string.show_library_manga),
+                icon = Icons.Filled.Visibility,
+                onClick = onClick)
     }
 }
 
@@ -61,9 +83,9 @@ fun AppBarActions(
             expanded = showMenu,
             onDismiss = { showMenu = false },
             dropDownItems =
-            overflowActions.map { appBarAction ->
-                appBarAction.toSimpleAction()
-            }.toPersistentList(),
+                overflowActions
+                    .map { appBarAction -> appBarAction.toSimpleAction() }
+                    .toPersistentList(),
         )
     }
 

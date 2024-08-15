@@ -11,9 +11,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.isGone
 import androidx.core.widget.TextViewCompat
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.MenuSheetItemBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.R
+import org.nekomanga.databinding.MenuSheetItemBinding
 
 class MenuSheetItemView constructor(context: Context, attrs: AttributeSet?) :
     LinearLayout(context, attrs) {
@@ -44,11 +44,12 @@ class MenuSheetItemView constructor(context: Context, attrs: AttributeSet?) :
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        binding = try {
-            MenuSheetItemBinding.bind(this)
-        } catch (e: Exception) {
-            MenuSheetItemBinding.inflate(LayoutInflater.from(context), this, true)
-        }
+        binding =
+            try {
+                MenuSheetItemBinding.bind(this)
+            } catch (e: Exception) {
+                MenuSheetItemBinding.inflate(LayoutInflater.from(context), this, true)
+            }
         text = mText
         setIcon(mIconRes)
         setEndIcon(mEndIconRes)
@@ -92,29 +93,34 @@ class MenuSheetItemView constructor(context: Context, attrs: AttributeSet?) :
         binding?.itemTextView?.setTextColor(color)
     }
 
-    fun setIconColor(@ColorInt color: Int) = binding?.itemTextView?.let {
-        TextViewCompat.setCompoundDrawableTintList(
-            it,
-            ColorStateList.valueOf(color),
-        )
-    }
+    fun setIconColor(@ColorInt color: Int) =
+        binding?.itemTextView?.let {
+            TextViewCompat.setCompoundDrawableTintList(
+                it,
+                ColorStateList.valueOf(color),
+            )
+        }
 
     fun setIcon(@DrawableRes res: Int) {
-        binding?.itemTextView?.setCompoundDrawablesRelativeWithIntrinsicBounds(
-            res,
-            0,
-            0,
-            0,
-        )
+        binding
+            ?.itemTextView
+            ?.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                res,
+                0,
+                0,
+                0,
+            )
     }
 
     fun setIcon(drawable: Drawable?) {
-        binding?.itemTextView?.setCompoundDrawablesRelativeWithIntrinsicBounds(
-            drawable,
-            null,
-            null,
-            null,
-        )
+        binding
+            ?.itemTextView
+            ?.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                drawable,
+                null,
+                null,
+                null,
+            )
     }
 
     fun getIcon(): Drawable? {

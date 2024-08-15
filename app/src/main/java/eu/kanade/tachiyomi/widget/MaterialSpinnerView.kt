@@ -16,12 +16,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.forEach
 import androidx.core.view.get
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.MaterialSpinnerViewBinding
 import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.toast
 import kotlin.math.max
+import org.nekomanga.R
+import org.nekomanga.databinding.MaterialSpinnerViewBinding
 import tachiyomi.core.preference.Preference
 
 class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
@@ -30,6 +30,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private var entries = emptyList<String>()
     var selectedPosition = 0
         private set
+
     var originalPosition: Int? = null
     var originalIcon: Drawable? = null
     private var pref: Preference<Int>? = null
@@ -43,11 +44,12 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
             binding.titleView.text = value
         }
 
-    private val blendedAccent = ColorUtils.blendARGB(
-        context.getResourceColor(R.attr.colorSecondary),
-        context.getResourceColor(R.attr.colorOnBackground),
-        0.5f,
-    )
+    private val blendedAccent =
+        ColorUtils.blendARGB(
+            context.getResourceColor(R.attr.colorSecondary),
+            context.getResourceColor(R.attr.colorOnBackground),
+            0.5f,
+        )
 
     private val slightAccent by lazy {
         ColorUtils.blendARGB(
@@ -63,17 +65,16 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
             if (value != null) {
                 popup = makeSettingsPopup()
                 setOnTouchListener(popup?.dragToOpenListener)
-                setOnClickListener {
-                    popup?.show()
-                }
+                setOnClickListener { popup?.show() }
             }
         }
 
-    private val binding = MaterialSpinnerViewBinding.inflate(
-        LayoutInflater.from(context),
-        this,
-        false,
-    )
+    private val binding =
+        MaterialSpinnerViewBinding.inflate(
+            LayoutInflater.from(context),
+            this,
+            false,
+        )
 
     init {
         addView(binding.root)
@@ -82,7 +83,10 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         val str = a.getString(R.styleable.MaterialSpinnerView_title) ?: ""
         title = str
 
-        val entries = (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
+        val entries =
+            (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries) ?: emptyArray()).map {
+                it.toString()
+            }
         this.entries = entries
 
         val maxLines = a.getInt(R.styleable.MaterialSpinnerView_android_maxLines, Int.MAX_VALUE)
@@ -94,9 +98,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         if (entries.isNotEmpty()) {
             popup = makeSettingsPopup()
             setOnTouchListener(popup?.dragToOpenListener)
-            setOnClickListener {
-                popup?.show()
-            }
+            setOnClickListener { popup?.show() }
         }
 
         a.recycle()
@@ -106,9 +108,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         this.entries = entries
         popup = makeSettingsPopup()
         setOnTouchListener(popup?.dragToOpenListener)
-        setOnClickListener {
-            popup?.show()
-        }
+        setOnClickListener { popup?.show() }
     }
 
     fun setSelection(selection: Int) {
@@ -146,9 +146,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         prefOffset = offset
         popup = makeSettingsPopup(pref, prefOffset, block)
         setOnTouchListener(popup?.dragToOpenListener)
-        setOnClickListener {
-            popup?.show()
-        }
+        setOnClickListener { popup?.show() }
     }
 
     inline fun <reified T : Enum<T>> bindToPreference(pref: Preference<T>) {
@@ -156,9 +154,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         enumConstants?.indexOf(pref.get())?.let { setSelection(it) }
         val popup = makeSettingsPopup(pref)
         setOnTouchListener(popup.dragToOpenListener)
-        setOnClickListener {
-            popup.show()
-        }
+        setOnClickListener { popup.show() }
     }
 
     fun bindToIntPreference(
@@ -172,9 +168,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         setSelection(max(0, intValues.indexOf(pref.get())))
         popup = makeSettingsPopup(pref, intValues, block)
         setOnTouchListener(popup?.dragToOpenListener)
-        setOnClickListener {
-            popup?.show()
-        }
+        setOnClickListener { popup?.show() }
     }
 
     inline fun <reified T : Enum<T>> makeSettingsPopup(preference: Preference<T>): PopupMenu {
@@ -249,9 +243,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     @SuppressLint("RestrictedApi")
     fun popup(): PopupMenu {
         val popup = PopupMenu(context, this, Gravity.END)
-        entries.forEachIndexed { index, entry ->
-            popup.menu.add(0, index, 0, entry)
-        }
+        entries.forEachIndexed { index, entry -> popup.menu.add(0, index, 0, entry) }
         if (popup.menu is MenuBuilder) {
             val m = popup.menu as MenuBuilder
             m.setOptionalIconsVisible(true)
@@ -261,8 +253,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         }
         popup.menu.getItem(selectedPosition)?.let { menuItem ->
             menuItem.icon = tintedCheck()
-            menuItem.title =
-                menuItem.title?.tintText(blendedAccent)
+            menuItem.title = menuItem.title?.tintText(blendedAccent)
         }
         this.popup = popup
         updateOriginalPositionMenu()
@@ -273,8 +264,8 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         popup ?: return
         val originalPosition = originalPosition ?: return
         if (originalPosition != selectedPosition &&
-            originalPosition >= 0 && originalPosition < (popup?.menu?.size() ?: 0)
-        ) {
+            originalPosition >= 0 &&
+            originalPosition < (popup?.menu?.size() ?: 0)) {
             popup?.menu?.getItem(originalPosition)?.let { menuItem ->
                 menuItem.icon = tintedOG()
                 menuItem
@@ -283,9 +274,10 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     }
 
     private fun tintedOG(): Drawable? {
-        return originalIcon ?: ContextCompat.getDrawable(context, R.drawable.ic_browse_outline_24dp)?.mutate()?.apply {
-            setTint(slightAccent)
-        }
+        return originalIcon
+            ?: ContextCompat.getDrawable(context, R.drawable.ic_browse_outline_24dp)
+                ?.mutate()
+                ?.apply { setTint(slightAccent) }
     }
 
     private fun tintedCheck(): Drawable? {

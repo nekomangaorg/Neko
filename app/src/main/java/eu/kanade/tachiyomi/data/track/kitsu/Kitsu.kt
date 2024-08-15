@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.track.kitsu
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackStatusService
@@ -11,6 +10,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import java.text.DecimalFormat
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
@@ -27,8 +27,7 @@ class Kitsu(private val context: Context, id: Int) : TrackStatusService(id) {
         const val DEFAULT_SCORE = 0f
     }
 
-    @StringRes
-    override fun nameRes() = R.string.kitsu
+    @StringRes override fun nameRes() = R.string.kitsu
 
     override val supportsReadingDates: Boolean = true
 
@@ -49,30 +48,34 @@ class Kitsu(private val context: Context, id: Int) : TrackStatusService(id) {
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
     override fun completedStatus(): Int = COMPLETED
+
     override fun readingStatus() = READING
+
     override fun planningStatus() = PLAN_TO_READ
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.currently_reading)
-            PLAN_TO_READ -> getString(R.string.want_to_read)
-            COMPLETED -> getString(R.string.completed)
-            ON_HOLD -> getString(R.string.on_hold)
-            DROPPED -> getString(R.string.dropped)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.currently_reading)
+                PLAN_TO_READ -> getString(R.string.want_to_read)
+                COMPLETED -> getString(R.string.completed)
+                ON_HOLD -> getString(R.string.on_hold)
+                DROPPED -> getString(R.string.dropped)
+                else -> ""
+            }
         }
-    }
 
-    override fun getGlobalStatus(status: Int): String = with(context) {
-        when (status) {
+    override fun getGlobalStatus(status: Int): String =
+        with(context) {
+            return when (status) {
             READING -> getString(R.string.global_tracker_status_reading)
             PLAN_TO_READ -> getString(R.string.global_tracker_status_plan_to_read)
             COMPLETED -> getString(R.string.global_tracker_status_completed)
             ON_HOLD -> getString(R.string.global_tracker_status_on_hold)
             DROPPED -> getString(R.string.global_tracker_status_dropped)
-            else -> ""
+                else -> ""
+            }
         }
-    }
 
     override fun getScoreList(): List<String> {
         val df = DecimalFormat("0.#")

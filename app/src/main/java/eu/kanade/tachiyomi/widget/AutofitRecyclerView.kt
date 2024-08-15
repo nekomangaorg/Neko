@@ -96,12 +96,13 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
     private fun useStaggered(use: Boolean) {
         if (use && manager !is StaggeredGridLayoutManagerAccurateOffset) {
-            manager = StaggeredGridLayoutManagerAccurateOffset(
-                context,
-                null,
-                1,
-                StaggeredGridLayoutManager.VERTICAL,
-            )
+            manager =
+                StaggeredGridLayoutManagerAccurateOffset(
+                    context,
+                    null,
+                    1,
+                    StaggeredGridLayoutManager.VERTICAL,
+                )
             setNewManager()
         } else if (!use && manager !is GridLayoutManagerAccurateOffset) {
             manager = GridLayoutManagerAccurateOffset(context, 1)
@@ -123,22 +124,25 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     fun scrollToPositionWithOffset(position: Int, offset: Int) {
         layoutManager ?: return
         return (layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, offset)
-            ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset).scrollToPositionWithOffset(
-                position,
-                offset,
-            )
+            ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset)
+                .scrollToPositionWithOffset(
+                    position,
+                    offset,
+                )
     }
 
     fun findFirstVisibleItemPosition(): Int {
         layoutManager ?: return 0
         return (layoutManager as? LinearLayoutManager)?.findFirstVisibleItemPosition()
-            ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset).findFirstVisibleItemPosition()
+            ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset)
+                .findFirstVisibleItemPosition()
     }
 
     fun findFirstCompletelyVisibleItemPosition(): Int {
         layoutManager ?: return 0
         return (layoutManager as? LinearLayoutManager)?.findFirstCompletelyVisibleItemPosition()
-            ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset).findFirstCompletelyVisibleItemPosition()
+            ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset)
+                .findFirstCompletelyVisibleItemPosition()
     }
 
     fun setGridSize(libraryPreferences: LibraryPreferences) {
@@ -147,19 +151,19 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val oldGridSize = prefs.getInt("grid_size", -1)
             if (oldGridSize != -1) {
-                libraryPreferences.gridSize().set(
-                    when (oldGridSize) {
-                        4 -> 3f
-                        3 -> 1.5f
-                        2 -> 1f
-                        1 -> 0f
-                        0 -> -.5f
-                        else -> .5f
-                    },
-                )
-                prefs.edit {
-                    remove("grid_size")
-                }
+                libraryPreferences
+                    .gridSize()
+                    .set(
+                        when (oldGridSize) {
+                            4 -> 3f
+                            3 -> 1.5f
+                            2 -> 1f
+                            1 -> 0f
+                            0 -> -.5f
+                            else -> .5f
+                        },
+                    )
+                prefs.edit { remove("grid_size") }
             }
         }
 
@@ -169,13 +173,11 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     private fun setSpan(force: Boolean = false) {
-        if ((
-                spanCount == 0 || force ||
-                    // Add 100dp check to make sure we dont update span for sidenav changes
-                    (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)
-                ) &&
-            columnWidth > 0
-        ) {
+        if ((spanCount == 0 ||
+            force ||
+            // Add 100dp check to make sure we dont update span for sidenav changes
+            (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)) &&
+            columnWidth > 0) {
             val dpWidth = (width.pxToDp / 100f).roundToInt()
             val count = max(1, (dpWidth / columnWidth).roundToInt())
             spanCount = count

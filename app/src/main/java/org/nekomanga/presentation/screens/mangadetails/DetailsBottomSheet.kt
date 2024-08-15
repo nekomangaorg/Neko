@@ -20,9 +20,7 @@ import org.nekomanga.presentation.components.sheets.TrackingSearchSheet
 import org.nekomanga.presentation.components.sheets.TrackingSheet
 import org.nekomanga.presentation.screens.ThemeColorState
 
-/**
- * Sealed class that holds the types of bottom sheets the details screen can show
- */
+/** Sealed class that holds the types of bottom sheets the details screen can show */
 sealed class DetailsBottomSheetScreen {
     class CategoriesSheet(
         val addingToLibrary: Boolean = false,
@@ -31,11 +29,20 @@ sealed class DetailsBottomSheetScreen {
     ) : DetailsBottomSheetScreen()
 
     object TrackingSheet : DetailsBottomSheetScreen()
+
     object ExternalLinksSheet : DetailsBottomSheetScreen()
+
     object MergeSheet : DetailsBottomSheetScreen()
+
     object ArtworkSheet : DetailsBottomSheetScreen()
+
     object FilterChapterSheet : DetailsBottomSheetScreen()
-    class TrackingSearchSheet(val trackingService: TrackServiceItem, val alreadySelectedTrack: TrackItem?) : DetailsBottomSheetScreen()
+
+    class TrackingSearchSheet(
+        val trackingService: TrackServiceItem,
+        val alreadySelectedTrack: TrackItem?
+    ) : DetailsBottomSheetScreen()
+
     class TrackingDateSheet(
         val trackAndService: TrackingConstants.TrackAndService,
         val trackingDate: TrackingConstants.TrackingDate,
@@ -62,51 +69,58 @@ fun DetailsBottomSheet(
 ) {
     val context = LocalContext.current
     when (currentScreen) {
-        is DetailsBottomSheetScreen.CategoriesSheet -> EditCategorySheet(
-            addingToLibrary = currentScreen.addingToLibrary,
-            categories = generalState.value.allCategories,
-            mangaCategories = generalState.value.currentCategories,
-            themeColorState = themeColorState,
-            cancelClick = closeSheet,
-            addNewCategory = addNewCategory,
-            confirmClicked = currentScreen.setCategories,
-            addToLibraryClick = currentScreen.addToLibraryClick,
-        )
-
-        is DetailsBottomSheetScreen.TrackingSheet -> TrackingSheet(
-            themeColor = themeColorState,
-            inLibrary = mangaState.value.inLibrary,
-            servicesProvider = { trackMergeState.value.loggedInTrackService },
-            tracksProvider = { trackMergeState.value.tracks },
-            dateFormat = dateFormat,
-            onLogoClick = openInWebView,
-            onSearchTrackClick = { service, track ->
-                closeSheet()
-                openSheet(
-                    DetailsBottomSheetScreen.TrackingSearchSheet(service, track),
-                )
-            },
-            trackStatusChanged = trackActions.statusChange,
+        is DetailsBottomSheetScreen.CategoriesSheet ->
+            EditCategorySheet(
+                addingToLibrary = currentScreen.addingToLibrary,
+                categories = generalState.value.allCategories,
+                mangaCategories = generalState.value.currentCategories,
+                themeColorState = themeColorState,
+                cancelClick = closeSheet,
+                addNewCategory = addNewCategory,
+                confirmClicked = currentScreen.setCategories,
+                addToLibraryClick = currentScreen.addToLibraryClick,
+            )
+        is DetailsBottomSheetScreen.TrackingSheet ->
+            TrackingSheet(
+                themeColor = themeColorState,
+                inLibrary = mangaState.value.inLibrary,
+                servicesProvider = { trackMergeState.value.loggedInTrackService },
+                tracksProvider = { trackMergeState.value.tracks },
+                dateFormat = dateFormat,
+                onLogoClick = openInWebView,
+                onSearchTrackClick = { service, track ->
+                    closeSheet()
+                    openSheet(
+                        DetailsBottomSheetScreen.TrackingSearchSheet(service, track),
+                    )
+                },
+                trackStatusChanged = trackActions.statusChange,
             trackListChange = trackActions.listChange,
-            trackScoreChanged = trackActions.scoreChange,
-            trackingRemoved = trackActions.remove,
-            trackChapterChanged = trackActions.chapterChange,
-            trackingStartDateClick = { trackAndService, trackingDate ->
-                closeSheet()
-                openSheet(
-                    DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, generalState.value.trackingSuggestedDates),
-                )
-            },
-            trackingFinishDateClick = { trackAndService, trackingDate ->
-                closeSheet()
-                openSheet(
-                    DetailsBottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, generalState.value.trackingSuggestedDates),
-                )
-            },
-        )
-
+                trackScoreChanged = trackActions.scoreChange,
+                trackingRemoved = trackActions.remove,
+                trackChapterChanged = trackActions.chapterChange,
+                trackingStartDateClick = { trackAndService, trackingDate ->
+                    closeSheet()
+                    openSheet(
+                        DetailsBottomSheetScreen.TrackingDateSheet(
+                            trackAndService,
+                            trackingDate,
+                            generalState.value.trackingSuggestedDates),
+                    )
+                },
+                trackingFinishDateClick = { trackAndService, trackingDate ->
+                    closeSheet()
+                    openSheet(
+                        DetailsBottomSheetScreen.TrackingDateSheet(
+                            trackAndService,
+                            trackingDate,
+                            generalState.value.trackingSuggestedDates),
+                    )
+                },
+            )
         is DetailsBottomSheetScreen.TrackingSearchSheet -> {
-            // do the initial search this way we dont need to "reset" the state after the sheet closes
+            // do the initial search this way we dont need to "reset" the state after the sheet
+            // closes
             LaunchedEffect(key1 = currentScreen.trackingService.id) {
                 trackActions.search(mangaState.value.originalTitle, currentScreen.trackingService)
             }
@@ -121,17 +135,20 @@ fun DetailsBottomSheet(
                     closeSheet()
                     openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
-                searchTracker = { query -> trackActions.search(query, currentScreen.trackingService) },
+                searchTracker = { query ->
+                    trackActions.search(query, currentScreen.trackingService)
+                },
                 openInBrowser = openInWebView,
                 trackingRemoved = trackActions.remove,
                 trackSearchItemClick = { trackSearch ->
                     closeSheet()
-                    trackActions.searchItemClick(TrackingConstants.TrackAndService(trackSearch.trackItem, currentScreen.trackingService))
+                    trackActions.searchItemClick(
+                        TrackingConstants.TrackAndService(
+                            trackSearch.trackItem, currentScreen.trackingService))
                     openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
             )
         }
-
         is DetailsBottomSheetScreen.TrackingDateSheet -> {
             TrackingDateSheet(
                 themeColorState = themeColorState,
@@ -149,7 +166,6 @@ fun DetailsBottomSheet(
                 },
             )
         }
-
         is DetailsBottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
                 themeColorState = themeColorState,
@@ -160,7 +176,6 @@ fun DetailsBottomSheet(
                 },
             )
         }
-
         is DetailsBottomSheetScreen.MergeSheet -> {
             MergeSheet(
                 themeColorState = themeColorState,
@@ -176,9 +191,7 @@ fun DetailsBottomSheet(
                     closeSheet()
                     mergeActions.remove(mergeType)
                 },
-                cancelClick = {
-                    closeSheet()
-                },
+                cancelClick = { closeSheet() },
                 search = mergeActions.search,
                 mergeMangaClick = { mergeManga ->
                     closeSheet()
@@ -187,7 +200,6 @@ fun DetailsBottomSheet(
                 validMergeTypes = generalState.value.validMergeTypes,
             )
         }
-
         is DetailsBottomSheetScreen.ArtworkSheet -> {
             ArtworkSheet(
                 themeColorState = themeColorState,
@@ -205,7 +217,6 @@ fun DetailsBottomSheet(
                 },
             )
         }
-
         is DetailsBottomSheetScreen.FilterChapterSheet -> {
             FilterChapterSheet(
                 themeColorState = themeColorState,

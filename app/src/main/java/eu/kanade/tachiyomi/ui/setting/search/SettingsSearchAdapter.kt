@@ -18,9 +18,7 @@ class SettingsSearchAdapter(val controller: SettingsSearchController) :
 
     val titleClickListener: OnTitleClickListener = controller
 
-    /**
-     * Bundle where the view state of the holders is saved.
-     */
+    /** Bundle where the view state of the holders is saved. */
     private var bundle = Bundle()
 
     override fun onBindViewHolder(

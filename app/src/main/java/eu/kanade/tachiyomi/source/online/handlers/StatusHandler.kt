@@ -22,23 +22,24 @@ import uy.kohesive.injekt.injectLazy
 
 class StatusHandler {
     val preferences: PreferencesHelper by injectLazy()
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
+    private val authService: MangaDexAuthorizedUserService by lazy {
+        Injekt.get<NetworkServices>().authService
+    }
 
     suspend fun fetchReadingStatusForAllManga(): Map<String, String?> {
         return withContext(Dispatchers.IO) {
-            return@withContext authService.readingStatusAllManga()
+            return@withContext authService
+                .readingStatusAllManga()
                 .getOrResultError("getting reading status")
                 .mapBoth(
-                    success = {
-                        it.statuses
-                    },
+                    success = { it.statuses },
                     failure = { emptyMap() },
                 )
         }
     }
 
     /**
-     * Mark a list of chapters as read or unread for a manga on MangaDex.  Defaults to marking read
+     * Mark a list of chapters as read or unread for a manga on MangaDex. Defaults to marking read
      */
     suspend fun marksChaptersStatus(
         mangaId: String,
@@ -46,27 +47,30 @@ class StatusHandler {
         read: Boolean = true,
     ) {
         withIOContext {
-            val dto = when (read) {
-                true -> MarkStatusDto(chapterIdsRead = chapterIds)
-                false -> MarkStatusDto(chapterIdsUnread = chapterIds)
-            }
+            val dto =
+                when (read) {
+                    true -> MarkStatusDto(chapterIdsRead = chapterIds)
+                    false -> MarkStatusDto(chapterIdsUnread = chapterIds)
+                }
             authService.markStatusForMultipleChapters(mangaId, dto).onFailure {
                 this.log("trying to mark chapters read=$read")
             }
         }
     }
 
-    suspend fun getReadChapterIds(mangaId: String) = flow<Set<String>> {
-        if (mangaId.isDigitsOnly()) {
-            emit(emptySet())
-        } else {
-            val response = authService.readChaptersForManga(mangaId)
-            response.suspendOnFailure {
-                this.log("trying to get chapterIds")
-                emit(emptySet())
-            }.suspendOnSuccess {
-                emit(this.data.data.toSet())
+    suspend fun getReadChapterIds(mangaId: String) =
+        flow<Set<String>> {
+                if (mangaId.isDigitsOnly()) {
+                    emit(emptySet())
+                } else {
+                    val response = authService.readChaptersForManga(mangaId)
+                    response
+                        .suspendOnFailure {
+                            this.log("trying to get chapterIds")
+                            emit(emptySet())
+                        }
+                        .suspendOnSuccess { emit(this.data.data.toSet()) }
+                }
             }
-        }
-    }.flowOn(Dispatchers.IO)
+            .flowOn(Dispatchers.IO)
 }

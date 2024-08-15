@@ -8,29 +8,22 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.zip.ZipFile
 
-/**
- * Loader used to load a chapter from a .zip or .cbz file.
- */
+/** Loader used to load a chapter from a .zip or .cbz file. */
 class ZipPageLoader(file: File) : PageLoader() {
 
-    /**
-     * The zip file to load pages from.
-     */
+    /** The zip file to load pages from. */
     private val zip = ZipFile(file, StandardCharsets.ISO_8859_1)
 
-    /**
-     * Recycles this loader and the open zip.
-     */
+    /** Recycles this loader and the open zip. */
     override fun recycle() {
         super.recycle()
         zip.close()
     }
 
-    /**
-     * Returns the pages found on this zip archive ordered with a natural comparator.
-     */
+    /** Returns the pages found on this zip archive ordered with a natural comparator. */
     override suspend fun getPages(): List<ReaderPage> {
-        return zip.entries().asSequence()
+        return zip.entries()
+            .asSequence()
             .filter { !it.isDirectory && ImageUtil.isImage(it.name) { zip.getInputStream(it) } }
             .sortedWith { f1, f2 -> f1.name.compareToCaseInsensitiveNaturalOrder(f2.name) }
             .mapIndexed { i, entry ->
@@ -42,9 +35,7 @@ class ZipPageLoader(file: File) : PageLoader() {
             .toList()
     }
 
-    /**
-     * No additional action required to load the page
-     */
+    /** No additional action required to load the page */
     override suspend fun loadPage(page: ReaderPage) {
         check(!isRecycled)
     }

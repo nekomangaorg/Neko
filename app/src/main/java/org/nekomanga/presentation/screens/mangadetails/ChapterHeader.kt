@@ -20,51 +20,53 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
-/**
- * Header that is shown above chapter list
- */
+/** Header that is shown above chapter list */
 @Composable
-fun ChapterHeader(themeColor: ThemeColorState, numberOfChaptersProvider: () -> Int, filterTextProvider: () -> String, onClick: () -> Unit = {}) {
+fun ChapterHeader(
+    themeColor: ThemeColorState,
+    numberOfChaptersProvider: () -> Int,
+    filterTextProvider: () -> String,
+    onClick: () -> Unit = {}
+) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 12.dp),
+        modifier =
+            Modifier.fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = Size.small, vertical = 12.dp),
     ) {
         ChapterText(
             numberOfChaptersProvider(),
-            modifier = Modifier
-                .align(Alignment.CenterStart),
+            modifier = Modifier.align(Alignment.CenterStart),
         )
 
         Row(
-            modifier = Modifier
-                .align(Alignment.CenterEnd),
-
+            modifier = Modifier.align(Alignment.CenterEnd),
             horizontalArrangement = Arrangement.End,
         ) {
             if (filterTextProvider().isNotBlank()) {
                 Text(
                     text = filterTextProvider(),
                     style =
-                    MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)),
-                    modifier = Modifier
-                        .requiredWidthIn(Size.none, 200.dp)
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 8.dp),
+                        MaterialTheme.typography.bodyMedium.copy(
+                            color =
+                                MaterialTheme.colorScheme.onSurface.copy(
+                                    alpha = NekoColors.disabledAlphaHighContrast)),
+                    modifier =
+                        Modifier.requiredWidthIn(Size.none, 200.dp)
+                            .align(Alignment.CenterVertically)
+                            .padding(end = Size.small),
                     textAlign = TextAlign.End,
                 )
             }
 
             FilterIcon(
                 themeColor.buttonColor,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically),
+                modifier = Modifier.align(Alignment.CenterVertically),
             )
         }
     }
@@ -75,7 +77,9 @@ private fun ChapterText(numberOfChapters: Int, modifier: Modifier = Modifier) {
     val resources = LocalContext.current.resources
 
     Text(
-        text = resources.getQuantityString(R.plurals.chapters_plural, numberOfChapters, numberOfChapters),
+        text =
+            resources.getQuantityString(
+                R.plurals.chapters_plural, numberOfChapters, numberOfChapters),
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast),
         modifier = modifier,
@@ -86,8 +90,7 @@ private fun ChapterText(numberOfChapters: Int, modifier: Modifier = Modifier) {
 private fun FilterIcon(buttonColor: Color, modifier: Modifier = Modifier) {
     Icon(
         imageVector = Icons.Filled.FilterList,
-        modifier = modifier
-            .size(28.dp),
+        modifier = modifier.size(28.dp),
         tint = buttonColor,
         contentDescription = null,
     )

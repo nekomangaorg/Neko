@@ -53,14 +53,14 @@ class ListHandler {
             }
             val coverQuality = preferencesHelper.thumbnailQuality().get()
 
-            val queryParameters =
+                        val queryParameters =
                 ProxyRetrofitQueryMap(
-                    mutableMapOf(
+                            mutableMapOf(
                         MdConstants.SearchParameters.contentRatingParam to contentRatings,
                         MdConstants.SearchParameters.offset to MdUtil.getMangaListOffset(page),
                         MdConstants.SearchParameters.limit to MdConstants.Limits.manga,
                     ),
-                )
+                            )
 
 
             currentService.viewCustomListInfo(listUUID)
@@ -70,12 +70,12 @@ class ListHandler {
 
                     currentService.viewCustomListManga(listUUID, queryParameters)
                         .getOrResultError("Error getting list manga")
-                        .andThen { mangaListDto ->
+                            .andThen { mangaListDto ->
                             when (mangaListDto.data.isEmpty()) {
                                 true -> Ok(ListResults(DisplayScreenType.List(listName, listUUID), persistentListOf(), false))
                                 false -> {
-                                    Ok(
-                                        ListResults(
+                                Ok(
+                                    ListResults(
                                             displayScreenType = DisplayScreenType.List(listName, listUUID),
                                             sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) }.toImmutableList(),
                                             hasNextPage = mangaListDto.limit + mangaListDto.offset < mangaListDto.total,
@@ -151,15 +151,15 @@ class ListHandler {
                                     uuid = customListDataDto.id,
                                 )
                             }.toPersistentList(),
-                        ),
-                    )
+                                    ),
+                                )
+                            }
+                    }
                 }
-            }
-    }
 
     suspend fun addToCustomList(mangaId: String, listUUID: String): ResultDto {
         return networkServices.authService.addToCustomList(mangaId, listUUID).getOrThrow()
-    }
+            }
 
     suspend fun removeFromCustomList(mangaId: String, listUUID: String): ResultDto {
         return networkServices.authService.removeFromCustomList(mangaId, listUUID).getOrThrow()

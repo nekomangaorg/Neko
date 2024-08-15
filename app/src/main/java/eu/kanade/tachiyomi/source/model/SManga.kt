@@ -112,7 +112,6 @@ interface SManga : Serializable {
             other_urls = other.other_urls
         }
 
-
         if (other.last_chapter_number != null) {
             last_chapter_number = other.last_chapter_number
         }

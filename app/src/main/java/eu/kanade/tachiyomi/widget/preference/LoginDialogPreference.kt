@@ -8,13 +8,13 @@ import androidx.core.view.isVisible
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import org.nekomanga.databinding.PrefAccountLoginBinding
 import rx.Subscription
 import uy.kohesive.injekt.injectLazy
 
@@ -22,8 +22,7 @@ abstract class LoginDialogPreference(
     @StringRes private val usernameLabelRes: Int? = null,
     bundle: Bundle? = null,
     val showUrl: Boolean = false,
-) :
-    DialogController(bundle) {
+) : DialogController(bundle) {
 
     var v: View? = null
         private set
@@ -39,30 +38,27 @@ abstract class LoginDialogPreference(
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         binding = PrefAccountLoginBinding.inflate(activity!!.layoutInflater)
-        val dialog = activity!!.materialAlertDialog().apply {
-            setView(binding.root)
-        }
+        val dialog = activity!!.materialAlertDialog().apply { setView(binding.root) }
         onViewCreated(binding.root)
 
         return dialog.create()
     }
 
     fun onViewCreated(view: View) {
-        v = view.apply {
-            if (usernameLabelRes != null) {
-                binding.usernameInput.hint = view.context.getString(usernameLabelRes)
-            }
+        v =
+            view.apply {
+                if (usernameLabelRes != null) {
+                    binding.usernameInput.hint = view.context.getString(usernameLabelRes)
+                }
 
-            binding.login.setOnClickListener {
-                checkLogin()
-            }
+                binding.login.setOnClickListener { checkLogin() }
 
-            if (showUrl) {
-                binding.urlHolder.isVisible = true
-            }
+                if (showUrl) {
+                    binding.urlHolder.isVisible = true
+                }
 
-            setCredentialsOnView(this)
-        }
+                setCredentialsOnView(this)
+            }
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {

@@ -21,10 +21,10 @@ import org.nekomanga.domain.network.ResultError
 import tachiyomi.core.util.system.getResourceColor
 
 /**
- * Replaces the given string to have at most [count] characters using [replacement] at its end.
- * If [replacement] is longer than [count] an exception will be thrown when `length > count`.
+ * Replaces the given string to have at most [count] characters using [replacement] at its end. If
+ * [replacement] is longer than [count] an exception will be thrown when `length > count`.
  */
-fun String.chop(count: Int, replacement: String = "…"): String {
+fun String.chop(count: Int, replacement: String = "⋅"): String {
     return if (length > count) {
         take(count - replacement.length) + replacement
     } else {
@@ -65,21 +65,16 @@ val String.sqLite: String
     get() = replace("'", "''")
 
 fun String.capitalizeWords(): String {
-    val firstReplace = split(" ").joinToString(" ") {
-        it.replaceFirstChar { text ->
-            text.titlecase(Locale.getDefault())
+    val firstReplace =
+        split(" ").joinToString(" ") {
+            it.replaceFirstChar { text -> text.titlecase(Locale.getDefault()) }
         }
-    }
     return firstReplace.split("-").joinToString("-") {
-        it.replaceFirstChar { text ->
-            text.titlecase(Locale.getDefault())
-        }
+        it.replaceFirstChar { text -> text.titlecase(Locale.getDefault()) }
     }
 }
 
-/**
- * Case-insensitive natural comparator for strings.
- */
+/** Case-insensitive natural comparator for strings. */
 fun String.compareToCaseInsensitiveNaturalOrder(other: String): Int {
     return String.CASE_INSENSITIVE_ORDER.then(naturalOrder()).compare(this, other)
 }
@@ -175,9 +170,7 @@ fun String.addBetaTag(context: Context, @AttrRes color: Int): Spanned {
 private val uuidFormatLines = arrayOf(8, 13, 18, 23)
 private val uuidFormatDigits = arrayOf((0..7), (9..12), (14..17), (19..22), (24..35))
 
-/**
- * Check if a string is in UUID format.
- */
+/** Check if a string is in UUID format. */
 fun String.isUUID() =
     this.length == 36 &&
         uuidFormatLines.all { idx -> this[idx] == '-' } &&
@@ -187,9 +180,7 @@ fun String.isUUID() =
             }
         }
 
-/**
- * HTML-decode the string
- */
+/** HTML-decode the string */
 fun String.htmlDecode(): String {
     return this.parseAsHtml().toString()
 }

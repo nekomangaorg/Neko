@@ -12,10 +12,10 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.textview.MaterialTextView
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.BaseToolbar
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.R
 
 class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseToolbar(context, attrs) {
@@ -65,12 +65,13 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
         }
 
     init {
-        val a = context.obtainStyledAttributes(
-            attrs,
-            R.styleable.Toolbar,
-            0,
-            defStyleRes,
-        )
+        val a =
+            context.obtainStyledAttributes(
+                attrs,
+                R.styleable.Toolbar,
+                0,
+                defStyleRes,
+            )
         subtitleTextAppearance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0)
         a.recycle()
     }
@@ -89,9 +90,10 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
         cardIncogImage = findViewById(R.id.card_incog_image)
 
         setNavigationIconTint(actionColorAlpha)
-        collapseIcon = context.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
-            setTint(actionColorAlpha)
-        }
+        collapseIcon =
+            context.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
+                setTint(actionColorAlpha)
+            }
         inflateMenu(R.menu.search)
     }
 
@@ -115,8 +117,6 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun setCustomTitle(title: CharSequence?) {
         super.setCustomTitle(title)
-        toolbarTitle.updateLayoutParams<LinearLayout.LayoutParams> {
-            gravity = Gravity.START
-        }
+        toolbarTitle.updateLayoutParams<LinearLayout.LayoutParams> { gravity = Gravity.START }
     }
 }

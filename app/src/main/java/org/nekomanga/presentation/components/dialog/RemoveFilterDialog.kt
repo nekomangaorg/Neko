@@ -15,14 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 */
-/**
- * Simple Dialog to save a filter
- */
+/** Simple Dialog to save a filter */
 /*
 
 @Composable

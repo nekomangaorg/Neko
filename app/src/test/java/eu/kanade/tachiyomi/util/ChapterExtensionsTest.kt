@@ -15,27 +15,28 @@ class ChapterExtensionsTest {
 
     private fun createChp(chapNum: Float, chapName: String): ChapterItem {
         return ChapterItem(
-            chapter = SimpleChapter(
-                id = 0,
-                mangaId = 0,
-                read = false,
-                bookmark = false,
-                lastPageRead = 0,
-                dateFetch = 0,
-                sourceOrder = 1,
-                url = "",
-                name = chapName,
-                dateUpload = 0,
-                chapterNumber = chapNum,
-                pagesLeft = 0,
-                volume = "",
-                chapterText = "",
-                chapterTitle = "",
-                language = "",
-                mangaDexChapterId = "",
-                oldMangaDexChapterId = null,
-                scanlator = "",
-            ),
+            chapter =
+                SimpleChapter(
+                    id = 0,
+                    mangaId = 0,
+                    read = false,
+                    bookmark = false,
+                    lastPageRead = 0,
+                    dateFetch = 0,
+                    sourceOrder = 1,
+                    url = "",
+                    name = chapName,
+                    dateUpload = 0,
+                    chapterNumber = chapNum,
+                    pagesLeft = 0,
+                    volume = "",
+                    chapterText = "",
+                    chapterTitle = "",
+                    language = "",
+                    mangaDexChapterId = "",
+                    oldMangaDexChapterId = null,
+                    scanlator = "",
+                ),
         )
     }
 }

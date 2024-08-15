@@ -9,8 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Context(
-    @SerialName("session_token")
-    val sessionToken: String,
+    @SerialName("session_token") val sessionToken: String,
     val uid: Long,
 )
 
@@ -24,8 +23,7 @@ data class Image(
 @Serializable
 data class ListItem(
     val series: Series? = null,
-    @SerialName("list_id")
-    val listId: Int? = null,
+    @SerialName("list_id") val listId: Int? = null,
     val status: Status? = null,
     val priority: Int? = null,
 )
@@ -43,27 +41,21 @@ data class Rating(
 )
 
 fun Rating.copyTo(track: Track): Track {
-    return track.apply {
-        this.score = rating ?: 0f
-    }
+    return track.apply { this.score = rating ?: 0f }
 }
 
 @Serializable
 data class Record(
-    @SerialName("series_id")
-    val seriesId: Long? = null,
+    @SerialName("series_id") val seriesId: Long? = null,
     val title: String? = null,
     val url: String? = null,
     val description: String? = null,
     val image: Image? = null,
     val type: String? = null,
     val year: String? = null,
-    @SerialName("bayesian_rating")
-    val bayesianRating: Double? = null,
-    @SerialName("rating_votes")
-    val ratingVotes: Int? = null,
-    @SerialName("latest_chapter")
-    val latestChapter: Int? = null,
+    @SerialName("bayesian_rating") val bayesianRating: Double? = null,
+    @SerialName("rating_votes") val ratingVotes: Int? = null,
+    @SerialName("latest_chapter") val latestChapter: Int? = null,
 )
 
 fun Record.toTrackSearch(id: Int): TrackSearch {

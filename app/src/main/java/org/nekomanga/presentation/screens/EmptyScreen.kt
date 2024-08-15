@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.R
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import org.nekomanga.R
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 
 @Composable
@@ -66,8 +66,7 @@ fun EmptyScreen(
         } else if (iconicImage != null) {
             Image(
                 asset = iconicImage,
-                modifier = Modifier
-                    .size(iconSize),
+                modifier = Modifier.size(iconSize),
                 colorFilter = ColorFilter.tint(iconColor),
             )
         }
@@ -83,15 +82,11 @@ private fun EmptyScreen(
 ) {
     val iconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f)
     BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = contentPadding.calculateTopPadding()),
+        modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding()),
     ) {
         val top = maxHeight / 2
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .paddingFromBaseline(top = top),
+            modifier = Modifier.fillMaxSize().paddingFromBaseline(top = top),
             Arrangement.Top,
             Alignment.CenterHorizontally,
         ) {
@@ -102,9 +97,7 @@ private fun EmptyScreen(
                     text = message,
                     color = iconColor,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     textAlign = TextAlign.Center,
                 )
             }

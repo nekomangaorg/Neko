@@ -8,7 +8,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
 
@@ -18,11 +18,19 @@ class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
         return R.layout.source_progress_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any>) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
         holder.progressBar.visibility = View.GONE
         holder.progressMessage.visibility = View.GONE
 
@@ -41,7 +49,8 @@ class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
         return this === other
     }
 
-    class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : FlexibleViewHolder(view, adapter) {
+    class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
+        FlexibleViewHolder(view, adapter) {
 
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
         val progressMessage: TextView = view.findViewById(R.id.progress_message)

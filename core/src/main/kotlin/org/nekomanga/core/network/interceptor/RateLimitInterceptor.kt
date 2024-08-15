@@ -12,11 +12,11 @@ import org.isomorphism.util.TokenBuckets
  *
  * Examples:
  *
- * permits = 5,  period = 1, unit = seconds  =>  5 requests per second
- * permits = 10, period = 2, unit = minutes  =>  10 requests per 2 minutes
+ * permits = 5, period = 1, unit = seconds => 5 requests per second permits = 10, period = 2, unit =
+ * minutes => 10 requests per 2 minutes
  *
- * @param permits {Int}   Number of requests allowed within a period of units.
- * @param period {Long}   The limiting duration. Defaults to 1.
+ * @param permits {Int} Number of requests allowed within a period of units.
+ * @param period {Long} The limiting duration. Defaults to 1.
  * @param unit {TimeUnit} The unit of time for the period. Defaults to seconds.
  */
 fun OkHttpClient.Builder.rateLimit(
@@ -31,8 +31,11 @@ private class RateLimitInterceptor(
     unit: TimeUnit = TimeUnit.SECONDS,
 ) : Interceptor {
 
-    private val bucket = TokenBuckets.builder().withCapacity(permits)
-        .withFixedIntervalRefillStrategy(permits, period, unit).build()
+    private val bucket =
+        TokenBuckets.builder()
+            .withCapacity(permits)
+            .withFixedIntervalRefillStrategy(permits, period, unit)
+            .build()
 
     override fun intercept(chain: Interceptor.Chain): Response {
         if (chain.call().isCanceled()) {

@@ -56,7 +56,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.BrowseFilterImpl
 import eu.kanade.tachiyomi.source.online.utils.MdSort
 import eu.kanade.tachiyomi.util.lang.isUUID
@@ -67,6 +66,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.nekomanga.R
 import org.nekomanga.domain.filter.DexFilters
 import org.nekomanga.domain.filter.Filter
 import org.nekomanga.domain.filter.QueryType
@@ -80,8 +80,8 @@ import org.nekomanga.presentation.components.dialog.SaveFilterDialog
 import org.nekomanga.presentation.components.sheetHandle
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
-import org.nekomanga.presentation.theme.Size
 import org.nekomanga.presentation.theme.Shapes
+import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun FilterBrowseSheet(
@@ -99,7 +99,7 @@ fun FilterBrowseSheet(
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
-        val paddingModifier = Modifier.padding(horizontal = 8.dp)
+        val paddingModifier = Modifier.padding(horizontal = Size.small)
 
         var originalLanguageExpanded by remember { mutableStateOf(false) }
         var contentRatingExpanded by remember { mutableStateOf(false) }
@@ -111,15 +111,17 @@ fun FilterBrowseSheet(
 
         var showSaveFilterDialog by remember { mutableStateOf(false) }
 
-        val nameOfEnabledFilter by rememberSaveable(filters, savedFilters) {
-            mutableStateOf(
-                savedFilters.firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }?.name ?: "",
-            )
-        }
+        val nameOfEnabledFilter by
+            rememberSaveable(filters, savedFilters) {
+                mutableStateOf(
+                    savedFilters
+                        .firstOrNull { Json.decodeFromString<DexFilters>(it.dexFilters) == filters }
+                        ?.name ?: "",
+                )
+            }
 
-        val disabled by remember(filters.queryMode) {
-            mutableStateOf(filters.queryMode != QueryType.Title)
-        }
+        val disabled by
+            remember(filters.queryMode) { mutableStateOf(filters.queryMode != QueryType.Title) }
 
         LaunchedEffect(key1 = filters.queryMode) {
             if (filters.queryMode != QueryType.Title) {
@@ -134,43 +136,42 @@ fun FilterBrowseSheet(
         }
 
         if (showSaveFilterDialog) {
-            SaveFilterDialog(themeColorState = themeColorState, currentSavedFilters = savedFilters, onDismiss = { showSaveFilterDialog = false }, onConfirm = { saveClick(it) })
+            SaveFilterDialog(
+                themeColorState = themeColorState,
+                currentSavedFilters = savedFilters,
+                onDismiss = { showSaveFilterDialog = false },
+                onConfirm = { saveClick(it) })
         }
 
-        var queryText by remember {
-            mutableStateOf(filters.query.text)
-        }
+        var queryText by remember { mutableStateOf(filters.query.text) }
 
         ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(topEnd = Shapes.sheetRadius, topStart = Shapes.sheetRadius),
         ) {
             Column(
-                modifier = paddingModifier
-                    .verticalScroll(rememberScrollState())
-                    .weight(weight = 1f, fill = false),
+                modifier =
+                    paddingModifier
+                        .verticalScroll(rememberScrollState())
+                        .weight(weight = 1f, fill = false),
             ) {
                 sheetHandle()
                 Gap(16.dp)
-                val titleRes = when (filters.queryMode) {
-                    QueryType.Title -> {
-                        R.string.title
+                val titleRes =
+                    when (filters.queryMode) {
+                        QueryType.Title -> {
+                            R.string.title
+                        }
+                        QueryType.Author -> {
+                            R.string.author
+                        }
+                        QueryType.Group -> {
+                            R.string.scanlator_group
+                        }
+                        QueryType.List -> {
+                            R.string.list_id
+                        }
                     }
-
-                    QueryType.Author -> {
-                        R.string.author
-                    }
-
-                    QueryType.Group -> {
-                        R.string.scanlator_group
-                    }
-
-                    QueryType.List -> {
-                        R.string.list_id
-                    }
-                }
-
 
                 FlowRow(
                     Modifier.fillMaxWidth(),
@@ -210,13 +211,14 @@ fun FilterBrowseSheet(
                     )
                 }
 
-                val isError = remember(filters.query.text) {
-                    if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
-                        false
-                    } else {
-                        !filters.query.text.isUUID()
+                val isError =
+                    remember(filters.query.text) {
+                        if (filters.queryMode != QueryType.List || filters.query.text.isBlank()) {
+                            false
+                        } else {
+                            !filters.query.text.isUUID()
+                        }
                     }
-                }
 
                 SearchFooter(
                     themeColorState = themeColorState,
@@ -238,7 +240,9 @@ fun FilterBrowseSheet(
                     headerClicked = { originalLanguageExpanded = !originalLanguageExpanded },
                     headerRes = R.string.original_language,
                     anyEnabled = filters.originalLanguage.any { it.state },
-                    onClick = { originalLanguage -> filterChanged(originalLanguage.copy(state = !originalLanguage.state)) },
+                    onClick = { originalLanguage ->
+                        filterChanged(originalLanguage.copy(state = !originalLanguage.state))
+                    },
                     selected = { originalLanguage -> originalLanguage.state },
                     name = { originalLanguage -> originalLanguage.language.prettyPrint },
                 )
@@ -250,7 +254,11 @@ fun FilterBrowseSheet(
                         disabled = disabled,
                         headerClicked = { contentRatingExpanded = !contentRatingExpanded },
                         headerRes = R.string.content_rating,
-                        anyEnabled = filters.contentRatings.any { (it.rating.key in defaultContentRatings && !it.state) || it.rating.key !in defaultContentRatings && it.state },
+                        anyEnabled =
+                            filters.contentRatings.any {
+                                (it.rating.key in defaultContentRatings && !it.state) ||
+                                    it.rating.key !in defaultContentRatings && it.state
+                            },
                         onClick = { rating -> filterChanged(rating.copy(state = !rating.state)) },
                         selected = { rating -> rating.state },
                         nameRes = { rating -> rating.rating.nameRes },
@@ -261,7 +269,9 @@ fun FilterBrowseSheet(
                     items = filters.publicationDemographics.toImmutableList(),
                     expanded = publicationDemographicExpanded,
                     disabled = disabled,
-                    headerClicked = { publicationDemographicExpanded = !publicationDemographicExpanded },
+                    headerClicked = {
+                        publicationDemographicExpanded = !publicationDemographicExpanded
+                    },
                     headerRes = R.string.publication_demographic,
                     anyEnabled = filters.publicationDemographics.any { it.state },
                     onClick = { demo -> filterChanged(demo.copy(state = !demo.state)) },
@@ -311,14 +321,12 @@ fun FilterBrowseSheet(
                     themeColorState = themeColorState,
                     onHeaderClick = { otherExpanded = !otherExpanded },
                     filters = filters,
-                    anyEnabled = (
-                        filters.tagExclusionMode != Filter.TagExclusionMode() ||
+                    anyEnabled =
+                        (filters.tagExclusionMode != Filter.TagExclusionMode() ||
                             filters.tagInclusionMode != Filter.TagInclusionMode() ||
                             filters.hasAvailableChapters != Filter.HasAvailableChapters() ||
                             filters.authorId.uuid.isNotBlank() ||
-                            filters.groupId.uuid.isNotBlank()
-                        ),
-
+                            filters.groupId.uuid.isNotBlank()),
                     filterChanged = filterChanged,
                     filterClick = filterClick,
                 )
@@ -335,11 +343,10 @@ fun FilterBrowseSheet(
                 filterDefaultClick = filterDefaultClick,
             )
 
-            Gap(8.dp)
+            Gap(Size.small)
 
             Row(
-                modifier = paddingModifier
-                    .fillMaxWidth(),
+                modifier = paddingModifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(
@@ -348,37 +355,59 @@ fun FilterBrowseSheet(
                         resetClick()
                     },
                     shape = RoundedCornerShape(35),
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
-                    Icon(imageVector = Icons.Default.RestartAlt, contentDescription = null, tint = themeColorState.buttonColor)
+                    Icon(
+                        imageVector = Icons.Default.RestartAlt,
+                        contentDescription = null,
+                        tint = themeColorState.buttonColor)
                     Gap(Size.tiny)
-                    Text(text = stringResource(id = R.string.reset), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        text = stringResource(id = R.string.reset),
+                        style = MaterialTheme.typography.titleSmall)
                 }
 
-                AnimatedVisibility(nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
-                    TextButton(
-                        onClick = { showSaveFilterDialog = true },
-                        shape = RoundedCornerShape(35),
-                        colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
-                    ) {
-                        Icon(imageVector = Icons.Default.Save, contentDescription = null, tint = themeColorState.buttonColor)
-                        Gap(Size.tiny)
-                        Text(text = stringResource(id = R.string.save), style = MaterialTheme.typography.titleSmall)
+                AnimatedVisibility(
+                    nameOfEnabledFilter.isEmpty(), enter = fadeIn(), exit = fadeOut()) {
+                        TextButton(
+                            onClick = { showSaveFilterDialog = true },
+                            shape = RoundedCornerShape(35),
+                            colors =
+                                ButtonDefaults.textButtonColors(
+                                    contentColor = themeColorState.buttonColor),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Save,
+                                contentDescription = null,
+                                tint = themeColorState.buttonColor)
+                            Gap(Size.tiny)
+                            Text(
+                                text = stringResource(id = R.string.save),
+                                style = MaterialTheme.typography.titleSmall)
+                        }
                     }
-                }
 
                 ElevatedButton(
                     onClick = filterClick,
                     shape = RoundedCornerShape(35),
-                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor),
+                    colors =
+                        ButtonDefaults.elevatedButtonColors(
+                            containerColor = themeColorState.buttonColor),
                 ) {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.surface)
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.surface)
                     Gap(Size.tiny)
-                    Text(text = stringResource(id = R.string.filter), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                    Text(
+                        text = stringResource(id = R.string.filter),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.surface)
                 }
             }
 
-            Gap(bottomContentPadding + 8.dp)
+            Gap(bottomContentPadding + Size.small)
         }
     }
 }
@@ -398,14 +427,15 @@ private fun <T> FilterRow(
     name: ((T) -> String)? = null,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         ExpandableRow(
             isExpanded = expanded,
             disabled = disabled,
             onClick = headerClicked,
-            textColor = if (anyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            textColor =
+                if (anyEnabled) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface,
             rowText = stringResource(id = headerRes),
         )
 
@@ -415,18 +445,18 @@ private fun <T> FilterRow(
             exit = slideExit(),
         ) {
             FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Size.small),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
                 horizontalArrangement = Arrangement.spacedBy(Size.small, Alignment.Start),
             ) {
                 items.forEach { item ->
-                    val itemName = when {
-                        nameRes != null -> stringResource(id = nameRes(item))
-                        name != null -> name(item)
-                        else -> ""
-                    }
-                    FilterChipWrapper(selected = selected(item), onClick = { onClick(item) }, name = itemName)
+                    val itemName =
+                        when {
+                            nameRes != null -> stringResource(id = nameRes(item))
+                            name != null -> name(item)
+                            else -> ""
+                        }
+                    FilterChipWrapper(
+                        selected = selected(item), onClick = { onClick(item) }, name = itemName)
                 }
             }
         }
@@ -448,14 +478,15 @@ private fun <T> FilterTriStateRow(
     name: ((T) -> String)? = null,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         ExpandableRow(
             isExpanded = expanded,
             disabled = disabled,
             onClick = headerClicked,
-            textColor = if (anyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            textColor =
+                if (anyEnabled) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface,
             rowText = stringResource(id = headerRes),
         )
 
@@ -465,18 +496,20 @@ private fun <T> FilterTriStateRow(
             exit = slideExit(),
         ) {
             FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = Size.small),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),
                 horizontalArrangement = Arrangement.spacedBy(Size.small, Alignment.Start),
             ) {
                 items.forEach { item ->
-                    val itemName = when {
-                        nameRes != null -> stringResource(id = nameRes(item))
-                        name != null -> name(item)
-                        else -> ""
-                    }
-                    TriStateFilterChip(state = selected(item), toggleState = { state -> toggleState(state, item) }, name = itemName)
+                    val itemName =
+                        when {
+                            nameRes != null -> stringResource(id = nameRes(item))
+                            name != null -> name(item)
+                            else -> ""
+                        }
+                    TriStateFilterChip(
+                        state = selected(item),
+                        toggleState = { state -> toggleState(state, item) },
+                        name = itemName)
                 }
             }
         }
@@ -495,69 +528,94 @@ fun OtherRow(
     filterClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .imePadding()
-            .fillMaxWidth(),
+        modifier = Modifier.imePadding().fillMaxWidth(),
     ) {
         ExpandableRow(
             isExpanded = isExpanded,
             disabled = disabled,
             onClick = onHeaderClick,
-            textColor = if (anyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            textColor =
+                if (anyEnabled) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurface,
             rowText = stringResource(id = R.string.other),
         )
         AnimatedVisibility(visible = isExpanded, enter = slideEnter(), exit = slideExit()) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 CheckboxRow(
                     checkedState = filters.hasAvailableChapters.state,
-                    checkedChange = { newState -> filterChanged(filters.hasAvailableChapters.copy(state = newState)) },
-                    rowText = stringResource(
-                        id = R.string.has_available_chapters,
-                    ),
+                    checkedChange = { newState ->
+                        filterChanged(filters.hasAvailableChapters.copy(state = newState))
+                    },
+                    rowText =
+                        stringResource(
+                            id = R.string.has_available_chapters,
+                        ),
                 )
 
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = stringResource(id = R.string.tag_inclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        text = stringResource(id = R.string.tag_inclusion_mode),
+                        modifier = Modifier.padding(start = Size.small),
+                        style = MaterialTheme.typography.labelMedium)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = filters.tagInclusionMode.mode == TagMode.And,
-                            onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.And)) },
+                            onClick = {
+                                filterChanged(filters.tagInclusionMode.copy(mode = TagMode.And))
+                            },
                         )
-                        Text(text = stringResource(id = R.string.and), color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            text = stringResource(id = R.string.and),
+                            color = MaterialTheme.colorScheme.onSurface)
                         RadioButton(
                             selected = filters.tagInclusionMode.mode == TagMode.Or,
-                            onClick = { filterChanged(filters.tagInclusionMode.copy(mode = TagMode.Or)) },
+                            onClick = {
+                                filterChanged(filters.tagInclusionMode.copy(mode = TagMode.Or))
+                            },
                         )
-                        Text(text = stringResource(id = R.string.or), color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            text = stringResource(id = R.string.or),
+                            color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
 
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = stringResource(id = R.string.tag_exclusion_mode), modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        text = stringResource(id = R.string.tag_exclusion_mode),
+                        modifier = Modifier.padding(start = Size.small),
+                        style = MaterialTheme.typography.labelMedium)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
                             selected = filters.tagExclusionMode.mode == TagMode.And,
-                            onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.And)) },
+                            onClick = {
+                                filterChanged(filters.tagExclusionMode.copy(mode = TagMode.And))
+                            },
                         )
-                        Text(text = stringResource(id = R.string.and), color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            text = stringResource(id = R.string.and),
+                            color = MaterialTheme.colorScheme.onSurface)
                         RadioButton(
                             selected = filters.tagExclusionMode.mode == TagMode.Or,
-                            onClick = { filterChanged(filters.tagExclusionMode.copy(mode = TagMode.Or)) },
+                            onClick = {
+                                filterChanged(filters.tagExclusionMode.copy(mode = TagMode.Or))
+                            },
                         )
-                        Text(text = stringResource(id = R.string.or), color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            text = stringResource(id = R.string.or),
+                            color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
 
-                val groupIdError = remember(filters.groupId.uuid) {
-                    if (filters.groupId.uuid.isBlank()) {
-                        false
-                    } else {
-                        !filters.groupId.uuid.isUUID()
+                val groupIdError =
+                    remember(filters.groupId.uuid) {
+                        if (filters.groupId.uuid.isBlank()) {
+                            false
+                        } else {
+                            !filters.groupId.uuid.isUUID()
+                        }
                     }
-                }
                 SearchFooter(
                     themeColorState = themeColorState,
                     labelText = stringResource(id = R.string.scanlator_group_id),
@@ -569,13 +627,14 @@ fun OtherRow(
                 )
                 Gap(Size.tiny)
 
-                val isError = remember(filters.authorId.uuid) {
-                    if (filters.authorId.uuid.isBlank()) {
-                        false
-                    } else {
-                        !filters.authorId.uuid.isUUID()
+                val isError =
+                    remember(filters.authorId.uuid) {
+                        if (filters.authorId.uuid.isBlank()) {
+                            false
+                        } else {
+                            !filters.authorId.uuid.isUUID()
+                        }
                     }
-                }
                 SearchFooter(
                     themeColorState = themeColorState,
                     labelText = stringResource(id = R.string.author_id),
@@ -585,7 +644,7 @@ fun OtherRow(
                     textChanged = { text: String -> filterChanged(Filter.AuthorId(text)) },
                     search = { filterClick() },
                 )
-                Gap(8.dp)
+                Gap(Size.tiny)
             }
         }
     }
@@ -602,20 +661,23 @@ fun SavedFilters(
 ) {
     AnimatedVisibility(visible = visible, enter = slideEnter(), exit = slideExit()) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            val sortedFilters by remember(nameOfEnabledFilter) {
-                val enabledFilterIndex = savedFilters.indexOfFirst { nameOfEnabledFilter.equals(it.name, true) }
-                if (enabledFilterIndex == -1) {
-                    mutableStateOf(savedFilters)
-                } else {
-                    val mutableFilters = savedFilters.toMutableList()
-                    val enabledFilter = mutableFilters.removeAt(enabledFilterIndex)
-                    mutableStateOf(persistentListOf(enabledFilter) + mutableFilters.toImmutableList())
+            val sortedFilters by
+                remember(nameOfEnabledFilter) {
+                    val enabledFilterIndex =
+                        savedFilters.indexOfFirst { nameOfEnabledFilter.equals(it.name, true) }
+                    if (enabledFilterIndex == -1) {
+                        mutableStateOf(savedFilters)
+                    } else {
+                        val mutableFilters = savedFilters.toMutableList()
+                        val enabledFilter = mutableFilters.removeAt(enabledFilterIndex)
+                        mutableStateOf(
+                            persistentListOf(enabledFilter) + mutableFilters.toImmutableList())
+                    }
                 }
-            }
             val listState: LazyListState = rememberLazyListState()
             val scope = rememberCoroutineScope()
             LazyRow(verticalAlignment = Alignment.CenterVertically, state = listState) {
-                item { Gap(8.dp) }
+                item { Gap(Size.tiny) }
 
                 items(sortedFilters) { filter ->
                     val isEnabled = nameOfEnabledFilter.equals(filter.name, true)
@@ -628,16 +690,34 @@ fun SavedFilters(
                         },
                         name = filter.name,
                     )
-                    // AnimatedVisibility(visible = isEnabled, enter = slideInHorizontally() + fadeIn(), exit = slideOutHorizontally() + fadeOut()) {
+                    // AnimatedVisibility(visible = isEnabled, enter = slideInHorizontally() +
+                    // fadeIn(), exit = slideOutHorizontally() + fadeOut()) {
                     if (isEnabled) {
                         Row(modifier = Modifier.animateItemPlacement()) {
-                            ToolTipButton(toolTipLabel = stringResource(id = R.string.delete_filter), icon = Icons.Outlined.Delete, buttonClicked = { deleteFilterClick(nameOfEnabledFilter) })
-                            val isDefault = savedFilters.firstOrNull { nameOfEnabledFilter.equals(it.name, true) }?.default ?: false
-                            val (textRes, makeDefault, icon) = when (isDefault) {
-                                true -> Triple(R.string.remove_default, false, Icons.Default.HeartBroken)
-                                false -> Triple(R.string.make_default, true, Icons.Default.Favorite)
-                            }
-                            ToolTipButton(toolTipLabel = stringResource(textRes), icon = icon, buttonClicked = { filterDefaultClick(nameOfEnabledFilter, makeDefault) })
+                            ToolTipButton(
+                                toolTipLabel = stringResource(id = R.string.delete_filter),
+                                icon = Icons.Outlined.Delete,
+                                buttonClicked = { deleteFilterClick(nameOfEnabledFilter) })
+                            val isDefault =
+                                savedFilters
+                                    .firstOrNull { nameOfEnabledFilter.equals(it.name, true) }
+                                    ?.default ?: false
+                            val (textRes, makeDefault, icon) =
+                                when (isDefault) {
+                                    true ->
+                                        Triple(
+                                            R.string.remove_default,
+                                            false,
+                                            Icons.Default.HeartBroken)
+                                    false ->
+                                        Triple(R.string.make_default, true, Icons.Default.Favorite)
+                                }
+                            ToolTipButton(
+                                toolTipLabel = stringResource(textRes),
+                                icon = icon,
+                                buttonClicked = {
+                                    filterDefaultClick(nameOfEnabledFilter, makeDefault)
+                                })
                         }
                     }
                     Gap(Size.tiny)
@@ -649,13 +729,17 @@ fun SavedFilters(
 }
 
 private fun slideEnter(): EnterTransition {
-    return slideInVertically() + expandVertically(
-        // Expand from the top.
-        clip = true,
-        expandFrom = Alignment.Top,
-    ) + fadeIn()
+    return slideInVertically() +
+        expandVertically(
+            // Expand from the top.
+            clip = true,
+            expandFrom = Alignment.Top,
+        ) +
+        fadeIn()
 }
 
 private fun slideExit(): ExitTransition {
-    return slideOutVertically { it / 3 } + shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
+    return slideOutVertically { it / 3 } +
+        shrinkVertically(shrinkTowards = Alignment.Top) +
+        fadeOut()
 }

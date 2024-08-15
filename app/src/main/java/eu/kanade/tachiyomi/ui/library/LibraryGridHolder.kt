@@ -13,10 +13,8 @@ import androidx.core.view.updateLayoutParams
 import coil.dispose
 import coil.size.Precision
 import coil.size.Scale
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadManga
-import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
 import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -24,10 +22,12 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.setCards
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import org.nekomanga.R
+import org.nekomanga.databinding.MangaGridItemBinding
 
 /**
- * Class used to hold the displayed data of a manga in the library, like the cover or the title.
- * All the elements from the layout file "item_catalogue_grid" are available in this class.
+ * Class used to hold the displayed data of a manga in the library, like the cover or the title. All
+ * the elements from the layout file "item_catalogue_grid" are available in this class.
  *
  * @param view the inflated view for this holder.
  * @param adapter the adapter handling this holder.
@@ -72,26 +72,31 @@ class LibraryGridHolder(
         binding.title.text = item.manga.title.highlightText(item.filter, color)
         binding.behindTitle.text = item.manga.title
         val mangaColor = MangaCoverMetadata.getColors(item.manga.id!!)
-        binding.coverConstraint.backgroundColor = mangaColor?.first ?: itemView.context.getResourceColor(R.attr.background)
+        binding.coverConstraint.backgroundColor =
+            mangaColor?.first ?: itemView.context.getResourceColor(R.attr.background)
         binding.behindTitle.setTextColor(
             mangaColor?.second ?: itemView.context.getResourceColor(R.attr.colorOnBackground),
         )
-        val authorArtist = if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
-            item.manga.author?.trim() ?: ""
-        } else {
-            listOfNotNull(
-                item.manga.author?.trim()?.takeIf { it.isNotBlank() },
-                item.manga.artist?.trim()?.takeIf { it.isNotBlank() },
-            ).joinToString(", ")
-        }
+        val authorArtist =
+            if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
+                item.manga.author?.trim() ?: ""
+            } else {
+                listOfNotNull(
+                        item.manga.author?.trim()?.takeIf { it.isNotBlank() },
+                        item.manga.artist?.trim()?.takeIf { it.isNotBlank() },
+                    )
+                    .joinToString(", ")
+            }
         binding.subtitle.text = authorArtist.highlightText(item.filter, color)
 
-        binding.compactTitle.text = binding.title.text?.toString()?.highlightText(item.filter, color)
+        binding.compactTitle.text =
+            binding.title.text?.toString()?.highlightText(item.filter, color)
 
         binding.title.post {
             val hasAuthorInFilter =
                 item.filter.isNotBlank() && authorArtist.contains(item.filter, true)
-            binding.subtitle.isVisible = (binding.title.lineCount <= 1 || hasAuthorInFilter) && authorArtist.isNotBlank()
+            binding.subtitle.isVisible =
+                (binding.title.lineCount <= 1 || hasAuthorInFilter) && authorArtist.isNotBlank()
             binding.title.maxLines = if (hasAuthorInFilter) 1 else 2
         }
 
@@ -111,11 +116,12 @@ class LibraryGridHolder(
 
     fun setSelected(isSelected: Boolean) {
         with(binding) {
-            card.strokeWidth = when {
-                isSelected -> 3.dpToPx
-                adapter.showOutline -> 1.dpToPx
-                else -> 0
-            }
+            card.strokeWidth =
+                when {
+                    isSelected -> 3.dpToPx
+                    adapter.showOutline -> 1.dpToPx
+                    else -> 0
+                }
             arrayOf(card, unreadDownloadBadge.root, title, subtitle).forEach {
                 it.isSelected = isSelected
             }
@@ -125,7 +131,8 @@ class LibraryGridHolder(
     private fun setCover(manga: Manga) {
         if ((adapter.recyclerView.context as? Activity)?.isDestroyed == true) return
         binding.coverThumbnail.loadManga(manga) {
-            val hasRatio = binding.coverThumbnail.layoutParams.height != ViewGroup.LayoutParams.WRAP_CONTENT
+            val hasRatio =
+                binding.coverThumbnail.layoutParams.height != ViewGroup.LayoutParams.WRAP_CONTENT
             if (!fixedSize && !hasRatio) {
                 precision(Precision.INEXACT)
                 scale(Scale.FIT)
@@ -174,8 +181,7 @@ fun MangaGridItemBinding.setFreeformCoverRatio(manga: Manga?, parent: AutofitRec
     } else {
         val coverHeight = (itemWidth / 3f * 4f).toInt()
         constraintLayout.minHeight = coverHeight / 2
-        coverThumbnail.minimumHeight =
-            (itemWidth / 3f * 3.6f).toInt()
+        coverThumbnail.minimumHeight = (itemWidth / 3f * 3.6f).toInt()
         coverThumbnail.maxHeight = (itemWidth / 3f * 6f).toInt()
         coverThumbnail.adjustViewBounds = true
     }

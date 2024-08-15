@@ -25,49 +25,64 @@ object MangaCoverMetadata {
 
     fun load() {
         val ratios = mangaDetailsPreferences.coverRatios().get()
-        coverRatioMap = ConcurrentHashMap(
-            ratios.mapNotNull {
-                val splits = it.split("|")
-                val id = splits.firstOrNull()?.toLongOrNull()
-                val ratio = splits.lastOrNull()?.toFloatOrNull()
-                if (id != null && ratio != null) {
-                    id to ratio
-                } else {
-                    null
-                }
-            }.toMap(),
-        )
+        coverRatioMap =
+            ConcurrentHashMap(
+                ratios
+                    .mapNotNull {
+                        val splits = it.split("|")
+                        val id = splits.firstOrNull()?.toLongOrNull()
+                        val ratio = splits.lastOrNull()?.toFloatOrNull()
+                        if (id != null && ratio != null) {
+                            id to ratio
+                        } else {
+                            null
+                        }
+                    }
+                    .toMap(),
+            )
         val colors = mangaDetailsPreferences.coverColors().get()
-        coverColorMap = ConcurrentHashMap(
-            colors.mapNotNull {
-                val splits = it.split("|")
-                val id = splits.firstOrNull()?.toLongOrNull()
-                val color = splits.getOrNull(1)?.toIntOrNull()
-                val textColor = splits.getOrNull(2)?.toIntOrNull()
-                if (id != null && color != null) {
-                    id to (color to (textColor ?: 0))
-                } else {
-                    null
-                }
-            }.toMap(),
-        )
+        coverColorMap =
+            ConcurrentHashMap(
+                colors
+                    .mapNotNull {
+                        val splits = it.split("|")
+                        val id = splits.firstOrNull()?.toLongOrNull()
+                        val color = splits.getOrNull(1)?.toIntOrNull()
+                        val textColor = splits.getOrNull(2)?.toIntOrNull()
+                        if (id != null && color != null) {
+                            id to (color to (textColor ?: 0))
+                        } else {
+                            null
+                        }
+                    }
+                    .toMap(),
+            )
 
         val vibrantColors = mangaDetailsPreferences.coverVibrantColors().get()
-        coverVibrantColorMap = ConcurrentHashMap(
-            vibrantColors.mapNotNull {
-                val splits = it.split("|")
-                val id = splits.firstOrNull()?.toLongOrNull()
-                val color = splits.lastOrNull()?.toIntOrNull()
-                if (id != null && color != null) {
-                    id to color
-                } else {
-                    null
-                }
-            }.toMap(),
-        )
+        coverVibrantColorMap =
+            ConcurrentHashMap(
+                vibrantColors
+                    .mapNotNull {
+                        val splits = it.split("|")
+                        val id = splits.firstOrNull()?.toLongOrNull()
+                        val color = splits.lastOrNull()?.toIntOrNull()
+                        if (id != null && color != null) {
+                            id to color
+                        } else {
+                            null
+                        }
+                    }
+                    .toMap(),
+            )
     }
 
-    fun setRatioAndColors(mangaId: Long, originalThumbnailUrl: String?, inLibrary: Boolean, ogFile: File? = null, force: Boolean = false) {
+    fun setRatioAndColors(
+        mangaId: Long,
+        originalThumbnailUrl: String?,
+        inLibrary: Boolean,
+        ogFile: File? = null,
+        force: Boolean = false
+    ) {
         if (!inLibrary) {
             remove(mangaId)
         }
@@ -77,14 +92,18 @@ object MangaCoverMetadata {
 
         if (vibrantColor != null && !inLibrary) return
 
-        val file = ogFile ?: coverCache.getCustomCoverFile(mangaId).takeIf { it.exists() } ?: coverCache.getCoverFile(originalThumbnailUrl, inLibrary)
+        val file =
+            ogFile
+                ?: coverCache.getCustomCoverFile(mangaId).takeIf { it.exists() }
+                ?: coverCache.getCoverFile(originalThumbnailUrl, inLibrary)
         // if the file exists and the there was still an error then the file is corrupted
         if (file.exists()) {
             val options = BitmapFactory.Options()
-            val hasVibrantColor = when (inLibrary) {
-                true -> vibrantColor != null
-                false -> true
-            }
+            val hasVibrantColor =
+                when (inLibrary) {
+                    true -> vibrantColor != null
+                    false -> true
+                }
 
             if (dominantColors != null && hasVibrantColor && !force) {
                 options.inJustDecodeBounds = true
@@ -154,8 +173,12 @@ object MangaCoverMetadata {
         val mapCopy = coverRatioMap.toMap()
         mangaDetailsPreferences.coverRatios().set(mapCopy.map { "${it.key}|${it.value}" }.toSet())
         val mapColorCopy = coverColorMap.toMap()
-        mangaDetailsPreferences.coverColors().set(mapColorCopy.map { "${it.key}|${it.value.first}|${it.value.second}" }.toSet())
+        mangaDetailsPreferences
+            .coverColors()
+            .set(mapColorCopy.map { "${it.key}|${it.value.first}|${it.value.second}" }.toSet())
         val vibrantColorCopy = coverVibrantColorMap.toMap()
-        mangaDetailsPreferences.coverVibrantColors().set(vibrantColorCopy.map { "${it.key}|${it.value}" }.toSet())
+        mangaDetailsPreferences
+            .coverVibrantColors()
+            .set(vibrantColorCopy.map { "${it.key}|${it.value}" }.toSet())
     }
 }

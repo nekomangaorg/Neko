@@ -6,9 +6,7 @@ import org.nekomanga.logging.TimberKt
 
 object DeviceUtil {
 
-    val isMiui by lazy {
-        getSystemProperty("ro.miui.ui.version.name")?.isNotEmpty() ?: false
-    }
+    val isMiui by lazy { getSystemProperty("ro.miui.ui.version.name")?.isNotEmpty() ?: false }
 
     /**
      * Extracts the MIUI major version code from a string like "V12.5.3.0.QFGMIXM".
@@ -18,10 +16,7 @@ object DeviceUtil {
     val miuiMajorVersion by lazy {
         if (!isMiui) return@lazy null
 
-        Build.VERSION.INCREMENTAL
-            .substringBefore('.')
-            .trimStart('V')
-            .toIntOrNull()
+        Build.VERSION.INCREMENTAL.substringBefore('.').trimStart('V').toIntOrNull()
     }
 
     @SuppressLint("PrivateApi")
@@ -32,17 +27,14 @@ object DeviceUtil {
         }
 
         return try {
-            Class.forName("android.miui.AppOpsUtils")
-                .getDeclaredMethod("isXOptMode")
-                .invoke(null) as Boolean
+            Class.forName("android.miui.AppOpsUtils").getDeclaredMethod("isXOptMode").invoke(null)
+                as Boolean
         } catch (e: Exception) {
             false
         }
     }
 
-    val isSamsung by lazy {
-        Build.MANUFACTURER.equals("samsung", ignoreCase = true)
-    }
+    val isSamsung by lazy { Build.MANUFACTURER.equals("samsung", ignoreCase = true) }
 
     val oneUiVersion by lazy {
         try {
@@ -58,11 +50,12 @@ object DeviceUtil {
         }
     }
 
-    val invalidDefaultBrowsers = listOf(
-        "android",
-        "com.huawei.android.internal.app",
-        "com.zui.resolver",
-    )
+    val invalidDefaultBrowsers =
+        listOf(
+            "android",
+            "com.huawei.android.internal.app",
+            "com.zui.resolver",
+        )
 
     @SuppressLint("PrivateApi")
     private fun getSystemProperty(key: String?): String? {

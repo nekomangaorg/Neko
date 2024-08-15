@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1.1.0
+        uses: gradle/wrapper-validation-action@v3.4.2
 
   build:
     name: Build app
@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.12.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
@@ -42,14 +42,14 @@ jobs:
           java-version: 17
 
       - name: Write google-services.json
-        uses: DamianReeves/write-file-action@v1.2
+        uses: DamianReeves/write-file-action@v1.3
         with:
           path: app/google-services.json
           contents: ${{ secrets.GOOGLE_SERVICE_JSON }}
           write-mode: overwrite # optional, default is preserve
 
       - name: Build app
-        uses: eskatos/gradle-command-action@v2
+        uses: eskatos/gradle-command-action@v3
         with:
           arguments: assembleStandardRelease
 
@@ -113,16 +113,13 @@ jobs:
           sha=`sha256sum neko-x86_64.apk | awk '{ print $1 }'`
           echo "APK_X86_64_SHA=$sha" >> $GITHUB_ENV
 
-      - name: Delete any draft releases and last latest tag
-        uses: dev-drprasad/delete-tag-and-release@v0.2.1
-        with:
-          delete_release: true
-          tag_name: latest
+      - name: Delete release draft
+        uses: hugo19941994/delete-draft-releases@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        uses: ncipollo/release-action@v1.13.0
+        uses: ncipollo/release-action@v1.14.0
         with:
           allowUpdates: true
           body: |

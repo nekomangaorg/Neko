@@ -23,21 +23,18 @@ fun PullRefresh(
     contentColor: Color = MaterialTheme.colorScheme.onSecondary,
     content: @Composable () -> Unit,
 ) {
-    val state = rememberPullRefreshState(
-        refreshing = refreshing,
-        onRefresh = onRefresh,
-        refreshingOffset = indicatorOffset,
-    )
-
+    val state =
+        rememberPullRefreshState(
+            refreshing = refreshing,
+            onRefresh = onRefresh,
+            refreshingOffset = indicatorOffset,
+        )
 
     Box(Modifier.pullRefresh(state, !refreshing)) {
         content()
 
         Box(
-            Modifier
-                .padding()
-                .matchParentSize()
-                .clipToBounds(),
+            Modifier.padding().matchParentSize().clipToBounds(),
         ) {
             PullRefreshIndicator(
                 refreshing = refreshing,
@@ -49,4 +46,3 @@ fun PullRefresh(
         }
     }
 }
-

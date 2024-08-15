@@ -68,18 +68,18 @@ class MergeMangaCoverFetcher(
     }
 
     private fun newRequest(): Request {
-        val request = Request.Builder()
-            .url(url)
-            .headers(sourceLazy.value.headers)
-            // Support attaching custom data to the network request.
-            .tag(Parameters::class.java, options.parameters)
+        val request =
+            Request.Builder()
+                .url(url)
+                .headers(sourceLazy.value.headers)
+                // Support attaching custom data to the network request.
+                .tag(Parameters::class.java, options.parameters)
 
         when {
             options.networkCachePolicy.readEnabled -> {
                 // don't take up okhttp cache
                 request.cacheControl(CACHE_CONTROL_NO_STORE)
             }
-
             else -> {
                 // This causes the request to fail with a 504 Unsatisfiable Request.
                 request.cacheControl(CACHE_CONTROL_NO_NETWORK_NO_CACHE)
@@ -90,6 +90,7 @@ class MergeMangaCoverFetcher(
     }
 
     companion object {
-        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE = CacheControl.Builder().noCache().onlyIfCached().build()
+        private val CACHE_CONTROL_NO_NETWORK_NO_CACHE =
+            CacheControl.Builder().noCache().onlyIfCached().build()
     }
 }

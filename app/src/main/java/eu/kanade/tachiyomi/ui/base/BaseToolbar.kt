@@ -7,8 +7,8 @@ import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import com.bluelinelabs.conductor.Router
 import com.google.android.material.appbar.MaterialToolbar
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.SearchActivity
+import org.nekomanga.R
 
 open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialToolbar(context, attrs) {
@@ -19,18 +19,21 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
 
     lateinit var toolbarTitle: TextView
         protected set
+
     private val defStyleRes = com.google.android.material.R.style.Widget_Material3_Toolbar
 
     protected val titleTextAppearance: Int
 
     var incognito = false
+
     init {
-        val a = context.obtainStyledAttributes(
-            attrs,
-            R.styleable.Toolbar,
-            0,
-            defStyleRes,
-        )
+        val a =
+            context.obtainStyledAttributes(
+                attrs,
+                R.styleable.Toolbar,
+                0,
+                defStyleRes,
+            )
         titleTextAppearance = a.getResourceId(R.styleable.Toolbar_titleTextAppearance, 0)
         a.recycle()
     }

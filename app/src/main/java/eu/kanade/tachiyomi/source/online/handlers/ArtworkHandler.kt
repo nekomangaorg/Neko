@@ -27,41 +27,53 @@ class ArtworkHandler {
 
     suspend fun getArtwork(mangaUUID: String): Result<List<SourceArtwork>, ResultError> {
         return withContext(Dispatchers.IO) {
-            fetchArtwork(mangaUUID, 0)
-                .andThen { relationshipDtoList ->
-                    val artwork = relationshipDtoList.data.toMutableList()
+            fetchArtwork(mangaUUID, 0).andThen { relationshipDtoList ->
+                val artwork = relationshipDtoList.data.toMutableList()
 
-                    Ok(
-                        when (relationshipDtoList.total > relationshipDtoList.limit) {
-                            true -> artwork + fetchRestOfArtwork(mangaUUID, relationshipDtoList.limit, relationshipDtoList.total)
-                            false -> artwork
-                        }
-                            .map {
-                                SourceArtwork(
-                                    fileName = it.attributes!!.fileName!!,
-                                    locale = it.attributes.locale ?: "",
-                                    volume = if (it.attributes.volume != null) "Vol. ${it.attributes.volume}" else "",
-                                    description = it.attributes.description ?: "",
-                                )
-                            },
-                    )
-                }
+                Ok(
+                    when (relationshipDtoList.total > relationshipDtoList.limit) {
+                        true ->
+                            artwork +
+                                fetchRestOfArtwork(
+                                    mangaUUID, relationshipDtoList.limit, relationshipDtoList.total)
+                        false -> artwork
+                    }.map {
+                        SourceArtwork(
+                            fileName = it.attributes!!.fileName!!,
+                            locale = it.attributes.locale ?: "",
+                            volume =
+                                if (it.attributes.volume != null) "Vol. ${it.attributes.volume}"
+                                else "",
+                            description = it.attributes.description ?: "",
+                        )
+                    },
+                )
+            }
         }
     }
 
-    private suspend fun fetchRestOfArtwork(mangaUUID: String, limit: Int, total: Int): List<RelationshipDto> {
+    private suspend fun fetchRestOfArtwork(
+        mangaUUID: String,
+        limit: Int,
+        total: Int
+    ): List<RelationshipDto> {
         return withContext(Dispatchers.IO) {
             val totalRequestNo = (total / limit)
-            (1..totalRequestNo).map { pos ->
-                async {
-                    fetchArtwork(mangaUUID, pos * limit)
-                }
-            }.awaitAll().mapNotNull { it.getOrElse { null } }.map { it.data }.flatten()
+            (1..totalRequestNo)
+                .map { pos -> async { fetchArtwork(mangaUUID, pos * limit) } }
+                .awaitAll()
+                .mapNotNull { it.getOrElse { null } }
+                .map { it.data }
+                .flatten()
         }
     }
 
-    private suspend fun fetchArtwork(mangaUUID: String, offset: Int): Result<RelationshipDtoList, ResultError> {
-        return service.viewArtwork(mangaUUID = mangaUUID, limit = MdConstants.Limits.artwork, offset = offset)
+    private suspend fun fetchArtwork(
+        mangaUUID: String,
+        offset: Int
+    ): Result<RelationshipDtoList, ResultError> {
+        return service
+            .viewArtwork(mangaUUID = mangaUUID, limit = MdConstants.Limits.artwork, offset = offset)
             .getOrResultError("Failed to get artwork")
     }
 }

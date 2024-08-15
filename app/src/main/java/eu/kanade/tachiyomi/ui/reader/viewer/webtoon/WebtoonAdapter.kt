@@ -11,14 +11,10 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.hasMissingChapters
 
-/**
- * RecyclerView Adapter used by this [viewer] to where [ViewerChapters] updates are posted.
- */
+/** RecyclerView Adapter used by this [viewer] to where [ViewerChapters] updates are posted. */
 class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    /**
-     * List of currently set items.
-     */
+    /** List of currently set items. */
     var items: List<Any> = emptyList()
         private set
 
@@ -46,7 +42,9 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         }
 
         // Skip transition page if the chapter is loaded & current page is not a transition page
-        if (prevHasMissingChapters || forceTransition || chapters.prevChapter?.state !is ReaderChapter.State.Loaded) {
+        if (prevHasMissingChapters ||
+            forceTransition ||
+            chapters.prevChapter?.state !is ReaderChapter.State.Loaded) {
             newItems.add(ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter))
         }
 
@@ -59,7 +57,9 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         currentChapter = chapters.currChapter
 
         // Add next chapter transition and pages.
-        if (nextHasMissingChapters || forceTransition || chapters.nextChapter?.state !is ReaderChapter.State.Loaded) {
+        if (nextHasMissingChapters ||
+            forceTransition ||
+            chapters.nextChapter?.state !is ReaderChapter.State.Loaded) {
             newItems.add(ChapterTransition.Next(chapters.currChapter, chapters.nextChapter))
         }
 
@@ -77,16 +77,12 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         result.dispatchUpdatesTo(this)
     }
 
-    /**
-     * Returns the amount of items of the adapter.
-     */
+    /** Returns the amount of items of the adapter. */
     override fun getItemCount(): Int {
         return items.size
     }
 
-    /**
-     * Returns the view type for the item at the given [position].
-     */
+    /** Returns the view type for the item at the given [position]. */
     override fun getItemViewType(position: Int): Int {
         return when (val item = items[position]) {
             is ReaderPage -> PAGE_VIEW
@@ -95,9 +91,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         }
     }
 
-    /**
-     * Creates a new view holder for an item with the given [viewType].
-     */
+    /** Creates a new view holder for an item with the given [viewType]. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             PAGE_VIEW -> {
@@ -112,9 +106,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         }
     }
 
-    /**
-     * Binds an existing view [holder] with the item at the given [position].
-     */
+    /** Binds an existing view [holder] with the item at the given [position]. */
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
         when (holder) {
@@ -123,9 +115,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         }
     }
 
-    /**
-     * Recycles an existing view [holder] before adding it to the view pool.
-     */
+    /** Recycles an existing view [holder] before adding it to the view pool. */
     override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         when (holder) {
             is WebtoonPageHolder -> holder.recycle()
@@ -133,17 +123,13 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         }
     }
 
-    /**
-     * Diff util callback used to dispatch delta updates instead of full dataset changes.
-     */
+    /** Diff util callback used to dispatch delta updates instead of full dataset changes. */
     private class Callback(
         private val oldItems: List<Any>,
         private val newItems: List<Any>,
     ) : DiffUtil.Callback() {
 
-        /**
-         * Returns true if these two items are the same.
-         */
+        /** Returns true if these two items are the same. */
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             val oldItem = oldItems[oldItemPosition]
             val newItem = newItems[newItemPosition]
@@ -151,37 +137,27 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
             return oldItem == newItem
         }
 
-        /**
-         * Returns true if the contents of the items are the same.
-         */
+        /** Returns true if the contents of the items are the same. */
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return true
         }
 
-        /**
-         * Returns the size of the old list.
-         */
+        /** Returns the size of the old list. */
         override fun getOldListSize(): Int {
             return oldItems.size
         }
 
-        /**
-         * Returns the size of the new list.
-         */
+        /** Returns the size of the new list. */
         override fun getNewListSize(): Int {
             return newItems.size
         }
     }
 
     private companion object {
-        /**
-         * View holder type of a chapter page view.
-         */
+        /** View holder type of a chapter page view. */
         const val PAGE_VIEW = 0
 
-        /**
-         * View holder type of a chapter transition view.
-         */
+        /** View holder type of a chapter transition view. */
         const val TRANSITION_VIEW = 1
     }
 }

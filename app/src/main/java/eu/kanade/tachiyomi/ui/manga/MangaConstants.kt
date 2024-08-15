@@ -73,14 +73,18 @@ object MangaConstants {
     data class MangaScreenTrackMergeState(
         val loggedInTrackService: ImmutableList<TrackServiceItem> = persistentListOf(),
         val tracks: ImmutableList<TrackItem> = persistentListOf(),
-        val trackSearchResult: TrackingConstants.TrackSearchResult = TrackingConstants.TrackSearchResult.Loading,
-        val mergeSearchResult: MergeConstants.MergeSearchResult = MergeConstants.MergeSearchResult.Loading,
+        val trackSearchResult: TrackingConstants.TrackSearchResult =
+            TrackingConstants.TrackSearchResult.Loading,
+        val mergeSearchResult: MergeConstants.MergeSearchResult =
+            MergeConstants.MergeSearchResult.Loading,
     )
 
-    /**
-     * Holds the next unread chapter and the text to display for the quick read button.
-     */
-    data class NextUnreadChapter(@StringRes val id: Int? = null, val text: String = "", val simpleChapter: SimpleChapter? = null)
+    /** Holds the next unread chapter and the text to display for the quick read button. */
+    data class NextUnreadChapter(
+        @StringRes val id: Int? = null,
+        val text: String = "",
+        val simpleChapter: SimpleChapter? = null
+    )
 
     data class SortFilter(
         val sourceOrderSort: SortState = SortState.None,
@@ -144,7 +148,6 @@ object MangaConstants {
         Ascending(MdConstants.Sort.ascending),
         Descending(MdConstants.Sort.descending),
         None(""),
-        ;
     }
 
     enum class SetGlobal {
@@ -164,12 +167,19 @@ object MangaConstants {
         data class DownloadNextUnread(val numberToDownload: Int) : DownloadAction()
 
         object DownloadAll : DownloadAction()
+
         object DownloadUnread : DownloadAction()
+
         object Download : DownloadAction()
+
         object ImmediateDownload : DownloadAction()
+
         object Remove : DownloadAction()
+
         object RemoveRead : DownloadAction()
+
         object RemoveAll : DownloadAction()
+
         object Cancel : DownloadAction()
     }
 
@@ -177,11 +187,24 @@ object MangaConstants {
         abstract val canUndo: Boolean
 
         data class Bookmark(override val canUndo: Boolean = false) : MarkAction()
+
         data class UnBookmark(override val canUndo: Boolean = false) : MarkAction()
-        data class PreviousRead(override val canUndo: Boolean, val altChapters: List<ChapterItem>) : MarkAction()
-        data class PreviousUnread(override val canUndo: Boolean, val altChapters: List<ChapterItem>) : MarkAction()
+
+        data class PreviousRead(override val canUndo: Boolean, val altChapters: List<ChapterItem>) :
+            MarkAction()
+
+        data class PreviousUnread(
+            override val canUndo: Boolean,
+            val altChapters: List<ChapterItem>
+        ) : MarkAction()
+
         data class Read(override val canUndo: Boolean = false) : MarkAction()
-        data class Unread(override val canUndo: Boolean = false, val lastRead: Int? = null, val pagesLeft: Int? = null) : MarkAction()
+
+        data class Unread(
+            override val canUndo: Boolean = false,
+            val lastRead: Int? = null,
+            val pagesLeft: Int? = null
+        ) : MarkAction()
     }
 
     class CategoryActions(

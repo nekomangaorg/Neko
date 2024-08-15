@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.Amazon
 import eu.kanade.tachiyomi.data.external.AniList
@@ -24,6 +23,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import java.util.Locale
+import org.nekomanga.R
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import tachiyomi.source.model.MangaInfo
 
@@ -66,6 +66,7 @@ interface Manga : SManga {
     fun setSortToGlobal() = setChapterFlags(CHAPTER_SORT_FILTER_GLOBAL, CHAPTER_SORT_LOCAL_MASK)
 
     fun setFilterToGlobal() = setChapterFlags(CHAPTER_SORT_FILTER_GLOBAL, CHAPTER_FILTER_LOCAL_MASK)
+
     fun setFilterToLocal() = setChapterFlags(CHAPTER_FILTER_LOCAL, CHAPTER_FILTER_LOCAL_MASK)
 
     private fun setChapterFlags(flag: Int, mask: Int) {
@@ -98,31 +99,37 @@ interface Manga : SManga {
         if (usesLocalFilter) readFilter else mangaDetailsPreferences.filterChapterByRead().get()
 
     fun downloadedFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
-        if (usesLocalFilter) downloadedFilter else mangaDetailsPreferences.filterChapterByDownloaded().get()
+        if (usesLocalFilter) downloadedFilter
+        else mangaDetailsPreferences.filterChapterByDownloaded().get()
 
     fun bookmarkedFilter(mangaDetailsPreferences: MangaDetailsPreferences): Int =
-        if (usesLocalFilter) bookmarkedFilter else mangaDetailsPreferences.filterChapterByBookmarked().get()
+        if (usesLocalFilter) bookmarkedFilter
+        else mangaDetailsPreferences.filterChapterByBookmarked().get()
 
     fun hideChapterTitle(mangaDetailsPreferences: MangaDetailsPreferences): Boolean =
-        if (usesLocalFilter) hideChapterTitles else mangaDetailsPreferences.hideChapterTitlesByDefault().get()
+        if (usesLocalFilter) hideChapterTitles
+        else mangaDetailsPreferences.hideChapterTitlesByDefault().get()
 
     fun showChapterTitle(defaultShow: Boolean): Boolean =
         chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
 
     fun seriesType(context: Context): String {
-        return context.getString(
-            when (seriesType()) {
-                TYPE_WEBTOON -> R.string.webtoon
-                TYPE_MANHWA -> R.string.manhwa
-                TYPE_MANHUA -> R.string.manhua
-                TYPE_COMIC -> R.string.comic
-                else -> R.string.manga
-            },
-        ).lowercase(Locale.getDefault())
+        return context
+            .getString(
+                when (seriesType()) {
+                    TYPE_WEBTOON -> R.string.webtoon
+                    TYPE_MANHWA -> R.string.manhwa
+                    TYPE_MANHUA -> R.string.manhua
+                    TYPE_COMIC -> R.string.comic
+                    else -> R.string.manga
+                },
+            )
+            .lowercase(Locale.getDefault())
     }
 
     fun getGenres(filterOutSafe: Boolean = false): List<String>? {
-        return genre?.split(",")
+        return genre
+            ?.split(",")
             ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
             ?.filter {
                 if (filterOutSafe) {
@@ -134,12 +141,12 @@ interface Manga : SManga {
     }
 
     fun getContentRating(): String? {
-        return getGenres()?.firstOrNull { it.startsWith("Content rating: ") }?.substringAfter("Content rating: ")
+        return getGenres()
+            ?.firstOrNull { it.startsWith("Content rating: ") }
+            ?.substringAfter("Content rating: ")
     }
 
-    /**
-     * The type of comic the manga is (ie. manga, manhwa, manhua)
-     */
+    /** The type of comic the manga is (ie. manga, manhwa, manhua) */
     fun seriesType(): Int {
         // lump everything as manga if not manhua or manhwa
         return when (lang_flag) {
@@ -151,8 +158,8 @@ interface Manga : SManga {
     }
 
     /**
-     * The type the reader should use. Different from manga type as certain manga has different
-     * read types
+     * The type the reader should use. Different from manga type as certain manga has different read
+     * types
      */
     fun defaultReaderType(): Int {
         val currentTags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
@@ -160,22 +167,16 @@ interface Manga : SManga {
             isLongStrip() -> {
                 ReadingModeType.WEBTOON.flagValue
             }
-
-            currentTags?.any
-            { tag ->
+            currentTags?.any { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
             } == true -> {
                 ReadingModeType.WEBTOON.flagValue
             }
-
-            currentTags?.any
-            { tag ->
-                tag == "chinese" || tag == "manhua" ||
-                    tag.startsWith("english") || tag == "comic"
+            currentTags?.any { tag ->
+                tag == "chinese" || tag == "manhua" || tag.startsWith("english") || tag == "comic"
             } == true -> {
                 ReadingModeType.LEFT_TO_RIGHT.flagValue
             }
-
             else -> 0
         }
     }
@@ -184,14 +185,11 @@ interface Manga : SManga {
         val tags by lazy { genre?.split(",")?.map { it.trim().lowercase(Locale.US) } }
         val chapters by lazy { db.getChapters(this).executeAsBlocking() }
         val firstChapterName by lazy { chapters.firstOrNull()?.name?.lowercase() ?: "" }
-        return status == SManga.COMPLETED || tags?.contains("oneshot") == true ||
-            (
-                chapters.size == 1 &&
-                    (
-                        Regex("one.?shot").containsMatchIn(firstChapterName) ||
-                            firstChapterName.contains("oneshot")
-                        )
-                )
+        return status == SManga.COMPLETED ||
+            tags?.contains("oneshot") == true ||
+            (chapters.size == 1 &&
+                (Regex("one.?shot").containsMatchIn(firstChapterName) ||
+                    firstChapterName.contains("oneshot")))
     }
 
     fun key(): String {
@@ -199,7 +197,8 @@ interface Manga : SManga {
     }
 
     fun getAltTitles(): List<String> {
-        return alt_titles?.split("|~|")?.filter { it.isNotBlank() }?.filter { it != originalTitle } ?: emptyList()
+        return alt_titles?.split("|~|")?.filter { it.isNotBlank() }?.filter { it != originalTitle }
+            ?: emptyList()
     }
 
     fun getExternalLinks(): List<ExternalLink> {
@@ -207,27 +206,15 @@ interface Manga : SManga {
         list.add(Dex(MdUtil.getMangaUUID(url)))
         list.add(DexApi(MdUtil.getMangaUUID(url)))
 
-        thread_id?.let {
-            list.add(DexComments(it))
-        }
+        thread_id?.let { list.add(DexComments(it)) }
 
-        kitsu_id?.let {
-            list.add(Kitsu(it))
-        }
+        kitsu_id?.let { list.add(Kitsu(it)) }
 
-        anilist_id?.let {
-            list.add(AniList(it))
-        }
-        anime_planet_id?.let {
-            list.add(AnimePlanet(it))
-        }
-        manga_updates_id?.let {
-            list.add(MangaUpdatesLink(it))
-        }
+        anilist_id?.let { list.add(AniList(it)) }
+        anime_planet_id?.let { list.add(AnimePlanet(it)) }
+        manga_updates_id?.let { list.add(MangaUpdatesLink(it)) }
 
-        my_anime_list_id?.let {
-            list.add(Mal(it))
-        }
+        my_anime_list_id?.let { list.add(Mal(it)) }
 
         other_urls?.let { combinedString ->
             combinedString.split("||").forEach { pairString ->
@@ -317,15 +304,14 @@ interface Manga : SManga {
         const val TYPE_COMIC = 4
         const val TYPE_WEBTOON = 5
 
-        fun create(source: Long): Manga = MangaImpl().apply {
-            this.source = source
-        }
+        fun create(source: Long): Manga = MangaImpl().apply { this.source = source }
 
-        fun create(pathUrl: String, title: String, source: Long = 0): Manga = MangaImpl().apply {
-            url = pathUrl
-            this.title = title
-            this.source = source
-        }
+        fun create(pathUrl: String, title: String, source: Long = 0): Manga =
+            MangaImpl().apply {
+                url = pathUrl
+                this.title = title
+                this.source = source
+            }
     }
 }
 

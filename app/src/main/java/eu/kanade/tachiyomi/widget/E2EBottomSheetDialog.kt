@@ -21,6 +21,7 @@ abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
     protected open var recyclerView: RecyclerView? = null
 
     private val isLight: Boolean
+
     init {
         binding = createBinding(activity.layoutInflater)
         setContentView(binding.root)
@@ -47,8 +48,7 @@ abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
                     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                         super.onScrollStateChanged(recyclerView, newState)
                         if (newState == RecyclerView.SCROLL_STATE_IDLE ||
-                            newState == RecyclerView.SCROLL_STATE_SETTLING
-                        ) {
+                            newState == RecyclerView.SCROLL_STATE_SETTLING) {
                             sheetBehavior.isDraggable = true
                         } else {
                             sheetBehavior.isDraggable = !recyclerView.canScrollVertically(-1)

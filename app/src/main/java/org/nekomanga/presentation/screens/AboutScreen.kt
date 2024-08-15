@@ -29,16 +29,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.SimpleIcons
+import compose.icons.simpleicons.Discord
 import compose.icons.simpleicons.Github
 import eu.kanade.presentation.components.PreferenceRow
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.ui.more.about.AboutScreenState
 import eu.kanade.tachiyomi.util.system.isOnline
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
@@ -68,16 +69,16 @@ fun AboutScreen(
         onNavigationIconClicked = onBackPressed,
         snackBarHost = snackbarHost(snackbarHostState),
     ) { contentPadding ->
-
         LaunchedEffect(snackbarHostState.currentSnackbarData) {
             snackbar.collect { state ->
                 scope.launch {
                     snackbarHostState.currentSnackbarData?.dismiss()
-                    val result = snackbarHostState.showSnackbar(
-                        message = state.getFormattedMessage(context),
-                        actionLabel = state.getFormattedActionLabel(context),
-                        withDismissAction = true,
-                    )
+                    val result =
+                        snackbarHostState.showSnackbar(
+                            message = state.getFormattedMessage(context),
+                            actionLabel = state.getFormattedActionLabel(context),
+                            withDismissAction = true,
+                        )
                     when (result) {
                         SnackbarResult.ActionPerformed -> state.action?.invoke()
                         SnackbarResult.Dismissed -> state.dismissAction?.invoke()
@@ -86,33 +87,31 @@ fun AboutScreen(
             }
         }
 
-        if (aboutScreenState.value.shouldShowUpdateDialog && aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate) {
+        if (aboutScreenState.value.shouldShowUpdateDialog &&
+            aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate) {
             AppUpdateDialog(
-                release = (aboutScreenState.value.updateResult as AppUpdateResult.NewUpdate).release,
+                release =
+                    (aboutScreenState.value.updateResult as AppUpdateResult.NewUpdate).release,
                 onDismissRequest = dismissDialog,
                 onConfirm = onDownloadClicked,
             )
         }
 
         LazyColumn(contentPadding = contentPadding) {
-            item {
-                LogoHeader()
-            }
-            item {
-                Spacer(modifier = Modifier.size(24.dp))
-            }
+            item { LogoHeader() }
+            item { Spacer(modifier = Modifier.size(Size.large)) }
             item {
                 PreferenceRow(
                     title = stringResource(R.string.version),
-                    subtitle = when {
-                        BuildConfig.DEBUG -> {
-                            "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
-                        }
-
-                        else -> {
-                            "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
-                        }
-                    },
+                    subtitle =
+                        when {
+                            BuildConfig.DEBUG -> {
+                                "Debug ${BuildConfig.COMMIT_SHA} (${aboutScreenState.value.buildTime})"
+                            }
+                            else -> {
+                                "Stable ${BuildConfig.VERSION_NAME} (${aboutScreenState.value.buildTime})"
+                            }
+                        },
                     onClick = { onVersionClicked(context) },
                 )
             }
@@ -138,11 +137,12 @@ fun AboutScreen(
                 PreferenceRow(
                     title = stringResource(R.string.whats_new),
                     onClick = {
-                        val url = if (BuildConfig.DEBUG) {
-                            "https://github.com/nekomangaorg/Neko/commits/master"
-                        } else {
-                            RELEASE_URL
-                        }
+                        val url =
+                            if (BuildConfig.DEBUG) {
+                                "https://github.com/nekomangaorg/Neko/commits/master"
+                            } else {
+                                RELEASE_URL
+                            }
                         uriHandler.openUri(url)
                     },
                 )
@@ -158,22 +158,27 @@ fun AboutScreen(
             item {
                 PreferenceRow(
                     title = stringResource(R.string.privacy_policy),
-                    onClick = { uriHandler.openUri("https://github.com/nekomangaorg/privacy_policy") },
+                    onClick = {
+                        uriHandler.openUri("https://github.com/nekomangaorg/privacy_policy")
+                    },
                 )
             }
-            item {
-                Spacer(modifier = Modifier.size(16.dp))
-            }
+            item { Spacer(modifier = Modifier.size(16.dp)) }
 
             item {
                 FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(Size.medium),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().padding(Size.medium),
+                    horizontalArrangement = Arrangement.Center,
                 ) {
-                    val modifier = Modifier.size(24.dp)
+                    val modifier = Modifier.size(Size.extraLarge)
                     LinkIcon(
+                        label = "Discord",
+                        modifier = modifier,
+                        icon = SimpleIcons.Discord,
+                        url = "https://discord.gg/4vmK42QuKG",
+                    )
+                    LinkIcon(
+                        modifier = modifier,
                         label = "GitHub",
                         icon = SimpleIcons.Github,
                         url = "https://nekomanga.org/",
@@ -188,12 +193,10 @@ fun AboutScreen(
 private fun LogoHeader() {
     Column {
         Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 30.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 30.dp),
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_neko_notification),
+                painter = painterResource(id = R.drawable.ic_neko_yokai),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(200.dp),
                 contentDescription = null,

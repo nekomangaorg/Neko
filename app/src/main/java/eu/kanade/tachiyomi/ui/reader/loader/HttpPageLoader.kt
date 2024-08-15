@@ -27,9 +27,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-/**
- * Loader used to load chapters from an online source.
- */
+/** Loader used to load chapters from an online source. */
 class HttpPageLoader(
     private val chapter: ReaderChapter,
     private val source: HttpSource,
@@ -38,9 +36,7 @@ class HttpPageLoader(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    /**
-     * A queue used to manage requests one by one while allowing priorities.
-     */
+    /** A queue used to manage requests one by one while allowing priorities. */
     private val queue = PriorityBlockingQueue<PriorityPage>()
 
     private val readerPreferences by injectLazy<ReaderPreferences>()
@@ -48,26 +44,20 @@ class HttpPageLoader(
 
     init {
         // Adding flow since we can reach reader settings after this is created
-        readerPreferences.preloadPageAmount().changes().onEach {
-            preloadSize = it
-        }.launchIn(scope)
+        readerPreferences.preloadPageAmount().changes().onEach { preloadSize = it }.launchIn(scope)
 
         scope.launchIO {
             flow {
-                while (true) {
-                    emit(runInterruptible { queue.take() }.page)
+                    while (true) {
+                        emit(runInterruptible { queue.take() }.page)
+                    }
                 }
-            }
                 .filter { it.status == Page.State.QUEUE }
-                .collect {
-                    collectPage(it)
-                }
+                .collect { collectPage(it) }
         }
     }
 
-    /**
-     * Recycles this loader and the active subscriptions and queue.
-     */
+    /** Recycles this loader and the active subscriptions and queue. */
     override fun recycle() {
         super.recycle()
         scope.cancel()
@@ -95,14 +85,8 @@ class HttpPageLoader(
      * otherwise fallbacks to network.
      */
     override suspend fun getPages(): List<ReaderPage> {
-        val pages = try {
-            chapterCache.getPageListFromCache(chapter.chapter)
-        } catch (e: Throwable) {
-            if (e is CancellationException) {
-                throw e
-            }
-            source.fetchPageList(chapter.chapter)
-        }
+        val pages = source.getPageList(chapter.chapter)
+
         return pages.mapIndexed { index, page ->
             // Don't trust sources and use our own indexing
             ReaderPage(index, page.url, page.imageUrl, page.mangaDexChapterId)
@@ -110,14 +94,17 @@ class HttpPageLoader(
     }
 
     /**
-     * Loads a page through the queue. Handles re-enqueueing pages if they were evicted from the cache.
+     * Loads a page through the queue. Handles re-enqueueing pages if they were evicted from the
+     * cache.
      */
     override suspend fun loadPage(page: ReaderPage) {
         withIOContext {
             val imageUrl = page.imageUrl
 
             // Check if the image has been deleted
-            if (page.status == Page.State.READY && imageUrl != null && !chapterCache.isImageInCache(imageUrl)) {
+            if (page.status == Page.State.READY &&
+                imageUrl != null &&
+                !chapterCache.isImageInCache(imageUrl)) {
                 page.status = Page.State.QUEUE
             }
 
@@ -146,6 +133,7 @@ class HttpPageLoader(
 
     /**
      * Preloads the given [amount] of pages after the [currentPage] with a lower priority.
+     *
      * @return a list of [PriorityPage] that were added to the [queue]
      */
     private fun preloadNextPages(currentPage: ReaderPage, amount: Int): List<PriorityPage> {
@@ -153,20 +141,16 @@ class HttpPageLoader(
         val pages = currentPage.chapter.pages ?: return emptyList()
         if (pageIndex == pages.lastIndex) return emptyList()
 
-        return pages
-            .subList(pageIndex + 1, min(pageIndex + 1 + amount, pages.size))
-            .mapNotNull {
-                if (it.status == Page.State.QUEUE) {
-                    PriorityPage(it, 0).apply { queue.offer(this) }
-                } else {
-                    null
-                }
+        return pages.subList(pageIndex + 1, min(pageIndex + 1 + amount, pages.size)).mapNotNull {
+            if (it.status == Page.State.QUEUE) {
+                PriorityPage(it, 0).apply { queue.offer(this) }
+            } else {
+                null
             }
+        }
     }
 
-    /**
-     * Retries a page. This method is only called from user interaction on the viewer.
-     */
+    /** Retries a page. This method is only called from user interaction on the viewer. */
     override fun retryPage(page: ReaderPage) {
         if (page.status == Page.State.ERROR) {
             page.status = Page.State.QUEUE
@@ -174,9 +158,7 @@ class HttpPageLoader(
         queue.offer(PriorityPage(page, 2))
     }
 
-    /**
-     * Data class used to keep ordering of pages in order to maintain priority.
-     */
+    /** Data class used to keep ordering of pages in order to maintain priority. */
     private class PriorityPage(
         val page: ReaderPage,
         val priority: Int,
@@ -194,8 +176,8 @@ class HttpPageLoader(
     }
 
     /**
-     * Loads the page, retrieving the image URL and downloading the image if necessary.
-     * Downloaded images are stored in the chapter cache.
+     * Loads the page, retrieving the image URL and downloading the image if necessary. Downloaded
+     * images are stored in the chapter cache.
      *
      * @param page the page whose source image has to be downloaded.
      */
@@ -204,7 +186,7 @@ class HttpPageLoader(
             val imageUrl = page.imageUrl!!
             if (!chapterCache.isImageInCache(imageUrl)) {
                 page.status = Page.State.DOWNLOAD_IMAGE
-                val imageResponse = source.fetchImage(page)
+                val imageResponse = source.getImage(page)
                 chapterCache.putImageToCache(imageUrl, imageResponse)
             }
 
@@ -212,9 +194,10 @@ class HttpPageLoader(
             page.status = Page.State.READY
         } catch (e: Throwable) {
             page.status = Page.State.ERROR
-            TimberKt.e(e) { "Error loading page" }
             if (e is CancellationException) {
                 throw e
+            } else {
+                TimberKt.e(e) { "Error loading page" }
             }
         }
     }

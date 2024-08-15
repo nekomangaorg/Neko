@@ -1,7 +1,8 @@
 package org.nekomanga.core.network
 
 /**
- * Allow retrofit to handle multi values for same query https://github.com/square/retrofit/issues/1324
+ * Allow retrofit to handle multi values for same query
+ * https://github.com/square/retrofit/issues/1324
  */
 class ProxyRetrofitQueryMap(val m: MutableMap<String, Any>) : HashMap<String, Any>(m) {
     override val entries: MutableSet<MutableMap.MutableEntry<String, Any>>

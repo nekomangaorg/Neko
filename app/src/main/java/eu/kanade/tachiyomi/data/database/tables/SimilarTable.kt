@@ -24,5 +24,6 @@ object SimilarTable {
             """
 
     val createMangaIdIndexQuery: String
-        get() = "CREATE INDEX ${SimilarTable.TABLE}_${SimilarTable.COL_MANGA_ID}_index ON ${SimilarTable.TABLE}(${SimilarTable.COL_MANGA_ID})"
+        get() =
+            "CREATE INDEX ${SimilarTable.TABLE}_${SimilarTable.COL_MANGA_ID}_index ON ${SimilarTable.TABLE}(${SimilarTable.COL_MANGA_ID})"
 }

@@ -15,11 +15,12 @@ abstract class ReducedHttpSource : HttpSource() {
 
     abstract suspend fun fetchChapters(mangaUrl: String): Result<List<SChapter>, ResultError>
 
-    override suspend fun fetchImage(page: Page): Response {
+    override suspend fun getImage(page: Page): Response {
         return client.newCachelessCallWithProgress(imageRequest(page), page).await()
     }
 
     companion object {
-        const val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"
+        const val userAgent =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"
     }
 }

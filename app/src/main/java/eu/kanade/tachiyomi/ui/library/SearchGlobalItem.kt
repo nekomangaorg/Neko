@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.MaterialTextButtonBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import org.nekomanga.R
+import org.nekomanga.databinding.MaterialTextButtonBinding
 
 class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
 
@@ -25,9 +25,7 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): Holder {
-        view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            width = MATCH_PARENT
-        }
+        view.updateLayoutParams<ViewGroup.MarginLayoutParams> { width = MATCH_PARENT }
         return Holder(view, adapter)
     }
 
@@ -68,9 +66,7 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
         private val binding = MaterialTextButtonBinding.bind(view)
 
         init {
-            binding.button.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                width = MATCH_PARENT
-            }
+            binding.button.updateLayoutParams<ViewGroup.MarginLayoutParams> { width = MATCH_PARENT }
             binding.button.setOnClickListener {
                 val query = (adapter.getItem(flexibleAdapterPosition) as SearchGlobalItem).string
                 (adapter as? LibraryCategoryAdapter)?.libraryListener?.globalSearch(query)

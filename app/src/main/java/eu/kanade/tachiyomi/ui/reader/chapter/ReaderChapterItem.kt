@@ -7,20 +7,20 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.ReaderChapterItemBinding
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import org.nekomanga.R
+import org.nekomanga.constants.Constants
+import org.nekomanga.databinding.ReaderChapterItemBinding
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import uy.kohesive.injekt.injectLazy
 
 class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: Boolean) :
-    AbstractItem<ReaderChapterItem.ViewHolder>(),
-    Chapter by chapter {
+    AbstractItem<ReaderChapterItem.ViewHolder>(), Chapter by chapter {
 
     val decimalFormat =
         DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
@@ -48,21 +48,23 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val chapterColor = ChapterUtil.chapterColor(itemView.context, item.chapter)
 
-            val typeface = if (item.isCurrent) {
-                ResourcesCompat.getFont(
-                    itemView.context,
-                    R.font.montserrat_black,
-                )
-            } else {
-                null
-            }
+            val typeface =
+                if (item.isCurrent) {
+                    ResourcesCompat.getFont(
+                        itemView.context,
+                        R.font.montserrat_black,
+                    )
+                } else {
+                    null
+                }
 
-            binding.chapterTitle.text = if (manga.hideChapterTitle(item.mangaDetailsPreferences)) {
-                val number = item.decimalFormat.format(item.chapter_number.toDouble())
-                itemView.context.getString(R.string.chapter_, number)
-            } else {
-                item.name
-            }
+            binding.chapterTitle.text =
+                if (manga.hideChapterTitle(item.mangaDetailsPreferences)) {
+                    val number = item.decimalFormat.format(item.chapter_number.toDouble())
+                    itemView.context.getString(R.string.chapter_, number)
+                } else {
+                    item.name
+                }
 
             val statuses = mutableListOf<String>()
             ChapterUtil.relativeDate(item)?.let { statuses.add(it) }
@@ -76,11 +78,11 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 binding.chapterSubtitle.setTypeface(null, Typeface.NORMAL)
             }
 
-            if (item.chapter.language.isNullOrBlank() || item.chapter.language.equals(
+            if (item.chapter.language.isNullOrBlank() ||
+                item.chapter.language.equals(
                     "english",
                     true,
-                )
-            ) {
+                )) {
                 binding.chapterLanguage.isVisible = false
             } else {
                 binding.chapterLanguage.isVisible = true
@@ -106,7 +108,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             binding.chapterTitle.typeface = typeface
             binding.chapterSubtitle.typeface = typeface
             binding.chapterLanguage.typeface = typeface
-            binding.chapterSubtitle.text = statuses.joinToString(" • ")
+            binding.chapterSubtitle.text = statuses.joinToString(Constants.SEPARATOR)
         }
 
         override fun unbindView(item: ReaderChapterItem) {

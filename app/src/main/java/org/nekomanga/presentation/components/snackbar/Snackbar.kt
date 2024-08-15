@@ -12,16 +12,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun snackbarHost(snackbarHostState: SnackbarHostState, actionColor: Color? = null): @Composable () -> Unit {
+fun snackbarHost(
+    snackbarHostState: SnackbarHostState,
+    actionColor: Color? = null
+): @Composable () -> Unit {
     return {
         SwipeableSnackbarHost(snackbarHostState) { data, modifier ->
             Snackbar(
-                modifier = modifier
-                    .systemBarsPadding()
-                    .padding(10.dp),
-                dismissAction = { },
+                modifier = modifier.systemBarsPadding().padding(10.dp),
+                dismissAction = {},
                 action = {
                     data.visuals.actionLabel?.let {
                         TextButton(
@@ -30,13 +32,15 @@ fun snackbarHost(snackbarHostState: SnackbarHostState, actionColor: Color? = nul
                             Text(
                                 text = data.visuals.actionLabel!!,
                                 color = actionColor ?: MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                                style =
+                                    MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Medium),
                             )
                         }
                     }
                 },
                 dismissActionContentColor = MaterialTheme.colorScheme.onSurface,
-                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
                 Text(

@@ -11,19 +11,20 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import org.nekomanga.R
 
 class MiniSearchView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     SearchView(context, attrs) {
 
     private var scope: CoroutineScope? = null
-    private val searchTextView: SearchAutoComplete? = findViewById(androidx.appcompat.R.id.search_src_text)
+    private val searchTextView: SearchAutoComplete? =
+        findViewById(androidx.appcompat.R.id.search_src_text)
 
     init {
         searchTextView?.setTextAppearance(android.R.style.TextAppearance_Material_Body1)
@@ -34,14 +35,16 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
         searchTextView?.setHintTextColor(actionColorAlpha)
 
         val clearButton = findViewById<ImageView>(androidx.appcompat.R.id.search_close_btn)
-        clearButton?.imageTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.actionBarTintColor))
+        clearButton?.imageTintList =
+            ColorStateList.valueOf(context.getResourceColor(R.attr.actionBarTintColor))
 
         val searchPlateView = findViewById<View>(androidx.appcompat.R.id.search_plate)
         searchPlateView?.setBackgroundColor(Color.TRANSPARENT)
 
         setIconifiedByDefault(false)
 
-        val searchMagIconImageView = findViewById<ImageView>(androidx.appcompat.R.id.search_mag_icon)
+        val searchMagIconImageView =
+            findViewById<ImageView>(androidx.appcompat.R.id.search_mag_icon)
         searchMagIconImageView?.layoutParams = LinearLayout.LayoutParams(0, 0)
     }
 
@@ -68,7 +71,8 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun addSearchModifierIcon(imageViewFactory: (Context) -> ImageView): ImageView? {
-        return findViewById<LinearLayout>(androidx.appcompat.R.id.search_plate)?.let { searchPlateView ->
+        return findViewById<LinearLayout>(androidx.appcompat.R.id.search_plate)?.let {
+            searchPlateView ->
             val imageView = imageViewFactory(searchPlateView.context)
             val clearButton = findViewById<ImageView>(androidx.appcompat.R.id.search_close_btn)
             imageView.layoutParams = clearButton?.layoutParams
@@ -77,5 +81,6 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
         }
     }
 
-    fun removeSearchModifierIcon(view: ImageView) = findViewById<LinearLayout>(androidx.appcompat.R.id.search_plate)?.removeView(view)
+    fun removeSearchModifierIcon(view: ImageView) =
+        findViewById<LinearLayout>(androidx.appcompat.R.id.search_plate)?.removeView(view)
 }

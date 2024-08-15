@@ -11,9 +11,11 @@ import tachiyomi.core.preference.getEnum
 
 class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
-    fun animatedPageTransitions() = this.preferenceStore.getBoolean("pref_enable_transitions_key", true)
+    fun animatedPageTransitions() =
+        this.preferenceStore.getBoolean("pref_enable_transitions_key", true)
 
-    fun animatedPageTransitionsWebtoon() = this.preferenceStore.getBoolean("pref_enable_transitions_webtoon_key", true)
+    fun animatedPageTransitionsWebtoon() =
+        this.preferenceStore.getBoolean("pref_enable_transitions_webtoon_key", true)
 
     fun pagerCutoutBehavior() = this.preferenceStore.getInt("pager_cutout_behavior")
 
@@ -38,10 +40,12 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
     fun colorFilterMode() = this.preferenceStore.getInt("color_filter_mode")
 
     fun defaultReadingMode() =
-        this.preferenceStore.getInt("pref_default_reading_mode_key", ReadingModeType.RIGHT_TO_LEFT.flagValue)
+        this.preferenceStore.getInt(
+            "pref_default_reading_mode_key", ReadingModeType.RIGHT_TO_LEFT.flagValue)
 
     fun defaultOrientationType() =
-        this.preferenceStore.getInt("pref_default_orientation_type_key", OrientationType.FREE.flagValue)
+        this.preferenceStore.getInt(
+            "pref_default_orientation_type_key", OrientationType.FREE.flagValue)
 
     fun imageScaleType() = this.preferenceStore.getInt("pref_image_scale_type_key", 1)
 
@@ -71,17 +75,20 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun readWithVolumeKeys() = this.preferenceStore.getBoolean("reader_volume_keys")
 
-    fun readWithVolumeKeysInverted() = this.preferenceStore.getBoolean("reader_volume_keys_inverted")
+    fun readWithVolumeKeysInverted() =
+        this.preferenceStore.getBoolean("reader_volume_keys_inverted")
 
     fun navigationModePager() = this.preferenceStore.getInt("reader_navigation_mode_pager")
 
     fun navigationModeWebtoon() = this.preferenceStore.getInt("reader_navigation_mode_webtoon")
 
     fun pagerNavInverted() =
-        this.preferenceStore.getEnum("reader_tapping_inverted", ViewerNavigation.TappingInvertMode.NONE)
+        this.preferenceStore.getEnum(
+            "reader_tapping_inverted", ViewerNavigation.TappingInvertMode.NONE)
 
     fun webtoonNavInverted() =
-        this.preferenceStore.getEnum("reader_tapping_inverted_webtoon", ViewerNavigation.TappingInvertMode.NONE)
+        this.preferenceStore.getEnum(
+            "reader_tapping_inverted_webtoon", ViewerNavigation.TappingInvertMode.NONE)
 
     fun pageLayout() = this.preferenceStore.getInt("page_layout", PageLayout.AUTOMATIC.value)
 
@@ -89,13 +96,18 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun invertDoublePages() = this.preferenceStore.getBoolean("invert_double_pages")
 
-    fun webtoonPageLayout() = this.preferenceStore.getInt("webtoon_page_layout", PageLayout.SINGLE_PAGE.value)
+    fun webtoonPageLayout() =
+        this.preferenceStore.getInt("webtoon_page_layout", PageLayout.SINGLE_PAGE.value)
 
-    fun webtoonReaderHideThreshold() = this.preferenceStore.getEnum("reader_hide_threshold", PreferenceValues.ReaderHideThreshold.LOW)
+    fun webtoonReaderHideThreshold() =
+        this.preferenceStore.getEnum(
+            "reader_hide_threshold", PreferenceValues.ReaderHideThreshold.LOW)
 
     fun webtoonInvertDoublePages() = this.preferenceStore.getBoolean("webtoon_invert_double_pages")
 
-    fun readerBottomButtons() = this.preferenceStore.getStringSet("reader_bottom_buttons", ReaderBottomButton.BUTTONS_DEFAULTS)
+    fun readerBottomButtons() =
+        this.preferenceStore.getStringSet(
+            "reader_bottom_buttons", ReaderBottomButton.BUTTONS_DEFAULTS)
 
     fun preloadPageAmount() = this.preferenceStore.getInt("preload_size", 6)
 
@@ -111,5 +123,6 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
 
     fun skipDuplicates() = this.preferenceStore.getBoolean("skip_duplicates")
 
-    fun alwaysShowChapterTransition() = this.preferenceStore.getBoolean("always_show_chapter_transition", true)
+    fun alwaysShowChapterTransition() =
+        this.preferenceStore.getBoolean("always_show_chapter_transition", true)
 }

@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.widget.TextView
 import androidx.core.widget.TextViewCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.util.system.contextCompatColor
@@ -13,6 +12,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
+import org.nekomanga.R
 
 class ChapterUtil {
     companion object {
@@ -47,11 +47,12 @@ class ChapterUtil {
         private fun setBookmark(textView: TextView, chapter: Chapter) {
             if (chapter.bookmark) {
                 val context = textView.context
-                val drawable = VectorDrawableCompat.create(
-                    textView.resources,
-                    R.drawable.ic_bookmark_24dp,
-                    context.theme,
-                )
+                val drawable =
+                    VectorDrawableCompat.create(
+                        textView.resources,
+                        R.drawable.ic_bookmark_24dp,
+                        context.theme,
+                    )
                 drawable?.setBounds(0, 0, textView.textSize.toInt(), textView.textSize.toInt())
                 textView.setCompoundDrawablesRelative(
                     drawable,

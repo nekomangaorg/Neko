@@ -18,8 +18,6 @@ import androidx.preference.PreferenceScreen
 import com.github.michaelbull.result.onSuccess
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -45,6 +43,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import org.nekomanga.BuildConfig
+import org.nekomanga.R
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.logging.TimberKt
 import rx.Observable
@@ -81,224 +81,229 @@ class SettingsAdvancedController : SettingsController() {
     private val downloadManager: DownloadManager by injectLazy()
 
     @SuppressLint("BatteryLife")
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
-        titleRes = R.string.advanced
+    override fun setupPreferenceScreen(screen: PreferenceScreen) =
+        screen.apply {
+            titleRes = R.string.advanced
 
-        switchPreference {
-            key = "acra.enable"
-            titleRes = R.string.send_crash_report
-            summaryRes = R.string.helps_fix_bugs
-            defaultValue = true
-            onClick {
-                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isEnabled)
-            }
-        }
-
-        preference {
-            key = "dump_crash_logs"
-            titleRes = R.string.dump_crash_logs
-            summaryRes = R.string.saves_error_logs
-
-            onClick {
-                (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
-                    CrashLogUtil(context).dumpLogs()
-                }
-            }
-        }
-
-        switchPreference {
-            key = networkPreferences.verboseLogging().key()
-            titleRes = R.string.verbose_logging
-            summaryRes = R.string.verbose_logging_summary
-            defaultValue = BuildConfig.DEBUG
-            onChange {
-                activity?.toast(R.string.requires_app_restart)
-                true
-            }
-        }
-
-        val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
-        if (pm != null) {
-            preference {
-                key = "disable_batt_opt"
-                titleRes = R.string.disable_battery_optimization
-                summaryRes = R.string.disable_if_issues_with_updating
-
+            switchPreference {
+                key = "acra.enable"
+                titleRes = R.string.send_crash_report
+                summaryRes = R.string.helps_fix_bugs
+                defaultValue = true
                 onClick {
-                    val packageName: String = context.packageName
-                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                        val intent = Intent().apply {
-                            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                            data = "package:$packageName".toUri()
-                        }
-                        startActivity(intent)
-                    } else {
-                        context.toast(R.string.battery_optimization_disabled)
-                    }
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isEnabled)
                 }
             }
-        }
-
-        preference {
-            key = "pref_dont_kill_my_app"
-            title = "Don't kill my app!"
-            summaryRes = R.string.about_dont_kill_my_app
-
-            onClick {
-                openInBrowser("https://dontkillmyapp.com/")
-            }
-        }
-
-        preferenceCategory {
-            titleRes = R.string.data_management
-            preference {
-                key = CLEAR_CACHE_KEY
-                titleRes = R.string.clear_chapter_cache
-                summary = context.getString(R.string.used_, chapterCache.readableSize)
-
-                onClick { clearChapterCache() }
-            }
 
             preference {
-                titleRes = R.string.force_download_cache_refresh
-                summaryRes = R.string.force_download_cache_refresh_summary
+                key = "dump_crash_logs"
+                titleRes = R.string.dump_crash_logs
+                summaryRes = R.string.saves_error_logs
+
                 onClick {
                     (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
-                        downloadManager.refreshCache()
+                        CrashLogUtil(context).dumpLogs()
                     }
                 }
             }
 
-            preference {
-                key = "clean_cached_covers"
-                titleRes = R.string.clean_up_cached_covers
-                summary = context.getString(
-                    R.string.delete_old_covers_in_library_used_,
-                    coverCache.getChapterCacheSize(),
-                )
-
-                onClick {
-                    context.toast(R.string.starting_cleanup)
-                    (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
-                        coverCache.deleteOldCovers()
-                    }
-                }
-            }
-            preference {
-                key = "clear_cached_not_library"
-                titleRes = R.string.clear_cached_covers_non_library
-                summary = context.getString(
-                    R.string.delete_all_covers__not_in_library_used_,
-                    coverCache.getOnlineCoverCacheSize(),
-                )
-
-                onClick {
-                    context.toast(R.string.starting_cleanup)
-                    (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
-                        coverCache.deleteAllCachedCovers()
-                    }
-                }
-            }
-            preference {
-                key = "clean_downloaded_chapters"
-                titleRes = R.string.clean_up_downloaded_chapters
-
-                summaryRes = R.string.delete_unused_chapters
-
-                onClick {
-                    val ctrl = CleanupDownloadsDialogController()
-                    ctrl.targetController = this@SettingsAdvancedController
-                    ctrl.showDialog(router)
-                }
-            }
-            preference {
-                key = "pref_clear_webview_data"
-                titleRes = R.string.pref_clear_webview_data
-
-                onClick { clearWebViewData() }
-            }
-            preference {
-                key = "clear_database"
-                titleRes = R.string.clear_database
-                summaryRes = R.string.clear_database_summary
-
-                onClick {
-                    val ctrl = ClearDatabaseDialogController()
-                    ctrl.targetController = this@SettingsAdvancedController
-                    ctrl.showDialog(router)
-                }
-            }
-        }
-
-        preferenceCategory {
-            titleRes = R.string.network
-            preference {
-                key = "clear_cookies"
-                titleRes = R.string.clear_cookies
-
-                onClick {
-                    network.cookieManager.removeAll()
-                    activity?.toast(R.string.cookies_cleared)
-                }
-            }
-            intListPreference(activity) {
-                key = networkPreferences.dohProvider().key()
-                titleRes = R.string.doh
-                entriesRes = arrayOf(
-                    R.string.disabled,
-                    R.string.cloudflare,
-                    R.string.google,
-                    R.string.ad_guard,
-                    R.string.quad9,
-                    R.string.aliDNS,
-                    R.string.dnsPod,
-                    R.string.dns_360,
-                    R.string.quad_101,
-                    R.string.mullvad,
-                    R.string.control_d,
-                    R.string.njalla,
-                    R.string.shecan,
-                )
-                entryValues = listOf(
-                    -1,
-                    PREF_DOH_CLOUDFLARE,
-                    PREF_DOH_GOOGLE,
-                    PREF_DOH_ADGUARD,
-                    PREF_DOH_QUAD9,
-                    PREF_DOH_ALIDNS,
-                    PREF_DOH_DNSPOD,
-                    PREF_DOH_360,
-                    PREF_DOH_QUAD101,
-                    PREF_DOH_MULLVAD,
-                    PREF_DOH_CONTROLD,
-                    PREF_DOH_NJALLA,
-                    PREF_DOH_SHECAN,
-                )
-
-                defaultValue = -1
+            switchPreference {
+                key = networkPreferences.verboseLogging().key()
+                titleRes = R.string.verbose_logging
+                summaryRes = R.string.verbose_logging_summary
+                defaultValue = BuildConfig.DEBUG
                 onChange {
                     activity?.toast(R.string.requires_app_restart)
                     true
                 }
             }
-        }
 
-        preference {
-            key = "send_firebase_event"
-            title = "send a test firebase event"
+            val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
+            if (pm != null) {
+                preference {
+                    key = "disable_batt_opt"
+                    titleRes = R.string.disable_battery_optimization
+                    summaryRes = R.string.disable_if_issues_with_updating
 
-            onClick {
-                FirebaseAnalytics.getInstance(context).logEvent("test_event", Bundle().apply { this.putString("test", "test") })
+                    onClick {
+                        val packageName: String = context.packageName
+                        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                            val intent =
+                                Intent().apply {
+                                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                                    data = "package:$packageName".toUri()
+                                }
+                            startActivity(intent)
+                        } else {
+                            context.toast(R.string.battery_optimization_disabled)
+                        }
+                    }
+                }
             }
-        }
-        if (BuildConfig.DEBUG) {
+
             preference {
-                title = "Remove library manga from All MDLists"
+                key = "pref_dont_kill_my_app"
+                title = "Don't kill my app!"
+                summaryRes = R.string.about_dont_kill_my_app
+
+                onClick { openInBrowser("https://dontkillmyapp.com/") }
+            }
+
+            preferenceCategory {
+                titleRes = R.string.data_management
+                preference {
+                    key = CLEAR_CACHE_KEY
+                    titleRes = R.string.clear_chapter_cache
+                    summary = context.getString(R.string.used_, chapterCache.readableSize)
+
+                    onClick { clearChapterCache() }
+                }
+
+                preference {
+                    titleRes = R.string.force_download_cache_refresh
+                    summaryRes = R.string.force_download_cache_refresh_summary
+                    onClick {
+                        (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                            downloadManager.refreshCache()
+                        }
+                    }
+                }
+
+                preference {
+                    key = "clean_cached_covers"
+                    titleRes = R.string.clean_up_cached_covers
+                    summary =
+                        context.getString(
+                            R.string.delete_old_covers_in_library_used_,
+                            coverCache.getChapterCacheSize(),
+                        )
+
+                    onClick {
+                        context.toast(R.string.starting_cleanup)
+                        (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                            coverCache.deleteOldCovers()
+                        }
+                    }
+                }
+                preference {
+                    key = "clear_cached_not_library"
+                    titleRes = R.string.clear_cached_covers_non_library
+                    summary =
+                        context.getString(
+                            R.string.delete_all_covers__not_in_library_used_,
+                            coverCache.getOnlineCoverCacheSize(),
+                        )
+
+                    onClick {
+                        context.toast(R.string.starting_cleanup)
+                        (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                            coverCache.deleteAllCachedCovers()
+                        }
+                    }
+                }
+                preference {
+                    key = "clean_downloaded_chapters"
+                    titleRes = R.string.clean_up_downloaded_chapters
+
+                    summaryRes = R.string.delete_unused_chapters
+
+                    onClick {
+                        val ctrl = CleanupDownloadsDialogController()
+                        ctrl.targetController = this@SettingsAdvancedController
+                        ctrl.showDialog(router)
+                    }
+                }
+                preference {
+                    key = "pref_clear_webview_data"
+                    titleRes = R.string.pref_clear_webview_data
+
+                    onClick { clearWebViewData() }
+                }
+                preference {
+                    key = "clear_database"
+                    titleRes = R.string.clear_database
+                    summaryRes = R.string.clear_database_summary
+
+                    onClick {
+                        val ctrl = ClearDatabaseDialogController()
+                        ctrl.targetController = this@SettingsAdvancedController
+                        ctrl.showDialog(router)
+                    }
+                }
+            }
+
+            preferenceCategory {
+                titleRes = R.string.network
+                preference {
+                    key = "clear_cookies"
+                    titleRes = R.string.clear_cookies
+
+                    onClick {
+                        network.cookieManager.removeAll()
+                        activity?.toast(R.string.cookies_cleared)
+                    }
+                }
+                intListPreference(activity) {
+                    key = networkPreferences.dohProvider().key()
+                    titleRes = R.string.doh
+                    entriesRes =
+                        arrayOf(
+                            R.string.disabled,
+                            R.string.cloudflare,
+                            R.string.google,
+                            R.string.ad_guard,
+                            R.string.quad9,
+                            R.string.aliDNS,
+                            R.string.dnsPod,
+                            R.string.dns_360,
+                            R.string.quad_101,
+                            R.string.mullvad,
+                            R.string.control_d,
+                            R.string.njalla,
+                            R.string.shecan,
+                        )
+                    entryValues =
+                        listOf(
+                            -1,
+                            PREF_DOH_CLOUDFLARE,
+                            PREF_DOH_GOOGLE,
+                            PREF_DOH_ADGUARD,
+                            PREF_DOH_QUAD9,
+                            PREF_DOH_ALIDNS,
+                            PREF_DOH_DNSPOD,
+                            PREF_DOH_360,
+                            PREF_DOH_QUAD101,
+                            PREF_DOH_MULLVAD,
+                            PREF_DOH_CONTROLD,
+                            PREF_DOH_NJALLA,
+                            PREF_DOH_SHECAN,
+                        )
+
+                    defaultValue = -1
+                    onChange {
+                        activity?.toast(R.string.requires_app_restart)
+                        true
+                    }
+                }
+            }
+
+            preference {
+                key = "send_firebase_event"
+                title = "send a test firebase event"
+
                 onClick {
-                    launchIO {
-                        val db = Injekt.get<DatabaseHelper>()
+                    FirebaseAnalytics.getInstance(context)
+                        .logEvent("test_event", Bundle().apply { this.putString("test", "test") })
+                }
+            }
+            if (BuildConfig.DEBUG) {
+                preference {
+                title = "Remove library manga from All MDLists"
+                    onClick {
+                        launchIO {
+                            val db = Injekt.get<DatabaseHelper>()
                         val mangaDex = Injekt.get<SourceManager>().mangaDex
-                        val trackManager: TrackManager = Injekt.get()
+                            val trackManager: TrackManager = Injekt.get()
                         mangaDex.fetchAllUserLists().onSuccess { resultListPage ->
                             val listIds = resultListPage.results.map { it.uuid }
                             db.getLibraryMangaList().executeAsBlocking().forEach { libraryManga ->
@@ -314,40 +319,41 @@ class SettingsAdvancedController : SettingsController() {
                     }
                 }
             }
-            preference {
-                title = "Clear all Manga"
-                onClick {
-                    launchIO {
-                        val db = Injekt.get<DatabaseHelper>()
-                        db.deleteAllManga().executeOnIO()
+                preference {
+                    title = "Clear all Manga"
+                    onClick {
+                        launchIO {
+                            val db = Injekt.get<DatabaseHelper>()
+                            db.deleteAllManga().executeOnIO()
+                        }
                     }
                 }
-            }
-            preference {
-                title = "Clear all categories"
-                onClick {
-                    launchIO {
-                        val db = Injekt.get<DatabaseHelper>()
-                        val categories = db.getCategories().executeAsBlocking()
-                        db.deleteCategories(categories).executeOnIO()
+                preference {
+                    title = "Clear all categories"
+                    onClick {
+                        launchIO {
+                            val db = Injekt.get<DatabaseHelper>()
+                            val categories = db.getCategories().executeAsBlocking()
+                            db.deleteCategories(categories).executeOnIO()
+                        }
                     }
                 }
-            }
-            preference {
-                title = "Clear all trackers"
-                onClick {
-                    launchIO {
-                        val db = Injekt.get<DatabaseHelper>()
-                        db.deleteTracks().executeOnIO()
+                preference {
+                    title = "Clear all trackers"
+                    onClick {
+                        launchIO {
+                            val db = Injekt.get<DatabaseHelper>()
+                            db.deleteTracks().executeOnIO()
+                        }
                     }
                 }
             }
         }
-    }
 
     class CleanupDownloadsDialogController : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return activity!!.materialAlertDialog()
+            return activity!!
+                .materialAlertDialog()
                 .setTitle(R.string.clean_up_downloaded_chapters)
                 .setMultiChoiceItems(
                     R.array.clean_up_downloads,
@@ -368,8 +374,10 @@ class SettingsAdvancedController : SettingsController() {
                     )
                 }
                 .setNegativeButton(android.R.string.cancel, null)
-                .create().apply {
-                    this.disableItems(arrayOf(activity!!.getString(R.string.clean_orphaned_downloads)))
+                .create()
+                .apply {
+                    this.disableItems(
+                        arrayOf(activity!!.getString(R.string.clean_orphaned_downloads)))
                 }
         }
     }
@@ -379,45 +387,46 @@ class SettingsAdvancedController : SettingsController() {
 
         activity?.toast(R.string.starting_cleanup)
         job = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
-            val downloadProvider = DownloadProvider(activity!!)
-            var foldersCleared = 0
-            val mangaList = db.getMangaList().executeAsBlocking()
-            val mangaFolders = downloadManager.getMangaFolders()
+                val downloadProvider = DownloadProvider(activity!!)
+                var foldersCleared = 0
+                val mangaList = db.getMangaList().executeAsBlocking()
+                val mangaFolders = downloadManager.getMangaFolders()
 
-            for (mangaFolder in mangaFolders) {
-                val manga =
-                    mangaList.find { downloadProvider.getMangaDirName(it) == mangaFolder.name }
-                if (manga == null) {
-                    // download is orphaned delete it if remove non favorited is enabled
-                    if (removeNonFavorite) {
-                        foldersCleared += 1 + (mangaFolder.listFiles()?.size ?: 0)
-                        mangaFolder.delete()
+                for (mangaFolder in mangaFolders) {
+                    val manga =
+                        mangaList.find { downloadProvider.getMangaDirName(it) == mangaFolder.name }
+                    if (manga == null) {
+                        // download is orphaned delete it if remove non favorited is enabled
+                        if (removeNonFavorite) {
+                            foldersCleared += 1 + (mangaFolder.listFiles()?.size ?: 0)
+                            mangaFolder.delete()
+                        }
+                        continue
                     }
-                    continue
-                }
-                val chapterList = db.getChapters(manga).executeAsBlocking()
-                foldersCleared += downloadManager.cleanupChapters(
-                    chapterList,
-                    manga,
-                    removeRead,
-                    removeNonFavorite,
-                )
-            }
-            launchUI {
-                val activity = activity ?: return@launchUI
-                val cleanupString =
-                    if (foldersCleared == 0) {
-                        activity.getString(R.string.no_folders_to_cleanup)
-                    } else {
-                        resources!!.getQuantityString(
-                            R.plurals.cleanup_done,
-                            foldersCleared,
-                            foldersCleared,
+                    val chapterList = db.getChapters(manga).executeAsBlocking()
+                    foldersCleared +=
+                        downloadManager.cleanupChapters(
+                            chapterList,
+                            manga,
+                            removeRead,
+                            removeNonFavorite,
                         )
-                    }
-                activity.toast(cleanupString, Toast.LENGTH_LONG)
+                }
+                launchUI {
+                    val activity = activity ?: return@launchUI
+                    val cleanupString =
+                        if (foldersCleared == 0) {
+                            activity.getString(R.string.no_folders_to_cleanup)
+                        } else {
+                            resources!!.getQuantityString(
+                                R.plurals.cleanup_done,
+                                foldersCleared,
+                                foldersCleared,
+                            )
+                        }
+                    activity.toast(cleanupString, Toast.LENGTH_LONG)
+                }
             }
-        }
     }
 
     private fun clearChapterCache() {
@@ -435,11 +444,8 @@ class SettingsAdvancedController : SettingsController() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {
-                },
-                {
-                    activity?.toast(R.string.cache_delete_error)
-                },
+                {},
+                { activity?.toast(R.string.cache_delete_error) },
                 {
                     activity?.toast(
                         resources?.getQuantityString(
@@ -458,13 +464,17 @@ class SettingsAdvancedController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val item = arrayOf(activity!!.getString(R.string.clear_db_exclude_read))
             val selected = booleanArrayOf(false)
-            return activity!!.materialAlertDialog()
-                .setCustomTitleAndMessage(R.string.clear_database_confirmation_title, activity!!.getString(R.string.clear_database_confirmation))
+            return activity!!
+                .materialAlertDialog()
+                .setCustomTitleAndMessage(
+                    R.string.clear_database_confirmation_title,
+                    activity!!.getString(R.string.clear_database_confirmation))
                 .setMultiChoiceItems(item, selected) { _, which, checked ->
                     selected[which] = checked
                 }
                 .setPositiveButton(android.R.string.ok) { _, _ ->
-                    (targetController as? SettingsAdvancedController)?.clearDatabase(selected.last())
+                    (targetController as? SettingsAdvancedController)?.clearDatabase(
+                        selected.last())
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()

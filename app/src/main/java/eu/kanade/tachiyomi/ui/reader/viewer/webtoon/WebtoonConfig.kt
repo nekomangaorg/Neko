@@ -18,9 +18,7 @@ import org.nekomanga.domain.reader.ReaderPreferences
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/**
- * Configuration used by webtoon viewers.
- */
+/** Configuration used by webtoon viewers. */
 class WebtoonConfig(
     scope: CoroutineScope,
     preferences: PreferencesHelper = Injekt.get(),
@@ -44,7 +42,8 @@ class WebtoonConfig(
 
     var zoomPropertyChangedListener: ((Boolean) -> Unit)? = null
 
-    var splitPages = readerPreferences.webtoonPageLayout().get() == PageLayout.SPLIT_PAGES.webtoonValue
+    var splitPages =
+        readerPreferences.webtoonPageLayout().get() == PageLayout.SPLIT_PAGES.webtoonValue
 
     var invertDoublePages = false
 
@@ -53,43 +52,49 @@ class WebtoonConfig(
     init {
         readerPreferences.animatedPageTransitionsWebtoon().register({ usePageTransitions = it })
 
-        readerPreferences.navigationModeWebtoon()
+        readerPreferences
+            .navigationModeWebtoon()
             .register({ navigationMode = it }, { updateNavigation(it) })
 
-        readerPreferences.webtoonNavInverted()
+        readerPreferences
+            .webtoonNavInverted()
             .register(
                 { tappingInverted = it },
-                {
-                    navigator.invertMode = it
-                },
+                { navigator.invertMode = it },
             )
 
-        readerPreferences.webtoonNavInverted().changes()
+        readerPreferences
+            .webtoonNavInverted()
+            .changes()
             .drop(1)
-            .onEach {
-                navigationModeInvertedListener?.invoke()
-            }
+            .onEach { navigationModeInvertedListener?.invoke() }
             .launchIn(scope)
 
-        readerPreferences.cropBordersWebtoon()
+        readerPreferences
+            .cropBordersWebtoon()
             .register({ webtoonCropBorders = it }, { imagePropertyChangedListener?.invoke() })
 
-        readerPreferences.cropBorders()
+        readerPreferences
+            .cropBorders()
             .register({ verticalCropBorders = it }, { imagePropertyChangedListener?.invoke() })
 
-        readerPreferences.webtoonSidePadding()
+        readerPreferences
+            .webtoonSidePadding()
             .register({ sidePadding = it }, { imagePropertyChangedListener?.invoke() })
 
-        readerPreferences.webtoonEnableZoomOut()
+        readerPreferences
+            .webtoonEnableZoomOut()
             .register({ enableZoomOut = it }, { zoomPropertyChangedListener?.invoke(it) })
 
-        readerPreferences.webtoonPageLayout()
+        readerPreferences
+            .webtoonPageLayout()
             .register(
                 { splitPages = it == PageLayout.SPLIT_PAGES.webtoonValue },
                 { imagePropertyChangedListener?.invoke() },
             )
         readerPreferences.webtoonReaderHideThreshold().register({ menuThreshold = it.threshold })
-        readerPreferences.webtoonInvertDoublePages()
+        readerPreferences
+            .webtoonInvertDoublePages()
             .register({ invertDoublePages = it }, { imagePropertyChangedListener?.invoke() })
 
         navigationOverlayForNewUser = preferences.showNavigationOverlayNewUserWebtoon().get()
@@ -108,15 +113,16 @@ class WebtoonConfig(
     }
 
     override fun updateNavigation(navigationMode: Int) {
-        this.navigator = when (navigationMode) {
-            0 -> defaultNavigation()
-            1 -> LNavigation()
-            2 -> KindlishNavigation()
-            3 -> EdgeNavigation()
-            4 -> RightAndLeftNavigation()
-            5 -> DisabledNavigation()
-            else -> defaultNavigation()
-        }
+        this.navigator =
+            when (navigationMode) {
+                0 -> defaultNavigation()
+                1 -> LNavigation()
+                2 -> KindlishNavigation()
+                3 -> EdgeNavigation()
+                4 -> RightAndLeftNavigation()
+                5 -> DisabledNavigation()
+                else -> defaultNavigation()
+            }
         navigationModeChangedListener?.invoke()
     }
 }

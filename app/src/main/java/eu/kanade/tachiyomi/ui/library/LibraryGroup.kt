@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 object LibraryGroup {
 

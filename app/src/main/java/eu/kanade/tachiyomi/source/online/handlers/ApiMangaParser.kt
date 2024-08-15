@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.lang.toResultError
 import kotlin.math.floor
+import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
@@ -27,10 +28,12 @@ class ApiMangaParser {
     val network: NetworkHelper by injectLazy()
     val preferencesHelper: PreferencesHelper by injectLazy()
 
-    /**
-     * Parse the manga details json into manga object
-     */
-    fun mangaDetailsParse(mangaDto: MangaDataDto, stats: Stats, simpleChapters: List<String>): Result<SManga, ResultError> {
+    /** Parse the manga details json into manga object */
+    fun mangaDetailsParse(
+        mangaDto: MangaDataDto,
+        stats: Stats,
+        simpleChapters: List<String>
+    ): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
             val manga = mangaDto.toBasicManga(preferencesHelper.thumbnailQuality().get())
@@ -42,23 +45,31 @@ class ApiMangaParser {
 
             manga.description = mangaAttributesDto.description.asMdMap<String>()["en"]
 
-            manga.author = mangaDto.relationships.filter { relationshipDto ->
-                relationshipDto.type.equals(MdConstants.Types.author, true)
-            }.mapNotNull { it.attributes!!.name }.distinct().joinToString(" • ")
+            manga.author =
+                mangaDto.relationships
+                    .filter { relationshipDto ->
+                        relationshipDto.type.equals(MdConstants.Types.author, true)
+                    }
+                    .mapNotNull { it.attributes!!.name }
+                    .distinct()
+                    .joinToString(Constants.SEPARATOR)
 
-            manga.artist = mangaDto.relationships.filter { relationshipDto ->
-                relationshipDto.type.equals(MdConstants.Types.artist, true)
-            }.mapNotNull { it.attributes!!.name }.distinct().joinToString(" • ")
+            manga.artist =
+                mangaDto.relationships
+                    .filter { relationshipDto ->
+                        relationshipDto.type.equals(MdConstants.Types.artist, true)
+                    }
+                    .mapNotNull { it.attributes!!.name }
+                    .distinct()
+                    .joinToString(Constants.SEPARATOR)
 
-            val altTitles = mangaAttributesDto.altTitles?.map { it.asMdMap<String>().values }?.flatten()
+            val altTitles =
+                mangaAttributesDto.altTitles?.map { it.asMdMap<String>().values }?.flatten()
             manga.setAltTitles(altTitles)
-
 
             manga.lang_flag = mangaAttributesDto.originalLanguage
             val lastChapter = mangaAttributesDto.lastChapter?.toFloatOrNull()
-            lastChapter?.let {
-                manga.last_chapter_number = floor(it).toInt()
-            }
+            lastChapter?.let { manga.last_chapter_number = floor(it).toInt() }
 
             val otherUrls = mutableListOf<String>()
             mangaAttributesDto.links?.asMdMap<String>()?.let { linkMap ->
@@ -81,8 +92,7 @@ class ApiMangaParser {
             val tempStatus = parseStatus(mangaAttributesDto.status ?: "")
             val publishedOrCancelled =
                 (tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED)
-            if (publishedOrCancelled && simpleChapters.contains(mangaAttributesDto.lastChapter)
-            ) {
+            if (publishedOrCancelled && simpleChapters.contains(mangaAttributesDto.lastChapter)) {
                 manga.status = SManga.COMPLETED
                 manga.missing_chapters = null
             } else {
@@ -91,20 +101,23 @@ class ApiMangaParser {
 
             val tempContentRating = mangaAttributesDto.contentRating?.capitalized()
 
-            val contentRating = if (tempContentRating == null) {
-                null
-            } else {
-                "Content rating: " + tempContentRating.capitalized()
-            }
+            val contentRating =
+                if (tempContentRating == null) {
+                    null
+                } else {
+                    "Content rating: " + tempContentRating.capitalized()
+                }
 
-            val genres = (
-                listOf(mangaAttributesDto.publicationDemographic?.capitalized()) +
-                    mangaAttributesDto.tags.map { it.id }
-                        .map { dexTagId -> MangaTag.values().firstOrNull { tag -> tag.uuid == dexTagId } }
-                        .map { tag -> tag?.prettyPrint } +
-                    listOf(contentRating)
-                )
-                .filterNotNull()
+            val genres =
+                (listOf(mangaAttributesDto.publicationDemographic?.capitalized()) +
+                        mangaAttributesDto.tags
+                            .map { it.id }
+                            .map { dexTagId ->
+                                MangaTag.values().firstOrNull { tag -> tag.uuid == dexTagId }
+                            }
+                            .map { tag -> tag?.prettyPrint } +
+                        listOf(contentRating))
+                    .filterNotNull()
 
             manga.genre = genres.joinToString(", ")
 
@@ -115,13 +128,14 @@ class ApiMangaParser {
         }
     }
 
-    private fun parseStatus(status: String) = when (status) {
-        "ongoing" -> SManga.ONGOING
-        "completed" -> SManga.PUBLICATION_COMPLETE
-        "cancelled" -> SManga.CANCELLED
-        "hiatus" -> SManga.HIATUS
-        else -> SManga.UNKNOWN
-    }
+    private fun parseStatus(status: String) =
+        when (status) {
+            "ongoing" -> SManga.ONGOING
+            "completed" -> SManga.PUBLICATION_COMPLETE
+            "cancelled" -> SManga.CANCELLED
+            "hiatus" -> SManga.HIATUS
+            else -> SManga.UNKNOWN
+        }
 
     fun chapterListParse(
         lastChapterNumber: Int?,
@@ -129,17 +143,18 @@ class ApiMangaParser {
         groupMap: Map<String, String>,
     ): Result<List<SChapter>, ResultError> {
         return runCatching {
-            Ok(
-                chapterListResponse.asSequence()
-                    .map {
-                        mapChapter(it, lastChapterNumber, groupMap)
-                    }.toList(),
-            )
-        }.getOrElse {
-            val msg = "Exception parsing chapters"
-            TimberKt.e(it) { msg }
-            Err(msg.toResultError())
-        }
+                Ok(
+                    chapterListResponse
+                        .asSequence()
+                        .map { mapChapter(it, lastChapterNumber, groupMap) }
+                        .toList(),
+                )
+            }
+            .getOrElse {
+                val msg = "Exception parsing chapters"
+                TimberKt.e(it) { msg }
+                Err(msg.toResultError())
+            }
     }
 
     private fun mapChapter(
@@ -157,8 +172,10 @@ class ApiMangaParser {
         chapter.date_upload = MdUtil.parseDate(attributes.readableAt)
 
         val scanlatorName =
-            networkChapter.relationships.filter { it.type == MdConstants.Types.scanlator }
-                .mapNotNull { groups[it.id] }.toMutableSet()
+            networkChapter.relationships
+                .filter { it.type == MdConstants.Types.scanlator }
+                .mapNotNull { groups[it.id] }
+                .toMutableSet()
 
         if (scanlatorName.contains("no group") || scanlatorName.isEmpty()) {
             scanlatorName.remove("no group")
@@ -175,7 +192,10 @@ class ApiMangaParser {
     }
 }
 
-fun ChapterDataDto.buildChapterName(chapter: SChapter? = null, lastChapterNumber: Int? = null): String {
+fun ChapterDataDto.buildChapterName(
+    chapter: SChapter? = null,
+    lastChapterNumber: Int? = null
+): String {
     val chapterName = mutableListOf<String>()
     // Build chapter name
 

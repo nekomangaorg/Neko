@@ -3,24 +3,23 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackStatusService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 class MyAnimeList(private val context: Context, id: Int) : TrackStatusService(id) {
 
     private val json: Json by injectLazy()
-    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword().get()) }
+    private val interceptor by lazy { MyAnimeListInterceptor(this) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
-    @StringRes
-    override fun nameRes() = R.string.myanimelist
+    @StringRes override fun nameRes() = R.string.myanimelist
 
     override val supportsReadingDates: Boolean = true
 
@@ -28,27 +27,29 @@ class MyAnimeList(private val context: Context, id: Int) : TrackStatusService(id
 
     override fun getLogoColor() = Color.rgb(46, 81, 162)
 
-    override fun getStatus(status: Int): String = with(context) {
-        when (status) {
-            READING -> getString(R.string.reading)
-            COMPLETED -> getString(R.string.completed)
-            ON_HOLD -> getString(R.string.on_hold)
-            DROPPED -> getString(R.string.dropped)
-            PLAN_TO_READ -> getString(R.string.plan_to_read)
-            else -> ""
+    override fun getStatus(status: Int): String =
+        with(context) {
+            when (status) {
+                READING -> getString(R.string.reading)
+                COMPLETED -> getString(R.string.completed)
+                ON_HOLD -> getString(R.string.on_hold)
+                DROPPED -> getString(R.string.dropped)
+                PLAN_TO_READ -> getString(R.string.plan_to_read)
+                else -> ""
+            }
         }
-    }
 
-    override fun getGlobalStatus(status: Int): String = with(context) {
-        when (status) {
+    override fun getGlobalStatus(status: Int): String =
+        with(context) {
+            when (status) {
             READING -> getString(R.string.global_tracker_status_reading)
             PLAN_TO_READ -> getString(R.string.global_tracker_status_plan_to_read)
             COMPLETED -> getString(R.string.global_tracker_status_completed)
             ON_HOLD -> getString(R.string.global_tracker_status_on_hold)
             DROPPED -> getString(R.string.global_tracker_status_dropped)
-            else -> ""
+                else -> ""
+            }
         }
-    }
 
     override fun getStatusList(): List<Int> {
         return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
@@ -57,7 +58,9 @@ class MyAnimeList(private val context: Context, id: Int) : TrackStatusService(id
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
     override fun completedStatus(): Int = COMPLETED
+
     override fun readingStatus() = READING
+
     override fun planningStatus() = PLAN_TO_READ
 
     override fun getScoreList(): List<String> {
@@ -143,6 +146,14 @@ class MyAnimeList(private val context: Context, id: Int) : TrackStatusService(id
         super.logout()
         preferences.trackToken(this).delete()
         interceptor.setAuth(null)
+    }
+
+    fun getIfAuthExpired(): Boolean {
+        return preferences.trackAuthExpired(this).get()
+    }
+
+    fun setAuthExpired() {
+        preferences.trackAuthExpired(this).set(true)
     }
 
     fun saveOAuth(oAuth: OAuth?) {

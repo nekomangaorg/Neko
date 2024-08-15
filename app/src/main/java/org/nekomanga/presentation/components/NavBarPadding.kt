@@ -24,7 +24,6 @@ fun rememberSideBarVisible(windowSizeClass: WindowSizeClass, sideNavMode: SideNa
                     WindowWidthSizeClass.Medium -> {
                         windowSizeClass.heightSizeClass != WindowHeightSizeClass.Medium
                     }
-
                     else -> false
                 }
             }
@@ -33,18 +32,29 @@ fun rememberSideBarVisible(windowSizeClass: WindowSizeClass, sideNavMode: SideNa
 }
 
 @Composable
-fun rememberNavBarPadding(isSideBarShowing: Boolean, shouldIgnoreBottomNavPadding: Boolean = false): PaddingValues {
-    val bottomNav = PaddingValues(
-        bottom = when {
-            shouldIgnoreBottomNavPadding -> Size.none
-            else -> Size.navBarSize + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        },
-    )
-    val sideNav = PaddingValues(start = Size.navBarSize, bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-    return remember(isSideBarShowing, WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()) {
-        when (isSideBarShowing) {
-            true -> sideNav
-            false -> bottomNav
+fun rememberNavBarPadding(
+    isSideBarShowing: Boolean,
+    shouldIgnoreBottomNavPadding: Boolean = false
+): PaddingValues {
+    val bottomNav =
+        PaddingValues(
+            bottom =
+                when {
+                    shouldIgnoreBottomNavPadding -> Size.none
+                    else ->
+                        Size.navBarSize +
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                },
+        )
+    val sideNav =
+        PaddingValues(
+            start = Size.navBarSize,
+            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+    return remember(
+        isSideBarShowing, WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()) {
+            when (isSideBarShowing) {
+                true -> sideNav
+                false -> bottomNav
+            }
         }
-    }
 }

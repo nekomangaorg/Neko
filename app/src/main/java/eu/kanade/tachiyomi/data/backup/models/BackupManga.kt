@@ -42,23 +42,19 @@ data class BackupManga(
     @ProtoNumber(800) var customTitle: String? = null,
 
     // Neko Values
-    @Deprecated("Use mergeMangaList")
-    @ProtoNumber(900)
-    var mergedMangaUrl: String? = null,
+    @Deprecated("Use mergeMangaList") @ProtoNumber(900) var mergedMangaUrl: String? = null,
     @ProtoNumber(901) var scanlatorFilter: String? = null,
-    @Deprecated("Use mergeMangaList")
-    @ProtoNumber(902)
-    var mergedMangaImageUrl: String? = null,
+    @Deprecated("Use mergeMangaList") @ProtoNumber(902) var mergedMangaImageUrl: String? = null,
     @ProtoNumber(903) var alternativeArtwork: String? = null,
     @ProtoNumber(904) var mergeMangaList: List<BackupMergeManga> = emptyList(),
-
 ) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
-            url = this@BackupManga.url.replace(
-                "/manga/",
-                "/title/",
-            ) // tachiyomi extension uses /manga/
+            url =
+                this@BackupManga.url.replace(
+                    "/manga/",
+                    "/title/",
+                ) // tachiyomi extension uses /manga/
             title = this@BackupManga.title
             artist = this@BackupManga.artist
             author = this@BackupManga.author
@@ -70,11 +66,8 @@ data class BackupManga(
             source = this@BackupManga.source
             date_added = this@BackupManga.dateAdded
             merge_manga_url = this@BackupManga.mergedMangaUrl
-            viewer_flags = (
-                this@BackupManga.viewer_flags
-                    ?: this@BackupManga.viewer
-                ).takeIf { it != 0 }
-                ?: -1
+            viewer_flags =
+                (this@BackupManga.viewer_flags ?: this@BackupManga.viewer).takeIf { it != 0 } ?: -1
             chapter_flags = this@BackupManga.chapterFlags
             filtered_scanlators = this@BackupManga.scanlatorFilter
             user_title = this@BackupManga.customTitle
@@ -83,21 +76,15 @@ data class BackupManga(
     }
 
     fun getMergeMangaImpl(): List<MergeMangaImpl> {
-        return mergeMangaList.map {
-            it.toMergeMangaImpl()
-        }
+        return mergeMangaList.map { it.toMergeMangaImpl() }
     }
 
     fun getChaptersImpl(): List<ChapterImpl> {
-        return chapters.map {
-            it.toChapterImpl()
-        }
+        return chapters.map { it.toChapterImpl() }
     }
 
     fun getTrackingImpl(): List<TrackImpl> {
-        return tracking.map {
-            it.getTrackingImpl()
-        }
+        return tracking.map { it.getTrackingImpl() }
     }
 
     companion object {

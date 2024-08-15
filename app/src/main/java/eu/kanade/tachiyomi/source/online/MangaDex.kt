@@ -90,11 +90,15 @@ open class MangaDex : HttpSource() {
 
     suspend fun getRandomManga(): Result<SourceManga, ResultError> {
         return withIOContext {
-            val response = networkServices.service.randomManga(preferences.contentRatingSelections().get().toList())
+            val response =
+                networkServices.service.randomManga(
+                    preferences.contentRatingSelections().get().toList())
 
-            val result = response.getOrResultError("trying to get random Manga")
-                .andThen {
-                    Ok(it.data.toSourceManga(preferences.thumbnailQuality().get(), useNoCoverUrl = false))
+            val result =
+                response.getOrResultError("trying to get random Manga").andThen {
+                    Ok(
+                        it.data.toSourceManga(
+                            preferences.thumbnailQuality().get(), useNoCoverUrl = false))
                 }
 
             return@withIOContext result
@@ -109,11 +113,13 @@ open class MangaDex : HttpSource() {
 
     suspend fun getScanlator(scanlator: String): Result<Scanlator, ResultError> {
         return withIOContext {
-            networkServices.service.scanlatorGroup(scanlator).getOrResultError("Trying to get scanlator")
+            networkServices.service
+                .scanlatorGroup(scanlator)
+                .getOrResultError("Trying to get scanlator")
                 .andThen { groupListDto ->
                     val groupDto = groupListDto.data.firstOrNull()
                     when (groupDto == null) {
-                        true -> Err("No Results".toResultError())
+                        true -> Err("No Scanlator Group found".toResultError())
                         false -> {
                             Ok(
                                 Scanlator(
@@ -162,25 +168,25 @@ open class MangaDex : HttpSource() {
 
     suspend fun fetchHomePageInfo(blockedScanlatorUUIDs: List<String>, showSubscriptionFeed: Boolean): Result<List<ListResults>, ResultError> {
         return withIOContext {
-            binding {
+            coroutineBinding {
                 val seasonal = async {
                     fetchList(MdConstants.oldSeasonalId, 1, false).andThen { listResults ->
                         Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
-                    }
+                        }
                         .bind()
                 }
 
                 val staffPick = async {
                     fetchList(MdConstants.staffPicksId, 1, false).andThen { listResults ->
                         Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
-                    }
+                        }
                         .bind()
                 }
 
                 val nekoDevPicks = async {
                     fetchList(MdConstants.nekoDevPicksId, 1, false).andThen { listResults ->
                         Ok(listResults.copy(sourceManga = listResults.sourceManga.shuffled().toImmutableList()))
-                    }
+                        }
                         .bind()
                 }
 
@@ -196,23 +202,42 @@ open class MangaDex : HttpSource() {
                 }
 
                 val popularNewTitles = async {
-                    searchHandler.popularNewTitles(1).andThen { mangaListPage ->
-                        Ok(ListResults(displayScreenType = DisplayScreenType.PopularNewTitles(), sourceManga = mangaListPage.sourceManga.shuffled().toImmutableList()))
-                    }.bind()
+                    searchHandler
+                        .popularNewTitles(1)
+                        .andThen { mangaListPage ->
+                            Ok(
+                                ListResults(
+                                    displayScreenType = DisplayScreenType.PopularNewTitles(),
+                                    sourceManga =
+                                        mangaListPage.sourceManga.shuffled().toImmutableList()))
+                        }
+                        .bind()
                 }
 
                 val latestChapter = async {
-                    latestChapterHandler.getPage(blockedScanlatorUUIDs = blockedScanlatorUUIDs, limit = MdConstants.Limits.latestSmaller)
+                    latestChapterHandler
+                        .getPage(
+                            blockedScanlatorUUIDs = blockedScanlatorUUIDs,
+                            limit = MdConstants.Limits.latestSmaller)
                         .andThen { mangaListPage ->
-                            Ok(ListResults(displayScreenType = DisplayScreenType.LatestChapters(), sourceManga = mangaListPage.sourceManga))
-                        }.bind()
+                            Ok(
+                                ListResults(
+                                    displayScreenType = DisplayScreenType.LatestChapters(),
+                                    sourceManga = mangaListPage.sourceManga))
+                        }
+                        .bind()
                 }
 
                 val recentlyAdded = async {
-                    searchHandler.recentlyAdded(1).andThen { mangaListPage ->
-
-                        Ok(ListResults(displayScreenType = DisplayScreenType.RecentlyAdded(), sourceManga = mangaListPage.sourceManga))
-                    }.bind()
+                    searchHandler
+                        .recentlyAdded(1)
+                        .andThen { mangaListPage ->
+                            Ok(
+                                ListResults(
+                                    displayScreenType = DisplayScreenType.RecentlyAdded(),
+                                    sourceManga = mangaListPage.sourceManga))
+                        }
+                        .bind()
                 }
 
                 listOfNotNull(subscriptionFeed.await(), popularNewTitles.await(), latestChapter.await(), seasonal.await(), staffPick.await(), nekoDevPicks.await(), recentlyAdded.await())
@@ -232,11 +257,19 @@ open class MangaDex : HttpSource() {
         return latestChapterHandler.getPage(page, blockedScanlatorUUIDs, feedType = feedType)
     }
 
-    suspend fun getMangaDetails(mangaUUID: String, fetchArtwork: Boolean = true): Result<Pair<SManga, List<SourceArtwork>>, ResultError> {
-        return logTimeTaken("Total time to get manga details $mangaUUID") { mangaHandler.fetchMangaDetails(mangaUUID, fetchArtwork) }
+    suspend fun getMangaDetails(
+        mangaUUID: String,
+        fetchArtwork: Boolean = true
+    ): Result<Pair<SManga, List<SourceArtwork>>, ResultError> {
+        return logTimeTaken("Total time to get manga details $mangaUUID") {
+            mangaHandler.fetchMangaDetails(mangaUUID, fetchArtwork)
+        }
     }
 
-    suspend fun fetchMangaAndChapterDetails(manga: SManga, fetchArtwork: Boolean): Result<MangaDetailChapterInformation, ResultError> {
+    suspend fun fetchMangaAndChapterDetails(
+        manga: SManga,
+        fetchArtwork: Boolean
+    ): Result<MangaDetailChapterInformation, ResultError> {
         return mangaHandler.fetchMangaAndChapterDetails(manga, fetchArtwork)
     }
 
@@ -248,11 +281,11 @@ open class MangaDex : HttpSource() {
         return mangaHandler.fetchChapterList(manga.uuid(), manga.last_chapter_number)
     }
 
-    override suspend fun fetchPageList(chapter: SChapter): List<Page> {
+    override suspend fun getPageList(chapter: SChapter): List<Page> {
         return pageHandler.fetchPageList(chapter)
     }
 
-    override suspend fun fetchImage(page: Page): Response {
+    override suspend fun getImage(page: Page): Response {
         return imageHandler.getImage(page, loginHelper.isLoggedIn())
     }
 
@@ -287,7 +320,8 @@ open class MangaDex : HttpSource() {
     suspend fun checkIfUp(): Boolean {
         return withContext(Dispatchers.IO) {
             true
-            // val response = network.client.newCall(GET(MdUtil.apiUrl + MdUtil.apiManga + 1)).await()
+            // val response = network.client.newCall(GET(MdUtil.apiUrl + MdUtil.apiManga +
+            // 1)).await()
             // response.isSuccessful
         }
     }

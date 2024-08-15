@@ -12,7 +12,9 @@ import com.mikepenz.fastadapter.listeners.OnBindViewHolderListenerImpl
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.util.system.dpToPx
 
-class CategoryRecyclerView @JvmOverloads constructor(
+class CategoryRecyclerView
+@JvmOverloads
+constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : RecyclerView(context, attrs) {
@@ -20,7 +22,7 @@ class CategoryRecyclerView @JvmOverloads constructor(
     val manager = LinearLayoutManager(context)
     private val fastAdapter: FastAdapter<CategoryItem>
     var onCategoryClicked: (Int) -> Unit = { _ -> }
-    var onShowAllClicked: (Boolean) -> Unit = { }
+    var onShowAllClicked: (Boolean) -> Unit = {}
     private val itemAdapter = ItemAdapter<CategoryItem>()
     var selectedCategory: Int = 0
 
@@ -35,19 +37,17 @@ class CategoryRecyclerView @JvmOverloads constructor(
     fun setCategories(items: List<Category>, itemsMap: Map<Int, Int>) {
         itemAdapter.set(items.map { CategoryItem(it, itemsMap[it.id]) })
         fastAdapter.onBindViewHolderListener =
-            (
-                object : OnBindViewHolderListenerImpl<CategoryItem>() {
-                    override fun onBindViewHolder(
-                        viewHolder: ViewHolder,
-                        position: Int,
-                        payloads: List<Any>,
-                    ) {
-                        super.onBindViewHolder(viewHolder, position, payloads)
-                        (viewHolder as? CategoryItem.ViewHolder)?.categoryTitle?.isSelected =
-                            selectedCategory == position
-                    }
+            (object : OnBindViewHolderListenerImpl<CategoryItem>() {
+                override fun onBindViewHolder(
+                    viewHolder: ViewHolder,
+                    position: Int,
+                    payloads: List<Any>,
+                ) {
+                    super.onBindViewHolder(viewHolder, position, payloads)
+                    (viewHolder as? CategoryItem.ViewHolder)?.categoryTitle?.isSelected =
+                        selectedCategory == position
                 }
-                )
+            })
         fastAdapter.onClickListener = { _, _, item, _ ->
             if (item.category.id != -1) {
                 onCategoryClicked(item.category.order)
@@ -69,8 +69,9 @@ class CategoryRecyclerView @JvmOverloads constructor(
     fun setCategories(selected: Int) {
         selectedCategory = selected
         for (i in 0..manager.itemCount) {
-            (findViewHolderForAdapterPosition(i) as? CategoryItem.ViewHolder)?.categoryTitle?.isSelected =
-                selectedCategory == i
+            (findViewHolderForAdapterPosition(i) as? CategoryItem.ViewHolder)
+                ?.categoryTitle
+                ?.isSelected = selectedCategory == i
         }
     }
 
@@ -78,11 +79,12 @@ class CategoryRecyclerView @JvmOverloads constructor(
         val mainView = (parent.parent.parent as ViewGroup)
         val top = marginTop
         val parent = mainView.measuredHeight - top - 100.dpToPx
-        val heightS = if (parent > 0) {
-            MeasureSpec.makeMeasureSpec(parent, MeasureSpec.AT_MOST)
-        } else {
-            heightSpec
-        }
+        val heightS =
+            if (parent > 0) {
+                MeasureSpec.makeMeasureSpec(parent, MeasureSpec.AT_MOST)
+            } else {
+                heightSpec
+            }
         super.onMeasure(widthSpec, heightS)
     }
 }

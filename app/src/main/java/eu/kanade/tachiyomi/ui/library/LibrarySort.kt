@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.library
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
+import org.nekomanga.R
 
 enum class LibrarySort(
     val mainValue: Int,
@@ -30,7 +30,6 @@ enum class LibrarySort(
         R.drawable.ic_label_outline_24dp,
     ),
     Rating(8, R.string.rating, R.drawable.ic_poll_24dp),
-
     ;
 
     val categoryValue: Char
@@ -39,11 +38,9 @@ enum class LibrarySort(
     val categoryValueDescending: Char
         get() = if (this == DragAndDrop) 'D' else 'b' + catValue * 2
 
-    @StringRes
-    fun stringRes(isDynamic: Boolean) = if (isDynamic) dynamicStringRes else stringRes
+    @StringRes fun stringRes(isDynamic: Boolean) = if (isDynamic) dynamicStringRes else stringRes
 
-    @DrawableRes
-    fun iconRes(isDynamic: Boolean) = if (isDynamic) dynamicIconRes else iconRes
+    @DrawableRes fun iconRes(isDynamic: Boolean) = if (isDynamic) dynamicIconRes else iconRes
 
     fun menuSheetItem(isDynamic: Boolean): MaterialMenuSheet.MenuSheetItem {
         return MaterialMenuSheet.MenuSheetItem(
@@ -55,6 +52,7 @@ enum class LibrarySort(
 
     companion object {
         fun valueOf(value: Int) = values().find { it.mainValue == value }
+
         fun valueOf(char: Char?) =
             values().find { it.categoryValue == char || it.categoryValueDescending == char }
     }

@@ -5,9 +5,9 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.updateLayoutParams
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.SortTextViewBinding
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import org.nekomanga.R
+import org.nekomanga.databinding.SortTextViewBinding
 
 class SortTextView constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {
@@ -29,11 +29,12 @@ class SortTextView constructor(context: Context, attrs: AttributeSet?) :
     val isSorting: Boolean
         get() = state != State.NONE
 
-    private val binding = SortTextViewBinding.inflate(
-        LayoutInflater.from(context),
-        this,
-        false,
-    )
+    private val binding =
+        SortTextViewBinding.inflate(
+            LayoutInflater.from(context),
+            this,
+            false,
+        )
     private var mOnSortChangeListener: OnSortChangeListener? = null
 
     init {
@@ -51,7 +52,8 @@ class SortTextView constructor(context: Context, attrs: AttributeSet?) :
             binding.textView.setTextAppearance(resourceId)
         }
 
-        val drawablePadding = a.getDimensionPixelSize(R.styleable.SortTextView_android_drawablePadding, 0)
+        val drawablePadding =
+            a.getDimensionPixelSize(R.styleable.SortTextView_android_drawablePadding, 0)
         if (drawablePadding != 0) {
             binding.textView.updateLayoutParams<MarginLayoutParams> {
                 marginStart = drawablePadding
@@ -71,8 +73,7 @@ class SortTextView constructor(context: Context, attrs: AttributeSet?) :
     }
 
     /**
-     * Register a callback to be invoked when the checked state of this button
-     * changes.
+     * Register a callback to be invoked when the checked state of this button changes.
      *
      * @param listener the callback to call on checked state change
      */
@@ -100,12 +101,11 @@ class SortTextView constructor(context: Context, attrs: AttributeSet?) :
         ASCENDING,
         DESCENDING,
         NONE,
-        ;
     }
 
     /**
-     * Interface definition for a callback to be invoked when the checked state
-     * of a compound button changed.
+     * Interface definition for a callback to be invoked when the checked state of a compound button
+     * changed.
      */
     fun interface OnSortChangeListener {
         /**

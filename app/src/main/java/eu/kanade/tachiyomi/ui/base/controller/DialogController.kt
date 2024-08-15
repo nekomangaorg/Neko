@@ -11,11 +11,11 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 
 /**
- * A controller that displays a dialog window, floating on top of its activity's window.
- * This is a wrapper over [Dialog] object like [android.app.DialogFragment].
+ * A controller that displays a dialog window, floating on top of its activity's window. This is a
+ * wrapper over [Dialog] object like [android.app.DialogFragment].
  *
- *
- * Implementations should override this class and implement [.onCreateDialog] to create a custom dialog, such as an [android.app.AlertDialog]
+ * Implementations should override this class and implement [.onCreateDialog] to create a custom
+ * dialog, such as an [android.app.AlertDialog]
  */
 abstract class DialogController : Controller {
 
@@ -24,9 +24,7 @@ abstract class DialogController : Controller {
 
     private var dismissed = false
 
-    /**
-     * Convenience constructor for use when no arguments are needed.
-     */
+    /** Convenience constructor for use when no arguments are needed. */
     protected constructor() : super(null)
 
     /**
@@ -36,7 +34,11 @@ abstract class DialogController : Controller {
      */
     protected constructor(args: Bundle?) : super(args)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup,
+        savedViewState: Bundle?
+    ): View {
         dialog = onCreateDialog(savedViewState)
         dialog!!.setOwnerActivity(activity!!)
         dialog!!.setOnDismissListener { dismissDialog() }
@@ -74,6 +76,7 @@ abstract class DialogController : Controller {
 
     /**
      * Display the dialog, create a transaction and pushing the controller.
+     *
      * @param router The router on which the transaction will be applied
      */
     open fun showDialog(router: Router) {
@@ -82,6 +85,7 @@ abstract class DialogController : Controller {
 
     /**
      * Display the dialog, create a transaction and pushing the controller.
+     *
      * @param router The router on which the transaction will be applied
      * @param tag The tag for this controller
      */
@@ -95,9 +99,7 @@ abstract class DialogController : Controller {
         )
     }
 
-    /**
-     * Dismiss the dialog and pop this controller
-     */
+    /** Dismiss the dialog and pop this controller */
     fun dismissDialog() {
         if (dismissed) {
             return
@@ -109,7 +111,8 @@ abstract class DialogController : Controller {
     /**
      * Build your own custom Dialog container such as an [android.app.AlertDialog]
      *
-     * @param savedViewState A bundle for the view's state, which would have been created in [.onSaveViewState] or `null` if no saved state exists.
+     * @param savedViewState A bundle for the view's state, which would have been created in
+     *   [.onSaveViewState] or `null` if no saved state exists.
      * @return Return a new Dialog instance to be displayed by the Controller
      */
     protected abstract fun onCreateDialog(savedViewState: Bundle?): Dialog

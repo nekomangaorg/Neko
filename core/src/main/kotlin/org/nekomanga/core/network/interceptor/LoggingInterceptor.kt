@@ -11,7 +11,9 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
         HttpLoggingInterceptor.Logger { message ->
             try {
                 if (message.contains("grant_type=") || message.contains("""access_token:""")) {
-                    TimberKt.d { "Not logging request because it contained sessionToken || refreshToken" }
+                    TimberKt.d {
+                        "Not logging request because it contained sessionToken || refreshToken"
+                    }
                 } else {
                     val element = json.parseToJsonElement(message)
                     TimberKt.d { json.encodeToString(element) }
@@ -21,14 +23,12 @@ fun loggingInterceptor(verboseLoggingProvider: () -> Boolean, json: Json): HttpL
             }
         }
 
-
     return HttpLoggingInterceptor(logger).apply {
-        level = when (verboseLoggingProvider()) {
-            true -> HttpLoggingInterceptor.Level.BODY
-            false -> HttpLoggingInterceptor.Level.BASIC
-        }
+        level =
+            when (verboseLoggingProvider()) {
+                true -> HttpLoggingInterceptor.Level.BODY
+                false -> HttpLoggingInterceptor.Level.BASIC
+            }
         redactHeader(HttpHeaders.AUTHORIZATION)
     }
 }
-
-

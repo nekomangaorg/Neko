@@ -89,9 +89,7 @@ open class MangaImpl : Manga {
     override var thread_id: String? = null
 
     override fun copyFrom(other: SManga) {
-        if (other is MangaImpl &&
-            other.title.isNotBlank() && other.title != title
-        ) {
+        if (other is MangaImpl && other.title.isNotBlank() && other.title != title) {
             val oldTitle = title
             title = other.title
             val db: DownloadManager by injectLazy()

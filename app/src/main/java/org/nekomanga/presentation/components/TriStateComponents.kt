@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.defaultThemeColorState
@@ -37,22 +36,26 @@ fun TriStateCheckboxRow(
     themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     Row(
-        modifier = modifier.clickable {
-            toggleStateIfAble(disabled, state, toggleState)
-        },
+        modifier = modifier.clickable { toggleStateIfAble(disabled, state, toggleState) },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TriStateCheckbox(
             state = state,
             onClick = { toggleStateIfAble(disabled, state, toggleState) },
             enabled = !disabled,
-            colors = CheckboxDefaults.colors(
-                checkedColor = themeColorState.buttonColor,
-                checkmarkColor = MaterialTheme.colorScheme.surface,
-            ),
+            colors =
+                CheckboxDefaults.colors(
+                    checkedColor = themeColorState.buttonColor,
+                    checkmarkColor = MaterialTheme.colorScheme.surface,
+                ),
         )
         Gap(Size.tiny)
-        Text(text = rowText, color = if (!disabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast), style = rowTextStyle)
+        Text(
+            text = rowText,
+            color =
+                if (!disabled) MaterialTheme.colorScheme.onSurface
+                else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
+            style = rowTextStyle)
     }
 }
 
@@ -63,7 +66,8 @@ fun TriStateFilterChip(
     name: String,
     modifier: Modifier = Modifier,
     hideIcons: Boolean = false,
-    labelTextStyle: TextStyle = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+    labelTextStyle: TextStyle =
+        MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
 ) {
     FilterChip(
         modifier = modifier,
@@ -80,26 +84,36 @@ fun TriStateFilterChip(
         },
         shape = RoundedCornerShape(100),
         label = { Text(text = name, style = labelTextStyle) },
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            selectedContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-            selectedLabelColor = MaterialTheme.colorScheme.primary,
-            selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
-        ),
-        border = FilterChipDefaults.filterChipBorder(
-            borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
-            selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-        ),
+        colors =
+            FilterChipDefaults.filterChipColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                selectedContainerColor =
+                    MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
+                selectedLabelColor = MaterialTheme.colorScheme.primary,
+                selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+            ),
+        border =
+            FilterChipDefaults.filterChipBorder(
+                enabled = true,
+                selected = false,
+                borderColor = MaterialTheme.colorScheme.onSurface.copy(NekoColors.veryLowContrast),
+                selectedBorderColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
+            ),
     )
 }
 
-private fun toggleStateIfAble(disabled: Boolean, state: ToggleableState, toggleState: (ToggleableState) -> Unit) {
+private fun toggleStateIfAble(
+    disabled: Boolean,
+    state: ToggleableState,
+    toggleState: (ToggleableState) -> Unit
+) {
     if (!disabled) {
-        val newState = when (state) {
-            ToggleableState.On -> ToggleableState.Indeterminate
-            ToggleableState.Indeterminate -> ToggleableState.Off
-            ToggleableState.Off -> ToggleableState.On
-        }
+        val newState =
+            when (state) {
+                ToggleableState.On -> ToggleableState.Indeterminate
+                ToggleableState.Indeterminate -> ToggleableState.Off
+                ToggleableState.Off -> ToggleableState.On
+            }
         toggleState(newState)
     }
 }

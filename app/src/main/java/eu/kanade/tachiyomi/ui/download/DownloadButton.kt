@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.download
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
@@ -11,10 +10,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.databinding.DownloadButtonBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import org.nekomanga.R
+import org.nekomanga.databinding.DownloadButtonBinding
 
 class DownloadButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
@@ -22,64 +21,82 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
     var colorSecondary = context.getResourceColor(R.attr.colorSecondary)
         set(value) {
             field = value
-            activeColor = ColorUtils.blendARGB(
-                colorSecondary,
-                context.getResourceColor(R.attr.background),
-                0.05f,
-            )
-            downloadedColor = ColorUtils.blendARGB(
-                colorSecondary,
-                context.getResourceColor(R.attr.colorOnBackground),
-                0.3f,
-            )
+            activeColor =
+                ColorUtils.blendARGB(
+                    colorSecondary,
+                    context.getResourceColor(R.attr.background),
+                    0.05f,
+                )
+            downloadedColor =
+                ColorUtils.blendARGB(
+                    colorSecondary,
+                    context.getResourceColor(R.attr.colorOnBackground),
+                    0.3f,
+                )
         }
-    private var activeColor = ColorUtils.blendARGB(
-        colorSecondary,
-        context.getResourceColor(R.attr.background),
-        0.05f,
-    )
-    private val progressBGColor = ContextCompat.getColor(
-        context,
-        R.color.divider,
-    )
-    private val disabledColor = ContextCompat.getColor(
-        context,
-        R.color.material_on_surface_disabled,
-    )
-    private var downloadedColor = ColorUtils.blendARGB(
-        colorSecondary,
-        context.getResourceColor(R.attr.colorOnBackground),
-        0.3f,
-    )
+
+    private var activeColor =
+        ColorUtils.blendARGB(
+            colorSecondary,
+            context.getResourceColor(R.attr.background),
+            0.05f,
+        )
+    private val progressBGColor =
+        ContextCompat.getColor(
+            context,
+            R.color.divider,
+        )
+    private val disabledColor =
+        ContextCompat.getColor(
+            context,
+            R.color.material_on_surface_disabled,
+        )
+    private var downloadedColor =
+        ColorUtils.blendARGB(
+            colorSecondary,
+            context.getResourceColor(R.attr.colorOnBackground),
+            0.3f,
+        )
     private val downloadedTextColor = context.getResourceColor(R.attr.background)
-    private val errorColor = ContextCompat.getColor(
-        context,
-        R.color.material_red_500,
-    )
-    private val filledCircle = ContextCompat.getDrawable(
-        context,
-        R.drawable.filled_circle,
-    )?.mutate()
-    private val borderCircle = ContextCompat.getDrawable(
-        context,
-        R.drawable.border_circle,
-    )?.mutate()
-    private val downloadDrawable = ContextCompat.getDrawable(
-        context,
-        R.drawable.ic_arrow_downward_24dp,
-    )?.mutate()
-    private val checkDrawable = ContextCompat.getDrawable(
-        context,
-        R.drawable.ic_check_24dp,
-    )?.mutate()
-    private val filledAnim = AnimatedVectorDrawableCompat.create(
-        context,
-        R.drawable.anim_outline_to_filled,
-    )
-    private val checkAnim = AnimatedVectorDrawableCompat.create(
-        context,
-        R.drawable.anim_dl_to_check_to_dl,
-    )
+    private val errorColor =
+        ContextCompat.getColor(
+            context,
+            R.color.material_red_500,
+        )
+    private val filledCircle =
+        ContextCompat.getDrawable(
+                context,
+                R.drawable.filled_circle,
+            )
+            ?.mutate()
+    private val borderCircle =
+        ContextCompat.getDrawable(
+                context,
+                R.drawable.border_circle,
+            )
+            ?.mutate()
+    private val downloadDrawable =
+        ContextCompat.getDrawable(
+                context,
+                R.drawable.ic_arrow_downward_24dp,
+            )
+            ?.mutate()
+    private val checkDrawable =
+        ContextCompat.getDrawable(
+                context,
+                R.drawable.ic_check_24dp,
+            )
+            ?.mutate()
+    private val filledAnim =
+        AnimatedVectorDrawableCompat.create(
+            context,
+            R.drawable.anim_outline_to_filled,
+        )
+    private val checkAnim =
+        AnimatedVectorDrawableCompat.create(
+            context,
+            R.drawable.anim_dl_to_check_to_dl,
+        )
     private var isAnimating = false
     private var iconAnimation: ObjectAnimator? = null
 
@@ -96,22 +113,8 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             binding.downloadIcon.alpha = 1f
             isAnimating = false
         }
-        binding.downloadIcon.setImageDrawable(
-            if (state == Download.State.CHECKED) {
-                checkDrawable
-            } else {
-                downloadDrawable
-            },
-        )
+        binding.downloadIcon.setImageDrawable(downloadDrawable)
         when (state) {
-            Download.State.CHECKED -> {
-                binding.downloadProgress.isVisible = false
-                binding.downloadBorder.isVisible = true
-                binding.downloadProgressIndeterminate.isVisible = false
-                binding.downloadBorder.setImageDrawable(filledCircle)
-                binding.downloadBorder.drawable.setTint(activeColor)
-                binding.downloadIcon.drawable.setTint(Color.WHITE)
-            }
             Download.State.NOT_DOWNLOADED -> {
                 binding.downloadBorder.isVisible = true
                 binding.downloadProgress.isVisible = false
@@ -138,11 +141,12 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                 binding.downloadProgress.progressDrawable?.setTint(downloadedColor)
                 binding.downloadIcon.drawable.setTint(disabledColor)
                 if (!isAnimating) {
-                    iconAnimation = ObjectAnimator.ofFloat(binding.downloadIcon, "alpha", 1f, 0f).apply {
-                        duration = 1000
-                        repeatCount = ObjectAnimator.INFINITE
-                        repeatMode = ObjectAnimator.REVERSE
-                    }
+                    iconAnimation =
+                        ObjectAnimator.ofFloat(binding.downloadIcon, "alpha", 1f, 0f).apply {
+                            duration = 1000
+                            repeatCount = ObjectAnimator.INFINITE
+                            repeatMode = ObjectAnimator.REVERSE
+                        }
                     iconAnimation?.start()
                     isAnimating = true
                 }

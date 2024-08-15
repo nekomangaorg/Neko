@@ -14,33 +14,35 @@ interface MergeMangaQueries : DbProvider {
 
     fun getMergeMangaList(manga: Manga) = getMergeMangaList(manga.id!!)
 
-    fun getMergeMangaList(mangaId: Long) = db.get()
-        .listOfObjects(MergeMangaImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(MergeMangaTable.TABLE)
-                .where("${MergeMangaTable.COL_MANGA_ID} = ?")
-                .whereArgs(mangaId)
-                .build(),
-        )
-        .prepare()
+    fun getMergeMangaList(mangaId: Long) =
+        db.get()
+            .listOfObjects(MergeMangaImpl::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(MergeMangaTable.TABLE)
+                    .where("${MergeMangaTable.COL_MANGA_ID} = ?")
+                    .whereArgs(mangaId)
+                    .build(),
+            )
+            .prepare()
 
-    fun getAllMergeManga() = db.get()
-        .listOfObjects(MergeMangaImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(MergeMangaTable.TABLE)
-                .build(),
-        )
-        .prepare()
+    fun getAllMergeManga() =
+        db.get()
+            .listOfObjects(MergeMangaImpl::class.java)
+            .withQuery(
+                Query.builder().table(MergeMangaTable.TABLE).build(),
+            )
+            .prepare()
 
-    fun deleteMergeMangaForType(mangaId: Long, mergeType: MergeType) = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(MergeMangaTable.TABLE)
-                .where("${MergeMangaTable.COL_MANGA_ID} = ? AND ${MergeMangaTable.COL_MERGE_TYPE} = ?")
-                .whereArgs(mangaId, mergeType.id)
-                .build(),
-        )
-        .prepare()
+    fun deleteMergeMangaForType(mangaId: Long, mergeType: MergeType) =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(MergeMangaTable.TABLE)
+                    .where(
+                        "${MergeMangaTable.COL_MANGA_ID} = ? AND ${MergeMangaTable.COL_MERGE_TYPE} = ?")
+                    .whereArgs(mangaId, mergeType.id)
+                    .build(),
+            )
+            .prepare()
 }

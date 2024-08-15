@@ -3,9 +3,10 @@ package eu.kanade.tachiyomi.widget
 import android.content.Context
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
-class GridLayoutManagerAccurateOffset(context: Context?, spanCount: Int) : GridLayoutManager(context, spanCount) {
+class GridLayoutManagerAccurateOffset(context: Context?, spanCount: Int) :
+    GridLayoutManager(context, spanCount) {
 
     var rView: RecyclerView? = null
 
@@ -32,10 +33,13 @@ class GridLayoutManagerAccurateOffset(context: Context?, spanCount: Int) : GridL
             return 0
         }
         rView ?: return super.computeVerticalScrollOffset(state)
-        val firstChild = (0 until childCount)
-            .mapNotNull { getChildAt(it) }
-            .mapNotNull { pos -> (pos to getPosition(pos)).takeIf { it.second != RecyclerView.NO_POSITION } }
-            .minByOrNull { it.second } ?: return 0
+        val firstChild =
+            (0 until childCount)
+                .mapNotNull { getChildAt(it) }
+                .mapNotNull { pos ->
+                    (pos to getPosition(pos)).takeIf { it.second != RecyclerView.NO_POSITION }
+                }
+                .minByOrNull { it.second } ?: return 0
         val scrolledY: Int = -firstChild.first.y.toInt()
         return if (firstChild.second == 0) {
             scrolledY + paddingTop

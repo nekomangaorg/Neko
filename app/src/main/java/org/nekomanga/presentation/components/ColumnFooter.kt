@@ -24,7 +24,6 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.launch
@@ -34,6 +33,7 @@ import org.nekomanga.presentation.theme.Size
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ColumnScope.SearchFooter(
+    modifier: Modifier = Modifier,
     themeColorState: ThemeColorState,
     title: String,
     labelText: String,
@@ -53,52 +53,58 @@ fun ColumnScope.SearchFooter(
     }
 
     OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .bringIntoViewRequester(bringIntoViewRequester)
-            .onFocusEvent {
-                if (it.isFocused || it.hasFocus) {
-                    scope.launch {
-                        bringIntoViewRequester.bringIntoView()
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .bringIntoViewRequester(bringIntoViewRequester)
+                .onFocusEvent {
+                    if (it.isFocused || it.hasFocus) {
+                        scope.launch { bringIntoViewRequester.bringIntoView() }
                     }
                 }
-            }
-            .padding(horizontal = 8.dp),
+                .padding(horizontal = Size.small),
         value = title,
         enabled = enabled,
         singleLine = true,
-        label = {
-            Text(text = labelText, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        },
+        label = { Text(text = labelText, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         trailingIcon = {
             if (isError) {
-                Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error)
             } else if (title.isNotEmpty()) {
                 IconButton(onClick = { textChanged("") }) {
-                    Icon(imageVector = Icons.Default.Cancel, contentDescription = null, tint = themeColorState.buttonColor)
+                    Icon(
+                        imageVector = Icons.Default.Cancel,
+                        contentDescription = null,
+                        tint = themeColorState.buttonColor)
                 }
             }
         },
         isError = isError,
         onValueChange = { textChanged(it) },
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedLabelColor = themeColorState.buttonColor,
-            focusedBorderColor = themeColorState.buttonColor,
-            cursorColor = themeColorState.buttonColor,
-            errorBorderColor = MaterialTheme.colorScheme.error,
-            errorCursorColor = MaterialTheme.colorScheme.error,
-            errorLabelColor = MaterialTheme.colorScheme.error,
-        ),
-        keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Search,
-        ),
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                if (!isError) {
-                    focusManager.clearFocus()
-                    search(title)
-                }
-            },
-        ),
+        colors =
+            TextFieldDefaults.outlinedTextFieldColors(
+                focusedLabelColor = themeColorState.buttonColor,
+                focusedBorderColor = themeColorState.buttonColor,
+                cursorColor = themeColorState.buttonColor,
+                errorBorderColor = MaterialTheme.colorScheme.error,
+                errorCursorColor = MaterialTheme.colorScheme.error,
+                errorLabelColor = MaterialTheme.colorScheme.error,
+            ),
+        keyboardOptions =
+            KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Search,
+            ),
+        keyboardActions =
+            KeyboardActions(
+                onSearch = {
+                    if (!isError) {
+                        focusManager.clearFocus()
+                        search(title)
+                    }
+                },
+            ),
     )
 }

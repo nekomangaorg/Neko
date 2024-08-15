@@ -1,127 +1,138 @@
 [versions]
-aboutlib_version = "10.10.0"
-chucker_version = "3.5.2"
-coil_version = "2.5.0"
-fast_adapter_version = "5.7.0"
-nucleus_version = "3.0.0"
-iconics_version = "5.4.0"
-ka_helpers_version = "3.4.8"
-okhttp_version = "5.0.0-alpha.11"
-retrofit_version = "2.9.0"
-rxbinding_version = "1.0.1"
-roboelectric_version = "4.8.1"
-sandwich_version = "2.0.5"
-kotlin_result = "1.1.18"
+aboutlibVersion = "11.2.2"
+cascadeComposeVersion = "2.3.0"
+cascadeVersion = "2.3.0"
+chuckerVersion = "3.5.2"
+coilVersion = "2.7.0"
+fastAdapterVersion = "5.7.0"
+firebaseBomVersion = "33.1.2"
+firebasePluginVersion = "3.0.2"
+googleServicesPluginVersion = "4.4.2"
+iconicsVersion = "5.4.0"
+injektCoreVersion = "65b0440"
+kotlinResultVersion = "2.0.0"
+ktfmtVersion = "0.19.0"
+loadingButtonAndroidVersion = "2.2.0"
+nucleusVersion = "3.0.0"
+okhttpVersion = "5.0.0-alpha.14"
+photoViewVersion = "2.3.0"
+retrofitVersion = "2.11.0"
+roboelectricVersion = "4.8.1"
+rxbindingVersion = "1.0.1"
+sandwichVersion = "2.0.8"
+simpleIconsVersion = "1.0.0"
+sqliteAndroidVersion = "3.39.2"
+sqliteVersion = "2.3.1"
+taptargetviewVersion = "1.13.3"
+viewTooltipVersion = "f79a8955ef"
 
 
 [libraries]
-google-services-gradle = "com.google.gms:google-services:4.4.0"
-firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.9"
-
-material = "com.google.android.material:material:1.11.0"
+cascade-compose = { module = "me.saket.cascade:cascade-compose", version.ref = "cascadeComposeVersion" }
+cascade = { module = "me.saket.cascade:cascade", version.ref = "cascadeVersion" }
+injekt-core = { module = "com.github.inorichi.injekt:injekt-core", version.ref = "injektCoreVersion" }
+loadingButtonAndroid = { module = "com.github.leandroBorgesFerreira:LoadingButtonAndroid", version.ref = "loadingButtonAndroidVersion" }
+material = "com.google.android.material:material:1.12.0"
 desugaring = "com.android.tools:desugar_jdk_libs:2.0.4"
-firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.5.0"
-firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.6.0"
+photoView = { module = "com.github.chrisbanes:PhotoView", version.ref = "photoViewVersion" }
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"
 flex-box = "com.google.android.flexbox:flexbox:3.0.0"
 #needed for token bucket to work
 guava-fix = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
 
 
-coil = { module = "io.coil-kt:coil", version.ref = "coil_version" }
-coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coil_version" }
-coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil_version" }
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil_version" }
+coil = { module = "io.coil-kt:coil", version.ref = "coilVersion" }
+coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilVersion" }
+coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilVersion" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilVersion" }
 
 disklrue = "com.jakewharton:disklrucache:2.0.2"
 
-iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconics_version" }
-iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconics_version" }
-iconics-compose = { module = "com.mikepenz:iconics-compose", version.ref = "iconics_version" }
-iconics-material = "com.mikepenz:community-material-typeface:7.0.96.0-kotlin"
-iconics-dx = "com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin"
-iconics-outlined = "com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin"
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBomVersion" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
-jsoup = "org.jsoup:jsoup:1.17.2"
+iconics-core = { module = "com.mikepenz:iconics-core", version.ref = "iconicsVersion" }
+iconics-views = { module = "com.mikepenz:iconics-views", version.ref = "iconicsVersion" }
+iconics-compose = { module = "com.mikepenz:iconics-compose", version.ref = "iconicsVersion" }
 
-kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlin_result" }
-kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlin_result" }
 
-nucleus = { module = "info.android15.nucleus:nucleus", version.ref = "nucleus_version" }
-nucleus-support = { module = "info.android15.nucleus:nucleus-support-v7", version.ref = "nucleus_version" }
+jsoup = "org.jsoup:jsoup:1.18.1"
 
+kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlinResultVersion" }
+kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlinResultVersion" }
 
 rx-android = "io.reactivex:rxandroid:1.2.1"
 rx-java = "io.reactivex:rxjava:1.3.8"
 rx-relay = "com.jakewharton.rxrelay:rxrelay:1.2.0"
-rxbinding-kotlin = { module = "com.jakewharton.rxbinding:rxbinding-kotlin", version.ref = "rxbinding_version" }
-rxbinding-appcompat-v7 = { module = "com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin", version.ref = "rxbinding_version" }
-rxbinding-appcompat-v4 = { module = "com.jakewharton.rxbinding:rxbinding-support-v4-kotlin", version.ref = "rxbinding_version" }
-rxbinding-recycler-v7 = { module = "com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin", version.ref = "rxbinding_version" }
+rxbinding-kotlin = { module = "com.jakewharton.rxbinding:rxbinding-kotlin", version.ref = "rxbindingVersion" }
+rxbinding-appcompat-v7 = { module = "com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin", version.ref = "rxbindingVersion" }
+rxbinding-appcompat-v4 = { module = "com.jakewharton.rxbinding:rxbinding-support-v4-kotlin", version.ref = "rxbindingVersion" }
+rxbinding-recycler-v7 = { module = "com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin", version.ref = "rxbindingVersion" }
 
 j2k-subsample = "com.github.jays2kings:subsampling-scale-image-view:756849e"
 
+simple-icons = { module = "br.com.devsrsouza.compose.icons.android:simple-icons", version.ref = "simpleIconsVersion" }
+sqlite-android = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroidVersion" }
+storio-sqlite = "com.github.inorichi.storio:storio-sqlite:8be19de"
+storio-common = "com.github.inorichi.storio:storio-common:8be19de"
+sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqliteVersion" }
 tachi-image-decoder = "com.github.tachiyomiorg:image-decoder:7879b45"
 tachi-source-api = "org.tachiyomi:source-api:1.1"
 tachi-directional-view-pager = "com.github.tachiyomiorg:DirectionalViewPager:1.0.0"
-tachi-unifile = "com.github.tachiyomiorg:unifile:17bec43"
+tachi-unifile = "com.github.tachiyomiorg:unifile:a9de196cc7"
 
 
-ka-helpers-kotlin-ext = { module = "com.github.FunkyMuse.KAHelpers:kotlinextensions", version.ref = "ka_helpers_version" }
-ka-helpers-activity = { module = "com.github.FunkyMuse.KAHelpers:activity", version.ref = "ka_helpers_version" }
-ka-helpers-string = { module = "com.github.FunkyMuse.KAHelpers:string", version.ref = "ka_helpers_version" }
-ka-helpers-common = { module = "com.github.FunkyMuse.KAHelpers:common", version.ref = "ka_helpers_version" }
-
-chucker-debug = { module = "com.github.ChuckerTeam.Chucker:library", version.ref = "chucker_version" }
-chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", version.ref = "chucker_version" }
-
-
-
-
+chucker-debug = { module = "com.github.ChuckerTeam.Chucker:library", version.ref = "chuckerVersion" }
+chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", version.ref = "chuckerVersion" }
+# TLS 1.3 support for Android < 10
 conscrypt = "org.conscrypt:conscrypt-android:2.5.2"
 conductor = "com.bluelinelabs:conductor:3.2.0"
 conductor-supportpref = "com.github.tachiyomiorg:conductor-support-preference:3.1.8"
 
-fast-adapter = { module = "com.mikepenz:fastadapter", version.ref = "fast_adapter_version" }
-fast-adapter-binding = { module = "com.mikepenz:fastadapter-extensions-binding", version.ref = "fast_adapter_version" }
+fast-adapter = { module = "com.mikepenz:fastadapter", version.ref = "fastAdapterVersion" }
+fast-adapter-binding = { module = "com.mikepenz:fastadapter-extensions-binding", version.ref = "fastAdapterVersion" }
 
 flexible-adapter-core = "com.github.arkon.FlexibleAdapter:flexible-adapter:c8013533"
 flexible-adapter-ui = "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c8013533"
 
-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp_version" }
-okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp_version" }
-okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttp_version" }
-okio = "com.squareup.okio:okio:3.7.0"
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttpVersion" }
+okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttpVersion" }
+okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttpVersion" }
+okio = "com.squareup.okio:okio:3.9.0"
 
-sandwich = { module = "com.github.skydoves:sandwich", version.ref = "sandwich_version" }
-sandwich-retrofit = { module = "com.github.skydoves:sandwich-retrofit", version.ref = "sandwich_version" }
-sandwich-retrofit-serialization = { module = "com.github.skydoves:sandwich-retrofit-serialization", version.ref = "sandwich_version" }
+sandwich = { module = "com.github.skydoves:sandwich", version.ref = "sandwichVersion" }
+sandwich-retrofit = { module = "com.github.skydoves:sandwich-retrofit", version.ref = "sandwichVersion" }
+sandwich-retrofit-serialization = { module = "com.github.skydoves:sandwich-retrofit-serialization", version.ref = "sandwichVersion" }
 
+taptargetview = { module = "com.getkeepsafe.taptargetview:taptargetview", version.ref = "taptargetviewVersion" }
 versioncompare = "io.github.g00fy2:versioncompare:1.5.0"
 
 timber = "com.jakewharton.timber:timber:5.0.1"
 
+aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibVersion" }
 
-aboutLibraries-gradle = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlib_version" }
-aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutlib_version" }
-
-leakcanary = "com.squareup.leakcanary:leakcanary-android:2.13"
+leakcanary = "com.squareup.leakcanary:leakcanary-android:2.14"
 pastelplaceholders = "com.github.zedlabs:pastelPlaceholders:1.0.4"
 fuzzysearch = "me.xdrop:fuzzywuzzy:1.4.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
 
-retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }
-retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0"
-retrofit-scalars = "com.squareup.retrofit2:converter-scalars:2.9.0"
+retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
+retrofit-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofitVersion" }
+retrofit-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "retrofitVersion" }
 
 
 #test libs
 junit = "junit:junit:4.13.2"
-mockk = "io.mockk:mockk:1.13.9"
-kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.8.0"
+mockk = "io.mockk:mockk:1.13.12"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.9.1"
+viewTooltip = { module = "com.github.nonproto:ViewTooltip", version.ref = "viewTooltipVersion" }
 
 [plugins]
-kotlinter = { id = "org.jmailen.kotlinter", version = "4.1.1" }
+about-libraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibVersion" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServicesPluginVersion" }
+firebase = { id = "com.google.firebase.crashlytics", version.ref = "firebasePluginVersion" }
+ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmtVersion" }
 
 [bundles]
 coil = ["coil", "coil-gif", "coil-svg", "coil-compose"]
@@ -131,9 +142,7 @@ firebase = ["firebase-analytics", "firebase-crashlytics"]
 flexibleadapter = ["flexible-adapter-core", "flexible-adapter-ui"]
 google = ["material", "guava-fix", "play-services", "flex-box"]
 iconics = ["iconics-core", "iconics-views", "iconics-compose"]
-kahelpers = ["ka-helpers-kotlin-ext", "ka-helpers-activity", "ka-helpers-string", "ka-helpers-common"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
-nucleus = ["nucleus", "nucleus-support"]
 sandwich = ["sandwich", "sandwich-retrofit", "sandwich-retrofit-serialization"]
 tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-pager", "tachi-unifile"]
 tests = ["junit", "mockk", "kotest-assertions"]

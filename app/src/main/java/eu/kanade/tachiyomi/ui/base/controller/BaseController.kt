@@ -16,7 +16,6 @@ import androidx.viewbinding.ViewBinding
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.isControllerVisible
@@ -24,16 +23,17 @@ import eu.kanade.tachiyomi.util.view.removeQueryListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 
-abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
-    Controller(bundle) {
+abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) : Controller(bundle) {
 
     lateinit var binding: VB
     lateinit var viewScope: CoroutineScope
     var isDragging = false
 
-    val isBindingInitialized get() = this::binding.isInitialized
+    val isBindingInitialized
+        get() = this::binding.isInitialized
 
     init {
         addLifecycleListener(
@@ -148,11 +148,12 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     }
 
     /**
-     * Workaround for buggy menu item layout after expanding/collapsing an expandable item like a SearchView.
-     * This method should be removed when fixed upstream.
-     * Issue link: https://issuetracker.google.com/issues/37657375
+     * Workaround for buggy menu item layout after expanding/collapsing an expandable item like a
+     * SearchView. This method should be removed when fixed upstream. Issue link:
+     * https://issuetracker.google.com/issues/37657375
      */
     var expandActionViewFromInteraction = false
+
     fun MenuItem.fixExpand(
         onExpand: ((MenuItem) -> Boolean)? = null,
         onCollapse: ((MenuItem) -> Boolean)? = null,
@@ -179,7 +180,9 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     }
 
     open fun onActionViewExpand(item: MenuItem?) {}
+
     open fun onActionViewCollapse(item: MenuItem?) {}
+
     open fun onSearchActionViewLongClickQuery(): String? = null
 
     fun hideItemsIfExpanded(searchItem: MenuItem?, menu: Menu?, isExpanded: Boolean = false) {
@@ -195,9 +198,10 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     }
 
     /**
-     * Workaround for menu items not disappearing when expanding an expandable item like a SearchView.
-     * [expandActionViewFromInteraction] should be set to true in [onOptionsItemSelected] when the expandable item is selected
-     * This method should be called as part of [MenuItem.OnActionExpandListener.onMenuItemActionExpand]
+     * Workaround for menu items not disappearing when expanding an expandable item like a
+     * SearchView. [expandActionViewFromInteraction] should be set to true in
+     * [onOptionsItemSelected] when the expandable item is selected This method should be called as
+     * part of [MenuItem.OnActionExpandListener.onMenuItemActionExpand]
      */
     fun invalidateMenuOnExpand(): Boolean {
         return if (expandActionViewFromInteraction) {

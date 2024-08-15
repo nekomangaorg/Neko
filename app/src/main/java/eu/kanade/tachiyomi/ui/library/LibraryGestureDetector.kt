@@ -11,47 +11,48 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sign
 
-class LibraryGestureDetector(private val controller: LibraryController) : GestureDetector
-.SimpleOnGestureListener() {
+class LibraryGestureDetector(private val controller: LibraryController) :
+    GestureDetector.SimpleOnGestureListener() {
+
+    private var startingX = 0f
+    private var startingY = 0f
+
     override fun onDown(e: MotionEvent): Boolean {
+        startingX = e.x
+        startingY = e.y
         return false
     }
 
     override fun onScroll(
-        e: MotionEvent?,
+        e1: MotionEvent?,
         e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
-        val e1 = e ?: return false
-
-        val distance = (e1.rawX - e2.rawX) / 50
+        val distance = (startingX - e2.x) / 50
         val poa = 1.7f
-        controller.binding.categoryHopperFrame.translationX = abs(distance).pow(poa) * -sign(distance)
+        controller.binding.categoryHopperFrame.translationX =
+            abs(distance).pow(poa) * -sign(distance)
         return super.onScroll(e1, e2, distanceX, distanceY)
     }
 
     @SuppressLint("RtlHardcoded")
     override fun onFling(
-        e: MotionEvent?,
+        e1: MotionEvent?,
         e2: MotionEvent,
         velocityX: Float,
         velocityY: Float,
     ): Boolean {
-        val e1 = e ?: return false
         var result = false
-        val diffY = e2.y - e1.y
-        val diffX = e2.x - e1.x
+        val diffY = e2.y - startingY
+        val diffX = e2.x - startingX
         val hopperFrame = controller.binding.categoryHopperFrame
         val animator = controller.binding.categoryHopperFrame.animate().setDuration(150L)
         animator.translationX(0f)
-        animator.withEndAction {
-            hopperFrame.translationX = 0f
-        }
+        animator.withEndAction { hopperFrame.translationX = 0f }
         if (abs(diffX) <= abs(diffY) &&
             abs(diffY) > SWIPE_THRESHOLD &&
-            abs(velocityY) > SWIPE_VELOCITY_THRESHOLD
-        ) {
+            abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
             if (diffY <= 0) {
                 controller.showSheet()
             } else {
@@ -60,53 +61,59 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
         } else if (abs(diffX) >= abs(diffY) &&
             abs(diffX) > SWIPE_THRESHOLD * 5 &&
             abs(velocityX) > SWIPE_VELOCITY_THRESHOLD &&
-            sign(diffX) == sign(velocityX)
-        ) {
-            val hopperGravity = (controller.binding.categoryHopperFrame.layoutParams as CoordinatorLayout.LayoutParams).gravity
+            sign(diffX) == sign(velocityX)) {
+            val hopperGravity =
+                (controller.binding.categoryHopperFrame.layoutParams
+                        as CoordinatorLayout.LayoutParams)
+                    .gravity
             if (diffX <= 0) {
-                animator.translationX(
-                    if (hopperGravity == Gravity.TOP or Gravity.LEFT) {
-                        0f
-                    } else {
-                        (-(controller.view!!.width - controller.binding.categoryHopperFrame.width) / 2).toFloat()
-                    },
-                ).withEndAction {
-                    hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                        gravity =
-                            Gravity.TOP or (
-                                if (gravity == Gravity.TOP or Gravity.RIGHT) {
-                                    controller.libraryPreferences.hopperGravity().set(1)
-                                    Gravity.CENTER
-                                } else {
-                                    controller.libraryPreferences.hopperGravity().set(0)
-                                    Gravity.LEFT
-                                }
-                                )
+                animator
+                    .translationX(
+                        if (hopperGravity == Gravity.TOP or Gravity.LEFT) {
+                            0f
+                        } else {
+                            (-(controller.view!!.width -
+                                    controller.binding.categoryHopperFrame.width) / 2)
+                                .toFloat()
+                        },
+                    )
+                    .withEndAction {
+                        hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                            gravity =
+                                Gravity.TOP or
+                                    (if (gravity == Gravity.TOP or Gravity.RIGHT) {
+                                        controller.libraryPreferences.hopperGravity().set(1)
+                                        Gravity.CENTER
+                                    } else {
+                                        controller.libraryPreferences.hopperGravity().set(0)
+                                        Gravity.LEFT
+                                    })
+                        }
+                        savePrefs()
                     }
-                    savePrefs()
-                }
             } else {
-                animator.translationX(
-                    if (hopperGravity == Gravity.TOP or Gravity.RIGHT) {
-                        0f
-                    } else {
-                        ((controller.view!!.width - hopperFrame.width) / 2).toFloat()
-                    },
-                ).withEndAction {
-                    hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                        gravity =
-                            Gravity.TOP or (
-                                if (gravity == Gravity.TOP or Gravity.LEFT) {
-                                    controller.libraryPreferences.hopperGravity().set(1)
-                                    Gravity.CENTER
-                                } else {
-                                    controller.libraryPreferences.hopperGravity().set(2)
-                                    Gravity.RIGHT
-                                }
-                                )
+                animator
+                    .translationX(
+                        if (hopperGravity == Gravity.TOP or Gravity.RIGHT) {
+                            0f
+                        } else {
+                            ((controller.view!!.width - hopperFrame.width) / 2).toFloat()
+                        },
+                    )
+                    .withEndAction {
+                        hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                            gravity =
+                                Gravity.TOP or
+                                    (if (gravity == Gravity.TOP or Gravity.LEFT) {
+                                        controller.libraryPreferences.hopperGravity().set(1)
+                                        Gravity.CENTER
+                                    } else {
+                                        controller.libraryPreferences.hopperGravity().set(2)
+                                        Gravity.RIGHT
+                                    })
+                        }
+                        savePrefs()
                     }
-                    savePrefs()
-                }
             }
             result = true
         }

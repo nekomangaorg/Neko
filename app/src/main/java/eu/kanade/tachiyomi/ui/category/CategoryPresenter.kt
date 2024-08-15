@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.category
 
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -11,12 +10,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/**
- * Presenter of [CategoryController]. Used to manage the categories of the library.
- */
+/** Presenter of [CategoryController]. Used to manage the categories of the library. */
 class CategoryPresenter(
     private val controller: CategoryController,
     private val db: DatabaseHelper = Injekt.get(),
@@ -27,14 +25,10 @@ class CategoryPresenter(
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
-    /**
-     * List containing categories.
-     */
+    /** List containing categories. */
     private var categories: MutableList<Category> = mutableListOf()
 
-    /**
-     * Called when the presenter is created.
-     */
+    /** Called when the presenter is created. */
     fun getCategories() {
         if (categories.isNotEmpty()) {
             controller.setCategories(categories.map(::CategoryItem))
@@ -44,9 +38,7 @@ class CategoryPresenter(
             categories.add(newCategory())
             categories.addAll(db.getCategories().executeAsBlocking())
             val catItems = categories.map(::CategoryItem)
-            withContext(Dispatchers.Main) {
-                controller.setCategories(catItems)
-            }
+            withContext(Dispatchers.Main) { controller.setCategories(catItems) }
         }
     }
 
@@ -107,7 +99,8 @@ class CategoryPresenter(
             categories.forEachIndexed { i, category ->
                 if (category.order != CREATE_CATEGORY_ORDER) category.order = i - 1
             }
-            db.insertCategories(categories.filter { it.order != CREATE_CATEGORY_ORDER }).executeOnIO()
+            db.insertCategories(categories.filter { it.order != CREATE_CATEGORY_ORDER })
+                .executeOnIO()
             this@CategoryPresenter.categories = categories.sortedBy { it.order }.toMutableList()
             withContext(Dispatchers.Main) {
                 controller.setCategories(this@CategoryPresenter.categories.map(::CategoryItem))
@@ -138,9 +131,7 @@ class CategoryPresenter(
         return true
     }
 
-    /**
-     * Returns true if a category with the given name already exists.
-     */
+    /** Returns true if a category with the given name already exists. */
     private fun categoryExists(name: String, id: Int?): Boolean {
         return categories.any { it.name.equals(name, true) && id != it.id }
     }

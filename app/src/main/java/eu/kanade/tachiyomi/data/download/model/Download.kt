@@ -1,80 +1,91 @@
 package eu.kanade.tachiyomi.data.download.model
 
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.getHttpSource
 import eu.kanade.tachiyomi.source.online.HttpSource
-import kotlin.math.roundToInt
-import rx.subjects.PublishSubject
+import eu.kanade.tachiyomi.util.system.executeOnIO
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
-class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
+private const val PROGRESS_DELAY = 50L
+
+data class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
 
     var pages: List<Page>? = null
 
-    @Volatile
-    @Transient
-    var totalProgress: Int = 0
+    val totalProgress: Int
+        get() = pages?.sumOf(Page::progress) ?: 0
 
-    @Volatile
-    @Transient
-    var downloadedImages: Int = 0
+    val downloadedImages: Int
+        get() = pages?.count { it.status == Page.State.READY } ?: 0
 
-    @Volatile
-    @Transient
-    var status: State = State.default
+    @Transient private val _statusFlow = MutableStateFlow(State.NOT_DOWNLOADED)
+
+    @Transient val statusFlow = _statusFlow.asStateFlow()
+    var status: State
+        get() = _statusFlow.value
         set(status) {
-            field = status
-            statusSubject?.onNext(this)
-            statusCallback?.invoke(this)
+            _statusFlow.value = status
         }
 
     @Transient
-    private var statusSubject: PublishSubject<Download>? = null
+    val progressFlow =
+        flow {
+                if (pages == null) {
+                    emit(0)
+                    while (pages == null) {
+                        delay(PROGRESS_DELAY)
+                    }
+                }
 
-    @Transient
-    private var statusCallback: ((Download) -> Unit)? = null
-
-    val pageProgress: Int
-        get() {
-            val pages = pages ?: return 0
-            return pages.map(Page::progress).sum()
-        }
+                val progressFlows = pages!!.map(Page::progressFlow)
+                emitAll(combine(progressFlows) { it.average().toInt() })
+            }
+            .distinctUntilChanged()
+            .debounce(PROGRESS_DELAY)
 
     val progress: Int
         get() {
             val pages = pages ?: return 0
-            return pages.map(Page::progress).average().roundToInt()
+            return pages.map(Page::progress).average().toInt()
         }
 
-    val progressFloat: Float
-        get() {
-            return (progress.toFloat().div(100))
-        }
-
-    fun setStatusSubject(subject: PublishSubject<Download>?) {
-        statusSubject = subject
+    enum class State(val value: Int) {
+        NOT_DOWNLOADED(0),
+        QUEUE(1),
+        DOWNLOADING(2),
+        DOWNLOADED(3),
+        ERROR(4),
     }
 
-    fun setStatusCallback(f: ((Download) -> Unit)?) {
-        statusCallback = f
-    }
+    companion object {
 
-    enum class State {
-        CHECKED,
-        NOT_DOWNLOADED,
-        QUEUE,
-        DOWNLOADING,
-        DOWNLOADED,
-        ERROR,
+        // max progress
+        const val MaxProgress = 100
 
-        ;
+        suspend fun fromChapterId(
+            chapterId: Long,
+            db: DatabaseHelper = Injekt.get(),
+            sourceManager: SourceManager = Injekt.get(),
+        ): Download? {
+            val chapter = db.getChapter(chapterId).executeOnIO()
+            chapter?.manga_id ?: return null
+            val manga = db.getManga(chapter.manga_id!!).executeOnIO() ?: return null
+            val source = chapter.getHttpSource(sourceManager)
 
-        companion object {
-            val default = NOT_DOWNLOADED
-        }
-
-        fun isActive(): Boolean {
-            return this == QUEUE || this == DOWNLOADING
+            return Download(source, manga, chapter)
         }
     }
 }

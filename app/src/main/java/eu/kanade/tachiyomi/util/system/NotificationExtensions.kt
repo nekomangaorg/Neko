@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 fun NotificationCompat.Builder.customize(
     context: Context,
@@ -12,7 +12,7 @@ fun NotificationCompat.Builder.customize(
 ): NotificationCompat.Builder {
     setContentTitle(title)
     setSmallIcon(smallIcon)
-    color = context.contextCompatColor(R.color.new_neko_accent)
+    color = context.contextCompatColor(R.color.iconOutline)
     if (ongoing) {
         setOngoing(true)
     }

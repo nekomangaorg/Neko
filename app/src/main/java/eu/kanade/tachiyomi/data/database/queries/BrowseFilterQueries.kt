@@ -8,45 +8,47 @@ import eu.kanade.tachiyomi.data.database.tables.BrowseFilterTable
 
 interface BrowseFilterQueries : DbProvider {
 
-    fun insertBrowseFilter(browseFilterImpl: BrowseFilterImpl) = db.put().`object`(browseFilterImpl).prepare()
+    fun insertBrowseFilter(browseFilterImpl: BrowseFilterImpl) =
+        db.put().`object`(browseFilterImpl).prepare()
 
-    fun insertBrowseFilters(browseFilters: List<BrowseFilterImpl>) = db.put().objects(browseFilters).prepare()
+    fun insertBrowseFilters(browseFilters: List<BrowseFilterImpl>) =
+        db.put().objects(browseFilters).prepare()
 
-    fun deleteBrowseFilter(name: String) = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(BrowseFilterTable.TABLE)
-                .where("${BrowseFilterTable.COL_NAME} = ?")
-                .whereArgs(name)
-                .build(),
-        )
-        .prepare()
+    fun deleteBrowseFilter(name: String) =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(BrowseFilterTable.TABLE)
+                    .where("${BrowseFilterTable.COL_NAME} = ?")
+                    .whereArgs(name)
+                    .build(),
+            )
+            .prepare()
 
-    fun deleteAllBrowseFilters() = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(BrowseFilterTable.TABLE)
-                .build(),
-        )
-        .prepare()
+    fun deleteAllBrowseFilters() =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder().table(BrowseFilterTable.TABLE).build(),
+            )
+            .prepare()
 
-    fun getBrowseFilters() = db.get()
-        .listOfObjects(BrowseFilterImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(BrowseFilterTable.TABLE)
-                .build(),
-        )
-        .prepare()
+    fun getBrowseFilters() =
+        db.get()
+            .listOfObjects(BrowseFilterImpl::class.java)
+            .withQuery(
+                Query.builder().table(BrowseFilterTable.TABLE).build(),
+            )
+            .prepare()
 
-    fun getDefault() = db.get()
-        .listOfObjects(BrowseFilterImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(BrowseFilterTable.TABLE)
-                .where("${BrowseFilterTable.COL_DEFAULT} = ?")
-                .whereArgs(true)
-                .build(),
-        )
-        .prepare()
+    fun getDefault() =
+        db.get()
+            .listOfObjects(BrowseFilterImpl::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(BrowseFilterTable.TABLE)
+                    .where("${BrowseFilterTable.COL_DEFAULT} = ?")
+                    .whereArgs(true)
+                    .build(),
+            )
+            .prepare()
 }

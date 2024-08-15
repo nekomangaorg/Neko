@@ -5,33 +5,37 @@ import android.view.GestureDetector
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import androidx.core.view.isVisible
-import eu.kanade.tachiyomi.databinding.LibraryCategoryHeaderItemBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sign
+import org.nekomanga.databinding.LibraryCategoryHeaderItemBinding
 
 class LibraryHeaderGestureDetector(
     private val header: LibraryHeaderHolder?,
     private val binding: LibraryCategoryHeaderItemBinding?,
 ) : GestureDetector.SimpleOnGestureListener() {
 
+    private var startingX = 0f
+    private var startingY = 0f
     var vibrated = false
+
     override fun onDown(e: MotionEvent): Boolean {
         vibrated = false
+        startingX = e.x
+        startingY = e.y
         return super.onDown(e)
     }
 
     override fun onScroll(
-        e: MotionEvent?,
+        e1: MotionEvent?,
         e2: MotionEvent,
         distanceX: Float,
         distanceY: Float,
     ): Boolean {
-        val e1 = e ?: return false
         if (binding == null || header == null) return false
-        val distance = (e1.rawX - e2.rawX)
+        val distance = (startingX - e2.x)
         val poa = 0.75f
         binding.categoryHeaderLayout.translationX = abs(distance).pow(poa) * -sign(distance)
         binding.rearView.isVisible = distance != 0f
@@ -59,16 +63,14 @@ class LibraryHeaderGestureDetector(
     }
 
     override fun onFling(
-        e: MotionEvent?,
+        e1: MotionEvent?,
         e2: MotionEvent,
         velocityX: Float,
         velocityY: Float,
     ): Boolean {
-        val e1 = e ?: return false
-
         var result = false
-        val diffY = e2.y - e1.y
-        val diffX = e2.x - e1.x
+        val diffY = e2.y - startingY
+        val diffX = e2.x - startingX
         val mainLayout = binding?.categoryHeaderLayout ?: return false
         val animator = binding.categoryHeaderLayout.animate().setDuration(200L)
         header?.itemView?.parent?.requestDisallowInterceptTouchEvent(false)
@@ -78,9 +80,9 @@ class LibraryHeaderGestureDetector(
             binding.rearView.isVisible = false
         }
         val x = abs(binding.categoryHeaderLayout.translationX)
-        if (abs(diffX) >= abs(diffY) && sign(velocityX) == sign(diffX) &&
-            ((x > 30f.dpToPx && abs(velocityX) > 100) || abs(velocityX) > 5000)
-        ) {
+        if (abs(diffX) >= abs(diffY) &&
+            sign(velocityX) == sign(diffX) &&
+            ((x > 30f.dpToPx && abs(velocityX) > 100) || abs(velocityX) > 5000)) {
             header?.addCategoryToUpdate()
             result = true
         }

@@ -1,7 +1,7 @@
 package org.nekomanga.domain.manga
 
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 
 enum class MangaType(@StringRes val typeRes: Int) {
     Manhua(R.string.manhua),

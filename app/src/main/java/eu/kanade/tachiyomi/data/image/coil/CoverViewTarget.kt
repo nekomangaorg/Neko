@@ -22,10 +22,17 @@ class CoverViewTarget(
         progress?.isVisible = false
         if (errorUrl == null) {
             view.scaleType = ImageView.ScaleType.CENTER
-            view.setImageDrawable(view.context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_broken_image, color = android.R.attr.textColorSecondary))
+            view.setImageDrawable(
+                view.context.iconicsDrawableLarge(
+                    MaterialDesignDx.Icon.gmf_broken_image,
+                    color = android.R.attr.textColorSecondary))
         } else {
-            val request = ImageRequest.Builder(view.context).data(errorUrl).memoryCachePolicy(CachePolicy.ENABLED)
-                .target(CoverViewTarget(view, progress)).build()
+            val request =
+                ImageRequest.Builder(view.context)
+                    .data(errorUrl)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .target(CoverViewTarget(view, progress))
+                    .build()
             Coil.imageLoader(view.context).enqueue(request)
         }
     }

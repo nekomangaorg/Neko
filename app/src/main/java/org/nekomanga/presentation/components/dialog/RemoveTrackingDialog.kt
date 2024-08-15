@@ -16,49 +16,61 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import eu.kanade.tachiyomi.R
+import org.nekomanga.R
 import org.nekomanga.presentation.components.CheckboxRow
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun RemoveTrackingDialog(themeColorState: ThemeColorState, name: String, canRemoveFromTracker: Boolean, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-        var removeFromTracker by remember { mutableStateOf(true) }
+fun RemoveTrackingDialog(
+    themeColorState: ThemeColorState,
+    name: String,
+    canRemoveFromTracker: Boolean,
+    onConfirm: (Boolean) -> Unit,
+    onDismiss: () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+            var removeFromTracker by remember { mutableStateOf(true) }
 
-        AlertDialog(
-            title = {
-                Text(text = stringResource(id = R.string.remove_tracking))
-            },
-            text = {
-                if (canRemoveFromTracker) {
-                    Column {
-                        CheckboxRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            checkedState = removeFromTracker,
-                            checkedChange = { removeFromTracker = !removeFromTracker },
-                            themeColorState = themeColorState,
-                            rowText = stringResource(id = R.string.remove_tracking_from_, name),
-                        )
+            AlertDialog(
+                title = { Text(text = stringResource(id = R.string.remove_tracking)) },
+                text = {
+                    if (canRemoveFromTracker) {
+                        Column {
+                            CheckboxRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                checkedState = removeFromTracker,
+                                checkedChange = { removeFromTracker = !removeFromTracker },
+                                themeColorState = themeColorState,
+                                rowText = stringResource(id = R.string.remove_tracking_from_, name),
+                            )
+                        }
                     }
-                }
-            },
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onConfirm(removeFromTracker && canRemoveFromTracker)
-                        onDismiss()
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
-                ) {
-                    Text(text = stringResource(id = R.string.remove))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-            },
-        )
-    }
+                },
+                onDismissRequest = onDismiss,
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            onConfirm(removeFromTracker && canRemoveFromTracker)
+                            onDismiss()
+                        },
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor),
+                    ) {
+                        Text(text = stringResource(id = R.string.remove))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = onDismiss,
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor)) {
+                            Text(text = stringResource(id = R.string.cancel))
+                        }
+                },
+            )
+        }
 }

@@ -36,42 +36,52 @@ class SearchHandler {
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
     suspend fun searchForManga(mangaUUID: String): Result<MangaListPage, ResultError> {
-        return service.viewManga(mangaUUID)
+        return service
+            .viewManga(mangaUUID)
             .getOrResultError("trying to view manga with UUID $mangaUUID")
             .andThen { mangaDto ->
-                val sourceManga = persistentListOf(mangaDto.data.toSourceManga(preferencesHelper.thumbnailQuality().get(), false))
+                val sourceManga =
+                    persistentListOf(
+                        mangaDto.data.toSourceManga(
+                            preferencesHelper.thumbnailQuality().get(), false))
                 Ok(MangaListPage(sourceManga = sourceManga, hasNextPage = false))
             }
     }
 
     suspend fun searchForAuthor(authorQuery: String): Result<ResultListPage, ResultError> {
-        return service.searchAuthor(query = authorQuery, limit = MdConstants.Limits.author)
+        return service
+            .searchAuthor(query = authorQuery, limit = MdConstants.Limits.author)
             .getOrResultError("trying to search author $authorQuery")
             .andThen { authorListDto ->
-
-                val results = authorListDto.data.map {
-                    SourceResult(
-                        title = it.attributes.name,
-                        uuid = it.id,
-                        information = it.attributes.biography.asMdMap<String>()["en"] ?: "",
-                    )
-                }.toImmutableList()
+                val results =
+                    authorListDto.data
+                        .map {
+                            SourceResult(
+                                title = it.attributes.name,
+                                uuid = it.id,
+                                information = it.attributes.biography.asMdMap<String>()["en"] ?: "",
+                            )
+                        }
+                        .toImmutableList()
                 Ok(ResultListPage(hasNextPage = false, results = results))
             }
     }
 
     suspend fun searchForGroup(groupQuery: String): Result<ResultListPage, ResultError> {
-        return service.searchGroup(query = groupQuery, limit = MdConstants.Limits.group)
+        return service
+            .searchGroup(query = groupQuery, limit = MdConstants.Limits.group)
             .getOrResultError("trying to search group $groupQuery")
             .andThen { authorListDto ->
-
-                val results = authorListDto.data.map {
-                    SourceResult(
-                        title = it.attributes.name,
-                        uuid = it.id,
-                        information = it.attributes.description ?: "",
-                    )
-                }.toImmutableList()
+                val results =
+                    authorListDto.data
+                        .map {
+                            SourceResult(
+                                title = it.attributes.name,
+                                uuid = it.id,
+                                information = it.attributes.description ?: "",
+                            )
+                        }
+                        .toImmutableList()
                 Ok(ResultListPage(hasNextPage = false, results = results))
             }
     }
@@ -93,39 +103,51 @@ class SearchHandler {
                 queryParameters[MdConstants.SearchParameters.contentRatingParam] = contentRating
             }
 
-            val originalLanguage = filters.originalLanguage.filter { it.state }.map { it.language.lang }
+            val originalLanguage =
+                filters.originalLanguage.filter { it.state }.map { it.language.lang }
             if (originalLanguage.isNotEmpty()) {
-                queryParameters[MdConstants.SearchParameters.originalLanguageParam] = originalLanguage
+                queryParameters[MdConstants.SearchParameters.originalLanguageParam] =
+                    originalLanguage
             }
 
-            val demographics = filters.publicationDemographics.filter { it.state }.map { it.demographic.key }
+            val demographics =
+                filters.publicationDemographics.filter { it.state }.map { it.demographic.key }
             if (demographics.isNotEmpty()) {
-                queryParameters[MdConstants.SearchParameters.publicationDemographicParam] = demographics
+                queryParameters[MdConstants.SearchParameters.publicationDemographicParam] =
+                    demographics
             }
 
             val status = filters.statuses.filter { it.state }.map { it.status.key }
             if (status.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.statusParam] = status
             }
-            val tagsToInclude = filters.tags.filter { it.state == ToggleableState.On }.map { it.tag.uuid }
+            val tagsToInclude =
+                filters.tags.filter { it.state == ToggleableState.On }.map { it.tag.uuid }
             if (tagsToInclude.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.includedTagsParam] = tagsToInclude
             }
 
-            val tagsToExclude = filters.tags.filter { it.state == ToggleableState.Indeterminate }.map { it.tag.uuid }
+            val tagsToExclude =
+                filters.tags
+                    .filter { it.state == ToggleableState.Indeterminate }
+                    .map { it.tag.uuid }
             if (tagsToExclude.isNotEmpty()) {
                 queryParameters[MdConstants.SearchParameters.excludedTagsParam] = tagsToExclude
             }
 
             val sortMode = filters.sort.first { it.state }
-            queryParameters[MdConstants.SearchParameters.sortParam(sortMode.sort.key)] = sortMode.sort.state.key
+            queryParameters[MdConstants.SearchParameters.sortParam(sortMode.sort.key)] =
+                sortMode.sort.state.key
 
             if (filters.hasAvailableChapters.state) {
-                queryParameters[MdConstants.SearchParameters.availableTranslatedLanguage] = MdUtil.getLangsToShow(preferencesHelper)
+                queryParameters[MdConstants.SearchParameters.availableTranslatedLanguage] =
+                    MdUtil.getLangsToShow(preferencesHelper)
             }
 
-            queryParameters[MdConstants.SearchParameters.includedTagModeParam] = filters.tagInclusionMode.mode.key
-            queryParameters[MdConstants.SearchParameters.excludedTagModeParam] = filters.tagExclusionMode.mode.key
+            queryParameters[MdConstants.SearchParameters.includedTagModeParam] =
+                filters.tagInclusionMode.mode.key
+            queryParameters[MdConstants.SearchParameters.excludedTagModeParam] =
+                filters.tagExclusionMode.mode.key
 
             if (filters.authorId.uuid.isNotBlank()) {
                 queryParameters[MdConstants.SearchParameters.authorOrArtist] = filters.authorId.uuid
@@ -135,13 +157,12 @@ class SearchHandler {
                 queryParameters[MdConstants.SearchParameters.group] = filters.groupId.uuid
             }
 
-            service.search(ProxyRetrofitQueryMap(queryParameters))
+            service
+                .search(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Trying to search")
                 .andThen { response ->
                     TimberKt.d { "Page: $page" }
-                    response.data.forEach {
-                        TimberKt.d { "#mangaid: ${it.id}" }
-                    }
+                    response.data.forEach { TimberKt.d { "#mangaid: ${it.id}" } }
                     searchMangaParse(response)
                 }
         }
@@ -157,13 +178,21 @@ class SearchHandler {
                 queryParameters["contentRating[]"] = contentRatings
             }
             val thumbQuality = preferencesHelper.thumbnailQuality().get()
-            service.recentlyAdded(ProxyRetrofitQueryMap(queryParameters))
+            service
+                .recentlyAdded(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error getting recently added")
                 .andThen { mangaListDto ->
-                    val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
+                    val hasMoreResults =
+                        mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 
                     Ok(
-                        MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaListDto.data.distinctBy { it.id }.map { it.toSourceManga(thumbQuality) }.toImmutableList()),
+                        MangaListPage(
+                            hasNextPage = hasMoreResults,
+                            sourceManga =
+                                mangaListDto.data
+                                    .distinctBy { it.id }
+                                    .map { it.toSourceManga(thumbQuality) }
+                                    .toImmutableList()),
                     )
                 }
         }
@@ -187,12 +216,19 @@ class SearchHandler {
             service.popularNewReleases(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error popular new releases")
                 .andThen { mangaListDto ->
-                    val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
+                    val hasMoreResults =
+                        mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 
                     Ok(
                         MangaListPage(
                             hasNextPage = hasMoreResults,
-                            sourceManga = mangaListDto.data.mapIndexed { index, dto -> dto.toSourceManga(thumbQuality, displayText = "No. ${offset + index + 1}") }.toImmutableList(),
+                            sourceManga =
+                                mangaListDto.data
+                                    .mapIndexed { index, dto ->
+                                        dto.toSourceManga(
+                                            thumbQuality, displayText = "No. ${offset + index + 1}")
+                                    }
+                                    .toImmutableList(),
                         ),
                     )
                 }
@@ -200,15 +236,18 @@ class SearchHandler {
     }
 
     private fun searchMangaParse(mangaListDto: MangaListDto): Result<MangaListPage, ResultError> {
-        return com.github.michaelbull.result.runCatching {
-            val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
-            val thumbQuality = preferencesHelper.thumbnailQuality().get()
-            val mangaList = mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()
-            MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)
-        }.mapError {
-            TimberKt.e(it) { "Error parsing search manga" }
-            "error parsing search manga".toResultError()
-        }
+        return com.github.michaelbull.result
+            .runCatching {
+                val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
+                val thumbQuality = preferencesHelper.thumbnailQuality().get()
+                val mangaList =
+                    mangaListDto.data.map { it.toSourceManga(thumbQuality) }.toImmutableList()
+                MangaListPage(hasNextPage = hasMoreResults, sourceManga = mangaList)
+            }
+            .mapError {
+                TimberKt.e(it) { "Error parsing search manga" }
+                "error parsing search manga".toResultError()
+            }
     }
 
     companion object {

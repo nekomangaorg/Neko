@@ -33,19 +33,22 @@ class LibraryFastScroll @JvmOverloads constructor(context: Context, attrs: Attri
 
     override fun setRecyclerViewPosition(y: Float) {
         if (recyclerView != null) {
-            val adapter = recyclerView.adapter as? LibraryCategoryAdapter ?: return super.setRecyclerViewPosition(y)
+            val adapter =
+                recyclerView.adapter as? LibraryCategoryAdapter
+                    ?: return super.setRecyclerViewPosition(y)
             if (adapter.isSingleCategory || categoryFastScroll) {
                 return super.setRecyclerViewPosition(y)
             }
             var targetPos = getTargetPos(y)
-            val category = when (val item = adapter.getItem(targetPos)) {
-                is LibraryItem -> {
-                    targetPos = adapter.currentItems.indexOf(item.header)
-                    item.header.category
+            val category =
+                when (val item = adapter.getItem(targetPos)) {
+                    is LibraryItem -> {
+                        targetPos = adapter.currentItems.indexOf(item.header)
+                        item.header.category
+                    }
+                    is LibraryHeaderItem -> item.category
+                    else -> return super.setRecyclerViewPosition(y)
                 }
-                is LibraryHeaderItem -> item.category
-                else -> return super.setRecyclerViewPosition(y)
-            }
             adapter.controller?.scrollToCategory(category)
             updateBubbleText(targetPos)
         }
@@ -56,10 +59,10 @@ class LibraryFastScroll @JvmOverloads constructor(context: Context, attrs: Attri
         if (bubbleEnabled && !isSingleCategory) {
             bubble.translationX =
                 if (categoryFastScroll) {
-                250f * (if (resources.isLTR) -1 else 1)
-            } else {
-                currentX - handle.x
-            } + (-45f).dpToPxEnd(resources)
+                    250f * (if (resources.isLTR) -1 else 1)
+                } else {
+                    currentX - handle.x
+                } + (-45f).dpToPxEnd(resources)
         }
     }
 }

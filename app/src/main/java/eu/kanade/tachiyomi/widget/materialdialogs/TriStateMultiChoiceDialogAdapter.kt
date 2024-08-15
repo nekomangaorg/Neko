@@ -5,20 +5,23 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.databinding.ListitemTristatechoiceBinding
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import org.nekomanga.databinding.ListitemTristatechoiceBinding
 
 private object CheckPayload
+
 private object InverseCheckPayload
+
 private object UncheckPayload
 
-internal typealias TriStateMultiChoiceListener = (
-    adapter: TriStateMultiChoiceDialogAdapter,
-    indices: IntArray,
-    items: List<CharSequence>,
-    selectedIndex: Int,
-    selectedState: Int,
-) -> Unit
+internal typealias TriStateMultiChoiceListener =
+    (
+        adapter: TriStateMultiChoiceDialogAdapter,
+        indices: IntArray,
+        items: List<CharSequence>,
+        selectedIndex: Int,
+        selectedState: Int,
+    ) -> Unit
 
 internal class TriStateMultiChoiceDialogAdapter(
     private var dialog: MaterialAlertDialogBuilder,
@@ -31,11 +34,12 @@ internal class TriStateMultiChoiceDialogAdapter(
 
     private val states = TriStateCheckBox.State.values()
     private val defaultOrdinal
-        get() = if (skipChecked) {
-            TriStateCheckBox.State.IGNORE.ordinal
-        } else {
-            TriStateCheckBox.State.CHECKED.ordinal
-        }
+        get() =
+            if (skipChecked) {
+                TriStateCheckBox.State.IGNORE.ordinal
+            } else {
+                TriStateCheckBox.State.CHECKED.ordinal
+            }
 
     private var currentSelection: IntArray = initialSelection
         set(value) {
@@ -44,35 +48,38 @@ internal class TriStateMultiChoiceDialogAdapter(
             previousSelection.forEachIndexed { index, previous ->
                 val current = value[index]
                 when {
-                    current == TriStateCheckBox.State.CHECKED.ordinal && previous != TriStateCheckBox.State.CHECKED.ordinal -> {
+                    current == TriStateCheckBox.State.CHECKED.ordinal &&
+                        previous != TriStateCheckBox.State.CHECKED.ordinal -> {
                         // This value was selected
                         notifyItemChanged(index, CheckPayload)
                     }
-                    current == TriStateCheckBox.State.IGNORE.ordinal && previous != TriStateCheckBox.State.IGNORE.ordinal -> {
+                    current == TriStateCheckBox.State.IGNORE.ordinal &&
+                        previous != TriStateCheckBox.State.IGNORE.ordinal -> {
                         // This value was inverse selected
                         notifyItemChanged(index, InverseCheckPayload)
                     }
-                    current == TriStateCheckBox.State.UNCHECKED.ordinal && previous != TriStateCheckBox.State.UNCHECKED.ordinal -> {
+                    current == TriStateCheckBox.State.UNCHECKED.ordinal &&
+                        previous != TriStateCheckBox.State.UNCHECKED.ordinal -> {
                         // This value was unselected
                         notifyItemChanged(index, UncheckPayload)
                     }
                 }
             }
         }
+
     private var disabledIndices: IntArray = disabledItems ?: IntArray(0)
 
     internal fun itemClicked(index: Int) {
         val newSelection = this.currentSelection.toMutableList()
-        newSelection[index] = when (currentSelection[index]) {
-            TriStateCheckBox.State.CHECKED.ordinal -> TriStateCheckBox.State.IGNORE.ordinal
-            TriStateCheckBox.State.IGNORE.ordinal -> TriStateCheckBox.State.UNCHECKED.ordinal
-            // UNCHECKED
-            else -> defaultOrdinal
-        }
+        newSelection[index] =
+            when (currentSelection[index]) {
+                TriStateCheckBox.State.CHECKED.ordinal -> TriStateCheckBox.State.IGNORE.ordinal
+                TriStateCheckBox.State.IGNORE.ordinal -> TriStateCheckBox.State.UNCHECKED.ordinal
+                // UNCHECKED
+                else -> defaultOrdinal
+            }
         currentSelection = newSelection.toIntArray()
-        val selectedItems = this.items.filterIndexed { i, _ ->
-            currentSelection[i] != 0
-        }
+        val selectedItems = this.items.filterIndexed { i, _ -> currentSelection[i] != 0 }
         listener?.invoke(this, currentSelection, selectedItems, index, newSelection[index])
     }
 
@@ -80,8 +87,10 @@ internal class TriStateMultiChoiceDialogAdapter(
         parent: ViewGroup,
         viewType: Int,
     ): TriStateMultiChoiceViewHolder {
-        val listItemView: View = ListitemTristatechoiceBinding
-            .inflate(LayoutInflater.from(dialog.context), parent, false).root
+        val listItemView: View =
+            ListitemTristatechoiceBinding.inflate(
+                    LayoutInflater.from(dialog.context), parent, false)
+                .root
         return TriStateMultiChoiceViewHolder(
             itemView = listItemView,
             adapter = this,
@@ -96,13 +105,14 @@ internal class TriStateMultiChoiceDialogAdapter(
     ) {
         holder.isEnabled = !disabledIndices.contains(position)
 
-        holder.controlView.state = states.getOrNull(currentSelection[position]) ?: TriStateCheckBox.State.UNCHECKED
+        holder.controlView.state =
+            states.getOrNull(currentSelection[position]) ?: TriStateCheckBox.State.UNCHECKED
         holder.controlView.text = items[position]
-//        holder.itemView.background = dialog.getItemSelector()
+        //        holder.itemView.background = dialog.getItemSelector()
 
-//        if (dialog.bodyFont != null) {
-//            holder.titleView.typeface = dialog.bodyFont
-//        }
+        //        if (dialog.bodyFont != null) {
+        //            holder.titleView.typeface = dialog.bodyFont
+        //        }
     }
 
     override fun onBindViewHolder(

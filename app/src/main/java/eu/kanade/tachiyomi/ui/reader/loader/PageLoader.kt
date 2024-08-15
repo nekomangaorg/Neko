@@ -9,9 +9,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
  */
 abstract class PageLoader {
 
-    /**
-     * Whether this loader has been already recycled.
-     */
+    /** Whether this loader has been already recycled. */
     var isRecycled = false
         private set
 
@@ -24,15 +22,13 @@ abstract class PageLoader {
         isRecycled = true
     }
 
-    /**
-     * Returns the list of pages of a chapter.
-     */
+    /** Returns the list of pages of a chapter. */
     abstract suspend fun getPages(): List<ReaderPage>
 
     /**
-     * Loads the page. May also preload other pages.
-     * Progress of the page loading should be followed via [page.statusFlow].
-     * [loadPage] is not currently guaranteed to complete, so it should be launched asynchronously.
+     * Loads the page. May also preload other pages. Progress of the page loading should be followed
+     * via [page.statusFlow]. [loadPage] is not currently guaranteed to complete, so it should be
+     * launched asynchronously.
      */
     abstract suspend fun loadPage(page: ReaderPage)
 

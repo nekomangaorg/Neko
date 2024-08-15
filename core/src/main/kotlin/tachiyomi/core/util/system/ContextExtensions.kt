@@ -16,4 +16,3 @@ fun Context.getResourceColor(@AttrRes resource: Int): Int {
     typedArray.recycle()
     return attrValue
 }
-

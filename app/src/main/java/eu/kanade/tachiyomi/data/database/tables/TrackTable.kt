@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.data.database.tables
 
+import eu.kanade.tachiyomi.data.track.TrackManager
+
 object TrackTable {
 
     const val TABLE = "manga_sync"
@@ -68,8 +70,7 @@ object TrackTable {
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_FINISH_DATE LONG NOT NULL DEFAULT 0"
 
     val renameTableToTemp: String
-        get() =
-            "ALTER TABLE $TABLE RENAME TO ${TABLE}_tmp"
+        get() = "ALTER TABLE $TABLE RENAME TO ${TABLE}_tmp"
 
     val insertFromTempTable: String
         get() =
@@ -77,10 +78,20 @@ object TrackTable {
             |INSERT INTO $TABLE($COL_ID,$COL_MANGA_ID,$COL_SYNC_ID,$COL_MEDIA_ID,$COL_LIBRARY_ID,$COL_TITLE,$COL_LAST_CHAPTER_READ,$COL_TOTAL_CHAPTERS,$COL_STATUS,$COL_SCORE,$COL_TRACKING_URL,$COL_START_DATE,$COL_FINISH_DATE)
             |SELECT $COL_ID,$COL_MANGA_ID,$COL_SYNC_ID,$COL_MEDIA_ID,$COL_LIBRARY_ID,$COL_TITLE,$COL_LAST_CHAPTER_READ,$COL_TOTAL_CHAPTERS,$COL_STATUS,$COL_SCORE,$COL_TRACKING_URL,$COL_START_DATE,$COL_FINISH_DATE
             |FROM ${TABLE}_tmp
-            """.trimMargin()
+            """
+                .trimMargin()
 
     val dropTempTable: String
         get() = "DROP TABLE ${TABLE}_tmp"
+
+    val updateMangaUpdatesScore: String
+        get() =
+            """
+                UPDATE $TABLE
+                SET $COL_SCORE = max($COL_SCORE, 0)
+                WHERE $COL_SYNC_ID = ${TrackManager.MANGA_UPDATES};
+            """
+                .trimIndent()
 
     val addListId: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LIST_ID TEXT DEFAULT ''"

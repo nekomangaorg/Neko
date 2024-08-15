@@ -12,24 +12,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.mikepenz.markdown.compose.Markdown
-import com.mikepenz.markdown.model.markdownColor
-import com.mikepenz.markdown.model.markdownTypography
-import eu.kanade.tachiyomi.R
+import com.mikepenz.markdown.m3.markdownColor
+import com.mikepenz.markdown.m3.markdownTypography
 import eu.kanade.tachiyomi.data.updater.GithubRelease
+import org.nekomanga.R
 
-/**
- * Dialog that shows when an app update is available
- */
+/** Dialog that shows when an app update is available */
 @Composable
-fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConfirm: (String) -> Unit) {
+fun AppUpdateDialog(
+    release: GithubRelease,
+    onDismissRequest: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
     val body = release.info.substringBeforeLast("| Variant | SHA-256")
     val url = release.downloadLink
     AlertDialog(
-        title = {
-            Text(text = stringResource(id = R.string.new_version_available))
-        },
-        modifier = Modifier
-            .fillMaxHeight(.8f),
+        title = { Text(text = stringResource(id = R.string.new_version_available)) },
+        modifier = Modifier.fillMaxHeight(.8f),
         text = {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item {
@@ -44,7 +43,9 @@ fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConf
         onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(onClick = { onConfirm(url) }) {
-                val text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) R.string.update else R.string.download
+                val text =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) R.string.update
+                    else R.string.download
                 Text(text = stringResource(id = text))
             }
         },
@@ -57,21 +58,22 @@ fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConf
 }
 
 @Composable
-private fun nekoMarkdownColors() = markdownColor(
-    text = MaterialTheme.colorScheme.onSurface,
-    codeText = MaterialTheme.colorScheme.onSurface,
-    codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-)
+private fun nekoMarkdownColors() =
+    markdownColor(
+        text = MaterialTheme.colorScheme.onSurface,
+        codeText = MaterialTheme.colorScheme.onSurface,
+        codeBackground = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+    )
 
 @Composable
-private fun nekoMarkdownTypography() = markdownTypography(
-    h1 = MaterialTheme.typography.headlineMedium,
-    h2 = MaterialTheme.typography.headlineSmall,
-    h3 = MaterialTheme.typography.titleLarge,
-    h4 = MaterialTheme.typography.titleMedium,
-    h5 = MaterialTheme.typography.titleSmall,
-    h6 = MaterialTheme.typography.bodyLarge,
-    paragraph = MaterialTheme.typography.bodyMedium,
-    text = MaterialTheme.typography.bodySmall,
-)
-
+private fun nekoMarkdownTypography() =
+    markdownTypography(
+        h1 = MaterialTheme.typography.headlineMedium,
+        h2 = MaterialTheme.typography.headlineSmall,
+        h3 = MaterialTheme.typography.titleLarge,
+        h4 = MaterialTheme.typography.titleMedium,
+        h5 = MaterialTheme.typography.titleSmall,
+        h6 = MaterialTheme.typography.bodyLarge,
+        paragraph = MaterialTheme.typography.bodyMedium,
+        text = MaterialTheme.typography.bodySmall,
+    )

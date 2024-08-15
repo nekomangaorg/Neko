@@ -17,11 +17,7 @@ fun GET(
     headers: Headers = DEFAULT_HEADERS,
     cache: CacheControl = DEFAULT_CACHE_CONTROL,
 ): Request {
-    return Request.Builder()
-        .url(url)
-        .headers(headers)
-        .cacheControl(cache)
-        .build()
+    return Request.Builder().url(url).headers(headers).cacheControl(cache).build()
 }
 
 fun POST(
@@ -30,12 +26,7 @@ fun POST(
     body: RequestBody = DEFAULT_BODY,
     cache: CacheControl = DEFAULT_CACHE_CONTROL,
 ): Request {
-    return Request.Builder()
-        .url(url)
-        .post(body)
-        .headers(headers)
-        .cacheControl(cache)
-        .build()
+    return Request.Builder().url(url).post(body).headers(headers).cacheControl(cache).build()
 }
 
 fun PUT(
@@ -44,12 +35,7 @@ fun PUT(
     body: RequestBody = DEFAULT_BODY,
     cache: CacheControl = DEFAULT_CACHE_CONTROL,
 ): Request {
-    return Request.Builder()
-        .url(url)
-        .put(body)
-        .headers(headers)
-        .cacheControl(cache)
-        .build()
+    return Request.Builder().url(url).put(body).headers(headers).cacheControl(cache).build()
 }
 
 fun DELETE(
@@ -58,10 +44,5 @@ fun DELETE(
     body: RequestBody = DEFAULT_BODY,
     cache: CacheControl = DEFAULT_CACHE_CONTROL,
 ): Request {
-    return Request.Builder()
-        .url(url)
-        .delete(body)
-        .headers(headers)
-        .cacheControl(cache)
-        .build()
+    return Request.Builder().url(url).delete(body).headers(headers).cacheControl(cache).build()
 }

@@ -16,9 +16,8 @@ object MiuiUtil {
         }
 
         return try {
-            Class.forName("android.miui.AppOpsUtils")
-                .getDeclaredMethod("isXOptMode")
-                .invoke(null) as Boolean
+            Class.forName("android.miui.AppOpsUtils").getDeclaredMethod("isXOptMode").invoke(null)
+                as Boolean
         } catch (e: Exception) {
             false
         }

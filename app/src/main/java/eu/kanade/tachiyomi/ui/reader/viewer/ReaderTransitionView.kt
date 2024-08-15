@@ -11,17 +11,18 @@ import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import androidx.core.view.isVisible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.databinding.ReaderTransitionViewBinding
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import kotlin.math.roundToInt
+import org.nekomanga.R
+import org.nekomanga.databinding.ReaderTransitionViewBinding
 
-class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    LinearLayout(context, attrs) {
+class ReaderTransitionView
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(context, attrs) {
 
     private val binding: ReaderTransitionViewBinding =
         ReaderTransitionViewBinding.inflate(LayoutInflater.from(context), this, true)
@@ -33,16 +34,16 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
     fun bind(transition: ChapterTransition, downloadManager: DownloadManager, manga: Manga?) {
         manga ?: return
         when (transition) {
-            is ChapterTransition.Prev -> bindPrevChapterTransition(transition, downloadManager, manga)
-            is ChapterTransition.Next -> bindNextChapterTransition(transition, downloadManager, manga)
+            is ChapterTransition.Prev ->
+                bindPrevChapterTransition(transition, downloadManager, manga)
+            is ChapterTransition.Next ->
+                bindNextChapterTransition(transition, downloadManager, manga)
         }
 
         missingChapterWarning(transition)
     }
 
-    /**
-     * Binds a previous chapter transition on this view and subscribes to the page load status.
-     */
+    /** Binds a previous chapter transition on this view and subscribes to the page load status. */
     private fun bindPrevChapterTransition(
         transition: ChapterTransition,
         downloadManager: DownloadManager,
@@ -54,7 +55,8 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
         if (prevChapter != null) {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_TEXT_START
             val isPrevDownloaded = downloadManager.isChapterDownloaded(prevChapter.chapter, manga)
-            val isCurrentDownloaded = downloadManager.isChapterDownloaded(transition.from.chapter, manga)
+            val isCurrentDownloaded =
+                downloadManager.isChapterDownloaded(transition.from.chapter, manga)
             binding.upperText.text = buildSpannedString {
                 bold { append(context.getString(R.string.previous_title)) }
                 append("\n${prevChapter.chapter.name}")
@@ -70,9 +72,7 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
         }
     }
 
-    /**
-     * Binds a next chapter transition on this view and subscribes to the load status.
-     */
+    /** Binds a next chapter transition on this view and subscribes to the load status. */
     private fun bindNextChapterTransition(
         transition: ChapterTransition,
         downloadManager: DownloadManager,
@@ -83,7 +83,8 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
         binding.lowerText.isVisible = nextChapter != null
         if (nextChapter != null) {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_TEXT_START
-            val isCurrentDownloaded = downloadManager.isChapterDownloaded(transition.from.chapter, manga)
+            val isCurrentDownloaded =
+                downloadManager.isChapterDownloaded(transition.from.chapter, manga)
             val isNextDownloaded = downloadManager.isChapterDownloaded(nextChapter.chapter, manga)
             binding.upperText.text = buildSpannedString {
                 bold { append(context.getString(R.string.finished_chapter)) }
@@ -101,15 +102,18 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
     }
 
     private fun SpannableStringBuilder.addDLImageSpan(isDownloaded: Boolean) {
-        val icon = context.contextCompatDrawable(
-            if (isDownloaded) R.drawable.ic_file_download_24dp else R.drawable.ic_cloud_24dp,
-        )
-            ?.mutate()
-            ?.apply {
-                val size = binding.lowerText.textSize + 4f.dpToPx
-                setTint(binding.lowerText.currentTextColor)
-                setBounds(0, 0, size.roundToInt(), size.roundToInt())
-            } ?: return
+        val icon =
+            context
+                .contextCompatDrawable(
+                    if (isDownloaded) R.drawable.ic_file_download_24dp
+                    else R.drawable.ic_cloud_24dp,
+                )
+                ?.mutate()
+                ?.apply {
+                    val size = binding.lowerText.textSize + 4f.dpToPx
+                    setTint(binding.lowerText.currentTextColor)
+                    setBounds(0, 0, size.roundToInt(), size.roundToInt())
+                } ?: return
         append(" ")
         inSpans(ImageSpan(icon)) { append("image") }
     }
@@ -126,22 +130,30 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
             return
         }
 
-        val hasMissingChapters = when (transition) {
-            is ChapterTransition.Prev -> hasMissingChapters(transition.from, transition.to)
-            is ChapterTransition.Next -> hasMissingChapters(transition.to, transition.from)
-        }
+        val hasMissingChapters =
+            when (transition) {
+                is ChapterTransition.Prev -> hasMissingChapters(transition.from, transition.to)
+                is ChapterTransition.Next -> hasMissingChapters(transition.to, transition.from)
+            }
 
         if (!hasMissingChapters) {
             binding.warning.isVisible = false
             return
         }
 
-        val chapterDifference = when (transition) {
-            is ChapterTransition.Prev -> calculateChapterDifference(transition.from, transition.to)
-            is ChapterTransition.Next -> calculateChapterDifference(transition.to, transition.from)
-        }
+        val chapterDifference =
+            when (transition) {
+                is ChapterTransition.Prev ->
+                    calculateChapterDifference(transition.from, transition.to)
+                is ChapterTransition.Next ->
+                    calculateChapterDifference(transition.to, transition.from)
+            }
 
-        binding.warningText.text = resources.getQuantityString(R.plurals.missing_chapters_warning, chapterDifference.toInt(), chapterDifference.toInt())
+        binding.warningText.text =
+            resources.getQuantityString(
+                R.plurals.missing_chapters_warning,
+                chapterDifference.toInt(),
+                chapterDifference.toInt())
         binding.warning.isVisible = true
     }
 }

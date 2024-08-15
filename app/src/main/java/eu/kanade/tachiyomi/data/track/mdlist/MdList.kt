@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
@@ -121,9 +122,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
     }
 
     suspend fun updateScore(track: Track) {
-        withContext(Dispatchers.IO) {
-            mdex.updateRating(track)
-        }
+        withContext(Dispatchers.IO) { mdex.updateRating(track) }
     }
 
     override suspend fun bind(track: Track): Track {
@@ -162,11 +161,12 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
         manga: Manga,
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
-        val track = TrackSearch.create(TrackManager.MDLIST).apply {
-            this.manga_id = manga.id!!
-            this.tracking_url = MdConstants.baseUrl + manga.url
-            this.title = manga.title
-        }
+        val track =
+            TrackSearch.create(TrackManager.MDLIST).apply {
+                this.manga_id = manga.id!!
+                this.tracking_url = MdConstants.baseUrl + manga.url
+                this.title = manga.title
+            }
 
         return listOf(track)
     }
@@ -174,8 +174,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
     override suspend fun login(username: String, password: String): Boolean =
         throw Exception("not used")
 
-    @SuppressLint("MissingSuperCall")
-    override fun logout() = throw Exception("not used")
+    @SuppressLint("MissingSuperCall") override fun logout() = throw Exception("not used")
 
     override fun isLogged() = mangaDexLoginHelper.isLoggedIn()
 

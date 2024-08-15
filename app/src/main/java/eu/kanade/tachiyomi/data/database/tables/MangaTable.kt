@@ -136,8 +136,9 @@ object MangaTable {
         get() = "CREATE INDEX ${TABLE}_${COL_URL}_index ON $TABLE($COL_URL)"
 
     val createLibraryIndexQuery: String
-        get() = "CREATE INDEX library_${COL_FAVORITE}_index ON $TABLE($COL_FAVORITE) " +
-            "WHERE $COL_FAVORITE = 1"
+        get() =
+            "CREATE INDEX library_${COL_FAVORITE}_index ON $TABLE($COL_FAVORITE) " +
+                "WHERE $COL_FAVORITE = 1"
 
     val addDateAddedCol: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_DATE_ADDED LONG DEFAULT 0"
@@ -206,7 +207,8 @@ object MangaTable {
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_REPLIES_COUNT TEXT DEFAULT NULL"
 
     val clearScanlators: String
-        get() = "UPDATE $TABLE SET $COL_SCANLATOR_FILTER_FLAG = NULL where _id in (select _id from $TABLE where $COL_SCANLATOR_FILTER_FLAG IS NOT NULL)"
+        get() =
+            "UPDATE $TABLE SET $COL_SCANLATOR_FILTER_FLAG = NULL where _id in (select _id from $TABLE where $COL_SCANLATOR_FILTER_FLAG IS NOT NULL)"
 
     val addLanguageFilterFlag: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LANGUAGE_FILTER_FLAG TEXT DEFAULT NULL"

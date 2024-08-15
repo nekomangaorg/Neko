@@ -9,8 +9,8 @@ import android.view.ViewConfiguration
 import kotlin.math.abs
 
 /**
- * A custom gesture detector that also implements an on long tap confirmed, because the built-in
- * one conflicts with the quick scale feature.
+ * A custom gesture detector that also implements an on long tap confirmed, because the built-in one
+ * conflicts with the quick scale feature.
  */
 open class GestureDetectorWithLongTap(
     context: Context,
@@ -28,9 +28,7 @@ open class GestureDetectorWithLongTap(
     private var lastUp = 0L
     private var lastDownEvent: MotionEvent? = null
 
-    /**
-     * Runnable to execute when a long tap is confirmed.
-     */
+    /** Runnable to execute when a long tap is confirmed. */
     private val longTapFn = Runnable { listener.onLongTapConfirmed(lastDownEvent!!) }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
@@ -56,21 +54,17 @@ open class GestureDetectorWithLongTap(
                 lastUp = ev.eventTime
                 handler.removeCallbacks(longTapFn)
             }
-            MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_POINTER_DOWN -> {
+            MotionEvent.ACTION_CANCEL,
+            MotionEvent.ACTION_POINTER_DOWN -> {
                 handler.removeCallbacks(longTapFn)
             }
         }
         return super.onTouchEvent(ev)
     }
 
-    /**
-     * Custom listener to also include a long tap confirmed
-     */
+    /** Custom listener to also include a long tap confirmed */
     open class Listener : SimpleOnGestureListener() {
-        /**
-         * Notified when a long tap occurs with the initial on down [ev] that triggered it.
-         */
-        open fun onLongTapConfirmed(ev: MotionEvent) {
-        }
+        /** Notified when a long tap occurs with the initial on down [ev] that triggered it. */
+        open fun onLongTapConfirmed(ev: MotionEvent) {}
     }
 }

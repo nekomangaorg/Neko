@@ -1,13 +1,10 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -31,17 +28,23 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import androidx.work.CoroutineWorker
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.hippo.unifile.UniFile
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
+import kotlinx.coroutines.delay
+import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -130,18 +133,14 @@ fun Context.contextCompatDrawable(@DrawableRes resource: Int): Drawable? {
     return ContextCompat.getDrawable(this, resource)
 }
 
-/**
- * Converts to dp.
- */
+/** Converts to dp. */
 val Int.pxToDp: Int
     get() = (this / Resources.getSystem().displayMetrics.density).toInt()
 
 val Float.pxToDp: Float
     get() = (this / Resources.getSystem().displayMetrics.density)
 
-/**
- * Converts to px.
- */
+/** Converts to px. */
 val Int.dpToPx: Int
     get() = (this * Resources.getSystem().displayMetrics.density).toInt()
 
@@ -153,10 +152,10 @@ val Float.dpToPx: Float
 
 /** Converts to px and takes into account LTR/RTL layout */
 val Float.dpToPxEnd: Float
-    get() = (
-        this * Resources.getSystem().displayMetrics.density *
-            if (Resources.getSystem().isLTR) 1 else -1
-        )
+    get() =
+        (this *
+            Resources.getSystem().displayMetrics.density *
+            if (Resources.getSystem().isLTR) 1 else -1)
 
 /** Converts to px and takes into account LTR/RTL layout */
 fun Float.dpToPxEnd(resources: Resources): Float {
@@ -171,15 +170,18 @@ fun Context.isTablet() = resources.configuration.smallestScreenWidthDp >= 600
 val displayMaxHeightInPx: Int
     get() = Resources.getSystem().displayMetrics.let { max(it.heightPixels, it.widthPixels) }
 
-/** Gets the duration multiplier for general animations on the device
+/**
+ * Gets the duration multiplier for general animations on the device
+ *
  * @see Settings.Global.ANIMATOR_DURATION_SCALE
  */
 val Context.animatorDurationScale: Float
-    get() = Settings.Global.getFloat(
-        this.contentResolver,
-        Settings.Global.ANIMATOR_DURATION_SCALE,
-        1f,
-    )
+    get() =
+        Settings.Global.getFloat(
+            this.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            1f,
+        )
 
 /**
  * Helper method to create a notification builder.
@@ -192,8 +194,9 @@ fun Context.notificationBuilder(
     channelId: String,
     block: (NotificationCompat.Builder.() -> Unit)? = null,
 ): NotificationCompat.Builder {
-    val builder = NotificationCompat.Builder(this, channelId)
-        .setColor(ContextCompat.getColor(this, R.color.splash_background))
+    val builder =
+        NotificationCompat.Builder(this, channelId)
+            .setColor(ContextCompat.getColor(this, R.color.ic_launcher_background))
     if (block != null) {
         builder.block()
     }
@@ -202,19 +205,21 @@ fun Context.notificationBuilder(
 
 fun Context.prepareSideNavContext(): Context {
     val configuration = resources.configuration
-    val expected = when (Injekt.get<PreferencesHelper>().sideNavMode().get()) {
-        SideNavMode.ALWAYS.prefValue -> true
-        SideNavMode.NEVER.prefValue -> false
-        else -> null
-    }
+    val expected =
+        when (Injekt.get<PreferencesHelper>().sideNavMode().get()) {
+            SideNavMode.ALWAYS.prefValue -> true
+            SideNavMode.NEVER.prefValue -> false
+            else -> null
+        }
     if (expected != null) {
         val overrideConf = Configuration()
         overrideConf.setTo(configuration)
-        overrideConf.screenWidthDp = if (expected) {
-            overrideConf.screenWidthDp.coerceAtLeast(TABLET_UI_MIN_SCREEN_WIDTH_DP)
-        } else {
-            overrideConf.screenWidthDp.coerceAtMost(TABLET_UI_MIN_SCREEN_WIDTH_DP - 1)
-        }
+        overrideConf.screenWidthDp =
+            if (expected) {
+                overrideConf.screenWidthDp.coerceAtLeast(TABLET_UI_MIN_SCREEN_WIDTH_DP)
+            } else {
+                overrideConf.screenWidthDp.coerceAtMost(TABLET_UI_MIN_SCREEN_WIDTH_DP - 1)
+            }
         return createConfigurationContext(overrideConf)
     }
     return this
@@ -234,93 +239,22 @@ fun Context.isLandscape(): Boolean {
     return resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
 }
 
-/**
- * Convenience method to acquire a partial wake lock.
- */
-fun Context.acquireWakeLock(tag: String? = null, timeout: Long? = null): PowerManager.WakeLock {
-    val wakeLock = powerManager.newWakeLock(
-        PowerManager.PARTIAL_WAKE_LOCK,
-        "${tag ?: javaClass.name}:WakeLock",
-    )
-    if (timeout != null) {
-        wakeLock.acquire(timeout)
-    } else {
-        wakeLock.acquire()
-    }
-    return wakeLock
-}
-
-/**
- * Property to get the notification manager from the context.
- */
+/** Property to get the notification manager from the context. */
 val Context.notificationManager: NotificationManager
     get() = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-/**
- * Property to get the connectivity manager from the context.
- */
+/** Property to get the connectivity manager from the context. */
 val Context.connectivityManager: ConnectivityManager
     get() = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
 val Context.wifiManager: WifiManager
     get() = getSystemService()!!
 
-/**
- * Property to get the power manager from the context.
- */
+/** Property to get the power manager from the context. */
 val Context.powerManager: PowerManager
     get() = getSystemService()!!
 
-/**
- * Function used to send a local broadcast asynchronous
- *
- * @param intent intent that contains broadcast information
- */
-fun Context.sendLocalBroadcast(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(
-        intent,
-    )
-}
-
-/**
- * Function used to send a local broadcast synchronous
- *
- * @param intent intent that contains broadcast information
- */
-fun Context.sendLocalBroadcastSync(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
-        .sendBroadcastSync(
-            intent,
-        )
-}
-
-/**
- * Function used to register local broadcast
- *
- * @param receiver receiver that gets registered.
- */
-fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
-        receiver,
-        filter,
-    )
-}
-
-/**
- * Function used to unregister local broadcast
- *
- * @param receiver receiver that gets unregistered.
- */
-fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
-        .unregisterReceiver(
-            receiver,
-        )
-}
-
-/**
- * Returns true if device is connected to Wifi.
- */
+/** Returns true if device is connected to Wifi. */
 fun Context.isConnectedToWifi(): Boolean {
     if (!wifiManager.isWifiEnabled) return false
 
@@ -337,41 +271,34 @@ fun Context.isConnectedToWifi(): Boolean {
     }
 }
 
-/**
- * Returns true if the given service class is running.
- */
-fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
-    val className = serviceClass.name
-    val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    @Suppress("DEPRECATION")
-    return manager.getRunningServices(Integer.MAX_VALUE)
-        .any { className == it.service.className }
-}
-
 fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
-    return packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-        ?.activityInfo?.packageName
+    return packageManager
+        .resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+        ?.activityInfo
+        ?.packageName
         ?.takeUnless { it in DeviceUtil.invalidDefaultBrowsers }
 }
 
 fun Context.openInWebView(url: String, title: String = "") {
-    val intent = WebViewActivity.newIntent(
-        this.applicationContext,
-        url,
-        title,
-    )
+    val intent =
+        WebViewActivity.newIntent(
+            this.applicationContext,
+            url,
+            title,
+        )
     startActivity(intent)
 }
 
 fun Context.openInFirefox(url: String) {
     val uri = url.toUri()
     try {
-        val intent = Intent().apply {
-            setPackage("org.mozilla.firefox")
-            action = Intent.ACTION_VIEW
-            data = uri
-        }
+        val intent =
+            Intent().apply {
+                setPackage("org.mozilla.firefox")
+                action = Intent.ACTION_VIEW
+                data = uri
+            }
         startActivity(intent)
     } catch (e: Exception) {
         toast(e.message)
@@ -389,12 +316,13 @@ fun Context.openInBrowser(url: String, forceDefaultBrowser: Boolean = false) {
 
 fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
     try {
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            // Force default browser so that verified extensions don't re-open Neko
-            if (forceDefaultBrowser) {
-                defaultBrowserPackageName()?.let { setPackage(it) }
+        val intent =
+            Intent(Intent.ACTION_VIEW, uri).apply {
+                // Force default browser so that verified extensions don't re-open Neko
+                if (forceDefaultBrowser) {
+                    defaultBrowserPackageName()?.let { setPackage(it) }
+                }
             }
-        }
         startActivity(intent)
     } catch (e: Exception) {
         toast(e.message)
@@ -405,6 +333,20 @@ fun Context.isInNightMode(): Boolean {
     val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
 }
+
+suspend fun CoroutineWorker.tryToSetForeground() {
+    try {
+        setForeground(getForegroundInfo())
+        delay(500)
+    } catch (e: IllegalStateException) {
+        TimberKt.e(e) { "Not allowed to set foreground job" }
+    }
+}
+
+fun WorkManager.jobIsRunning(tag: String): Boolean =
+    getWorkInfosForUniqueWork(tag).get().let { list ->
+        list.count { it.state == WorkInfo.State.RUNNING } == 1
+    }
 
 fun Context.appDelegateNightMode(): Int {
     return if (isInNightMode()) {
@@ -417,12 +359,27 @@ fun Context.appDelegateNightMode(): Int {
 fun Context.isOnline(): Boolean {
     val networkCapabilities = connectivityManager.activeNetwork ?: return false
     val actNw = connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-    val maxTransport = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 -> NetworkCapabilities.TRANSPORT_LOWPAN
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> NetworkCapabilities.TRANSPORT_WIFI_AWARE
-        else -> NetworkCapabilities.TRANSPORT_VPN
-    }
+    val maxTransport =
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 ->
+                NetworkCapabilities.TRANSPORT_LOWPAN
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ->
+                NetworkCapabilities.TRANSPORT_WIFI_AWARE
+            else -> NetworkCapabilities.TRANSPORT_VPN
+        }
     return (NetworkCapabilities.TRANSPORT_CELLULAR..maxTransport).any(actNw::hasTransport)
+}
+
+fun Context.launchRequestPackageInstallsPermission() {
+    val intent =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                data = Uri.parse("package:$packageName")
+            }
+        } else {
+            Intent(Settings.ACTION_SECURITY_SETTINGS)
+        }
+    startActivity(intent)
 }
 
 fun Context.createFileInCacheDir(name: String): File {
@@ -449,9 +406,7 @@ fun Context.iconicsDrawableLarge(
     return this.iconicsDrawable(icon, size, color, attributeColor)
 }
 
-/**
- * default tinted to actionbar
- */
+/** default tinted to actionbar */
 @SuppressLint("ResourceType")
 fun Context.iconicsDrawableMedium(
     icon: IIcon,
@@ -471,13 +426,16 @@ fun Context.iconicsDrawable(
 ): IconicsDrawable {
     return IconicsDrawable(this, icon).apply {
         sizeDp = size
-        colorInt = when {
-            attributeColor -> getResourceColor(color)
-            else -> contextCompatColor(color)
-        }
+        colorInt =
+            when {
+                attributeColor -> getResourceColor(color)
+                else -> contextCompatColor(color)
+            }
     }
 }
 
-fun Context.sharedCacheDir(): File {
-    return File(this.cacheDir, "shared_image")
+fun Context.sharedCacheDir(): UniFile? {
+    val uniFile = UniFile.fromFile(this.cacheDir)?.createDirectory("shared_image")
+    uniFile?.listFiles()?.filter { it.isFile }?.map { it.delete() }
+    return uniFile
 }

@@ -6,6 +6,7 @@ interface Release {
 
     /**
      * Get download link of latest release.
+     *
      * @return download link of latest release.
      */
     val downloadLink: String

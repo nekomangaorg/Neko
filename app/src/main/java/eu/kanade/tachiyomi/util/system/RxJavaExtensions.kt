@@ -7,19 +7,20 @@ import rx.Observable
 import rx.Observer
 
 fun <T : Any> Observable<T>.asFlow(): Flow<T> = callbackFlow {
-    val observer = object : Observer<T> {
-        override fun onNext(t: T) {
-            trySend(t)
-        }
+    val observer =
+        object : Observer<T> {
+            override fun onNext(t: T) {
+                trySend(t)
+            }
 
-        override fun onError(e: Throwable) {
-            close(e)
-        }
+            override fun onError(e: Throwable) {
+                close(e)
+            }
 
-        override fun onCompleted() {
-            close()
+            override fun onCompleted() {
+                close()
+            }
         }
-    }
     val subscription = subscribe(observer)
     awaitClose { subscription.unsubscribe() }
 }

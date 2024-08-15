@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.databinding.BottomMenuSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -25,6 +23,8 @@ import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import kotlin.math.max
 import kotlin.math.min
+import org.nekomanga.R
+import org.nekomanga.databinding.BottomMenuSheetBinding
 
 class MaterialMenuSheet(
     activity: Activity,
@@ -37,6 +37,7 @@ class MaterialMenuSheet(
 ) : E2EBottomSheetDialog<BottomMenuSheetBinding>(activity) {
 
     override fun createBinding(inflater: LayoutInflater) = BottomMenuSheetBinding.inflate(inflater)
+
     private val fastAdapter: FastAdapter<MaterialMenuSheetItem>
     private val itemAdapter = ItemAdapter<MaterialMenuSheetItem>()
 
@@ -46,7 +47,8 @@ class MaterialMenuSheet(
         binding.menuSheetLayout.checkHeightThen {
             binding.menuSheetRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
-                val insets = activity.window.decorView.rootWindowInsetsCompat?.getInsets(systemBars())
+                val insets =
+                    activity.window.decorView.rootWindowInsetsCompat?.getInsets(systemBars())
                 matchConstraintMaxHeight =
                     min(
                         (maxHeight ?: fullHeight) + (insets?.bottom ?: 0),
@@ -102,13 +104,15 @@ class MaterialMenuSheet(
             val nonElevateColor = activity.getResourceColor(R.attr.colorSurface)
             val elevateColor = activity.getResourceColor(R.attr.colorPrimaryVariant)
 
-            elevationAnimator = ValueAnimator.ofArgb(
-                if (elevate) nonElevateColor else elevateColor,
-                if (elevate) elevateColor else nonElevateColor,
-            )
+            elevationAnimator =
+                ValueAnimator.ofArgb(
+                    if (elevate) nonElevateColor else elevateColor,
+                    if (elevate) elevateColor else nonElevateColor,
+                )
 
             elevationAnimator?.addUpdateListener {
-                binding.titleLayout.backgroundTintList = ColorStateList.valueOf(it.animatedValue as Int)
+                binding.titleLayout.backgroundTintList =
+                    ColorStateList.valueOf(it.animatedValue as Int)
             }
             elevationAnimator?.start()
         }

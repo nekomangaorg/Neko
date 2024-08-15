@@ -9,8 +9,8 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.ui.setting.SettingsAdvancedController
 import eu.kanade.tachiyomi.ui.setting.SettingsAppearanceController
-import eu.kanade.tachiyomi.ui.setting.SettingsBackupController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
+import eu.kanade.tachiyomi.ui.setting.SettingsDataController
 import eu.kanade.tachiyomi.ui.setting.SettingsDownloadController
 import eu.kanade.tachiyomi.ui.setting.SettingsGeneralController
 import eu.kanade.tachiyomi.ui.setting.SettingsLibraryController
@@ -28,25 +28,25 @@ object SettingsSearchHelper {
     private var prefSearchResultList: MutableList<SettingsSearchResult> = mutableListOf()
 
     /**
-     * All subclasses of `SettingsController` should be listed here, in order to have their preferences searchable.
+     * All subclasses of `SettingsController` should be listed here, in order to have their
+     * preferences searchable.
      */
-    private val settingControllersList: List<KClass<out SettingsController>> = listOf(
-        SettingsAdvancedController::class,
-        SettingsAppearanceController::class,
-        SettingsBackupController::class,
-        SettingsDownloadController::class,
-        SettingsGeneralController::class,
-        SettingsLibraryController::class,
-        SettingsMainController::class,
-        SettingsReaderController::class,
-        SettingsSecurityController::class,
-        SettingsSiteController::class,
-        SettingsTrackingController::class,
-    )
+    private val settingControllersList: List<KClass<out SettingsController>> =
+        listOf(
+            SettingsAdvancedController::class,
+            SettingsAppearanceController::class,
+            SettingsDataController::class,
+            SettingsDownloadController::class,
+            SettingsGeneralController::class,
+            SettingsLibraryController::class,
+            SettingsMainController::class,
+            SettingsReaderController::class,
+            SettingsSecurityController::class,
+            SettingsSiteController::class,
+            SettingsTrackingController::class,
+        )
 
-    /**
-     * Must be called to populate `prefSearchResultList`
-     */
+    /** Must be called to populate `prefSearchResultList` */
     @SuppressLint("RestrictedApi")
     fun initPreferenceSearchResultCollection(context: Context) {
         val preferenceManager = PreferenceManager(context)
@@ -55,11 +55,14 @@ object SettingsSearchHelper {
         launchNow {
             settingControllersList.forEach { kClass ->
                 val ctrl = kClass.createInstance()
-                val settingsPrefScreen = ctrl.setupPreferenceScreen(preferenceManager.createPreferenceScreen(context))
+                val settingsPrefScreen =
+                    ctrl.setupPreferenceScreen(preferenceManager.createPreferenceScreen(context))
                 val prefCount = settingsPrefScreen.preferenceCount
                 for (i in 0 until prefCount) {
                     val rootPref = settingsPrefScreen.getPreference(i)
-                    if (rootPref.title == null) continue // no title, not a preference. (note: only info notes appear to not have titles)
+                    if (rootPref.title == null)
+                        continue // no title, not a preference. (note: only info notes appear to not
+                    // have titles)
                     getSettingSearchResult(ctrl, rootPref, "${settingsPrefScreen.title}")
                 }
             }
@@ -77,8 +80,9 @@ object SettingsSearchHelper {
     }
 
     /**
-     * Extracts the data needed from a `Preference` to create a `SettingsSearchResult`, and then adds it to `prefSearchResultList`
-     * Future enhancement: make bold the text matched by the search query.
+     * Extracts the data needed from a `Preference` to create a `SettingsSearchResult`, and then
+     * adds it to `prefSearchResultList` Future enhancement: make bold the text matched by the
+     * search query.
      */
     private fun getSettingSearchResult(
         ctrl: SettingsController,
@@ -106,11 +110,12 @@ object SettingsSearchHelper {
                 // Is an actual preference
                 val title = pref.title.toString()
                 // ListPreferences occasionally run into ArrayIndexOutOfBoundsException issues
-                val summary = try {
-                    pref.summary?.toString() ?: ""
-                } catch (e: Throwable) {
-                    ""
-                }
+                val summary =
+                    try {
+                        pref.summary?.toString() ?: ""
+                    } catch (e: Throwable) {
+                        ""
+                    }
 
                 prefSearchResultList.add(
                     SettingsSearchResult(

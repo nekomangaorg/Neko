@@ -21,6 +21,7 @@ sealed class TrackService(val id: Int) {
     val db: DatabaseHelper by injectLazy()
 
     open fun canRemoveFromService() = false
+
     open fun isAutoAddTracker() = false
     open fun isMdList() = false
 
@@ -28,17 +29,14 @@ sealed class TrackService(val id: Int) {
         get() = networkService.client
 
     // Name of the manga sync service to display
-    @StringRes
-    abstract fun nameRes(): Int
+    @StringRes abstract fun nameRes(): Int
 
     // Application and remote support for reading dates
     open val supportsReadingDates: Boolean = false
 
-    @DrawableRes
-    abstract fun getLogo(): Int
+    @DrawableRes abstract fun getLogo(): Int
 
-    @ColorInt
-    abstract fun getLogoColor(): Int
+    @ColorInt abstract fun getLogoColor(): Int
 
     abstract fun getScoreList(): List<String>
 
@@ -147,23 +145,21 @@ abstract class TrackStatusService(_id: Int) : TrackService(_id) {
         if (setToComplete &&
             (!mustReadToComplete || track.status == readingStatus()) &&
             track.total_chapters != 0 &&
-            track.last_chapter_read.toInt() == track.total_chapters
-        ) {
+            track.last_chapter_read.toInt() == track.total_chapters) {
             track.status = completedStatus()
         }
     }
 
     suspend fun updateNewTrackInfo(track: Track, planningStatus: Int) {
         val manga = db.getManga(track.manga_id).executeOnIO()
-        val allRead = manga?.isOneShotOrCompleted(db) == true &&
+    val allRead =
+        manga?.isOneShotOrCompleted(db) == true &&
             db.getChapters(track.manga_id).executeOnIO().all { it.read }
-        if (supportsReadingDates) {
-            track.started_reading_date = getStartDate(track)
-            track.finished_reading_date = getCompletedDate(track, allRead)
-        }
-        track.last_chapter_read = getLastChapterRead(track).takeUnless {
-            it == 0f && allRead
-        } ?: 1f
+    if (supportsReadingDates) {
+        track.started_reading_date = getStartDate(track)
+        track.finished_reading_date = getCompletedDate(track, allRead)
+    }
+    track.last_chapter_read = getLastChapterRead(track).takeUnless { it == 0f && allRead } ?: 1f
         if (track.last_chapter_read == 0f) {
             track.status = planningStatus
         }
