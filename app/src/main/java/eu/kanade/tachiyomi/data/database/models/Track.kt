@@ -43,8 +43,7 @@ interface Track : Serializable {
 
     companion object {
         val LIST_SEPERATOR = "~||~"
-        fun create(serviceId: Int): Track = TrackImpl().apply {
-            sync_id = serviceId
-        }
+
+        fun create(serviceId: Int): Track = TrackImpl().apply { sync_id = serviceId }
     }
 }

@@ -64,7 +64,10 @@ class BrowseRepository(
 
     suspend fun getList(listUuid: String, page: Int): Result<List<DisplayManga>, ResultError> {
         return mangaDex.fetchList(listUuid, page, false).andThen { resultListPage ->
-            val displayManga = resultListPage.sourceManga.map { it.toDisplayManga(db, sourceId = mangaDex.id) }.toImmutableList()
+            val displayManga =
+                resultListPage.sourceManga
+                    .map { it.toDisplayManga(db, sourceId = mangaDex.id) }
+                    .toImmutableList()
             Ok(displayManga)
         }
     }
@@ -108,23 +111,25 @@ class BrowseRepository(
         return if (blockedScanlatorUUIDs.filterErrors().isNotEmpty()) {
             Err(blockedScanlatorUUIDs.filterErrors().first())
         } else {
-            val uuids = blockedScanlatorUUIDs.getAll().map { it.uuid }
-            mangaDex.fetchHomePageInfo(uuids, isLoggedIn())
-                .andThen { listResults ->
+            val uuids = blockedScanlatorUUIDs.filterValues().map { it.uuid }
+            mangaDex.fetchHomePageInfo(uuids, isLoggedIn()).andThen { listResults ->
                 Ok(
-                        listResults.mapNotNull { listResult ->
-                            if (listResult.sourceManga.isEmpty() && listResult.displayScreenType is DisplayScreenType.SubscriptionFeed) {
-                                null
-                            } else {
-                        HomePageManga(
-                            displayScreenType = listResult.displayScreenType,
-                            displayManga =
-                                listResult.sourceManga
-                                    .map { it.toDisplayManga(db, mangaDex.id) }
-                                    .distinctBy { it.url }
-                                    .toPersistentList(),
-                        )
-                            }
+                    listResults.mapNotNull { listResult ->
+                        if (
+                            listResult.sourceManga.isEmpty() &&
+                                listResult.displayScreenType is DisplayScreenType.SubscriptionFeed
+                        ) {
+                            null
+                        } else {
+                            HomePageManga(
+                                displayScreenType = listResult.displayScreenType,
+                                displayManga =
+                                    listResult.sourceManga
+                                        .map { it.toDisplayManga(db, mangaDex.id) }
+                                        .distinctBy { it.url }
+                                        .toPersistentList(),
+                            )
+                        }
                     },
                 )
             }

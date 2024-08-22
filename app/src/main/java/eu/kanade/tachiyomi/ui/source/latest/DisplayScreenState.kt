@@ -40,5 +40,6 @@ sealed interface DisplayScreenType : Parcelable {
     data class PopularNewTitles(val titleRes: Int = R.string.popularNewTitles) : DisplayScreenType
 
     @Parcelize
-    data class List(val title: String, val listUUID: String, val privateList: Boolean = false) : DisplayScreenType
+    data class List(val title: String, val listUUID: String, val privateList: Boolean = false) :
+        DisplayScreenType
 }

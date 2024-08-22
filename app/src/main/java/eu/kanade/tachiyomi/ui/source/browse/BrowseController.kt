@@ -51,7 +51,9 @@ class BrowseController(incomingQuery: String = "") : BaseComposeController<Brows
             loadNextPage = presenter::loadNextItems,
             retryClick = presenter::retry,
             otherClick = presenter::otherClick,
-            listClick = { title: String, uuid: String -> openDisplayScreen(DisplayScreenType.List(title, uuid, true)) },
+            listClick = { title: String, uuid: String ->
+                openDisplayScreen(DisplayScreenType.List(title, uuid, true))
+            },
             changeScreenType = presenter::changeScreenType,
             randomClick = presenter::randomManga,
             incognitoClick = presenter::toggleIncognitoMode,

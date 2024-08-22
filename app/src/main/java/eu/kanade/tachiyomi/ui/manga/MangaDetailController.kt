@@ -112,11 +112,20 @@ class MangaDetailController(private val mangaId: Long) :
             generatePalette = this::setPalette,
             toggleFavorite = presenter::toggleFavorite,
             dateFormat = preferences.dateFormat(),
-            trackActions = TrackActions(
-                statusChange = { statusIndex, trackAndService -> presenter.updateTrackStatus(statusIndex, trackAndService) },
-                scoreChange = { statusIndex, trackAndService -> presenter.updateTrackScore(statusIndex, trackAndService) },
-                chapterChange = { newChapterNumber, trackAndService -> presenter.updateTrackChapter(newChapterNumber, trackAndService) },
-                listChange = { listIdsToAdd, listIdsToRemove, trackAndService -> presenter.updateTrackList(listIdsToAdd, listIdsToRemove, trackAndService) },
+            trackActions =
+                TrackActions(
+                    statusChange = { statusIndex, trackAndService ->
+                        presenter.updateTrackStatus(statusIndex, trackAndService)
+                    },
+                    scoreChange = { statusIndex, trackAndService ->
+                        presenter.updateTrackScore(statusIndex, trackAndService)
+                    },
+                    chapterChange = { newChapterNumber, trackAndService ->
+                        presenter.updateTrackChapter(newChapterNumber, trackAndService)
+                    },
+                    listChange = { listIdsToAdd, listIdsToRemove, trackAndService ->
+                        presenter.updateTrackList(listIdsToAdd, listIdsToRemove, trackAndService)
+                    },
                     search = { title, service -> presenter.searchTracker(title, service) },
                     searchItemClick = { trackAndService ->
                         presenter.registerTracking(trackAndService)

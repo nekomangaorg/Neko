@@ -45,97 +45,113 @@ fun TrackingListDialog(
     onDismiss: () -> Unit,
     trackListChange: (List<String>, List<String>) -> Unit,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-        val scope = rememberCoroutineScope()
+    CompositionLocalProvider(
+        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
+            val scope = rememberCoroutineScope()
 
-        val saver = listSaver<MutableList<Int>, Int>(
-            save = {
-                when (it.isEmpty()) {
-                    true -> emptyList()
-                    false -> it.toList()
-                }
-            },
-            restore = {
-                it.toMutableStateList()
-            },
-        )
-
-        val positionOfItemsToAdd = rememberSaveable(saver = saver) { mutableStateListOf() }
-        val positionOfItemsToRemove = rememberSaveable(saver = saver) { mutableStateListOf() }
-
-        AlertDialog(
-            title = {
-                Text(text = stringResource(id = R.string.list), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            },
-            text = {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    service.lists?.forEachIndexed { index, list ->
-                        var isSelected by remember {
-                            mutableStateOf(currentLists.contains(list) || positionOfItemsToAdd.contains(index))
+            val saver =
+                listSaver<MutableList<Int>, Int>(
+                    save = {
+                        when (it.isEmpty()) {
+                            true -> emptyList()
+                            false -> it.toList()
                         }
+                    },
+                    restore = { it.toMutableStateList() },
+                )
 
-                        val clicked = { enabled: Boolean ->
-                            scope.launch {
-                                isSelected = enabled
-                                when (enabled) {
-                                    true -> {
-                                        positionOfItemsToRemove.remove(index)
-                                        if (currentLists.firstOrNull { it.id == service.lists[index].id } == null)
-                                            positionOfItemsToAdd.add(index)
-                                    }
+            val positionOfItemsToAdd = rememberSaveable(saver = saver) { mutableStateListOf() }
+            val positionOfItemsToRemove = rememberSaveable(saver = saver) { mutableStateListOf() }
 
-                                    false -> {
-                                        positionOfItemsToAdd.remove(index)
-                                        positionOfItemsToRemove.add(index)
+            AlertDialog(
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.list),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth())
+                },
+                text = {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        service.lists?.forEachIndexed { index, list ->
+                            var isSelected by remember {
+                                mutableStateOf(
+                                    currentLists.contains(list) ||
+                                        positionOfItemsToAdd.contains(index))
+                            }
+
+                            val clicked = { enabled: Boolean ->
+                                scope.launch {
+                                    isSelected = enabled
+                                    when (enabled) {
+                                        true -> {
+                                            positionOfItemsToRemove.remove(index)
+                                            if (currentLists.firstOrNull {
+                                                it.id == service.lists[index].id
+                                            } == null)
+                                                positionOfItemsToAdd.add(index)
+                                        }
+
+                                        false -> {
+                                            positionOfItemsToAdd.remove(index)
+                                            positionOfItemsToRemove.add(index)
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .selectable(
-                                    selected = isSelected,
-                                    onClick = {
-                                        clicked(!isSelected)
-                                    },
-                                ),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Checkbox(
-                                checked = (isSelected),
-                                onCheckedChange = { enabled -> clicked(enabled) },
-                                colors = CheckboxDefaults.colors(checkedColor = themeColorState.buttonColor),
-                            )
-                            Gap(width = 8.dp)
-                            Text(text = list.name, style = MaterialTheme.typography.titleMedium)
+                            Row(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .selectable(
+                                            selected = isSelected,
+                                            onClick = { clicked(!isSelected) },
+                                        ),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(
+                                    checked = (isSelected),
+                                    onCheckedChange = { enabled -> clicked(enabled) },
+                                    colors =
+                                        CheckboxDefaults.colors(
+                                            checkedColor = themeColorState.buttonColor),
+                                )
+                                Gap(width = 8.dp)
+                                Text(text = list.name, style = MaterialTheme.typography.titleMedium)
+                            }
                         }
                     }
-                }
-            },
-            onDismissRequest = onDismiss,
-            dismissButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (service.lists != null) {
-                            trackListChange
-                            val itemsToAddUUIDs = positionOfItemsToAdd.map { service.lists[it].id }
-                            val itemsToRemoveUUIDs = positionOfItemsToRemove.map { service.lists[it].id }
-                            trackListChange(itemsToAddUUIDs, itemsToRemoveUUIDs)
+                },
+                onDismissRequest = onDismiss,
+                dismissButton = {
+                    TextButton(
+                        onClick = onDismiss,
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor)) {
+                            Text(text = stringResource(id = R.string.cancel))
                         }
-                        onDismiss()
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
-                ) {
-                    Text(text = stringResource(id = android.R.string.ok))
-                }
-            },
-        )
-    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            if (service.lists != null) {
+                                trackListChange
+                                val itemsToAddUUIDs =
+                                    positionOfItemsToAdd.map { service.lists[it].id }
+                                val itemsToRemoveUUIDs =
+                                    positionOfItemsToRemove.map { service.lists[it].id }
+                                trackListChange(itemsToAddUUIDs, itemsToRemoveUUIDs)
+                            }
+                            onDismiss()
+                        },
+                        colors =
+                            ButtonDefaults.textButtonColors(
+                                contentColor = themeColorState.buttonColor),
+                    ) {
+                        Text(text = stringResource(id = android.R.string.ok))
+                    }
+                },
+            )
+        }
 }

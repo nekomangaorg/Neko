@@ -175,8 +175,11 @@ fun BrowseScreen(
                 actions = {
                     AppBarActions(
                         actions =
-                        when (browseScreenType != BrowseScreenType.Homepage && browseScreenType != BrowseScreenType.Other && browseScreenType != BrowseScreenType.Lists) {
-                            true -> listOf(
+                            when (browseScreenType != BrowseScreenType.Homepage &&
+                                browseScreenType != BrowseScreenType.Other &&
+                                browseScreenType != BrowseScreenType.Lists) {
+                                true ->
+                                    listOf(
                                         listGridAppBarAction(
                                             isList = browseScreenState.value.isList,
                                             onClick = switchDisplayClick,
@@ -184,16 +187,17 @@ fun BrowseScreen(
                                     )
                                 false -> emptyList()
                             } +
-                            when (browseScreenType == BrowseScreenType.Lists) {
-                                true -> emptyList()
-                                false -> listOf(
-                                    showLibraryEntriesAction(
-                                        showEntries = browseScreenState.value.showLibraryEntries,
-                                        onClick = switchLibraryVisibilityClick,
-                                    ),
-                                )
-                            }
-                            +
+                                when (browseScreenType == BrowseScreenType.Lists) {
+                                    true -> emptyList()
+                                    false ->
+                                        listOf(
+                                            showLibraryEntriesAction(
+                                                showEntries =
+                                                    browseScreenState.value.showLibraryEntries,
+                                                onClick = switchLibraryVisibilityClick,
+                                            ),
+                                        )
+                                } +
                                 if (browseScreenState.value.isDeepLink) {
                                     emptyList()
                                 } else {
@@ -271,7 +275,8 @@ fun BrowseScreen(
                             contentPadding = recyclerContentPadding,
                         )
                     } else {
-                        Crossfade(targetState = browseScreenType, label = "Crossfade browse") { type ->
+                        Crossfade(targetState = browseScreenType, label = "Crossfade browse") { type
+                            ->
                             when (type) {
                                 BrowseScreenType.Homepage ->
                                     BrowseHomePage(
@@ -288,7 +293,9 @@ fun BrowseScreen(
                                     BrowseOtherPage(
                                         results = browseScreenState.value.otherResults,
                                         contentPadding = recyclerContentPadding,
-                                        onClick = { displayResult -> otherClick(displayResult.uuid) },
+                                        onClick = { displayResult ->
+                                            otherClick(displayResult.uuid)
+                                        },
                                     )
                                 }
 
@@ -296,7 +303,9 @@ fun BrowseScreen(
                                     BrowseOtherPage(
                                         results = browseScreenState.value.otherResults,
                                         contentPadding = recyclerContentPadding,
-                                        onClick = { displayResult -> listClick(displayResult.title, displayResult.uuid) },
+                                        onClick = { displayResult ->
+                                            listClick(displayResult.title, displayResult.uuid)
+                                        },
                                     )
                                 }
                                 BrowseScreenType.Filter -> {

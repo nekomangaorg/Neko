@@ -142,7 +142,8 @@ interface BaseMangaGetResolver {
             users = cursor.getString(cursor.getColumnIndex(COL_USERS))
             merge_manga_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_URL))
             last_chapter_number = cursor.getIntOrNull(cursor.getColumnIndex(COL_MANGA_LAST_CHAPTER))
-            merge_manga_image_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_IMAGE_URL))
+            merge_manga_image_url =
+                cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_IMAGE_URL))
             alt_titles = cursor.getString(cursor.getColumnIndex(COL_ALT_TITLE))
             user_cover = cursor.getString(cursor.getColumnIndex(COL_USER_COVER))
             user_title = cursor.getString(cursor.getColumnIndex(COL_USER_TITLE))

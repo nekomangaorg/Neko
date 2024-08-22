@@ -238,17 +238,22 @@ class BrowsePresenter(
     private fun getListPage(forceUpdate: Boolean) {
         presenterScope.launchIO {
             if (!isOnline()) return@launchIO
-            if (forceUpdate || _browseScreenState.value.displayMangaHolder.resultType != BrowseScreenType.Lists) {
-                _browseScreenState.update { state ->
-                    state.copy(initialLoading = true)
-                }
-                browseRepository.getLists(1).onFailure {
+            if (forceUpdate ||
+                _browseScreenState.value.displayMangaHolder.resultType != BrowseScreenType.Lists) {
+                _browseScreenState.update { state -> state.copy(initialLoading = true) }
+                browseRepository
+                    .getLists(1)
+                    .onFailure {
                         _browseScreenState.update { state ->
                             state.copy(error = UiText.String(it.message()), initialLoading = false)
                         }
-                }.onSuccess { dr ->
-                    _browseScreenState.update {
-                        it.copy(otherResults = dr.toImmutableList(), screenType = BrowseScreenType.Lists, initialLoading = false)
+                    }
+                    .onSuccess { dr ->
+                        _browseScreenState.update {
+                            it.copy(
+                                otherResults = dr.toImmutableList(),
+                                screenType = BrowseScreenType.Lists,
+                                initialLoading = false)
                         }
                     }
             }
@@ -273,7 +278,11 @@ class BrowsePresenter(
             if (!isOnline()) return@launchIO
 
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, title = UiText.StringResource(R.string.browse), error = null, page = 1)
+                state.copy(
+                    initialLoading = true,
+                    title = UiText.StringResource(R.string.browse),
+                    error = null,
+                    page = 1)
             }
 
             val currentQuery = browseScreenState.value.filters.query.text
@@ -326,7 +335,9 @@ class BrowsePresenter(
                                         initialLoading = false)
                                 }
                             } else {
-                                browseRepository.getList(uuid, 1).onFailure {
+                                browseRepository
+                                    .getList(uuid, 1)
+                                    .onFailure {
                                         _browseScreenState.update { state ->
                                             state.copy(
                                                 error = UiText.String(it.message()),
@@ -424,7 +435,9 @@ class BrowsePresenter(
                     if (!_browseScreenState.value.handledIncomingQuery) {
                         _browseScreenState.update { it.copy(handledIncomingQuery = true) }
                     }
-                    browseRepository.getList(uuid, 1).onFailure {
+                    browseRepository
+                        .getList(uuid, 1)
+                        .onFailure {
                             _browseScreenState.update { state ->
                                 state.copy(
                                     error = UiText.String(it.message()), initialLoading = false)
@@ -847,20 +860,20 @@ class BrowsePresenter(
 
     fun changeScreenType(browseScreenType: BrowseScreenType, forceUpdate: Boolean = false) {
         presenterScope.launch {
-            val title = when (browseScreenType) {
-                BrowseScreenType.Lists -> {
-                    getListPage(forceUpdate)
-                    UiText.StringResource(R.string.my_lists)
+            val title =
+                when (browseScreenType) {
+                    BrowseScreenType.Lists -> {
+                        getListPage(forceUpdate)
+                        UiText.StringResource(R.string.my_lists)
+                    }
+
+                    BrowseScreenType.Filter -> {
+                        getSearchPage()
+                        UiText.StringResource(R.string.browse)
+                    }
+
+                    else -> UiText.StringResource(R.string.browse)
                 }
-
-                BrowseScreenType.Filter -> {
-                    getSearchPage()
-                    UiText.StringResource(R.string.browse)
-                }
-
-                else -> UiText.StringResource(R.string.browse)
-
-            }
             _browseScreenState.update {
                 it.copy(screenType = browseScreenType, title = title, error = null)
             }

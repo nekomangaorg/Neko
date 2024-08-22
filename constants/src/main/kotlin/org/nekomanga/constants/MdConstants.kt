@@ -11,7 +11,6 @@ object MdConstants {
     const val nekoDevPicksId = "9650e839-1266-4456-860d-c7eee164b451"
     const val oldSeasonalId = "a153b4e6-1fcc-4f45-a990-f37f989c0d74"
 
-
     const val baseUrl = "https://mangadex.org"
     const val cdnUrl = "https://uploads.mangadex.dev"
     const val forumUrl = "https://forums.mangadex.org/threads/"

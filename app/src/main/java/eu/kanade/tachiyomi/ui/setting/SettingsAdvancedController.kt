@@ -298,27 +298,28 @@ class SettingsAdvancedController : SettingsController() {
             }
             if (BuildConfig.DEBUG) {
                 preference {
-                title = "Remove library manga from All MDLists"
+                    title = "Remove library manga from All MDLists"
                     onClick {
                         launchIO {
                             val db = Injekt.get<DatabaseHelper>()
-                        val mangaDex = Injekt.get<SourceManager>().mangaDex
+                            val mangaDex = Injekt.get<SourceManager>().mangaDex
                             val trackManager: TrackManager = Injekt.get()
-                        mangaDex.fetchAllUserLists().onSuccess { resultListPage ->
-                            val listIds = resultListPage.results.map { it.uuid }
-                            db.getLibraryMangaList().executeAsBlocking().forEach { libraryManga ->
-                                listIds.forEach { id ->
-                                    mangaDex.removeFromCustomList(libraryManga.uuid(), id)
-                                }
-                                db.getMDList(libraryManga).executeOnIO()?.let { _ ->
-                                    db.deleteTrackForManga(libraryManga, trackManager.mdList)
-                                        .executeAsBlocking()
+                            mangaDex.fetchAllUserLists().onSuccess { resultListPage ->
+                                val listIds = resultListPage.results.map { it.uuid }
+                                db.getLibraryMangaList().executeAsBlocking().forEach { libraryManga
+                                    ->
+                                    listIds.forEach { id ->
+                                        mangaDex.removeFromCustomList(libraryManga.uuid(), id)
+                                    }
+                                    db.getMDList(libraryManga).executeOnIO()?.let { _ ->
+                                        db.deleteTrackForManga(libraryManga, trackManager.mdList)
+                                            .executeAsBlocking()
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
                 preference {
                     title = "Clear all Manga"
                     onClick {
@@ -386,7 +387,8 @@ class SettingsAdvancedController : SettingsController() {
         if (job?.isActive == true) return
 
         activity?.toast(R.string.starting_cleanup)
-        job = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+        job =
+            GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
                 val downloadProvider = DownloadProvider(activity!!)
                 var foldersCleared = 0
                 val mangaList = db.getMangaList().executeAsBlocking()

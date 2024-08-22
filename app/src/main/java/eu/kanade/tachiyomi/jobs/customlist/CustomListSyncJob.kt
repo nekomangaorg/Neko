@@ -13,7 +13,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -33,9 +32,7 @@ import org.nekomanga.R
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
-/**
- * WorkManager job that syncs FollowsList to and from Neko
- */
+/** WorkManager job that syncs FollowsList to and from Neko */
 class CustomListSyncJob(
     val context: Context,
     params: WorkerParameters,
@@ -78,12 +75,6 @@ class CustomListSyncJob(
             return@coroutineScope Result.failure()
         }
 
-        val type = inputData.getInt(SYNC_TO_MANGADEX, TO_DEX)
-        val uuids = inputData.getStringArray(SYNC_UUIDS)
-        val mangaIds = inputData.getLongArray(MANGA_IDS)
-
-        TimberKt.d { "Number of mangaIds ${mangaIds!!.size}" }
-
         try {
             when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
                 null,
@@ -103,7 +94,8 @@ class CustomListSyncJob(
                             ::errorNotification,
                             ::updateNotificationProgress,
                             ::completeNotificationFromDex,
-                            ::updateManga)
+                            ::updateManga
+                        )
                     withUIContext {
                         applicationContext.toast(
                             applicationContext.getString(
@@ -115,12 +107,7 @@ class CustomListSyncJob(
                     }
                 }
                 else -> {
-                    TimberKt.d { "sync to MangaDex with given ids" }
-
-                    customListSyncProcessor.toMangaDex(
-                        ::updateNotificationProgress,
-                        ::completeNotificationToDex,
-                    )
+                    throw Exception("No value passed for custom list job")
                 }
             }
 
@@ -187,7 +174,8 @@ class CustomListSyncJob(
         val notification =
             progressNotification
                 .setContentTitle(
-                    errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync))
+                    errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync)
+                )
                 .setAutoCancel(true)
                 .build()
         context.notificationManager.notify(
@@ -200,11 +188,8 @@ class CustomListSyncJob(
 
         val TAG = "mdlist_sync_job"
         private const val SYNC_TO_MANGADEX = "sync_to_mangadex"
-        private const val SYNC_UUIDS = "sync_uuids"
-        private const val MANGA_IDS = "manga_ids"
-
-        const val TO_DEX = 0
-        const val FROM_DEX = 1
+        const val toDex = "0"
+        const val fromDex = "1"
 
         fun startNow(context: Context, syncToMangadex: String) {
             val request =

@@ -323,13 +323,15 @@ class MangaDetailPresenter(
         }
     }
 
-    /**
-     * Update tracker with new lists
-     */
-
-    fun updateTrackList(listIdsToAdd: List<String>, listIdsToRemove: List<String>, trackAndService: TrackAndService) {
+    /** Update tracker with new lists */
+    fun updateTrackList(
+        listIdsToAdd: List<String>,
+        listIdsToRemove: List<String>,
+        trackAndService: TrackAndService
+    ) {
         presenterScope.launchIO {
-            val trackingUpdate = trackingCoordinator.updateTrackLists(listIdsToAdd, listIdsToRemove, trackAndService)
+            val trackingUpdate =
+                trackingCoordinator.updateTrackLists(listIdsToAdd, listIdsToRemove, trackAndService)
             handleTrackingUpdate(trackingUpdate)
         }
     }
@@ -886,7 +888,9 @@ class MangaDetailPresenter(
                 val autoAddTracker = preferences.autoAddTracker().get()
 
                 // Always add the mdlist initial tracker, also add it as PTR if need be
-                trackMergeState.value.loggedInTrackService.firstOrNull { it.isMdList }?.let { _ ->
+                trackMergeState.value.loggedInTrackService
+                    .firstOrNull { it.isMdList }
+                    ?.let { _ ->
                         val mdList = trackManager.mdList
 
                         var track =
@@ -907,15 +911,23 @@ class MangaDetailPresenter(
                             }
                             db.insertTrack(track).executeOnIO()
                         }
-                    val enabledDefaultLists = preferences.enableDefaultCustomLists().get()
-                    val defaultCustomListUUID = preferences.getAddToLibraryToSpecificCustomList().get()
-                    val shouldAddToDefaultCustomList = currentManga().favorite && enabledDefaultLists && defaultCustomListUUID.isNotEmpty()
-                    if (shouldAddToDefaultCustomList && isOnline()) {
-                        defaultCustomListUUID.filterNot { id -> id in track.listIds }
-                        val idsToAdd = defaultCustomListUUID.filterNot { id -> id in track.listIds }
-                        if (idsToAdd.isNotEmpty()) {
-                            trackingCoordinator.updateTrackingListService(track.toTrackItem(), trackManager.mdList.toTrackServiceItem(), idsToAdd = idsToAdd)
-                        }
+                        val enabledDefaultLists = preferences.enableDefaultCustomLists().get()
+                        val defaultCustomListUUID =
+                            preferences.getAddToLibraryToSpecificCustomList().get()
+                        val shouldAddToDefaultCustomList =
+                            currentManga().favorite &&
+                                enabledDefaultLists &&
+                                defaultCustomListUUID.isNotEmpty()
+                        if (shouldAddToDefaultCustomList && isOnline()) {
+                            defaultCustomListUUID.filterNot { id -> id in track.listIds }
+                            val idsToAdd =
+                                defaultCustomListUUID.filterNot { id -> id in track.listIds }
+                            if (idsToAdd.isNotEmpty()) {
+                                trackingCoordinator.updateTrackingListService(
+                                    track.toTrackItem(),
+                                    trackManager.mdList.toTrackServiceItem(),
+                                    idsToAdd = idsToAdd)
+                            }
                         }
                     }
 
@@ -1008,8 +1020,10 @@ class MangaDetailPresenter(
                     val trackService = trackManager.getService(trackServiceItem.id)!!
                     trackMergeState.value.tracks.any { track ->
                         // return true if track matches and not MDList
-                    // or track matches and MDlist is any list
-                    trackService.matchingTrack(track) && (!trackService.isMdList() || (trackService.isMdList() && track.listIds.isNotEmpty()))
+                        // or track matches and MDlist is any list
+                        trackService.matchingTrack(track) &&
+                            (!trackService.isMdList() ||
+                                (trackService.isMdList() && track.listIds.isNotEmpty()))
                     }
                 }
 

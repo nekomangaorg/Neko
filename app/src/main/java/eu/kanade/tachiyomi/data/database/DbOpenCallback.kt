@@ -49,7 +49,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             execSQL(SimilarTable.createTableQuery)
             execSQL(ArtworkTable.createTableQuery)
             execSQL(ScanlatorTable.createTableQuery)
-        execSQL(CustomListTable.createTableQuery)
+            execSQL(CustomListTable.createTableQuery)
             execSQL(BrowseFilterTable.createTableQuery)
             execSQL(MergeMangaTable.createTableQuery)
             // DB indexes
@@ -170,10 +170,10 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         if (oldVersion < 37) {
             db.execSQL(TrackTable.updateMangaUpdatesScore)
 
-        if (oldVersion < 38) {
-            db.execSQL(TrackTable.addListId)
-            db.execSQL(CustomListTable.createTableQuery)
-        }
+            if (oldVersion < 38) {
+                db.execSQL(TrackTable.addListId)
+                db.execSQL(CustomListTable.createTableQuery)
+            }
         }
     }
 }

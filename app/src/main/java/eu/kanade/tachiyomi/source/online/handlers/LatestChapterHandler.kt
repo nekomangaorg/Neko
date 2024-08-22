@@ -27,7 +27,9 @@ import uy.kohesive.injekt.injectLazy
 
 class LatestChapterHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
+    private val authService: MangaDexAuthorizedUserService by lazy {
+        Injekt.get<NetworkServices>().authService
+    }
 
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
@@ -48,14 +50,17 @@ class LatestChapterHandler {
             val contentRatings = preferencesHelper.contentRatingSelections().get().toList()
 
             return@withContext when (feedType) {
-                MdConstants.FeedType.Latest -> service.latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
-                    .getOrResultError("getting latest chapters")
+                MdConstants.FeedType.Latest ->
+                    service
+                        .latestChapters(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+                        .getOrResultError("getting latest chapters")
 
-                MdConstants.FeedType.Subscription -> authService.subscriptionFeed(limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
-                    .getOrResultError("getting subscription feed")
-            }.andThen {
-                latestChapterParse(it)
-            }
+                MdConstants.FeedType.Subscription ->
+                    authService
+                        .subscriptionFeed(
+                            limit, offset, langs, contentRatings, blockedScanlatorUUIDs)
+                        .getOrResultError("getting subscription feed")
+            }.andThen { latestChapterParse(it) }
         }
     }
 

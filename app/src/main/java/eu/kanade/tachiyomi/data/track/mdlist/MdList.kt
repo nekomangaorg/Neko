@@ -32,26 +32,30 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
     private val mangaDexLoginHelper by lazy { Injekt.get<MangaDexLoginHelper>() }
 
     override fun nameRes() = R.string.mdlist
+
     override suspend fun populateLists() {
         mdex.fetchAllUserLists().onSuccess { resultListPage ->
-            val customLists = resultListPage.results.map { CustomListImpl(name = it.title, uuid = it.uuid) }
+            val customLists =
+                resultListPage.results.map { CustomListImpl(name = it.title, uuid = it.uuid) }
             db.insertCustomsLists(customLists).executeOnIO()
         }
     }
 
     override fun viewLists(): List<TrackList> {
-        return db.getCustomLists().executeAsBlocking().map { TrackList(name = it.name, id = it.uuid) }
+        return db.getCustomLists().executeAsBlocking().map {
+            TrackList(name = it.name, id = it.uuid)
+        }
     }
 
     override suspend fun addToList(track: Track, listId: String): Track {
         return withContext(Dispatchers.IO) {
-            kotlin.runCatching {
-                if (mdex.addToCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
-                    track.listIds = (track.listIds + listOf(listId)).distinct()
+            kotlin
+                .runCatching {
+                    if (mdex.addToCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
+                        track.listIds = (track.listIds + listOf(listId)).distinct()
+                    }
                 }
-            }.onFailure { e ->
-                TimberKt.e(e) { "error updating MDList" }
-            }
+                .onFailure { e -> TimberKt.e(e) { "error updating MDList" } }
 
             track
         }
@@ -59,13 +63,14 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
 
     override suspend fun removeFromList(track: Track, listId: String): Track {
         return withContext(Dispatchers.IO) {
-            kotlin.runCatching {
-                if (mdex.removeFromCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
-                    track.listIds = track.listIds.filterNot { it == listId }
+            kotlin
+                .runCatching {
+                    if (mdex.removeFromCustomList(
+                        MdUtil.getMangaUUID(track.tracking_url), listId)) {
+                        track.listIds = track.listIds.filterNot { it == listId }
+                    }
                 }
-            }.onFailure { e ->
-                TimberKt.e(e) { "error updating MDList" }
-            }
+                .onFailure { e -> TimberKt.e(e) { "error updating MDList" } }
 
             track
         }
@@ -73,15 +78,15 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
 
     override suspend fun addToLists(track: Track, listIds: List<String>): Track {
         return withContext(Dispatchers.IO) {
-            kotlin.runCatching {
-                listIds.forEach { listId ->
-                    if (mdex.addToCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
-                        track.listIds = (track.listIds + listOf(listId)).distinct()
+            kotlin
+                .runCatching {
+                    listIds.forEach { listId ->
+                        if (mdex.addToCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
+                            track.listIds = (track.listIds + listOf(listId)).distinct()
+                        }
                     }
                 }
-            }.onFailure { e ->
-                TimberKt.e(e) { "error updating MDList" }
-            }
+                .onFailure { e -> TimberKt.e(e) { "error updating MDList" } }
 
             track
         }
@@ -89,15 +94,16 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
 
     override suspend fun removeFromLists(track: Track, listIds: List<String>): Track {
         return withContext(Dispatchers.IO) {
-            kotlin.runCatching {
-                listIds.forEach { listId ->
-                    if (mdex.removeFromCustomList(MdUtil.getMangaUUID(track.tracking_url), listId)) {
-                        track.listIds = track.listIds.filterNot { it == listId }
+            kotlin
+                .runCatching {
+                    listIds.forEach { listId ->
+                        if (mdex.removeFromCustomList(
+                            MdUtil.getMangaUUID(track.tracking_url), listId)) {
+                            track.listIds = track.listIds.filterNot { it == listId }
+                        }
                     }
                 }
-            }.onFailure { e ->
-                TimberKt.e(e) { "error updating MDList" }
-            }
+                .onFailure { e -> TimberKt.e(e) { "error updating MDList" } }
 
             track
         }
@@ -132,7 +138,7 @@ class MdList(private val context: Context, id: Int) : TrackListService(id) {
         }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
         track.copyPersonalFrom(remoteTrack)
-        //TODO should this be here
+        // TODO should this be here
         db.insertTrack(track).executeAsBlocking()
         return track
     }

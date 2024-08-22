@@ -8,36 +8,40 @@ import eu.kanade.tachiyomi.data.database.tables.CustomListTable
 
 interface CustomListQueries : DbProvider {
 
-    fun insertCustomsLists(customLists: List<CustomListImpl>) = db.put().objects(customLists).prepare()
+    fun insertCustomsLists(customLists: List<CustomListImpl>) =
+        db.put().objects(customLists).prepare()
 
-    fun getCustomListByUUID(uuid: String) = db.get()
-        .`object`(CustomListImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(CustomListTable.TABLE)
-                .where("${CustomListTable.COL_UUID} = ?")
-                .whereArgs(uuid)
-                .build(),
-        )
-        .prepare()
+    fun getCustomListByUUID(uuid: String) =
+        db.get()
+            .`object`(CustomListImpl::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(CustomListTable.TABLE)
+                    .where("${CustomListTable.COL_UUID} = ?")
+                    .whereArgs(uuid)
+                    .build(),
+            )
+            .prepare()
 
-    fun getCustomLists() = db.get()
-        .listOfObjects(CustomListImpl::class.java)
-        .withQuery(
-            Query.builder()
-                .table(CustomListTable.TABLE)
-                .orderBy(CustomListTable.COL_NAME)
-                .build(),
-        )
-        .prepare()
+    fun getCustomLists() =
+        db.get()
+            .listOfObjects(CustomListImpl::class.java)
+            .withQuery(
+                Query.builder()
+                    .table(CustomListTable.TABLE)
+                    .orderBy(CustomListTable.COL_NAME)
+                    .build(),
+            )
+            .prepare()
 
-    fun deleteCustomListByUUID(uuid: String) = db.delete()
-        .byQuery(
-            DeleteQuery.builder()
-                .table(CustomListTable.TABLE)
-                .where("${CustomListTable.COL_UUID} = ?")
-                .whereArgs(uuid)
-                .build(),
-        )
-        .prepare()
+    fun deleteCustomListByUUID(uuid: String) =
+        db.delete()
+            .byQuery(
+                DeleteQuery.builder()
+                    .table(CustomListTable.TABLE)
+                    .where("${CustomListTable.COL_UUID} = ?")
+                    .whereArgs(uuid)
+                    .build(),
+            )
+            .prepare()
 }

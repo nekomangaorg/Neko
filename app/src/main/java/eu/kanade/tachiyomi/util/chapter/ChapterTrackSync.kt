@@ -56,7 +56,10 @@ suspend fun updateTrackChapterRead(
         val trackList = db.getTracks(mangaId).executeAsBlocking()
         trackList.map { track ->
             val service = trackManager.getService(track.sync_id)
-        if (service != null && service.isLogged() && newChapterRead > track.last_chapter_read && service is TrackStatusService) {
+            if (service != null &&
+                service.isLogged() &&
+                newChapterRead > track.last_chapter_read &&
+                service is TrackStatusService) {
                 if (retryWhenOnline && !preferences.context.isOnline()) {
                     delayTrackingUpdate(preferences.context, newChapterRead, track)
                 } else if (preferences.context.isOnline()) {

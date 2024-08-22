@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.data.preference
 
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import android.content.Context
 import android.util.Base64
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.color.DynamicColors
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
@@ -60,11 +60,15 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun lightTheme() =
         this.preferenceStore.getEnum(
-            Keys.lightTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
+            Keys.lightTheme,
+            if (supportsDynamic) Themes.MONET else Themes.DEFAULT
+        )
 
     fun darkTheme() =
         this.preferenceStore.getEnum(
-            Keys.darkTheme, if (supportsDynamic) Themes.MONET else Themes.DEFAULT)
+            Keys.darkTheme,
+            if (supportsDynamic) Themes.MONET else Themes.DEFAULT
+        )
 
     fun showNavigationOverlayNewUser() =
         this.preferenceStore.getBoolean(Keys.showNavigationOverlayNewUser, true)
@@ -206,7 +210,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
 
     fun hideBottomNavOnScroll() =
         this.preferenceStore.getBoolean(
-            "false_key") // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
+            "false_key"
+        ) // this.preferenceStore.getBoolean(Keys.hideBottomNavOnScroll, false)
 
     fun sideNavIconAlignment() = this.preferenceStore.getInt(Keys.sideNavIconAlignment, 1)
 
@@ -236,11 +241,14 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun contentRatingSelections() =
         this.preferenceStore.getStringSet(
             Keys.contentRating,
-            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive))
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
+        )
 
-    fun enableDefaultCustomLists() = this.preferenceStore.getBoolean(Keys.enableDefaultCustomLists, false)
+    fun enableDefaultCustomLists() =
+        this.preferenceStore.getBoolean(Keys.enableDefaultCustomLists, false)
 
-    fun getAddToLibraryToSpecificCustomList() = this.preferenceStore.getStringSet(Keys.defaultCustomLists)
+    fun getAddToLibraryToSpecificCustomList() =
+        this.preferenceStore.getStringSet(Keys.defaultCustomLists)
 
     fun changeAddToLibraryToSpecificCustomList(uuid: Set<String>) {
         getAddToLibraryToSpecificCustomList().set(uuid)
@@ -253,12 +261,15 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
                 MdConstants.ContentRating.safe,
                 MdConstants.ContentRating.suggestive,
                 MdConstants.ContentRating.erotica,
-                MdConstants.ContentRating.pornographic),
+                MdConstants.ContentRating.pornographic
+            ),
         )
 
     fun autoAddTracker() =
         this.preferenceStore.getStringSet(
-            Keys.autoAddTracker, setOf(TrackManager.MDLIST.toString()))
+            Keys.autoAddTracker,
+            setOf(TrackManager.MDLIST.toString())
+        )
 
     fun setAutoAddTracker(trackersToAutoAdd: Set<String>) {
         autoAddTracker().set(trackersToAutoAdd)
@@ -317,4 +328,9 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
             }
         }
     }
+
+    fun syncToFromMangaDexListUuids() =
+        this.preferenceStore.getStringSet("TO_DEX_LIST_UUIDS", emptySet())
+
+    fun syncToMangaDexMangaIds() = this.preferenceStore.getStringSet("TO_DEX_MANGA_IDS", emptySet())
 }

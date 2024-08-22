@@ -110,8 +110,6 @@ object PreferenceKeys {
 
     const val defaultCustomLists = "default_mdlists_"
 
-    const val mangadexSyncToLibraryIndexes = "pref_mangadex_sync_to_library_indexes"
-
     const val thumbnailQuality = "mangadex_thumbnail_quality"
 
     const val savedFilters = "browse_saved_filters"

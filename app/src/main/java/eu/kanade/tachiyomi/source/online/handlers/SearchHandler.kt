@@ -213,7 +213,8 @@ class SearchHandler {
                 queryParameters["contentRating[]"] = contentRatings
             }
             val thumbQuality = preferencesHelper.thumbnailQuality().get()
-            service.popularNewReleases(ProxyRetrofitQueryMap(queryParameters))
+            service
+                .popularNewReleases(ProxyRetrofitQueryMap(queryParameters))
                 .getOrResultError("Error popular new releases")
                 .andThen { mangaListDto ->
                     val hasMoreResults =

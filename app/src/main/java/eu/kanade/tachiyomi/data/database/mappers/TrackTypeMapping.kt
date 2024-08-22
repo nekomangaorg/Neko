@@ -76,10 +76,11 @@ class TrackGetResolver : DefaultGetResolver<Track>() {
             score = cursor.getFloat(cursor.getColumnIndexOrThrow(COL_SCORE))
 
             val ids = cursor.getString(cursor.getColumnIndexOrThrow(COL_LIST_ID))
-            listIds = when (ids.isEmpty()) {
-                true -> emptyList()
-                false -> ids.split(Track.LIST_SEPERATOR)
-            }
+            listIds =
+                when (ids.isEmpty()) {
+                    true -> emptyList()
+                    false -> ids.split(Track.LIST_SEPERATOR)
+                }
 
             tracking_url = cursor.getString(cursor.getColumnIndexOrThrow(COL_TRACKING_URL))
             started_reading_date = cursor.getLong(cursor.getColumnIndexOrThrow(COL_START_DATE))

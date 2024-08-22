@@ -44,8 +44,11 @@ interface MangaDexService : CommonListFunctions {
     @GET("${MdConstants.Api.manga}?&order[createdAt]=desc&includes[]=${MdConstants.Types.coverArt}")
     suspend fun recentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
-    @GET("${MdConstants.Api.manga}?&order[${MdConstants.Sort.subscribedCount}]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
-    suspend fun popularNewReleases(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
+    @GET(
+        "${MdConstants.Api.manga}?&order[${MdConstants.Sort.subscribedCount}]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
+    suspend fun popularNewReleases(
+        @QueryMap options: ProxyRetrofitQueryMap
+    ): ApiResponse<MangaListDto>
 
     @GET(
         "${MdConstants.Api.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")

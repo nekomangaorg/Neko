@@ -68,11 +68,11 @@ class Kitsu(private val context: Context, id: Int) : TrackStatusService(id) {
     override fun getGlobalStatus(status: Int): String =
         with(context) {
             return when (status) {
-            READING -> getString(R.string.global_tracker_status_reading)
-            PLAN_TO_READ -> getString(R.string.global_tracker_status_plan_to_read)
-            COMPLETED -> getString(R.string.global_tracker_status_completed)
-            ON_HOLD -> getString(R.string.global_tracker_status_on_hold)
-            DROPPED -> getString(R.string.global_tracker_status_dropped)
+                READING -> getString(R.string.global_tracker_status_reading)
+                PLAN_TO_READ -> getString(R.string.global_tracker_status_plan_to_read)
+                COMPLETED -> getString(R.string.global_tracker_status_completed)
+                ON_HOLD -> getString(R.string.global_tracker_status_on_hold)
+                DROPPED -> getString(R.string.global_tracker_status_dropped)
                 else -> ""
             }
         }

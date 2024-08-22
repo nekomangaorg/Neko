@@ -51,14 +51,16 @@ fun TrackService.toTrackServiceItem(): TrackServiceItem {
         nameRes = this.nameRes(),
         logoRes = this.getLogo(),
         logoColor = this.getLogoColor(),
-        statusList = when (this) {
-            is TrackListService -> null
-            is TrackStatusService -> this.getStatusList().toImmutableList()
-        },
-        lists = when (this) {
-            is TrackListService -> this.viewLists().toPersistentList()
-            is TrackStatusService -> null
-        },
+        statusList =
+            when (this) {
+                is TrackListService -> null
+                is TrackStatusService -> this.getStatusList().toImmutableList()
+            },
+        lists =
+            when (this) {
+                is TrackListService -> this.viewLists().toPersistentList()
+                is TrackStatusService -> null
+            },
         supportsReadingDates = this.supportsReadingDates,
         canRemoveFromService = this.canRemoveFromService(),
         isAutoAddTracker = this.isAutoAddTracker(),

@@ -15,5 +15,8 @@ interface CommonListFunctions {
     suspend fun viewCustomListInfo(@Path("id") id: String): ApiResponse<CustomListDto>
 
     @GET("${MdConstants.Api.list}/{id}${MdConstants.Api.manga}")
-    suspend fun viewCustomListManga(@Path("id") id: String, @QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
+    suspend fun viewCustomListManga(
+        @Path("id") id: String,
+        @QueryMap options: ProxyRetrofitQueryMap
+    ): ApiResponse<MangaListDto>
 }

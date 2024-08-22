@@ -22,18 +22,15 @@ import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class CustomListSyncService {
+class CustomListSyncProcessor {
 
     val preferences: PreferencesHelper = Injekt.get()
     val db: DatabaseHelper = Injekt.get()
     val mangadex: MangaDex = Injekt.get<SourceManager>().mangaDex
     val trackManager: TrackManager = Injekt.get()
 
-    /**
-     * Syncs from a list of MdLists
-     */
+    /** Syncs from a list of MdLists */
     suspend fun fromMangaDex(
-        listUuids: List<String>,
         errorNotification: (String) -> Unit,
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: () -> Unit,
@@ -47,31 +44,39 @@ class CustomListSyncService {
             val defaultCategoryId = preferences.defaultCategory().get()
             val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-            val mangaToAdd = listUuids.map { listUUID ->
-                mangadex.fetchAllFromList(listUUID, true).onFailure {
-                    val errorMessage = "Error getting from list $listUUID. ${it.message()}"
-                    errorNotification(errorMessage)
-                    TimberKt.e { errorMessage }
-                }.mapBoth(
-                    { it },
-                    {
-                        emptyList()
-                    },
-                )
-            }.flatten().distinct()
+            val mangaDexListUuids = preferences.syncToFromMangaDexListUuids().get().toList()
+
+            val mangaToAdd =
+                mangaDexListUuids
+                    .map { listUUID ->
+                        mangadex
+                            .fetchAllFromList(listUUID, true)
+                            .onFailure {
+                                val errorMessage =
+                                    "Error getting from list $listUUID. ${it.message()}"
+                                errorNotification(errorMessage)
+                                TimberKt.e { errorMessage }
+                            }
+                            .mapBoth(
+                                { it },
+                                { emptyList() },
+                            )
+                    }
+                    .flatten()
+                    .distinct()
             TimberKt.d { "total number from mangadex is ${mangaToAdd.size}" }
 
             mangaToAdd.forEach { networkManga ->
                 updateNotification(networkManga.title, count.andIncrement, mangaToAdd.size)
 
-                var dbManga = db.getManga(networkManga.url, mangadex.id)
-                    .executeAsBlocking()
+                var dbManga = db.getManga(networkManga.url, mangadex.id).executeAsBlocking()
                 if (dbManga == null) {
-                    dbManga = Manga.create(
-                        networkManga.url,
-                        networkManga.title,
-                        mangadex.id,
-                    )
+                    dbManga =
+                        Manga.create(
+                            networkManga.url,
+                            networkManga.title,
+                            mangadex.id,
+                        )
                     dbManga.date_added = Date().time
                 }
 
@@ -88,17 +93,14 @@ class CustomListSyncService {
                 }
             }
 
+            preferences.syncToFromMangaDexListUuids().delete()
+
             completeNotification()
             countOfAdded.get()
         }
     }
 
-    /**
-     * Syncs Library manga to MangaDex as Reading and puts them on the follows list
-     */
     suspend fun toMangaDex(
-        listIds: List<String>,
-        mangaIds: List<Long>,
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: (total: Int) -> Unit,
     ) {
@@ -107,12 +109,21 @@ class CustomListSyncService {
             val count = AtomicInteger(0)
             val countNew = AtomicInteger(0)
 
+            val mangaDexListUuids = preferences.syncToFromMangaDexListUuids().get().toList()
+
+            if (mangaDexListUuids.isEmpty()) {
+                throw Exception("Unable to sync to MangaDex as no Lists were given")
+            }
+
+            val mangaIds = preferences.syncToMangaDexMangaIds().get()
+
             TimberKt.d { "Number of Manga ids to sync ${mangaIds.size}" }
 
-            val listManga = when (mangaIds.isEmpty()) {
-                true -> db.getLibraryMangaList().executeAsBlocking()
-                false -> mangaIds.mapNotNull { db.getManga(it).executeAsBlocking() }
-            }.distinctBy { it.uuid() }
+            val listManga =
+                when (mangaIds.isEmpty()) {
+                    true -> db.getLibraryMangaList().executeAsBlocking()
+                    false -> mangaIds.mapNotNull { db.getManga(it.toLong()).executeAsBlocking() }
+                }.distinctBy { it.uuid() }
 
             TimberKt.d { "Number of Manga to Sync to MangaDex ${listManga.size}" }
 
@@ -120,12 +131,13 @@ class CustomListSyncService {
                 updateNotification(manga.title, count.andIncrement, listManga.size)
 
                 val mdListTrack = getTrack(manga)
-                withIOContext {
-                    trackManager.mdList.addToLists(mdListTrack, listIds)
-                }
+                withIOContext { trackManager.mdList.addToLists(mdListTrack, mangaDexListUuids) }
 
                 countNew.incrementAndGet()
             }
+
+            preferences.syncToFromMangaDexListUuids().delete()
+            preferences.syncToMangaDexMangaIds().delete()
             completeNotification(countNew.get())
         }
     }
@@ -142,4 +154,3 @@ class CustomListSyncService {
         return mdListTrack
     }
 }
-

@@ -35,50 +35,70 @@ class ListHandler {
 
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
-    suspend fun retrieveMangaFromList(listUUID: String, page: Int, privateList: Boolean, useDefaultContentRating: Boolean = true): Result<ListResults, ResultError> {
+    suspend fun retrieveMangaFromList(
+        listUUID: String,
+        page: Int,
+        privateList: Boolean,
+        useDefaultContentRating: Boolean = true
+    ): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
-
-            val currentService = when (privateList) {
-                true -> networkServices.authService
-                false -> networkServices.service
-            }
-            val contentRatings = when (useDefaultContentRating) {
-                true -> {
-                    val enabledContentRatings = preferencesHelper.contentRatingSelections().get()
-                    MangaContentRating.getOrdered().filter { enabledContentRatings.contains(it.key) }.map { it.key }
+            val currentService =
+                when (privateList) {
+                    true -> networkServices.authService
+                    false -> networkServices.service
                 }
+            val contentRatings =
+                when (useDefaultContentRating) {
+                    true -> {
+                        val enabledContentRatings =
+                            preferencesHelper.contentRatingSelections().get()
+                        MangaContentRating.getOrdered()
+                            .filter { enabledContentRatings.contains(it.key) }
+                            .map { it.key }
+                    }
 
-                false -> MangaContentRating.getOrdered().map { it.key }
-
-            }
+                    false -> MangaContentRating.getOrdered().map { it.key }
+                }
             val coverQuality = preferencesHelper.thumbnailQuality().get()
 
-                        val queryParameters =
+            val queryParameters =
                 ProxyRetrofitQueryMap(
-                            mutableMapOf(
+                    mutableMapOf(
                         MdConstants.SearchParameters.contentRatingParam to contentRatings,
                         MdConstants.SearchParameters.offset to MdUtil.getMangaListOffset(page),
                         MdConstants.SearchParameters.limit to MdConstants.Limits.manga,
                     ),
-                            )
+                )
 
-
-            currentService.viewCustomListInfo(listUUID)
+            currentService
+                .viewCustomListInfo(listUUID)
                 .getOrResultError("Error getting list with UUID: $listUUID")
                 .andThen { customListDto ->
                     val listName = customListDto.data.attributes.name
 
-                    currentService.viewCustomListManga(listUUID, queryParameters)
+                    currentService
+                        .viewCustomListManga(listUUID, queryParameters)
                         .getOrResultError("Error getting list manga")
-                            .andThen { mangaListDto ->
+                        .andThen { mangaListDto ->
                             when (mangaListDto.data.isEmpty()) {
-                                true -> Ok(ListResults(DisplayScreenType.List(listName, listUUID), persistentListOf(), false))
+                                true ->
+                                    Ok(
+                                        ListResults(
+                                            DisplayScreenType.List(listName, listUUID),
+                                            persistentListOf(),
+                                            false))
                                 false -> {
-                                Ok(
-                                    ListResults(
-                                            displayScreenType = DisplayScreenType.List(listName, listUUID),
-                                            sourceManga = mangaListDto.data.map { it.toSourceManga(coverQuality) }.toImmutableList(),
-                                            hasNextPage = mangaListDto.limit + mangaListDto.offset < mangaListDto.total,
+                                    Ok(
+                                        ListResults(
+                                            displayScreenType =
+                                                DisplayScreenType.List(listName, listUUID),
+                                            sourceManga =
+                                                mangaListDto.data
+                                                    .map { it.toSourceManga(coverQuality) }
+                                                    .toImmutableList(),
+                                            hasNextPage =
+                                                mangaListDto.limit + mangaListDto.offset <
+                                                    mangaListDto.total,
                                         ),
                                     )
                                 }
@@ -88,7 +108,10 @@ class ListHandler {
         }
     }
 
-    suspend fun retrieveAllMangaFromList(listUUID: String, privateList: Boolean): Result<ImmutableList<SourceManga>, ResultError> {
+    suspend fun retrieveAllMangaFromList(
+        listUUID: String,
+        privateList: Boolean
+    ): Result<ImmutableList<SourceManga>, ResultError> {
         var hasPages = true
         var page = 1
         val list: MutableList<SourceManga> = mutableListOf()
@@ -137,42 +160,51 @@ class ListHandler {
 
     suspend fun retrieveUserLists(page: Int): Result<ResultListPage, ResultError> {
         val offset = MdUtil.getLatestChapterListOffset(page)
-        return networkServices.authService.usersLists(offset, MdConstants.Limits.latest).getOrResultError("Error getting user's lists")
+        return networkServices.authService
+            .usersLists(offset, MdConstants.Limits.latest)
+            .getOrResultError("Error getting user's lists")
             .andThen { customListListDto ->
                 when (customListListDto.data.isEmpty()) {
                     true -> Ok(ResultListPage(false, persistentListOf()))
-                    false -> Ok(
-                        ResultListPage(
-                            hasNextPage = customListListDto.limit + customListListDto.offset < customListListDto.total,
-                            customListListDto.data.map { customListDataDto ->
-                                SourceResult(
-                                    title = customListDataDto.attributes.name,
-                                    information = customListDataDto.attributes.visibility,
-                                    uuid = customListDataDto.id,
-                                )
-                            }.toPersistentList(),
-                                    ),
-                                )
-                            }
-                    }
+                    false ->
+                        Ok(
+                            ResultListPage(
+                                hasNextPage =
+                                    customListListDto.limit + customListListDto.offset <
+                                        customListListDto.total,
+                                customListListDto.data
+                                    .map { customListDataDto ->
+                                        SourceResult(
+                                            title = customListDataDto.attributes.name,
+                                            information = customListDataDto.attributes.visibility,
+                                            uuid = customListDataDto.id,
+                                        )
+                                    }
+                                    .toPersistentList(),
+                            ),
+                        )
                 }
+            }
+    }
 
     suspend fun addToCustomList(mangaId: String, listUUID: String): ResultDto {
         return networkServices.authService.addToCustomList(mangaId, listUUID).getOrThrow()
-            }
+    }
 
     suspend fun removeFromCustomList(mangaId: String, listUUID: String): ResultDto {
         return networkServices.authService.removeFromCustomList(mangaId, listUUID).getOrThrow()
     }
 
     suspend fun createCustomList(listName: String, isPublic: Boolean): ResultDto {
-        val newCustomListDto = NewCustomListDto(
-            name = listName,
-            visibility = when (isPublic) {
-                true -> MdConstants.Visibility.public
-                false -> MdConstants.Visibility.private
-            },
-        )
+        val newCustomListDto =
+            NewCustomListDto(
+                name = listName,
+                visibility =
+                    when (isPublic) {
+                        true -> MdConstants.Visibility.public
+                        false -> MdConstants.Visibility.private
+                    },
+            )
         return networkServices.authService.createCustomList(newCustomListDto).getOrThrow()
     }
 
@@ -182,5 +214,7 @@ class ListHandler {
 }
 
 data class ListResults(
-    val displayScreenType: DisplayScreenType, val sourceManga: ImmutableList<SourceManga>, val hasNextPage: Boolean = false,
+    val displayScreenType: DisplayScreenType,
+    val sourceManga: ImmutableList<SourceManga>,
+    val hasNextPage: Boolean = false,
 )

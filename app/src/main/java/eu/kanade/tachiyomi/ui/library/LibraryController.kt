@@ -532,7 +532,8 @@ class LibraryController(
     }
 
     private fun showGroupOptions() {
-        val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_STATUS, BY_AUTHOR, BY_CONTENT, BY_LANGUAGE)
+        val groupItems =
+            mutableListOf(BY_DEFAULT, BY_TAG, BY_STATUS, BY_AUTHOR, BY_CONTENT, BY_LANGUAGE)
         if (presenter.isLoggedIntoTrackingStatus) {
             groupItems.add(BY_TRACK_STATUS)
         }
@@ -2111,7 +2112,8 @@ class LibraryController(
             R.id.action_sync_to_dex -> {
                 val options = presenter.trackManager.mdList.viewLists()
 
-                activity!!.materialAlertDialog()
+                activity!!
+                    .materialAlertDialog()
                     .setNegativeButton(android.R.string.cancel, null)
                     .setMultiChoiceItems(
                         options.map { it.name }.toTypedArray(),
@@ -2132,7 +2134,6 @@ class LibraryController(
                             presenter.syncMangaToDex(selectedMangaSet.toList(), uuidsSelected)
                         }
                         destroyActionModeIfNeeded()
-
                     }
                     .show()
             }

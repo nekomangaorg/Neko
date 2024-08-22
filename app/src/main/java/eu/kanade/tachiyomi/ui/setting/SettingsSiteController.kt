@@ -6,16 +6,12 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
 import com.google.android.material.checkbox.MaterialCheckBox.STATE_CHECKED
-import eu.kanade.tachiyomi.BuildConfig
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.databinding.CreateCustomListDialogBinding
 import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncJob
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -35,6 +31,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.BuildConfig
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
+import org.nekomanga.databinding.CreateCustomListDialogBinding
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -53,9 +50,11 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                     title = "MangaDex Login"
                     key = PreferenceKeys.refreshToken
 
-            preferences.mangaDexUserName().changes().onEach { userName ->
-                this.username = userName
-            }.launchIn(viewScope)
+                    preferences
+                        .mangaDexUserName()
+                        .changes()
+                        .onEach { userName -> this.username = userName }
+                        .launchIn(viewScope)
 
                     setOnLoginClickListener {
                         when (mangaDexLoginHelper.isLoggedIn()) {
@@ -229,78 +228,83 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                 defaultValue = false
             }
 
-        preferenceCategory {
-            titleRes = R.string.mdlists_
+            preferenceCategory {
+                titleRes = R.string.mdlists_
 
-            switchPreference {
-                key = PreferenceKeys.enableDefaultCustomLists
-                titleRes = R.string.enable_default_mdlists
-                summaryRes = R.string.enable_default_mdlists_summary
-                defaultValue = false
-            }
+                switchPreference {
+                    key = PreferenceKeys.enableDefaultCustomLists
+                    titleRes = R.string.enable_default_mdlists
+                    summaryRes = R.string.enable_default_mdlists_summary
+                    defaultValue = false
+                }
 
-            preference {
-                preferences.enableDefaultCustomLists().changes().onEach {
-                    isVisible = it
-                }.launchIn(viewScope)
+                preference {
+                    preferences
+                        .enableDefaultCustomLists()
+                        .changes()
+                        .onEach { isVisible = it }
+                        .launchIn(viewScope)
 
-                titleRes = R.string.default_mdlists_
-                onClick {
-                    val ctrl = ChooseCustomListDialog(preferences)
-                    ctrl.targetController = this@SettingsSiteController
-                    ctrl.showDialog(router)
+                    titleRes = R.string.default_mdlists_
+                    onClick {
+                        val ctrl = ChooseCustomListDialog(preferences)
+                        ctrl.targetController = this@SettingsSiteController
+                        ctrl.showDialog(router)
+                    }
+                }
+
+                preference {
+                    titleRes = R.string.add_mdlist
+                    onClick {
+                        val ctrl = AddCustomListDialog(viewScope)
+                        ctrl.targetController = this@SettingsSiteController
+                        ctrl.showDialog(router)
+                    }
+                }
+
+                preference {
+                    titleRes = R.string.delete_mdlist
+                    onClick {
+                        val ctrl = DeleteCustomListDialog(viewScope)
+                        ctrl.targetController = this@SettingsSiteController
+                        ctrl.showDialog(router)
+                    }
                 }
             }
 
             preference {
-                titleRes = R.string.add_mdlist
+                titleRes = R.string.sync_mdlist_to_library
+                summaryRes = R.string.sync_mdlist_to_library_summary
+
                 onClick {
-                    val ctrl = AddCustomListDialog(viewScope)
-                    ctrl.targetController = this@SettingsSiteController
-                    ctrl.showDialog(router)
-                }
-            }
+                    val trackManager: TrackManager = Injekt.get()
+                    val options = trackManager.mdList.viewLists()
 
-            preference {
-                titleRes = R.string.delete_mdlist
-                onClick {
-                    val ctrl = DeleteCustomListDialog(viewScope)
-                    ctrl.targetController = this@SettingsSiteController
-                    ctrl.showDialog(router)
-                }
-            }
-
-        }
-
-
-        preference {
-            titleRes = R.string.sync_mdlist_to_library
-            summaryRes = R.string.sync_mdlist_to_library_summary
-
-            onClick {
-
-                val trackManager: TrackManager = Injekt.get()
-                val options = trackManager.mdList.viewLists()
-
-                activity!!.materialAlertDialog()
+                    activity!!
+                        .materialAlertDialog()
                         .setNegativeButton(android.R.string.cancel, null)
                         .setMultiChoiceItems(
-                        options.map { it.name }.toTypedArray(),
-                        options.map { false }.toBooleanArray(),
+                            options.map { it.name }.toTypedArray(),
+                            options.map { false }.toBooleanArray(),
                         ) { dialog, position, bool ->
                             val listView = (dialog as AlertDialog).listView
                             listView.setItemChecked(position, bool)
                         }
                         .setPositiveButton(android.R.string.ok) { dialog, t ->
                             val listView = (dialog as AlertDialog).listView
-                        val uuidsSelected = mutableListOf<String>()
+                            val uuidsSelected = mutableListOf<String>()
                             for (i in 0 until listView.count) {
                                 if (listView.isItemChecked(i)) {
-                                uuidsSelected.add(options[i].id)
+                                    uuidsSelected.add(options[i].id)
                                 }
                             }
-                        if (uuidsSelected.size > 0) {
-                            CustomListSyncJob.fromMangaDex(context, uuidsSelected)
+                            if (uuidsSelected.size > 0) {
+                                preferences
+                                    .mangadexSyncToLibraryIndexes()
+                                    .set(uuidsSelected.toSet())
+                                TimberKt.d { "Starting sync job" }
+
+                                CustomListSyncJob.startNow(context, CustomListSyncJob.fromDex)
                             }
                         }
                         .show()
@@ -311,34 +315,34 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                 titleRes = R.string.push_favorites_to_mangadex
                 summaryRes = R.string.push_favorites_to_mangadex_summary
 
-            onClick {
+                onClick {
+                    val trackManager: TrackManager = Injekt.get()
+                    val options = trackManager.mdList.viewLists()
 
-                val trackManager: TrackManager = Injekt.get()
-                val options = trackManager.mdList.viewLists()
-
-                activity!!.materialAlertDialog()
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setMultiChoiceItems(
-                        options.map { it.name }.toTypedArray(),
-                        options.map { false }.toBooleanArray(),
-                    ) { dialog, position, bool ->
-                        val listView = (dialog as AlertDialog).listView
-                        listView.setItemChecked(position, bool)
-                    }
-                    .setPositiveButton(android.R.string.ok) { dialog, t ->
-                        val listView = (dialog as AlertDialog).listView
-                        val uuidsSelected = mutableListOf<String>()
-                        for (i in 0 until listView.count) {
-                            if (listView.isItemChecked(i)) {
-                                uuidsSelected.add(options[i].id)
-            }
+                    activity!!
+                        .materialAlertDialog()
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setMultiChoiceItems(
+                            options.map { it.name }.toTypedArray(),
+                            options.map { false }.toBooleanArray(),
+                        ) { dialog, position, bool ->
+                            val listView = (dialog as AlertDialog).listView
+                            listView.setItemChecked(position, bool)
                         }
-                        if (uuidsSelected.size > 0) {
-                            CustomListSyncJob.toMangaDex(context, uuidsSelected, emptyList())
+                        .setPositiveButton(android.R.string.ok) { dialog, t ->
+                            val listView = (dialog as AlertDialog).listView
+                            val uuidsSelected = mutableListOf<String>()
+                            for (i in 0 until listView.count) {
+                                if (listView.isItemChecked(i)) {
+                                    uuidsSelected.add(options[i].id)
+                                }
+                            }
+                            if (uuidsSelected.size > 0) {
+                                CustomListSyncJob.startNow(context, CustomListSyncJob.toDex)
+                            }
                         }
-                    }
-                    .show()
-            }
+                        .show()
+                }
             }
         }
 
@@ -356,29 +360,34 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
             val trackManager: TrackManager = Injekt.get()
             val sourceManager: SourceManager = Injekt.get()
 
-            return activity!!.materialAlertDialog().apply {
-                setTitle(R.string.add_mdlist)
-                binding = CreateCustomListDialogBinding.inflate(activity!!.layoutInflater)
-                setView(binding.root)
-                setNegativeButton(android.R.string.cancel, null)
-                setPositiveButton(R.string.save) { dialog, _ ->
-                    val customListName = binding.title.text.toString()
-                    val isPublic = binding.makePublicCheckbox.checkedState == STATE_CHECKED
-                    if (customListName.isNotEmpty()) {
-                        scope?.launchIO {
-                            if (!sourceManager.mangaDex.createCustomList(customListName, isPublic)) {
-                                launchUI {
-                                    activity?.toast(R.string.failed_to_create_list)
+            return activity!!
+                .materialAlertDialog()
+                .apply {
+                    setTitle(R.string.add_mdlist)
+                    binding = CreateCustomListDialogBinding.inflate(activity!!.layoutInflater)
+                    setView(binding.root)
+                    setNegativeButton(android.R.string.cancel, null)
+                    setPositiveButton(R.string.save) { dialog, _ ->
+                        val customListName = binding.title.text.toString()
+                        val isPublic = binding.makePublicCheckbox.checkedState == STATE_CHECKED
+                        if (customListName.isNotEmpty()) {
+                            scope?.launchIO {
+                                if (
+                                    !sourceManager.mangaDex.createCustomList(
+                                        customListName,
+                                        isPublic
+                                    )
+                                ) {
+                                    launchUI { activity?.toast(R.string.failed_to_create_list) }
+                                } else {
+                                    trackManager.mdList.populateLists()
                                 }
-                            } else {
-                                trackManager.mdList.populateLists()
                             }
+                            dismissDialog()
                         }
-                        dismissDialog()
                     }
-
                 }
-            }.create()
+                .create()
         }
     }
 
@@ -390,32 +399,31 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
 
         constructor(scope: CoroutineScope) : this() {
             this.scope = scope
-            scope.launchIO {
-                trackManager.mdList.populateLists()
-            }
+            scope.launchIO { trackManager.mdList.populateLists() }
         }
 
         val options = trackManager.mdList.viewLists()
 
         val allLists = ((options.map { it.name })).toTypedArray()
+
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
 
-            return activity!!.materialAlertDialog().apply {
-                setTitle(R.string.delete)
-                setSingleChoiceItems(allLists, -1) { dialog, position ->
-                    val listUUID = options[position].id
-                    scope?.launchIO {
-                        if (!sourceManager.mangaDex.deleteCustomList(listUUID)) {
-                            launchUI {
-                                activity?.toast(R.string.failed_to_delete_list)
+            return activity!!
+                .materialAlertDialog()
+                .apply {
+                    setTitle(R.string.delete)
+                    setSingleChoiceItems(allLists, -1) { dialog, position ->
+                        val listUUID = options[position].id
+                        scope?.launchIO {
+                            if (!sourceManager.mangaDex.deleteCustomList(listUUID)) {
+                                launchUI { activity?.toast(R.string.failed_to_delete_list) }
+                            } else {
+                                trackManager.mdList.populateLists()
                             }
-                        } else {
-                            trackManager.mdList.populateLists()
                         }
+                        dismissDialog()
                     }
-                    dismissDialog()
                 }
-            }
                 .create()
         }
     }
@@ -434,14 +442,19 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
 
             val options = trackManager.mdList.viewLists()
 
-            val initialIds = preferences!!.getAddToLibraryToSpecificCustomList().get()
-                .map { id -> options.indexOfFirst { it.id == id } }.toIntArray()
+            val initialIds =
+                preferences!!
+                    .getAddToLibraryToSpecificCustomList()
+                    .get()
+                    .map { id -> options.indexOfFirst { it.id == id } }
+                    .toIntArray()
 
             val allLists = ((options.map { it.name })).toTypedArray()
             val enabledIds =
                 (List(options.size) { index -> initialIds.contains(index) }).toBooleanArray()
 
-            return activity.materialAlertDialog()
+            return activity
+                .materialAlertDialog()
                 .setTitle(R.string.default_mdlists_)
                 .setMultiChoiceItems(
                     allLists,

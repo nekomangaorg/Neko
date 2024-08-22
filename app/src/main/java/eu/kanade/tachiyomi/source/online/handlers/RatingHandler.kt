@@ -16,16 +16,19 @@ import uy.kohesive.injekt.injectLazy
 class RatingHandler {
 
     val preferences: PreferencesHelper by injectLazy()
-    private val authService: MangaDexAuthorizedUserService by lazy { Injekt.get<NetworkServices>().authService }
+    private val authService: MangaDexAuthorizedUserService by lazy {
+        Injekt.get<NetworkServices>().authService
+    }
 
     suspend fun updateRating(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaUUID(track.tracking_url)
-            val response = if (track.score == 0f) {
-                authService.removeRating(mangaID)
-            } else {
-                authService.updateRating(mangaID, RatingDto(track.score.toInt()))
-            }
+            val response =
+                if (track.score == 0f) {
+                    authService.removeRating(mangaID)
+                } else {
+                    authService.updateRating(mangaID, RatingDto(track.score.toInt()))
+                }
 
             response.getOrNull()?.result == "ok"
         }

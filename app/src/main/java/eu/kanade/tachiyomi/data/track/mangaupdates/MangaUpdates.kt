@@ -6,10 +6,13 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackStatusService
+import eu.kanade.tachiyomi.data.track.mangaupdates.dto.ListItem
+import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Rating
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.copyTo
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.toTrackSearch
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import kotlinx.collections.immutable.toImmutableList
+import org.nekomanga.R
 
 class MangaUpdates(private val context: Context, id: Int) : TrackStatusService(id) {
 
@@ -42,11 +45,11 @@ class MangaUpdates(private val context: Context, id: Int) : TrackStatusService(i
     override fun getGlobalStatus(status: Int) =
         with(context) {
             when (status) {
-            READING_LIST -> getString(R.string.global_tracker_status_reading)
-            COMPLETE_LIST -> getString(R.string.global_tracker_status_completed)
-            ON_HOLD_LIST -> getString(R.string.global_tracker_status_on_hold)
-            UNFINISHED_LIST -> getString(R.string.global_tracker_status_dropped)
-            WISH_LIST -> getString(R.string.global_tracker_status_plan_to_read)
+                READING_LIST -> getString(R.string.global_tracker_status_reading)
+                COMPLETE_LIST -> getString(R.string.global_tracker_status_completed)
+                ON_HOLD_LIST -> getString(R.string.global_tracker_status_on_hold)
+                UNFINISHED_LIST -> getString(R.string.global_tracker_status_dropped)
+                WISH_LIST -> getString(R.string.global_tracker_status_plan_to_read)
                 else -> ""
             }
         }

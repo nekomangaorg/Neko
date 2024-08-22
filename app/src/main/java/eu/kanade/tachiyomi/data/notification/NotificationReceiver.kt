@@ -18,7 +18,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppDownloadInstallJob
-import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
@@ -34,7 +34,6 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
 import java.io.File
 import org.nekomanga.BuildConfig.APPLICATION_ID as ID
-import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncJob
 import org.nekomanga.R
 import tachiyomi.core.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt

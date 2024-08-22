@@ -9,8 +9,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncService
-import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncService
+import eu.kanade.tachiyomi.jobs.customlist.CustomListSyncProcessor
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
 import eu.kanade.tachiyomi.source.SourceManager
@@ -45,7 +44,6 @@ import org.nekomanga.BuildConfig
 import org.nekomanga.core.network.NetworkPreferences
 import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.backup.BackupPreferences
-import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.details.MangaDetailsPreferences
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences

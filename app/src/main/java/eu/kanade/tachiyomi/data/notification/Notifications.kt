@@ -233,7 +233,7 @@ object Notifications {
                     .apply { lockscreenVisibility = Notification.VISIBILITY_SECRET },
                 NotificationChannel(
                         Channel.Status,
-                context.getString(R.string.sync_mdlist_to_library),
+                        context.getString(R.string.sync_mdlist_to_library),
                         NotificationManager.IMPORTANCE_LOW,
                     )
                     .apply { setShowBadge(false) },

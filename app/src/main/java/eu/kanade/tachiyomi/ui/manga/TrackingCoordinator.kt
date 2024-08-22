@@ -25,24 +25,31 @@ class TrackingCoordinator {
     private val db: DatabaseHelper by injectLazy()
     private val trackManager: TrackManager = Injekt.get()
 
-    /**
-     * Update tracker with new status
-     */
-    suspend fun updateTrackStatus(statusIndex: Int, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
+    /** Update tracker with new status */
+    suspend fun updateTrackStatus(
+        statusIndex: Int,
+        trackAndService: TrackingConstants.TrackAndService
+    ): TrackingUpdate {
         val service = trackManager.getService(trackAndService.service.id)
-        var track = trackAndService.track.copy(status = trackAndService.service.statusList!![statusIndex])
+        var track =
+            trackAndService.track.copy(status = trackAndService.service.statusList!![statusIndex])
 
-        if (service is TrackStatusService && service.isCompletedStatus(statusIndex) && track.totalChapters > 0) {
+        if (service is TrackStatusService &&
+            service.isCompletedStatus(statusIndex) &&
+            track.totalChapters > 0) {
             track = track.copy(lastChapterRead = track.totalChapters.toFloat())
         }
         return updateTrackingStatusService(track, trackAndService.service)
     }
 
-    /**
-     * Update tracker with new status
-     */
-    suspend fun updateTrackLists(listIdsToAdd: List<String>, listIdsToRemove: List<String>, trackAndService: TrackingConstants.TrackAndService): TrackingUpdate {
-        return updateTrackingListService(trackAndService.track, trackAndService.service, listIdsToAdd, listIdsToRemove)
+    /** Update tracker with new status */
+    suspend fun updateTrackLists(
+        listIdsToAdd: List<String>,
+        listIdsToRemove: List<String>,
+        trackAndService: TrackingConstants.TrackAndService
+    ): TrackingUpdate {
+        return updateTrackingListService(
+            trackAndService.track, trackAndService.service, listIdsToAdd, listIdsToRemove)
     }
 
     /** Update tracker with new score */
@@ -144,41 +151,45 @@ class TrackingCoordinator {
         return TrackingUpdate.Success
     }
 
-    /**
-     * Updates the remote tracking service with tracking changes
-     */
-    suspend fun updateTrackingStatusService(track: TrackItem, service: TrackServiceItem): TrackingUpdate {
+    /** Updates the remote tracking service with tracking changes */
+    suspend fun updateTrackingStatusService(
+        track: TrackItem,
+        service: TrackServiceItem
+    ): TrackingUpdate {
         return runCatching {
-            val updatedTrack = (trackManager.getService(service.id)!! as TrackStatusService).update(track.toDbTrack())
+                val updatedTrack =
+                    (trackManager.getService(service.id)!! as TrackStatusService).update(
+                        track.toDbTrack())
                 db.insertTrack(updatedTrack).executeOnIO()
                 TrackingUpdate.Success
             }
             .getOrElse { TrackingUpdate.Error("Error updating tracker", it) }
     }
 
-    /**
-     * Updates the remote tracking service with the list changes
-     */
-
-    suspend fun updateTrackingListService(track: TrackItem, service: TrackServiceItem, idsToAdd: List<String> = emptyList(), idsToRemove: List<String> = emptyList()): TrackingUpdate {
+    /** Updates the remote tracking service with the list changes */
+    suspend fun updateTrackingListService(
+        track: TrackItem,
+        service: TrackServiceItem,
+        idsToAdd: List<String> = emptyList(),
+        idsToRemove: List<String> = emptyList()
+    ): TrackingUpdate {
         return runCatching {
-            val service = (trackManager.getService(service.id)!! as TrackListService)
+                val service = (trackManager.getService(service.id)!! as TrackListService)
 
-            var track = track.toDbTrack()
+                var track = track.toDbTrack()
 
-            if (idsToAdd.isNotEmpty()) {
-                track = service.addToLists(track, idsToAdd)
+                if (idsToAdd.isNotEmpty()) {
+                    track = service.addToLists(track, idsToAdd)
+                }
+
+                if (idsToRemove.isNotEmpty()) {
+                    track = service.removeFromLists(track, idsToRemove)
+                }
+
+                db.insertTrack(track).executeOnIO()
+                TrackingUpdate.Success
             }
-
-            if (idsToRemove.isNotEmpty()) {
-                track = service.removeFromLists(track, idsToRemove)
-            }
-
-            db.insertTrack(track).executeOnIO()
-            TrackingUpdate.Success
-        }.getOrElse {
-            TrackingUpdate.Error("Error updating tracker", it)
-        }
+            .getOrElse { TrackingUpdate.Error("Error updating tracker", it) }
     }
 
     /** Search Tracker */

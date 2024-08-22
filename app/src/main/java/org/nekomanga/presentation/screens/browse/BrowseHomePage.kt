@@ -61,11 +61,16 @@ fun BrowseHomePage(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
     ) {
-        items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga) }) { homePageManga ->
-            val headerText = when (homePageManga.displayScreenType) {
-                is DisplayScreenType.LatestChapters -> stringResource(homePageManga.displayScreenType.titleRes)
-                is DisplayScreenType.RecentlyAdded -> stringResource(homePageManga.displayScreenType.titleRes)
-                is DisplayScreenType.SubscriptionFeed -> stringResource(homePageManga.displayScreenType.titleRes)
+        items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga) }) {
+            homePageManga ->
+            val headerText =
+                when (homePageManga.displayScreenType) {
+                    is DisplayScreenType.LatestChapters ->
+                        stringResource(homePageManga.displayScreenType.titleRes)
+                    is DisplayScreenType.RecentlyAdded ->
+                        stringResource(homePageManga.displayScreenType.titleRes)
+                    is DisplayScreenType.SubscriptionFeed ->
+                        stringResource(homePageManga.displayScreenType.titleRes)
                     is DisplayScreenType.List -> homePageManga.displayScreenType.title
                     is DisplayScreenType.PopularNewTitles ->
                         stringResource(id = homePageManga.displayScreenType.titleRes)

@@ -54,8 +54,7 @@ fun TrackingStatusDialog(
                 },
                 text = {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                    service.statusList?.forEachIndexed { index, status ->
-
+                        service.statusList?.forEachIndexed { index, status ->
                             val clicked = {
                                 selectedStatus = status
                                 scope.launch {
@@ -81,8 +80,10 @@ fun TrackingStatusDialog(
                                         RadioButtonDefaults.colors(
                                             selectedColor = themeColorState.buttonColor),
                                 )
-                            Gap(Size.small)
-                            Text(text = service.status(status) ?: "", style = MaterialTheme.typography.titleMedium)
+                                Gap(Size.small)
+                                Text(
+                                    text = service.status(status) ?: "",
+                                    style = MaterialTheme.typography.titleMedium)
                             }
                         }
                     }

@@ -30,26 +30,34 @@ class DisplayRepository(
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return when (displayScreenType) {
             is DisplayScreenType.LatestChapters -> getLatestChapterPage(page)
-            is DisplayScreenType.SubscriptionFeed -> getLatestChapterPage(page, feedType = MdConstants.FeedType.Subscription)
-            is DisplayScreenType.List -> getListPage(displayScreenType.listUUID, page, displayScreenType.privateList)
+            is DisplayScreenType.SubscriptionFeed ->
+                getLatestChapterPage(page, feedType = MdConstants.FeedType.Subscription)
+            is DisplayScreenType.List ->
+                getListPage(displayScreenType.listUUID, page, displayScreenType.privateList)
             is DisplayScreenType.RecentlyAdded -> getRecentlyAddedPage(page)
             is DisplayScreenType.PopularNewTitles -> getPopularNewTitles(page)
         }
     }
 
-    private suspend fun getLatestChapterPage(page: Int, feedType: MdConstants.FeedType = MdConstants.FeedType.Latest): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
-        val blockedScanlatorUUIDs = preferenceHelper.blockedScanlators().get().mapNotNull {
-                    var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
-                    if (scanlatorImpl == null) {
-                        mangaDex.getScanlator(scanlator = it).map { scanlator ->
-                            scanlatorImpl = scanlator.toScanlatorImpl()
-                        }
-                        db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
+    private suspend fun getLatestChapterPage(
+        page: Int,
+        feedType: MdConstants.FeedType = MdConstants.FeedType.Latest
+    ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        val blockedScanlatorUUIDs =
+            preferenceHelper.blockedScanlators().get().mapNotNull {
+                var scanlatorImpl = db.getScanlatorByName(it).executeAsBlocking()
+                if (scanlatorImpl == null) {
+                    mangaDex.getScanlator(scanlator = it).map { scanlator ->
+                        scanlatorImpl = scanlator.toScanlatorImpl()
                     }
-                    scanlatorImpl
+                    db.insertScanlators(listOf(scanlatorImpl!!)).executeOnIO()
                 }
+                scanlatorImpl
+            }
 
-        return mangaDex.latestChapters(page, blockedScanlatorUUIDs, feedType).mapBoth(
+        return mangaDex
+            .latestChapters(page, blockedScanlatorUUIDs, feedType)
+            .mapBoth(
                 success = { mangaListPage ->
                     val displayMangaList =
                         mangaListPage.sourceManga.map { sourceManga ->
@@ -61,14 +69,20 @@ class DisplayRepository(
             )
     }
 
-    private suspend fun getListPage(listUUID: String, page: Int, privateList: Boolean): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
-        return mangaDex.fetchList(listUUID, page, privateList).mapBoth(
+    private suspend fun getListPage(
+        listUUID: String,
+        page: Int,
+        privateList: Boolean
+    ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
+        return mangaDex
+            .fetchList(listUUID, page, privateList)
+            .mapBoth(
                 success = { listResults ->
                     val displayMangaList =
                         listResults.sourceManga.map { sourceManga ->
                             sourceManga.toDisplayManga(db, mangaDex.id)
                         }
-                Ok(listResults.hasNextPage to displayMangaList.toImmutableList())
+                    Ok(listResults.hasNextPage to displayMangaList.toImmutableList())
                 },
                 failure = { Err(it) },
             )

@@ -97,9 +97,9 @@ fun TrackingSheet(
                         initialStatus = trackAndService.track.status,
                         service = trackAndService.service,
                         onDismiss = { statusDialog = HideDialog },
-                trackStatusChange = { statusIndex ->
-                    trackStatusChanged(statusIndex, trackAndService)
-                },
+                        trackStatusChange = { statusIndex ->
+                            trackStatusChanged(statusIndex, trackAndService)
+                        },
                     )
                 }
 
@@ -107,10 +107,15 @@ fun TrackingSheet(
                     if (trackAndService.service.lists.isNotEmpty()) {
                         TrackingListDialog(
                             themeColorState = themeColor,
-                            currentLists = trackAndService.track.listIds.mapNotNull { trackAndService.service.currentList(it) }.toImmutableList(),
+                            currentLists =
+                                trackAndService.track.listIds
+                                    .mapNotNull { trackAndService.service.currentList(it) }
+                                    .toImmutableList(),
                             service = trackAndService.service,
                             onDismiss = { statusDialog = HideDialog },
-                            trackListChange = { listIdsToAdd, listIdsToRemove -> trackListChange(listIdsToAdd, listIdsToRemove, trackAndService) },
+                            trackListChange = { listIdsToAdd, listIdsToRemove ->
+                                trackListChange(listIdsToAdd, listIdsToRemove, trackAndService)
+                            },
                         )
                     }
                 }
@@ -363,12 +368,21 @@ private fun TrackRowTwo(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TrackingBox(clickable = statusClick) {
-            val (text, color) = when {
-                service.status(track.status) != null -> (service.status(track.status) ?: "") to MaterialTheme.colorScheme.onSurface
-                track.listIds.size > 1 -> stringResource(id = R.string.multiple_lists) to MaterialTheme.colorScheme.onSurface
-                track.listIds.isEmpty() -> stringResource(id = R.string.not_applicable) to MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)
-                else -> service.currentList(track.listIds.first())!!.name to MaterialTheme.colorScheme.onSurface
-            }
+            val (text, color) =
+                when {
+                    service.status(track.status) != null ->
+                        (service.status(track.status) ?: "") to MaterialTheme.colorScheme.onSurface
+                    track.listIds.size > 1 ->
+                        stringResource(id = R.string.multiple_lists) to
+                            MaterialTheme.colorScheme.onSurface
+                    track.listIds.isEmpty() ->
+                        stringResource(id = R.string.not_applicable) to
+                            MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = NekoColors.disabledAlphaHighContrast)
+                    else ->
+                        service.currentList(track.listIds.first())!!.name to
+                            MaterialTheme.colorScheme.onSurface
+                }
 
             Text(
                 text,

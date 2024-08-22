@@ -90,7 +90,9 @@ class LibraryPresenter(
 
     val trackManager by lazy { Injekt.get<TrackManager>() }
 
-    private val loggedServices by lazy { trackManager.services.values.filter { it.isLogged() || it.isMdList() } }
+    private val loggedServices by lazy {
+        trackManager.services.values.filter { it.isLogged() || it.isMdList() }
+    }
 
     private val statusHandler: StatusHandler by injectLazy()
 
@@ -440,10 +442,9 @@ class LibraryPresenter(
             val tracks = db.getTracks(item.manga).executeAsBlocking()
 
             val hasTrack = loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
-            val service = if (filterTrackers.isNotEmpty()) {
-                loggedServices.find {
-                    context.getString(it.nameRes()) == filterTrackers
-                }
+            val service =
+                if (filterTrackers.isNotEmpty()) {
+                    loggedServices.find { context.getString(it.nameRes()) == filterTrackers }
                 } else {
                     null
                 }
@@ -460,9 +461,7 @@ class LibraryPresenter(
                 if (hasTrack && filterTrackers.isEmpty()) return false
                 if (filterTrackers.isNotEmpty()) {
                     if (service != null) {
-                        val hasServiceTrack = tracks.any {
-                                    it.sync_id == service.id
-                            }
+                        val hasServiceTrack = tracks.any { it.sync_id == service.id }
                         if (hasServiceTrack) return false
                     }
                 }
@@ -831,9 +830,12 @@ class LibraryPresenter(
                         }
                         BY_TRACK_STATUS -> {
                             val tracks = db.getTracks(manga).executeAsBlocking()
-                    val results = tracks.mapNotNull { track ->
-                        val service = trackManager.getService(track.sync_id)
-                        return@mapNotNull when (service?.isLogged() == true && service is TrackStatusService) {
+                            val results =
+                                tracks
+                                    .mapNotNull { track ->
+                                        val service = trackManager.getService(track.sync_id)
+                                        return@mapNotNull when (service?.isLogged() == true &&
+                                            service is TrackStatusService) {
                                             true -> Pair(track, service)
                                             else -> null
                                         }
@@ -856,27 +858,43 @@ class LibraryPresenter(
                             }
                         }
 
-                BY_LIST -> {
-                    val tracks = db.getTracks(manga).executeAsBlocking()
-                    val results = tracks.asSequence().mapNotNull { track ->
-                        val service = trackManager.getService(track.sync_id)
-                        return@mapNotNull when (service?.isLogged() == true && service.isMdList() && service is TrackListService) {
-                            true -> Pair(track, service)
-                            else -> null
-                        }
-                    }.map { trackAndService ->
-                        val lists = trackAndService.second.viewLists()
-                        trackAndService.first.listIds.map { listId -> lists.firstOrNull { trackList -> trackList.id == listId }?.name ?: listId }
-                    }.flatten()
-                        .distinct().map { status ->
-                            LibraryItem(manga, makeOrGetHeader(status))
-                        }.toList()
+                        BY_LIST -> {
+                            val tracks = db.getTracks(manga).executeAsBlocking()
+                            val results =
+                                tracks
+                                    .asSequence()
+                                    .mapNotNull { track ->
+                                        val service = trackManager.getService(track.sync_id)
+                                        return@mapNotNull when (service?.isLogged() == true &&
+                                            service.isMdList() &&
+                                            service is TrackListService) {
+                                            true -> Pair(track, service)
+                                            else -> null
+                                        }
+                                    }
+                                    .map { trackAndService ->
+                                        val lists = trackAndService.second.viewLists()
+                                        trackAndService.first.listIds.map { listId ->
+                                            lists
+                                                .firstOrNull { trackList -> trackList.id == listId }
+                                                ?.name ?: listId
+                                        }
+                                    }
+                                    .flatten()
+                                    .distinct()
+                                    .map { status -> LibraryItem(manga, makeOrGetHeader(status)) }
+                                    .toList()
 
-                    when (results.isEmpty()) {
-                        true -> listOf(LibraryItem(manga, makeOrGetHeader(context.getString(R.string.not_applicable))))
-                        false -> results
-                    }
-                }
+                            when (results.isEmpty()) {
+                                true ->
+                                    listOf(
+                                        LibraryItem(
+                                            manga,
+                                            makeOrGetHeader(
+                                                context.getString(R.string.not_applicable))))
+                                false -> results
+                            }
+                        }
 
                         BY_AUTHOR -> {
                             if (manga.artist.isNullOrBlank() && manga.author.isNullOrBlank()) {

@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.source.online
 
-import com.skydoves.sandwich.getOrThrow
 import android.app.Application
 import android.content.Context
+import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -19,6 +19,8 @@ import org.nekomanga.core.network.POST
 import org.nekomanga.logging.TimberKt
 import tachiyomi.core.network.await
 import tachiyomi.core.network.parseAs
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class MangaDexLoginHelper {
@@ -65,12 +67,16 @@ class MangaDexLoginHelper {
             kotlin
                 .runCatching {
                     with(MdUtil.jsonParser) {
-                val data = network.client.newCall(
+                        val data =
+                            network.client
+                                .newCall(
                                     POST(
                                         url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
                                         body = formBody,
                                     ),
-                ).await().parseAs<LoginResponseDto>()
+                                )
+                                .await()
+                                .parseAs<LoginResponseDto>()
 
                         preferences.setTokens(
                             data.refreshToken,
@@ -78,9 +84,9 @@ class MangaDexLoginHelper {
                         )
                     }
 
-            trackManager.mdList.populateLists()
-
-        }.exceptionOrNull()
+                    trackManager.mdList.populateLists()
+                }
+                .exceptionOrNull()
 
         return when (error == null) {
             true -> true
@@ -109,12 +115,16 @@ class MangaDexLoginHelper {
             kotlin
                 .runCatching {
                     with(MdUtil.jsonParser) {
-                val data = network.mangadexClient.newCall(
+                        val data =
+                            network.mangadexClient
+                                .newCall(
                                     POST(
                                         url = MdConstants.Api.baseAuthUrl + MdConstants.Api.token,
                                         body = loginFormBody,
                                     ),
-                ).await().parseAs<LoginResponseDto>()
+                                )
+                                .await()
+                                .parseAs<LoginResponseDto>()
 
                         preferences.setTokens(
                             data.refreshToken,
@@ -122,15 +132,15 @@ class MangaDexLoginHelper {
                         )
                     }
 
-            val userInfo = networkServices.authService.getUserInfo().getOrThrow()
-            preferences.setUserInfo(
-                userInfo.data.id,
-                userInfo.data.attributes.username,
-            )
+                    val userInfo = networkServices.authService.getUserInfo().getOrThrow()
+                    preferences.setUserInfo(
+                        userInfo.data.id,
+                        userInfo.data.attributes.username,
+                    )
 
-            trackManager.mdList.populateLists()
-
-        }.exceptionOrNull()
+                    trackManager.mdList.populateLists()
+                }
+                .exceptionOrNull()
 
         return when (error == null) {
             true -> true
@@ -161,8 +171,11 @@ class MangaDexLoginHelper {
                 .add("redirect_uri", MdConstants.Login.redirectUri)
                 .build()
 
-        val error = kotlin.runCatching {
-            network.mangadexClient.newCall(
+        val error =
+            kotlin
+                .runCatching {
+                    network.mangadexClient
+                        .newCall(
                             POST(
                                 url = MdConstants.Api.baseAuthUrl + MdConstants.Api.logout,
                                 headers =

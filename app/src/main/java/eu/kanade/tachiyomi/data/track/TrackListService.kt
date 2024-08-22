@@ -23,6 +23,7 @@ sealed class TrackService(val id: Int) {
     open fun canRemoveFromService() = false
 
     open fun isAutoAddTracker() = false
+
     open fun isMdList() = false
 
     open val client: OkHttpClient
@@ -71,7 +72,8 @@ sealed class TrackService(val id: Int) {
         preferences.setTrackCredentials(this, "", "")
     }
 
-    open fun isLogged(): Boolean = getUsername().get().isNotEmpty() && getPassword().get().isNotEmpty()
+    open fun isLogged(): Boolean =
+        getUsername().get().isNotEmpty() && getPassword().get().isNotEmpty()
 
     fun getUsername() = preferences.trackUsername(this)!!
 
@@ -113,22 +115,31 @@ sealed class TrackService(val id: Int) {
 
 abstract class TrackListService(_id: Int) : TrackService(_id) {
     abstract suspend fun populateLists()
+
     abstract fun viewLists(): List<TrackList>
 
     abstract suspend fun addToList(track: Track, listId: String): Track
+
     abstract suspend fun removeFromList(track: Track, listId: String): Track
 
     abstract suspend fun addToLists(track: Track, listIds: List<String>): Track
+
     abstract suspend fun removeFromLists(track: Track, listIds: List<String>): Track
 }
 
 abstract class TrackStatusService(_id: Int) : TrackService(_id) {
     abstract fun getStatusList(): List<Int>
+
     abstract fun isCompletedStatus(index: Int): Boolean
+
     abstract fun completedStatus(): Int
+
     abstract fun readingStatus(): Int
+
     abstract fun planningStatus(): Int
+
     abstract fun getStatus(status: Int): String
+
     abstract fun getGlobalStatus(status: Int): String
 
     abstract suspend fun update(track: Track, setToRead: Boolean = false): Track
@@ -152,14 +163,14 @@ abstract class TrackStatusService(_id: Int) : TrackService(_id) {
 
     suspend fun updateNewTrackInfo(track: Track, planningStatus: Int) {
         val manga = db.getManga(track.manga_id).executeOnIO()
-    val allRead =
-        manga?.isOneShotOrCompleted(db) == true &&
-            db.getChapters(track.manga_id).executeOnIO().all { it.read }
-    if (supportsReadingDates) {
-        track.started_reading_date = getStartDate(track)
-        track.finished_reading_date = getCompletedDate(track, allRead)
-    }
-    track.last_chapter_read = getLastChapterRead(track).takeUnless { it == 0f && allRead } ?: 1f
+        val allRead =
+            manga?.isOneShotOrCompleted(db) == true &&
+                db.getChapters(track.manga_id).executeOnIO().all { it.read }
+        if (supportsReadingDates) {
+            track.started_reading_date = getStartDate(track)
+            track.finished_reading_date = getCompletedDate(track, allRead)
+        }
+        track.last_chapter_read = getLastChapterRead(track).takeUnless { it == 0f && allRead } ?: 1f
         if (track.last_chapter_read == 0f) {
             track.status = planningStatus
         }
