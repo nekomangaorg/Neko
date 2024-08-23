@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
-import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
+import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.track.TrackManager
 import okio.buffer
 import okio.gzip
@@ -30,7 +30,7 @@ class BackupFileValidator(
                     context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use {
                         it.readByteArray()
                     }
-                backupManager.parser.decodeFromByteArray(BackupSerializer, backupString)
+                backupManager.parser.decodeFromByteArray(Backup.serializer(), backupString)
             } catch (e: Exception) {
                 throw IllegalStateException(e)
             }
