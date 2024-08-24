@@ -71,19 +71,27 @@
         tools:visibility="visible"
         android:text="@string/two_factor" />
 
-    <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
+    <Button
         android:id="@+id/login"
-        style="@style/Theme.Widget.Button.Primary"
+        style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_gravity="center"
         android:scaleType="fitCenter"
         android:text="@string/log_in"
-        android:textSize="16sp"
-        app:finalCornerAngle="50dp"
-        app:initialCornerAngle="2dp"
-        app:spinning_bar_color="@color/md_white_1000"
-        app:spinning_bar_padding="6dp"
-        app:spinning_bar_width="3dp" />
+        android:textSize="16sp" />
+
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progress"
+        style="@style/Widget.Material3.LinearProgressIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:paddingTop="2dp"
+        tools:visibility="visible"
+        android:indeterminate="true"
+        app:showAnimationBehavior="inward"
+        app:hideAnimationBehavior="outward"
+        android:visibility="gone" />
 
 </LinearLayout>

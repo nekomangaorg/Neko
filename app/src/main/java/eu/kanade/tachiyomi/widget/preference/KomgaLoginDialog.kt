@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
@@ -51,10 +50,8 @@ class KomgaLoginDialog(bundle: Bundle? = null) :
 
     override fun checkLogin() {
         v?.apply {
-            binding.login.apply {
-                progressType = ProgressType.INDETERMINATE
-                startAnimation()
-            }
+            binding.progress.visibility = View.VISIBLE
+            binding.login.visibility = View.GONE
 
             if (binding.username.text.isNullOrBlank() ||
                 binding.password.text.isNullOrBlank() ||
@@ -102,9 +99,9 @@ class KomgaLoginDialog(bundle: Bundle? = null) :
         v?.apply {
             dialog?.setCancelable(true)
             dialog?.setCanceledOnTouchOutside(true)
-            binding.login.revertAnimation {
-                binding.login.text = activity!!.getText(R.string.unknown_error)
-            }
+            binding.progress.visibility = View.GONE
+            binding.login.visibility = View.VISIBLE
+            scope.launch { context.toast(R.string.unknown_error) }
         }
     }
 

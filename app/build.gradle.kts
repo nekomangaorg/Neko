@@ -165,7 +165,6 @@ dependencies {
 
     // UI
     implementation(libs.bundles.fastadapter)
-    implementation(libs.loadingButtonAndroid)
 
     implementation(libs.bundles.flexibleadapter)
 
