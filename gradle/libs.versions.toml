@@ -9,7 +9,7 @@ firebaseBomVersion = "33.1.2"
 firebasePluginVersion = "3.0.2"
 googleServicesPluginVersion = "4.4.2"
 iconicsVersion = "5.4.0"
-injektCoreVersion = "65b0440"
+injektCoreVersion = "1.16.1"
 kotlinResultVersion = "2.0.0"
 ktfmtVersion = "0.19.0"
 okhttpVersion = "5.0.0-alpha.14"
@@ -27,7 +27,7 @@ viewTooltipVersion = "f79a8955ef"
 [libraries]
 cascade-compose = { module = "me.saket.cascade:cascade-compose", version.ref = "cascadeComposeVersion" }
 cascade = { module = "me.saket.cascade:cascade", version.ref = "cascadeVersion" }
-injekt-core = { module = "com.github.inorichi.injekt:injekt-core", version.ref = "injektCoreVersion" }
+injekt-core = { module = "uy.kohesive.injekt:injekt-core", version.ref = "injektCoreVersion" }
 material = "com.google.android.material:material:1.12.0"
 desugaring = "com.android.tools:desugar_jdk_libs:2.0.4"
 photoView = { module = "com.github.chrisbanes:PhotoView", version.ref = "photoViewVersion" }
