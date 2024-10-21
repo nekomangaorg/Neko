@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.source.online.handlers.external
 
-import eu.kanade.tachiyomi.extension.all.mangaplus.Language
 import eu.kanade.tachiyomi.extension.all.mangaplus.MangaPlusResponse
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
 import java.util.UUID
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -14,6 +14,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.nekomanga.core.network.GET
+import org.nekomanga.core.network.interceptor.rateLimitHost
 import tachiyomi.core.network.await
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -35,6 +36,7 @@ class MangaPlusHandler {
             .client
             .newBuilder()
             .addInterceptor { imageIntercept(it) }
+            .rateLimitHost(API_URL.toHttpUrl(), 1)
             .build()
     }
 
@@ -44,8 +46,17 @@ class MangaPlusHandler {
     }
 
     private fun pageListRequest(chapterId: String): Request {
+        val url =
+            API_URL.toHttpUrl()
+                .newBuilder()
+                .addPathSegment("manga_viewer")
+                .addQueryParameter("chapter_id", chapterId)
+                .addQueryParameter("split", "yes")
+                .addQueryParameter("img_quality", "super_high")
+                .addQueryParameter("format", "json")
+                .toString()
         return GET(
-            "$API_URL/manga_viewer?chapter_id=$chapterId&split=yes&img_quality=super_high&format=json",
+            url,
             headers,
         )
     }
@@ -58,8 +69,12 @@ class MangaPlusHandler {
         val result = response.asMangaPlusResponse()
 
         checkNotNull(result.success) {
-            result.error!!.popups.firstOrNull { it.language == Language.ENGLISH }
-                ?: "Error with MangaPlus"
+            val error = result.error!!.popups.firstOrNull()?.body
+            when (error) {
+                null -> "Error with MangaPlus"
+                "Invalid user access(11302)" -> "Error chapter is region locked"
+                else -> error
+            }
         }
 
         return result.success.mangaViewer!!

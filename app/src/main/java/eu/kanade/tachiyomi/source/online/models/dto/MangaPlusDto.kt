@@ -212,6 +212,7 @@ class Title(
 
 enum class Language {
     ENGLISH,
+    GERMAN,
     SPANISH,
     FRENCH,
     INDONESIAN,
