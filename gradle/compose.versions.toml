@@ -16,7 +16,7 @@ material3-windowsize = { module = "androidx.compose.material3:material3-window-s
 activity = "androidx.activity:activity-compose:1.9.3"
 animations = { module = "androidx.compose.animation:animation-graphics", version.ref = "compose_version" }
 
-lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.8.4"
+lifecycle = "androidx.lifecycle:lifecycle-runtime-compose:2.8.6"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
