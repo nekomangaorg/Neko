@@ -63,7 +63,7 @@ class BrowseRepository(
     }
 
     suspend fun getList(listUuid: String): Result<List<DisplayManga>, ResultError> {
-        return mangaDex.fetchList(listUuid).andThen { resultListPage ->
+        return mangaDex.fetchAllList(listUuid).andThen { resultListPage ->
             val displayManga =
                 resultListPage.sourceManga
                     .map { it.toDisplayManga(db, sourceId = mangaDex.id) }

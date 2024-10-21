@@ -131,7 +131,11 @@ open class MangaDex : HttpSource() {
     }
 
     suspend fun fetchList(listId: String): Result<ListResults, ResultError> {
-        return listHandler.retrieveList(listId)
+        return listHandler.retrieveMangaFromList(listId, 1)
+    }
+
+    suspend fun fetchAllList(listId: String): Result<ListResults, ResultError> {
+        return listHandler.retrieveAllMangaFromList(listId, false)
     }
 
     suspend fun fetchHomePageInfo(

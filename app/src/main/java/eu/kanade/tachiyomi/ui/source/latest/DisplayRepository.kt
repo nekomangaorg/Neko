@@ -71,7 +71,7 @@ class DisplayRepository(
         listUUID: String
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex
-            .fetchList(listUUID)
+            .fetchAllList(listUUID)
             .mapBoth(
                 success = { listResults ->
                     val displayMangaList =
