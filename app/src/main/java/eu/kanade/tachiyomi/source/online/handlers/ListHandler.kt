@@ -40,14 +40,25 @@ class ListHandler {
     ): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
             service.viewList(listUUID).getOrResultError("Error getting list").andThen { listDto ->
-                val mangaIds =
+                val allMangaIds =
                     listDto.data.relationships
                         .filter { it.type == MdConstants.Types.manga }
                         .map { it.id }
-                when (mangaIds.isEmpty()) {
+                when (allMangaIds.isEmpty()) {
                     true ->
                         Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
                     false -> {
+                        val mangaIds =
+                            when (allMangaIds.size < MdConstants.Limits.manga) {
+                                true -> allMangaIds
+                                false ->
+                                    allMangaIds.subList(
+                                        MdUtil.getMangaListOffset(page),
+                                        MdUtil.getMangaListOffset(page) + MdConstants.Limits.manga -
+                                            1,
+                                    )
+                            }
+
                         val enabledContentRatings =
                             preferencesHelper.contentRatingSelections().get()
                         val contentRatings =
@@ -57,6 +68,7 @@ class ListHandler {
 
                         val queryParameters =
                             mutableMapOf(
+                                MdConstants.SearchParameters.mangaIds to mangaIds,
                                 MdConstants.SearchParameters.offset to
                                     MdUtil.getMangaListOffset(page),
                                 MdConstants.SearchParameters.limit to MdConstants.Limits.manga,

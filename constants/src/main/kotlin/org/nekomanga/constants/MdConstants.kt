@@ -142,6 +142,7 @@ object MdConstants {
         const val authorOrArtist = "authorOrArtist"
         const val group = "group"
         const val includedTagsParam = "includedTags[]"
+        const val mangaIds = "ids[]"
 
         fun sortParam(sort: String) = "order[$sort]"
 
