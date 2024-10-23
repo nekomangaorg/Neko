@@ -22,9 +22,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -93,7 +93,9 @@ fun NekoScaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
         topBar = {
-            CompositionLocalProvider(LocalRippleTheme provides (themeColorState.rippleTheme)) {
+            CompositionLocalProvider(
+                LocalRippleConfiguration provides themeColorState.rippleConfiguration
+            ) {
                 when (type) {
                     NekoScaffoldType.Title ->
                         TitleOnlyTopAppBar(
@@ -142,7 +144,10 @@ fun NekoScaffold(
             }
         },
     ) { paddingValues ->
-        CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
+        CompositionLocalProvider(
+            LocalRippleConfiguration provides
+                nekoRippleConfiguration(MaterialTheme.colorScheme.primary)
+        ) {
             content(paddingValues)
         }
     }

@@ -24,8 +24,8 @@ import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.rememberDismissState
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -99,7 +99,7 @@ fun ChapterRow(
     markPrevious: (Boolean) -> Unit,
     onDownload: (DownloadAction) -> Unit,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
+    CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
         val dismissState = rememberDismissState(initialValue = DismissValue.Default)
         NekoSwipeToDismiss(
             state = dismissState,
@@ -273,9 +273,9 @@ private fun ChapterInfo(
     val rowColor =
         when (dropdown) {
             true ->
-                themeColorState.rippleTheme
-                    .defaultColor()
-                    .copy(alpha = themeColorState.rippleTheme.rippleAlpha().focusedAlpha)
+                themeColorState.rippleConfiguration.color.copy(
+                    alpha = themeColorState.rippleConfiguration.rippleAlpha!!.focusedAlpha
+                )
             false -> MaterialTheme.colorScheme.surface
         }
 

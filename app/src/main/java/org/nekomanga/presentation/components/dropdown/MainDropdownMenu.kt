@@ -8,9 +8,9 @@ import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,7 +55,9 @@ fun MainDropdownMenu(
         colorScheme = MaterialTheme.colorScheme.copy(surface = MaterialTheme.colorScheme.surface),
         shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp)),
     ) {
-        CompositionLocalProvider(LocalRippleTheme provides (defaultThemeColorState().rippleTheme)) {
+        CompositionLocalProvider(
+            LocalRippleConfiguration provides (defaultThemeColorState().rippleConfiguration)
+        ) {
             CascadeDropdownMenu(
                 expanded = expanded,
                 offset = DpOffset(12.dp, Size.none),

@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,7 +46,9 @@ fun FilterChapterSheet(
     changeLanguageFilter: (MangaConstants.LanguageOption?) -> Unit,
     setAsGlobal: (MangaConstants.SetGlobal) -> Unit,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration
+    ) {
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .8
 
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {

@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -32,7 +32,7 @@ fun BaseSheet(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColor.rippleTheme,
+        LocalRippleConfiguration provides themeColor.rippleConfiguration,
         LocalTextSelectionColors provides themeColor.textSelectionColors,
     ) {
         val screenHeight = LocalConfiguration.current.screenHeightDp

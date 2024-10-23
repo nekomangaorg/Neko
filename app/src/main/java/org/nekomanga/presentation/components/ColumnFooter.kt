@@ -14,8 +14,8 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -87,7 +87,7 @@ fun ColumnScope.SearchFooter(
         isError = isError,
         onValueChange = { textChanged(it) },
         colors =
-            TextFieldDefaults.outlinedTextFieldColors(
+            OutlinedTextFieldDefaults.colors(
                 focusedLabelColor = themeColorState.buttonColor,
                 focusedBorderColor = themeColorState.buttonColor,
                 cursorColor = themeColorState.buttonColor,

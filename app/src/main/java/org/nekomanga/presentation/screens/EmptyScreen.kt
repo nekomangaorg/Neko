@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,7 +33,7 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
-import org.nekomanga.presentation.components.PrimaryColorRippleTheme
+import org.nekomanga.presentation.components.nekoRippleConfiguration
 
 @Composable
 fun NoResultsEmptyScreen(contentPaddingValues: PaddingValues) {
@@ -101,7 +101,10 @@ private fun EmptyScreen(
                     textAlign = TextAlign.Center,
                 )
             }
-            CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
+            CompositionLocalProvider(
+                LocalRippleConfiguration provides
+                    nekoRippleConfiguration(MaterialTheme.colorScheme.primary)
+            ) {
                 actions.forEach { action ->
                     Spacer(modifier = Modifier.size(16.dp))
                     TextButton(onClick = action.onClick) {

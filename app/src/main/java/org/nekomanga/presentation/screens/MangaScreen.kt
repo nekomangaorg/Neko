@@ -25,9 +25,9 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -71,13 +71,12 @@ import org.nekomanga.R
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.snackbar.SnackbarState
 import org.nekomanga.presentation.components.ChapterRow
-import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.NekoScaffoldType
-import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.PullRefresh
 import org.nekomanga.presentation.components.dialog.RemovedChaptersDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
+import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.components.snackbar.snackbarHost
 import org.nekomanga.presentation.screens.mangadetails.ChapterHeader
 import org.nekomanga.presentation.screens.mangadetails.DetailsBottomSheet
@@ -159,7 +158,7 @@ fun MangaScreen(
         themeColorState =
             ThemeColorState(
                 buttonColor = color,
-                rippleTheme = DynamicRippleTheme(color),
+                rippleConfiguration = nekoRippleConfiguration(color),
                 textSelectionColors = dynamicTextSelectionColor(color),
                 altContainerColor =
                     Color(ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f)),
@@ -248,7 +247,7 @@ fun MangaScreen(
                     )
 
                 CompositionLocalProvider(
-                    LocalRippleTheme provides themeColorState.rippleTheme,
+                    LocalRippleConfiguration provides themeColorState.rippleConfiguration,
                     LocalTextSelectionColors provides themeColorState.textSelectionColors,
                 ) {
                     if (
@@ -597,12 +596,12 @@ fun Details(
 
 class ThemeColorState(
     buttonColor: Color,
-    rippleTheme: RippleTheme,
+    rippleConfiguration: RippleConfiguration,
     textSelectionColors: TextSelectionColors,
     altContainerColor: Color,
 ) {
     var buttonColor by mutableStateOf(buttonColor)
-    var rippleTheme by mutableStateOf(rippleTheme)
+    var rippleConfiguration by mutableStateOf(rippleConfiguration)
     var textSelectionColors by mutableStateOf(textSelectionColors)
     var altContainerColor by mutableStateOf(altContainerColor)
 }
@@ -611,7 +610,7 @@ class ThemeColorState(
 fun defaultThemeColorState(): ThemeColorState {
     return ThemeColorState(
         buttonColor = MaterialTheme.colorScheme.secondary,
-        rippleTheme = PrimaryColorRippleTheme,
+        rippleConfiguration = nekoRippleConfiguration(MaterialTheme.colorScheme.primary),
         textSelectionColors = LocalTextSelectionColors.current,
         altContainerColor =
             Color(

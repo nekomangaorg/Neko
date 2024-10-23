@@ -19,9 +19,9 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -48,10 +48,10 @@ import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
-import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
+import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -77,7 +77,7 @@ fun MangaDetailsHeader(
     quickReadClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColorState.rippleTheme,
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
         LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
@@ -247,7 +247,8 @@ private fun ColumnScope.QuickReadButton(
     if (quickReadTextProvider().text.isNotEmpty() && quickReadTextProvider().id != null) {
         Gap(Size.tiny)
         CompositionLocalProvider(
-            LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)
+            LocalRippleConfiguration provides
+                nekoRippleConfiguration(themeColorState.altContainerColor)
         ) {
             ElevatedButton(
                 onClick = quickReadClick,
