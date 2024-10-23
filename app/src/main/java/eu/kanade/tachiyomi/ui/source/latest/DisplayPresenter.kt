@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.unique
 import java.util.Date
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -223,7 +224,7 @@ class DisplayPresenter(
     fun updateMangaForChanges() {
         presenterScope.launch {
             val newDisplayManga =
-                _displayScreenState.value.allDisplayManga.resync(db).toImmutableList()
+                _displayScreenState.value.allDisplayManga.resync(db).unique().toImmutableList()
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,

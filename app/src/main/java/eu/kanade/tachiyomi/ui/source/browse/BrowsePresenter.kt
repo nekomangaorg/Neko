@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.unique
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableList
@@ -945,7 +946,7 @@ class BrowsePresenter(
             }
             presenterScope.launch {
                 val allDisplayManga =
-                    _browseScreenState.value.displayMangaHolder.allDisplayManga.resync(db)
+                    _browseScreenState.value.displayMangaHolder.allDisplayManga.resync(db).unique()
                 _browseScreenState.update {
                     it.copy(
                         displayMangaHolder =

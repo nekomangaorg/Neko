@@ -164,6 +164,10 @@ fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
     }
 }
 
+fun List<DisplayManga>.unique(): List<DisplayManga> {
+    return this.distinctBy { it.url }
+}
+
 /** Updates the visibility of HomePageManga display manga */
 fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): ImmutableList<HomePageManga> {
     return this.map { homePageManga ->
