@@ -19,16 +19,14 @@ fun BackDrop(
     artworkProvider: () -> Artwork,
     showBackdropProvider: () -> Boolean,
     modifier: Modifier = Modifier,
-    generatePalette: (drawable: Drawable) -> Unit = {}
+    generatePalette: (drawable: Drawable) -> Unit = {},
 ) {
     Box {
         if (showBackdropProvider()) {
             Box(
                 modifier =
                     Modifier.matchParentSize()
-                        .background(
-                            themeColorState.buttonColor.copy(alpha = .25f),
-                        ),
+                        .background(themeColorState.buttonColor.copy(alpha = .25f))
             )
         }
         AsyncImage(

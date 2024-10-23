@@ -54,7 +54,8 @@ class MergeMangaGetResolver : DefaultGetResolver<MergeMangaImpl>() {
             url = cursor.getString(cursor.getColumnIndex(MergeMangaTable.COL_URL)),
             mergeType =
                 MergeType.getById(
-                    cursor.getInt(cursor.getColumnIndex(MergeMangaTable.COL_MERGE_TYPE))),
+                    cursor.getInt(cursor.getColumnIndex(MergeMangaTable.COL_MERGE_TYPE))
+                ),
         )
 }
 

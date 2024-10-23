@@ -82,7 +82,7 @@ private fun EmptyScreen(
 ) {
     val iconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f)
     BoxWithConstraints(
-        modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding()),
+        modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())
     ) {
         val top = maxHeight / 2
         Column(
@@ -128,7 +128,4 @@ private fun EmptyViewPreview() {
     )
 }
 
-data class Action(
-    @StringRes val resId: Int,
-    val onClick: () -> Unit = {},
-)
+data class Action(@StringRes val resId: Int, val onClick: () -> Unit = {})

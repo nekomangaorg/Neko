@@ -89,20 +89,17 @@ internal class TriStateMultiChoiceDialogAdapter(
     ): TriStateMultiChoiceViewHolder {
         val listItemView: View =
             ListitemTristatechoiceBinding.inflate(
-                    LayoutInflater.from(dialog.context), parent, false)
+                    LayoutInflater.from(dialog.context),
+                    parent,
+                    false,
+                )
                 .root
-        return TriStateMultiChoiceViewHolder(
-            itemView = listItemView,
-            adapter = this,
-        )
+        return TriStateMultiChoiceViewHolder(itemView = listItemView, adapter = this)
     }
 
     override fun getItemCount() = items.size
 
-    override fun onBindViewHolder(
-        holder: TriStateMultiChoiceViewHolder,
-        position: Int,
-    ) {
+    override fun onBindViewHolder(holder: TriStateMultiChoiceViewHolder, position: Int) {
         holder.isEnabled = !disabledIndices.contains(position)
 
         holder.controlView.state =

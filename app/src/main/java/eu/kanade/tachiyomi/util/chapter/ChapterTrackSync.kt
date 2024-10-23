@@ -75,11 +75,7 @@ suspend fun updateTrackChapterRead(
     }
 }
 
-private fun delayTrackingUpdate(
-    context: Context,
-    newChapterRead: Float,
-    track: Track,
-) {
+private fun delayTrackingUpdate(context: Context, newChapterRead: Float, track: Track) {
     val delayedTrackingStore = Injekt.get<DelayedTrackingStore>()
     delayedTrackingStore.add(track.id!!, newChapterRead)
     DelayedTrackingUpdateJob.setupTask(context)

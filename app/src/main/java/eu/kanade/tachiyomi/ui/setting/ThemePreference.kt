@@ -68,7 +68,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     (!it.isDarkTheme || it.followsSystem) &&
                         (it.styleRes != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                 }
-                .map { ThemeItem(it, false) },
+                .map { ThemeItem(it, false) }
         )
         itemAdapterDark.set(
             enumConstants
@@ -76,7 +76,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     (it.isDarkTheme || it.followsSystem) &&
                         (it.styleRes != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                 }
-                .map { ThemeItem(it, true) },
+                .map { ThemeItem(it, true) }
         )
         isSelectable = false
     }
@@ -98,14 +98,17 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     }
                     if (!selected) {
                         preferences.nightMode().set(nightMode)
-                    } else if (preferences.nightMode().get() !=
-                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
+                    } else if (
+                        preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    ) {
                         preferences.nightMode().set(nightMode)
                     }
-                    if ((preferences.nightMode().get() ==
-                        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
-                        nightMode != context.appDelegateNightMode()) ||
-                        (!selected && nightMode == context.appDelegateNightMode())) {
+                    if (
+                        (preferences.nightMode().get() ==
+                            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                            nightMode != context.appDelegateNightMode()) ||
+                            (!selected && nightMode == context.appDelegateNightMode())
+                    ) {
                         fastAdapterLight.notifyDataSetChanged()
                         fastAdapterDark.notifyDataSetChanged()
                     } else {
@@ -131,7 +134,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     super.onScrolled(recyclerView, dx, dy)
                     lastScrollPostionLight = recyclerView.computeHorizontalScrollOffset()
                 }
-            },
+            }
         )
 
         binding.themeRecyclerDark.setHasFixedSize(true)
@@ -145,36 +148,30 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     super.onScrolled(recyclerView, dx, dy)
                     lastScrollPostionDark = recyclerView.computeHorizontalScrollOffset()
                 }
-            },
+            }
         )
 
         if (lastScrollPostionLight != null) {
             val lX = lastScrollPostionLight!!
             (binding.themeRecycler.layoutManager as LinearLayoutManager).apply {
-                scrollToPositionWithOffset(
-                    lX / 110.dpToPx,
-                    -lX % 110.dpToPx,
-                )
+                scrollToPositionWithOffset(lX / 110.dpToPx, -lX % 110.dpToPx)
             }
             lastScrollPostionLight = binding.themeRecycler.computeHorizontalScrollOffset()
         } else {
             binding.themeRecycler.scrollToPosition(
-                max((selectExtensionLight.selections.firstOrNull() ?: 0) - 1, 0),
+                max((selectExtensionLight.selections.firstOrNull() ?: 0) - 1, 0)
             )
         }
 
         if (lastScrollPostionDark != null) {
             val lX = lastScrollPostionDark!!
             (binding.themeRecyclerDark.layoutManager as LinearLayoutManager).apply {
-                scrollToPositionWithOffset(
-                    lX / 110.dpToPx,
-                    -lX % 110.dpToPx,
-                )
+                scrollToPositionWithOffset(lX / 110.dpToPx, -lX % 110.dpToPx)
             }
             lastScrollPostionDark = binding.themeRecyclerDark.computeHorizontalScrollOffset()
         } else {
             binding.themeRecyclerDark.scrollToPosition(
-                max((selectExtensionDark.selections.firstOrNull() ?: 0) - 1, 0),
+                max((selectExtensionDark.selections.firstOrNull() ?: 0) - 1, 0)
             )
         }
     }
@@ -228,7 +225,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                         item.theme.darkNameRes
                     } else {
                         item.theme.nameRes
-                    },
+                    }
                 )
 
                 binding.checkbox.isVisible = item.isSelected

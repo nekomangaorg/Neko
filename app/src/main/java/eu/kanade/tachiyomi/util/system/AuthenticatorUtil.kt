@@ -33,12 +33,7 @@ object AuthenticatorUtil {
     ) {
         isAuthenticating = true
         val executor: Executor = ContextCompat.getMainExecutor(this)
-        val biometricPrompt =
-            BiometricPrompt(
-                this,
-                executor,
-                callback,
-            )
+        val biometricPrompt = BiometricPrompt(this, executor, callback)
 
         val promptInfo =
             BiometricPrompt.PromptInfo.Builder()
@@ -46,7 +41,8 @@ object AuthenticatorUtil {
                 .setSubtitle(subtitle)
                 .setAllowedAuthenticators(
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL or
-                        BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK
+                )
                 .setConfirmationRequired(confirmationRequired)
                 .build()
 

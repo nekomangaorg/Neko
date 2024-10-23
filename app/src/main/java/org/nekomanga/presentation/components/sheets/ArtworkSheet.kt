@@ -70,113 +70,114 @@ fun ArtworkSheet(
 ) {
     CompositionLocalProvider(
         LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-            if (alternativeArtwork.isEmpty()) {
-                BaseSheet(themeColor = themeColorState) {
-                    Text(
-                        text = "Please swipe refresh to pull latest artwork",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            } else {
-                var currentImage by remember {
-                    mutableStateOf(
-                        alternativeArtwork.firstOrNull { it.active } ?: alternativeArtwork.first())
-                }
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
+    ) {
+        if (alternativeArtwork.isEmpty()) {
+            BaseSheet(themeColor = themeColorState) {
+                Text(
+                    text = "Please swipe refresh to pull latest artwork",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        } else {
+            var currentImage by remember {
+                mutableStateOf(
+                    alternativeArtwork.firstOrNull { it.active } ?: alternativeArtwork.first()
+                )
+            }
 
-                val screenHeight = LocalConfiguration.current.screenHeightDp
-                val thumbnailSize = (screenHeight * .12f).dp
-                val imageHeight = screenHeight * .7f
-                val gradientHeight = (thumbnailSize / 2f)
+            val screenHeight = LocalConfiguration.current.screenHeightDp
+            val thumbnailSize = (screenHeight * .12f).dp
+            val imageHeight = screenHeight * .7f
+            val gradientHeight = (thumbnailSize / 2f)
 
-                Column(
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .fillMaxHeight(.95f)
-                            .background(MaterialTheme.colorScheme.surface)
-                            .statusBarsPadding()
-                            .navigationBarsPadding(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+            Column(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .fillMaxHeight(.95f)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .statusBarsPadding()
+                        .navigationBarsPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current).data(currentImage).build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.height(imageHeight.dp).padding(horizontal = Size.small),
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(Size.tiny),
+                    Arrangement.spacedBy(Size.tiny),
                 ) {
-                    AsyncImage(
-                        model =
-                            ImageRequest.Builder(LocalContext.current).data(currentImage).build(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.height(imageHeight.dp).padding(horizontal = Size.small),
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(Size.tiny),
-                        Arrangement.spacedBy(Size.tiny),
+                    ArtworkButton(
+                        text = stringResource(id = R.string.save),
+                        color = themeColorState.buttonColor,
+                        modifier = Modifier.weight(1f),
                     ) {
+                        saveClick(currentImage)
+                    }
+                    if (inLibrary) {
                         ArtworkButton(
-                            text = stringResource(id = R.string.save),
+                            text = stringResource(id = R.string.set),
                             color = themeColorState.buttonColor,
-                            modifier = Modifier.weight(1f)) {
-                                saveClick(currentImage)
-                            }
-                        if (inLibrary) {
-                            ArtworkButton(
-                                text = stringResource(id = R.string.set),
-                                color = themeColorState.buttonColor,
-                                modifier = Modifier.weight(1f)) {
-                                    setClick(currentImage)
-                                }
-                            ArtworkButton(
-                                text = stringResource(id = R.string.reset),
-                                color = themeColorState.buttonColor,
-                                modifier = Modifier.weight(1f)) {
-                                    resetClick()
-                                }
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            setClick(currentImage)
                         }
                         ArtworkButton(
-                            text = stringResource(id = R.string.share),
+                            text = stringResource(id = R.string.reset),
                             color = themeColorState.buttonColor,
-                            modifier = Modifier.weight(1f)) {
-                                shareClick(currentImage)
-                            }
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            resetClick()
+                        }
                     }
-                    if (currentImage.description.isNotBlank()) {
-                        Text(
-                            text = currentImage.description,
-                            modifier = Modifier.padding(horizontal = Size.small),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelMedium,
-                        )
+                    ArtworkButton(
+                        text = stringResource(id = R.string.share),
+                        color = themeColorState.buttonColor,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        shareClick(currentImage)
                     }
-                    Gap(Size.small)
-                    if (alternativeArtwork.size > 1) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement =
-                                Arrangement.spacedBy(Size.tiny, Alignment.Bottom)) {
-                                LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
-                                    items(alternativeArtwork) { artwork ->
-                                        Box {
-                                            Thumbnail(
-                                                artwork = artwork,
-                                                thumbnailSize = thumbnailSize,
-                                            ) {
-                                                currentImage = artwork
-                                            }
-                                            if (artwork.active) {
-                                                ActiveIndicator(themeColorState)
-                                            }
-                                            if (artwork.volume.isNotBlank()) {
-                                                VolumeSection(
-                                                    thumbnailSize, gradientHeight, artwork)
-                                            }
-                                        }
+                }
+                if (currentImage.description.isNotBlank()) {
+                    Text(
+                        text = currentImage.description,
+                        modifier = Modifier.padding(horizontal = Size.small),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+                Gap(Size.small)
+                if (alternativeArtwork.size > 1) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(Size.tiny, Alignment.Bottom),
+                    ) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
+                            items(alternativeArtwork) { artwork ->
+                                Box {
+                                    Thumbnail(artwork = artwork, thumbnailSize = thumbnailSize) {
+                                        currentImage = artwork
+                                    }
+                                    if (artwork.active) {
+                                        ActiveIndicator(themeColorState)
+                                    }
+                                    if (artwork.volume.isNotBlank()) {
+                                        VolumeSection(thumbnailSize, gradientHeight, artwork)
                                     }
                                 }
                             }
-                        Gap(Size.small)
+                        }
                     }
+                    Gap(Size.small)
                 }
             }
         }
+    }
 }
 
 @Composable
@@ -203,11 +204,9 @@ private fun Thumbnail(artwork: Artwork, thumbnailSize: Dp, thumbnailClicked: () 
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier =
-            Modifier.size(thumbnailSize)
-                .clip(
-                    RoundedCornerShape(Shapes.coverRadius),
-                )
-                .clickable { thumbnailClicked() },
+            Modifier.size(thumbnailSize).clip(RoundedCornerShape(Shapes.coverRadius)).clickable {
+                thumbnailClicked()
+            },
     )
 }
 
@@ -220,12 +219,15 @@ private fun BoxScope.VolumeSection(thumbnailSize: Dp, gradientHeight: Dp, artwor
                 .height(gradientHeight)
                 .clip(
                     RoundedCornerShape(
-                        bottomStart = Shapes.coverRadius, bottomEnd = Shapes.coverRadius))
+                        bottomStart = Shapes.coverRadius,
+                        bottomEnd = Shapes.coverRadius,
+                    )
+                )
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface),
-                    ),
-                ),
+                        colors = listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface)
+                    )
+                )
     )
     Text(
         text = artwork.volume,
@@ -243,12 +245,13 @@ private fun ActiveIndicator(themeColorState: ThemeColorState) {
         modifier =
             Modifier.padding(Size.tiny)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface),
+                .background(MaterialTheme.colorScheme.surface)
     ) {
         Icon(
             imageVector = Icons.Filled.Star,
             modifier = Modifier.padding(Size.tiny),
             contentDescription = null,
-            tint = themeColorState.buttonColor)
+            tint = themeColorState.buttonColor,
+        )
     }
 }

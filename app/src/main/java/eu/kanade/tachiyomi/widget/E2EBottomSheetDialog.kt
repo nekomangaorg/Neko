@@ -47,14 +47,16 @@ abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
                 object : RecyclerView.OnScrollListener() {
                     override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                         super.onScrollStateChanged(recyclerView, newState)
-                        if (newState == RecyclerView.SCROLL_STATE_IDLE ||
-                            newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                        if (
+                            newState == RecyclerView.SCROLL_STATE_IDLE ||
+                                newState == RecyclerView.SCROLL_STATE_SETTLING
+                        ) {
                             sheetBehavior.isDraggable = true
                         } else {
                             sheetBehavior.isDraggable = !recyclerView.canScrollVertically(-1)
                         }
                     }
-                },
+                }
             )
         }
     }

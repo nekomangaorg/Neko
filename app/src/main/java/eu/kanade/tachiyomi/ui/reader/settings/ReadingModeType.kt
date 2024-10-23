@@ -17,8 +17,10 @@ enum class ReadingModeType(
     VERTICAL(3, R.string.vertical_viewer, R.drawable.ic_reader_vertical_24dp),
     WEBTOON(4, R.string.webtoon, R.drawable.ic_reader_webtoon_24dp),
     CONTINUOUS_VERTICAL(
-        5, R.string.continuous_vertical, R.drawable.ic_reader_continuous_vertical_24dp),
-    ;
+        5,
+        R.string.continuous_vertical,
+        R.drawable.ic_reader_continuous_vertical_24dp,
+    );
 
     companion object {
         fun fromPreference(preference: Int): ReadingModeType =

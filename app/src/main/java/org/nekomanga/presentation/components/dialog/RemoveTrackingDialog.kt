@@ -26,51 +26,51 @@ fun RemoveTrackingDialog(
     name: String,
     canRemoveFromTracker: Boolean,
     onConfirm: (Boolean) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     CompositionLocalProvider(
         LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-            var removeFromTracker by remember { mutableStateOf(true) }
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
+    ) {
+        var removeFromTracker by remember { mutableStateOf(true) }
 
-            AlertDialog(
-                title = { Text(text = stringResource(id = R.string.remove_tracking)) },
-                text = {
-                    if (canRemoveFromTracker) {
-                        Column {
-                            CheckboxRow(
-                                modifier = Modifier.fillMaxWidth(),
-                                checkedState = removeFromTracker,
-                                checkedChange = { removeFromTracker = !removeFromTracker },
-                                themeColorState = themeColorState,
-                                rowText = stringResource(id = R.string.remove_tracking_from_, name),
-                            )
-                        }
+        AlertDialog(
+            title = { Text(text = stringResource(id = R.string.remove_tracking)) },
+            text = {
+                if (canRemoveFromTracker) {
+                    Column {
+                        CheckboxRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            checkedState = removeFromTracker,
+                            checkedChange = { removeFromTracker = !removeFromTracker },
+                            themeColorState = themeColorState,
+                            rowText = stringResource(id = R.string.remove_tracking_from_, name),
+                        )
                     }
-                },
-                onDismissRequest = onDismiss,
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            onConfirm(removeFromTracker && canRemoveFromTracker)
-                            onDismiss()
-                        },
-                        colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = themeColorState.buttonColor),
-                    ) {
-                        Text(text = stringResource(id = R.string.remove))
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = onDismiss,
-                        colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = themeColorState.buttonColor)) {
-                            Text(text = stringResource(id = R.string.cancel))
-                        }
-                },
-            )
-        }
+                }
+            },
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onConfirm(removeFromTracker && canRemoveFromTracker)
+                        onDismiss()
+                    },
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
+                    Text(text = stringResource(id = R.string.remove))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDismiss,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            },
+        )
+    }
 }

@@ -46,13 +46,15 @@ interface MangaDexService {
     suspend fun recentlyAdded(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
     @GET(
-        "${MdConstants.Api.manga}?&order[followedCount]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true")
+        "${MdConstants.Api.manga}?&order[followedCount]=desc&includes[]=${MdConstants.Types.coverArt}&hasAvailableChapters=true"
+    )
     suspend fun popularNewReleases(
         @QueryMap options: ProxyRetrofitQueryMap
     ): ApiResponse<MangaListDto>
 
     @GET(
-        "${MdConstants.Api.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
+        "${MdConstants.Api.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}"
+    )
     suspend fun viewManga(@Path("id") id: String): ApiResponse<MangaDto>
 
     @GET("${MdConstants.Api.manga}/{id}/aggregate")
@@ -62,21 +64,18 @@ interface MangaDexService {
     ): ApiResponse<AggregateDto>
 
     @GET("${MdConstants.Api.statistics}${MdConstants.Api.manga}/{id}")
-    suspend fun mangaStatistics(
-        @Path("id") mangaId: String,
-    ): ApiResponse<StatisticResponseDto>
+    suspend fun mangaStatistics(@Path("id") mangaId: String): ApiResponse<StatisticResponseDto>
 
     @GET("${MdConstants.Api.statistics}${MdConstants.Api.chapter}/{id}")
-    suspend fun chapterStatistics(
-        @Path("id") chapterId: String,
-    ): ApiResponse<StatisticResponseDto>
+    suspend fun chapterStatistics(@Path("id") chapterId: String): ApiResponse<StatisticResponseDto>
 
     @GET("${MdConstants.Api.manga}/{id}/relation")
     suspend fun relatedManga(@Path("id") id: String): ApiResponse<RelationListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET(
-        "${MdConstants.Api.manga}/{id}/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
+        "${MdConstants.Api.manga}/{id}/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc"
+    )
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,

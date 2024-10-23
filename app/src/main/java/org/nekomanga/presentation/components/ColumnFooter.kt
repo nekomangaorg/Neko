@@ -72,13 +72,15 @@ fun ColumnScope.SearchFooter(
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error)
+                    tint = MaterialTheme.colorScheme.error,
+                )
             } else if (title.isNotEmpty()) {
                 IconButton(onClick = { textChanged("") }) {
                     Icon(
                         imageVector = Icons.Default.Cancel,
                         contentDescription = null,
-                        tint = themeColorState.buttonColor)
+                        tint = themeColorState.buttonColor,
+                    )
                 }
             }
         },
@@ -93,10 +95,7 @@ fun ColumnScope.SearchFooter(
                 errorCursorColor = MaterialTheme.colorScheme.error,
                 errorLabelColor = MaterialTheme.colorScheme.error,
             ),
-        keyboardOptions =
-            KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Search,
-            ),
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions =
             KeyboardActions(
                 onSearch = {
@@ -104,7 +103,7 @@ fun ColumnScope.SearchFooter(
                         focusManager.clearFocus()
                         search(title)
                     }
-                },
+                }
             ),
     )
 }

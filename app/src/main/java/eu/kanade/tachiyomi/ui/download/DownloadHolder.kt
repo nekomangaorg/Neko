@@ -54,10 +54,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             notifyDownloadedPages()
         }
 
-        binding.downloadMenu.setVectorCompat(
-            R.drawable.ic_more_vert_24dp,
-            R.attr.colorOnBackground,
-        )
+        binding.downloadMenu.setVectorCompat(R.drawable.ic_more_vert_24dp, R.attr.colorOnBackground)
     }
 
     /** Updates the progress bar of the download. */

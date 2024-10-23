@@ -36,7 +36,7 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
                     activity.getResourceColor(R.attr.background),
                     activity.getResourceColor(R.attr.colorSecondary),
                     0.075f,
-                ),
+                )
             )
         binding.touchOutside.setOnClickListener { cancel() }
         val incogText = context.getString(R.string.incognito_mode)
@@ -57,7 +57,7 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
                     R.drawable.ic_incognito_24dp
                 } else {
                     R.drawable.ic_glasses_24dp
-                },
+                }
             )
             setOnClickListener {
                 securityPreferences.incognitoMode().toggle()

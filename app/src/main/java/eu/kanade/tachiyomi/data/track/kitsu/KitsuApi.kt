@@ -239,22 +239,15 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
 
         @Headers("Content-Type: application/vnd.api+json")
         @POST("library-entries")
-        suspend fun addLibManga(
-            @Body data: JsonObject,
-        ): JsonObject
+        suspend fun addLibManga(@Body data: JsonObject): JsonObject
 
         @Headers("Content-Type: application/vnd.api+json")
         @DELETE("library-entries/{id}")
-        suspend fun deleteLibManga(
-            @Path("id") remoteId: Long,
-        ): Response<Unit>
+        suspend fun deleteLibManga(@Path("id") remoteId: Long): Response<Unit>
 
         @Headers("Content-Type: application/vnd.api+json")
         @PATCH("library-entries/{id}")
-        suspend fun updateLibManga(
-            @Path("id") remoteId: Long,
-            @Body data: JsonObject,
-        ): JsonObject
+        suspend fun updateLibManga(@Path("id") remoteId: Long, @Body data: JsonObject): JsonObject
 
         @GET("library-entries")
         suspend fun findLibManga(
@@ -271,7 +264,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
 
         @GET("users")
         suspend fun getCurrentUser(
-            @Query("filter[self]", encoded = true) self: Boolean = true,
+            @Query("filter[self]", encoded = true) self: Boolean = true
         ): JsonObject
     }
 

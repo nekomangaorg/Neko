@@ -22,7 +22,7 @@ class HistoryUpsertResolver : HistoryPutResolver() {
                         .table(updateQuery.table())
                         .where(updateQuery.where())
                         .whereArgs(updateQuery.whereArgs())
-                        .build(),
+                        .build()
                 )
 
         return cursor.use { putCursor ->

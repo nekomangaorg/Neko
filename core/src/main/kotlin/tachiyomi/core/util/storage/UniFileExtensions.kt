@@ -18,11 +18,7 @@ val UniFile.displayablePath: String
 
 fun UniFile.toTempFile(context: Context): File {
     val inputStream = context.contentResolver.openInputStream(uri)!!
-    val tempFile =
-        File.createTempFile(
-            nameWithoutExtension.orEmpty(),
-            null,
-        )
+    val tempFile = File.createTempFile(nameWithoutExtension.orEmpty(), null)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         FileUtils.copy(inputStream, tempFile.outputStream())

@@ -32,7 +32,7 @@ class ApiMangaParser {
     fun mangaDetailsParse(
         mangaDto: MangaDataDto,
         stats: Stats,
-        simpleChapters: List<String>
+        simpleChapters: List<String>,
     ): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
@@ -147,7 +147,7 @@ class ApiMangaParser {
                     chapterListResponse
                         .asSequence()
                         .map { mapChapter(it, lastChapterNumber, groupMap) }
-                        .toList(),
+                        .toList()
                 )
             }
             .getOrElse {
@@ -194,7 +194,7 @@ class ApiMangaParser {
 
 fun ChapterDataDto.buildChapterName(
     chapter: SChapter? = null,
-    lastChapterNumber: Int? = null
+    lastChapterNumber: Int? = null,
 ): String {
     val chapterName = mutableListOf<String>()
     // Build chapter name

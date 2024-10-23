@@ -233,19 +233,14 @@ class DownloadManager(val context: Context) {
                 val mangaDir = provider.findMangaDir(manga)
 
                 val chapterDirs =
-                    provider.findChapterDirs(
-                        chapters,
-                        manga,
-                    ) +
-                        provider.findTempChapterDirs(
-                            chapters,
-                            manga,
-                        )
+                    provider.findChapterDirs(chapters, manga) +
+                        provider.findTempChapterDirs(chapters, manga)
                 launchIO {
                     chapterDirs.forEach { it.delete() }
 
-                    if (cache.getDownloadCount(manga, true) ==
-                        0) { // Delete manga directory if empty
+                    if (
+                        cache.getDownloadCount(manga, true) == 0
+                    ) { // Delete manga directory if empty
                         chapterDirs.firstOrNull()?.parentFile?.delete()
                     }
 
@@ -428,7 +423,7 @@ class DownloadManager(val context: Context) {
                 emitAll(
                     queueState.value
                         .filter { download -> download.status == Download.State.DOWNLOADING }
-                        .asFlow(),
+                        .asFlow()
                 )
             }
 
@@ -441,7 +436,7 @@ class DownloadManager(val context: Context) {
                 emitAll(
                     queueState.value
                         .filter { download -> download.status == Download.State.DOWNLOADING }
-                        .asFlow(),
+                        .asFlow()
                 )
             }
 }

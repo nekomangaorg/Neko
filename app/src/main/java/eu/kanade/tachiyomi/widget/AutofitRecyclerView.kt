@@ -90,7 +90,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         useStaggered(
             libraryPreferences.staggeredGrid().get() &&
                 !libraryPreferences.uniformGrid().get() &&
-                libraryPreferences.layout().get() != LibraryItem.LAYOUT_LIST,
+                libraryPreferences.layout().get() != LibraryItem.LAYOUT_LIST
         )
     }
 
@@ -125,10 +125,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         layoutManager ?: return
         return (layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, offset)
             ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset)
-                .scrollToPositionWithOffset(
-                    position,
-                    offset,
-                )
+                .scrollToPositionWithOffset(position, offset)
     }
 
     fun findFirstVisibleItemPosition(): Int {
@@ -161,7 +158,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
                             1 -> 0f
                             0 -> -.5f
                             else -> .5f
-                        },
+                        }
                     )
                 prefs.edit { remove("grid_size") }
             }
@@ -173,11 +170,13 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     private fun setSpan(force: Boolean = false) {
-        if ((spanCount == 0 ||
-            force ||
-            // Add 100dp check to make sure we dont update span for sidenav changes
-            (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)) &&
-            columnWidth > 0) {
+        if (
+            (spanCount == 0 ||
+                force ||
+                // Add 100dp check to make sure we dont update span for sidenav changes
+                (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)) &&
+                columnWidth > 0
+        ) {
             val dpWidth = (width.pxToDp / 100f).roundToInt()
             val count = max(1, (dpWidth / columnWidth).roundToInt())
             spanCount = count

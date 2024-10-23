@@ -5,15 +5,11 @@ sealed class ChapterTransition {
     abstract val from: ReaderChapter
     abstract val to: ReaderChapter?
 
-    class Prev(
-        override val from: ReaderChapter,
-        override val to: ReaderChapter?,
-    ) : ChapterTransition()
+    class Prev(override val from: ReaderChapter, override val to: ReaderChapter?) :
+        ChapterTransition()
 
-    class Next(
-        override val from: ReaderChapter,
-        override val to: ReaderChapter?,
-    ) : ChapterTransition()
+    class Next(override val from: ReaderChapter, override val to: ReaderChapter?) :
+        ChapterTransition()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

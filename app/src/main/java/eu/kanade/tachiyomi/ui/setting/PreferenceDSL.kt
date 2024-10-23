@@ -103,10 +103,7 @@ inline fun PreferenceGroup.triStateListPreference(
 inline fun PreferenceScreen.preferenceCategory(
     block: (@DSL PreferenceCategory).() -> Unit
 ): PreferenceCategory {
-    return addThenInit(
-        PreferenceCategory(context).apply { isIconSpaceReserved = false },
-        block,
-    )
+    return addThenInit(PreferenceCategory(context).apply { isIconSpaceReserved = false }, block)
 }
 
 inline fun PreferenceScreen.switchPreference(
@@ -242,7 +239,7 @@ fun SwitchPreferenceCompat.requireAuthentication(
 
                             override fun onAuthenticationError(
                                 errorCode: Int,
-                                errString: CharSequence
+                                errString: CharSequence,
                             ) {
                                 super.onAuthenticationError(errorCode, errString)
                                 activity.toast(errString.toString())

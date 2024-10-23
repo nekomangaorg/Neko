@@ -153,7 +153,8 @@ class Komga : ReducedHttpSource() {
                         responseBody.use {
                             json
                                 .decodeFromString<KomgaPaginatedResponseDto<KomgaBookDto>>(
-                                    it.string())
+                                    it.string()
+                                )
                                 .content
                         }
                     val r =

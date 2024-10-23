@@ -11,9 +11,7 @@ import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class BackupFileValidator(
-    private val trackManager: TrackManager = Injekt.get(),
-) {
+class BackupFileValidator(private val trackManager: TrackManager = Injekt.get()) {
 
     /**
      * Checks for critical backup file data.

@@ -319,12 +319,7 @@ class Downloader(
                         // Don't trust index from source
                         val reIndexedPages =
                             pages.mapIndexed { index, page ->
-                                Page(
-                                    index,
-                                    page.url,
-                                    page.imageUrl,
-                                    uri = page.uri,
-                                )
+                                Page(index, page.url, page.imageUrl, uri = page.uri)
                             }
                         download.pages = reIndexedPages
                         reIndexedPages
@@ -407,11 +402,12 @@ class Downloader(
             val file =
                 when {
                     imageFile != null -> imageFile
-                    chapterCache.isImageInCache(
-                        page.imageUrl!!,
-                    ) ->
+                    chapterCache.isImageInCache(page.imageUrl!!) ->
                         copyImageFromCache(
-                            chapterCache.getImageFile(page.imageUrl!!), tmpDir, filename)
+                            chapterCache.getImageFile(page.imageUrl!!),
+                            tmpDir,
+                            filename,
+                        )
                     else -> downloadImage(page, download.source, tmpDir, filename)
                 }
 
@@ -442,7 +438,7 @@ class Downloader(
         page: Page,
         source: HttpSource,
         tmpDir: UniFile,
-        filename: String
+        filename: String,
     ): UniFile {
         page.status = Page.State.DOWNLOAD_IMAGE
         page.progress = 0
@@ -518,7 +514,10 @@ class Downloader(
                 tmpDir.listFiles()?.firstOrNull { it.name.orEmpty().startsWith(fileName) }
                     ?: throw Error(
                         context.getString(
-                            R.string.download_notifier_split_page_not_found, page.number))
+                            R.string.download_notifier_split_page_not_found,
+                            page.number,
+                        )
+                    )
 
             // Check if the original page was previously split before then skip.
             if (imageFile.name.orEmpty().startsWith("${fileName}__")) return
@@ -535,10 +534,7 @@ class Downloader(
      * @param download the download to check.
      * @param tmpDir the directory where the download is currently stored.
      */
-    private fun isDownloadSuccessful(
-        download: Download,
-        tmpDir: UniFile,
-    ): Boolean {
+    private fun isDownloadSuccessful(download: Download, tmpDir: UniFile): Boolean {
         // Page list hasn't been initialized or all pages have not been downloaded
         if (download.pages?.size == null || download.pages!!.size != download.downloadedImages) {
             return false
@@ -562,11 +558,7 @@ class Downloader(
     }
 
     /** Archive the chapter pages as a CBZ. */
-    private fun archiveChapter(
-        mangaDir: UniFile,
-        dirname: String,
-        tmpDir: UniFile,
-    ) {
+    private fun archiveChapter(mangaDir: UniFile, dirname: String, tmpDir: UniFile) {
         val zip = mangaDir.createFile("$dirname.cbz$TMP_DIR_SUFFIX")!!
         ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
             zipOut.setMethod(ZipEntry.STORED)
@@ -609,8 +601,10 @@ class Downloader(
     private fun removeFromQueue(download: Download) {
         _queueState.update {
             store.remove(download)
-            if (download.status == Download.State.DOWNLOADING ||
-                download.status == Download.State.QUEUE) {
+            if (
+                download.status == Download.State.DOWNLOADING ||
+                    download.status == Download.State.QUEUE
+            ) {
                 download.status = Download.State.NOT_DOWNLOADED
             }
             it - download
@@ -622,8 +616,10 @@ class Downloader(
             val downloads = queue.filter { predicate(it) }
             store.removeAll(downloads)
             downloads.forEach { download ->
-                if (download.status == Download.State.DOWNLOADING ||
-                    download.status == Download.State.QUEUE) {
+                if (
+                    download.status == Download.State.DOWNLOADING ||
+                        download.status == Download.State.QUEUE
+                ) {
                     download.status = Download.State.NOT_DOWNLOADED
                 }
             }
@@ -643,8 +639,10 @@ class Downloader(
     private fun clearQueueState() {
         _queueState.update {
             it.forEach { download ->
-                if (download.status == Download.State.DOWNLOADING ||
-                    download.status == Download.State.QUEUE) {
+                if (
+                    download.status == Download.State.DOWNLOADING ||
+                        download.status == Download.State.QUEUE
+                ) {
                     download.status = Download.State.NOT_DOWNLOADED
                 }
             }

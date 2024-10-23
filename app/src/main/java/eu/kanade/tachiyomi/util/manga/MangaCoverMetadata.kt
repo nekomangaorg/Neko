@@ -38,7 +38,7 @@ object MangaCoverMetadata {
                             null
                         }
                     }
-                    .toMap(),
+                    .toMap()
             )
         val colors = mangaDetailsPreferences.coverColors().get()
         coverColorMap =
@@ -55,7 +55,7 @@ object MangaCoverMetadata {
                             null
                         }
                     }
-                    .toMap(),
+                    .toMap()
             )
 
         val vibrantColors = mangaDetailsPreferences.coverVibrantColors().get()
@@ -72,7 +72,7 @@ object MangaCoverMetadata {
                             null
                         }
                     }
-                    .toMap(),
+                    .toMap()
             )
     }
 
@@ -81,7 +81,7 @@ object MangaCoverMetadata {
         originalThumbnailUrl: String?,
         inLibrary: Boolean,
         ogFile: File? = null,
-        force: Boolean = false
+        force: Boolean = false,
     ) {
         if (!inLibrary) {
             remove(mangaId)

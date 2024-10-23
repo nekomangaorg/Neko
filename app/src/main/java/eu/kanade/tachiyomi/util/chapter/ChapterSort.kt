@@ -23,11 +23,7 @@ class ChapterSort(
         val chapters =
             when {
                 filterForReader ->
-                    chapterFilter.filterChaptersForReader(
-                        rawChapters,
-                        manga,
-                        currentChapter,
-                    )
+                    chapterFilter.filterChaptersForReader(rawChapters, manga, currentChapter)
                 andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
                 else -> rawChapters
             }
@@ -35,10 +31,7 @@ class ChapterSort(
         return chapters.sortedWith(sortComparator())
     }
 
-    fun <T : Chapter> getNextUnreadChapter(
-        rawChapters: List<T>,
-        andFiltered: Boolean = true,
-    ): T? {
+    fun <T : Chapter> getNextUnreadChapter(rawChapters: List<T>, andFiltered: Boolean = true): T? {
         val chapters =
             when {
                 andFiltered -> chapterFilter.filterChapters(rawChapters, manga)

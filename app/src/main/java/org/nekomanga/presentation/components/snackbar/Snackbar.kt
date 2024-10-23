@@ -17,7 +17,7 @@ import org.nekomanga.presentation.theme.Size
 @Composable
 fun snackbarHost(
     snackbarHostState: SnackbarHostState,
-    actionColor: Color? = null
+    actionColor: Color? = null,
 ): @Composable () -> Unit {
     return {
         SwipeableSnackbarHost(snackbarHostState) { data, modifier ->
@@ -26,15 +26,14 @@ fun snackbarHost(
                 dismissAction = {},
                 action = {
                     data.visuals.actionLabel?.let {
-                        TextButton(
-                            onClick = { data.performAction() },
-                        ) {
+                        TextButton(onClick = { data.performAction() }) {
                             Text(
                                 text = data.visuals.actionLabel!!,
                                 color = actionColor ?: MaterialTheme.colorScheme.onSurface,
                                 style =
                                     MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Medium),
+                                        fontWeight = FontWeight.Medium
+                                    ),
                             )
                         }
                     }
@@ -43,10 +42,7 @@ fun snackbarHost(
                 containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small),
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ) {
-                Text(
-                    text = data.visuals.message,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                Text(text = data.visuals.message, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }

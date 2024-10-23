@@ -36,21 +36,10 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         }
 
     private var activeColor =
-        ColorUtils.blendARGB(
-            colorSecondary,
-            context.getResourceColor(R.attr.background),
-            0.05f,
-        )
-    private val progressBGColor =
-        ContextCompat.getColor(
-            context,
-            R.color.divider,
-        )
+        ColorUtils.blendARGB(colorSecondary, context.getResourceColor(R.attr.background), 0.05f)
+    private val progressBGColor = ContextCompat.getColor(context, R.color.divider)
     private val disabledColor =
-        ContextCompat.getColor(
-            context,
-            R.color.material_on_surface_disabled,
-        )
+        ContextCompat.getColor(context, R.color.material_on_surface_disabled)
     private var downloadedColor =
         ColorUtils.blendARGB(
             colorSecondary,
@@ -58,45 +47,19 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             0.3f,
         )
     private val downloadedTextColor = context.getResourceColor(R.attr.background)
-    private val errorColor =
-        ContextCompat.getColor(
-            context,
-            R.color.material_red_500,
-        )
+    private val errorColor = ContextCompat.getColor(context, R.color.material_red_500)
     private val filledCircle =
-        ContextCompat.getDrawable(
-                context,
-                R.drawable.filled_circle,
-            )
-            ?.mutate()
+        ContextCompat.getDrawable(context, R.drawable.filled_circle)?.mutate()
     private val borderCircle =
-        ContextCompat.getDrawable(
-                context,
-                R.drawable.border_circle,
-            )
-            ?.mutate()
+        ContextCompat.getDrawable(context, R.drawable.border_circle)?.mutate()
     private val downloadDrawable =
-        ContextCompat.getDrawable(
-                context,
-                R.drawable.ic_arrow_downward_24dp,
-            )
-            ?.mutate()
+        ContextCompat.getDrawable(context, R.drawable.ic_arrow_downward_24dp)?.mutate()
     private val checkDrawable =
-        ContextCompat.getDrawable(
-                context,
-                R.drawable.ic_check_24dp,
-            )
-            ?.mutate()
+        ContextCompat.getDrawable(context, R.drawable.ic_check_24dp)?.mutate()
     private val filledAnim =
-        AnimatedVectorDrawableCompat.create(
-            context,
-            R.drawable.anim_outline_to_filled,
-        )
+        AnimatedVectorDrawableCompat.create(context, R.drawable.anim_outline_to_filled)
     private val checkAnim =
-        AnimatedVectorDrawableCompat.create(
-            context,
-            R.drawable.anim_dl_to_check_to_dl,
-        )
+        AnimatedVectorDrawableCompat.create(context, R.drawable.anim_dl_to_check_to_dl)
     private var isAnimating = false
     private var iconAnimation: ObjectAnimator? = null
 

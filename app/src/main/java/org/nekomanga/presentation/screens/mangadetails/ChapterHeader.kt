@@ -31,18 +31,15 @@ fun ChapterHeader(
     themeColor: ThemeColorState,
     numberOfChaptersProvider: () -> Int,
     filterTextProvider: () -> String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Box(
         modifier =
             Modifier.fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = Size.small, vertical = 12.dp),
+                .padding(horizontal = Size.small, vertical = 12.dp)
     ) {
-        ChapterText(
-            numberOfChaptersProvider(),
-            modifier = Modifier.align(Alignment.CenterStart),
-        )
+        ChapterText(numberOfChaptersProvider(), modifier = Modifier.align(Alignment.CenterStart))
 
         Row(
             modifier = Modifier.align(Alignment.CenterEnd),
@@ -55,7 +52,9 @@ fun ChapterHeader(
                         MaterialTheme.typography.bodyMedium.copy(
                             color =
                                 MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = NekoColors.disabledAlphaHighContrast)),
+                                    alpha = NekoColors.disabledAlphaHighContrast
+                                )
+                        ),
                     modifier =
                         Modifier.requiredWidthIn(Size.none, 200.dp)
                             .align(Alignment.CenterVertically)
@@ -79,7 +78,10 @@ private fun ChapterText(numberOfChapters: Int, modifier: Modifier = Modifier) {
     Text(
         text =
             resources.getQuantityString(
-                R.plurals.chapters_plural, numberOfChapters, numberOfChapters),
+                R.plurals.chapters_plural,
+                numberOfChapters,
+                numberOfChapters,
+            ),
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast),
         modifier = modifier,

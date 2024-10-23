@@ -4,9 +4,7 @@ import java.io.IOException
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class MangaUpdatesInterceptor(
-    mangaUpdates: MangaUpdates,
-) : Interceptor {
+class MangaUpdatesInterceptor(mangaUpdates: MangaUpdates) : Interceptor {
 
     private var token: String? = mangaUpdates.restoreSession()
 

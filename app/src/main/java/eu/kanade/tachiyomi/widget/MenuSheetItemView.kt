@@ -95,32 +95,17 @@ class MenuSheetItemView constructor(context: Context, attrs: AttributeSet?) :
 
     fun setIconColor(@ColorInt color: Int) =
         binding?.itemTextView?.let {
-            TextViewCompat.setCompoundDrawableTintList(
-                it,
-                ColorStateList.valueOf(color),
-            )
+            TextViewCompat.setCompoundDrawableTintList(it, ColorStateList.valueOf(color))
         }
 
     fun setIcon(@DrawableRes res: Int) {
-        binding
-            ?.itemTextView
-            ?.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                res,
-                0,
-                0,
-                0,
-            )
+        binding?.itemTextView?.setCompoundDrawablesRelativeWithIntrinsicBounds(res, 0, 0, 0)
     }
 
     fun setIcon(drawable: Drawable?) {
         binding
             ?.itemTextView
-            ?.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                drawable,
-                null,
-                null,
-                null,
-            )
+            ?.setCompoundDrawablesRelativeWithIntrinsicBounds(drawable, null, null, null)
     }
 
     fun getIcon(): Drawable? {

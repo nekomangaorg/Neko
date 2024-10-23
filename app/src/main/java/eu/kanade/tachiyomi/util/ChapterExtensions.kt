@@ -4,10 +4,7 @@ import kotlin.math.floor
 import org.nekomanga.constants.Constants
 import org.nekomanga.domain.chapter.ChapterItem
 
-data class MissingChapterHolder(
-    val count: String? = null,
-    val estimatedChapters: String? = null,
-)
+data class MissingChapterHolder(val count: String? = null, val estimatedChapters: String? = null)
 
 fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
     var count = 0
@@ -47,9 +44,11 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
 
             chapterNumberArray.forEachIndexed { index, chpNum ->
                 val lastIndex = index - 1
-                if (lastIndex >= 0 &&
-                    (chpNum - 1) > chapterNumberArray[lastIndex] &&
-                    chapterNumberArray[lastIndex] > 0) {
+                if (
+                    lastIndex >= 0 &&
+                        (chpNum - 1) > chapterNumberArray[lastIndex] &&
+                        chapterNumberArray[lastIndex] > 0
+                ) {
                     count += (chpNum - chapterNumberArray[lastIndex]) - 1
                     val beginningChp = (chapterNumberArray[lastIndex] + 1)
                     val endChap = chpNum - 1
@@ -75,8 +74,5 @@ fun List<ChapterItem>.getMissingChapters(): MissingChapterHolder {
             false -> estimateChapters.joinToString(Constants.SEPARATOR)
         }
 
-    return MissingChapterHolder(
-        count = actualCount,
-        estimatedChapters = estimateChapterString,
-    )
+    return MissingChapterHolder(count = actualCount, estimatedChapters = estimateChapterString)
 }

@@ -67,12 +67,9 @@ fun NekoSwipeToDismiss(
                         factorAtMax = maxFactor,
                     ),
                 velocityThreshold = SwipeableDefaults.VelocityThreshold * 100,
-            ),
-        ) {
-            Row(
-                content = background,
-                modifier = Modifier.matchParentSize(),
             )
+        ) {
+            Row(content = background, modifier = Modifier.matchParentSize())
             Row(
                 content = dismissContent,
                 modifier = Modifier.offset { IntOffset(state.offset.value.roundToInt(), 0) },

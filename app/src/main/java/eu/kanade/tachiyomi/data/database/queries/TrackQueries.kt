@@ -20,7 +20,7 @@ interface TrackQueries : DbProvider {
                     .table(TrackTable.TABLE)
                     .where("${TrackTable.COL_ID} = ?")
                     .whereArgs(id)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -34,7 +34,7 @@ interface TrackQueries : DbProvider {
                     .table(TrackTable.TABLE)
                     .where("${TrackTable.COL_MANGA_ID} = ?")
                     .whereArgs(mangaId)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -46,7 +46,7 @@ interface TrackQueries : DbProvider {
                     .table(TrackTable.TABLE)
                     .where("${TrackTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaIds.size)})")
                     .whereArgs(*mangaIds.toTypedArray())
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -58,7 +58,7 @@ interface TrackQueries : DbProvider {
                     .table(TrackTable.TABLE)
                     .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
                     .whereArgs(manga.id, TrackManager.MDLIST)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -75,14 +75,10 @@ interface TrackQueries : DbProvider {
                     .table(TrackTable.TABLE)
                     .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
                     .whereArgs(mangaId, sync.id)
-                    .build(),
+                    .build()
             )
             .prepare()
 
     fun deleteTracks() =
-        db.delete()
-            .byQuery(
-                DeleteQuery.builder().table(TrackTable.TABLE).build(),
-            )
-            .prepare()
+        db.delete().byQuery(DeleteQuery.builder().table(TrackTable.TABLE).build()).prepare()
 }

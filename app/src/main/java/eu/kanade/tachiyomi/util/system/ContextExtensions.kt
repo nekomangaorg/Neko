@@ -177,11 +177,7 @@ val displayMaxHeightInPx: Int
  */
 val Context.animatorDurationScale: Float
     get() =
-        Settings.Global.getFloat(
-            this.contentResolver,
-            Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f,
-        )
+        Settings.Global.getFloat(this.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
 
 /**
  * Helper method to create a notification builder.
@@ -281,12 +277,7 @@ fun Context.defaultBrowserPackageName(): String? {
 }
 
 fun Context.openInWebView(url: String, title: String = "") {
-    val intent =
-        WebViewActivity.newIntent(
-            this.applicationContext,
-            url,
-            title,
-        )
+    val intent = WebViewActivity.newIntent(this.applicationContext, url, title)
     startActivity(intent)
 }
 

@@ -22,7 +22,7 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
 
     constructor(
         service: TrackService,
-        @StringRes usernameLabelRes: Int?
+        @StringRes usernameLabelRes: Int?,
     ) : this(usernameLabelRes, Bundle().apply { putInt("key", service.id) })
 
     override fun setCredentialsOnView(view: View) =

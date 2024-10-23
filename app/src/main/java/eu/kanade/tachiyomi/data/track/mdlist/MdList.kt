@@ -77,8 +77,10 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 // network call
 
                 if (followStatus != FollowStatus.UNFOLLOWED) {
-                    if (track.total_chapters != 0 &&
-                        track.last_chapter_read.toInt() == track.total_chapters) {
+                    if (
+                        track.total_chapters != 0 &&
+                            track.last_chapter_read.toInt() == track.total_chapters
+                    ) {
                         track.status = FollowStatus.COMPLETED.int
                         mdex.updateFollowStatus(
                             MdUtil.getMangaUUID(track.tracking_url),

@@ -11,15 +11,11 @@ import org.nekomanga.presentation.screens.NoResultsEmptyScreen
 fun BrowseOtherPage(
     results: ImmutableList<DisplayResult>,
     contentPadding: PaddingValues = PaddingValues(),
-    onClick: (String) -> Unit
+    onClick: (String) -> Unit,
 ) {
     if (results.isEmpty()) {
         NoResultsEmptyScreen(contentPaddingValues = contentPadding)
     } else {
-        ResultList(
-            results = results,
-            contentPadding = contentPadding,
-            onClick = onClick,
-        )
+        ResultList(results = results, contentPadding = contentPadding, onClick = onClick)
     }
 }

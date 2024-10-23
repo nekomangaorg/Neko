@@ -8,10 +8,7 @@ import android.graphics.PorterDuffXfermode
 import android.util.AttributeSet
 import android.view.View
 
-class ReaderColorFilterView(
-    context: Context,
-    attrs: AttributeSet? = null,
-) : View(context, attrs) {
+class ReaderColorFilterView(context: Context, attrs: AttributeSet? = null) : View(context, attrs) {
 
     private val colorFilterPaint: Paint = Paint()
 
@@ -26,7 +23,7 @@ class ReaderColorFilterView(
                     4 -> PorterDuff.Mode.LIGHTEN
                     5 -> PorterDuff.Mode.DARKEN
                     else -> PorterDuff.Mode.SRC_OVER
-                },
+                }
             )
         invalidate()
     }

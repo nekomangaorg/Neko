@@ -54,12 +54,7 @@ class ChapterUtil {
                         context.theme,
                     )
                 drawable?.setBounds(0, 0, textView.textSize.toInt(), textView.textSize.toInt())
-                textView.setCompoundDrawablesRelative(
-                    drawable,
-                    null,
-                    null,
-                    null,
-                )
+                textView.setCompoundDrawablesRelative(drawable, null, null, null)
                 TextViewCompat.setCompoundDrawableTintList(
                     textView,
                     ColorStateList.valueOf(bookmarkedColor(context)),

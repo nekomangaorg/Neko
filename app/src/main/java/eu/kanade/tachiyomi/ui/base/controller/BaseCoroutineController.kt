@@ -17,7 +17,7 @@ abstract class BaseCoroutineController<VB : ViewBinding, PS : BaseCoroutinePrese
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup,
-        savedViewState: Bundle?
+        savedViewState: Bundle?,
     ): View {
         showToolbar()
         return super.onCreateView(inflater, container, savedViewState)

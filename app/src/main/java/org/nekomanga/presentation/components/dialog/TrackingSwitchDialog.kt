@@ -24,47 +24,44 @@ fun TrackingSwitchDialog(
     oldName: String,
     newName: String,
     onConfirm: (Boolean) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     CompositionLocalProvider(
         LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-            AlertDialog(
-                title = { Text(text = stringResource(id = R.string.remove_previous_tracker)) },
-                text = {
-                    Column {
-                        TextButton(
-                            onClick = { onConfirm(true) },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(
-                                text =
-                                    stringResource(
-                                        id = R.string.remove_x_from_service_and_add_y,
-                                        oldName,
-                                        name,
-                                        newName))
-                        }
-
-                        Gap(Size.small)
-                        TextButton(
-                            onClick = { onConfirm(false) },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(text = stringResource(id = R.string.keep_both_on_service, name))
-                        }
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
+    ) {
+        AlertDialog(
+            title = { Text(text = stringResource(id = R.string.remove_previous_tracker)) },
+            text = {
+                Column {
+                    TextButton(onClick = { onConfirm(true) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text =
+                                stringResource(
+                                    id = R.string.remove_x_from_service_and_add_y,
+                                    oldName,
+                                    name,
+                                    newName,
+                                )
+                        )
                     }
-                },
-                onDismissRequest = onDismiss,
-                confirmButton = {
-                    TextButton(
-                        onClick = onDismiss,
-                        colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = themeColorState.buttonColor)) {
-                            Text(text = stringResource(id = R.string.cancel))
-                        }
-                },
-            )
-        }
+
+                    Gap(Size.small)
+                    TextButton(onClick = { onConfirm(false) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(text = stringResource(id = R.string.keep_both_on_service, name))
+                    }
+                }
+            },
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(
+                    onClick = onDismiss,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            },
+        )
+    }
 }

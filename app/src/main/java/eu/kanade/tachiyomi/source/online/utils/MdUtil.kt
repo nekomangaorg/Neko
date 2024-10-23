@@ -65,10 +65,7 @@ class MdUtil {
                 MdLang.values().firstOrNull { mdLang -> it == mdLang.lang } != null
             }
 
-        fun getTitle(
-            titleMap: Map<String, String?>,
-            originalLanguage: String,
-        ): String {
+        fun getTitle(titleMap: Map<String, String?>, originalLanguage: String): String {
             return titleMap[MdLang.ENGLISH.lang]
                 ?: titleMap[originalLanguage]
                 ?: titleMap["$originalLanguage-ro"]

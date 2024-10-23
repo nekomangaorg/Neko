@@ -11,7 +11,7 @@ import org.nekomanga.presentation.screens.DisplayScreen
 
 class DisplayController(private val displayScreenType: DisplayScreenType) :
     BaseComposeController<DisplayPresenter>(
-        Bundle().apply { putParcelable(Display_Type, displayScreenType) },
+        Bundle().apply { putParcelable(Display_Type, displayScreenType) }
     ) {
 
     constructor(bundle: Bundle) : this(bundle.getParcelable<DisplayScreenType>(Display_Type)!!)

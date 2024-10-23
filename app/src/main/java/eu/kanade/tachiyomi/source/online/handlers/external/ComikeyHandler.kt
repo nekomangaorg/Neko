@@ -96,7 +96,8 @@ class ComikeyHandler {
                     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                         super.onPageStarted(view, url, favicon)
                         view?.evaluateJavascript(
-                            webviewScript.replace("__interface__", interfaceName)) {}
+                            webviewScript.replace("__interface__", interfaceName)
+                        ) {}
                     }
 
                     // If you're logged in, the manifest URL sent to the client is not a direct
@@ -111,8 +112,10 @@ class ComikeyHandler {
                     ): WebResourceResponse? {
                         val url = request?.url ?: return super.shouldInterceptRequest(view, request)
 
-                        if (url.host != "relay-us.epub.rocks" ||
-                            url.path?.endsWith("/manifest") != true) {
+                        if (
+                            url.host != "relay-us.epub.rocks" ||
+                                url.path?.endsWith("/manifest") != true
+                        ) {
                             return super.shouldInterceptRequest(view, request)
                         }
 
@@ -172,9 +175,11 @@ class ComikeyHandler {
                     .apply {
                         removePathSegment(manifestUrl.pathSize - 1)
 
-                        if (it.alternate.isNotEmpty() &&
-                            it.height == 2048 &&
-                            it.type == "image/jpeg") {
+                        if (
+                            it.alternate.isNotEmpty() &&
+                                it.height == 2048 &&
+                                it.type == "image/jpeg"
+                        ) {
                             addPathSegments(
                                 it.alternate
                                     .first {
@@ -182,7 +187,7 @@ class ComikeyHandler {
 
                                         dimension <= 1536 && it.type == "image/webp"
                                     }
-                                    .href,
+                                    .href
                             )
                         } else {
                             addPathSegments(it.href)
@@ -266,10 +271,7 @@ class ComikeyHandler {
         }
     }
 
-    private class JsInterface(
-        private val latch: CountDownLatch,
-        private val json: Json,
-    ) {
+    private class JsInterface(private val latch: CountDownLatch, private val json: Json) {
         var manifest: ComikeyEpisodeManifest? = null
             private set
 
@@ -308,10 +310,7 @@ class ComikeyHandler {
         val readingOrder: List<ComikeyPage>,
     )
 
-    @Serializable
-    data class ComikeyEpisodeManifestMetadata(
-        val readingProgression: String,
-    )
+    @Serializable data class ComikeyEpisodeManifestMetadata(val readingProgression: String)
 
     @Serializable
     data class ComikeyPage(

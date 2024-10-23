@@ -74,9 +74,7 @@ fun InformationBlock(
     val mediumAlpha =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
-    Column(
-        modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small),
-    ) {
+    Column(modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small)) {
         if (!titleProvider().isNullOrEmpty()) {
             NoRippleText(
                 text = titleProvider(),
@@ -84,7 +82,9 @@ fun InformationBlock(
                 onLongClick = titleLongClick,
                 style =
                     MaterialTheme.typography.headlineSmall.copy(
-                        letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium),
+                        letterSpacing = (-.5).sp,
+                        fontWeight = FontWeight.Medium,
+                    ),
                 color = highAlpha,
             )
         }
@@ -122,15 +122,17 @@ fun InformationBlock(
                                 children =
                                     listOf(
                                         SimpleDropDownItem.Action(
-                                            text = UiText.StringResource(R.string.copy)) {
-                                                creatorExpanded = false
-                                                creatorCopyClick(individualCreator)
-                                            },
+                                            text = UiText.StringResource(R.string.copy)
+                                        ) {
+                                            creatorExpanded = false
+                                            creatorCopyClick(individualCreator)
+                                        },
                                         SimpleDropDownItem.Action(
-                                            text = UiText.StringResource(R.string.search)) {
-                                                creatorExpanded = false
-                                                creatorSearchClick(individualCreator)
-                                            },
+                                            text = UiText.StringResource(R.string.search)
+                                        ) {
+                                            creatorExpanded = false
+                                            creatorSearchClick(individualCreator)
+                                        },
                                     ),
                             )
                         }
@@ -172,7 +174,8 @@ fun InformationBlock(
                         painter =
                             rememberDrawablePainter(
                                 drawable =
-                                    AppCompatResources.getDrawable(LocalContext.current, flag)),
+                                    AppCompatResources.getDrawable(LocalContext.current, flag)
+                            ),
                         modifier = Modifier.height(Size.large).clip(RoundedCornerShape(Size.tiny)),
                         contentDescription = "flag",
                     )
@@ -197,7 +200,8 @@ fun InformationBlock(
                     Image(
                         imageVector = Icons.Filled.HotelClass,
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha))
+                        colorFilter = ColorFilter.tint(mediumAlpha),
+                    )
                     Gap(Size.tiny)
                     NoRippleText(
                         text = formattedRating,
@@ -219,7 +223,8 @@ fun InformationBlock(
                     Image(
                         imageVector = Icons.Filled.Bookmarks,
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha))
+                        colorFilter = ColorFilter.tint(mediumAlpha),
+                    )
                     Gap(Size.tiny)
                     NoRippleText(
                         text = numberOfUsers,
@@ -242,7 +247,8 @@ fun InformationBlock(
                     Image(
                         imageVector = Icons.Filled.Comment,
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha))
+                        colorFilter = ColorFilter.tint(mediumAlpha),
+                    )
                     Gap(Size.tiny)
                     NoRippleText(
                         text = numberOfComments,
@@ -256,7 +262,8 @@ fun InformationBlock(
                 Gap(Size.tiny)
                 com.mikepenz.iconics.compose.Image(
                     asset = CommunityMaterial.Icon.cmd_check_decagram,
-                    colorFilter = ColorFilter.tint(mediumAlpha))
+                    colorFilter = ColorFilter.tint(mediumAlpha),
+                )
             }
         }
 

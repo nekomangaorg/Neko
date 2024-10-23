@@ -51,11 +51,7 @@ object DeviceUtil {
     }
 
     val invalidDefaultBrowsers =
-        listOf(
-            "android",
-            "com.huawei.android.internal.app",
-            "com.zui.resolver",
-        )
+        listOf("android", "com.huawei.android.internal.app", "com.zui.resolver")
 
     @SuppressLint("PrivateApi")
     private fun getSystemProperty(key: String?): String? {

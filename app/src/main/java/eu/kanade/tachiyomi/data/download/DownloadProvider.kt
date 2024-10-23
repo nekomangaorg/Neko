@@ -27,7 +27,7 @@ import uy.kohesive.injekt.api.get
  */
 class DownloadProvider(
     private val context: Context,
-    private val storageManager: StorageManager = Injekt.get()
+    private val storageManager: StorageManager = Injekt.get(),
 ) {
 
     /** Preferences helper. */
@@ -56,7 +56,10 @@ class DownloadProvider(
 
             throw Exception(
                 context.getString(
-                    R.string.invalid_download_location, downloadsDir?.displayablePath ?: ""))
+                    R.string.invalid_download_location,
+                    downloadsDir?.displayablePath ?: "",
+                )
+            )
         }
     }
 
@@ -149,9 +152,7 @@ class DownloadProvider(
                     }
                     val afterScanlatorCheck = fileName.substringAfter("_")
                     return@filter chapterNameHashSet.contains(fileName) ||
-                        chapterNameHashSet.contains(
-                            afterScanlatorCheck,
-                        )
+                        chapterNameHashSet.contains(afterScanlatorCheck)
                 }
             }
             return@filter false
@@ -165,10 +166,7 @@ class DownloadProvider(
      * @param manga the manga of the chapter.
      * @param source the source of the chapter.
      */
-    fun findUnmatchedChapterDirs(
-        chapters: List<Chapter>,
-        manga: Manga,
-    ): List<UniFile> {
+    fun findUnmatchedChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
         val mangaDir = findMangaDir(manga) ?: return emptyList()
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
@@ -193,9 +191,7 @@ class DownloadProvider(
 
                     val afterScanlatorCheck = fileName.substringAfter("_")
                     return@filter !chapterNameHashSet.contains(fileName) &&
-                        !chapterNameHashSet.contains(
-                            afterScanlatorCheck,
-                        )
+                        !chapterNameHashSet.contains(afterScanlatorCheck)
                 }
             }
             // everything else is considered true
@@ -272,7 +268,7 @@ class DownloadProvider(
                 "${chapter.scanlator}_${chapter.name}"
             } else {
                 chapter.name
-            },
+            }
         )
     }
 

@@ -88,7 +88,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                         activity.showMenu()
                     }
                 }
-            },
+            }
         )
         recycler.tapListener = f@{ event ->
             val pos = PointF(event.rawX / recycler.width, event.rawY / recycler.height)
@@ -289,10 +289,10 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
             KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_PAGE_UP, -> if (isUp) moveToPrevious()
+            KeyEvent.KEYCODE_PAGE_UP -> if (isUp) moveToPrevious()
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_PAGE_DOWN, -> if (isUp) moveToNext()
+            KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) moveToNext()
             else -> return false
         }
         return true

@@ -7,8 +7,7 @@ enum class MangaType(@StringRes val typeRes: Int) {
     Manhua(R.string.manhua),
     Manhwa(R.string.manhwa),
     Manga(R.string.manga),
-    Unknown(R.string.unknown),
-    ;
+    Unknown(R.string.unknown);
 
     companion object {
         fun fromLangFlag(lang: String?): MangaType {

@@ -45,11 +45,7 @@ class WeebCentral : ReducedHttpSource() {
         val document = response.asJsoup()
         response.closeQuietly()
         return document.select("section img").mapIndexed { index, element ->
-            Page(
-                index,
-                document.location(),
-                element.select("img").first()?.absUrl("src"),
-            )
+            Page(index, document.location(), element.select("img").first()?.absUrl("src"))
         }
     }
 

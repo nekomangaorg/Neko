@@ -9,11 +9,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 open class ListMatPreference
 @JvmOverloads
-constructor(
-    activity: Activity?,
-    context: Context,
-    attrs: AttributeSet? = null,
-) : MatPreference(activity, context, attrs) {
+constructor(activity: Activity?, context: Context, attrs: AttributeSet? = null) :
+    MatPreference(activity, context, attrs) {
 
     var entryValues: List<String> = emptyList()
     var entriesRes: Array<Int>

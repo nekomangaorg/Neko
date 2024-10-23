@@ -44,7 +44,7 @@ class BrowseRepository(
 
     suspend fun getSearchPage(
         page: Int,
-        filters: DexFilters
+        filters: DexFilters,
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex.search(page, filters).andThen { mangaListPage ->
             val displayMangaList =
@@ -116,7 +116,7 @@ class BrowseRepository(
                                     .distinctBy { it.url }
                                     .toPersistentList(),
                         )
-                    },
+                    }
                 )
             }
         }
@@ -135,8 +135,7 @@ enum class DeepLinkType {
     Error,
     Manga,
     List,
-    None,
-    ;
+    None;
 
     companion object {
         fun getDeepLinkType(query: String): DeepLinkType {

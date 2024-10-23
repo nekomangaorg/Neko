@@ -26,13 +26,15 @@ class TrackingCoordinator {
     /** Update tracker with new status */
     suspend fun updateTrackStatus(
         statusIndex: Int,
-        trackAndService: TrackingConstants.TrackAndService
+        trackAndService: TrackingConstants.TrackAndService,
     ): TrackingUpdate {
         var track =
             trackAndService.track.copy(status = trackAndService.service.statusList[statusIndex])
 
-        if (trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) &&
-            track.totalChapters > 0) {
+        if (
+            trackManager.getService(trackAndService.service.id)!!.isCompletedStatus(statusIndex) &&
+                track.totalChapters > 0
+        ) {
             track = track.copy(lastChapterRead = track.totalChapters.toFloat())
         }
         return updateTrackingService(track, trackAndService.service)
@@ -41,12 +43,10 @@ class TrackingCoordinator {
     /** Update tracker with new score */
     suspend fun updateTrackScore(
         scoreIndex: Int,
-        trackAndService: TrackingConstants.TrackAndService
+        trackAndService: TrackingConstants.TrackAndService,
     ): TrackingUpdate {
         val trackItem =
-            trackAndService.track.copy(
-                score = trackAndService.service.indexToScore(scoreIndex),
-            )
+            trackAndService.track.copy(score = trackAndService.service.indexToScore(scoreIndex))
 
         return if (trackAndService.service.isMdList) {
             runCatching {
@@ -62,7 +62,7 @@ class TrackingCoordinator {
     /** Update the tracker with the new chapter information */
     suspend fun updateTrackChapter(
         newChapterNumber: Int,
-        trackAndService: TrackingConstants.TrackAndService
+        trackAndService: TrackingConstants.TrackAndService,
     ): TrackingUpdate {
         val track = trackAndService.track.copy(lastChapterRead = newChapterNumber.toFloat())
         return updateTrackingService(track, trackAndService.service)
@@ -96,13 +96,10 @@ class TrackingCoordinator {
     /** Register tracker */
     suspend fun registerTracking(
         trackAndService: TrackingConstants.TrackAndService,
-        mangaId: Long
+        mangaId: Long,
     ): TrackingUpdate {
         return runCatching {
-                val trackItem =
-                    trackAndService.track.copy(
-                        mangaId = mangaId,
-                    )
+                val trackItem = trackAndService.track.copy(mangaId = mangaId)
 
                 val track =
                     trackManager
@@ -121,7 +118,7 @@ class TrackingCoordinator {
     suspend fun removeTracking(
         alsoRemoveFromTracker: Boolean,
         serviceItem: TrackServiceItem,
-        mangaId: Long
+        mangaId: Long,
     ): TrackingUpdate {
         val service = trackManager.getService(serviceItem.id)!!
         val tracks = db.getTracks(mangaId).executeOnIO().filter { it.sync_id == service.id }
@@ -152,7 +149,7 @@ class TrackingCoordinator {
         title: String,
         service: TrackServiceItem,
         manga: Manga,
-        previouslyTracker: Boolean
+        previouslyTracker: Boolean,
     ) =
         flow {
                 emit(TrackingConstants.TrackSearchResult.Loading)
@@ -163,15 +160,19 @@ class TrackingCoordinator {
                         true -> TrackingConstants.TrackSearchResult.NoResult
                         false ->
                             TrackingConstants.TrackSearchResult.Success(
-                                results.map { it.toTrackSearchItem() }.toImmutableList())
-                    },
+                                results.map { it.toTrackSearchItem() }.toImmutableList()
+                            )
+                    }
                 )
             }
             .catch {
                 TimberKt.e(it) { "error searching tracker" }
                 emit(
                     TrackingConstants.TrackSearchResult.Error(
-                        it.message ?: "Error searching tracker", service.nameRes))
+                        it.message ?: "Error searching tracker",
+                        service.nameRes,
+                    )
+                )
             }
 
     /** Search Tracker */
@@ -179,7 +180,7 @@ class TrackingCoordinator {
         title: String,
         service: TrackServiceItem,
         manga: Manga,
-        previouslyTracker: Boolean
+        previouslyTracker: Boolean,
     ): TrackingConstants.TrackSearchResult {
         return kotlin
             .runCatching {
@@ -189,13 +190,16 @@ class TrackingCoordinator {
                     true -> TrackingConstants.TrackSearchResult.NoResult
                     false ->
                         TrackingConstants.TrackSearchResult.Success(
-                            results.map { it.toTrackSearchItem() }.toImmutableList())
+                            results.map { it.toTrackSearchItem() }.toImmutableList()
+                        )
                 }
             }
             .getOrElse {
                 TimberKt.e(it) { "error searching tracker" }
                 TrackingConstants.TrackSearchResult.Error(
-                    it.message ?: "Error searching tracker", service.nameRes)
+                    it.message ?: "Error searching tracker",
+                    service.nameRes,
+                )
             }
     }
 }

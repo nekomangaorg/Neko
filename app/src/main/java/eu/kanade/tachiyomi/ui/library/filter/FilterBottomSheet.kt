@@ -139,7 +139,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         ?.reEnableBackPressedCallBack()
                     stateChanged(state)
                 }
-            },
+            }
         )
 
         sheetBehavior?.hide()
@@ -161,7 +161,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     BottomSheetBehavior.STATE_HIDDEN -> -1f
                     BottomSheetBehavior.STATE_EXPANDED -> 1f
                     else -> 0f
-                },
+                }
             )
 
             if (binding.secondLayout.width + (binding.groupBy.width * 2) + 20.dpToPx < width) {
@@ -196,7 +196,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             libraryRecyler?.updatePaddingRelative(
-                bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
+                bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight
+            )
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -224,7 +225,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             libraryRecyler?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
         } else {
             libraryRecyler?.updatePaddingRelative(
-                bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
+                bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight
+            )
         }
     }
 
@@ -236,7 +238,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 R.string.expand_all_categories
             } else {
                 R.string.collapse_all_categories
-            },
+            }
         )
         if (animated) {
             binding.expandCategories.icon =
@@ -255,7 +257,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     R.drawable.ic_expand_more_24dp
                 } else {
                     R.drawable.ic_expand_less_24dp
-                },
+                }
             )
         }
     }
@@ -347,7 +349,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         Manga.TYPE_MANHWA -> context.getString(R.string.manhwa)
                         Manga.TYPE_COMIC -> context.getString(R.string.comic)
                         else -> ""
-                    },
+                    }
                 )
                 missingChapters.setState(libraryPreferences.filterMissingChapters())
                 merged.setState(libraryPreferences.filterMerged())
@@ -458,7 +460,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             when (index) {
                                 in 0..1 -> index + 3
                                 else -> 0
-                            },
+                            }
                         )
                     null
                 }
@@ -523,7 +525,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
         androidx.transition.TransitionManager.beginDelayedTransition(
-            binding.filterLayout, transition)
+            binding.filterLayout,
+            transition,
+        )
         reorderFilters()
         filterItems.forEach { it.reset() }
         trackers?.let { filterItems.remove(it) }
@@ -566,8 +570,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         Bookmarked('b', R.string.bookmarked),
         MissingChapters('o', R.string.missing_chapters),
         Merged('n', R.string.merged),
-        Tracked('t', R.string.tracked),
-        ;
+        Tracked('t', R.string.tracked);
 
         companion object {
             val DEFAULT_ORDER =

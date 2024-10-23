@@ -82,14 +82,18 @@ class DownloadCache(
         val fileNames = mangaFiles[manga.id]?.first ?: return false
         val mangadexIds = mangaFiles[manga.id]?.second ?: return false
 
-        if (!chapter.isMergedChapter() &&
-            chapter.mangadex_chapter_id.isNotEmpty() &&
-            chapter.mangadex_chapter_id in mangadexIds) {
+        if (
+            !chapter.isMergedChapter() &&
+                chapter.mangadex_chapter_id.isNotEmpty() &&
+                chapter.mangadex_chapter_id in mangadexIds
+        ) {
             return true
         }
-        if (!chapter.isMergedChapter() &&
-            chapter.old_mangadex_id != null &&
-            chapter.old_mangadex_id in mangadexIds) {
+        if (
+            !chapter.isMergedChapter() &&
+                chapter.old_mangadex_id != null &&
+                chapter.old_mangadex_id in mangadexIds
+        ) {
             return true
         }
 
@@ -125,11 +129,11 @@ class DownloadCache(
             files.forEach {
                 if (!MergeType.containsMergeSourceName(it)) {
                     val mangadexId = it.substringAfterLast("- ")
-                    if (mangadexId.isNotBlank() &&
-                        mangadexId.isDigitsOnly() &&
-                        !ids.contains(
-                            mangadexId,
-                        )) {
+                    if (
+                        mangadexId.isNotBlank() &&
+                            mangadexId.isDigitsOnly() &&
+                            !ids.contains(mangadexId)
+                    ) {
                         count++
                     }
                 }
@@ -200,11 +204,7 @@ class DownloadCache(
                     .mapNotNull { mangaDir ->
                         val manga =
                             findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key)
-                                ?: findManga(
-                                    sourceMangaPair.second,
-                                    mangaDir.key,
-                                    sourceValue.key,
-                                )
+                                ?: findManga(sourceMangaPair.second, mangaDir.key, sourceValue.key)
                         val id = manga?.id ?: return@mapNotNull null
 
                         val mangadexIds =
@@ -319,10 +319,7 @@ class DownloadCache(
     )
 
     /** Class to store the files under a manga directory. */
-    private class MangaDirectory(
-        val dir: UniFile,
-        var files: MutableSet<String> = hashSetOf(),
-    )
+    private class MangaDirectory(val dir: UniFile, var files: MutableSet<String> = hashSetOf())
 
     /** Returns a new map containing only the key entries of [transform] that are not null. */
     private inline fun <K, V, R> Map<out K, V>.mapNotNullKeys(

@@ -35,7 +35,7 @@ abstract class RxController<VB : ViewBinding>(bundle: Bundle? = null) : BaseCont
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup,
-        savedViewState: Bundle?
+        savedViewState: Bundle?,
     ): View {
         showToolbar()
         return super.onCreateView(inflater, container, savedViewState)

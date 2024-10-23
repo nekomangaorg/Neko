@@ -15,14 +15,14 @@ object TrackingConstants {
     data class TrackingDate(
         val readingDate: ReadingDate,
         val currentDate: Long,
-        val dateFormat: DateFormat
+        val dateFormat: DateFormat,
     )
 
     data class TrackingSuggestedDates(val startDate: Long, val finishedDate: Long)
 
     sealed class TrackDateChange(
         val readingDate: ReadingDate,
-        val trackAndService: TrackAndService
+        val trackAndService: TrackAndService,
     ) {
         class RemoveTrackingDate(readingDate: ReadingDate, trackAndService: TrackAndService) :
             TrackDateChange(readingDate, trackAndService)
@@ -30,7 +30,7 @@ object TrackingConstants {
         class EditTrackingDate(
             readingDate: ReadingDate,
             val newDate: LocalDate,
-            trackAndService: TrackAndService
+            trackAndService: TrackAndService,
         ) : TrackDateChange(readingDate, trackAndService)
     }
 

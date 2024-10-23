@@ -49,7 +49,8 @@ class FollowsSyncProcessor {
                 .fetchAllFollows()
                 .onFailure {
                     errorNotification(
-                        (it as? ResultError.Generic)?.errorString ?: "Error fetching follows")
+                        (it as? ResultError.Generic)?.errorString ?: "Error fetching follows"
+                    )
                 }
                 .onSuccess { unfilteredManga ->
                     val listManga =
@@ -68,7 +69,10 @@ class FollowsSyncProcessor {
                     val mangaIdsToUpdate =
                         listManga.mapNotNull { networkManga ->
                             updateNotification(
-                                networkManga.title, count.andIncrement, listManga.size)
+                                networkManga.title,
+                                count.andIncrement,
+                                listManga.size,
+                            )
                             var dbManga =
                                 db.getManga(networkManga.url, sourceManager.mangaDex.id)
                                     .executeAsBlocking()

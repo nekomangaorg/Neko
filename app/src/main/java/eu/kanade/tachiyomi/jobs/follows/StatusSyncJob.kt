@@ -33,10 +33,8 @@ import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 /** WorkManager job that syncs FollowsList to and from Neko */
-class StatusSyncJob(
-    val context: Context,
-    params: WorkerParameters,
-) : CoroutineWorker(context, params) {
+class StatusSyncJob(val context: Context, params: WorkerParameters) :
+    CoroutineWorker(context, params) {
 
     private val followsSyncProcessor: FollowsSyncProcessor by injectLazy()
     val source: SourceManager by injectLazy()
@@ -92,7 +90,8 @@ class StatusSyncJob(
                             ::errorNotification,
                             ::updateNotificationProgress,
                             ::completeNotificationFromDex,
-                            ::updateManga)
+                            ::updateManga,
+                        )
                     withUIContext {
                         applicationContext.toast(
                             applicationContext.getString(
@@ -140,10 +139,7 @@ class StatusSyncJob(
         completeNotification(R.string.sync_follows_complete)
         launchUI {
             applicationContext.toast(
-                applicationContext.getString(
-                    R.string.push_favorites_to_mangadex_toast,
-                    total,
-                ),
+                applicationContext.getString(R.string.push_favorites_to_mangadex_toast, total),
                 Toast.LENGTH_LONG,
             )
         }
@@ -166,10 +162,7 @@ class StatusSyncJob(
             progressNotification
                 .setContentTitle(context.getString(R.string.sync_follows_complete))
                 .build()
-        context.notificationManager.notify(
-            Notifications.Id.Status.Complete,
-            notification,
-        )
+        context.notificationManager.notify(Notifications.Id.Status.Complete, notification)
     }
 
     private fun errorNotification(errorTxt: String? = null) {
@@ -177,13 +170,11 @@ class StatusSyncJob(
         val notification =
             progressNotification
                 .setContentTitle(
-                    errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync))
+                    errorTxt ?: context.getString(R.string.not_logged_into_mangadex_cannot_sync)
+                )
                 .setAutoCancel(true)
                 .build()
-        context.notificationManager.notify(
-            Notifications.Id.Status.Complete,
-            notification,
-        )
+        context.notificationManager.notify(Notifications.Id.Status.Complete, notification)
     }
 
     companion object {
@@ -200,7 +191,7 @@ class StatusSyncJob(
                     .addTag(TAG)
                     .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                     .setInputData(
-                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).build(),
+                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex).build()
                     )
                     .build()
 

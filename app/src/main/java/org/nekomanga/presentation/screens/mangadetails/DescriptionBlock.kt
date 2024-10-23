@@ -87,7 +87,9 @@ fun DescriptionBlock(
 
     val tagColor =
         MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-            themeColorState.buttonColor, 16.dp)
+            themeColorState.buttonColor,
+            16.dp,
+        )
 
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -101,7 +103,7 @@ fun DescriptionBlock(
         }
 
     Column(
-        modifier = Modifier.padding(horizontal = 16.dp).then(clickable),
+        modifier = Modifier.padding(horizontal = 16.dp).then(clickable)
         // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
     ) {
         if (!isExpanded) {
@@ -142,12 +144,16 @@ fun DescriptionBlock(
                                         listOf(
                                             Color.Transparent,
                                             MaterialTheme.colorScheme.surface.copy(alpha = .8f),
-                                            MaterialTheme.colorScheme.surface),
-                                ),
-                            ),
+                                            MaterialTheme.colorScheme.surface,
+                                        )
+                                )
+                            )
                 ) {
                     MoreLessButton(
-                        themeColorState.buttonColor, true, Modifier.align(Alignment.TopEnd))
+                        themeColorState.buttonColor,
+                        true,
+                        Modifier.align(Alignment.TopEnd),
+                    )
                 }
             }
         } else {
@@ -210,9 +216,7 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
             false -> R.string.less to Icons.Filled.ExpandLess
         }
 
-    Row(
-        modifier = modifier,
-    ) {
+    Row(modifier = modifier) {
         Text(
             modifier =
                 Modifier.background(MaterialTheme.colorScheme.surface).padding(start = Size.small),
@@ -228,7 +232,8 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
             modifier = Modifier.align(Alignment.CenterVertically),
             imageVector = icon,
             contentDescription = null,
-            tint = buttonColor)
+            tint = buttonColor,
+        )
     }
 }
 
@@ -246,7 +251,8 @@ private fun AltTitles(
         val isCustomTitle = altTitles.contains(currentTitle)
         val onChipColor =
             MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                alpha = NekoColors.mediumAlphaHighContrast)
+                alpha = NekoColors.mediumAlphaHighContrast
+            )
 
         Text(
             text = "Alt Titles:",
@@ -293,45 +299,50 @@ private fun FlowableAltTitles(
 ) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Size.small)) {
-            if (isCustomTitle) {
-                TextButton(onClick = resetClick) {
-                    Text(
-                        text = stringResource(id = R.string.reset),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor)
-                }
-            }
-            altTitles.forEach { title ->
-                val currentlySelected = isCustomTitle && title == currentTitle
-                AssistChip(
-                    onClick = {
-                        if (!currentlySelected) {
-                            altTitleClick(title)
-                        }
-                    },
-                    colors =
-                        AssistChipDefaults.assistChipColors(
-                            containerColor = tagColor, labelColor = onChipColor),
-                    border = null,
-                    leadingIcon = {
-                        if (currentlySelected) {
-                            Icon(
-                                imageVector = Icons.Filled.Check,
-                                contentDescription = null,
-                                tint = onChipColor)
-                        }
-                    },
-                    label = {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(Size.none),
-                        )
-                    },
+        horizontalArrangement = Arrangement.spacedBy(Size.small),
+    ) {
+        if (isCustomTitle) {
+            TextButton(onClick = resetClick) {
+                Text(
+                    text = stringResource(id = R.string.reset),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = themeColorState.buttonColor,
                 )
             }
         }
+        altTitles.forEach { title ->
+            val currentlySelected = isCustomTitle && title == currentTitle
+            AssistChip(
+                onClick = {
+                    if (!currentlySelected) {
+                        altTitleClick(title)
+                    }
+                },
+                colors =
+                    AssistChipDefaults.assistChipColors(
+                        containerColor = tagColor,
+                        labelColor = onChipColor,
+                    ),
+                border = null,
+                leadingIcon = {
+                    if (currentlySelected) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = onChipColor,
+                        )
+                    }
+                },
+                label = {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(Size.none),
+                    )
+                },
+            )
+        }
+    }
 }
 
 @Composable
@@ -353,7 +364,7 @@ private fun ScrollableAltTitles(
                         constraints.copy(
                             minWidth = constraints.maxWidth + Size.medium.roundToPx(),
                             maxWidth = constraints.maxWidth + Size.medium.roundToPx(),
-                        ),
+                        )
                     )
                 layout(placeable.width, placeable.height) { placeable.place(0, 0) }
             },
@@ -366,7 +377,8 @@ private fun ScrollableAltTitles(
                     Text(
                         text = stringResource(id = R.string.reset),
                         style = MaterialTheme.typography.labelMedium,
-                        color = themeColorState.buttonColor)
+                        color = themeColorState.buttonColor,
+                    )
                 }
             }
         }
@@ -382,14 +394,17 @@ private fun ScrollableAltTitles(
                 },
                 colors =
                     AssistChipDefaults.assistChipColors(
-                        containerColor = tagColor, labelColor = onChipColor),
+                        containerColor = tagColor,
+                        labelColor = onChipColor,
+                    ),
                 border = null,
                 leadingIcon = {
                     if (currentlySelected) {
                         Icon(
                             imageVector = Icons.Filled.Check,
                             contentDescription = null,
-                            tint = onChipColor)
+                            tint = onChipColor,
+                        )
                     }
                 },
                 label = {
@@ -411,7 +426,7 @@ private fun ColumnScope.Genres(
     tagColor: Color,
     themeColorState: ThemeColorState,
     genreSearch: (String) -> Unit,
-    genreLibrarySearch: (String) -> Unit
+    genreLibrarySearch: (String) -> Unit,
 ) {
     if (genres.isEmpty()) return
 
@@ -429,7 +444,7 @@ private fun ColumnScope.Genres(
                         constraints.copy(
                             minWidth = constraints.maxWidth + 16.dp.roundToPx(),
                             maxWidth = constraints.maxWidth + 16.dp.roundToPx(),
-                        ),
+                        )
                     )
                 layout(placeable.width, placeable.height) { placeable.place(0, 0) }
             },
@@ -461,10 +476,11 @@ private fun ColumnScope.Genres(
                             genreSearch(genres[genrePosition])
                         },
                         SimpleDropDownItem.Action(
-                            text = UiText.StringResource(R.string.search_library)) {
-                                genreExpanded = false
-                                genreLibrarySearch(genres[genrePosition])
-                            },
+                            text = UiText.StringResource(R.string.search_library)
+                        ) {
+                            genreExpanded = false
+                            genreLibrarySearch(genres[genrePosition])
+                        },
                     )
                     .toPersistentList(),
         )

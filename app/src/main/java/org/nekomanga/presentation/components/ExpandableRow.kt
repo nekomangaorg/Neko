@@ -24,7 +24,7 @@ fun ExpandableRow(
     isExpanded: Boolean,
     disabled: Boolean,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     Row(

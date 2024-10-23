@@ -72,7 +72,8 @@ open class App : Application(), DefaultLifecycleObserver {
                 Toast.makeText(
                         applicationContext,
                         "Error! App requires WebView to be installed",
-                        Toast.LENGTH_LONG)
+                        Toast.LENGTH_LONG,
+                    )
                     .show()
             }
 
@@ -139,10 +140,12 @@ open class App : Application(), DefaultLifecycleObserver {
                                 )
                             setContentIntent(pendingIntent)
                         }
-                    if (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.POST_NOTIFICATIONS,
-                    ) != PackageManager.PERMISSION_GRANTED) {
+                    if (
+                        ActivityCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.POST_NOTIFICATIONS,
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
                         return@onEach
                     }
                     notificationManager.notify(Notifications.ID_INCOGNITO_MODE, notification)

@@ -7,9 +7,7 @@ import java.io.File
 import org.nekomanga.core.BuildConfig
 import org.nekomanga.core.R
 
-class AndroidStorageFolderProvider(
-    private val context: Context,
-) : FolderProvider {
+class AndroidStorageFolderProvider(private val context: Context) : FolderProvider {
 
     override fun directory(): File {
         return File(
@@ -18,7 +16,8 @@ class AndroidStorageFolderProvider(
                 when (BuildConfig.DEBUG) {
                     true -> context.getString(R.string.app_name) + "_debug"
                     false -> context.getString(R.string.app_name)
-                })
+                }
+        )
     }
 
     override fun path(): String {

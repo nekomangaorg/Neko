@@ -9,7 +9,7 @@ import tachiyomi.core.util.storage.FolderProvider
 class StoragePreferences(
     private val context: Context,
     private val folderProvider: FolderProvider,
-    private val preferenceStore: PreferenceStore
+    private val preferenceStore: PreferenceStore,
 ) {
 
     fun baseStorageDirectory() = preferenceStore.getString("storage_dir", folderProvider.path())

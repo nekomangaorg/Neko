@@ -68,11 +68,7 @@ class BackupCreator(val context: Context) {
                 throw NoLibraryManga()
             }
 
-            backup =
-                Backup(
-                    backupManga(databaseManga, flags),
-                    backupCategories(),
-                )
+            backup = Backup(backupManga(databaseManga, flags), backupCategories())
         }
 
         var file: UniFile? = null

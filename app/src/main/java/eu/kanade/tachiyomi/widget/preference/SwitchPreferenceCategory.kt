@@ -15,15 +15,8 @@ import org.nekomanga.R
 
 class SwitchPreferenceCategory
 @JvmOverloads
-constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-) :
-    PreferenceCategory(
-        context,
-        attrs,
-        R.attr.switchPreferenceCompatStyle,
-    ),
+constructor(context: Context, attrs: AttributeSet? = null) :
+    PreferenceCategory(context, attrs, R.attr.switchPreferenceCompatStyle),
     CompoundButton.OnCheckedChangeListener {
 
     private var mChecked = false
@@ -122,7 +115,7 @@ constructor(
                 getPersistedBoolean(mChecked)
             } else {
                 defaultValue as Boolean
-            },
+            }
         )
     }
 }

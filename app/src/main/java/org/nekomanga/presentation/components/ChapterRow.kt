@@ -110,7 +110,9 @@ fun ChapterRow(
                         null -> MaterialTheme.colorScheme.surface
                         else ->
                             MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
-                                themeColor.buttonColor, 8.dp)
+                                themeColor.buttonColor,
+                                8.dp,
+                            )
                     }
 
                 when (dismissState.dismissDirection) {
@@ -125,7 +127,8 @@ fun ChapterRow(
                             Alignment.CenterEnd,
                             color,
                             stringResource(id = text),
-                            themeColor.buttonColor)
+                            themeColor.buttonColor,
+                        )
                     }
                     DismissDirection.StartToEnd -> {
                         val (icon, text) =
@@ -138,7 +141,8 @@ fun ChapterRow(
                             Alignment.CenterStart,
                             color,
                             stringResource(id = text),
-                            themeColor.buttonColor)
+                            themeColor.buttonColor,
+                        )
                     }
                     else -> Unit
                 }
@@ -194,7 +198,7 @@ private fun Background(
     alignment: Alignment,
     color: Color,
     text: String,
-    contentColor: Color
+    contentColor: Color,
 ) {
     Box(
         Modifier.fillMaxSize().background(color).padding(horizontal = Dp(20f)),
@@ -207,11 +211,7 @@ private fun Background(
                 tint = contentColor,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
-            Text(
-                text = text,
-                textAlign = TextAlign.Center,
-                color = contentColor,
-            )
+            Text(text = text, textAlign = TextAlign.Center, color = contentColor)
         }
     }
 }
@@ -266,7 +266,8 @@ private fun ChapterInfo(
             false ->
                 MaterialTheme.colorScheme.onSurface to
                     MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = NekoColors.mediumAlphaLowContrast)
+                        alpha = NekoColors.mediumAlphaLowContrast
+                    )
         }
 
     val rowColor =
@@ -307,9 +308,7 @@ private fun ChapterInfo(
                 .padding(start = Size.small, top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Column(
-            modifier = Modifier.align(Alignment.CenterVertically).fillMaxWidth(.8f),
-        ) {
+        Column(modifier = Modifier.align(Alignment.CenterVertically).fillMaxWidth(.8f)) {
             val titleText =
                 when (shouldHideChapterTitles) {
                     true ->
@@ -333,7 +332,8 @@ private fun ChapterInfo(
                         MaterialTheme.typography.bodyLarge.copy(
                             color = textColor,
                             fontWeight = FontWeight.Medium,
-                            letterSpacing = (-.6).sp),
+                            letterSpacing = (-.6).sp,
+                        ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -348,12 +348,10 @@ private fun ChapterInfo(
 
             if (showPagesLeft && pagesLeft > 0) {
                 statuses.add(
-                    resources.getQuantityString(R.plurals.pages_left, pagesLeft, pagesLeft),
+                    resources.getQuantityString(R.plurals.pages_left, pagesLeft, pagesLeft)
                 )
             } else if (showPagesLeft) {
-                statuses.add(
-                    stringResource(id = R.string.page_, lastPageRead + 1),
-                )
+                statuses.add(stringResource(id = R.string.page_, lastPageRead + 1))
             }
 
             if (scanlator.isNotBlank()) {
@@ -382,7 +380,10 @@ private fun ChapterInfo(
                                 rememberDrawablePainter(
                                     drawable =
                                         AppCompatResources.getDrawable(
-                                            LocalContext.current, iconRes))
+                                            LocalContext.current,
+                                            iconRes,
+                                        )
+                                )
                             Image(
                                 painter = painter,
                                 modifier =
@@ -410,65 +411,61 @@ private fun ChapterInfo(
         }
         Box(
             modifier = Modifier.align(Alignment.CenterVertically),
-            contentAlignment = Alignment.Center) {
-                DownloadButton(
-                    themeColorState.buttonColor,
-                    downloadState,
-                    downloadProgress,
-                    Modifier.combinedClickable(
-                        onClick = {
-                            when (downloadState) {
-                                Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
-                                else -> chapterDropdown = true
-                            }
-                        },
-                        onLongClick = {},
-                    ),
-                )
-
-                val scope = rememberCoroutineScope()
-                SimpleDropdownMenu(
-                    expanded = chapterDropdown,
-                    themeColorState = themeColorState,
-                    onDismiss = { chapterDropdown = false },
-                    dropDownItems =
+            contentAlignment = Alignment.Center,
+        ) {
+            DownloadButton(
+                themeColorState.buttonColor,
+                downloadState,
+                downloadProgress,
+                Modifier.combinedClickable(
+                    onClick = {
                         when (downloadState) {
-                            Download.State.DOWNLOADED -> {
-                                persistentListOf(
-                                    SimpleDropDownItem.Action(
-                                        text = UiText.StringResource(R.string.remove),
-                                        onClick = {
-                                            scope.launchDelayed {
-                                                onDownload(DownloadAction.Remove)
-                                            }
-                                        },
-                                    ),
+                            Download.State.NOT_DOWNLOADED -> onDownload(DownloadAction.Download)
+                            else -> chapterDropdown = true
+                        }
+                    },
+                    onLongClick = {},
+                ),
+            )
+
+            val scope = rememberCoroutineScope()
+            SimpleDropdownMenu(
+                expanded = chapterDropdown,
+                themeColorState = themeColorState,
+                onDismiss = { chapterDropdown = false },
+                dropDownItems =
+                    when (downloadState) {
+                        Download.State.DOWNLOADED -> {
+                            persistentListOf(
+                                SimpleDropDownItem.Action(
+                                    text = UiText.StringResource(R.string.remove),
+                                    onClick = {
+                                        scope.launchDelayed { onDownload(DownloadAction.Remove) }
+                                    },
                                 )
-                            }
-                            else -> {
-                                persistentListOf(
-                                    SimpleDropDownItem.Action(
-                                        text =
-                                            UiText.StringResource(R.string.start_downloading_now),
-                                        onClick = {
-                                            scope.launchDelayed {
-                                                onDownload(DownloadAction.ImmediateDownload)
-                                            }
-                                        },
-                                    ),
-                                    SimpleDropDownItem.Action(
-                                        text = UiText.StringResource(R.string.cancel),
-                                        onClick = {
-                                            scope.launchDelayed {
-                                                onDownload(DownloadAction.Cancel)
-                                            }
-                                        },
-                                    ),
-                                )
-                            }
-                        },
-                )
-            }
+                            )
+                        }
+                        else -> {
+                            persistentListOf(
+                                SimpleDropDownItem.Action(
+                                    text = UiText.StringResource(R.string.start_downloading_now),
+                                    onClick = {
+                                        scope.launchDelayed {
+                                            onDownload(DownloadAction.ImmediateDownload)
+                                        }
+                                    },
+                                ),
+                                SimpleDropDownItem.Action(
+                                    text = UiText.StringResource(R.string.cancel),
+                                    onClick = {
+                                        scope.launchDelayed { onDownload(DownloadAction.Cancel) }
+                                    },
+                                ),
+                            )
+                        }
+                    },
+            )
+        }
     }
 }
 
@@ -506,7 +503,7 @@ private fun getDropDownItems(
                     SimpleDropDownItem.Parent(
                         text = UiText.StringResource(R.string.block_scanlator),
                         children = scanlators,
-                    ),
+                    )
                 )
             } else {
                 emptyList()
@@ -516,7 +513,7 @@ private fun getDropDownItems(
                     SimpleDropDownItem.Action(
                         text = UiText.StringResource(R.string.comments),
                         onClick = onComment,
-                    ),
+                    )
                 )
             } else {
                 emptyList()
@@ -524,8 +521,4 @@ private fun getDropDownItems(
         .toPersistentList()
 }
 
-val decimalFormat =
-    DecimalFormat(
-        "#.###",
-        DecimalFormatSymbols().apply { decimalSeparator = '.' },
-    )
+val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })

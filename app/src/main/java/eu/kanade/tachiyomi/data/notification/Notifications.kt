@@ -98,10 +98,7 @@ object Notifications {
     const val CHANNEL_INCOGNITO_MODE = "incognito_mode_channel"
     const val ID_INCOGNITO_MODE = -701
 
-    private val deprecatedChannels =
-        listOf(
-            "library_channel",
-        )
+    private val deprecatedChannels = listOf("library_channel")
 
     /**
      * Creates the notification channels introduced in Android Oreo.
@@ -121,9 +118,10 @@ object Notifications {
                     context.getString(R.string.group_backup_restore),
                 ),
                 NotificationChannelGroup(
-                    Group.Download, context.getString(R.string.group_downloader)),
-                NotificationChannelGroup(
-                    GROUP_APP_UPDATES, context.getString(R.string.app_updates)),
+                    Group.Download,
+                    context.getString(R.string.group_downloader),
+                ),
+                NotificationChannelGroup(GROUP_APP_UPDATES, context.getString(R.string.app_updates)),
             )
             .forEach(context.notificationManager::createNotificationChannelGroup)
 

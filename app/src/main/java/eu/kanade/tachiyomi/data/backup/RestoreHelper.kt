@@ -77,13 +77,7 @@ class RestoreHelper(val context: Context) {
             Notifications.ID_RESTORE_PROGRESS,
             progressNotification
                 .setContentTitle(title.chop(30))
-                .setContentText(
-                    context.getString(
-                        R.string.restoring_progress,
-                        current,
-                        total,
-                    ),
-                )
+                .setContentText(context.getString(R.string.restoring_progress, current, total))
                 .setProgress(total, current, false)
                 .build(),
         )
@@ -127,7 +121,7 @@ class RestoreHelper(val context: Context) {
                     R.plurals.restore_categories,
                     categoriesAmount,
                     categoriesAmount,
-                ),
+                )
             )
         }
 
@@ -136,15 +130,10 @@ class RestoreHelper(val context: Context) {
                 R.string.restore_completed_successful,
                 restoreProgress.toString(),
                 restoreAmount.toString(),
-            ),
+            )
         )
 
-        content.add(
-            context.getString(
-                R.string.restore_completed_errors,
-                errors.size.toString(),
-            ),
-        )
+        content.add(context.getString(R.string.restore_completed_errors, errors.size.toString()))
 
         if (skippedAmount > 0) {
             content.add(
@@ -152,7 +141,7 @@ class RestoreHelper(val context: Context) {
                     R.string.restore_skipped,
                     skippedAmount.toString(),
                     totalAmount.toString(),
-                ),
+                )
             )
         }
 
@@ -178,9 +167,7 @@ class RestoreHelper(val context: Context) {
         if (!path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(
                 R.drawable.ic_close_24dp,
-                context.getString(
-                    R.string.view_log,
-                ),
+                context.getString(R.string.view_log),
                 getErrorLogIntent(path, file),
             )
         }
@@ -385,10 +372,7 @@ class RestoreHelper(val context: Context) {
         mergeMangaList.forEach { mergeManga ->
             val dbMergeManga = dbMergeMangaList.find { it.mergeType == mergeManga.mergeType }
             if (dbMergeManga == null) {
-                val newMergeManga =
-                    mergeManga.copy(
-                        mangaId = manga.id!!,
-                    )
+                val newMergeManga = mergeManga.copy(mangaId = manga.id!!)
                 db.insertMergeManga(newMergeManga).executeAsBlocking()
             }
         }

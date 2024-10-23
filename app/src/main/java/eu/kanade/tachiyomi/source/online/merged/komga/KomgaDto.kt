@@ -2,12 +2,7 @@ package eu.kanade.tachiyomi.source.online.merged.komga
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class KomgaPageDto(
-    val number: Int,
-    val fileName: String,
-    val mediaType: String,
-)
+@Serializable data class KomgaPageDto(val number: Int, val fileName: String, val mediaType: String)
 
 @Serializable
 data class KomgaSeriesDto(
@@ -21,10 +16,7 @@ data class KomgaSeriesDto(
     val metadata: KomgaSeriesMetadataDto,
 )
 
-@Serializable
-data class KomgaSeriesMetadataDto(
-    val title: String,
-)
+@Serializable data class KomgaSeriesMetadataDto(val title: String)
 
 @Serializable
 data class KomgaPaginatedResponseDto<T>(
@@ -70,8 +62,4 @@ data class KomgaBookMetadataDto(
     val authorsLock: Boolean,
 )
 
-@Serializable
-data class KomgaAuthorDto(
-    val name: String,
-    val role: String,
-)
+@Serializable data class KomgaAuthorDto(val name: String, val role: String)

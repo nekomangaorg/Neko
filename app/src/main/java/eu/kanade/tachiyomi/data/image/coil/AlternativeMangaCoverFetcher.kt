@@ -46,7 +46,8 @@ class AlternativeMangaCoverFetcher(
         ArtworkKeyer()
             .key(
                 Artwork(url = url, inLibrary = false, originalArtwork = "", mangaId = mangaId),
-                options)
+                options,
+            )
     }
 
     val fileScope = CoroutineScope(Job() + Dispatchers.IO)
@@ -150,7 +151,8 @@ class AlternativeMangaCoverFetcher(
                     sourceLazy.value.headers
                         .newBuilder()
                         .add("x-request-id", "Neko-" + UUID.randomUUID())
-                        .build())
+                        .build()
+                )
                 // Support attaching custom data to the network request.
                 .tag(Parameters::class.java, options.parameters)
 
@@ -214,9 +216,7 @@ class AlternativeMangaCoverFetcher(
         else null
     }
 
-    private fun writeToDiskCache(
-        response: Response,
-    ): DiskCache.Snapshot? {
+    private fun writeToDiskCache(response: Response): DiskCache.Snapshot? {
         val editor = diskCacheLazy.value.openEditor(diskCacheKey!!) ?: return null
         try {
             diskCacheLazy.value.fileSystem.write(editor.data) {
@@ -254,7 +254,7 @@ class AlternativeMangaCoverFetcher(
 
     private enum class Type {
         File,
-        URL
+        URL,
     }
 
     companion object {

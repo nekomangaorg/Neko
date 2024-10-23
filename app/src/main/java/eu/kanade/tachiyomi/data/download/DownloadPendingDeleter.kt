@@ -111,11 +111,7 @@ class DownloadPendingDeleter(context: Context) {
     }
 
     /** Class used to save an entry of chapters with their manga into preferences. */
-    @Serializable
-    private data class Entry(
-        val chapters: List<ChapterEntry>,
-        val manga: MangaEntry,
-    )
+    @Serializable private data class Entry(val chapters: List<ChapterEntry>, val manga: MangaEntry)
 
     /** Class used to save an entry for a chapter into preferences. */
     @Serializable

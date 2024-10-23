@@ -63,9 +63,7 @@ class RecentsPresenter(
     private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
     private val continueReadingHeader =
-        RecentMangaHeaderItem(
-            RecentMangaHeaderItem.CONTINUE_READING,
-        )
+        RecentMangaHeaderItem(RecentMangaHeaderItem.CONTINUE_READING)
     var finished = false
     var heldItems: HashMap<Int, List<RecentMangaItem>> = hashMapOf()
     private var shouldMoveToTop = false
@@ -220,16 +218,19 @@ class RecentsPresenter(
             cReading
                 .filterBlockedScanlators(blockedScanlators)
                 .distinctBy {
-                    if (query.isEmpty() &&
-                        viewType != VIEW_TYPE_ONLY_HISTORY &&
-                        viewType != VIEW_TYPE_ONLY_UPDATES)
+                    if (
+                        query.isEmpty() &&
+                            viewType != VIEW_TYPE_ONLY_HISTORY &&
+                            viewType != VIEW_TYPE_ONLY_UPDATES
+                    )
                         it.manga.id
                     else it.chapter.id
                 }
                 .filter { mch ->
                     if (updatePageCount && !isOnFirstPage && query.isEmpty()) {
-                        if (viewType != VIEW_TYPE_ONLY_HISTORY &&
-                            viewType != VIEW_TYPE_ONLY_UPDATES) {
+                        if (
+                            viewType != VIEW_TYPE_ONLY_HISTORY && viewType != VIEW_TYPE_ONLY_UPDATES
+                        ) {
                             recentItems.none { mch.manga.id == it.mch.manga.id }
                         } else {
                             recentItems.none { mch.chapter.id == it.mch.chapter.id }
@@ -253,8 +254,10 @@ class RecentsPresenter(
                         }
                         it.history.id == null -> {
                             getFirstUpdatedChapter(it.manga, it.chapter)
-                                ?: if ((showRead && it.chapter.id != null) ||
-                                    viewType == VIEW_TYPE_ONLY_UPDATES)
+                                ?: if (
+                                    (showRead && it.chapter.id != null) ||
+                                        viewType == VIEW_TYPE_ONLY_UPDATES
+                                )
                                     it.chapter
                                 else null
                         }
@@ -263,8 +266,10 @@ class RecentsPresenter(
                         }
                     }
                 if (chapter == null)
-                    if ((query.isNotEmpty() || viewType > VIEW_TYPE_UNGROUP_ALL) &&
-                        it.chapter.id != null) {
+                    if (
+                        (query.isNotEmpty() || viewType > VIEW_TYPE_UNGROUP_ALL) &&
+                            it.chapter.id != null
+                    ) {
                         Pair(it, it.chapter)
                     } else {
                         null
@@ -280,33 +285,23 @@ class RecentsPresenter(
                         .asSequence()
                         .filter { it.first.history.id == null && it.first.chapter.id != null }
                         .sortedWith { f1, f2 ->
-                            if (abs(f1.second.date_fetch - f2.second.date_fetch) <=
-                                TimeUnit.HOURS.toMillis(12)) {
+                            if (
+                                abs(f1.second.date_fetch - f2.second.date_fetch) <=
+                                    TimeUnit.HOURS.toMillis(12)
+                            ) {
                                 f2.second.date_upload.compareTo(f1.second.date_upload)
                             } else {
                                 f2.second.date_fetch.compareTo(f1.second.date_fetch)
                             }
                         }
                         .take(4)
-                        .map {
-                            RecentMangaItem(
-                                it.first,
-                                it.second,
-                                newChaptersHeader,
-                            )
-                        }
+                        .map { RecentMangaItem(it.first, it.second, newChaptersHeader) }
                         .toMutableList()
                 val cReadingItems =
                     pairs
                         .filter { it.first.history.id != null }
                         .take(9 - nChaptersItems.size)
-                        .map {
-                            RecentMangaItem(
-                                it.first,
-                                it.second,
-                                continueReadingHeader,
-                            )
-                        }
+                        .map { RecentMangaItem(it.first, it.second, continueReadingHeader) }
                         .toMutableList()
                 if (nChaptersItems.isNotEmpty()) {
                     nChaptersItems.add(RecentMangaItem(header = newChaptersHeader))
@@ -354,10 +349,12 @@ class RecentsPresenter(
         }
         val newCount = itemCount + newItems.size
         val hasNewItems = newItems.isNotEmpty()
-        if (updatePageCount &&
-            newCount < 25 &&
-            (viewType != VIEW_TYPE_GROUP_ALL || query.isNotEmpty()) &&
-            !limit) {
+        if (
+            updatePageCount &&
+                newCount < 25 &&
+                (viewType != VIEW_TYPE_GROUP_ALL || query.isNotEmpty()) &&
+                !limit
+        ) {
             runRecents(oldQuery, true, retryCount + (if (hasNewItems) 0 else 1), newCount)
             return
         }
@@ -518,7 +515,10 @@ class RecentsPresenter(
             }
             if (preferences.readingSync().get() && !chapter.isMergedChapter()) {
                 statusHandler.marksChaptersStatus(
-                    manga.uuid(), listOf(chapter.mangadex_chapter_id), read)
+                    manga.uuid(),
+                    listOf(chapter.mangadex_chapter_id),
+                    read,
+                )
             }
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()
             getRecents()

@@ -61,7 +61,8 @@ fun ToolTipButton(
                 Text(
                     modifier = Modifier.padding(Size.tiny),
                     style = MaterialTheme.typography.bodyLarge,
-                    text = toolTipLabel)
+                    text = toolTipLabel,
+                )
             }
         },
     ) {
@@ -80,11 +81,7 @@ fun ToolTipButton(
                 ),
         ) {
             if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    modifier = iconModifier,
-                    contentDescription = toolTipLabel,
-                )
+                Icon(imageVector = icon, modifier = iconModifier, contentDescription = toolTipLabel)
             } else {
                 Icon(
                     painter = painter!!,
@@ -116,7 +113,8 @@ fun CombinedClickableIconButton(
                 enabledTint
             } else {
                 MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = NekoColors.disabledAlphaLowContrast)
+                    alpha = NekoColors.disabledAlphaLowContrast
+                )
             }
         CompositionLocalProvider(LocalContentColor provides contentColor, content = content)
     }
@@ -137,10 +135,7 @@ fun Modifier.iconButtonCombinedClickable(
         combinedClickable(
             interactionSource = remember { MutableInteractionSource() },
             indication =
-                rememberRipple(
-                    bounded = false,
-                    radius = IconButtonTokens.StateLayerSize / 2,
-                ),
+                rememberRipple(bounded = false, radius = IconButtonTokens.StateLayerSize / 2),
             onClickLabel = toolTipLabel,
             role = Role.Button,
             onClick = onClick,

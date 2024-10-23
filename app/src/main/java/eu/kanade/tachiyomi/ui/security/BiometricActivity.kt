@@ -50,7 +50,8 @@ class BiometricActivity : BaseThemedActivity() {
                 .setTitle(getString(R.string.unlock_library))
                 .setAllowedAuthenticators(
                     BiometricManager.Authenticators.DEVICE_CREDENTIAL or
-                        BiometricManager.Authenticators.BIOMETRIC_WEAK)
+                        BiometricManager.Authenticators.BIOMETRIC_WEAK
+                )
                 .build()
 
         biometricPrompt.authenticate(promptInfo)

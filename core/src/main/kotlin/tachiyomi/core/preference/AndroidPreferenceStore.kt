@@ -13,9 +13,7 @@ import tachiyomi.core.preference.AndroidPreference.Object
 import tachiyomi.core.preference.AndroidPreference.StringPrimitive
 import tachiyomi.core.preference.AndroidPreference.StringSetPrimitive
 
-class AndroidPreferenceStore(
-    context: Context,
-) : PreferenceStore {
+class AndroidPreferenceStore(context: Context) : PreferenceStore {
 
     private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 

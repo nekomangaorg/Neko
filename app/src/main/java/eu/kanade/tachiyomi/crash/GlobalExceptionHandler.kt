@@ -57,10 +57,7 @@ private constructor(
     companion object {
         private const val INTENT_EXTRA = "Throwable"
 
-        fun initialize(
-            applicationContext: Context,
-            activityToBeLaunched: Class<*>,
-        ) {
+        fun initialize(applicationContext: Context, activityToBeLaunched: Class<*>) {
             val handler =
                 GlobalExceptionHandler(
                     applicationContext,

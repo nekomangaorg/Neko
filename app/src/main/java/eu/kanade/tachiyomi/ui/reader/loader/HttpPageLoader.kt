@@ -102,9 +102,11 @@ class HttpPageLoader(
             val imageUrl = page.imageUrl
 
             // Check if the image has been deleted
-            if (page.status == Page.State.READY &&
-                imageUrl != null &&
-                !chapterCache.isImageInCache(imageUrl)) {
+            if (
+                page.status == Page.State.READY &&
+                    imageUrl != null &&
+                    !chapterCache.isImageInCache(imageUrl)
+            ) {
                 page.status = Page.State.QUEUE
             }
 
@@ -159,10 +161,7 @@ class HttpPageLoader(
     }
 
     /** Data class used to keep ordering of pages in order to maintain priority. */
-    private class PriorityPage(
-        val page: ReaderPage,
-        val priority: Int,
-    ) : Comparable<PriorityPage> {
+    private class PriorityPage(val page: ReaderPage, val priority: Int) : Comparable<PriorityPage> {
         companion object {
             private val idGenerator = AtomicInteger()
         }

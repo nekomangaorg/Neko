@@ -22,23 +22,11 @@ class TabbedReaderSettingsSheet(
     showColorFilterSettings: Boolean = false,
 ) : TabbedBottomSheetDialog(readerActivity) {
     private val generalView: ReaderGeneralView =
-        View.inflate(
-            readerActivity,
-            R.layout.reader_general_layout,
-            null,
-        ) as ReaderGeneralView
+        View.inflate(readerActivity, R.layout.reader_general_layout, null) as ReaderGeneralView
     private val pagedView: ReaderPagedView =
-        View.inflate(
-            readerActivity,
-            R.layout.reader_paged_layout,
-            null,
-        ) as ReaderPagedView
+        View.inflate(readerActivity, R.layout.reader_paged_layout, null) as ReaderPagedView
     private val filterView: ReaderFilterView =
-        View.inflate(
-            readerActivity,
-            R.layout.reader_color_filter,
-            null,
-        ) as ReaderFilterView
+        View.inflate(readerActivity, R.layout.reader_color_filter, null) as ReaderFilterView
 
     var showWebtoonView: Boolean = run {
         val mangaViewer = readerActivity.viewModel.getMangaReadingMode()
@@ -55,12 +43,7 @@ class TabbedReaderSettingsSheet(
         }
     }
 
-    override fun getTabViews(): List<View> =
-        listOf(
-            generalView,
-            pagedView,
-            filterView,
-        )
+    override fun getTabViews(): List<View> = listOf(generalView, pagedView, filterView)
 
     override fun getTabTitles(): List<Int> =
         listOf(
@@ -89,10 +72,7 @@ class TabbedReaderSettingsSheet(
             binding.menu.tooltipText = context.getString(R.string.reader_settings)
         }
         binding.menu.setImageDrawable(
-            ContextCompat.getDrawable(
-                context,
-                R.drawable.ic_outline_settings_24dp,
-            ),
+            ContextCompat.getDrawable(context, R.drawable.ic_outline_settings_24dp)
         )
         binding.menu.setOnClickListener {
             val intent = SearchActivity.openReaderSettings(readerActivity)
@@ -137,7 +117,7 @@ class TabbedReaderSettingsSheet(
                 override fun onTabUnselected(tab: TabLayout.Tab?) {}
 
                 override fun onTabReselected(tab: TabLayout.Tab?) {}
-            },
+            }
         )
 
         if (showColorFilterSettings) {

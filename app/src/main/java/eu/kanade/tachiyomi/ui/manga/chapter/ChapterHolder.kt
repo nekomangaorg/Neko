@@ -17,10 +17,8 @@ import org.nekomanga.R
 import org.nekomanga.constants.Constants
 import org.nekomanga.databinding.ChaptersItemBinding
 
-class ChapterHolder(
-    view: View,
-    private val adapter: MangaDetailsAdapter,
-) : BaseChapterHolder(view, adapter) {
+class ChapterHolder(view: View, private val adapter: MangaDetailsAdapter) :
+    BaseChapterHolder(view, adapter) {
 
     private val binding = ChaptersItemBinding.bind(view)
     private var localSource = false
@@ -58,15 +56,10 @@ class ChapterHolder(
                     R.plurals.pages_left,
                     chapter.pages_left,
                     chapter.pages_left,
-                ),
+                )
             )
         } else if (showPagesLeft) {
-            statuses.add(
-                itemView.context.getString(
-                    R.string.page_,
-                    chapter.last_page_read + 1,
-                ),
-            )
+            statuses.add(itemView.context.getString(R.string.page_, chapter.last_page_read + 1))
         }
 
         if (chapter.language.isNullOrBlank() || chapter.language.equals("en", true)) {
@@ -87,10 +80,10 @@ class ChapterHolder(
 
         if (binding.frontView.translationX == 0f) {
             binding.read.setImageResource(
-                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp,
+                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp
             )
             binding.bookmark.setImageResource(
-                if (item.bookmark) R.drawable.ic_bookmark_off_24dp else R.drawable.ic_bookmark_24dp,
+                if (item.bookmark) R.drawable.ic_bookmark_off_24dp else R.drawable.ic_bookmark_24dp
             )
         }
         // this will color the scanlator the same bookmarks
@@ -163,7 +156,7 @@ class ChapterHolder(
         status: Download.State,
         locked: Boolean,
         progress: Int,
-        animated: Boolean = false
+        animated: Boolean = false,
     ) =
         with(binding.downloadButton.downloadButton) {
             /* adapter.delegate.accentColor()?.let {

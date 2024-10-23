@@ -10,7 +10,7 @@ import org.nekomanga.R
 
 class TabbedRecentsOptionsSheet(
     val controller: RecentsController,
-    @IntRange(from = 0, to = 2) startingTab: Int
+    @IntRange(from = 0, to = 2) startingTab: Int,
 ) : TabbedBottomSheetDialog(controller.activity!!) {
 
     private val generalView =
@@ -34,17 +34,8 @@ class TabbedRecentsOptionsSheet(
         controller.displaySheet = null
     }
 
-    override fun getTabViews(): List<View> =
-        listOf(
-            generalView,
-            historyView,
-            updatesView,
-        )
+    override fun getTabViews(): List<View> = listOf(generalView, historyView, updatesView)
 
     override fun getTabTitles(): List<Int> =
-        listOf(
-            R.string.general,
-            R.string.history,
-            R.string.updates,
-        )
+        listOf(R.string.general, R.string.history, R.string.updates)
 }

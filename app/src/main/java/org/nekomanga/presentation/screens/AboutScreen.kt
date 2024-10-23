@@ -87,8 +87,10 @@ fun AboutScreen(
             }
         }
 
-        if (aboutScreenState.value.shouldShowUpdateDialog &&
-            aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate) {
+        if (
+            aboutScreenState.value.shouldShowUpdateDialog &&
+                aboutScreenState.value.updateResult is AppUpdateResult.NewUpdate
+        ) {
             AppUpdateDialog(
                 release =
                     (aboutScreenState.value.updateResult as AppUpdateResult.NewUpdate).release,
@@ -192,9 +194,7 @@ fun AboutScreen(
 @Composable
 private fun LogoHeader() {
     Column {
-        Surface(
-            modifier = Modifier.fillMaxWidth().padding(top = 30.dp),
-        ) {
+        Surface(modifier = Modifier.fillMaxWidth().padding(top = 30.dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_neko_yokai),
                 tint = MaterialTheme.colorScheme.primary,

@@ -17,9 +17,7 @@ object Migrations {
      * @param preferences Preferences of the application.
      * @return true if a migration is performed, false otherwise.
      */
-    fun upgrade(
-        preferences: PreferencesHelper,
-    ): Boolean {
+    fun upgrade(preferences: PreferencesHelper): Boolean {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit { remove(AppDownloadInstallJob.NOTIFY_ON_INSTALL_KEY) }

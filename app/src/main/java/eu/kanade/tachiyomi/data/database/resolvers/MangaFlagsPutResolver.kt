@@ -13,7 +13,7 @@ import kotlin.reflect.KProperty1
 class MangaFlagsPutResolver(
     private val colName: String,
     private val fieldGetter: KProperty1<Manga, Int>,
-    private val updateAll: Boolean = false
+    private val updateAll: Boolean = false,
 ) : PutResolver<Manga>() {
 
     override fun performPut(db: StorIOSQLite, manga: Manga) =
@@ -39,8 +39,5 @@ class MangaFlagsPutResolver(
         }
     }
 
-    fun mapToContentValues(manga: Manga) =
-        contentValuesOf(
-            colName to fieldGetter.get(manga),
-        )
+    fun mapToContentValues(manga: Manga) = contentValuesOf(colName to fieldGetter.get(manga))
 }

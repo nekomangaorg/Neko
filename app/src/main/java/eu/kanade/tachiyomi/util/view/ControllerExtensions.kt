@@ -72,9 +72,11 @@ fun Controller.setOnQueryTextChangeListener(
     searchView?.setOnQueryTextListener(
         object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String?): Boolean {
-                if (!onlyOnSubmit &&
-                    router.backstack.lastOrNull()?.controller ==
-                        this@setOnQueryTextChangeListener) {
+                if (
+                    !onlyOnSubmit &&
+                        router.backstack.lastOrNull()?.controller ==
+                            this@setOnQueryTextChangeListener
+                ) {
                     return f(newText)
                 }
                 return false
@@ -92,7 +94,7 @@ fun Controller.setOnQueryTextChangeListener(
                 }
                 return true
             }
-        },
+        }
     )
 }
 
@@ -108,7 +110,7 @@ fun Controller.removeQueryListener(includeSearchTB: Boolean = true) {
                 override fun onQueryTextSubmit(query: String?) = true
 
                 override fun onQueryTextChange(newText: String?) = true
-            },
+            }
         )
     }
     searchView2?.setOnQueryTextListener(
@@ -116,7 +118,7 @@ fun Controller.removeQueryListener(includeSearchTB: Boolean = true) {
             override fun onQueryTextSubmit(query: String?) = true
 
             override fun onQueryTextChange(newText: String?) = true
-        },
+        }
     )
 }
 
@@ -222,13 +224,15 @@ fun <T> Controller.liftAppbarWith(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (router?.backstack?.lastOrNull()?.controller == this@liftAppbarWith &&
-                    activity != null) {
+                if (
+                    router?.backstack?.lastOrNull()?.controller == this@liftAppbarWith &&
+                        activity != null
+                ) {
                     val notAtTop = recycler.canScrollVertically(-1)
                     if (notAtTop != isToolbarColored) colorToolbar(notAtTop)
                 }
             }
-        },
+        }
     )
 }
 
@@ -281,7 +285,7 @@ fun Controller.scrollViewWith(
         recycler.updatePaddingRelative(
             top =
                 (activity?.window?.decorView?.rootWindowInsetsCompat?.getInsets(systemBars())?.top
-                    ?: 0) + appBarHeight,
+                    ?: 0) + appBarHeight
         )
     }
     val atTopOfRecyclerView: () -> Boolean = f@{
@@ -381,9 +385,11 @@ fun Controller.scrollViewWith(
                     activityBinding?.toolbar?.tag = randomTag
                     activityBinding?.toolbar?.setOnClickListener { recycler.smoothScrollToTop() }
                 } else {
-                    if (!customPadding &&
-                        lastY == 0f &&
-                        ((this@scrollViewWith !is FloatingSearchInterface) || includeTabView)) {
+                    if (
+                        !customPadding &&
+                            lastY == 0f &&
+                            ((this@scrollViewWith !is FloatingSearchInterface) || includeTabView)
+                    ) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val v = View(activity)
                         fakeToolbarView = v
@@ -395,10 +401,12 @@ fun Controller.scrollViewWith(
                         v.layoutParams = params
                         onLeavingController?.invoke()
                     }
-                    if (!customPadding &&
-                        router.backstackSize == 2 &&
-                        changeType == ControllerChangeType.PUSH_EXIT &&
-                        router.backstack.lastOrNull()?.controller !is DialogController) {
+                    if (
+                        !customPadding &&
+                            router.backstackSize == 2 &&
+                            changeType == ControllerChangeType.PUSH_EXIT &&
+                            router.backstack.lastOrNull()?.controller !is DialogController
+                    ) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val bottomNav = activityBinding?.bottomNav ?: return
                         val v = View(activity)
@@ -418,7 +426,7 @@ fun Controller.scrollViewWith(
                     }
                 }
             }
-        },
+        }
     )
     colorToolbar(!atTopOfRecyclerView())
 
@@ -432,17 +440,17 @@ fun Controller.scrollViewWith(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (isControllerVisible &&
-                    statusBarHeight > -1 &&
-                    (this@scrollViewWith as? BaseController<*>)?.isDragging != true &&
-                    activity != null &&
-                    (activityBinding?.appBar?.height ?: 0) > 0 &&
-                    recycler.translationY == 0f) {
+                if (
+                    isControllerVisible &&
+                        statusBarHeight > -1 &&
+                        (this@scrollViewWith as? BaseController<*>)?.isDragging != true &&
+                        activity != null &&
+                        (activityBinding?.appBar?.height ?: 0) > 0 &&
+                        recycler.translationY == 0f
+                ) {
                     if (!recycler.canScrollVertically(-1)) {
                         val shortAnimationDuration =
-                            resources?.getInteger(
-                                android.R.integer.config_shortAnimTime,
-                            ) ?: 0
+                            resources?.getInteger(android.R.integer.config_shortAnimTime) ?: 0
                         activityBinding?.appBar?.y = 0f
                         activityBinding?.appBar?.updateAppBarAfterY(recycler)
                         if (router.backstackSize == 1 && isInView) {
@@ -478,10 +486,12 @@ fun Controller.scrollViewWith(
                             }
                         }
 
-                        if (!isToolbarColor &&
-                            (dy == 0 ||
-                                activityBinding?.appBar?.let { it.y <= -it.height.toFloat() } ==
-                                    true)) {
+                        if (
+                            !isToolbarColor &&
+                                (dy == 0 ||
+                                    activityBinding?.appBar?.let { it.y <= -it.height.toFloat() } ==
+                                        true)
+                        ) {
                             colorToolbar(true)
                         }
                         val notAtTop = !atTopOfRecyclerView()
@@ -498,26 +508,30 @@ fun Controller.scrollViewWith(
                 val activityBinding = activityBinding ?: return
 
                 super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE &&
-                    (this@scrollViewWith as? BaseController<*>)?.isDragging != true) {
-                    if (isControllerVisible &&
-                        statusBarHeight > -1 &&
-                        activity != null &&
-                        activityBinding.appBar.height > 0 &&
-                        recycler.translationY == 0f) {
+                if (
+                    newState == RecyclerView.SCROLL_STATE_IDLE &&
+                        (this@scrollViewWith as? BaseController<*>)?.isDragging != true
+                ) {
+                    if (
+                        isControllerVisible &&
+                            statusBarHeight > -1 &&
+                            activity != null &&
+                            activityBinding.appBar.height > 0 &&
+                            recycler.translationY == 0f
+                    ) {
                         val halfWay = activityBinding.appBar.height.toFloat() / 2
                         val shortAnimationDuration =
-                            resources?.getInteger(
-                                android.R.integer.config_shortAnimTime,
-                            ) ?: 0
+                            resources?.getInteger(android.R.integer.config_shortAnimTime) ?: 0
                         val closerToTop = abs(activityBinding.appBar.y) > halfWay
                         val halfWayBottom = (activityBinding.bottomNav?.height?.toFloat() ?: 0f) / 2
                         val closerToBottom =
                             activityBinding.bottomNav?.translationY ?: 0f > halfWayBottom
                         val atTop = !recycler.canScrollVertically(-1)
                         val closerToEdge =
-                            if (activityBinding.bottomNav?.isVisible == true &&
-                                preferences.hideBottomNavOnScroll().get()) {
+                            if (
+                                activityBinding.bottomNav?.isVisible == true &&
+                                    preferences.hideBottomNavOnScroll().get()
+                            ) {
                                 closerToBottom
                             } else {
                                 closerToTop
@@ -528,14 +542,13 @@ fun Controller.scrollViewWith(
                                     this@scrollViewWith.activityBinding?.appBar
                                         ?: return@snapAppBarY
                                 swipeCircle?.translationY =
-                                    max(
-                                        appBar.y,
-                                        -appBar.height + appBar.paddingTop.toFloat(),
-                                    )
+                                    max(appBar.y, -appBar.height + appBar.paddingTop.toFloat())
                             }
-                        if (activityBinding.bottomNav?.isVisible == true &&
-                            isInView &&
-                            preferences.hideBottomNavOnScroll().get()) {
+                        if (
+                            activityBinding.bottomNav?.isVisible == true &&
+                                isInView &&
+                                preferences.hideBottomNavOnScroll().get()
+                        ) {
                             activityBinding.bottomNav.let {
                                 val lastBottomY =
                                     if (closerToEdge && !atTop) it.height.toFloat() else 0f
@@ -558,7 +571,7 @@ fun Controller.scrollViewWith(
                     imm.hideSoftInputFromWindow(view.windowToken, 0)
                 }
             }
-        },
+        }
     )
     return colorToolbar
 }
@@ -635,9 +648,11 @@ fun Controller.moveRecyclerViewUp(allTheWayUp: Boolean = false, scrollUpAnyway: 
     val recycler = mainRecyclerView ?: return
     val activityBinding = activityBinding ?: return
     val appBarOffset = activityBinding.appBar.toolbarDistanceToTop
-    if (allTheWayUp &&
-        recycler.computeVerticalScrollOffset() - recycler.paddingTop <=
-            fullAppBarHeight ?: activityBinding.appBar.preLayoutHeight) {
+    if (
+        allTheWayUp &&
+            recycler.computeVerticalScrollOffset() - recycler.paddingTop <=
+                fullAppBarHeight ?: activityBinding.appBar.preLayoutHeight
+    ) {
         (recycler.layoutManager as? LinearLayoutManager)?.scrollToPosition(0)
         (recycler.layoutManager as? StaggeredGridLayoutManager)?.scrollToPosition(0)
         recycler.post {
@@ -646,16 +661,23 @@ fun Controller.moveRecyclerViewUp(allTheWayUp: Boolean = false, scrollUpAnyway: 
         }
         return
     }
-    if (scrollUpAnyway ||
-        recycler.computeVerticalScrollOffset() - recycler.paddingTop <= 0 - appBarOffset) {
+    if (
+        scrollUpAnyway ||
+            recycler.computeVerticalScrollOffset() - recycler.paddingTop <= 0 - appBarOffset
+    ) {
         (recycler.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(
-            0, activityBinding.appBar.yNeededForSmallToolbar)
+            0,
+            activityBinding.appBar.yNeededForSmallToolbar,
+        )
         (recycler.layoutManager as? StaggeredGridLayoutManager)?.scrollToPositionWithOffset(
-            0, activityBinding.appBar.yNeededForSmallToolbar)
+            0,
+            activityBinding.appBar.yNeededForSmallToolbar,
+        )
         recycler.post {
             activityBinding.appBar.updateAppBarAfterY(recycler)
             activityBinding.appBar.useSearchToolbarForMenu(
-                recycler.computeVerticalScrollOffset() != 0)
+                recycler.computeVerticalScrollOffset() != 0
+            )
         }
     }
 }
@@ -667,10 +689,13 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
     if (!isControllerVisible) return
     if (floatingBar) {
         (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(
-            context.getResourceColor(R.attr.colorPrimaryVariant))
-        if (this !is SmallToolbarInterface &&
-            activityBinding?.appBar?.useLargeToolbar == true &&
-            activityBinding?.appBar?.compactSearchMode != true) {
+            context.getResourceColor(R.attr.colorPrimaryVariant)
+        )
+        if (
+            this !is SmallToolbarInterface &&
+                activityBinding?.appBar?.useLargeToolbar == true &&
+                activityBinding?.appBar?.compactSearchMode != true
+        ) {
             val colorSurface = context.getResourceColor(R.attr.colorSurface)
             val color =
                 ColorUtils.blendARGB(
@@ -706,9 +731,7 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
                     1 - value,
                 )
             (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(
-                ColorStateList.valueOf(
-                    invColor,
-                ),
+                ColorStateList.valueOf(invColor)
             )
         }
     }

@@ -40,12 +40,14 @@ object SecureActivityDelegate {
     fun promptLockIfNeeded(activity: Activity?, requireSuccess: Boolean = false) {
         if (activity == null || AuthenticatorUtil.isAuthenticating) return
         val lockApp = securityPreferences.useBiometrics().get()
-        if (lockApp &&
-            BiometricManager.from(activity)
-                .canAuthenticate(
-                    BiometricManager.Authenticators.DEVICE_CREDENTIAL or
-                        BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
-                BiometricManager.BIOMETRIC_SUCCESS) {
+        if (
+            lockApp &&
+                BiometricManager.from(activity)
+                    .canAuthenticate(
+                        BiometricManager.Authenticators.DEVICE_CREDENTIAL or
+                            BiometricManager.Authenticators.BIOMETRIC_WEAK
+                    ) == BiometricManager.BIOMETRIC_SUCCESS
+        ) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
                 intent.putExtra("fromSearch", (activity is SearchActivity) && !requireSuccess)

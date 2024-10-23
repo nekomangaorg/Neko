@@ -102,9 +102,12 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         activity.window.navigationBarColor =
                             lerpColor(
                                 ColorUtils.setAlphaComponent(
-                                    navPrimary, if (hasLightNav) 0 else 179),
+                                    navPrimary,
+                                    if (hasLightNav) 0 else 179,
+                                ),
                                 navPrimary,
-                                trueProgress)
+                                trueProgress,
+                            )
                     }
                 }
 
@@ -115,7 +118,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         (binding.chapterRecycler.layoutManager as LinearLayoutManager)
                             .scrollToPositionWithOffset(
                                 adapter?.getPosition(
-                                    viewModel.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
+                                    viewModel.getCurrentChapter()?.chapter?.id ?: 0L
+                                ) ?: 0,
                                 binding.chapterRecycler.height / 2 - 30.dpToPx,
                             )
                         if (canShowNav) {
@@ -123,8 +127,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         }
                         activity.binding.readerNav.root.alpha = 1f
                     }
-                    if (state == BottomSheetBehavior.STATE_DRAGGING ||
-                        state == BottomSheetBehavior.STATE_SETTLING) {
+                    if (
+                        state == BottomSheetBehavior.STATE_DRAGGING ||
+                            state == BottomSheetBehavior.STATE_SETTLING
+                    ) {
                         if (canShowNav) {
                             activity.binding.readerNav.root.isVisible = true
                         }
@@ -153,7 +159,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         state == BottomSheetBehavior.STATE_EXPANDED
                     activity.reEnableBackPressedCallBack()
                 }
-            },
+            }
         )
 
         adapter = FastAdapter.with(itemAdapter)
@@ -200,7 +206,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         refreshList()
                     }
                 }
-            },
+            }
         )
 
         backgroundTintList =
@@ -209,21 +215,23 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     primary
                 } else {
                     fullPrimary
-                },
+                }
             )
 
         binding.chapterRecycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
-                    if (newState == RecyclerView.SCROLL_STATE_IDLE ||
-                        newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                    if (
+                        newState == RecyclerView.SCROLL_STATE_IDLE ||
+                            newState == RecyclerView.SCROLL_STATE_SETTLING
+                    ) {
                         sheetBehavior?.isDraggable = true
                     } else {
                         sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
                     }
                 }
-            },
+            }
         )
 
         binding.chapterRecycler.layoutManager = LinearLayoutManager(context)
@@ -266,10 +274,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun lerpColorCalc(colorStart: Int, colorEnd: Int, percent: Int): Int {
-        return (min(colorStart, colorEnd) * (100 - percent) +
-            max(
-                colorStart,
-                colorEnd,
-            ) * percent) / 100
+        return (min(colorStart, colorEnd) * (100 - percent) + max(colorStart, colorEnd) * percent) /
+            100
     }
 }

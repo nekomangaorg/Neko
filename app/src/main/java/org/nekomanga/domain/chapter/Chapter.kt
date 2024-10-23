@@ -131,7 +131,7 @@ data class SimpleChapter(
 
     fun toChapterItem(
         downloadState: Download.State = Download.State.NOT_DOWNLOADED,
-        downloadProgress: Int = 0
+        downloadProgress: Int = 0,
     ): ChapterItem =
         ChapterItem(
             chapter = this,

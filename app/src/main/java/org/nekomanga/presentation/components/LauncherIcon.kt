@@ -21,18 +21,25 @@ import org.nekomanga.R
 @Composable
 fun LauncherIcon(size: Dp) {
     ResourcesCompat.getDrawable(
-            LocalContext.current.resources, R.mipmap.ic_launcher, LocalContext.current.theme)
+            LocalContext.current.resources,
+            R.mipmap.ic_launcher,
+            LocalContext.current.theme,
+        )
         ?.let { drawable ->
             val bitmap =
                 Bitmap.createBitmap(
-                    drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+                    drawable.intrinsicWidth,
+                    drawable.intrinsicHeight,
+                    Bitmap.Config.ARGB_8888,
+                )
             val canvas = android.graphics.Canvas(bitmap)
             drawable.setBounds(0, 0, canvas.width, canvas.height)
             drawable.draw(canvas)
             Image(
                 bitmap = bitmap.asImageBitmap(),
                 contentDescription = null,
-                modifier = Modifier.requiredSize(size))
+                modifier = Modifier.requiredSize(size),
+            )
         }
 }
 

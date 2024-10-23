@@ -25,8 +25,7 @@ import org.nekomanga.presentation.theme.Shapes
  */
 enum class MangaCover(val ratio: Float) {
     Square(1f / 1f),
-    Book(2f / 3f),
-    ;
+    Book(2f / 3f);
 
     @Composable
     operator fun invoke(
@@ -50,7 +49,8 @@ enum class MangaCover(val ratio: Float) {
                     this.border(
                         width = Outline.thickness,
                         color = Outline.color,
-                        shape = RoundedCornerShape(Shapes.coverRadius))
+                        shape = RoundedCornerShape(Shapes.coverRadius),
+                    )
                 },
         )
     }

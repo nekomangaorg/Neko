@@ -21,23 +21,17 @@ interface BrowseFilterQueries : DbProvider {
                     .table(BrowseFilterTable.TABLE)
                     .where("${BrowseFilterTable.COL_NAME} = ?")
                     .whereArgs(name)
-                    .build(),
+                    .build()
             )
             .prepare()
 
     fun deleteAllBrowseFilters() =
-        db.delete()
-            .byQuery(
-                DeleteQuery.builder().table(BrowseFilterTable.TABLE).build(),
-            )
-            .prepare()
+        db.delete().byQuery(DeleteQuery.builder().table(BrowseFilterTable.TABLE).build()).prepare()
 
     fun getBrowseFilters() =
         db.get()
             .listOfObjects(BrowseFilterImpl::class.java)
-            .withQuery(
-                Query.builder().table(BrowseFilterTable.TABLE).build(),
-            )
+            .withQuery(Query.builder().table(BrowseFilterTable.TABLE).build())
             .prepare()
 
     fun getDefault() =
@@ -48,7 +42,7 @@ interface BrowseFilterQueries : DbProvider {
                     .table(BrowseFilterTable.TABLE)
                     .where("${BrowseFilterTable.COL_DEFAULT} = ?")
                     .whereArgs(true)
-                    .build(),
+                    .build()
             )
             .prepare()
 }

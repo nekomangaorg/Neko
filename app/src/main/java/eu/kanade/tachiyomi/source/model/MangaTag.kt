@@ -79,8 +79,7 @@ enum class MangaTag(val uuid: String, val prettyPrint: String) : Parcelable {
     VILLAINESS("d14322ac-4d6f-4e9b-afd9-629d5f4d8a41", "Villainess"),
     VIRTUAL_REALITY("8c86611e-fab7-4986-9dec-d1a2f44acdd5", "Virtual Reality"),
     WEB_COMIC("e197df38-d0e7-43b5-9b09-2842d0c326dd", "Web Comic"),
-    WUXIA("acc803a4-c95a-4c22-86fc-eb6b582d82a2", "Wuxia"),
-    ;
+    WUXIA("acc803a4-c95a-4c22-86fc-eb6b582d82a2", "Wuxia");
 
     companion object {
 

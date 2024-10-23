@@ -10,11 +10,7 @@ import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
  * @param context the context of the fragment containing this adapter.
  */
 class DownloadAdapter(controller: DownloadItemListener) :
-    FlexibleAdapter<AbstractFlexibleItem<*>>(
-        null,
-        controller,
-        true,
-    ) {
+    FlexibleAdapter<AbstractFlexibleItem<*>>(null, controller, true) {
 
     /** Listener called when an item of the list is released. */
     val downloadItemListener: DownloadItemListener = controller

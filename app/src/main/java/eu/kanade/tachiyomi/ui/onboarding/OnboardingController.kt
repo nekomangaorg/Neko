@@ -53,7 +53,8 @@ class OnboardingController : BasicComposeController() {
                 if (currentStep > 0) {
                     currentStep--
                 }
-            })
+            },
+        )
 
         InfoScreen(
             headingText = stringResource(R.string.onboarding_heading),
@@ -63,7 +64,7 @@ class OnboardingController : BasicComposeController() {
                     when (isLastStep) {
                         true -> R.string.onboarding_action_finish
                         false -> R.string.onboarding_action_next
-                    },
+                    }
                 ),
             tint = MaterialTheme.colorScheme.primary,
             canAccept = steps[currentStep].isComplete,
@@ -75,27 +76,28 @@ class OnboardingController : BasicComposeController() {
                     }
                     false -> currentStep++
                 }
-            }) {
-                Box(
-                    modifier =
-                        Modifier.padding(vertical = Size.small)
-                            .clip(MaterialTheme.shapes.small)
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                ) {
-                    AnimatedContent(
-                        targetState = currentStep,
-                        transitionSpec = {
-                            materialSharedAxisX(
-                                forward = targetState > initialState,
-                                slideDistance = slideDistance,
-                            )
-                        },
-                        label = "stepContent",
-                    ) { step ->
-                        steps[step].Content()
-                    }
+            },
+        ) {
+            Box(
+                modifier =
+                    Modifier.padding(vertical = Size.small)
+                        .clip(MaterialTheme.shapes.small)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                AnimatedContent(
+                    targetState = currentStep,
+                    transitionSpec = {
+                        materialSharedAxisX(
+                            forward = targetState > initialState,
+                            slideDistance = slideDistance,
+                        )
+                    },
+                    label = "stepContent",
+                ) { step ->
+                    steps[step].Content()
                 }
             }
+        }
     }
 }

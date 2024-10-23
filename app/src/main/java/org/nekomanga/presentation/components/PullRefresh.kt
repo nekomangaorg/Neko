@@ -33,9 +33,7 @@ fun PullRefresh(
     Box(Modifier.pullRefresh(state, !refreshing)) {
         content()
 
-        Box(
-            Modifier.padding().matchParentSize().clipToBounds(),
-        ) {
+        Box(Modifier.padding().matchParentSize().clipToBounds()) {
             PullRefreshIndicator(
                 refreshing = refreshing,
                 state = state,

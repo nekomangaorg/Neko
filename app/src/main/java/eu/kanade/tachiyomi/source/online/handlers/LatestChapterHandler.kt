@@ -33,7 +33,7 @@ class LatestChapterHandler {
     suspend fun getPage(
         page: Int = 1,
         blockedScanlatorUUIDs: List<String>,
-        limit: Int = MdConstants.Limits.latest
+        limit: Int = MdConstants.Limits.latest,
     ): Result<MangaListPage, ResultError> {
         if (page == 1) uniqueManga.clear()
         return withContext(Dispatchers.IO) {
@@ -104,13 +104,17 @@ class LatestChapterHandler {
                                     val chapterName =
                                         result[it.id]?.firstOrNull()?.buildChapterName() ?: ""
                                     it.toSourceManga(
-                                        coverQuality = thumbQuality, displayText = chapterName)
+                                        coverQuality = thumbQuality,
+                                        displayText = chapterName,
+                                    )
                                 }
 
                         Ok(
                             MangaListPage(
                                 sourceManga = mangaList.toPersistentList(),
-                                hasNextPage = hasMoreResults))
+                                hasNextPage = hasMoreResults,
+                            )
+                        )
                     }
             }
             .getOrElse { e ->

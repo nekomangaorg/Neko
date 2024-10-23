@@ -18,11 +18,8 @@ class OneWayFadeChangeHandler : FadeChangeHandler {
 
     constructor(
         duration: Long,
-        removesFromViewOnPush: Boolean
-    ) : super(
-        duration,
-        removesFromViewOnPush,
-    )
+        removesFromViewOnPush: Boolean,
+    ) : super(duration, removesFromViewOnPush)
 
     var fadeOut = true
 

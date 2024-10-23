@@ -25,7 +25,7 @@ class DisplayRepository(
 
     suspend fun getPage(
         page: Int,
-        displayScreenType: DisplayScreenType
+        displayScreenType: DisplayScreenType,
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return when (displayScreenType) {
             is DisplayScreenType.LatestChapters -> getLatestChapterPage(page)

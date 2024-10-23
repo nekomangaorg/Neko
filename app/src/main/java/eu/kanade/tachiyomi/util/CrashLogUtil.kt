@@ -45,8 +45,8 @@ class CrashLogUtil(private val context: Context) {
                 storageManager
                     .getCrashLogDirectory()
                     ?.createFile(
-                        "neko_crash_log-${SimpleDateFormat("yyyyMMddHHmm").format(Date())}.txt")
-                    ?: return@withNonCancellableContext
+                        "neko_crash_log-${SimpleDateFormat("yyyyMMddHHmm").format(Date())}.txt"
+                    ) ?: return@withNonCancellableContext
 
             uniFile
                 .openOutputStream()

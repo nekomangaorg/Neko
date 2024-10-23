@@ -22,14 +22,16 @@ class RecentMangaDivider(context: Context) :
     override fun onDraw(
         c: Canvas,
         parent: androidx.recyclerview.widget.RecyclerView,
-        state: androidx.recyclerview.widget.RecyclerView.State
+        state: androidx.recyclerview.widget.RecyclerView.State,
     ) {
         val childCount = parent.childCount
         for (i in 0 until childCount - 1) {
             val child = parent.getChildAt(i)
             val holder = parent.getChildViewHolder(child)
-            if (holder is RecentMangaHolder &&
-                parent.getChildViewHolder(parent.getChildAt(i + 1)) is RecentMangaHolder) {
+            if (
+                holder is RecentMangaHolder &&
+                    parent.getChildViewHolder(parent.getChildAt(i + 1)) is RecentMangaHolder
+            ) {
                 val params =
                     child.layoutParams as androidx.recyclerview.widget.RecyclerView.LayoutParams
                 val top = child.bottom + params.bottomMargin

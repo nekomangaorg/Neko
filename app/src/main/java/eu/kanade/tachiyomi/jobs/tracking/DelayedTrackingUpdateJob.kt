@@ -26,7 +26,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
     private data class DelayedTracking(
         val mangaId: Long,
         val syncId: Int,
-        val lastReadChapter: Float
+        val lastReadChapter: Float,
     ) {
         fun print() = "$mangaId:$syncId:$lastReadChapter"
     }

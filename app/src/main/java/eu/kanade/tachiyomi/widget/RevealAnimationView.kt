@@ -41,7 +41,7 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
                     super.onAnimationEnd(animation)
                     this@RevealAnimationView.visibility = View.INVISIBLE
                 }
-            },
+            }
         )
 
         anim.start()
@@ -62,13 +62,7 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
 
         // Create animation
         val anim =
-            ViewAnimationUtils.createCircularReveal(
-                this,
-                centerX,
-                centerY,
-                0f,
-                height.toFloat(),
-            )
+            ViewAnimationUtils.createCircularReveal(this, centerX, centerY, 0f, height.toFloat())
 
         // Set duration of animation
         anim.duration = 350

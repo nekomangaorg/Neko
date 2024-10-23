@@ -8,9 +8,7 @@ import com.google.accompanist.themeadapter.material3.createMdc3Theme
 import org.nekomanga.presentation.theme.Typefaces.appTypography
 
 @Composable
-fun NekoTheme(
-    content: @Composable () -> Unit,
-) {
+fun NekoTheme(content: @Composable () -> Unit) {
     val context = LocalContext.current
 
     val (colorScheme) =
@@ -21,9 +19,5 @@ fun NekoTheme(
             readTypography = false,
         )
 
-    MaterialTheme(
-        colorScheme = colorScheme!!,
-        typography = appTypography,
-        content = content,
-    )
+    MaterialTheme(colorScheme = colorScheme!!, typography = appTypography, content = content)
 }

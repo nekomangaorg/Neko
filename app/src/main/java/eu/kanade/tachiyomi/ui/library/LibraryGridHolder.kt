@@ -75,7 +75,7 @@ class LibraryGridHolder(
         binding.coverConstraint.backgroundColor =
             mangaColor?.first ?: itemView.context.getResourceColor(R.attr.background)
         binding.behindTitle.setTextColor(
-            mangaColor?.second ?: itemView.context.getResourceColor(R.attr.colorOnBackground),
+            mangaColor?.second ?: itemView.context.getResourceColor(R.attr.colorOnBackground)
         )
         val authorArtist =
             if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
@@ -142,7 +142,7 @@ class LibraryGridHolder(
                     if (!fixedSize && !hasRatio && MangaCoverMetadata.getRatio(manga) != null) {
                         setFreeformCoverRatio(manga)
                     }
-                },
+                }
             )
         }
     }

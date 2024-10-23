@@ -45,9 +45,11 @@ class SearchActivity : MainActivity() {
         binding.toolbar.setNavigationOnClickListener { popToRoot() }
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
-            if ((rootSearchController is RootSearchInterface ||
-                (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)) &&
-                rootSearchController !is SmallToolbarInterface) {
+            if (
+                (rootSearchController is RootSearchInterface ||
+                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)) &&
+                    rootSearchController !is SmallToolbarInterface
+            ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
             } else {
                 popToRoot()
@@ -91,7 +93,7 @@ class SearchActivity : MainActivity() {
         show: Boolean,
         solidBG: Boolean,
         changeBG: Boolean,
-        showSearchAnyway: Boolean
+        showSearchAnyway: Boolean,
     ) {
         super.setFloatingToolbar(show, solidBG, changeBG, showSearchAnyway)
         val useLargeTB = binding.appBar.useLargeToolbar
@@ -202,20 +204,17 @@ class SearchActivity : MainActivity() {
                                     MdConstants.DeepLinkPrefix.manga + id
                                 }
                             }
-                        router.replaceTopController(
-                            BrowseController(
-                                    query,
-                                )
-                                .withFadeTransaction(),
-                        )
+                        router.replaceTopController(BrowseController(query).withFadeTransaction())
                     }
                 }
             }
             SHORTCUT_MANGA,
             SHORTCUT_MANGA_BACK -> {
                 val extras = intent.extras ?: return false
-                if (intent.action == SHORTCUT_MANGA_BACK &&
-                    preferences.openChapterInShortcuts().get()) {
+                if (
+                    intent.action == SHORTCUT_MANGA_BACK &&
+                        preferences.openChapterInShortcuts().get()
+                ) {
                     val mangaId = extras.getLong(MangaDetailController.MANGA_EXTRA)
                     if (mangaId != 0L) {
                         val db = Injekt.get<DatabaseHelper>()
@@ -239,7 +238,7 @@ class SearchActivity : MainActivity() {
                 router.replaceTopController(
                     RouterTransaction.with(MangaDetailController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler()),
+                        .popChangeHandler(FadeChangeHandler())
                 )
             }
             SHORTCUT_SOURCE -> {
@@ -248,14 +247,14 @@ class SearchActivity : MainActivity() {
                 router.replaceTopController(
                     RouterTransaction.with(BrowseController())
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler()),
+                        .popChangeHandler(FadeChangeHandler())
                 )
             }
             SHORTCUT_READER_SETTINGS -> {
                 router.replaceTopController(
                     RouterTransaction.with(SettingsReaderController())
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler()),
+                        .popChangeHandler(FadeChangeHandler())
                 )
             }
             else -> return false
@@ -265,20 +264,12 @@ class SearchActivity : MainActivity() {
 
     companion object {
         fun openMangaIntent(context: Context, id: Long?, canReturnToMain: Boolean = false) =
-            Intent(
-                    context,
-                    SearchActivity::class.java,
-                )
-                .apply {
-                    action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
-                    putExtra(MangaDetailController.MANGA_EXTRA, id)
-                }
+            Intent(context, SearchActivity::class.java).apply {
+                action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
+                putExtra(MangaDetailController.MANGA_EXTRA, id)
+            }
 
         fun openReaderSettings(context: Context) =
-            Intent(
-                    context,
-                    SearchActivity::class.java,
-                )
-                .apply { action = SHORTCUT_READER_SETTINGS }
+            Intent(context, SearchActivity::class.java).apply { action = SHORTCUT_READER_SETTINGS }
     }
 }

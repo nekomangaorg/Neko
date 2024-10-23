@@ -11,7 +11,7 @@ import tachiyomi.core.preference.Preference
 abstract class ViewerConfig(
     preferences: PreferencesHelper,
     readerPreferences: ReaderPreferences,
-    protected val scope: CoroutineScope
+    protected val scope: CoroutineScope,
 ) {
 
     var imagePropertyChangedListener: (() -> Unit)? = null
@@ -54,10 +54,7 @@ abstract class ViewerConfig(
             .register({ alwaysShowChapterTransition = it })
     }
 
-    fun <T> Preference<T>.register(
-        valueAssignment: (T) -> Unit,
-        onChanged: (T) -> Unit = {},
-    ) {
+    fun <T> Preference<T>.register(valueAssignment: (T) -> Unit, onChanged: (T) -> Unit = {}) {
         changes()
             .onEach {
                 valueAssignment(it)

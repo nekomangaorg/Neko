@@ -50,7 +50,7 @@ fun SwipeableSnackbarHost(
             onDispose {
                 when (swipeableState.currentValue) {
                     SwipeDirection.Right,
-                    SwipeDirection.Left, -> {
+                    SwipeDirection.Left -> {
                         hostState.currentSnackbarData?.dismiss()
                     }
                     else -> {

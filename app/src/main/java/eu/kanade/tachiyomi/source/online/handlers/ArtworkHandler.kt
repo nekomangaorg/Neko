@@ -35,7 +35,10 @@ class ArtworkHandler {
                         true ->
                             artwork +
                                 fetchRestOfArtwork(
-                                    mangaUUID, relationshipDtoList.limit, relationshipDtoList.total)
+                                    mangaUUID,
+                                    relationshipDtoList.limit,
+                                    relationshipDtoList.total,
+                                )
                         false -> artwork
                     }.map {
                         SourceArtwork(
@@ -46,7 +49,7 @@ class ArtworkHandler {
                                 else "",
                             description = it.attributes.description ?: "",
                         )
-                    },
+                    }
                 )
             }
         }
@@ -55,7 +58,7 @@ class ArtworkHandler {
     private suspend fun fetchRestOfArtwork(
         mangaUUID: String,
         limit: Int,
-        total: Int
+        total: Int,
     ): List<RelationshipDto> {
         return withContext(Dispatchers.IO) {
             val totalRequestNo = (total / limit)
@@ -70,7 +73,7 @@ class ArtworkHandler {
 
     private suspend fun fetchArtwork(
         mangaUUID: String,
-        offset: Int
+        offset: Int,
     ): Result<RelationshipDtoList, ResultError> {
         return service
             .viewArtwork(mangaUUID = mangaUUID, limit = MdConstants.Limits.artwork, offset = offset)

@@ -41,9 +41,11 @@ constructor(context: Context, attrs: AttributeSet? = null) : FastScroller(contex
 
     // Overriding to force a distance moved before scrolling
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (controller?.isDragging == true ||
-            recyclerView.computeVerticalScrollRange() <=
-                recyclerView.computeVerticalScrollExtent()) {
+        if (
+            controller?.isDragging == true ||
+                recyclerView.computeVerticalScrollRange() <=
+                    recyclerView.computeVerticalScrollExtent()
+        ) {
             return if (startY > -1f || controller?.isDragging == true) {
                 dispatchTouchToRecycler(event)
                 false
@@ -54,11 +56,13 @@ constructor(context: Context, attrs: AttributeSet? = null) : FastScroller(contex
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                if (if (context.resources.isLTR) {
-                    event.x < handle.x - handle.paddingStart
-                } else {
-                    event.x > handle.width + handle.paddingStart
-                }) {
+                if (
+                    if (context.resources.isLTR) {
+                        event.x < handle.x - handle.paddingStart
+                    } else {
+                        event.x > handle.width + handle.paddingStart
+                    }
+                ) {
                     return false
                 }
                 val y = event.y
@@ -105,7 +109,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : FastScroller(contex
 
     private fun dispatchTouchToRecycler(
         event: MotionEvent,
-        block: (MotionEvent.() -> Unit)? = null
+        block: (MotionEvent.() -> Unit)? = null,
     ) {
         val ev2 = MotionEvent.obtain(event)
         ev2.offsetLocation(this.x, this.y)
@@ -151,10 +155,12 @@ constructor(context: Context, attrs: AttributeSet? = null) : FastScroller(contex
                         verticalScrollOffset.toFloat() / (verticalScrollRange - height).toFloat()
                     setBubbleAndHandlePosition(height * proportion)
                     // If scroll amount is small, don't show it
-                    if (minimumScrollThreshold == 0 ||
-                        dy == 0 ||
-                        abs(dy) > minimumScrollThreshold ||
-                        scrollbarAnimator.isAnimating) {
+                    if (
+                        minimumScrollThreshold == 0 ||
+                            dy == 0 ||
+                            abs(dy) > minimumScrollThreshold ||
+                            scrollbarAnimator.isAnimating
+                    ) {
                         showScrollbar()
                         if (autoHideEnabled) hideScrollbar()
                     }

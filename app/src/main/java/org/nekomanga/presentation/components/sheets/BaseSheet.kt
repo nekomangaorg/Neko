@@ -33,27 +33,25 @@ fun BaseSheet(
 ) {
     CompositionLocalProvider(
         LocalRippleTheme provides themeColor.rippleTheme,
-        LocalTextSelectionColors provides themeColor.textSelectionColors) {
-            val screenHeight = LocalConfiguration.current.screenHeightDp
-            val maxSheetHeight = screenHeight * maxSheetHeightPercentage
-            val minSheetHeight = screenHeight * minSheetHeightPercentage
-            ElevatedCard(
-                modifier =
-                    Modifier.fillMaxWidth().requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
-                shape =
-                    RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd = Shapes.sheetRadius),
-            ) {
-                Column(
-                    modifier = Modifier.navigationBarsPadding().imePadding(),
-                ) {
-                    if (showHandle) {
-                        sheetHandle()
-                    }
-
-                    Gap(topPaddingAroundContent)
-                    content()
-                    Gap(bottomPaddingAroundContent)
+        LocalTextSelectionColors provides themeColor.textSelectionColors,
+    ) {
+        val screenHeight = LocalConfiguration.current.screenHeightDp
+        val maxSheetHeight = screenHeight * maxSheetHeightPercentage
+        val minSheetHeight = screenHeight * minSheetHeightPercentage
+        ElevatedCard(
+            modifier =
+                Modifier.fillMaxWidth().requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
+            shape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd = Shapes.sheetRadius),
+        ) {
+            Column(modifier = Modifier.navigationBarsPadding().imePadding()) {
+                if (showHandle) {
+                    sheetHandle()
                 }
+
+                Gap(topPaddingAroundContent)
+                content()
+                Gap(bottomPaddingAroundContent)
             }
         }
+    }
 }

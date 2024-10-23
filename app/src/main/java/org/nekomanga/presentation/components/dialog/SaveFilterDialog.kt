@@ -31,7 +31,7 @@ fun SaveFilterDialog(
     themeColorState: ThemeColorState,
     currentSavedFilters: List<BrowseFilterImpl>,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     val context = LocalContext.current
     var saveFilterText by remember { mutableStateOf("") }
@@ -40,69 +40,71 @@ fun SaveFilterDialog(
 
     CompositionLocalProvider(
         LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors) {
-            LaunchedEffect(saveFilterText, currentSavedFilters) {
-                if (saveFilterText.isEmpty()) {
-                    saveEnabled = false
-                    errorMessage = ""
-                } else if (currentSavedFilters.any { it.name.equals(saveFilterText, true) }) {
-                    saveEnabled = false
-                    errorMessage = context.getString(R.string.filter_with_name_exists)
-                } else {
-                    saveEnabled = true
-                    errorMessage = ""
-                }
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
+    ) {
+        LaunchedEffect(saveFilterText, currentSavedFilters) {
+            if (saveFilterText.isEmpty()) {
+                saveEnabled = false
+                errorMessage = ""
+            } else if (currentSavedFilters.any { it.name.equals(saveFilterText, true) }) {
+                saveEnabled = false
+                errorMessage = context.getString(R.string.filter_with_name_exists)
+            } else {
+                saveEnabled = true
+                errorMessage = ""
             }
-
-            AlertDialog(
-                title = { Text(text = stringResource(id = R.string.save_filter)) },
-                text = {
-                    Column {
-                        OutlinedTextField(
-                            value = saveFilterText,
-                            onValueChange = { saveFilterText = it },
-                            label = { Text(text = stringResource(id = R.string.name)) },
-                            singleLine = true,
-                            maxLines = 1,
-                            colors =
-                                TextFieldDefaults.outlinedTextFieldColors(
-                                    cursorColor = themeColorState.buttonColor,
-                                    focusedLabelColor = themeColorState.buttonColor,
-                                    focusedBorderColor = themeColorState.buttonColor,
-                                ),
-                        )
-                        Gap(Size.extraTiny)
-                        Text(
-                            text = errorMessage,
-                            style =
-                                MaterialTheme.typography.labelSmall.copy(
-                                    color = MaterialTheme.colorScheme.error))
-                    }
-                },
-                onDismissRequest = onDismiss,
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            onConfirm(saveFilterText)
-                            onDismiss()
-                        },
-                        enabled = saveEnabled,
-                        colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = themeColorState.buttonColor),
-                    ) {
-                        Text(text = stringResource(id = R.string.save))
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = onDismiss,
-                        colors =
-                            ButtonDefaults.textButtonColors(
-                                contentColor = themeColorState.buttonColor)) {
-                            Text(text = stringResource(id = R.string.cancel))
-                        }
-                },
-            )
         }
+
+        AlertDialog(
+            title = { Text(text = stringResource(id = R.string.save_filter)) },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = saveFilterText,
+                        onValueChange = { saveFilterText = it },
+                        label = { Text(text = stringResource(id = R.string.name)) },
+                        singleLine = true,
+                        maxLines = 1,
+                        colors =
+                            TextFieldDefaults.outlinedTextFieldColors(
+                                cursorColor = themeColorState.buttonColor,
+                                focusedLabelColor = themeColorState.buttonColor,
+                                focusedBorderColor = themeColorState.buttonColor,
+                            ),
+                    )
+                    Gap(Size.extraTiny)
+                    Text(
+                        text = errorMessage,
+                        style =
+                            MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.error
+                            ),
+                    )
+                }
+            },
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onConfirm(saveFilterText)
+                        onDismiss()
+                    },
+                    enabled = saveEnabled,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
+                    Text(text = stringResource(id = R.string.save))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDismiss,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            },
+        )
+    }
 }

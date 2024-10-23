@@ -33,7 +33,7 @@ import org.nekomanga.presentation.theme.Size
 fun SimpleStats(
     statsState: StatsConstants.SimpleState,
     contentPadding: PaddingValues,
-    windowSizeClass: WindowSizeClass
+    windowSizeClass: WindowSizeClass,
 ) {
     val na = stringResource(id = R.string.n_a)
 
@@ -91,26 +91,27 @@ fun SimpleStats(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = contentPadding,
-        verticalArrangement = verticalArrangement) {
-            val axisPadding =
-                when (isTablet) {
-                    true -> 16.dp
-                    false -> Size.small
-                }
+        verticalArrangement = verticalArrangement,
+    ) {
+        val axisPadding =
+            when (isTablet) {
+                true -> 16.dp
+                false -> Size.small
+            }
 
-            item {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth().padding(Size.medium),
-                    horizontalArrangement =
-                        Arrangement.spacedBy(axisPadding, Alignment.CenterHorizontally),
-                    verticalArrangement =
-                        Arrangement.spacedBy(axisPadding, Alignment.CenterVertically)) {
-                        stats.forEach {
-                            BasicStat(value = it.first, label = it.second, isTablet = isTablet)
-                        }
-                    }
+        item {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(Size.medium),
+                horizontalArrangement =
+                    Arrangement.spacedBy(axisPadding, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(axisPadding, Alignment.CenterVertically),
+            ) {
+                stats.forEach {
+                    BasicStat(value = it.first, label = it.second, isTablet = isTablet)
+                }
             }
         }
+    }
 }
 
 @Composable
@@ -121,23 +122,24 @@ private fun BasicStat(value: String, label: String, isTablet: Boolean) {
                 Triple(
                     MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.SemiBold),
                     MaterialTheme.typography.titleMedium,
-                    20.dp)
+                    20.dp,
+                )
             false ->
                 Triple(
                     MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                     MaterialTheme.typography.labelMedium,
-                    12.dp)
+                    12.dp,
+                )
         }
 
-    ElevatedCard(
-        shape = RoundedCornerShape(25),
-    ) {
+    ElevatedCard(shape = RoundedCornerShape(25)) {
         Box(modifier = Modifier.padding(padding)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = value,
                     style = titleTypography,
-                    color = MaterialTheme.colorScheme.primary)
+                    color = MaterialTheme.colorScheme.primary,
+                )
                 Text(text = label, style = labelTypography)
             }
         }

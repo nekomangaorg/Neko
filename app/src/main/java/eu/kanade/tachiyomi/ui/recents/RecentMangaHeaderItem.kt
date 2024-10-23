@@ -54,11 +54,7 @@ class RecentMangaHeaderItem(val recentsType: Int) :
     }
 
     class Holder(val view: View, adapter: RecentMangaAdapter) :
-        BaseFlexibleViewHolder(
-            view,
-            adapter,
-            true,
-        ) {
+        BaseFlexibleViewHolder(view, adapter, true) {
 
         private val binding = RecentsHeaderItemBinding.bind(view)
 
@@ -69,7 +65,7 @@ class RecentMangaHeaderItem(val recentsType: Int) :
                     NEW_CHAPTERS -> R.string.new_chapters
                     NEWLY_ADDED -> R.string.newly_added
                     else -> R.string.continue_reading
-                },
+                }
             )
         }
 

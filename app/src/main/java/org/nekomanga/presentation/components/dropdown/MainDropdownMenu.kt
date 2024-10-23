@@ -49,11 +49,7 @@ fun MainDropdownMenu(
     val background = MaterialTheme.colorScheme.background
     val secondary = MaterialTheme.colorScheme.secondary
     val backgroundArgb = remember {
-        ColorUtils.blendARGB(
-            background.toArgb(),
-            secondary.toArgb(),
-            0.05f,
-        )
+        ColorUtils.blendARGB(background.toArgb(), secondary.toArgb(), 0.05f)
     }
     MaterialTheme(
         colorScheme = MaterialTheme.colorScheme.copy(surface = MaterialTheme.colorScheme.surface),
@@ -119,7 +115,7 @@ private fun Row(
     subTitle: UiText? = null,
     icon: UiIcon,
     onClick: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     MaterialDropdownMenuItem(
         text = {
@@ -128,7 +124,10 @@ private fun Row(
                     text = title.asString(),
                     style =
                         MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp))
+                            color = MaterialTheme.colorScheme.onSurface,
+                            letterSpacing = (-.5).sp,
+                        ),
+                )
                 if (subTitle != null) {
                     Text(
                         text = subTitle.asString(),
@@ -136,8 +135,10 @@ private fun Row(
                             MaterialTheme.typography.bodySmall.copy(
                                 color =
                                     MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = NekoColors.mediumAlphaLowContrast),
-                                letterSpacing = (-.5).sp),
+                                        alpha = NekoColors.mediumAlphaLowContrast
+                                    ),
+                                letterSpacing = (-.5).sp,
+                            ),
                     )
                 }
             }
@@ -149,12 +150,14 @@ private fun Row(
                         imageVector = icon.icon,
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface)
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
                 is UiIcon.IIcon ->
                     Image(
                         asset = icon.icon,
                         modifier = Modifier.size(24.dp),
-                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface))
+                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface),
+                    )
             }
         },
         onClick = {

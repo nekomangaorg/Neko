@@ -68,10 +68,7 @@ class SimilarRepository {
                         logTimeTaken("MU Recs:") {
                             createGroup(
                                 R.string.manga_updates,
-                                similarHandler.fetchSimilarExternalMUManga(
-                                    dexId,
-                                    actualRefresh,
-                                ),
+                                similarHandler.fetchSimilarExternalMUManga(dexId, actualRefresh),
                             )
                         }
                     }
@@ -84,10 +81,7 @@ class SimilarRepository {
                         logTimeTaken("Anilist Recs:") {
                             createGroup(
                                 R.string.anilist,
-                                similarHandler.fetchAnilist(
-                                    dexId,
-                                    actualRefresh,
-                                ),
+                                similarHandler.fetchAnilist(dexId, actualRefresh),
                             )
                         }
                     }
@@ -100,10 +94,7 @@ class SimilarRepository {
                         logTimeTaken("Mal Recs:") {
                             createGroup(
                                 R.string.myanimelist,
-                                similarHandler.fetchSimilarExternalMalManga(
-                                    dexId,
-                                    actualRefresh,
-                                ),
+                                similarHandler.fetchSimilarExternalMalManga(dexId, actualRefresh),
                             )
                         }
                     }
@@ -112,7 +103,12 @@ class SimilarRepository {
             }
 
             listOfNotNull(
-                related.await(), similar.await(), mu.await(), anilist.await(), mal.await())
+                related.await(),
+                similar.await(),
+                mu.await(),
+                anilist.await(),
+                mal.await(),
+            )
         }
     }
 
@@ -120,10 +116,7 @@ class SimilarRepository {
         return if (manga.isEmpty()) {
             null
         } else {
-            SimilarMangaGroup(
-                id,
-                manga.map { it.toDisplayManga(db, mangaDex.id) },
-            )
+            SimilarMangaGroup(id, manga.map { it.toDisplayManga(db, mangaDex.id) })
         }
     }
 }

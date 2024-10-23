@@ -78,7 +78,8 @@ class PageHandler {
 
                 if (chapterDateNewer) {
                     throw Exception(
-                        "This chapter has no pages, it might not be release yet, try refreshing")
+                        "This chapter has no pages, it might not be release yet, try refreshing"
+                    )
                 }
 
                 val atHomeDto =
@@ -102,11 +103,7 @@ class PageHandler {
         }
     }
 
-    fun pageListParse(
-        chapterId: String,
-        atHomeDto: AtHomeDto,
-        dataSaver: Boolean,
-    ): List<Page> {
+    fun pageListParse(chapterId: String, atHomeDto: AtHomeDto, dataSaver: Boolean): List<Page> {
         val hash = atHomeDto.chapter.hash
         val pageArray =
             if (dataSaver) {

@@ -14,11 +14,8 @@ import org.nekomanga.R
 
 class TriStateListPreference
 @JvmOverloads
-constructor(
-    activity: Activity?,
-    context: Context,
-    attrs: AttributeSet? = null,
-) : ListMatPreference(activity, context, attrs) {
+constructor(activity: Activity?, context: Context, attrs: AttributeSet? = null) :
+    ListMatPreference(activity, context, attrs) {
 
     var allSelectionRes: Int? = null
     var excludeKey: String? = null
@@ -114,7 +111,7 @@ constructor(
                     TriStateCheckBox.State.CHECKED.ordinal
                 } else {
                     TriStateCheckBox.State.UNCHECKED.ordinal
-                },
+                }
             )
         val preselected =
             if (allSelectionRes != null && !showAllLast) {

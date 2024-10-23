@@ -66,7 +66,8 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         runningDrawable.centerRadius = 6f.dpToPx
         runningDrawable.strokeWidth = 2f.dpToPx
         runningDrawable.setColorSchemeColors(
-            itemView.context.getResourceColor(R.attr.colorSecondary))
+            itemView.context.getResourceColor(R.attr.colorSecondary)
+        )
 
         binding.endRefresh.setImageDrawable(progressDrawableEnd)
         binding.startRefresh.setImageDrawable(progressDrawableStart)
@@ -194,7 +195,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 R.drawable.ic_expand_more_24dp
             } else {
                 R.drawable.ic_expand_less_24dp
-            },
+            }
         )
         when {
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
@@ -327,8 +328,9 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 }
             } else {
                 val sortingMode = LibrarySort.valueOf(menuId) ?: LibrarySort.Title
-                if (sortingMode != LibrarySort.DragAndDrop &&
-                    sortingMode == category.sortingMode()) {
+                if (
+                    sortingMode != LibrarySort.DragAndDrop && sortingMode == category.sortingMode()
+                ) {
                     onCatSortClicked(category, null)
                     return
                 }
@@ -355,7 +357,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 contentView.context.getResourceColor(R.attr.colorSecondary)
             } else {
                 ContextCompat.getColor(contentView.context, R.color.gray_button)
-            },
+            }
         )
         binding.checkbox.setImageDrawable(tintedDrawable)
     }

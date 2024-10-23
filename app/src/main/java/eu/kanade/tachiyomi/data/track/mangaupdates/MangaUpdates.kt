@@ -107,7 +107,7 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun search(
         query: String,
         manga: Manga,
-        wasPreviouslyTracked: Boolean
+        wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         return api.search(query, manga, wasPreviouslyTracked).map { it.toTrackSearch(id) }
     }

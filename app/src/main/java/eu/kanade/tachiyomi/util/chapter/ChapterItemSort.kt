@@ -23,11 +23,7 @@ class ChapterItemSort(
         val chapters =
             when {
                 filterForReader ->
-                    chapterFilter.filterChaptersForReader(
-                        rawChapters,
-                        manga,
-                        currentChapter,
-                    )
+                    chapterFilter.filterChaptersForReader(rawChapters, manga, currentChapter)
                 andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
                 else -> rawChapters
             }

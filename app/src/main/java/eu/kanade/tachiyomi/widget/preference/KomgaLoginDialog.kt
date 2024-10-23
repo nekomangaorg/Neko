@@ -21,16 +21,7 @@ class KomgaLoginDialog(bundle: Bundle? = null) :
 
     val source: Komga by lazy { Injekt.get<SourceManager>().komga }
 
-    constructor(
-        source: Komga
-    ) : this(
-        Bundle().apply {
-            putLong(
-                "key",
-                source.id,
-            )
-        },
-    )
+    constructor(source: Komga) : this(Bundle().apply { putLong("key", source.id) })
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         binding = PrefAccountLoginBinding.inflate(activity!!.layoutInflater)
@@ -53,9 +44,11 @@ class KomgaLoginDialog(bundle: Bundle? = null) :
             binding.progress.visibility = View.VISIBLE
             binding.login.visibility = View.GONE
 
-            if (binding.username.text.isNullOrBlank() ||
-                binding.password.text.isNullOrBlank() ||
-                binding.url.text.isNullOrBlank()) {
+            if (
+                binding.username.text.isNullOrBlank() ||
+                    binding.password.text.isNullOrBlank() ||
+                    binding.url.text.isNullOrBlank()
+            ) {
                 errorResult()
                 context.toast(R.string.fields_cannot_be_blank)
                 return
@@ -72,12 +65,7 @@ class KomgaLoginDialog(bundle: Bundle? = null) :
                     val result = source.loginWithUrl(username, password, url)
                     if (result) {
                         dialog?.dismiss()
-                        preferences.setKomgaCredentials(
-                            source,
-                            username,
-                            password,
-                            url,
-                        )
+                        preferences.setKomgaCredentials(source, username, password, url)
                         context.toast(R.string.successfully_logged_in)
                         (targetController as? Listener)?.siteLoginDialogClosed(
                             source,

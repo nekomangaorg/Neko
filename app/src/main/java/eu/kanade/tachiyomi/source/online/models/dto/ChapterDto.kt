@@ -2,11 +2,7 @@ package eu.kanade.tachiyomi.source.online.models.dto
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class ChapterDto(
-    val result: String,
-    val data: ChapterDataDto,
-)
+@Serializable data class ChapterDto(val result: String, val data: ChapterDataDto)
 
 @Serializable
 data class ChapterListDto(
@@ -46,14 +42,6 @@ data class GroupListDto(
     val data: List<GroupDto>,
 )
 
-@Serializable
-data class GroupDto(
-    val id: String,
-    val attributes: GroupAttributesDto,
-)
+@Serializable data class GroupDto(val id: String, val attributes: GroupAttributesDto)
 
-@Serializable
-data class GroupAttributesDto(
-    val name: String,
-    val description: String?,
-)
+@Serializable data class GroupAttributesDto(val name: String, val description: String?)

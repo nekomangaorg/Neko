@@ -62,7 +62,7 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
                     view?.isNestedScrollingEnabled = true
                     view?.requestLayout()
                 }
-            },
+            }
         )
     }
 

@@ -210,10 +210,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                             .jsonObject["title"]!!
                             .jsonPrimitive
                             .content
-                            .contains(
-                                query,
-                                ignoreCase = true,
-                            )
+                            .contains(query, ignoreCase = true)
                     }
                     .map {
                         val id = it.jsonObject["node"]!!.jsonObject["id"]!!.jsonPrimitive.long

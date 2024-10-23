@@ -10,7 +10,7 @@ operator fun CompositeSubscription.plusAssign(subscription: Subscription) = add(
 
 fun <T, U, R> Observable<T>.combineLatest(
     o2: Observable<U>,
-    combineFn: (T, U) -> R
+    combineFn: (T, U) -> R,
 ): Observable<R> {
     return Observable.combineLatest(this, o2, combineFn)
 }

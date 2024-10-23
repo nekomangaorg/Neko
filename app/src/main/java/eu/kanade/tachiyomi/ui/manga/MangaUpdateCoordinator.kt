@@ -101,14 +101,18 @@ class MangaUpdateCoordinator {
                         manga.initialized = true
                         // This clears custom titles from j2k/sy and if MangaDex removes the title
                         manga.user_title?.let { customTitle ->
-                            if (customTitle != manga.originalTitle &&
-                                customTitle !in manga.getAltTitles()) {
+                            if (
+                                customTitle != manga.originalTitle &&
+                                    customTitle !in manga.getAltTitles()
+                            ) {
                                 manga.user_title = null
                             }
                         }
-                        if (networkManga.thumbnail_url != null &&
-                            networkManga.thumbnail_url != originalThumbnail &&
-                            originalThumbnail != MdConstants.noCoverUrl) {
+                        if (
+                            networkManga.thumbnail_url != null &&
+                                networkManga.thumbnail_url != originalThumbnail &&
+                                originalThumbnail != MdConstants.noCoverUrl
+                        ) {
                             coverCache.deleteFromCache(originalThumbnail, manga.favorite)
                         }
                         db.insertManga(manga).executeOnIO()
@@ -135,7 +139,7 @@ class MangaUpdateCoordinator {
     private fun ProducerScope<MangaResult>.startChapterJob(
         scope: CoroutineScope,
         manga: Manga,
-        mangaWasAlreadyInitialized: Boolean
+        mangaWasAlreadyInitialized: Boolean,
     ): Job {
         return scope.launchIO {
             val deferredChapters = async {
@@ -161,7 +165,9 @@ class MangaUpdateCoordinator {
                                     send(
                                         MangaResult.Error(
                                             text =
-                                                "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: ${it.message()}"))
+                                                "error with ${MergeType.getMergeTypeName(mergeManga.mergeType)}: ${it.message()}"
+                                        )
+                                    )
                                     this.cancel()
                                 }
                                 .getOrElse { emptyList() }
@@ -183,7 +189,8 @@ class MangaUpdateCoordinator {
                             manga,
                             newChapters.first
                                 .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
-                                .sortedBy { it.chapter.chapterNumber })
+                                .sortedBy { it.chapter.chapterNumber },
+                        )
                     }
                 }
                 mangaShortcutManager.updateShortcuts()

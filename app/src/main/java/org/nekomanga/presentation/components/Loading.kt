@@ -20,7 +20,7 @@ fun Loading(modifier: Modifier = Modifier) {
         modifier =
             modifier
                 .size(40.dp)
-                .background(color = MaterialTheme.colorScheme.secondary, shape = CircleShape),
+                .background(color = MaterialTheme.colorScheme.secondary, shape = CircleShape)
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(28.dp).padding(Size.extraTiny).align(Alignment.Center),

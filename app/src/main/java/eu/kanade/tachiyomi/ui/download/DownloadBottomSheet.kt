@@ -32,12 +32,7 @@ import org.nekomanga.R
 import org.nekomanga.databinding.DownloadBottomSheetBinding
 import uy.kohesive.injekt.injectLazy
 
-class DownloadBottomSheet
-@JvmOverloads
-constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-) :
+class DownloadBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     LinearLayout(context, attrs),
     DownloadAdapter.DownloadItemListener,
     FlexibleAdapter.OnActionStateListener {
@@ -119,10 +114,7 @@ constructor(
     private fun updateDLTitle(download: Download?) {
         binding.titleText.text =
             if (download != null) {
-                resources.getString(
-                    R.string.downloading_,
-                    download.chapter.name,
-                )
+                resources.getString(R.string.downloading_, download.chapter.name)
             } else {
                 ""
             }
@@ -203,7 +195,8 @@ constructor(
         binding.downloadFab.text =
             context.getString(if (isRunning) R.string.pause else R.string.resume)
         binding.downloadFab.setIconResource(
-            if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp)
+            if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp
+        )
     }
 
     fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -226,7 +219,7 @@ constructor(
 
     private fun <R : Comparable<R>> reorderQueue(
         selector: (DownloadItem) -> R,
-        reverse: Boolean = false
+        reverse: Boolean = false,
     ) {
         val adapter = adapter ?: return
         val newDownloads = mutableListOf<Download>()

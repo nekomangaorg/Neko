@@ -58,7 +58,8 @@ fun EditCategorySheet(
         val enabledCategories = remember { mangaCategories.associateBy { it.id }.toMutableMap() }
         val acceptText = remember {
             mutableStateOf(
-                calculateText(context, mangaCategories, enabledCategories, addingToLibrary))
+                calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
+            )
         }
 
         var showAddCategoryDialog by remember { mutableStateOf(false) }
@@ -68,102 +69,110 @@ fun EditCategorySheet(
         BaseSheet(
             themeColor = themeColorState,
             maxSheetHeightPercentage = .9f,
-            bottomPaddingAroundContent = bottomContentPadding) {
-                if (showAddCategoryDialog) {
-                    AddCategoryDialog(
-                        themeColorState = themeColorState,
-                        currentCategories = categories,
-                        onDismiss = { showAddCategoryDialog = false },
-                        onConfirm = { addNewCategory(it) })
-                }
-
-                val paddingModifier = Modifier.padding(horizontal = Size.small)
-
-                Gap(16.dp)
-                Row(
-                    modifier = paddingModifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically) {
-                        val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
-                        Text(
-                            modifier = paddingModifier,
-                            text = stringResource(id = prefix, stringResource(id = R.string.manga)),
-                            style = MaterialTheme.typography.titleLarge)
-                        TextButton(
-                            modifier = paddingModifier,
-                            onClick = { showAddCategoryDialog = true }) {
-                                Text(
-                                    text = stringResource(id = R.string.plus_new_category),
-                                    style =
-                                        MaterialTheme.typography.titleSmall.copy(
-                                            color = themeColorState.buttonColor))
-                            }
-                    }
-                Gap(16.dp)
-                Divider()
-
-                LazyColumn(
-                    modifier =
-                        Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
-                ) {
-                    items(categories) { category: CategoryItem ->
-                        var state by remember {
-                            mutableStateOf(enabledCategories.contains(category.id))
-                        }
-                        CheckboxRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            checkedState = state,
-                            checkedChange = { newState ->
-                                state = newState
-                                if (state) {
-                                    enabledCategories[category.id] = category
-                                } else {
-                                    enabledCategories.remove(category.id)
-                                }
-                                acceptText.value =
-                                    calculateText(
-                                        context,
-                                        mangaCategories,
-                                        enabledCategories,
-                                        addingToLibrary)
-                            },
-                            rowText = category.name,
-                            themeColorState = themeColorState,
-                        )
-                    }
-                }
-
-                Divider()
-                Gap(Size.tiny)
-                Row(
-                    modifier = paddingModifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                        TextButton(
-                            onClick = cancelClick,
-                            colors =
-                                ButtonDefaults.textButtonColors(
-                                    contentColor = themeColorState.buttonColor)) {
-                                Text(
-                                    text = stringResource(id = R.string.cancel),
-                                    style = MaterialTheme.typography.titleSmall)
-                            }
-                        ElevatedButton(
-                            onClick = {
-                                confirmClicked(enabledCategories.values.toList())
-                                addToLibraryClick()
-                                cancelClick()
-                            },
-                            colors =
-                                ButtonDefaults.elevatedButtonColors(
-                                    containerColor = themeColorState.buttonColor),
-                        ) {
-                            Text(
-                                text = acceptText.value,
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.surface)
-                        }
-                    }
+            bottomPaddingAroundContent = bottomContentPadding,
+        ) {
+            if (showAddCategoryDialog) {
+                AddCategoryDialog(
+                    themeColorState = themeColorState,
+                    currentCategories = categories,
+                    onDismiss = { showAddCategoryDialog = false },
+                    onConfirm = { addNewCategory(it) },
+                )
             }
+
+            val paddingModifier = Modifier.padding(horizontal = Size.small)
+
+            Gap(16.dp)
+            Row(
+                modifier = paddingModifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
+                Text(
+                    modifier = paddingModifier,
+                    text = stringResource(id = prefix, stringResource(id = R.string.manga)),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                TextButton(modifier = paddingModifier, onClick = { showAddCategoryDialog = true }) {
+                    Text(
+                        text = stringResource(id = R.string.plus_new_category),
+                        style =
+                            MaterialTheme.typography.titleSmall.copy(
+                                color = themeColorState.buttonColor
+                            ),
+                    )
+                }
+            }
+            Gap(16.dp)
+            Divider()
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp)
+            ) {
+                items(categories) { category: CategoryItem ->
+                    var state by remember {
+                        mutableStateOf(enabledCategories.contains(category.id))
+                    }
+                    CheckboxRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        checkedState = state,
+                        checkedChange = { newState ->
+                            state = newState
+                            if (state) {
+                                enabledCategories[category.id] = category
+                            } else {
+                                enabledCategories.remove(category.id)
+                            }
+                            acceptText.value =
+                                calculateText(
+                                    context,
+                                    mangaCategories,
+                                    enabledCategories,
+                                    addingToLibrary,
+                                )
+                        },
+                        rowText = category.name,
+                        themeColorState = themeColorState,
+                    )
+                }
+            }
+
+            Divider()
+            Gap(Size.tiny)
+            Row(
+                modifier = paddingModifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                TextButton(
+                    onClick = cancelClick,
+                    colors =
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.cancel),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                }
+                ElevatedButton(
+                    onClick = {
+                        confirmClicked(enabledCategories.values.toList())
+                        addToLibraryClick()
+                        cancelClick()
+                    },
+                    colors =
+                        ButtonDefaults.elevatedButtonColors(
+                            containerColor = themeColorState.buttonColor
+                        ),
+                ) {
+                    Text(
+                        text = acceptText.value,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.surface,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -171,7 +180,7 @@ private fun calculateText(
     context: Context,
     initialMangaCategories: List<CategoryItem>,
     currentlySelectedCategories: Map<Int, CategoryItem>,
-    addingToLibrary: Boolean
+    addingToLibrary: Boolean,
 ): String {
     val initialIds = initialMangaCategories.map { it.id }.toSet()
     val same = currentlySelectedCategories.filter { initialIds.contains(it.key) }.values.toList()

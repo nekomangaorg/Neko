@@ -29,8 +29,7 @@ enum class LibrarySort(
         R.string.category,
         R.drawable.ic_label_outline_24dp,
     ),
-    Rating(8, R.string.rating, R.drawable.ic_poll_24dp),
-    ;
+    Rating(8, R.string.rating, R.drawable.ic_poll_24dp);
 
     val categoryValue: Char
         get() = if (this == DragAndDrop) 'D' else 'a' + catValue * 2
@@ -43,11 +42,7 @@ enum class LibrarySort(
     @DrawableRes fun iconRes(isDynamic: Boolean) = if (isDynamic) dynamicIconRes else iconRes
 
     fun menuSheetItem(isDynamic: Boolean): MaterialMenuSheet.MenuSheetItem {
-        return MaterialMenuSheet.MenuSheetItem(
-            mainValue,
-            iconRes(isDynamic),
-            stringRes(isDynamic),
-        )
+        return MaterialMenuSheet.MenuSheetItem(mainValue, iconRes(isDynamic), stringRes(isDynamic))
     }
 
     companion object {

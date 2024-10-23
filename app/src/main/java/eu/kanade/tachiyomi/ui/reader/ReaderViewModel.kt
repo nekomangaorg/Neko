@@ -234,7 +234,12 @@ class ReaderViewModel(
                     val context = Injekt.get<Application>()
                     loader =
                         ChapterLoader(
-                            context, downloadManager, downloadProvider, manga, sourceManager)
+                            context,
+                            downloadManager,
+                            downloadProvider,
+                            manga,
+                            sourceManager,
+                        )
 
                     loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
                     Result.success(true)
@@ -346,10 +351,7 @@ class ReaderViewModel(
      * Loads the given [chapter] with this [loader] and updates the currently active chapters.
      * Callers must handle errors.
      */
-    private suspend fun loadChapter(
-        loader: ChapterLoader,
-        chapter: ReaderChapter,
-    ): ViewerChapters {
+    private suspend fun loadChapter(loader: ChapterLoader, chapter: ReaderChapter): ViewerChapters {
         TimberKt.d { "Loading ${chapter.chapter.url}" }
 
         loader.loadChapter(chapter)
@@ -415,8 +417,9 @@ class ReaderViewModel(
             }
         }
 
-        if (chapter.state != ReaderChapter.State.Wait &&
-            chapter.state !is ReaderChapter.State.Error) {
+        if (
+            chapter.state != ReaderChapter.State.Wait && chapter.state !is ReaderChapter.State.Error
+        ) {
             return
         }
 
@@ -461,10 +464,12 @@ class ReaderViewModel(
             !securityPreferences.incognitoMode().get() ||
                 hasTrackers ||
                 preferences.readingSync().get()
-        if (shouldTrack &&
-            // For double pages, check if the second to last page is doubled up
-            ((selectedChapter.pages?.lastIndex == page.index && page.firstHalf != true) ||
-                (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index))) {
+        if (
+            shouldTrack &&
+                // For double pages, check if the second to last page is doubled up
+                ((selectedChapter.pages?.lastIndex == page.index && page.firstHalf != true) ||
+                    (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index))
+        ) {
             if (!securityPreferences.incognitoMode().get()) {
                 selectedChapter.chapter.read = true
                 updateTrackChapterAfterReading(selectedChapter)
@@ -526,7 +531,9 @@ class ReaderViewModel(
      */
     private fun downloadChapters(chapters: List<DomainChapterItem>) {
         downloadManager.downloadChapters(
-            manga!!, chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() })
+            manga!!,
+            chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() },
+        )
     }
 
     /**
@@ -557,9 +564,11 @@ class ReaderViewModel(
             chapterToDownload = null
         }
         // Check if deleting option is enabled and chapter exists
-        if (removeAfterReadSlots != -1 &&
-            chapterToDelete != null &&
-            !currentChapter.chapter.bookmark) {
+        if (
+            removeAfterReadSlots != -1 &&
+                chapterToDelete != null &&
+                !currentChapter.chapter.bookmark
+        ) {
             enqueueDeleteReadChapters(chapterToDelete)
         }
     }
@@ -734,10 +743,7 @@ class ReaderViewModel(
         return destFile
     }
 
-    private fun parseChapterName(
-        chapterName: String,
-        pageNumber: String,
-    ): String {
+    private fun parseChapterName(chapterName: String, pageNumber: String): String {
         val builder = StringBuilder()
         var title = ""
         var vol = ""
@@ -795,9 +801,8 @@ class ReaderViewModel(
 
         // Build destination file.
         val filename =
-            DiskUtil.buildValidFilename(
-                "${manga.title} - ${chapter.name}".take(225),
-            ) + " - ${page1.number}-${page2.number}.jpg"
+            DiskUtil.buildValidFilename("${manga.title} - ${chapter.name}".take(225)) +
+                " - ${page1.number}-${page2.number}.jpg"
 
         val destFile = directory.createFile(filename)!!
         stream.use { input -> destFile.openOutputStream().use { output -> input.copyTo(output) } }
@@ -843,7 +848,7 @@ class ReaderViewModel(
         firstPage: ReaderPage,
         secondPage: ReaderPage,
         isLTR: Boolean,
-        @ColorInt bg: Int
+        @ColorInt bg: Int,
     ) {
         viewModelScope.launchNonCancellable {
             if (firstPage.status != Page.State.READY) return@launchNonCancellable
@@ -895,7 +900,7 @@ class ReaderViewModel(
         firstPage: ReaderPage,
         secondPage: ReaderPage,
         isLTR: Boolean,
-        @ColorInt bg: Int
+        @ColorInt bg: Int,
     ) {
         scope.launch {
             if (firstPage.status != Page.State.READY) return@launch
@@ -940,7 +945,7 @@ class ReaderViewModel(
     enum class SetAsCoverResult {
         Success,
         AddToLibraryFirst,
-        Error
+        Error,
     }
 
     /** Results of the save image feature. */
@@ -956,7 +961,9 @@ class ReaderViewModel(
         if (!preferences.readingSync().get() && !readerChapter.chapter.isMergedChapter()) return
         scope.launchIO {
             statusHandler.marksChaptersStatus(
-                manga!!.uuid(), listOf(readerChapter.chapter.mangadex_chapter_id))
+                manga!!.uuid(),
+                listOf(readerChapter.chapter.mangadex_chapter_id),
+            )
         }
     }
 
@@ -976,7 +983,8 @@ class ReaderViewModel(
                     launchIO {
                         eventChannel.send(Event.ShareTrackingError(listOf(service to message)))
                     }
-                })
+                },
+            )
         }
     }
 
@@ -1031,7 +1039,7 @@ class ReaderViewModel(
         data class ShareImage(
             val file: UniFile,
             val page: ReaderPage,
-            val extraPage: ReaderPage? = null
+            val extraPage: ReaderPage? = null,
         ) : Event()
 
         data class ShareTrackingError(val errors: List<Pair<TrackService, String?>>) : Event()

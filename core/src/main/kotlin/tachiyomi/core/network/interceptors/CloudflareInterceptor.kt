@@ -34,7 +34,7 @@ class CloudflareInterceptor(
     override fun intercept(
         chain: Interceptor.Chain,
         request: Request,
-        response: Response
+        response: Response,
     ): Response {
         try {
             response.close()

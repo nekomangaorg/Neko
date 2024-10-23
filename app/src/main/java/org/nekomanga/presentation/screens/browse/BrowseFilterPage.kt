@@ -59,9 +59,7 @@ fun BrowseFilterPage(
         if (pageLoading) {
             Column(Modifier.fillMaxSize()) {
                 Spacer(modifier = Modifier.fillMaxHeight(.92f))
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
         }
     }

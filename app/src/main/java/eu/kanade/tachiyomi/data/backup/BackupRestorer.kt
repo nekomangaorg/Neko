@@ -127,20 +127,19 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
         restoreProgress += 1
         totalAmount += 1
         restoreHelper.showProgressNotification(
-            restoreProgress, totalAmount, context.getString(R.string.categories))
+            restoreProgress,
+            totalAmount,
+            context.getString(R.string.categories),
+        )
     }
 
     private fun restoreManga(
         title: String,
         backupMangaList: List<BackupManga>,
-        backupCategories: List<BackupCategory>
+        backupCategories: List<BackupCategory>,
     ) {
         try {
-            restoreHelper.showProgressNotification(
-                restoreProgress,
-                totalAmount,
-                title,
-            )
+            restoreHelper.showProgressNotification(restoreProgress, totalAmount, title)
             restoreProgress += 1
 
             val backupManga =
@@ -181,7 +180,7 @@ class BackupRestorer(val context: Context, val notifier: BackupNotifier) {
                             mangaId = 0L,
                             url = manga.merge_manga_url!!,
                             mergeType = MergeType.MangaLife,
-                        ),
+                        )
                     )
                 } else {
                     backupManga.getMergeMangaImpl()

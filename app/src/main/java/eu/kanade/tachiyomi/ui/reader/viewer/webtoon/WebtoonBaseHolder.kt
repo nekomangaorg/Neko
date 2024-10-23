@@ -6,10 +6,8 @@ import android.view.ViewGroup.LayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import rx.Subscription
 
-abstract class WebtoonBaseHolder(
-    view: View,
-    protected val viewer: WebtoonViewer,
-) : RecyclerView.ViewHolder(view) {
+abstract class WebtoonBaseHolder(view: View, protected val viewer: WebtoonViewer) :
+    RecyclerView.ViewHolder(view) {
 
     /** Context getter because it's used often. */
     val context: Context

@@ -44,7 +44,9 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun layout() =
         this.preferenceStore.getInt(
-            "pref_display_library_layout", LibraryItem.LAYOUT_COMFORTABLE_GRID)
+            "pref_display_library_layout",
+            LibraryItem.LAYOUT_COMFORTABLE_GRID,
+        )
 
     fun sortingMode() = this.preferenceStore.getInt("library_sorting_mode")
 

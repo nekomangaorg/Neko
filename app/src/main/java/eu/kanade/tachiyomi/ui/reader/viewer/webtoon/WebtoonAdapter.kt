@@ -42,9 +42,11 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         }
 
         // Skip transition page if the chapter is loaded & current page is not a transition page
-        if (prevHasMissingChapters ||
-            forceTransition ||
-            chapters.prevChapter?.state !is ReaderChapter.State.Loaded) {
+        if (
+            prevHasMissingChapters ||
+                forceTransition ||
+                chapters.prevChapter?.state !is ReaderChapter.State.Loaded
+        ) {
             newItems.add(ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter))
         }
 
@@ -57,9 +59,11 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
         currentChapter = chapters.currChapter
 
         // Add next chapter transition and pages.
-        if (nextHasMissingChapters ||
-            forceTransition ||
-            chapters.nextChapter?.state !is ReaderChapter.State.Loaded) {
+        if (
+            nextHasMissingChapters ||
+                forceTransition ||
+                chapters.nextChapter?.state !is ReaderChapter.State.Loaded
+        ) {
             newItems.add(ChapterTransition.Next(chapters.currChapter, chapters.nextChapter))
         }
 
@@ -124,10 +128,8 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
     }
 
     /** Diff util callback used to dispatch delta updates instead of full dataset changes. */
-    private class Callback(
-        private val oldItems: List<Any>,
-        private val newItems: List<Any>,
-    ) : DiffUtil.Callback() {
+    private class Callback(private val oldItems: List<Any>, private val newItems: List<Any>) :
+        DiffUtil.Callback() {
 
         /** Returns true if these two items are the same. */
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

@@ -45,11 +45,7 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
     return categoriesForManga.any { it in includedCategories }
 }
 
-fun List<Manga>.moveCategories(
-    db: DatabaseHelper,
-    activity: Activity,
-    onMangaMoved: () -> Unit,
-) {
+fun List<Manga>.moveCategories(db: DatabaseHelper, activity: Activity, onMangaMoved: () -> Unit) {
     if (this.isEmpty()) return
     val categories = db.getCategories().executeAsBlocking()
     val commonCategories =
@@ -101,7 +97,7 @@ fun SourceManga.toDisplayManga(db: DatabaseHelper, sourceId: Long): DisplayManga
 
 fun Manga.toDisplayManga(
     displayText: String = "",
-    @StringRes displayTextRes: Int? = null
+    @StringRes displayTextRes: Int? = null,
 ): DisplayManga {
     return DisplayManga(
         mangaId = this.id!!,
@@ -113,7 +109,8 @@ fun Manga.toDisplayManga(
         currentArtwork =
             Artwork(
                 mangaId = this.id!!,
-                originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl),
+                originalArtwork = this.thumbnail_url ?: MdConstants.noCoverUrl,
+            ),
     )
 }
 
@@ -143,7 +140,7 @@ fun SManga.getSlug(): String {
 fun List<HomePageManga>.resync(db: DatabaseHelper): ImmutableList<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.resync(db).toImmutableList(),
+                displayManga = homePageManga.displayManga.resync(db).toImmutableList()
             )
         }
         .toImmutableList()
@@ -160,7 +157,9 @@ fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
                     currentArtwork =
                         displayManga.currentArtwork.copy(
                             url = dbManga.user_cover ?: "",
-                            originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl))
+                            originalArtwork = dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
+                        ),
+                )
         }
     }
 }
@@ -169,7 +168,7 @@ fun List<DisplayManga>.resync(db: DatabaseHelper): List<DisplayManga> {
 fun List<HomePageManga>.updateVisibility(prefs: PreferencesHelper): ImmutableList<HomePageManga> {
     return this.map { homePageManga ->
             homePageManga.copy(
-                displayManga = homePageManga.displayManga.updateVisibility(prefs).toImmutableList(),
+                displayManga = homePageManga.displayManga.updateVisibility(prefs).toImmutableList()
             )
         }
         .toImmutableList()

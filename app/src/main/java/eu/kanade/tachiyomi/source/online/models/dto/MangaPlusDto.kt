@@ -6,10 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class MangaPlusResponse(
-    val success: SuccessResult? = null,
-    val error: ErrorResult? = null,
-)
+class MangaPlusResponse(val success: SuccessResult? = null, val error: ErrorResult? = null)
 
 @Serializable
 class ErrorResult(val popups: List<Popup> = emptyList()) {
@@ -18,11 +15,7 @@ class ErrorResult(val popups: List<Popup> = emptyList()) {
 }
 
 @Serializable
-class Popup(
-    val subject: String,
-    val body: String,
-    val language: Language? = Language.ENGLISH,
-)
+class Popup(val subject: String, val body: String, val language: Language? = Language.ENGLISH)
 
 @Serializable
 class SuccessResult(
@@ -36,21 +29,14 @@ class SuccessResult(
 
 @Serializable class TitleRankingViewV2(val rankedTitles: List<RankedTitle> = emptyList())
 
-@Serializable
-class RankedTitle(
-    val titles: List<Title> = emptyList(),
-)
+@Serializable class RankedTitle(val titles: List<Title> = emptyList())
 
 @Serializable
 class AllTitlesViewV2(
-    @SerialName("AllTitlesGroup") val allTitlesGroup: List<AllTitlesGroup> = emptyList(),
+    @SerialName("AllTitlesGroup") val allTitlesGroup: List<AllTitlesGroup> = emptyList()
 )
 
-@Serializable
-class AllTitlesGroup(
-    val theTitle: String,
-    val titles: List<Title> = emptyList(),
-)
+@Serializable class AllTitlesGroup(val theTitle: String, val titles: List<Title> = emptyList())
 
 @Serializable
 class WebHomeViewV4(
@@ -59,10 +45,7 @@ class WebHomeViewV4(
     val featuredTitleLists: List<FeaturedTitleList> = emptyList(),
 )
 
-@Serializable
-class FeaturedTitleList(
-    val featuredTitles: List<Title> = emptyList(),
-)
+@Serializable class FeaturedTitleList(val featuredTitles: List<Title> = emptyList())
 
 @Serializable
 class TitleDetailView(
@@ -229,10 +212,7 @@ class UpdatedTitleV2Group(
 )
 
 @Serializable
-class OriginalTitleGroup(
-    val theTitle: String,
-    val titles: List<UpdatedTitle> = emptyList(),
-)
+class OriginalTitleGroup(val theTitle: String, val titles: List<UpdatedTitle> = emptyList())
 
 @Serializable class UpdatedTitle(val title: Title)
 

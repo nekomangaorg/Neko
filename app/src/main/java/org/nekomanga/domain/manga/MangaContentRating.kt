@@ -9,8 +9,7 @@ enum class MangaContentRating(val key: String, val nameRes: Int) {
     Suggestive(MdConstants.ContentRating.suggestive, R.string.suggestive),
     Erotica(MdConstants.ContentRating.erotica, R.string.erotica),
     Pornographic(MdConstants.ContentRating.pornographic, R.string.pornographic),
-    Unknown(MdConstants.ContentRating.unknown, R.string.unknown),
-    ;
+    Unknown(MdConstants.ContentRating.unknown, R.string.unknown);
 
     fun prettyPrint(): String {
         return key.capitalizeWords()

@@ -12,19 +12,12 @@ enum class ReaderBottomButton(val value: String, @StringRes val stringRes: Int) 
     CropBordersPaged("cbp", R.string.crop_borders_paged),
     CropBordersWebtoon("cbw", R.string.crop_borders_webtoon),
     PageLayout("pl", R.string.page_layout),
-    ShiftDoublePage("sdp", R.string.shift_double_pages),
-    ;
+    ShiftDoublePage("sdp", R.string.shift_double_pages);
 
     fun isIn(buttons: Collection<String>) = value in buttons
 
     companion object {
         val BUTTONS_DEFAULTS =
-            setOf(
-                    ViewChapters,
-                    Comment,
-                    ShiftDoublePage,
-                )
-                .map { it.value }
-                .toSet()
+            setOf(ViewChapters, Comment, ShiftDoublePage).map { it.value }.toSet()
     }
 }

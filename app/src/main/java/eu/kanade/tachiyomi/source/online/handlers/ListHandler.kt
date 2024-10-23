@@ -36,7 +36,7 @@ class ListHandler {
         listUUID: String,
         page: Int,
         privateList: Boolean = false,
-        useDefaultContentRating: Boolean = false
+        useDefaultContentRating: Boolean = false,
     ): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
             service.viewList(listUUID).getOrResultError("Error getting list").andThen { listDto ->
@@ -71,7 +71,9 @@ class ListHandler {
                                     ListResults(
                                         displayScreenType =
                                             DisplayScreenType.List(
-                                                listDto.data.attributes.name ?: "", listUUID),
+                                                listDto.data.attributes.name ?: "",
+                                                listUUID,
+                                            ),
                                         sourceManga =
                                             mangaListDto.data
                                                 .map { it.toSourceManga(coverQuality) }
@@ -79,7 +81,7 @@ class ListHandler {
                                         hasNextPage =
                                             (mangaListDto.limit + mangaListDto.offset) <
                                                 mangaIds.size,
-                                    ),
+                                    )
                                 )
                             }
                     }
@@ -90,7 +92,7 @@ class ListHandler {
 
     suspend fun retrieveAllMangaFromList(
         listUUID: String,
-        privateList: Boolean
+        privateList: Boolean,
     ): Result<ListResults, ResultError> {
         var hasPages = true
         var page = 1
@@ -118,7 +120,8 @@ class ListHandler {
                     ListResults(
                         displayScreenType = displayScreenType!!,
                         sourceManga = list.toImmutableList(),
-                    ))
+                    )
+                )
         }
     }
 }

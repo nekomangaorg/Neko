@@ -20,8 +20,10 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
             (context as ReaderActivity).viewModel.setMangaReadingMode(readingModeType.flagValue)
 
             val mangaViewer = activity.viewModel.getMangaReadingMode()
-            if (mangaViewer == ReadingModeType.WEBTOON.flagValue ||
-                mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue) {
+            if (
+                mangaViewer == ReadingModeType.WEBTOON.flagValue ||
+                    mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue
+            ) {
                 initWebtoonPreferences()
             } else {
                 initPagerPreferences()
@@ -30,7 +32,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.viewerSeries.setSelection(
             (context as? ReaderActivity)?.viewModel?.state?.value?.manga?.readingModeType?.let {
                 ReadingModeType.fromPreference(it).prefValue
-            } ?: 0,
+            } ?: 0
         )
         binding.rotationMode.onItemSelectedListener = { position ->
             val rotationType = OrientationType.fromSpinner(position)
@@ -39,7 +41,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.rotationMode.setSelection(
             (context as ReaderActivity).viewModel.manga?.orientationType?.let {
                 OrientationType.fromPreference(it).prefValue
-            } ?: 0,
+            } ?: 0
         )
 
         binding.backgroundColor.bindToPreference(readerPreferences.readerTheme(), 0)
@@ -47,7 +49,8 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.fullscreen.bindToPreference(readerPreferences.fullscreen())
         binding.keepscreen.bindToPreference(readerPreferences.keepScreenOn())
         binding.alwaysShowChapterTransition.bindToPreference(
-            readerPreferences.alwaysShowChapterTransition())
+            readerPreferences.alwaysShowChapterTransition()
+        )
     }
 
     /** Init the preferences for the webtoon reader. */

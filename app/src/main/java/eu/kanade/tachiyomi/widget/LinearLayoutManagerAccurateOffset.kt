@@ -119,7 +119,7 @@ fun RecyclerView.LayoutManager.getFirstPos(recyclerView: RecyclerView?, toolbarH
 
 fun RecyclerView.LayoutManager.getFirstCompletePos(
     recyclerView: RecyclerView?,
-    toolbarHeight: Int
+    toolbarHeight: Int,
 ): Int {
     val inset = recyclerView?.rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0
     return (0 until childCount)

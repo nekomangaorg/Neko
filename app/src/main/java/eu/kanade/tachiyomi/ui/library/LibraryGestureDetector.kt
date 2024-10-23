@@ -50,18 +50,22 @@ class LibraryGestureDetector(private val controller: LibraryController) :
         val animator = controller.binding.categoryHopperFrame.animate().setDuration(150L)
         animator.translationX(0f)
         animator.withEndAction { hopperFrame.translationX = 0f }
-        if (abs(diffX) <= abs(diffY) &&
-            abs(diffY) > SWIPE_THRESHOLD &&
-            abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+        if (
+            abs(diffX) <= abs(diffY) &&
+                abs(diffY) > SWIPE_THRESHOLD &&
+                abs(velocityY) > SWIPE_VELOCITY_THRESHOLD
+        ) {
             if (diffY <= 0) {
                 controller.showSheet()
             } else {
                 controller.binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.hide()
             }
-        } else if (abs(diffX) >= abs(diffY) &&
-            abs(diffX) > SWIPE_THRESHOLD * 5 &&
-            abs(velocityX) > SWIPE_VELOCITY_THRESHOLD &&
-            sign(diffX) == sign(velocityX)) {
+        } else if (
+            abs(diffX) >= abs(diffY) &&
+                abs(diffX) > SWIPE_THRESHOLD * 5 &&
+                abs(velocityX) > SWIPE_VELOCITY_THRESHOLD &&
+                sign(diffX) == sign(velocityX)
+        ) {
             val hopperGravity =
                 (controller.binding.categoryHopperFrame.layoutParams
                         as CoordinatorLayout.LayoutParams)
@@ -75,7 +79,7 @@ class LibraryGestureDetector(private val controller: LibraryController) :
                             (-(controller.view!!.width -
                                     controller.binding.categoryHopperFrame.width) / 2)
                                 .toFloat()
-                        },
+                        }
                     )
                     .withEndAction {
                         hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
@@ -98,7 +102,7 @@ class LibraryGestureDetector(private val controller: LibraryController) :
                             0f
                         } else {
                             ((controller.view!!.width - hopperFrame.width) / 2).toFloat()
-                        },
+                        }
                     )
                     .withEndAction {
                         hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {

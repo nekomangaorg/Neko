@@ -40,7 +40,7 @@ sealed class DetailsBottomSheetScreen {
 
     class TrackingSearchSheet(
         val trackingService: TrackServiceItem,
-        val alreadySelectedTrack: TrackItem?
+        val alreadySelectedTrack: TrackItem?,
     ) : DetailsBottomSheetScreen()
 
     class TrackingDateSheet(
@@ -90,9 +90,7 @@ fun DetailsBottomSheet(
                 onLogoClick = openInWebView,
                 onSearchTrackClick = { service, track ->
                     closeSheet()
-                    openSheet(
-                        DetailsBottomSheetScreen.TrackingSearchSheet(service, track),
-                    )
+                    openSheet(DetailsBottomSheetScreen.TrackingSearchSheet(service, track))
                 },
                 trackStatusChanged = trackActions.statusChange,
                 trackScoreChanged = trackActions.scoreChange,
@@ -104,7 +102,8 @@ fun DetailsBottomSheet(
                         DetailsBottomSheetScreen.TrackingDateSheet(
                             trackAndService,
                             trackingDate,
-                            generalState.value.trackingSuggestedDates),
+                            generalState.value.trackingSuggestedDates,
+                        )
                     )
                 },
                 trackingFinishDateClick = { trackAndService, trackingDate ->
@@ -113,7 +112,8 @@ fun DetailsBottomSheet(
                         DetailsBottomSheetScreen.TrackingDateSheet(
                             trackAndService,
                             trackingDate,
-                            generalState.value.trackingSuggestedDates),
+                            generalState.value.trackingSuggestedDates,
+                        )
                     )
                 },
             )
@@ -143,7 +143,10 @@ fun DetailsBottomSheet(
                     closeSheet()
                     trackActions.searchItemClick(
                         TrackingConstants.TrackAndService(
-                            trackSearch.trackItem, currentScreen.trackingService))
+                            trackSearch.trackItem,
+                            currentScreen.trackingService,
+                        )
+                    )
                     openSheet(DetailsBottomSheetScreen.TrackingSheet)
                 },
             )

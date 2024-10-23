@@ -73,9 +73,7 @@ fun TrackingSearchSheet(
     var trackSearchItem by remember { mutableStateOf<TrackSearchItem?>(null) }
 
     BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Header(stringResource(id = R.string.select_an_entry), cancelClick)
 
             when (trackSearchResult) {
@@ -86,8 +84,10 @@ fun TrackingSearchSheet(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         item { Gap(Size.tiny) }
-                        if (alreadySelectedTrack == null &&
-                            trackSearchResult.trackSearchResult.size == 1) {
+                        if (
+                            alreadySelectedTrack == null &&
+                                trackSearchResult.trackSearchResult.size == 1
+                        ) {
                             trackSearchItemClick(trackSearchResult.trackSearchResult.first())
                         }
 
@@ -127,7 +127,9 @@ fun TrackingSearchSheet(
                 }
                 else ->
                     CenteredBox(
-                        themeColorState = themeColorState, trackSearchResult = trackSearchResult)
+                        themeColorState = themeColorState,
+                        trackSearchResult = trackSearchResult,
+                    )
             }
             var searchText by remember { mutableStateOf(title) }
             SearchFooter(
@@ -135,25 +137,26 @@ fun TrackingSearchSheet(
                 labelText = stringResource(id = R.string.title),
                 title = searchText,
                 textChanged = { searchText = it },
-                search = searchTracker)
+                search = searchTracker,
+            )
         }
     }
 }
 
 @Composable
 private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: TrackSearchResult) {
-    Box(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        contentAlignment = Alignment.Center,
-    ) {
+    Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
         when (trackSearchResult) {
             is TrackSearchResult.Loading ->
                 CircularProgressIndicator(
-                    color = themeColorState.buttonColor, modifier = Modifier.size(32.dp))
+                    color = themeColorState.buttonColor,
+                    modifier = Modifier.size(32.dp),
+                )
             is TrackSearchResult.NoResult ->
                 Text(
                     text = stringResource(id = R.string.no_results_found),
-                    color = MaterialTheme.colorScheme.onSurface)
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             is TrackSearchResult.Error -> Text(text = trackSearchResult.errorMessage)
             else -> Unit
         }
@@ -185,9 +188,7 @@ private fun TrackSearchItem(
         border = CardDefaults.outlinedCardBorder(true).copy(brush = SolidColor(outlineColor)),
         onClick = { trackSearchItemClick(trackSearch) },
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-        ) {
+        Box(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             AsyncImage(
                 model =
                     ImageRequest.Builder(LocalContext.current).data(trackSearch.coverUrl).build(),
@@ -201,12 +202,15 @@ private fun TrackSearchItem(
                     Modifier.height(IntrinsicSize.Min)
                         .fillMaxWidth()
                         .background(
-                            color = backdropColor.copy(alpha = NekoColors.highAlphaLowContrast)),
+                            color = backdropColor.copy(alpha = NekoColors.highAlphaLowContrast)
+                        )
             ) {
                 IconButton(
                     onClick = {
                         openInBrowser(
-                            trackSearch.trackItem.trackingUrl, trackSearch.trackItem.title)
+                            trackSearch.trackItem.trackingUrl,
+                            trackSearch.trackItem.title,
+                        )
                     },
                     modifier = Modifier.padding(horizontal = Size.tiny).align(Alignment.TopEnd),
                 ) {
@@ -218,14 +222,13 @@ private fun TrackSearchItem(
                     )
                 }
 
-                Column(
-                    modifier = Modifier.padding(Size.small),
-                ) {
+                Column(modifier = Modifier.padding(Size.small)) {
                     Text(
                         text = trackSearch.trackItem.title,
                         style =
                             MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.SemiBold),
+                                fontWeight = FontWeight.SemiBold
+                            ),
                         modifier = Modifier.fillMaxWidth(.9f),
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -236,7 +239,8 @@ private fun TrackSearchItem(
                                 text = stringResource(id = R.string.type),
                                 style =
                                     MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = FontWeight.Medium),
+                                        fontWeight = FontWeight.Medium
+                                    ),
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                             Gap(Size.tiny)
@@ -244,7 +248,8 @@ private fun TrackSearchItem(
                                 text = trackSearch.publishingType,
                                 color =
                                     MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = NekoColors.mediumAlphaHighContrast),
+                                        alpha = NekoColors.mediumAlphaHighContrast
+                                    ),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                         }
@@ -256,13 +261,16 @@ private fun TrackSearchItem(
                                 text = stringResource(id = R.string.started),
                                 style =
                                     MaterialTheme.typography.bodyLarge.copy(
-                                        fontWeight = FontWeight.Medium))
+                                        fontWeight = FontWeight.Medium
+                                    ),
+                            )
                             Gap(Size.tiny)
                             Text(
                                 text = trackSearch.startDate,
                                 color =
                                     MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = NekoColors.mediumAlphaHighContrast),
+                                        alpha = NekoColors.mediumAlphaHighContrast
+                                    ),
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                         }
@@ -280,7 +288,8 @@ private fun TrackSearchItem(
                         overflow = TextOverflow.Ellipsis,
                         color =
                             MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = NekoColors.mediumAlphaHighContrast),
+                                alpha = NekoColors.mediumAlphaHighContrast
+                            ),
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }

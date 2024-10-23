@@ -127,11 +127,8 @@ fun MangaGridItem(
         Box(
             modifier =
                 Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
-                    .combinedClickable(
-                        onClick = onClick,
-                        onLongClick = onLongClick,
-                    )
-                    .padding(Size.extraTiny),
+                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                    .padding(Size.extraTiny)
         ) {
             val subtitleText =
                 when (displayManga.displayTextRes) {
@@ -140,21 +137,9 @@ fun MangaGridItem(
                 }
 
             if (isComfortable) {
-                Column {
-                    ComfortableGridItem(
-                        displayManga,
-                        subtitleText,
-                        shouldOutlineCover,
-                    )
-                }
+                Column { ComfortableGridItem(displayManga, subtitleText, shouldOutlineCover) }
             } else {
-                Box {
-                    CompactGridItem(
-                        displayManga,
-                        subtitleText,
-                        shouldOutlineCover,
-                    )
-                }
+                Box { CompactGridItem(displayManga, subtitleText, shouldOutlineCover) }
             }
         }
 
@@ -176,10 +161,7 @@ fun ColumnScope.ComfortableGridItem(
         shouldOutlineCover = shouldOutlineCover,
         modifier = modifier,
     )
-    MangaGridTitle(
-        title = manga.title,
-        hasSubtitle = subtitleText.isNotBlank(),
-    )
+    MangaGridTitle(title = manga.title, hasSubtitle = subtitleText.isNotBlank())
 
     MangaGridSubtitle(subtitleText = subtitleText)
 }
@@ -206,7 +188,8 @@ fun BoxScope.CompactGridItem(
                                 listOf(
                                     Color.Transparent,
                                     Color.Black.copy(NekoColors.veryLowContrast),
-                                    Color.Black.copy(NekoColors.highAlphaLowContrast)),
+                                    Color.Black.copy(NekoColors.highAlphaLowContrast),
+                                )
                         ),
                     shape =
                         RoundedCornerShape(
@@ -214,20 +197,15 @@ fun BoxScope.CompactGridItem(
                             bottomEnd = Shapes.coverRadius,
                         ),
                 )
-                .matchParentSize(),
+                .matchParentSize()
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-        ) {
+        Column(modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart)) {
             MangaGridTitle(
                 title = manga.title,
                 hasSubtitle = subtitleText.isNotBlank(),
                 isComfortable = false,
             )
-            MangaGridSubtitle(
-                subtitleText = subtitleText,
-                isComfortable = false,
-            )
+            MangaGridSubtitle(subtitleText = subtitleText, isComfortable = false)
         }
     }
 }
@@ -271,12 +249,7 @@ fun MangaGridSubtitle(subtitleText: String, isComfortable: Boolean = true) {
             fontWeight = if (isComfortable) FontWeight.Normal else FontWeight.SemiBold,
             overflow = TextOverflow.Ellipsis,
             modifier =
-                Modifier.padding(
-                    top = Size.none,
-                    bottom = Size.tiny,
-                    start = 6.dp,
-                    end = 6.dp,
-                ),
+                Modifier.padding(top = Size.none, bottom = Size.tiny, start = 6.dp, end = 6.dp),
         )
     }
 }

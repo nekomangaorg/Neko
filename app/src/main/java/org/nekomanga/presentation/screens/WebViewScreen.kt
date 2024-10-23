@@ -65,7 +65,7 @@ fun WebViewScreen(
                             )
                         } else {
                             AppBar.Empty
-                        },
+                        }
                     ) +
                         listOf(
                             if (navigator.canGoForward) {
@@ -76,7 +76,7 @@ fun WebViewScreen(
                                 )
                             } else {
                                 AppBar.Empty
-                            },
+                            }
                         ) +
                         listOf(
                             AppBar.OverflowAction(
@@ -93,23 +93,23 @@ fun WebViewScreen(
                             ),
                         ) +
                         listOf(
-                            if (navigator.canGoBack &&
-                                state.lastLoadedUrl != null &&
-                                canOpenInApp(state.lastLoadedUrl!!)) {
+                            if (
+                                navigator.canGoBack &&
+                                    state.lastLoadedUrl != null &&
+                                    canOpenInApp(state.lastLoadedUrl!!)
+                            ) {
                                 AppBar.OverflowAction(
                                     title = UiText.StringResource(R.string.open_in_app),
                                     onClick = { state.lastLoadedUrl?.let(onOpenInApp) },
                                 )
                             } else {
                                 AppBar.Empty
-                            },
-                        ),
+                            }
+                        )
             )
         },
     ) { paddingValues ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             val loadingState = state.loadingState
             if (loadingState is LoadingState.Loading) {
                 LinearProgressIndicator(
@@ -137,8 +137,10 @@ fun WebViewScreen(
                     webView.setDefaultSettings()
 
                     // Debug mode (chrome://inspect/#devices)
-                    if (BuildConfig.DEBUG &&
-                        0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) {
+                    if (
+                        BuildConfig.DEBUG &&
+                            0 != context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+                    ) {
                         WebView.setWebContentsDebuggingEnabled(true)
                     }
 

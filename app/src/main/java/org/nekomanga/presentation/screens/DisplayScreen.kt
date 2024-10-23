@@ -115,7 +115,7 @@ fun DisplayScreen(
                                 showEntries = displayScreenState.value.showLibraryEntries,
                                 onClick = switchLibraryVisibilityClick,
                             ),
-                        ),
+                        )
                 )
             },
         ) { incomingContentPadding ->
@@ -148,7 +148,7 @@ fun DisplayScreen(
                         Modifier.zIndex(1f)
                             .padding(Size.small)
                             .padding(top = contentPadding.calculateTopPadding())
-                            .align(Alignment.TopCenter),
+                            .align(Alignment.TopCenter)
                     )
                 }
             } else if (displayScreenState.value.error != null) {
@@ -193,9 +193,10 @@ fun DisplayScreen(
                             modifier =
                                 Modifier.padding(
                                         bottom =
-                                            contentPadding.calculateBottomPadding() + Size.small)
+                                            contentPadding.calculateBottomPadding() + Size.small
+                                    )
                                     .align(Alignment.BottomCenter)
-                                    .fillMaxWidth(),
+                                    .fillMaxWidth()
                         )
                     }
                 }

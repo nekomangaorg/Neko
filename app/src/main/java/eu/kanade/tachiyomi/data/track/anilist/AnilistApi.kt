@@ -122,12 +122,14 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 put(
                     "query",
                     if (manga.anilist_id != null && !wasPreviouslyTracked) findQuery()
-                    else searchQuery())
+                    else searchQuery(),
+                )
                 putJsonObject("variables") {
                     put(
                         "query",
                         if (manga.anilist_id != null && !wasPreviouslyTracked) manga.anilist_id
-                        else search)
+                        else search,
+                    )
                 }
             }
             with(json) {
@@ -198,12 +200,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             val payload = buildJsonObject { put("query", currentUserQuery()) }
             with(json) {
                 authClient
-                    .newCall(
-                        POST(
-                            apiUrl,
-                            body = payload.toString().toRequestBody(jsonMime),
-                        ),
-                    )
+                    .newCall(POST(apiUrl, body = payload.toString().toRequestBody(jsonMime)))
                     .await()
                     .parseAs<JsonObject>()
                     .let {

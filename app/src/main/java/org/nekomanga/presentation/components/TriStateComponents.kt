@@ -55,7 +55,8 @@ fun TriStateCheckboxRow(
             color =
                 if (!disabled) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.onSurface.copy(NekoColors.disabledAlphaLowContrast),
-            style = rowTextStyle)
+            style = rowTextStyle,
+        )
     }
 }
 
@@ -105,7 +106,7 @@ fun TriStateFilterChip(
 private fun toggleStateIfAble(
     disabled: Boolean,
     state: ToggleableState,
-    toggleState: (ToggleableState) -> Unit
+    toggleState: (ToggleableState) -> Unit,
 ) {
     if (!disabled) {
         val newState =

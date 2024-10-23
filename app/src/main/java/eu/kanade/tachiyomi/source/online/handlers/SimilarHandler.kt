@@ -40,10 +40,7 @@ class SimilarHandler {
     private val preferencesHelper: PreferencesHelper by injectLazy()
     private val json: Json by injectLazy()
 
-    suspend fun fetchRelated(
-        dexId: String,
-        forceRefresh: Boolean,
-    ): List<SourceManga> {
+    suspend fun fetchRelated(dexId: String, forceRefresh: Boolean): List<SourceManga> {
         if (forceRefresh) {
             val related = withIOContext {
                 networkServices.service
@@ -115,19 +112,11 @@ class SimilarHandler {
         otherText: String,
     ): RelatedMangaDto {
         val manga = this.toBasicManga(thumbQuality)
-        return RelatedMangaDto(
-            manga.url,
-            manga.title,
-            manga.thumbnail_url!!,
-            otherText,
-        )
+        return RelatedMangaDto(manga.url, manga.title, manga.thumbnail_url!!, otherText)
     }
 
     /** fetch our similar mangaList */
-    suspend fun fetchSimilar(
-        dexId: String,
-        forceRefresh: Boolean,
-    ): List<SourceManga> {
+    suspend fun fetchSimilar(dexId: String, forceRefresh: Boolean): List<SourceManga> {
         if (forceRefresh) {
             val response =
                 networkServices.similarService
@@ -156,10 +145,7 @@ class SimilarHandler {
             ?.sortedByDescending { it.displayText.split("%")[0].toDouble() } ?: emptyList()
     }
 
-    private suspend fun similarMangaParse(
-        dexId: String,
-        similarDto: SimilarMangaDto?,
-    ) {
+    private suspend fun similarMangaParse(dexId: String, similarDto: SimilarMangaDto?) {
         similarDto ?: return
 
         // Get our page of mangaList
@@ -168,8 +154,9 @@ class SimilarHandler {
         val idPairs =
             similarDto.matches
                 .mapNotNull {
-                    when (it.languages.isEmpty() ||
-                        it.languages.any { lang -> lang in activeLangs }) {
+                    when (
+                        it.languages.isEmpty() || it.languages.any { lang -> lang in activeLangs }
+                    ) {
                         true -> {
                             val id = it.id
                             val text = String.format("%.2f", 100.0 * it.score) + "% match"
@@ -200,10 +187,7 @@ class SimilarHandler {
     }
 
     /** fetch our similar mangaList from external service Anilist */
-    suspend fun fetchAnilist(
-        dexId: String,
-        forceRefresh: Boolean,
-    ): List<SourceManga> {
+    suspend fun fetchAnilist(dexId: String, forceRefresh: Boolean): List<SourceManga> {
         // See if we have a valid mapping for our Anlist service
         val anilistId = mappings.getExternalID(dexId, "al") ?: return emptyList()
 
@@ -217,8 +201,10 @@ class SimilarHandler {
                     .onFailure {
                         val type = "trying to get Anilist recommendations"
                         this.log(type)
-                        if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
-                            this is ApiResponse.Failure.Exception) {
+                        if (
+                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                                this is ApiResponse.Failure.Exception
+                        ) {
                             this.throws(type)
                         }
                     }
@@ -288,8 +274,10 @@ class SimilarHandler {
                     .onFailure {
                         val type = "trying to get MAL similar manga"
                         this.log(type)
-                        if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
-                            this is ApiResponse.Failure.Exception) {
+                        if (
+                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                                this is ApiResponse.Failure.Exception
+                        ) {
                             this.throws(type)
                         }
                     }
@@ -354,8 +342,10 @@ class SimilarHandler {
                     .onFailure {
                         val type = "trying to get MU similar manga"
                         this.log(type)
-                        if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
-                            this is ApiResponse.Failure.Exception) {
+                        if (
+                            (this is ApiResponse.Failure.Error && this.statusCode.code == 404) ||
+                                this is ApiResponse.Failure.Exception
+                        ) {
                             this.throws(type)
                         }
                     }
@@ -375,10 +365,7 @@ class SimilarHandler {
             } ?: emptyList()
     }
 
-    private suspend fun similarMangaExternalMUParse(
-        dexId: String,
-        similarDto: MUMangaDto?,
-    ) {
+    private suspend fun similarMangaExternalMUParse(dexId: String, similarDto: MUMangaDto?) {
         // Error check http response
         similarDto ?: return
 
@@ -431,7 +418,8 @@ class SimilarHandler {
                         MdConstants.ContentRating.safe,
                         MdConstants.ContentRating.suggestive,
                         MdConstants.ContentRating.erotica,
-                        MdConstants.ContentRating.pornographic),
+                        MdConstants.ContentRating.pornographic,
+                    ),
             )
         val responseBody =
             networkServices.service
@@ -446,7 +434,8 @@ class SimilarHandler {
         if (strictMatch && responseBody.data.size != mangaIds.size) {
             TimberKt.d { "manga returned doesn't match number of manga expected" }
             throw Exception(
-                "Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned")
+                "Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned"
+            )
         }
         return responseBody
     }

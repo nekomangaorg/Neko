@@ -17,18 +17,14 @@ class NetworkServices {
 
     private val scalarsRetrofitClient =
         Retrofit.Builder()
-            .addConverterFactory(
-                ScalarsConverterFactory.create(),
-            )
+            .addConverterFactory(ScalarsConverterFactory.create())
             .baseUrl(MdConstants.baseUrl)
             .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
             .client(networkHelper.client)
 
     private val jsonRetrofitClient =
         Retrofit.Builder()
-            .addConverterFactory(
-                json.asConverterFactory("application/json".toMediaType()),
-            )
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .baseUrl(MdConstants.baseUrl)
             .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
             .client(networkHelper.client)
@@ -61,7 +57,7 @@ class NetworkServices {
                     .newBuilder()
                     .connectTimeout(2, TimeUnit.SECONDS)
                     .readTimeout(2, TimeUnit.SECONDS)
-                    .build(),
+                    .build()
             )
             .build()
             .create(ThirdPartySimilarService::class.java)
@@ -73,7 +69,7 @@ class NetworkServices {
                     .newBuilder()
                     .connectTimeout(2, TimeUnit.SECONDS)
                     .readTimeout(2, TimeUnit.SECONDS)
-                    .build(),
+                    .build()
             )
             .build()
             .create(SimilarService::class.java)

@@ -80,9 +80,11 @@ class LibraryHeaderGestureDetector(
             binding.rearView.isVisible = false
         }
         val x = abs(binding.categoryHeaderLayout.translationX)
-        if (abs(diffX) >= abs(diffY) &&
-            sign(velocityX) == sign(diffX) &&
-            ((x > 30f.dpToPx && abs(velocityX) > 100) || abs(velocityX) > 5000)) {
+        if (
+            abs(diffX) >= abs(diffY) &&
+                sign(velocityX) == sign(diffX) &&
+                ((x > 30f.dpToPx && abs(velocityX) > 100) || abs(velocityX) > 5000)
+        ) {
             header?.addCategoryToUpdate()
             result = true
         }

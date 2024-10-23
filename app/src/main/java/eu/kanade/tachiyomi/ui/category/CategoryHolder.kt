@@ -55,7 +55,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) :
         createCategory = category.order == CREATE_CATEGORY_ORDER
         if (createCategory) {
             binding.title.setTextColor(
-                ContextCompat.getColor(itemView.context, R.color.material_on_background_disabled))
+                ContextCompat.getColor(itemView.context, R.color.material_on_background_disabled)
+            )
             regularDrawable = itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_add)
             binding.image.isVisible = false
             binding.editButton.setImageDrawable(null)
@@ -79,14 +80,16 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) :
             binding.editText.requestFocus()
             binding.editText.selectAll()
             binding.editButton.setImageDrawable(
-                ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp))
+                ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp)
+            )
             binding.editButton.drawable
                 .mutate()
                 .setTint(itemView.context.getResourceColor(R.attr.colorSecondary))
             showKeyboard()
             if (!createCategory) {
                 binding.reorder.setImageDrawable(
-                    itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_delete))
+                    itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_delete)
+                )
                 binding.reorder.setOnClickListener {
                     adapter.categoryItemListener.onItemDelete(flexibleAdapterPosition)
                 }
@@ -95,7 +98,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) :
             if (!createCategory) {
                 setDragHandleView(binding.reorder)
                 binding.editButton.setImageDrawable(
-                    itemView.context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_edit))
+                    itemView.context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_edit)
+                )
             } else {
                 binding.editButton.setImageDrawable(null)
                 binding.reorder.setOnTouchListener { _, _ -> true }
@@ -103,20 +107,19 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) :
             binding.editText.clearFocus()
             binding.editButton.drawable
                 ?.mutate()
-                ?.setTint(
-                    ContextCompat.getColor(
-                        itemView.context,
-                        R.color.gray_button,
-                    ),
-                )
+                ?.setTint(ContextCompat.getColor(itemView.context, R.color.gray_button))
             binding.reorder.setImageDrawable(regularDrawable)
         }
     }
 
     private fun submitChanges() {
         if (binding.editText.visibility == View.VISIBLE) {
-            if (adapter.categoryItemListener.onCategoryRename(
-                flexibleAdapterPosition, binding.editText.text.toString())) {
+            if (
+                adapter.categoryItemListener.onCategoryRename(
+                    flexibleAdapterPosition,
+                    binding.editText.text.toString(),
+                )
+            ) {
                 isEditing(false)
                 if (!createCategory) {
                     binding.title.text = binding.editText.text.toString()

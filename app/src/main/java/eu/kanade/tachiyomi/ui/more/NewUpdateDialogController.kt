@@ -10,17 +10,18 @@ import org.nekomanga.R
 
 @Deprecated(
     message =
-        "This is only used from the main screen when it auto checks. Manual checks use compose version remove when everything is composed")
+        "This is only used from the main screen when it auto checks. Manual checks use compose version remove when everything is composed"
+)
 class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundle) {
 
     constructor(
         body: String,
-        url: String
+        url: String,
     ) : this(
         Bundle().apply {
             putString(BODY_KEY, body)
             putString(URL_KEY, url)
-        },
+        }
     )
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {

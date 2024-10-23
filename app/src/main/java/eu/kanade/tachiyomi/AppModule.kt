@@ -177,7 +177,8 @@ class PreferenceModule(val application: Application) : InjektModule {
             StoragePreferences(
                 context = application,
                 folderProvider = get<AndroidStorageFolderProvider>(),
-                preferenceStore = get())
+                preferenceStore = get(),
+            )
         }
 
         addSingletonFactory { BackupPreferences(get()) }
@@ -192,11 +193,6 @@ class PreferenceModule(val application: Application) : InjektModule {
 
         addSingletonFactory { MangaDetailsPreferences(get()) }
 
-        addSingletonFactory {
-            PreferencesHelper(
-                context = application,
-                preferenceStore = get(),
-            )
-        }
+        addSingletonFactory { PreferencesHelper(context = application, preferenceStore = get()) }
     }
 }

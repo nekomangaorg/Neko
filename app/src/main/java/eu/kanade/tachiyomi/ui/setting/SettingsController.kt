@@ -53,7 +53,7 @@ abstract class SettingsController : PreferenceController() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         if (untilDestroySubscriptions.isUnsubscribed) {
             untilDestroySubscriptions = CompositeSubscription()
@@ -109,7 +109,8 @@ abstract class SettingsController : PreferenceController() {
         ValueAnimator.ofObject(
                 ArgbEvaluator(),
                 Color.TRANSPARENT,
-                view.context.getResourceColor(R.attr.colorControlHighlight))
+                view.context.getResourceColor(R.attr.colorControlHighlight),
+            )
             .apply {
                 duration = 500L
                 repeatCount = 2

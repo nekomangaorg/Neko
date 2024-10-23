@@ -43,8 +43,9 @@ class TrackSyncProcessor {
             if (autoAddTracker.size > 1) {
                 val validContentRatings = preferences.autoTrackContentRatingSelections().get()
                 val contentRating = manga.getContentRating()
-                if (contentRating == null ||
-                    validContentRatings.contains(contentRating.lowercase())) {
+                if (
+                    contentRating == null || validContentRatings.contains(contentRating.lowercase())
+                ) {
                     autoAddTracker
                         .map { it.toInt() }
                         .map { autoAddTrackerId ->
@@ -58,7 +59,9 @@ class TrackSyncProcessor {
                                                     trackService.toTrackServiceItem()
                                                 val id =
                                                     trackManager.getIdFromManga(
-                                                        trackServiceItem, manga)
+                                                        trackServiceItem,
+                                                        manga,
+                                                    )
                                                 if (id != null) {
                                                     val trackResult =
                                                         trackingCoordinator.searchTrackerNonFlow(
@@ -67,7 +70,8 @@ class TrackSyncProcessor {
                                                                 .getService(trackService.id)!!
                                                                 .toTrackServiceItem(),
                                                             manga,
-                                                            false)
+                                                            false,
+                                                        )
                                                     when (trackResult) {
                                                         is TrackingConstants.TrackSearchResult.Success -> {
                                                             val trackSearchItem =
@@ -75,8 +79,10 @@ class TrackSyncProcessor {
                                                             trackingCoordinator.registerTracking(
                                                                 TrackingConstants.TrackAndService(
                                                                     trackSearchItem.trackItem,
-                                                                    trackServiceItem),
-                                                                manga.id!!)
+                                                                    trackServiceItem,
+                                                                ),
+                                                                manga.id!!,
+                                                            )
                                                         }
                                                         else -> Unit
                                                     }

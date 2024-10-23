@@ -91,72 +91,81 @@ internal class ThemeStep : OnboardingStep {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = stringResource(id = R.string.follow_system_theme))
-                    Switch(
-                        checked = nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-                        colors =
-                            SwitchDefaults.colors(
-                                checkedTrackColor = MaterialTheme.colorScheme.primary),
-                        onCheckedChange = {
-                            when (it) {
-                                true -> {
-                                    preferences
-                                        .nightMode()
-                                        .set(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                                    (context as? Activity)?.let { activity ->
-                                        ActivityCompat.recreate(activity)
-                                    }
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = stringResource(id = R.string.follow_system_theme))
+                Switch(
+                    checked = nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+                    colors =
+                        SwitchDefaults.colors(
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        ),
+                    onCheckedChange = {
+                        when (it) {
+                            true -> {
+                                preferences
+                                    .nightMode()
+                                    .set(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                                (context as? Activity)?.let { activity ->
+                                    ActivityCompat.recreate(activity)
                                 }
-                                false -> preferences.nightMode().set(context.appDelegateNightMode())
                             }
-                        })
-                }
+                            false -> preferences.nightMode().set(context.appDelegateNightMode())
+                        }
+                    },
+                )
+            }
 
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(Size.medium)) {
-                    lightThemes.forEach { theme ->
-                        val isSelected =
-                            remember(darkAppTheme, lightAppTheme, nightMode) {
-                                isSelected(theme, false, darkAppTheme, lightAppTheme, nightMode)
-                            }
-                        ThemeItem(
-                            theme = theme,
-                            isDarkTheme = false,
-                            selected = isSelected,
-                            onClick = {
-                                themeClicked(
-                                    theme,
-                                    context,
-                                    isSelected = isSelected,
-                                    followingSystemTheme = followingSystemTheme,
-                                    isDarkTheme = false)
-                            })
-                    }
+                horizontalArrangement = Arrangement.spacedBy(Size.medium),
+            ) {
+                lightThemes.forEach { theme ->
+                    val isSelected =
+                        remember(darkAppTheme, lightAppTheme, nightMode) {
+                            isSelected(theme, false, darkAppTheme, lightAppTheme, nightMode)
+                        }
+                    ThemeItem(
+                        theme = theme,
+                        isDarkTheme = false,
+                        selected = isSelected,
+                        onClick = {
+                            themeClicked(
+                                theme,
+                                context,
+                                isSelected = isSelected,
+                                followingSystemTheme = followingSystemTheme,
+                                isDarkTheme = false,
+                            )
+                        },
+                    )
                 }
+            }
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(Size.medium)) {
-                    darkThemes.forEach { theme ->
-                        val isSelected =
-                            remember(darkAppTheme, lightAppTheme, nightMode) {
-                                isSelected(theme, true, darkAppTheme, lightAppTheme, nightMode)
-                            }
-                        ThemeItem(
-                            theme = theme,
-                            isDarkTheme = true,
-                            selected = isSelected,
-                            onClick = {
-                                themeClicked(
-                                    theme,
-                                    context,
-                                    isSelected = isSelected,
-                                    followingSystemTheme = followingSystemTheme,
-                                    isDarkTheme = true)
-                            })
-                    }
+                horizontalArrangement = Arrangement.spacedBy(Size.medium),
+            ) {
+                darkThemes.forEach { theme ->
+                    val isSelected =
+                        remember(darkAppTheme, lightAppTheme, nightMode) {
+                            isSelected(theme, true, darkAppTheme, lightAppTheme, nightMode)
+                        }
+                    ThemeItem(
+                        theme = theme,
+                        isDarkTheme = true,
+                        selected = isSelected,
+                        onClick = {
+                            themeClicked(
+                                theme,
+                                context,
+                                isSelected = isSelected,
+                                followingSystemTheme = followingSystemTheme,
+                                isDarkTheme = true,
+                            )
+                        },
+                    )
                 }
+            }
         }
     }
 
@@ -165,7 +174,7 @@ internal class ThemeStep : OnboardingStep {
         isDarkTheme: Boolean,
         darkAppTheme: Themes,
         lightAppTheme: Themes,
-        nightMode: Int
+        nightMode: Int,
     ): Boolean {
         return when (nightMode) {
             AppCompatDelegate.MODE_NIGHT_YES -> darkAppTheme == theme && isDarkTheme
@@ -180,7 +189,7 @@ internal class ThemeStep : OnboardingStep {
         context: Context,
         isSelected: Boolean,
         followingSystemTheme: Boolean,
-        isDarkTheme: Boolean
+        isDarkTheme: Boolean,
     ) {
         TimberKt.d {
             """

@@ -7,7 +7,7 @@ class CategoryUtil {
     companion object {
         fun shouldShowCategoryPrompt(
             preferencesHelper: PreferencesHelper,
-            categoryItems: List<CategoryItem>
+            categoryItems: List<CategoryItem>,
         ): Boolean {
             return preferencesHelper.defaultCategory().get() == -1 && categoryItems.isNotEmpty()
         }

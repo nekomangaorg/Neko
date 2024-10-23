@@ -1,16 +1,8 @@
 package eu.kanade.tachiyomi.data.database.models
 
-data class Scanlator(
-    val name: String,
-    val uuid: String,
-    val description: String?,
-) {
+data class Scanlator(val name: String, val uuid: String, val description: String?) {
     fun toScanlatorImpl(): ScanlatorImpl {
-        return ScanlatorImpl(
-            name = this.name,
-            uuid = this.uuid,
-            description = this.description,
-        )
+        return ScanlatorImpl(name = this.name, uuid = this.uuid, description = this.description)
     }
 }
 

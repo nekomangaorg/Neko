@@ -124,7 +124,7 @@ object SettingsSearchHelper {
                         summary = summary,
                         breadcrumb = breadcrumbs,
                         searchController = ctrl,
-                    ),
+                    )
                 )
             }
         }

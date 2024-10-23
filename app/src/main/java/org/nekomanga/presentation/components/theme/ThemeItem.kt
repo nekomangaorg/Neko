@@ -76,11 +76,13 @@ fun ThemeItem(theme: Themes, isDarkTheme: Boolean, selected: Boolean, onClick: (
             selected,
             selectedColor = MaterialTheme.colorScheme.primary,
             themeMatchesApp,
-            onClick)
+            onClick,
+        )
         Text(
             text = stringResource(id = if (isDarkTheme) theme.darkNameRes else theme.nameRes),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodySmall)
+            style = MaterialTheme.typography.bodySmall,
+        )
     }
 }
 
@@ -104,118 +106,110 @@ fun AppThemePreviewItem(
         onClick = onClick,
         modifier = Modifier.height(180.dp).fillMaxWidth(),
         colors = CardDefaults.outlinedCardColors(containerColor = colorScheme.background),
-        border = BorderStroke(width = Size.tiny, color = selectedColor)) {
-            // App Bar
-            Row(
-                modifier = Modifier.fillMaxWidth().height(40.dp).padding(Size.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier =
-                        Modifier.fillMaxHeight(0.8f)
-                            .weight(0.7f)
-                            .padding(end = Size.small)
-                            .background(
-                                color = colorScheme.surfaceVariant,
-                                shape = MaterialTheme.shapes.small,
-                            ),
-                )
-
-                Box(
-                    modifier = Modifier.weight(0.3f),
-                    contentAlignment = Alignment.CenterEnd,
-                ) {
-                    if (selected) {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = stringResource(R.string.selected),
-                            tint = selectedColor,
-                        )
-                    }
-                }
-            }
-
-            // Cover
+        border = BorderStroke(width = Size.tiny, color = selectedColor),
+    ) {
+        // App Bar
+        Row(
+            modifier = Modifier.fillMaxWidth().height(40.dp).padding(Size.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Box(
                 modifier =
-                    Modifier.padding(start = Size.small, top = Size.extraTiny)
+                    Modifier.fillMaxHeight(0.8f)
+                        .weight(0.7f)
+                        .padding(end = Size.small)
                         .background(
-                            color = DividerDefaults.color,
+                            color = colorScheme.surfaceVariant,
                             shape = MaterialTheme.shapes.small,
                         )
-                        .fillMaxWidth(0.5f)
-                        .aspectRatio(MangaCover.Book.ratio),
-            ) {
-                Row(
-                    modifier =
-                        Modifier.padding(Size.small)
-                            .size(width = Size.large, height = Size.medium)
-                            .clip(RoundedCornerShape(Size.small)),
-                ) {
-                    Box(
-                        modifier =
-                            Modifier.fillMaxHeight()
-                                .width(Size.smedium)
-                                .background(colorScheme.tertiary),
-                    )
-                    Box(
-                        modifier =
-                            Modifier.fillMaxHeight()
-                                .width(Size.smedium)
-                                .background(colorScheme.secondary),
-                    )
-                }
-            }
+            )
 
-            // Bottom bar
-            Box(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                contentAlignment = Alignment.BottomCenter,
-            ) {
-                Surface(
-                    tonalElevation = Size.small,
-                ) {
-                    Row(
-                        modifier =
-                            Modifier.height(Size.extraLarge)
-                                .fillMaxWidth()
-                                .background(colorScheme.surfaceVariant)
-                                .padding(horizontal = Size.small),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            modifier =
-                                Modifier.size(Size.medium)
-                                    .background(
-                                        color =
-                                            colorScheme.onSurface.copy(
-                                                alpha = NekoColors.mediumAlphaHighContrast),
-                                        shape = CircleShape,
-                                    ),
-                        )
-                        Box(
-                            modifier =
-                                Modifier.size(Size.medium)
-                                    .background(
-                                        color = colorScheme.primary,
-                                        shape = CircleShape,
-                                    ),
-                        )
-                        Box(
-                            modifier =
-                                Modifier.size(Size.medium)
-                                    .background(
-                                        color =
-                                            colorScheme.onSurface.copy(
-                                                alpha = NekoColors.mediumAlphaHighContrast),
-                                        shape = CircleShape,
-                                    ),
-                        )
-                    }
+            Box(modifier = Modifier.weight(0.3f), contentAlignment = Alignment.CenterEnd) {
+                if (selected) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = stringResource(R.string.selected),
+                        tint = selectedColor,
+                    )
                 }
             }
         }
+
+        // Cover
+        Box(
+            modifier =
+                Modifier.padding(start = Size.small, top = Size.extraTiny)
+                    .background(color = DividerDefaults.color, shape = MaterialTheme.shapes.small)
+                    .fillMaxWidth(0.5f)
+                    .aspectRatio(MangaCover.Book.ratio)
+        ) {
+            Row(
+                modifier =
+                    Modifier.padding(Size.small)
+                        .size(width = Size.large, height = Size.medium)
+                        .clip(RoundedCornerShape(Size.small))
+            ) {
+                Box(
+                    modifier =
+                        Modifier.fillMaxHeight()
+                            .width(Size.smedium)
+                            .background(colorScheme.tertiary)
+                )
+                Box(
+                    modifier =
+                        Modifier.fillMaxHeight()
+                            .width(Size.smedium)
+                            .background(colorScheme.secondary)
+                )
+            }
+        }
+
+        // Bottom bar
+        Box(
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            contentAlignment = Alignment.BottomCenter,
+        ) {
+            Surface(tonalElevation = Size.small) {
+                Row(
+                    modifier =
+                        Modifier.height(Size.extraLarge)
+                            .fillMaxWidth()
+                            .background(colorScheme.surfaceVariant)
+                            .padding(horizontal = Size.small),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier =
+                            Modifier.size(Size.medium)
+                                .background(
+                                    color =
+                                        colorScheme.onSurface.copy(
+                                            alpha = NekoColors.mediumAlphaHighContrast
+                                        ),
+                                    shape = CircleShape,
+                                )
+                    )
+                    Box(
+                        modifier =
+                            Modifier.size(Size.medium)
+                                .background(color = colorScheme.primary, shape = CircleShape)
+                    )
+                    Box(
+                        modifier =
+                            Modifier.size(Size.medium)
+                                .background(
+                                    color =
+                                        colorScheme.onSurface.copy(
+                                            alpha = NekoColors.mediumAlphaHighContrast
+                                        ),
+                                    shape = CircleShape,
+                                )
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Preview

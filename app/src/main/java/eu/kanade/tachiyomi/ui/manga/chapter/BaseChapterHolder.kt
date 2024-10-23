@@ -7,10 +7,8 @@ import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
 import org.nekomanga.R
 
-open class BaseChapterHolder(
-    view: View,
-    private val adapter: BaseChapterAdapter<*>,
-) : BaseFlexibleViewHolder(view, adapter) {
+open class BaseChapterHolder(view: View, private val adapter: BaseChapterAdapter<*>) :
+    BaseFlexibleViewHolder(view, adapter) {
 
     init {
         view.findViewById<View>(R.id.download_button)?.setOnClickListener { downloadOrRemoveMenu() }
@@ -20,8 +18,10 @@ open class BaseChapterHolder(
         val chapter = adapter.getItem(flexibleAdapterPosition) as? BaseChapterItem<*, *> ?: return
         val downloadButton = itemView.findViewById<View>(R.id.download_button) ?: return
 
-        if (chapter.status == Download.State.NOT_DOWNLOADED ||
-            chapter.status == Download.State.ERROR) {
+        if (
+            chapter.status == Download.State.NOT_DOWNLOADED ||
+                chapter.status == Download.State.ERROR
+        ) {
             adapter.baseDelegate?.downloadChapter(flexibleAdapterPosition)
         } else {
             downloadButton.post {
@@ -42,22 +42,16 @@ open class BaseChapterHolder(
                 // Hide download and show delete if the chapter is downloaded
                 if (chapter.status != Download.State.DOWNLOADED) {
                     popup.menu.findItem(R.id.action_delete).title =
-                        downloadButton.context.getString(
-                            R.string.cancel,
-                        )
+                        downloadButton.context.getString(R.string.cancel)
                 }
 
                 // Set a listener so we are notified if a menu item is clicked
                 popup.setOnMenuItemClickListener { item ->
                     when (item.itemId) {
                         R.id.action_delete ->
-                            adapter.baseDelegate?.downloadChapter(
-                                flexibleAdapterPosition,
-                            )
+                            adapter.baseDelegate?.downloadChapter(flexibleAdapterPosition)
                         R.id.action_start ->
-                            adapter.baseDelegate?.startDownloadNow(
-                                flexibleAdapterPosition,
-                            )
+                            adapter.baseDelegate?.startDownloadNow(flexibleAdapterPosition)
                     }
                     true
                 }

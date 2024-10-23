@@ -67,9 +67,7 @@ class StatsPresenter(
             val libraryList = getLibrary()
             if (libraryList.isEmpty()) {
                 _simpleState.value =
-                    StatsConstants.SimpleState(
-                        screenState = StatsConstants.ScreenState.NoResults,
-                    )
+                    StatsConstants.SimpleState(screenState = StatsConstants.ScreenState.NoResults)
             } else {
                 val tracks = getTracks(libraryList)
                 val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
@@ -98,8 +96,7 @@ class StatsPresenter(
                         readDuration = getReadDuration(),
                         averageMangaRating = getAverageMangaRating(libraryList),
                         averageUserRating = getUserScore(tracks),
-                        lastLibraryUpdate =
-                            if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
+                        lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
                     )
             }
         }
@@ -142,8 +139,8 @@ class StatsPresenter(
                                                 .map { category -> category.name }
                                                 .takeUnless { it.isEmpty() }
                                                 ?: listOf(
-                                                    prefs.context.getString(
-                                                        R.string.default_value)))
+                                                    prefs.context.getString(R.string.default_value)
+                                                ))
                                             .sorted()
                                             .toImmutableList(),
                                 )
@@ -190,7 +187,8 @@ class StatsPresenter(
                             StatsConstants.DetailedTagState(
                                 totalReadDuration = totalDuration,
                                 totalChapters = totalCount,
-                                sortedTagPairs = sortedSeries),
+                                sortedTagPairs = sortedSeries,
+                            )
                     )
                 }
             }

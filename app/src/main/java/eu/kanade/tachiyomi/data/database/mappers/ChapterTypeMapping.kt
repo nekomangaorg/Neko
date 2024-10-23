@@ -34,11 +34,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_VOL
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.TABLE
 
 class ChapterTypeMapping :
-    SQLiteTypeMapping<Chapter>(
-        ChapterPutResolver(),
-        ChapterGetResolver(),
-        ChapterDeleteResolver(),
-    )
+    SQLiteTypeMapping<Chapter>(ChapterPutResolver(), ChapterGetResolver(), ChapterDeleteResolver())
 
 class ChapterPutResolver : DefaultPutResolver<Chapter>() {
 

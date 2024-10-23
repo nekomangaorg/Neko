@@ -12,10 +12,8 @@ import kotlin.math.abs
  * A custom gesture detector that also implements an on long tap confirmed, because the built-in one
  * conflicts with the quick scale feature.
  */
-open class GestureDetectorWithLongTap(
-    context: Context,
-    listener: Listener,
-) : GestureDetector(context, listener) {
+open class GestureDetectorWithLongTap(context: Context, listener: Listener) :
+    GestureDetector(context, listener) {
 
     private val handler = Handler(Looper.getMainLooper())
 

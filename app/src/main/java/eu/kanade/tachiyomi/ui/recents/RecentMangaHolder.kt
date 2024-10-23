@@ -17,10 +17,8 @@ import eu.kanade.tachiyomi.util.view.setCards
 import org.nekomanga.R
 import org.nekomanga.databinding.RecentMangaItemBinding
 
-class RecentMangaHolder(
-    view: View,
-    val adapter: RecentMangaAdapter,
-) : BaseChapterHolder(view, adapter) {
+class RecentMangaHolder(view: View, val adapter: RecentMangaAdapter) :
+    BaseChapterHolder(view, adapter) {
 
     private val binding = RecentMangaItemBinding.bind(view)
 
@@ -126,7 +124,7 @@ class RecentMangaHolder(
         }
         if (binding.frontView.translationX == 0f) {
             binding.read.setImageResource(
-                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp,
+                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp
             )
         }
         val notValidNum = item.mch.chapter.chapter_number <= 0
@@ -195,11 +193,7 @@ class RecentMangaHolder(
         if ((itemView.context as? Activity)?.isDestroyed != true) {
             binding.coverThumbnail.loadManga(item.mch.manga)
         }
-        notifyStatus(
-            item.status,
-            item.progress,
-            item.chapter.read,
-        )
+        notifyStatus(item.status, item.progress, item.chapter.read)
 
         resetFrontView()
     }
@@ -233,7 +227,7 @@ class RecentMangaHolder(
         binding.downloadButton.downloadButton.isVisible =
             when (adapter.showDownloads) {
                 RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded,
-                RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded, ->
+                RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded ->
                     status != Download.State.NOT_DOWNLOADED || !isChapterRead
                 else -> binding.downloadButton.downloadButton.isVisible
             }

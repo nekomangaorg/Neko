@@ -20,7 +20,7 @@ class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
 
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): Holder {
         return Holder(view, adapter)
     }
@@ -29,7 +29,7 @@ class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: Holder,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
         holder.progressBar.visibility = View.GONE
         holder.progressMessage.visibility = View.GONE

@@ -82,13 +82,16 @@ class LibraryCategoryGestureDetector(private val controller: LibraryController?)
         val diffX = e2.x - startingX
         val recycler = controller.binding.libraryGridRecycler.recycler
         var moved = false
-        if (abs(diffX) >= abs(diffY) &&
-            abs(diffX) > SWIPE_THRESHOLD * 3 &&
-            abs(velocityX) > SWIPE_VELOCITY_THRESHOLD &&
-            sign(diffX) == sign(velocityX)) {
+        if (
+            abs(diffX) >= abs(diffY) &&
+                abs(diffX) > SWIPE_THRESHOLD * 3 &&
+                abs(velocityX) > SWIPE_VELOCITY_THRESHOLD &&
+                sign(diffX) == sign(velocityX)
+        ) {
             moved =
                 controller.jumpToNextCategory(
-                    (diffX >= 0).xor(controller.binding.root.resources.isLTR))
+                    (diffX >= 0).xor(controller.binding.root.resources.isLTR)
+                )
             result = true
         }
         if (!result || !moved) {

@@ -18,7 +18,7 @@ interface ScanlatorQueries : DbProvider {
                     .table(ScanlatorTable.TABLE)
                     .where("${ScanlatorTable.COL_NAME} = ?")
                     .whereArgs(name)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -29,7 +29,7 @@ interface ScanlatorQueries : DbProvider {
                     .table(ScanlatorTable.TABLE)
                     .where("${ScanlatorTable.COL_NAME} = ?")
                     .whereArgs(name)
-                    .build(),
+                    .build()
             )
             .prepare()
 }

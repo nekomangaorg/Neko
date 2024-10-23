@@ -36,7 +36,7 @@ class ChapterExtensionsTest {
                     mangaDexChapterId = "",
                     oldMangaDexChapterId = null,
                     scanlator = "",
-                ),
+                )
         )
     }
 }

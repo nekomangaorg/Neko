@@ -64,13 +64,7 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
         }
 
     init {
-        val a =
-            context.obtainStyledAttributes(
-                attrs,
-                R.styleable.Toolbar,
-                0,
-                defStyleRes,
-            )
+        val a = context.obtainStyledAttributes(attrs, R.styleable.Toolbar, 0, defStyleRes)
         subtitleTextAppearance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0)
         a.recycle()
     }

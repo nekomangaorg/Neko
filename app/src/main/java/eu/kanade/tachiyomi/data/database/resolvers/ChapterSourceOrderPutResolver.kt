@@ -24,7 +24,8 @@ class ChapterSourceOrderPutResolver : PutResolver<Chapter>() {
         UpdateQuery.builder()
             .table(ChapterTable.TABLE)
             .where(
-                "${ChapterTable.COL_MANGADEX_CHAPTER_ID} = ? AND ${ChapterTable.COL_MANGA_ID} = ?")
+                "${ChapterTable.COL_MANGADEX_CHAPTER_ID} = ? AND ${ChapterTable.COL_MANGA_ID} = ?"
+            )
             .whereArgs(chapter.mangadex_chapter_id, chapter.manga_id)
             .build()
 

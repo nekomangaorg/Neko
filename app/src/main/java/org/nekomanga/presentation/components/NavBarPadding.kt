@@ -34,7 +34,7 @@ fun rememberSideBarVisible(windowSizeClass: WindowSizeClass, sideNavMode: SideNa
 @Composable
 fun rememberNavBarPadding(
     isSideBarShowing: Boolean,
-    shouldIgnoreBottomNavPadding: Boolean = false
+    shouldIgnoreBottomNavPadding: Boolean = false,
 ): PaddingValues {
     val bottomNav =
         PaddingValues(
@@ -44,17 +44,20 @@ fun rememberNavBarPadding(
                     else ->
                         Size.navBarSize +
                             WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                },
+                }
         )
     val sideNav =
         PaddingValues(
             start = Size.navBarSize,
-            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+        )
     return remember(
-        isSideBarShowing, WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()) {
-            when (isSideBarShowing) {
-                true -> sideNav
-                false -> bottomNav
-            }
+        isSideBarShowing,
+        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+    ) {
+        when (isSideBarShowing) {
+            true -> sideNav
+            false -> bottomNav
         }
+    }
 }

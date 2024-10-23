@@ -34,10 +34,7 @@ import org.nekomanga.R
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun CrashScreen(
-    exception: Throwable?,
-    onRestartClick: () -> Unit,
-) {
+fun CrashScreen(exception: Throwable?, onRestartClick: () -> Unit) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     Scaffold(
@@ -63,14 +60,11 @@ fun CrashScreen(
                 ) {
                     Text(text = stringResource(id = R.string.pref_dump_crash_logs))
                 }
-                OutlinedButton(
-                    onClick = onRestartClick,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
+                OutlinedButton(onClick = onRestartClick, modifier = Modifier.fillMaxWidth()) {
                     Text(text = stringResource(R.string.crash_screen_restart_application))
                 }
             }
-        },
+        }
     ) { paddingValues ->
         Column(
             modifier =
@@ -91,7 +85,9 @@ fun CrashScreen(
             Text(
                 text =
                     stringResource(
-                        R.string.crash_screen_description, stringResource(id = R.string.app_name)),
+                        R.string.crash_screen_description,
+                        stringResource(id = R.string.app_name),
+                    ),
                 modifier = Modifier.padding(horizontal = Size.medium),
             )
             Box(
@@ -99,7 +95,7 @@ fun CrashScreen(
                     Modifier.padding(vertical = Size.small)
                         .clip(MaterialTheme.shapes.small)
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Text(
                     text = exception.toString(),

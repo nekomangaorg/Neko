@@ -136,7 +136,7 @@ constructor(
                             override fun onCenterChanged(newCenter: PointF?, origin: Int) {
                                 // Not used
                             }
-                        },
+                        }
                     )
                     setOnClickListener { this@ReaderPageImageView.onViewClicked() }
                 }
@@ -167,9 +167,11 @@ constructor(
         val insetInfo = config.insetInfo ?: return
         val topInsets = insetInfo.topCutoutInset
         val bottomInsets = insetInfo.bottomCutoutInset
-        if (insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
-            topInsets + bottomInsets > 0 &&
-            insetInfo.scaleTypeIsFullFit) {
+        if (
+            insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
+                topInsets + bottomInsets > 0 &&
+                insetInfo.scaleTypeIsFullFit
+        ) {
             setScaleAndCenter(
                 scale,
                 PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f)),
@@ -177,10 +179,7 @@ constructor(
         }
     }
 
-    private fun setNonAnimatedImage(
-        image: Any,
-        config: Config,
-    ) =
+    private fun setNonAnimatedImage(image: Any, config: Config) =
         (pageView as? SubsamplingScaleImageView)?.apply {
             setDoubleTapZoomDuration(config.zoomDuration.getSystemScaledDuration())
             setMinimumScaleType(config.minimumScaleType)
@@ -192,12 +191,14 @@ constructor(
                 setExtendPastCutout(
                     config.insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
                         config.insetInfo.scaleTypeIsFullFit &&
-                        topInsets + bottomInsets > 0,
+                        topInsets + bottomInsets > 0
                 )
-                if ((config.insetInfo.cutoutBehavior != PagerConfig.CUTOUT_IGNORE ||
-                    !config.insetInfo.scaleTypeIsFullFit) &&
-                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q &&
-                    config.insetInfo.isFullscreen) {
+                if (
+                    (config.insetInfo.cutoutBehavior != PagerConfig.CUTOUT_IGNORE ||
+                        !config.insetInfo.scaleTypeIsFullFit) &&
+                        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q &&
+                        config.insetInfo.isFullscreen
+                ) {
                     val insets: WindowInsets? = config.insetInfo.insets
                     setExtraSpace(
                         0f,
@@ -219,7 +220,7 @@ constructor(
                     override fun onImageLoadError(e: Exception) {
                         this@ReaderPageImageView.onImageLoadError()
                     }
-                },
+                }
             )
 
             when (image) {
@@ -230,7 +231,8 @@ constructor(
                 is InputStream -> setImage(ImageSource.inputStream(image))
                 else ->
                     throw IllegalArgumentException(
-                        "Not implemented for class ${image::class.simpleName}")
+                        "Not implemented for class ${image::class.simpleName}"
+                    )
             }
             isVisible = true
         }
@@ -266,7 +268,7 @@ constructor(
                                     this@ReaderPageImageView.onViewClicked()
                                     return super.onSingleTapConfirmed(e)
                                 }
-                            },
+                            }
                         )
                         setOnScaleChangeListener { _, _, _ ->
                             this@ReaderPageImageView.onScaleChanged(scale)
@@ -276,10 +278,7 @@ constructor(
         addView(pageView, MATCH_PARENT, MATCH_PARENT)
     }
 
-    private fun setAnimatedImage(
-        image: Any,
-        config: Config,
-    ) =
+    private fun setAnimatedImage(image: Any, config: Config) =
         (pageView as? AppCompatImageView)?.apply {
             if (this is PhotoView) {
                 setZoomTransitionDuration(config.zoomDuration.getSystemScaledDuration())
@@ -291,7 +290,8 @@ constructor(
                     is InputStream -> ByteBuffer.wrap(image.readBytes())
                     else ->
                         throw IllegalArgumentException(
-                            "Not implemented for class ${image::class.simpleName}")
+                            "Not implemented for class ${image::class.simpleName}"
+                        )
                 }
             val request =
                 ImageRequest.Builder(context)

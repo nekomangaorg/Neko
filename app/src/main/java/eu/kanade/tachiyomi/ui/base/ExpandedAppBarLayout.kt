@@ -144,8 +144,9 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
     private val minTabletHeight: Int
         get() {
             val tabHeight = if (tabsFrameLayout?.isVisible == true) 48.dpToPx else 0
-            return if (context.isTablet() ||
-                (compactSearchMode && toolbarMode == ToolbarState.EXPANDED)) {
+            return if (
+                context.isTablet() || (compactSearchMode && toolbarMode == ToolbarState.EXPANDED)
+            ) {
                 (mainToolbar?.height ?: 0) + paddingTop + tabHeight
             } else {
                 0
@@ -233,7 +234,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
         includeSearchToolbar: Boolean,
         includeTabs: Boolean,
         includeLargeToolbar: Boolean,
-        ignoreSearch: Boolean = false
+        ignoreSearch: Boolean = false,
     ): Int {
         val hasLargeToolbar =
             includeLargeToolbar && useLargeToolbar && (!compactSearchMode || ignoreSearch)
@@ -339,10 +340,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
                             if (offset > realHeight - shortH - tabHeight) {
                                 smallHeight
                             } else {
-                                min(
-                                    -offset.toFloat(),
-                                    0f,
-                                )
+                                min(-offset.toFloat(), 0f)
                             },
                         ) + top.toFloat(),
                     )
@@ -376,12 +374,8 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
         bigView?.alpha = MathUtils.clamp(if (alpha.isNaN()) 1f else alpha, 0f, 1f)
         val toolbarTextView = mainToolbar?.toolbarTitle ?: return
         toolbarTextView.setTextColorAlpha(
-            (MathUtils.clamp(
-                    (1 - ((if (alpha.isNaN()) 1f else alpha) + 0.95f)) * 2,
-                    0f,
-                    1f,
-                ) * 255)
-                .roundToInt(),
+            (MathUtils.clamp((1 - ((if (alpha.isNaN()) 1f else alpha) + 0.95f)) * 2, 0f, 1f) * 255)
+                .roundToInt()
         )
         val mainToolbar = mainToolbar ?: return
         mainToolbar.alpha =
@@ -394,13 +388,15 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
         val mainActivity = mainActivity ?: return
         val useSearchToolbar = mainToolbar.alpha <= 0.025f
         val idle = RecyclerView.SCROLL_STATE_IDLE
-        if (if (useSearchToolbar) {
-            -y >= height ||
-                (recyclerView is RecyclerView && recyclerView.scrollState <= idle) ||
-                context.isTablet()
-        } else {
-            mainActivity.currentToolbar == searchToolbar
-        }) {
+        if (
+            if (useSearchToolbar) {
+                -y >= height ||
+                    (recyclerView is RecyclerView && recyclerView.scrollState <= idle) ||
+                    context.isTablet()
+            } else {
+                mainActivity.currentToolbar == searchToolbar
+            }
+        ) {
             useSearchToolbarForMenu(useSearchToolbar)
         }
     }
@@ -416,7 +412,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
     fun snapAppBarY(
         controller: Controller?,
         recyclerView: RecyclerView,
-        callback: (() -> Unit)?
+        callback: (() -> Unit)?,
     ): Float {
         yAnimator?.cancel()
         val halfWay = compactAppBarHeight / 2
@@ -426,7 +422,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
                     android.R.integer.config_shortAnimTime
                 } else {
                     android.R.integer.config_longAnimTime
-                },
+                }
             ) ?: 0
         val realHeight = preLayoutHeightWhileSearching + paddingTop
         val closerToTop = abs(y) > realHeight - halfWay
@@ -463,8 +459,9 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
     fun useSearchToolbarForMenu(showCardTB: Boolean) {
         val mainActivity = mainActivity ?: return
         if (lockYPos) return
-        if ((showCardTB || toolbarMode == ToolbarState.SEARCH_ONLY) &&
-            cardFrame?.isVisible == true) {
+        if (
+            (showCardTB || toolbarMode == ToolbarState.SEARCH_ONLY) && cardFrame?.isVisible == true
+        ) {
             if (mainActivity.currentToolbar != searchToolbar) {
                 mainActivity.setFloatingToolbar(true, showSearchAnyway = true)
             } else {

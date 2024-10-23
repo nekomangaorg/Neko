@@ -140,7 +140,7 @@ class CategoryController(bundle: Bundle? = null) :
                             super.onDismissed(transientBottomBar, event)
                             if (!undoing) confirmDelete()
                         }
-                    },
+                    }
                 )
             }
         (activity as? MainActivity)?.setUndoSnackBar(snack)

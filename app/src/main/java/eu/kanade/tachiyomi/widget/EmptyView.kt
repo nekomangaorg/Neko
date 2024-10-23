@@ -81,24 +81,12 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * @param textResource text of information view
      */
     fun showMedium(icon: IIcon, message: String, actions: List<Action>? = null) {
-        binding.imageView.setImageDrawable(
-            icon.create(
-                context,
-                48f,
-                android.R.attr.textColorHint,
-            ),
-        )
+        binding.imageView.setImageDrawable(icon.create(context, 48f, android.R.attr.textColorHint))
         iconicsAfter(message, actions)
     }
 
     fun show(icon: IIcon, message: String, actions: List<Action>? = null) {
-        binding.imageView.setImageDrawable(
-            icon.create(
-                context,
-                128f,
-                android.R.attr.textColorHint,
-            ),
-        )
+        binding.imageView.setImageDrawable(icon.create(context, 128f, android.R.attr.textColorHint))
         iconicsAfter(message, actions)
     }
 
@@ -109,12 +97,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         if (!actions.isNullOrEmpty()) {
             actions.forEach {
                 val button =
-                    (inflate(
-                            context,
-                            R.layout.material_text_button,
-                            null,
-                        )
-                            as MaterialButton)
+                    (inflate(context, R.layout.material_text_button, null) as MaterialButton)
                         .apply {
                             setText(it.resId)
                             setOnClickListener(it.listener)
@@ -126,8 +109,5 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         this.isVisible = true
     }
 
-    data class Action(
-        @StringRes val resId: Int,
-        val listener: OnClickListener,
-    )
+    data class Action(@StringRes val resId: Int, val listener: OnClickListener)
 }

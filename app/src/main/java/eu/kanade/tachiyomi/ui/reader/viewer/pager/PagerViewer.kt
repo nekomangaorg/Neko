@@ -86,8 +86,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             override fun onPageSelected(position: Int) {
                 if (pager.isRestoring) return
                 val page = adapter.joinedItems.getOrNull(position)
-                if (!activity.isScrollingThroughPagesOrChapters &&
-                    page?.first !is ChapterTransition) {
+                if (
+                    !activity.isScrollingThroughPagesOrChapters && page?.first !is ChapterTransition
+                ) {
                     activity.hideMenu()
                 }
 
@@ -341,11 +342,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         TimberKt.d { "setChaptersInternal" }
         val forceTransition =
             config.alwaysShowChapterTransition ||
-                adapter.joinedItems
-                    .getOrNull(
-                        pager.currentItem,
-                    )
-                    ?.first is ChapterTransition
+                adapter.joinedItems.getOrNull(pager.currentItem)?.first is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
         // Layout the pager once a chapter is being set

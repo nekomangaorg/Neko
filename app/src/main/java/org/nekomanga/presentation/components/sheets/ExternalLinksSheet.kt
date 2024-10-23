@@ -30,7 +30,7 @@ import org.nekomanga.presentation.theme.Size
 fun ExternalLinksSheet(
     themeColorState: ThemeColorState,
     externalLinks: List<ExternalLink>,
-    onLinkClick: (String, String) -> Unit
+    onLinkClick: (String, String) -> Unit,
 ) {
     CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
@@ -69,7 +69,8 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String, String) -
                 text = externalLink.name,
                 style =
                     MaterialTheme.typography.bodyMedium.copy(
-                        color = Color(externalLink.onLogoColor)),
+                        color = Color(externalLink.onLogoColor)
+                    ),
             )
             Gap(12.dp)
         }

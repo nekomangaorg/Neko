@@ -5,10 +5,8 @@ import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import org.nekomanga.R
 import org.nekomanga.databinding.RecentsFooterItemBinding
 
-class RecentMangaFooterHolder(
-    view: View,
-    val adapter: RecentMangaAdapter,
-) : BaseChapterHolder(view, adapter) {
+class RecentMangaFooterHolder(view: View, val adapter: RecentMangaAdapter) :
+    BaseChapterHolder(view, adapter) {
     private val binding = RecentsFooterItemBinding.bind(view)
 
     fun bind(recentsType: Int) {

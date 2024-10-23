@@ -38,7 +38,7 @@ fun OkHttpClient.Builder.dohCloudflare() =
                 InetAddress.getByName("2606:4700:4700::0064"),
                 InetAddress.getByName("2606:4700:4700::6400"),
             )
-            .build(),
+            .build()
     )
 
 fun OkHttpClient.Builder.dohGoogle() =
@@ -52,7 +52,7 @@ fun OkHttpClient.Builder.dohGoogle() =
                 InetAddress.getByName("2001:4860:4860::8888"),
                 InetAddress.getByName("2001:4860:4860::8844"),
             )
-            .build(),
+            .build()
     )
 
 // AdGuard "Default" DNS works too but for the sake of making sure no site is blacklisted,
@@ -68,7 +68,7 @@ fun OkHttpClient.Builder.dohAdGuard() =
                 InetAddress.getByName("2a10:50c0::1:ff"),
                 InetAddress.getByName("2a10:50c0::2:ff"),
             )
-            .build(),
+            .build()
     )
 
 fun OkHttpClient.Builder.dohQuad9() =
@@ -82,7 +82,7 @@ fun OkHttpClient.Builder.dohQuad9() =
                 InetAddress.getByName("2620:fe::fe"),
                 InetAddress.getByName("2620:fe::9"),
             )
-            .build(),
+            .build()
     )
 
 fun OkHttpClient.Builder.dohAliDNS() =
@@ -96,7 +96,7 @@ fun OkHttpClient.Builder.dohAliDNS() =
                 InetAddress.getByName("2400:3200::1"),
                 InetAddress.getByName("2400:3200:baba::1"),
             )
-            .build(),
+            .build()
     )
 
 fun OkHttpClient.Builder.dohDNSPod() =
@@ -108,7 +108,7 @@ fun OkHttpClient.Builder.dohDNSPod() =
                 InetAddress.getByName("1.12.12.12"),
                 InetAddress.getByName("120.53.53.53"),
             )
-            .build(),
+            .build()
     )
 
 fun OkHttpClient.Builder.doh360() =
@@ -125,7 +125,7 @@ fun OkHttpClient.Builder.doh360() =
                 InetAddress.getByName("101.199.113.208"),
                 InetAddress.getByName("36.99.170.86"),
             )
-            .build(),
+            .build()
     )
 
 fun OkHttpClient.Builder.dohQuad101() =
@@ -138,7 +138,7 @@ fun OkHttpClient.Builder.dohQuad101() =
                 InetAddress.getByName("2001:de4::101"),
                 InetAddress.getByName("2001:de4::102"),
             )
-            .build(),
+            .build()
     )
 
 /*
@@ -156,7 +156,7 @@ fun OkHttpClient.Builder.dohMullvad() =
                 InetAddress.getByName("193.19.108.2"),
                 InetAddress.getByName("2a07:e340::2"),
             )
-            .build(),
+            .build()
     )
 
 /*
@@ -175,7 +175,7 @@ fun OkHttpClient.Builder.dohControlD() =
                 InetAddress.getByName("2606:1a40::"),
                 InetAddress.getByName("2606:1a40:1::"),
             )
-            .build(),
+            .build()
     )
 
 /*
@@ -191,7 +191,7 @@ fun OkHttpClient.Builder.dohNajalla() =
                 InetAddress.getByName("95.215.19.53"),
                 InetAddress.getByName("2001:67c:2354:2::53"),
             )
-            .build(),
+            .build()
     )
 
 /** Source: https://shecan.ir/ */
@@ -204,5 +204,5 @@ fun OkHttpClient.Builder.dohShecan() =
                 InetAddress.getByName("178.22.122.100"),
                 InetAddress.getByName("185.51.200.2"),
             )
-            .build(),
+            .build()
     )

@@ -29,7 +29,9 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             }
 
             doublePageGap.bindToIntPreference(
-                readerPreferences.doublePageGap(), R.array.double_page_gap)
+                readerPreferences.doublePageGap(),
+                R.array.double_page_gap,
+            )
             binding.navigatePan.bindToPreference(readerPreferences.navigateToPan())
             binding.landscapeZoom.bindToPreference(readerPreferences.landscapeZoom())
             zoomStart.bindToPreference(readerPreferences.zoomStart(), 1)
@@ -55,7 +57,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
                 }
             }
             doublePageRotateToFitInvert.bindToPreference(
-                readerPreferences.doublePageRotateReverse())
+                readerPreferences.doublePageRotateReverse()
+            )
 
             pageLayout.title =
                 pageLayout.title.toString().addBetaTag(context, R.attr.colorSecondary)
@@ -65,7 +68,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             val hasMargins = mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue
             cropBordersWebtoon.bindToPreference(
                 if (hasMargins) readerPreferences.cropBorders()
-                else readerPreferences.cropBordersWebtoon())
+                else readerPreferences.cropBordersWebtoon()
+            )
             webtoonSidePadding.bindToIntPreference(
                 readerPreferences.webtoonSidePadding(),
                 R.array.webtoon_side_padding_values,
@@ -76,7 +80,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             webtoonPageLayout.bindToPreference(readerPreferences.webtoonPageLayout())
             webtoonInvertDoublePages.bindToPreference(readerPreferences.webtoonInvertDoublePages())
             webtoonPageTransitions.bindToPreference(
-                readerPreferences.animatedPageTransitionsWebtoon())
+                readerPreferences.animatedPageTransitionsWebtoon()
+            )
 
             updatePagedGroup(!isWebtoonView)
         }
@@ -88,7 +93,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
         val hasMargins = mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue
         binding.cropBordersWebtoon.bindToPreference(
             if (hasMargins) readerPreferences.cropBorders()
-            else readerPreferences.cropBordersWebtoon())
+            else readerPreferences.cropBordersWebtoon()
+        )
         updatePagedGroup(!isWebtoonView)
     }
 
@@ -120,7 +126,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             when (readerPreferences.imageScaleType().get()) {
                 SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
                 SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
-                SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP, -> true
+                SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
                 else -> false
             }
         val ogView = (context as? Activity)?.window?.decorView

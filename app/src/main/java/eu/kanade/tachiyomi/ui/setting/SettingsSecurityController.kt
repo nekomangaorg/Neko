@@ -46,11 +46,7 @@ class SettingsSecurityController : SettingsController() {
                                 0 -> context.getString(R.string.always)
                                 -1 -> context.getString(R.string.never)
                                 else ->
-                                    resources?.getQuantityString(
-                                        R.plurals.after_minutes,
-                                        it,
-                                        it,
-                                    )
+                                    resources?.getQuantityString(R.plurals.after_minutes, it, it)
                             }
                         }
                     entryValues = values

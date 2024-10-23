@@ -43,7 +43,7 @@ class TachiyomiImageDecoder(private val resources: ImageSource, private val opti
         override fun create(
             result: SourceResult,
             options: Options,
-            imageLoader: ImageLoader
+            imageLoader: ImageLoader,
         ): Decoder? {
             if (!isApplicable(result.source.source())) return null
             return TachiyomiImageDecoder(result.source, options)

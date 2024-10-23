@@ -43,10 +43,7 @@ fun RadioGroup.bindToPreference(pref: Preference<Int>, block: (() -> Unit)? = nu
 }
 
 /** Binds a spinner to an int preference with an optional offset for the value. */
-fun Spinner.bindToPreference(
-    pref: Preference<Int>,
-    offset: Int = 0,
-) {
+fun Spinner.bindToPreference(pref: Preference<Int>, offset: Int = 0) {
     onItemSelectedListener = IgnoreFirstSpinnerListener { position -> pref.set(position + offset) }
     setSelection(pref.get() - offset, false)
 }

@@ -70,7 +70,8 @@ class RecentMangaItem(
     ) {
         if (mch.manga.id == null) {
             (holder as? RecentMangaFooterHolder)?.bind(
-                (header as? RecentMangaHeaderItem)?.recentsType ?: 0)
+                (header as? RecentMangaHeaderItem)?.recentsType ?: 0
+            )
         } else if (chapter.id != null) (holder as? RecentMangaHolder)?.bind(this)
     }
 }

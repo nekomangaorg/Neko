@@ -16,16 +16,12 @@ interface SimilarQueries : DbProvider {
                     .table(SimilarTable.TABLE)
                     .where("${SimilarTable.COL_MANGA_ID} = ?")
                     .whereArgs(manga_id)
-                    .build(),
+                    .build()
             )
             .prepare()
 
     fun insertSimilar(similar: MangaSimilar) = db.put().`object`(similar).prepare()
 
     fun deleteAllSimilar() =
-        db.delete()
-            .byQuery(
-                DeleteQuery.builder().table(SimilarTable.TABLE).build(),
-            )
-            .prepare()
+        db.delete().byQuery(DeleteQuery.builder().table(SimilarTable.TABLE).build()).prepare()
 }

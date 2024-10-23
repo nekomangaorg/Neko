@@ -16,11 +16,8 @@ import kotlin.math.abs
 /** Implementation of a [RecyclerView] used by the webtoon reader. */
 open class WebtoonRecyclerView
 @JvmOverloads
-constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyle: Int = 0,
-) : androidx.recyclerview.widget.RecyclerView(context, attrs, defStyle) {
+constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
+    androidx.recyclerview.widget.RecyclerView(context, attrs, defStyle) {
 
     private var isZooming = false
     private var atLastPosition = false
@@ -134,7 +131,7 @@ constructor(
                 override fun onAnimationCancel(animation: Animator) {}
 
                 override fun onAnimationRepeat(animation: Animator) {}
-            },
+            }
         )
     }
 
@@ -182,11 +179,7 @@ constructor(
 
     fun onScale(scaleFactor: Float) {
         currentScale *= scaleFactor
-        currentScale =
-            currentScale.coerceIn(
-                minRate,
-                MAX_SCALE_RATE,
-            )
+        currentScale = currentScale.coerceIn(minRate, MAX_SCALE_RATE)
 
         setScaleRate(currentScale)
 

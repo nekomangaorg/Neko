@@ -52,10 +52,7 @@ class NotificationReceiver : BroadcastReceiver() {
         when (intent.action) {
             // Dismiss notification
             ACTION_DISMISS_NOTIFICATION ->
-                dismissNotification(
-                    context,
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
-                )
+                dismissNotification(context, intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
             // Resume the download service
             ACTION_RESUME_DOWNLOADS -> DownloadJob.start(context)
             // Pause the download service
@@ -110,7 +107,10 @@ class NotificationReceiver : BroadcastReceiver() {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (notificationId > -1) {
                     dismissNotification(
-                        context, notificationId, intent.getIntExtra(EXTRA_GROUP_ID, 0))
+                        context,
+                        notificationId,
+                        intent.getIntExtra(EXTRA_GROUP_ID, 0),
+                    )
                 }
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
@@ -583,10 +583,7 @@ class NotificationReceiver : BroadcastReceiver() {
             downloadLink: String,
         ): PendingIntent {
             val newIntent =
-                Intent(
-                        context,
-                        MainActivity::class.java,
-                    )
+                Intent(context, MainActivity::class.java)
                     .setAction(MainActivity.SHORTCUT_UPDATE_NOTES)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     .putExtra(NewUpdateDialogController.BODY_KEY, notes)
@@ -608,7 +605,7 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun openChapterPendingActivity(
             context: Context,
             manga: Manga,
-            groupId: Int
+            groupId: Int,
         ): PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java)
@@ -649,7 +646,8 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 manga.id.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -661,7 +659,7 @@ class NotificationReceiver : BroadcastReceiver() {
          */
         internal fun openErrorOrSkippedLogPendingActivity(
             context: Context,
-            uri: Uri?
+            uri: Uri?,
         ): PendingIntent {
             val intent =
                 Intent().apply {
@@ -683,7 +681,8 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 0,
                 toLaunch,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -774,7 +773,7 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun startAppUpdatePendingJob(
             context: Context,
             url: String,
-            notifyOnInstall: Boolean = false
+            notifyOnInstall: Boolean = false,
         ): PendingIntent {
             val intent =
                 Intent(context, NotificationReceiver::class.java).apply {

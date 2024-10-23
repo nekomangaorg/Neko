@@ -55,10 +55,7 @@ class MangaPlusHandler {
                 .addQueryParameter("img_quality", "super_high")
                 .addQueryParameter("format", "json")
                 .toString()
-        return GET(
-            url,
-            headers,
-        )
+        return GET(url, headers)
     }
 
     private fun Response.asMangaPlusResponse(): MangaPlusResponse = use {

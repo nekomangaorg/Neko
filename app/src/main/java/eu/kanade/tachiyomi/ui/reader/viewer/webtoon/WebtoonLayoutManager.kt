@@ -41,10 +41,18 @@ class WebtoonLayoutManager(activity: ReaderActivity) : LinearLayoutManager(activ
         val child =
             if (mOrientation == HORIZONTAL) {
                 mHorizontalBoundCheck.findOneViewWithinBoundFlags(
-                    fromIndex, toIndex, preferredBoundsFlag, 0)
+                    fromIndex,
+                    toIndex,
+                    preferredBoundsFlag,
+                    0,
+                )
             } else {
                 mVerticalBoundCheck.findOneViewWithinBoundFlags(
-                    fromIndex, toIndex, preferredBoundsFlag, 0)
+                    fromIndex,
+                    toIndex,
+                    preferredBoundsFlag,
+                    0,
+                )
             }
 
         return if (child == null) NO_POSITION else getPosition(child)

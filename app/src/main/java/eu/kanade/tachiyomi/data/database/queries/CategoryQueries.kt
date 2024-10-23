@@ -13,7 +13,7 @@ interface CategoryQueries : DbProvider {
         db.get()
             .listOfObjects(Category::class.java)
             .withQuery(
-                Query.builder().table(CategoryTable.TABLE).orderBy(CategoryTable.COL_ORDER).build(),
+                Query.builder().table(CategoryTable.TABLE).orderBy(CategoryTable.COL_ORDER).build()
             )
             .prepare()
 
@@ -22,9 +22,7 @@ interface CategoryQueries : DbProvider {
     fun getCategoriesForManga(mangaId: Long?) =
         db.get()
             .listOfObjects(Category::class.java)
-            .withQuery(
-                RawQuery.builder().query(getCategoriesForMangaQuery()).args(mangaId).build(),
-            )
+            .withQuery(RawQuery.builder().query(getCategoriesForMangaQuery()).args(mangaId).build())
             .prepare()
 
     fun insertCategory(category: Category) = db.put().`object`(category).prepare()

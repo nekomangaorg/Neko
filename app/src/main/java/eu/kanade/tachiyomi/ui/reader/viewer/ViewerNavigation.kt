@@ -27,15 +27,10 @@ abstract class ViewerNavigation {
         }
     }
 
-    data class Region(
-        val rectF: RectF,
-        val type: NavigationRegion,
-    ) {
+    data class Region(val rectF: RectF, val type: NavigationRegion) {
         fun invert(invertMode: TappingInvertMode): Region {
             if (invertMode == TappingInvertMode.NONE) return this
-            return this.copy(
-                rectF = this.rectF.invert(invertMode),
-            )
+            return this.copy(rectF = this.rectF.invert(invertMode))
         }
     }
 
@@ -58,7 +53,7 @@ abstract class ViewerNavigation {
 
     enum class TappingInvertMode(
         val shouldInvertHorizontal: Boolean = false,
-        val shouldInvertVertical: Boolean = false
+        val shouldInvertVertical: Boolean = false,
     ) {
         NONE,
         HORIZONTAL(shouldInvertHorizontal = true),

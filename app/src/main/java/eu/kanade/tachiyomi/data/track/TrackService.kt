@@ -93,10 +93,12 @@ abstract class TrackService(val id: Int) {
         if (setToReadStatus && track.status == planningStatus() && track.last_chapter_read != 0f) {
             track.status = readingStatus()
         }
-        if (setToComplete &&
-            (!mustReadToComplete || track.status == readingStatus()) &&
-            track.total_chapters != 0 &&
-            track.last_chapter_read.toInt() == track.total_chapters) {
+        if (
+            setToComplete &&
+                (!mustReadToComplete || track.status == readingStatus()) &&
+                track.total_chapters != 0 &&
+                track.last_chapter_read.toInt() == track.total_chapters
+        ) {
             track.status = completedStatus()
         }
     }

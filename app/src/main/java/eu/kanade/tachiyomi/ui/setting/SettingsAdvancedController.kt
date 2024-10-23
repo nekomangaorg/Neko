@@ -399,7 +399,8 @@ class SettingsAdvancedController : SettingsController() {
                 .create()
                 .apply {
                     this.disableItems(
-                        arrayOf(activity!!.getString(R.string.clean_orphaned_downloads)))
+                        arrayOf(activity!!.getString(R.string.clean_orphaned_downloads))
+                    )
                 }
         }
     }
@@ -477,7 +478,7 @@ class SettingsAdvancedController : SettingsController() {
                             R.plurals.cache_cleared,
                             deletedFiles,
                             deletedFiles,
-                        ),
+                        )
                     )
                     findPreference(CLEAR_CACHE_KEY)?.summary =
                         resources?.getString(R.string.used_, chapterCache.readableSize)
@@ -493,13 +494,15 @@ class SettingsAdvancedController : SettingsController() {
                 .materialAlertDialog()
                 .setCustomTitleAndMessage(
                     R.string.clear_database_confirmation_title,
-                    activity!!.getString(R.string.clear_database_confirmation))
+                    activity!!.getString(R.string.clear_database_confirmation),
+                )
                 .setMultiChoiceItems(item, selected) { _, which, checked ->
                     selected[which] = checked
                 }
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     (targetController as? SettingsAdvancedController)?.clearDatabase(
-                        selected.last())
+                        selected.last()
+                    )
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .create()
