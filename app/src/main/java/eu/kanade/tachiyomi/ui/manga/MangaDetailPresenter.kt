@@ -1530,9 +1530,8 @@ class MangaDetailPresenter(
             } else {
                 _snackbarState.emit(SnackbarState(messageRes = R.string.no_chapters_to_delete))
             }
+            updateChapterFlows()
         }
-
-        updateChapterFlows()
     }
 
     /** Checks if a manga is favorited, if not then snack action to add to library */
