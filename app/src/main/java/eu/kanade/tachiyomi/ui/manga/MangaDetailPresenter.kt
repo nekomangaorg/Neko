@@ -165,10 +165,15 @@ class MangaDetailPresenter(
             _currentManga.value = dbManga
             val validMergeTypes =
                 when (sourceManager.komga.hasCredentials()) {
-                    true -> MergeType.entries.toPersistentList()
+                    true ->
+                        MergeType.entries.filterNot { it == MergeType.MangaLife }.toPersistentList()
                     false ->
-                        MergeType.entries.filterNot { it == MergeType.Komga }.toPersistentList()
+                        MergeType.entries
+                            .filterNot { it == MergeType.Komga }
+                            .filterNot { it == MergeType.MangaLife }
+                            .toPersistentList()
                 }
+
             _generalState.value =
                 MangaConstants.MangaScreenGeneralState(
                     hasDefaultCategory = preferences.defaultCategory().get() != -1,
