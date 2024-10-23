@@ -29,11 +29,11 @@ data class SourceMergeManga(
     }
 }
 
-enum class MergeType(val id: Int) {
-    MangaLife(0),
-    Komga(1),
-    Toonily(2),
-    ;
+enum class MergeType(val id: Int, val scanlatorName: String) {
+    MangaLife(0, eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife.name),
+    Komga(1, eu.kanade.tachiyomi.source.online.merged.komga.Komga.name),
+    Toonily(2, eu.kanade.tachiyomi.source.online.merged.toonily.Toonily.name),
+    WeebCentral(3, eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral.name);
 
     companion object {
         fun getById(id: Int): MergeType {
@@ -42,19 +42,16 @@ enum class MergeType(val id: Int) {
 
         fun getMergeTypeFromName(name: String?): MergeType? {
             return when (name) {
-                MangaLife.name -> MangaLife
-                Komga.name -> Komga
-                Toonily.name -> Toonily
+                MangaLife.scanlatorName -> MangaLife
+                Komga.scanlatorName -> Komga
+                Toonily.scanlatorName -> Toonily
+                WeebCentral.scanlatorName -> WeebCentral
                 else -> null
             }
         }
 
         fun getMergeTypeName(mergeType: MergeType): String {
-            return when (mergeType) {
-                MangaLife -> MangaLife.name
-                Komga -> Komga.name
-                Toonily -> Toonily.name
-            }
+            return mergeType.scanlatorName
         }
 
         fun getSource(mergeType: MergeType, sourceManager: SourceManager): ReducedHttpSource {
@@ -62,6 +59,7 @@ enum class MergeType(val id: Int) {
                 MangaLife -> sourceManager.mangaLife
                 Komga -> sourceManager.komga
                 Toonily -> sourceManager.toonily
+                WeebCentral -> sourceManager.weebCentral
             }
         }
 

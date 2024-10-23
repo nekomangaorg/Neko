@@ -124,6 +124,7 @@ fun MergeSheet(
                                         MergeType.Komga -> R.drawable.ic_komga_logo
                                         MergeType.MangaLife -> R.drawable.ic_mangalife_logo
                                         MergeType.Toonily -> R.drawable.ic_toonily
+                                        MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
                                     }
                                 MergeLogo(id = id, onClick = { mergeType = validMergeType })
                             }

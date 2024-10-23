@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.merged.komga.Komga
 import eu.kanade.tachiyomi.source.online.merged.mangalife.MangaLife
 import eu.kanade.tachiyomi.source.online.merged.toonily.Toonily
+import eu.kanade.tachiyomi.source.online.merged.weebcentral.WeebCentral
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.security.MessageDigest
 
@@ -17,6 +18,8 @@ open class SourceManager {
     val komga: Komga by lazy { Komga() }
 
     val toonily: Toonily by lazy { Toonily() }
+
+    val weebCentral: WeebCentral by lazy { WeebCentral() }
 
     open fun get(sourceKey: Long): Source? {
         return mangaDex
