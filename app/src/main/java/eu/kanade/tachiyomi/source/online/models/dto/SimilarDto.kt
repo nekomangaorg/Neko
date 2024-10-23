@@ -50,7 +50,7 @@ data class SimilarMangaMatchListDto(
     val title: Map<String, String>,
     val contentRating: String,
     val score: Double,
-    val languages: List<String>,
+    val languages: List<String> = emptyList(),
 )
 
 @Serializable data class AnilistMangaRecommendationsDto(val data: AnilistMangaSimilarMedia)
