@@ -1004,7 +1004,7 @@ class ReaderViewModel(
      * Deletes all the pending chapters. This operation will run in a background thread and errors
      * are ignored.
      */
-    private fun deletePendingChapters() {
+    fun deletePendingChapters() {
         scope.launchNonCancellable { downloadManager.deletePendingChapters() }
     }
 

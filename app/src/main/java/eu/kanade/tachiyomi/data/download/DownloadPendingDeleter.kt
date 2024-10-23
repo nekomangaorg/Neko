@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.core.content.edit
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadPendingDeleter.Entry
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uy.kohesive.injekt.injectLazy
@@ -80,11 +80,43 @@ class DownloadPendingDeleter(context: Context) {
     @Synchronized
     fun getPendingChapters(): Map<Manga, List<Chapter>> {
         val entries = decodeAll()
-        preferences.edit { clear() }
         lastAddedEntry = null
 
         return entries.associate { (chapters, manga) ->
             manga.toModel() to chapters.map { it.toModel() }
+        }
+    }
+
+    /**
+     * Returns the list of chapters to be deleted grouped by its manga.
+     *
+     * Note: the returned list of manga and chapters only contain basic information needed by the
+     * downloader, so don't use them for anything else.
+     */
+    @Synchronized
+    fun deletePendingChapter(manga: Manga, chapters: List<Chapter>) {
+        val existingEntry = preferences.getString(manga.id!!.toString(), null)
+        if (existingEntry != null) {
+            // Existing entry found on preferences, decode json and add the new chapter
+            val savedEntry = json.decodeFromString<Entry>(existingEntry)
+
+            // Append new chapters
+
+            val updatedChapters = savedEntry.chapters.removeUniqueById(chapters)
+
+            // If no chapters were removed, do nothing
+            if (updatedChapters.size == savedEntry.chapters.size) return
+
+            savedEntry.copy(chapters = updatedChapters)
+
+            if (updatedChapters.isEmpty()) {
+                preferences.edit { this.remove(savedEntry.manga.id.toString()) }
+            } else {
+
+                // Save current state
+                val json = json.encodeToString(savedEntry)
+                preferences.edit { putString(savedEntry.manga.id.toString(), json) }
+            }
         }
     }
 
@@ -108,6 +140,13 @@ class DownloadPendingDeleter(context: Context) {
             }
         }
         return newList
+    }
+
+    /** Returns a copy of chapter entries ensuring no duplicates by chapter id. */
+    private fun List<ChapterEntry>.removeUniqueById(chapters: List<Chapter>): List<ChapterEntry> {
+        return this.toMutableList().filterNot { chapterEntry ->
+            chapters.any { it.id == chapterEntry.id }
+        }
     }
 
     /** Class used to save an entry of chapters with their manga into preferences. */

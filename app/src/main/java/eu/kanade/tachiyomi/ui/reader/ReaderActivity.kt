@@ -353,6 +353,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     /** Called when the activity is destroyed. Cleans up the viewer, configuration and any view. */
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.deletePendingChapters()
         viewer?.destroy()
         binding.chaptersSheet.chaptersBottomSheet.adapter = null
         viewer = null
@@ -1169,6 +1170,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     override fun onPause() {
         viewModel.saveCurrentChapterReadingProgress()
+        viewModel.deletePendingChapters()
         super.onPause()
     }
 

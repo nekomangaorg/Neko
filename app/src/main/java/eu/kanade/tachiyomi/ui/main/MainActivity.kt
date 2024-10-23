@@ -270,6 +270,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
         val content: ViewGroup = binding.mainContent
         downloadManager.isDownloaderRunning.onEach(::downloadStatusChanged).launchIn(lifecycleScope)
+        lifecycleScope.launchIO { downloadManager.deletePendingChapters() }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowCustomEnabled(true)
