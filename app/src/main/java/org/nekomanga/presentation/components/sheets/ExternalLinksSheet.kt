@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -30,9 +30,11 @@ import org.nekomanga.presentation.theme.Size
 fun ExternalLinksSheet(
     themeColorState: ThemeColorState,
     externalLinks: List<ExternalLink>,
-    onLinkClick: (String, String) -> Unit
+    onLinkClick: (String, String) -> Unit,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration
+    ) {
         BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = Size.small),

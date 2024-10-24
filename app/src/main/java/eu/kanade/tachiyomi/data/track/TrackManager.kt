@@ -42,7 +42,7 @@ class TrackManager(private val context: Context) {
             myAnimeList.id to myAnimeList,
             aniList.id to aniList,
             kitsu.id to kitsu,
-            mangaUpdates.id to mangaUpdates
+            mangaUpdates.id to mangaUpdates,
         )
 
     fun getService(id: Int) = services[id]

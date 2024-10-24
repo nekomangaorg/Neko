@@ -44,14 +44,14 @@ class WebtoonLayoutManager(activity: ReaderActivity) : LinearLayoutManager(activ
                     fromIndex,
                     toIndex,
                     preferredBoundsFlag,
-                    0
+                    0,
                 )
             } else {
                 mVerticalBoundCheck.findOneViewWithinBoundFlags(
                     fromIndex,
                     toIndex,
                     preferredBoundsFlag,
-                    0
+                    0,
                 )
             }
 

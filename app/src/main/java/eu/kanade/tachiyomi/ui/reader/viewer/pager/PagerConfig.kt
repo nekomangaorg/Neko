@@ -87,10 +87,7 @@ class PagerConfig(
 
         readerPreferences
             .pagerNavInverted()
-            .register(
-                { tappingInverted = it },
-                { navigator.invertMode = it },
-            )
+            .register({ tappingInverted = it }, { navigator.invertMode = it })
 
         readerPreferences
             .pagerNavInverted()
@@ -127,24 +124,15 @@ class PagerConfig(
 
         readerPreferences
             .doublePageGap()
-            .register(
-                { doublePageGap = it },
-                { imagePropertyChangedListener?.invoke() },
-            )
+            .register({ doublePageGap = it }, { imagePropertyChangedListener?.invoke() })
 
         readerPreferences
             .doublePageRotate()
-            .register(
-                { doublePageRotate = it },
-                { imagePropertyChangedListener?.invoke() },
-            )
+            .register({ doublePageRotate = it }, { imagePropertyChangedListener?.invoke() })
 
         readerPreferences
             .doublePageRotateReverse()
-            .register(
-                { doublePageRotateReverse = it },
-                { imagePropertyChangedListener?.invoke() },
-            )
+            .register({ doublePageRotateReverse = it }, { imagePropertyChangedListener?.invoke() })
 
         readerPreferences
             .pageLayout()
@@ -161,15 +149,13 @@ class PagerConfig(
             .launchIn(scope)
         readerPreferences
             .pageLayout()
-            .register(
-                {
-                    autoDoublePages = it == PageLayout.AUTOMATIC.value
-                    if (!autoDoublePages) {
-                        doublePages = it == PageLayout.DOUBLE_PAGES.value
-                        splitPages = it == PageLayout.SPLIT_PAGES.value
-                    }
-                },
-            )
+            .register({
+                autoDoublePages = it == PageLayout.AUTOMATIC.value
+                if (!autoDoublePages) {
+                    doublePages = it == PageLayout.DOUBLE_PAGES.value
+                    splitPages = it == PageLayout.SPLIT_PAGES.value
+                }
+            })
 
         readerPreferences.automaticSplitsPage().register({ autoSplitPages = it })
         navigationOverlayForNewUser = preferences.showNavigationOverlayNewUser().get()
@@ -213,7 +199,7 @@ class PagerConfig(
         return when (imageScaleType) {
             SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
             SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
-            SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP, -> true
+            SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
             else -> false
         }
     }
@@ -235,7 +221,7 @@ class PagerConfig(
     enum class ZoomType {
         Left,
         Center,
-        Right
+        Right,
     }
 
     companion object {

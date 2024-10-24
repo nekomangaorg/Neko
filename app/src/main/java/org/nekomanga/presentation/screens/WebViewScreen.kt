@@ -65,7 +65,7 @@ fun WebViewScreen(
                             )
                         } else {
                             AppBar.Empty
-                        },
+                        }
                     ) +
                         listOf(
                             if (navigator.canGoForward) {
@@ -76,7 +76,7 @@ fun WebViewScreen(
                                 )
                             } else {
                                 AppBar.Empty
-                            },
+                            }
                         ) +
                         listOf(
                             AppBar.OverflowAction(
@@ -104,14 +104,12 @@ fun WebViewScreen(
                                 )
                             } else {
                                 AppBar.Empty
-                            },
-                        ),
+                            }
+                        )
             )
         },
     ) { paddingValues ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             val loadingState = state.loadingState
             if (loadingState is LoadingState.Loading) {
                 LinearProgressIndicator(

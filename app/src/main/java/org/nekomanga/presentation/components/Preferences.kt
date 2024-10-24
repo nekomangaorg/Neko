@@ -53,17 +53,14 @@ fun PreferenceRow(
         MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface)
     val subtitleTextStyle =
         MaterialTheme.typography.bodyMedium.copy(
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
         )
 
     Row(
         modifier =
             Modifier.fillMaxWidth()
                 .heightIn(min = height)
-                .combinedClickable(
-                    onLongClick = onLongClick,
-                    onClick = onClick,
-                ),
+                .combinedClickable(onLongClick = onLongClick, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (painter != null) {
@@ -74,13 +71,8 @@ fun PreferenceRow(
                 contentDescription = null,
             )
         }
-        Column(
-            Modifier.padding(horizontal = medium).weight(1f),
-        ) {
-            Text(
-                text = title,
-                style = titleTextStyle,
-            )
+        Column(Modifier.padding(horizontal = medium).weight(1f)) {
+            Text(text = title, style = titleTextStyle)
             if (subtitle != null) {
                 Text(
                     modifier = Modifier.padding(top = Size.tiny),

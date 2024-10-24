@@ -53,7 +53,7 @@ internal fun InLibraryBadge(outline: Boolean, offset: Dp = (-2).dp) {
                         topStartPercent = 50,
                         25,
                         bottomStartPercent = 25,
-                        bottomEndPercent = 50
+                        bottomEndPercent = 50,
                     )
                 )
                 .background(color = MaterialTheme.colorScheme.secondary)
@@ -66,10 +66,10 @@ internal fun InLibraryBadge(outline: Boolean, offset: Dp = (-2).dp) {
                                 topStartPercent = 50,
                                 25,
                                 bottomStartPercent = 25,
-                                bottomEndPercent = 50
-                            )
+                                bottomEndPercent = 50,
+                            ),
                     )
-                },
+                }
     ) {
         AutoSizeText(
             text = stringResource(id = R.string.in_library),

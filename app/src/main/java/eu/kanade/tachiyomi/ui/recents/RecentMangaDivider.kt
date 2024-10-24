@@ -22,7 +22,7 @@ class RecentMangaDivider(context: Context) :
     override fun onDraw(
         c: Canvas,
         parent: androidx.recyclerview.widget.RecyclerView,
-        state: androidx.recyclerview.widget.RecyclerView.State
+        state: androidx.recyclerview.widget.RecyclerView.State,
     ) {
         val childCount = parent.childCount
         for (i in 0 until childCount - 1) {

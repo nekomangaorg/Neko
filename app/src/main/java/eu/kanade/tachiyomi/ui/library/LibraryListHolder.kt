@@ -21,10 +21,8 @@ import org.nekomanga.databinding.MangaListItemBinding
  * @param adapter the adapter handling this holder.
  * @constructor creates a new library holder.
  */
-class LibraryListHolder(
-    private val view: View,
-    adapter: LibraryCategoryAdapter,
-) : LibraryHolder(view, adapter) {
+class LibraryListHolder(private val view: View, adapter: LibraryCategoryAdapter) :
+    LibraryHolder(view, adapter) {
 
     private val binding = MangaListItemBinding.bind(view)
 
@@ -53,7 +51,7 @@ class LibraryListHolder(
                             R.string.no_matches_for_filters_short
                         } else {
                             R.string.category_is_empty
-                        },
+                        }
                     )
             }
             binding.title.textAlignment = View.TEXT_ALIGNMENT_CENTER

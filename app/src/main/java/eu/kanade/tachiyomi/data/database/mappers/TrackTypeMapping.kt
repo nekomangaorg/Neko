@@ -27,11 +27,7 @@ import eu.kanade.tachiyomi.data.database.tables.TrackTable.COL_TRACKING_URL
 import eu.kanade.tachiyomi.data.database.tables.TrackTable.TABLE
 
 class TrackTypeMapping :
-    SQLiteTypeMapping<Track>(
-        TrackPutResolver(),
-        TrackGetResolver(),
-        TrackDeleteResolver(),
-    )
+    SQLiteTypeMapping<Track>(TrackPutResolver(), TrackGetResolver(), TrackDeleteResolver())
 
 class TrackPutResolver : DefaultPutResolver<Track>() {
 

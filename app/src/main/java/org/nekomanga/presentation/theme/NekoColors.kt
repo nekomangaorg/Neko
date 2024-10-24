@@ -2,9 +2,7 @@ package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -47,32 +45,15 @@ object ChartColors {
     val twelve = Color(0xFFde1f62)
 }
 
-object PrimaryColorRippleTheme : RippleTheme {
+fun nekoRippleConfiguration(color: Color) = RippleConfiguration(color, nekoRippleAlpha)
 
-    @Composable override fun defaultColor(): Color = MaterialTheme.colorScheme.primary
-
-    @Composable
-    override fun rippleAlpha() =
-        RippleAlpha(
-            draggedAlpha = NekoColors.mediumAlphaLowContrast,
-            focusedAlpha = NekoColors.mediumAlphaLowContrast,
-            hoveredAlpha = NekoColors.mediumAlphaLowContrast,
-            pressedAlpha = NekoColors.mediumAlphaLowContrast,
-        )
-}
-
-class DynamicRippleTheme(val color: Color) : RippleTheme {
-    @Composable override fun defaultColor(): Color = color
-
-    @Composable
-    override fun rippleAlpha() =
-        RippleAlpha(
-            draggedAlpha = NekoColors.mediumAlphaLowContrast,
-            focusedAlpha = NekoColors.mediumAlphaLowContrast,
-            hoveredAlpha = NekoColors.mediumAlphaLowContrast,
-            pressedAlpha = NekoColors.mediumAlphaLowContrast,
-        )
-}
+private val nekoRippleAlpha =
+    RippleAlpha(
+        draggedAlpha = NekoColors.mediumAlphaLowContrast,
+        focusedAlpha = NekoColors.mediumAlphaLowContrast,
+        hoveredAlpha = NekoColors.mediumAlphaLowContrast,
+        pressedAlpha = NekoColors.mediumAlphaLowContrast,
+    )
 
 fun dynamicTextSelectionColor(color: Color) =
     TextSelectionColors(

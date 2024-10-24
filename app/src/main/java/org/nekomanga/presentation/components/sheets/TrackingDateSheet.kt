@@ -76,9 +76,7 @@ fun TrackingDateSheet(
     val currentDateExists = trackingDate.currentDate > 0L
 
     BaseSheet(themeColor = themeColorState) {
-        Box(
-            modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth(),
-        ) {
+        Box(modifier = Modifier.padding(horizontal = 8.dp).fillMaxWidth()) {
             IconButton(onClick = { onDismiss() }) {
                 Icon(
                     imageVector = Icons.Default.Close,
@@ -94,7 +92,7 @@ fun TrackingDateSheet(
                             when (trackingDate.readingDate) {
                                 ReadingDate.Start -> R.string.started_reading_date
                                 ReadingDate.Finish -> R.string.finished_reading_date
-                            },
+                            }
                     ),
                 style =
                     MaterialTheme.typography.titleLarge.copy(
@@ -114,7 +112,7 @@ fun TrackingDateSheet(
                 text =
                     stringResource(
                         id = R.string.current_date_,
-                        trackingDate.dateFormat.format(trackingDate.currentDate)
+                        trackingDate.dateFormat.format(trackingDate.currentDate),
                     ),
                 style =
                     MaterialTheme.typography.titleSmall.copy(
@@ -155,13 +153,13 @@ fun TrackingDateSheet(
             val suggestedDate =
                 LocalDateTime.ofInstant(
                         Instant.ofEpochMilli(suggestedDateEpoch),
-                        ZoneId.systemDefault()
+                        ZoneId.systemDefault(),
                     )
                     .toLocalDate()
             val currentDate =
                 LocalDateTime.ofInstant(
                         Instant.ofEpochMilli(trackingDate.currentDate),
-                        ZoneId.systemDefault()
+                        ZoneId.systemDefault(),
                     )
                     .toLocalDate()
 
@@ -173,7 +171,7 @@ fun TrackingDateSheet(
                             EditTrackingDate(
                                 trackingDate.readingDate,
                                 suggestedDate,
-                                trackAndService
+                                trackAndService,
                             )
                         )
                     }
@@ -182,7 +180,7 @@ fun TrackingDateSheet(
                         text =
                             stringResource(
                                 id = R.string.use_suggested_date_of_,
-                                suggestedDate.format(dateTimeFormatter)
+                                suggestedDate.format(dateTimeFormatter),
                             ),
                         style =
                             MaterialTheme.typography.titleMedium.copy(
@@ -249,7 +247,7 @@ fun TrackingDateSheet(
                     colors =
                         ButtonDefaults.elevatedButtonColors(
                             containerColor = themeColorState.buttonColor,
-                            contentColor = MaterialTheme.colorScheme.surface
+                            contentColor = MaterialTheme.colorScheme.surface,
                         ),
                     enabled = newDate != null,
                 ) {

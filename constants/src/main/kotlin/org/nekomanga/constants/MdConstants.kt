@@ -6,7 +6,7 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 object MdConstants {
-    const val currentSeasonalId = "b5a843db-e757-4bec-89ec-5aa72aa61afa"
+    const val currentSeasonalId = "54736a5c-eb7f-4844-971b-80ee171cdf29"
     const val staffPicksId = "805ba886-dd99-4aa4-b460-4bd7c7b71352"
     const val nekoDevPicksId = "9650e839-1266-4456-860d-c7eee164b451"
     const val baseUrl = "https://mangadex.org"
@@ -142,6 +142,7 @@ object MdConstants {
         const val authorOrArtist = "authorOrArtist"
         const val group = "group"
         const val includedTagsParam = "includedTags[]"
+        const val mangaIds = "ids[]"
 
         fun sortParam(sort: String) = "order[$sort]"
 

@@ -62,7 +62,7 @@ internal class StorageStep : OnboardingStep {
                     R.string.onboarding_storage_info,
                     stringResource(R.string.app_name),
                     storageLocationText(storagePref),
-                ),
+                )
             )
 
             Button(
@@ -86,7 +86,7 @@ internal class StorageStep : OnboardingStep {
             Text(
                 stringResource(
                     R.string.onboarding_storage_help_info,
-                    stringResource(R.string.app_name)
+                    stringResource(R.string.app_name),
                 )
             )
             Button(
@@ -109,12 +109,12 @@ internal class StorageStep : OnboardingStep {
 
 @Composable
 fun storageLocationPicker(
-    storageDirPref: Preference<String>,
+    storageDirPref: Preference<String>
 ): ManagedActivityResultLauncher<Uri?, Uri?> {
     val context = LocalContext.current
 
     return rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocumentTree(),
+        contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
         if (uri != null) {
             val flags =
@@ -128,9 +128,7 @@ fun storageLocationPicker(
 }
 
 @Composable
-fun storageLocationText(
-    storageDirPref: Preference<String>,
-): String {
+fun storageLocationText(storageDirPref: Preference<String>): String {
     val context = LocalContext.current
     val storageDir by storageDirPref.collectAsState()
 

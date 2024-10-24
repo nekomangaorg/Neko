@@ -37,7 +37,7 @@ interface ChapterQueries : DbProvider {
                 RawQuery.builder()
                     .query(getRecentsQuery(search.sqLite, offset, limit, sortByFetched))
                     .observesTables(ChapterTable.TABLE)
-                    .build(),
+                    .build()
             )
             .withGetResolver(MangaChapterGetResolver.INSTANCE)
             .prepare()
@@ -50,7 +50,7 @@ interface ChapterQueries : DbProvider {
                     .table(ChapterTable.TABLE)
                     .where("${ChapterTable.COL_ID} = ?")
                     .whereArgs(id)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -62,7 +62,7 @@ interface ChapterQueries : DbProvider {
                     .table(ChapterTable.TABLE)
                     .where("${ChapterTable.COL_URL} = ?")
                     .whereArgs(url)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -74,7 +74,7 @@ interface ChapterQueries : DbProvider {
                     .table(ChapterTable.TABLE)
                     .where("${ChapterTable.COL_URL} = ? AND ${ChapterTable.COL_MANGA_ID} = ?")
                     .whereArgs(url, mangaId)
-                    .build(),
+                    .build()
             )
             .prepare()
 

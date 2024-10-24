@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
 import android.net.Uri
-import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
+import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.track.TrackManager
 import okio.buffer
 import okio.gzip
@@ -11,9 +11,7 @@ import org.nekomanga.R
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class BackupFileValidator(
-    private val trackManager: TrackManager = Injekt.get(),
-) {
+class BackupFileValidator(private val trackManager: TrackManager = Injekt.get()) {
 
     /**
      * Checks for critical backup file data.
@@ -30,7 +28,7 @@ class BackupFileValidator(
                     context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use {
                         it.readByteArray()
                     }
-                backupManager.parser.decodeFromByteArray(BackupSerializer, backupString)
+                backupManager.parser.decodeFromByteArray(Backup.serializer(), backupString)
             } catch (e: Exception) {
                 throw IllegalStateException(e)
             }

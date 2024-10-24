@@ -11,7 +11,7 @@ import okio.buffer
 
 class ProgressResponseBody(
     private val responseBody: ResponseBody,
-    private val progressListener: ProgressListener
+    private val progressListener: ProgressListener,
 ) : ResponseBody() {
 
     private val bufferedSource: BufferedSource by lazy { source(responseBody.source()).buffer() }
@@ -40,7 +40,7 @@ class ProgressResponseBody(
                 progressListener.update(
                     totalBytesRead,
                     responseBody.contentLength(),
-                    bytesRead == -1L
+                    bytesRead == -1L,
                 )
                 return bytesRead
             }

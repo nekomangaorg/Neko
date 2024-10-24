@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,7 +52,9 @@ fun EditCategorySheet(
     confirmClicked: (List<CategoryItem>) -> Unit,
     addToLibraryClick: () -> Unit = {},
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration
+    ) {
         val context = LocalContext.current
 
         val enabledCategories = remember { mangaCategories.associateBy { it.id }.toMutableMap() }
@@ -69,14 +71,14 @@ fun EditCategorySheet(
         BaseSheet(
             themeColor = themeColorState,
             maxSheetHeightPercentage = .9f,
-            bottomPaddingAroundContent = bottomContentPadding
+            bottomPaddingAroundContent = bottomContentPadding,
         ) {
             if (showAddCategoryDialog) {
                 AddCategoryDialog(
                     themeColorState = themeColorState,
                     currentCategories = categories,
                     onDismiss = { showAddCategoryDialog = false },
-                    onConfirm = { addNewCategory(it) }
+                    onConfirm = { addNewCategory(it) },
                 )
             }
 
@@ -86,13 +88,13 @@ fun EditCategorySheet(
             Row(
                 modifier = paddingModifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
                 Text(
                     modifier = paddingModifier,
                     text = stringResource(id = prefix, stringResource(id = R.string.manga)),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
                 )
                 TextButton(modifier = paddingModifier, onClick = { showAddCategoryDialog = true }) {
                     Text(
@@ -100,7 +102,7 @@ fun EditCategorySheet(
                         style =
                             MaterialTheme.typography.titleSmall.copy(
                                 color = themeColorState.buttonColor
-                            )
+                            ),
                     )
                 }
             }
@@ -108,7 +110,7 @@ fun EditCategorySheet(
             Divider()
 
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp),
+                modifier = Modifier.fillMaxWidth().requiredHeightIn(Size.none, maxLazyHeight.dp)
             ) {
                 items(categories) { category: CategoryItem ->
                     var state by remember {
@@ -129,7 +131,7 @@ fun EditCategorySheet(
                                     context,
                                     mangaCategories,
                                     enabledCategories,
-                                    addingToLibrary
+                                    addingToLibrary,
                                 )
                         },
                         rowText = category.name,
@@ -142,16 +144,16 @@ fun EditCategorySheet(
             Gap(Size.tiny)
             Row(
                 modifier = paddingModifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TextButton(
                     onClick = cancelClick,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(
                         text = stringResource(id = R.string.cancel),
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleSmall,
                     )
                 }
                 ElevatedButton(
@@ -168,7 +170,7 @@ fun EditCategorySheet(
                     Text(
                         text = acceptText.value,
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.surface
+                        color = MaterialTheme.colorScheme.surface,
                     )
                 }
             }
@@ -180,7 +182,7 @@ private fun calculateText(
     context: Context,
     initialMangaCategories: List<CategoryItem>,
     currentlySelectedCategories: Map<Int, CategoryItem>,
-    addingToLibrary: Boolean
+    addingToLibrary: Boolean,
 ): String {
     val initialIds = initialMangaCategories.map { it.id }.toSet()
     val same = currentlySelectedCategories.filter { initialIds.contains(it.key) }.values.toList()

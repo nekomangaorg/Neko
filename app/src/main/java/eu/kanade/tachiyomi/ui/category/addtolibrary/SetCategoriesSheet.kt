@@ -119,7 +119,7 @@ class SetCategoriesSheet(
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     updateBottomButtons()
                 }
-            },
+            }
         )
 
         binding.titleLayout.checkHeightThen {
@@ -145,7 +145,7 @@ class SetCategoriesSheet(
                     skipInversed = preselected[index] != TriStateCheckBox.State.IGNORE
                     state = preselected[index]
                 }
-            },
+            }
         )
         setCategoriesButtons()
         fastAdapter.onClickListener = onClickListener@{ view, _, item, _ ->
@@ -214,7 +214,7 @@ class SetCategoriesSheet(
         updateBottomButtons()
         binding.root.post {
             binding.categoryRecyclerView.scrollToPosition(
-                max(0, itemAdapter.adapterItems.indexOf(selectedItems.firstOrNull())),
+                max(0, itemAdapter.adapterItems.indexOf(selectedItems.firstOrNull()))
             )
         }
     }
@@ -235,7 +235,7 @@ class SetCategoriesSheet(
         binding.buttonLayout.updatePaddingRelative(
             bottom =
                 activity.window.decorView.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom
-                    ?: 0,
+                    ?: 0
         )
 
         binding.buttonLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -257,7 +257,7 @@ class SetCategoriesSheet(
                                     } != TriStateCheckBox.State.IGNORE
                                 state = map[category.id] ?: TriStateCheckBox.State.CHECKED
                             }
-                        },
+                        }
                     )
                     setCategoriesButtons()
                 }

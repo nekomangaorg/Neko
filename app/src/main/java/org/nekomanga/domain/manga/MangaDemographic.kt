@@ -8,8 +8,7 @@ enum class MangaDemographic(val key: String, val nameRes: Int) {
     Shounen(MdConstants.Demographic.shounen, R.string.shounen),
     Shoujo(MdConstants.Demographic.shoujo, R.string.shoujo),
     Seinen(MdConstants.Demographic.seinen, R.string.seinen),
-    Josei(MdConstants.Demographic.josei, R.string.josei),
-    ;
+    Josei(MdConstants.Demographic.josei, R.string.josei);
 
     companion object {
         fun getOrdered(): List<MangaDemographic> {

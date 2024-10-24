@@ -68,7 +68,7 @@ class Toonily : ReducedHttpSource() {
             .add("Referer", baseUrl)
             .add(
                 "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0$userAgentRandomizer"
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0$userAgentRandomizer",
             )
             .build()
 
@@ -82,7 +82,7 @@ class Toonily : ReducedHttpSource() {
                     POST(
                         "$baseUrl/wp-admin/admin-ajax.php",
                         searchHeaders,
-                        searchFormBuilder(query).build()
+                        searchFormBuilder(query).build(),
                     )
                 )
                 .await()

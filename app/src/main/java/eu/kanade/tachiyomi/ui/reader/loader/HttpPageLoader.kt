@@ -85,15 +85,8 @@ class HttpPageLoader(
      * otherwise fallbacks to network.
      */
     override suspend fun getPages(): List<ReaderPage> {
-        val pages =
-            try {
-                chapterCache.getPageListFromCache(chapter.chapter)
-            } catch (e: Throwable) {
-                if (e is CancellationException) {
-                    throw e
-                }
-                source.getPageList(chapter.chapter)
-            }
+        val pages = source.getPageList(chapter.chapter)
+
         return pages.mapIndexed { index, page ->
             // Don't trust sources and use our own indexing
             ReaderPage(index, page.url, page.imageUrl, page.mangaDexChapterId)
@@ -168,10 +161,7 @@ class HttpPageLoader(
     }
 
     /** Data class used to keep ordering of pages in order to maintain priority. */
-    private class PriorityPage(
-        val page: ReaderPage,
-        val priority: Int,
-    ) : Comparable<PriorityPage> {
+    private class PriorityPage(val page: ReaderPage, val priority: Int) : Comparable<PriorityPage> {
         companion object {
             private val idGenerator = AtomicInteger()
         }
@@ -203,9 +193,10 @@ class HttpPageLoader(
             page.status = Page.State.READY
         } catch (e: Throwable) {
             page.status = Page.State.ERROR
-            TimberKt.e(e) { "Error loading page" }
             if (e is CancellationException) {
                 throw e
+            } else {
+                TimberKt.e(e) { "Error loading page" }
             }
         }
     }

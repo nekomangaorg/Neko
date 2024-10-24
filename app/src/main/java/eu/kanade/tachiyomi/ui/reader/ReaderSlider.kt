@@ -7,12 +7,8 @@ import android.util.AttributeSet
 import com.google.android.material.slider.Slider
 
 /** Seekbar to show current chapter progress. */
-class ReaderSlider
-@JvmOverloads
-constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-) : Slider(context, attrs) {
+class ReaderSlider @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    Slider(context, attrs) {
 
     /** Whether the seekbar should draw from right to left. */
     var isRTL: Boolean

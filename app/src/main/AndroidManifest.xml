@@ -105,9 +105,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="myanimelist-auth"
-                    android:scheme="neko" />
+                <data android:scheme="neko" />
+                <data android:host="myanimelist-auth" />
             </intent-filter>
         </activity>
         <activity
@@ -120,9 +119,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="anilist-auth"
-                    android:scheme="neko" />
+                <data android:scheme="neko" />
+                <data android:host="anilist-auth" />
             </intent-filter>
         </activity>
         <activity
@@ -135,9 +133,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="${mangadexAuthRedirectUri}"
-                    android:scheme="neko" />
+                <data android:scheme="neko" />
+                <data android:host="${mangadexAuthRedirectUri}" />
             </intent-filter>
         </activity>
         <activity
@@ -210,38 +207,35 @@
                     android:host="mangadex.org"
                     android:pathPattern="/author/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="https"
-                    android:host="anilist.co"
-                    android:pathPattern="/manga/..*" />
+                <data android:scheme="https" />
+                <data android:host="anilist.co" />
+                <data android:pathPattern="/manga/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="https"
-                    android:host="myanimelist.net"
-                    android:pathPattern="/manga/..*" />
+                <data android:scheme="https" />
+                <data android:host="myanimelist.net" />
+                <data android:pathPattern="/manga/..*" />
             </intent-filter>
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="https"
-                    android:host="www.mangaupdates.com"
-                    android:pathPattern="/series/..*" />
+                <data android:scheme="https" />
+                <data android:host="www.mangaupdates.com" />
+                <data android:pathPattern="/series/..*" />
             </intent-filter>
         </activity>
 

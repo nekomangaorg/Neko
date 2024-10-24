@@ -24,9 +24,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SearchOff
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -99,7 +99,9 @@ fun NekoScaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
         topBar = {
-            CompositionLocalProvider(LocalRippleTheme provides (themeColorState.rippleTheme)) {
+            CompositionLocalProvider(
+                LocalRippleConfiguration provides themeColorState.rippleConfiguration
+            ) {
                 when (type) {
                     NekoScaffoldType.Title ->
                         TitleOnlyTopAppBar(
@@ -111,7 +113,7 @@ fun NekoScaffold(
                             actions,
                             incognitoMode,
                             isRoot,
-                            scrollBehavior
+                            scrollBehavior,
                         )
                     NekoScaffoldType.NoTitle ->
                         NoTitleTopAppBar(
@@ -120,7 +122,7 @@ fun NekoScaffold(
                             navigationIcon,
                             onNavigationIconClicked,
                             actions,
-                            scrollBehavior
+                            scrollBehavior,
                         )
                     NekoScaffoldType.TitleAndSubtitle ->
                         TitleAndSubtitleTopAppBar(
@@ -131,7 +133,7 @@ fun NekoScaffold(
                             navigationIcon,
                             onNavigationIconClicked,
                             actions,
-                            scrollBehavior
+                            scrollBehavior,
                         )
                     NekoScaffoldType.Search ->
                         NoTitleSearchTopAppBar(
@@ -156,7 +158,10 @@ fun NekoScaffold(
             }
         },
     ) { paddingValues ->
-        CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
+        CompositionLocalProvider(
+            LocalRippleConfiguration provides
+                nekoRippleConfiguration(MaterialTheme.colorScheme.primary)
+        ) {
             content(paddingValues)
         }
     }
@@ -201,11 +206,7 @@ private fun TitleAndSubtitleTopAppBar(
             )
         },
         actions = actions,
-        colors =
-            topAppBarColors(
-                containerColor = color,
-                scrolledContainerColor = color,
-            ),
+        colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
         scrollBehavior = scrollBehavior,
     )
 }
@@ -230,11 +231,7 @@ private fun NoTitleTopAppBar(
             )
         },
         actions = actions,
-        colors =
-            topAppBarColors(
-                containerColor = color,
-                scrolledContainerColor = color,
-            ),
+        colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
         scrollBehavior = scrollBehavior,
     )
 }
@@ -370,7 +367,7 @@ private fun NoTitleSearchTopAppBar(
             AnimatedVisibility(
                 visible = showTextField,
                 enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically()
+                exit = fadeOut() + slideOutVertically(),
             ) {
                 // research on configuration change
 
@@ -399,7 +396,7 @@ private fun NoTitleSearchTopAppBar(
                         AnimatedVisibility(
                             visible = searchText.isNotBlank(),
                             enter = fadeIn(),
-                            exit = fadeOut()
+                            exit = fadeOut(),
                         ) {
                             ToolTipButton(
                                 toolTipLabel = stringResource(id = R.string.clear),
@@ -417,10 +414,7 @@ private fun NoTitleSearchTopAppBar(
                         KeyboardOptions.Default.copy(
                             imeAction = androidx.compose.ui.text.input.ImeAction.Search
                         ),
-                    keyboardActions =
-                        KeyboardActions(
-                            onSearch = { onSearchText(searchText) },
-                        ),
+                    keyboardActions = KeyboardActions(onSearch = { onSearchText(searchText) }),
                 )
                 LaunchedEffect(Unit) {
                     if (!alreadyRequestedFocus) {
@@ -449,11 +443,7 @@ private fun NoTitleSearchTopAppBar(
             )
             actions()
         },
-        colors =
-            topAppBarColors(
-                containerColor = color,
-                scrolledContainerColor = color,
-            ),
+        colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
         scrollBehavior = scrollBehavior,
     )
 }
@@ -471,16 +461,12 @@ private fun TitleOnlyTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     CenterAlignedTopAppBar(
-        colors =
-            topAppBarColors(
-                containerColor = color,
-                scrolledContainerColor = color,
-            ),
+        colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
         modifier = Modifier.statusBarsPadding(),
         title = {
             AutoSizeText(
                 text = title,
-                style = MaterialTheme.typography.titleLarge.copy(letterSpacing = (-.6).sp)
+                style = MaterialTheme.typography.titleLarge.copy(letterSpacing = (-.6).sp),
             )
         },
         navigationIcon = {

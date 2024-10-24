@@ -12,11 +12,7 @@ import android.os.Build
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 
-data class NetworkState(
-    val isConnected: Boolean,
-    val isValidated: Boolean,
-    val isWifi: Boolean,
-) {
+data class NetworkState(val isConnected: Boolean, val isValidated: Boolean, val isWifi: Boolean) {
     val isOnline =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             isConnected && isValidated
@@ -45,7 +41,7 @@ fun Context.networkStateFlow() = callbackFlow {
             object : NetworkCallback() {
                 override fun onCapabilitiesChanged(
                     network: Network,
-                    networkCapabilities: NetworkCapabilities
+                    networkCapabilities: NetworkCapabilities,
                 ) {
                     trySend(activeNetworkState())
                 }

@@ -12,7 +12,7 @@ import org.nekomanga.presentation.components.UiText
 @Composable
 fun OverflowOptions(
     chapterActions: MangaConstants.ChapterActions,
-    chaptersProvider: () -> ImmutableList<ChapterItem>
+    chaptersProvider: () -> ImmutableList<ChapterItem>,
 ) {
     AppBarActions(
         actions =
@@ -31,7 +31,7 @@ fun OverflowOptions(
                                                 chapterActions.download(
                                                     emptyList(),
                                                     MangaConstants.DownloadAction
-                                                        .DownloadNextUnread(1)
+                                                        .DownloadNextUnread(1),
                                                 )
                                             },
                                         ),
@@ -41,7 +41,7 @@ fun OverflowOptions(
                                                 chapterActions.download(
                                                     emptyList(),
                                                     MangaConstants.DownloadAction
-                                                        .DownloadNextUnread(5)
+                                                        .DownloadNextUnread(5),
                                                 )
                                             },
                                         ),
@@ -51,7 +51,7 @@ fun OverflowOptions(
                                                 chapterActions.download(
                                                     emptyList(),
                                                     MangaConstants.DownloadAction
-                                                        .DownloadNextUnread(10)
+                                                        .DownloadNextUnread(10),
                                                 )
                                             },
                                         ),
@@ -62,7 +62,7 @@ fun OverflowOptions(
                                 onClick = {
                                     chapterActions.download(
                                         emptyList(),
-                                        MangaConstants.DownloadAction.DownloadUnread
+                                        MangaConstants.DownloadAction.DownloadUnread,
                                     )
                                 },
                             ),
@@ -71,7 +71,7 @@ fun OverflowOptions(
                                 onClick = {
                                     chapterActions.download(
                                         emptyList(),
-                                        MangaConstants.DownloadAction.DownloadAll
+                                        MangaConstants.DownloadAction.DownloadAll,
                                     )
                                 },
                             ),
@@ -86,7 +86,7 @@ fun OverflowOptions(
                                 onClick = {
                                     chapterActions.mark(
                                         chaptersProvider(),
-                                        MangaConstants.MarkAction.Read(true)
+                                        MangaConstants.MarkAction.Read(true),
                                     )
                                 },
                             ),
@@ -95,7 +95,7 @@ fun OverflowOptions(
                                 onClick = {
                                     chapterActions.mark(
                                         chaptersProvider(),
-                                        MangaConstants.MarkAction.Unread(true)
+                                        MangaConstants.MarkAction.Unread(true),
                                     )
                                 },
                             ),
@@ -110,7 +110,7 @@ fun OverflowOptions(
                                 onClick = {
                                     chapterActions.download(
                                         emptyList(),
-                                        MangaConstants.DownloadAction.RemoveAll
+                                        MangaConstants.DownloadAction.RemoveAll,
                                     )
                                 },
                             ),
@@ -119,12 +119,12 @@ fun OverflowOptions(
                                 onClick = {
                                     chapterActions.download(
                                         emptyList(),
-                                        MangaConstants.DownloadAction.RemoveRead
+                                        MangaConstants.DownloadAction.RemoveRead,
                                     )
                                 },
                             ),
                         ),
                 ),
-            ),
+            )
     )
 }

@@ -103,11 +103,7 @@ class PageHandler {
         }
     }
 
-    fun pageListParse(
-        chapterId: String,
-        atHomeDto: AtHomeDto,
-        dataSaver: Boolean,
-    ): List<Page> {
+    fun pageListParse(chapterId: String, atHomeDto: AtHomeDto, dataSaver: Boolean): List<Page> {
         val hash = atHomeDto.chapter.hash
         val pageArray =
             if (dataSaver) {

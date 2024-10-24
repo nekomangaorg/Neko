@@ -238,7 +238,7 @@ class ReaderViewModel(
                             downloadManager,
                             downloadProvider,
                             manga,
-                            sourceManager
+                            sourceManager,
                         )
 
                     loadChapter(loader!!, chapterList.first { chapterId == it.chapter.id })
@@ -351,10 +351,7 @@ class ReaderViewModel(
      * Loads the given [chapter] with this [loader] and updates the currently active chapters.
      * Callers must handle errors.
      */
-    private suspend fun loadChapter(
-        loader: ChapterLoader,
-        chapter: ReaderChapter,
-    ): ViewerChapters {
+    private suspend fun loadChapter(loader: ChapterLoader, chapter: ReaderChapter): ViewerChapters {
         TimberKt.d { "Loading ${chapter.chapter.url}" }
 
         loader.loadChapter(chapter)
@@ -535,7 +532,7 @@ class ReaderViewModel(
     private fun downloadChapters(chapters: List<DomainChapterItem>) {
         downloadManager.downloadChapters(
             manga!!,
-            chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() }
+            chapters.filter { !it.isDownloaded }.map { it.chapter.toDbChapter() },
         )
     }
 
@@ -746,10 +743,7 @@ class ReaderViewModel(
         return destFile
     }
 
-    private fun parseChapterName(
-        chapterName: String,
-        pageNumber: String,
-    ): String {
+    private fun parseChapterName(chapterName: String, pageNumber: String): String {
         val builder = StringBuilder()
         var title = ""
         var vol = ""
@@ -807,9 +801,8 @@ class ReaderViewModel(
 
         // Build destination file.
         val filename =
-            DiskUtil.buildValidFilename(
-                "${manga.title} - ${chapter.name}".take(225),
-            ) + " - ${page1.number}-${page2.number}.jpg"
+            DiskUtil.buildValidFilename("${manga.title} - ${chapter.name}".take(225)) +
+                " - ${page1.number}-${page2.number}.jpg"
 
         val destFile = directory.createFile(filename)!!
         stream.use { input -> destFile.openOutputStream().use { output -> input.copyTo(output) } }
@@ -829,15 +822,15 @@ class ReaderViewModel(
         val notifier = SaveImageNotifier(context)
         notifier.onClear()
 
-        var directory = storageManager.getPagesDirectory()!!
-
-        if (preferences.folderPerManga().get()) {
-            directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
-        }
-
         // Copy file in background.
         viewModelScope.launchNonCancellable {
             try {
+                var directory = storageManager.getPagesDirectory()
+
+                if (preferences.folderPerManga().get() && directory != null) {
+                    directory =
+                        directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
+                }
                 directory ?: throw Exception("Error creating directory to save page")
 
                 val file = saveImage(page, directory, manga)
@@ -855,24 +848,24 @@ class ReaderViewModel(
         firstPage: ReaderPage,
         secondPage: ReaderPage,
         isLTR: Boolean,
-        @ColorInt bg: Int
+        @ColorInt bg: Int,
     ) {
-        scope.launch {
-            if (firstPage.status != Page.State.READY) return@launch
-            if (secondPage.status != Page.State.READY) return@launch
-            val manga = manga ?: return@launch
+        viewModelScope.launchNonCancellable {
+            if (firstPage.status != Page.State.READY) return@launchNonCancellable
+            if (secondPage.status != Page.State.READY) return@launchNonCancellable
+            val manga = manga ?: return@launchNonCancellable
             val context = Injekt.get<Application>()
 
             val notifier = SaveImageNotifier(context)
             notifier.onClear()
 
-            var directory = storageManager.getPagesDirectory()!!
-
-            if (preferences.folderPerManga().get()) {
-                directory = directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
-            }
-
             try {
+                var directory = storageManager.getPagesDirectory()!!
+
+                if (preferences.folderPerManga().get()) {
+                    directory =
+                        directory.createDirectory(DiskUtil.buildValidFilename(manga.title))!!
+                }
                 val file = saveImages(firstPage, secondPage, isLTR, bg, directory, manga)
                 DiskUtil.scanMedia(context, file.uri)
                 notifier.onComplete(file)
@@ -907,7 +900,7 @@ class ReaderViewModel(
         firstPage: ReaderPage,
         secondPage: ReaderPage,
         isLTR: Boolean,
-        @ColorInt bg: Int
+        @ColorInt bg: Int,
     ) {
         scope.launch {
             if (firstPage.status != Page.State.READY) return@launch
@@ -952,7 +945,7 @@ class ReaderViewModel(
     enum class SetAsCoverResult {
         Success,
         AddToLibraryFirst,
-        Error
+        Error,
     }
 
     /** Results of the save image feature. */
@@ -969,7 +962,7 @@ class ReaderViewModel(
         scope.launchIO {
             statusHandler.marksChaptersStatus(
                 manga!!.uuid(),
-                listOf(readerChapter.chapter.mangadex_chapter_id)
+                listOf(readerChapter.chapter.mangadex_chapter_id),
             )
         }
     }
@@ -980,12 +973,18 @@ class ReaderViewModel(
      */
     private fun updateTrackChapterAfterReading(readerChapter: ReaderChapter) {
         if (!preferences.autoUpdateTrack().get()) return
-        viewModelScope.launchNonCancellable {
+        viewModelScope.launchIO {
             val newChapterRead = readerChapter.chapter.chapter_number
-            val errors = updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
-            if (errors.isNotEmpty()) {
-                eventChannel.send(Event.ShareTrackingError(errors))
-            }
+            updateTrackChapterRead(
+                manga?.id,
+                newChapterRead,
+                true,
+                onError = { service, message ->
+                    launchIO {
+                        eventChannel.send(Event.ShareTrackingError(listOf(service to message)))
+                    }
+                },
+            )
         }
     }
 
@@ -1005,7 +1004,7 @@ class ReaderViewModel(
      * Deletes all the pending chapters. This operation will run in a background thread and errors
      * are ignored.
      */
-    private fun deletePendingChapters() {
+    fun deletePendingChapters() {
         scope.launchNonCancellable { downloadManager.deletePendingChapters() }
     }
 
@@ -1040,7 +1039,7 @@ class ReaderViewModel(
         data class ShareImage(
             val file: UniFile,
             val page: ReaderPage,
-            val extraPage: ReaderPage? = null
+            val extraPage: ReaderPage? = null,
         ) : Event()
 
         data class ShareTrackingError(val errors: List<Pair<TrackService, String?>>) : Event()

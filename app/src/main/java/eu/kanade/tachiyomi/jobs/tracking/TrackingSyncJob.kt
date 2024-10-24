@@ -22,10 +22,8 @@ import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.injectLazy
 
 /** WorkManager job that syncs tracking from trackers to Neko */
-class TrackingSyncJob(
-    val context: Context,
-    params: WorkerParameters,
-) : CoroutineWorker(context, params) {
+class TrackingSyncJob(val context: Context, params: WorkerParameters) :
+    CoroutineWorker(context, params) {
 
     private val trackingSyncService: TrackSyncProcessor by injectLazy()
 
@@ -64,10 +62,7 @@ class TrackingSyncJob(
         tryToSetForeground()
 
         try {
-            trackingSyncService.process(
-                ::updateNotificationProgress,
-                ::completeNotification,
-            )
+            trackingSyncService.process(::updateNotificationProgress, ::completeNotification)
 
             return@coroutineScope Result.success()
         } catch (e: Exception) {

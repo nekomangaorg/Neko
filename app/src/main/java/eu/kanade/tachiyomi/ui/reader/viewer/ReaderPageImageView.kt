@@ -136,7 +136,7 @@ constructor(
                             override fun onCenterChanged(newCenter: PointF?, origin: Int) {
                                 // Not used
                             }
-                        },
+                        }
                     )
                     setOnClickListener { this@ReaderPageImageView.onViewClicked() }
                 }
@@ -179,10 +179,7 @@ constructor(
         }
     }
 
-    private fun setNonAnimatedImage(
-        image: Any,
-        config: Config,
-    ) =
+    private fun setNonAnimatedImage(image: Any, config: Config) =
         (pageView as? SubsamplingScaleImageView)?.apply {
             setDoubleTapZoomDuration(config.zoomDuration.getSystemScaledDuration())
             setMinimumScaleType(config.minimumScaleType)
@@ -194,7 +191,7 @@ constructor(
                 setExtendPastCutout(
                     config.insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
                         config.insetInfo.scaleTypeIsFullFit &&
-                        topInsets + bottomInsets > 0,
+                        topInsets + bottomInsets > 0
                 )
                 if (
                     (config.insetInfo.cutoutBehavior != PagerConfig.CUTOUT_IGNORE ||
@@ -223,7 +220,7 @@ constructor(
                     override fun onImageLoadError(e: Exception) {
                         this@ReaderPageImageView.onImageLoadError()
                     }
-                },
+                }
             )
 
             when (image) {
@@ -271,7 +268,7 @@ constructor(
                                     this@ReaderPageImageView.onViewClicked()
                                     return super.onSingleTapConfirmed(e)
                                 }
-                            },
+                            }
                         )
                         setOnScaleChangeListener { _, _, _ ->
                             this@ReaderPageImageView.onScaleChanged(scale)
@@ -281,10 +278,7 @@ constructor(
         addView(pageView, MATCH_PARENT, MATCH_PARENT)
     }
 
-    private fun setAnimatedImage(
-        image: Any,
-        config: Config,
-    ) =
+    private fun setAnimatedImage(image: Any, config: Config) =
         (pageView as? AppCompatImageView)?.apply {
             if (this is PhotoView) {
                 setZoomTransitionDuration(config.zoomDuration.getSystemScaledDuration())

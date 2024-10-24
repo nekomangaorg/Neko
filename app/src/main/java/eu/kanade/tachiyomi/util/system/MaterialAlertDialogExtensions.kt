@@ -33,10 +33,7 @@ fun MaterialAlertDialogBuilder.addCheckBoxPrompt(
     isChecked: Boolean = false,
     listener: MaterialAlertDialogBuilderOnCheckClickListener? = null,
 ): MaterialAlertDialogBuilder {
-    return setMultiChoiceItems(
-        arrayOf(text),
-        booleanArrayOf(isChecked),
-    ) { dialog, _, checked ->
+    return setMultiChoiceItems(arrayOf(text), booleanArrayOf(isChecked)) { dialog, _, checked ->
         listener?.onClick(dialog, checked)
     }
 }
@@ -56,13 +53,13 @@ fun AlertDialog.disableItems(items: Array<String>) {
             }
 
             override fun onChildViewRemoved(view: View?, view1: View?) {}
-        },
+        }
     )
 }
 
 fun MaterialAlertDialogBuilder.setCustomTitleAndMessage(
     title: Int,
-    message: String
+    message: String,
 ): MaterialAlertDialogBuilder {
     return setCustomTitle(
         (CustomDialogTitleMessageBinding.inflate(LayoutInflater.from(context)))
@@ -74,7 +71,7 @@ fun MaterialAlertDialogBuilder.setCustomTitleAndMessage(
                 }
                 this.message.text = message
             }
-            .root,
+            .root
     )
 }
 

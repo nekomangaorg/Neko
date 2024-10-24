@@ -26,11 +26,8 @@ import org.nekomanga.R
  */
 class ReaderProgressBar
 @JvmOverloads
-constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-) : View(context, attrs, defStyleAttr) {
+constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+    View(context, attrs, defStyleAttr) {
 
     /**
      * The current sweep angle. It always starts at 10% because otherwise the bar and the rotation
@@ -168,7 +165,7 @@ constructor(
                         override fun onAnimationCancel(animation: Animator) {
                             alpha = 1f
                         }
-                    },
+                    }
                 )
                 start()
             }

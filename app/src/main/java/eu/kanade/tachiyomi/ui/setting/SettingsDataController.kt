@@ -198,7 +198,7 @@ class SettingsDataController : SettingsController() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         putExtra(
                             DocumentsContract.EXTRA_INITIAL_URI,
-                            storageManager.getBackupDirectory()!!.uri
+                            storageManager.getBackupDirectory()!!.uri,
                         )
                     }
                 }
@@ -258,11 +258,7 @@ class SettingsDataController : SettingsController() {
     }
 
     class RestoreBackupDialog(bundle: Bundle? = null) : DialogController(bundle) {
-        constructor(
-            uri: Uri
-        ) : this(
-            bundleOf(KEY_URI to uri),
-        )
+        constructor(uri: Uri) : this(bundleOf(KEY_URI to uri))
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val activity = activity!!

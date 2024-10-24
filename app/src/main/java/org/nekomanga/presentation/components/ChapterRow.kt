@@ -24,8 +24,8 @@ import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.rememberDismissState
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -97,7 +97,7 @@ fun ChapterRow(
     markPrevious: (Boolean) -> Unit,
     onDownload: (DownloadAction) -> Unit,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
+    CompositionLocalProvider(LocalRippleConfiguration provides themeColor.rippleConfiguration) {
         val dismissState = rememberDismissState(initialValue = DismissValue.Default)
         NekoSwipeToDismiss(
             state = dismissState,
@@ -109,7 +109,7 @@ fun ChapterRow(
                         else ->
                             MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
                                 themeColor.buttonColor,
-                                8.dp
+                                8.dp,
                             )
                     }
 
@@ -125,7 +125,7 @@ fun ChapterRow(
                             Alignment.CenterEnd,
                             color,
                             stringResource(id = text),
-                            themeColor.buttonColor
+                            themeColor.buttonColor,
                         )
                     }
                     DismissDirection.StartToEnd -> {
@@ -139,7 +139,7 @@ fun ChapterRow(
                             Alignment.CenterStart,
                             color,
                             stringResource(id = text),
-                            themeColor.buttonColor
+                            themeColor.buttonColor,
                         )
                     }
                     else -> Unit
@@ -196,7 +196,7 @@ private fun Background(
     alignment: Alignment,
     color: Color,
     text: String,
-    contentColor: Color
+    contentColor: Color,
 ) {
     Box(
         Modifier.fillMaxSize().background(color).padding(horizontal = Dp(20f)),
@@ -209,11 +209,7 @@ private fun Background(
                 tint = contentColor,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
             )
-            Text(
-                text = text,
-                textAlign = TextAlign.Center,
-                color = contentColor,
-            )
+            Text(text = text, textAlign = TextAlign.Center, color = contentColor)
         }
     }
 }
@@ -274,9 +270,9 @@ private fun ChapterInfo(
     val rowColor =
         when (dropdown) {
             true ->
-                themeColorState.rippleTheme
-                    .defaultColor()
-                    .copy(alpha = themeColorState.rippleTheme.rippleAlpha().focusedAlpha)
+                themeColorState.rippleConfiguration.color.copy(
+                    alpha = themeColorState.rippleConfiguration.rippleAlpha!!.focusedAlpha
+                )
             false -> MaterialTheme.colorScheme.surface
         }
 
@@ -309,9 +305,7 @@ private fun ChapterInfo(
                 .padding(start = Size.small, top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Column(
-            modifier = Modifier.align(Alignment.CenterVertically).fillMaxWidth(.8f),
-        ) {
+        Column(modifier = Modifier.align(Alignment.CenterVertically).fillMaxWidth(.8f)) {
             val titleText =
                 when (shouldHideChapterTitles) {
                     true ->
@@ -335,7 +329,7 @@ private fun ChapterInfo(
                         MaterialTheme.typography.bodyLarge.copy(
                             color = textColor,
                             fontWeight = FontWeight.Medium,
-                            letterSpacing = (-.6).sp
+                            letterSpacing = (-.6).sp,
                         ),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -351,12 +345,10 @@ private fun ChapterInfo(
 
             if (showPagesLeft && pagesLeft > 0) {
                 statuses.add(
-                    resources.getQuantityString(R.plurals.pages_left, pagesLeft, pagesLeft),
+                    resources.getQuantityString(R.plurals.pages_left, pagesLeft, pagesLeft)
                 )
             } else if (showPagesLeft) {
-                statuses.add(
-                    stringResource(id = R.string.page_, lastPageRead + 1),
-                )
+                statuses.add(stringResource(id = R.string.page_, lastPageRead + 1))
             }
 
             if (scanlator.isNotBlank()) {
@@ -386,7 +378,7 @@ private fun ChapterInfo(
                                     drawable =
                                         AppCompatResources.getDrawable(
                                             LocalContext.current,
-                                            iconRes
+                                            iconRes,
                                         )
                                 )
                             Image(
@@ -458,7 +450,7 @@ private fun getDropDownItems(
                     SimpleDropDownItem.Parent(
                         text = UiText.StringResource(R.string.block_scanlator),
                         children = scanlators,
-                    ),
+                    )
                 )
             } else {
                 emptyList()
@@ -468,7 +460,7 @@ private fun getDropDownItems(
                     SimpleDropDownItem.Action(
                         text = UiText.StringResource(R.string.comments),
                         onClick = onComment,
-                    ),
+                    )
                 )
             } else {
                 emptyList()
@@ -476,8 +468,4 @@ private fun getDropDownItems(
         .toPersistentList()
 }
 
-val decimalFormat =
-    DecimalFormat(
-        "#.###",
-        DecimalFormatSymbols().apply { decimalSeparator = '.' },
-    )
+val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })

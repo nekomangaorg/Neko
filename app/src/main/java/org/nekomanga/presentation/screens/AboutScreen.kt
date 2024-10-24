@@ -194,9 +194,7 @@ fun AboutScreen(
 @Composable
 private fun LogoHeader() {
     Column {
-        Surface(
-            modifier = Modifier.fillMaxWidth().padding(top = 30.dp),
-        ) {
+        Surface(modifier = Modifier.fillMaxWidth().padding(top = 30.dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_neko_yokai),
                 tint = MaterialTheme.colorScheme.primary,

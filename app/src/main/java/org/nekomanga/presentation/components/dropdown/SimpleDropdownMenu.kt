@@ -26,14 +26,14 @@ fun SimpleDropdownMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     dropDownItems: ImmutableList<SimpleDropDownItem>,
-    themeColorState: ThemeColorState = defaultThemeColorState()
+    themeColorState: ThemeColorState = defaultThemeColorState(),
 ) {
     val background =
         Modifier.background(
             color =
                 MaterialTheme.colorScheme.surfaceColorAtElevationCustomColor(
                     themeColorState.buttonColor,
-                    8.dp
+                    8.dp,
                 )
         )
     CascadeDropdownMenu(
@@ -47,7 +47,7 @@ fun SimpleDropdownMenu(
         val style =
             MaterialTheme.typography.bodyLarge.copy(
                 color = MaterialTheme.colorScheme.onSurface,
-                letterSpacing = (-.5).sp
+                letterSpacing = (-.5).sp,
             )
         dropDownItems.forEach { item ->
             Row(modifier = background, item = item, style = style, onDismiss = onDismiss)
@@ -60,18 +60,13 @@ private fun CascadeColumnScope.Row(
     modifier: Modifier,
     item: SimpleDropDownItem,
     style: TextStyle,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     when (item) {
         is SimpleDropDownItem.Parent -> {
             DropdownMenuItem(
                 modifier = modifier,
-                text = {
-                    Text(
-                        text = item.text.asString(),
-                        style = style,
-                    )
-                },
+                text = { Text(text = item.text.asString(), style = style) },
                 children = {
                     for (child in item.children) {
                         Row(modifier = modifier, item = child, style = style, onDismiss = onDismiss)
@@ -80,12 +75,7 @@ private fun CascadeColumnScope.Row(
                 childrenHeader = {
                     DropdownMenuHeader(
                         modifier = modifier,
-                        text = {
-                            Text(
-                                text = item.text.asString(),
-                                style = style,
-                            )
-                        },
+                        text = { Text(text = item.text.asString(), style = style) },
                     )
                 },
             )
@@ -96,7 +86,7 @@ private fun CascadeColumnScope.Row(
                 text = item.text.asString(),
                 style = style,
                 onClick = item.onClick,
-                onDismiss = onDismiss
+                onDismiss = onDismiss,
             )
         }
     }
@@ -108,16 +98,11 @@ private fun Item(
     text: String,
     style: TextStyle,
     onClick: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     MaterialDropdownMenuItem(
         modifier = modifier,
-        text = {
-            Text(
-                text = text,
-                style = style,
-            )
-        },
+        text = { Text(text = text, style = style) },
         onClick = {
             onDismiss()
             onClick()

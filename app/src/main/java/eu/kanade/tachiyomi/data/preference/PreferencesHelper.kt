@@ -63,13 +63,13 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun lightTheme() =
         this.preferenceStore.getEnum(
             Keys.lightTheme,
-            if (supportsDynamic) Themes.MONET else Themes.DEFAULT
+            if (supportsDynamic) Themes.MONET else Themes.DEFAULT,
         )
 
     fun darkTheme() =
         this.preferenceStore.getEnum(
             Keys.darkTheme,
-            if (supportsDynamic) Themes.MONET else Themes.DEFAULT
+            if (supportsDynamic) Themes.MONET else Themes.DEFAULT,
         )
 
     fun showNavigationOverlayNewUser() =
@@ -81,9 +81,6 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun autoUpdateTrack() = this.preferenceStore.getBoolean(Keys.autoUpdateTrack, true)
 
     fun trackMarkedAsRead() = this.preferenceStore.getBoolean(Keys.trackMarkedAsRead, false)
-
-    fun trackingsToAddOnline() =
-        this.preferenceStore.getStringSet(Keys.trackingsToAddOnline, emptySet())
 
     fun lastVersionCode() = this.preferenceStore.getInt("last_version_code", 0)
 
@@ -130,10 +127,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun trackToken(sync: TrackService) = this.preferenceStore.getString(Keys.trackToken(sync.id))
 
     fun trackAuthExpired(tracker: TrackService) =
-        preferenceStore.getBoolean(
-            "track_token_expired_${tracker.id}",
-            false,
-        )
+        preferenceStore.getBoolean("track_token_expired_${tracker.id}", false)
 
     fun anilistScoreType() = this.preferenceStore.getString("anilist_score_type", "POINT_10")
 
@@ -252,7 +246,7 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun contentRatingSelections() =
         this.preferenceStore.getStringSet(
             Keys.contentRating,
-            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive),
         )
 
     fun autoTrackContentRatingSelections() =
@@ -262,14 +256,14 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
                 MdConstants.ContentRating.safe,
                 MdConstants.ContentRating.suggestive,
                 MdConstants.ContentRating.erotica,
-                MdConstants.ContentRating.pornographic
+                MdConstants.ContentRating.pornographic,
             ),
         )
 
     fun autoAddTracker() =
         this.preferenceStore.getStringSet(
             Keys.autoAddTracker,
-            setOf(TrackManager.MDLIST.toString())
+            setOf(TrackManager.MDLIST.toString()),
         )
 
     fun setAutoAddTracker(trackersToAutoAdd: Set<String>) {

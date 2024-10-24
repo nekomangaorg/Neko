@@ -50,10 +50,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val typeface =
                 if (item.isCurrent) {
-                    ResourcesCompat.getFont(
-                        itemView.context,
-                        R.font.montserrat_black,
-                    )
+                    ResourcesCompat.getFont(itemView.context, R.font.montserrat_black)
                 } else {
                     null
                 }
@@ -80,10 +77,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             if (
                 item.chapter.language.isNullOrBlank() ||
-                    item.chapter.language.equals(
-                        "english",
-                        true,
-                    )
+                    item.chapter.language.equals("english", true)
             ) {
                 binding.chapterLanguage.isVisible = false
             } else {
@@ -101,7 +95,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                     R.drawable.ic_bookmark_24dp
                 } else {
                     R.drawable.ic_bookmark_border_24dp
-                },
+                }
             )
 
             val drawableColor = ChapterUtil.bookmarkColor(itemView.context, item)

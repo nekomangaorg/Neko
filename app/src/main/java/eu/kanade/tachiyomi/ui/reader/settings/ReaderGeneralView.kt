@@ -32,7 +32,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.viewerSeries.setSelection(
             (context as? ReaderActivity)?.viewModel?.state?.value?.manga?.readingModeType?.let {
                 ReadingModeType.fromPreference(it).prefValue
-            } ?: 0,
+            } ?: 0
         )
         binding.rotationMode.onItemSelectedListener = { position ->
             val rotationType = OrientationType.fromSpinner(position)
@@ -41,7 +41,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
         binding.rotationMode.setSelection(
             (context as ReaderActivity).viewModel.manga?.orientationType?.let {
                 OrientationType.fromPreference(it).prefValue
-            } ?: 0,
+            } ?: 0
         )
 
         binding.backgroundColor.bindToPreference(readerPreferences.readerTheme(), 0)

@@ -54,14 +54,11 @@ fun BrowseHomePage(
     val coverSize =
         (maxOf(
                 LocalConfiguration.current.screenHeightDp,
-                LocalConfiguration.current.screenWidthDp
+                LocalConfiguration.current.screenWidthDp,
             ) / 5)
             .dp
 
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = contentPadding,
-    ) {
+    LazyColumn(modifier = Modifier.fillMaxWidth(), contentPadding = contentPadding) {
         items(browseHomePageManga, key = { homePageManga -> Objects.hash(homePageManga) }) {
             homePageManga ->
             val headerText =
@@ -74,9 +71,7 @@ fun BrowseHomePage(
                     is DisplayScreenType.PopularNewTitles ->
                         stringResource(id = homePageManga.displayScreenType.titleRes)
                 }
-            TextButton(
-                onClick = { titleClick(homePageManga.displayScreenType) },
-            ) {
+            TextButton(onClick = { titleClick(homePageManga.displayScreenType) }) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -94,7 +89,7 @@ fun BrowseHomePage(
                         imageVector = Icons.Default.ArrowForward,
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
@@ -115,7 +110,7 @@ fun BrowseHomePage(
                                         .combinedClickable(
                                             onClick = { onClick(displayManga.mangaId) },
                                             onLongClick = { onLongClick(displayManga) },
-                                        ),
+                                        )
                             ) {
                                 Column(modifier = Modifier.width(coverSize)) {
                                     MangaCover.Square.invoke(
@@ -138,9 +133,7 @@ fun BrowseHomePage(
             }
         }
         item {
-            TextButton(
-                onClick = randomClick,
-            ) {
+            TextButton(onClick = randomClick) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -158,7 +151,7 @@ fun BrowseHomePage(
                         imageVector = Icons.Default.ArrowForward,
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }

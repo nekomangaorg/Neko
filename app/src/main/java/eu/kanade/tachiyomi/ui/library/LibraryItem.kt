@@ -54,7 +54,7 @@ class LibraryItem(
 
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
@@ -73,7 +73,7 @@ class LibraryItem(
                             ContextCompat.getColorStateList(
                                 context,
                                 R.color.library_comfortable_grid_foreground,
-                            ),
+                            )
                         )
                     }
                     if (isFixedSize) {

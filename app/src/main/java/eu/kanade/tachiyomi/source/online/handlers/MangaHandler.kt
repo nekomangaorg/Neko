@@ -45,7 +45,7 @@ class MangaHandler {
 
     suspend fun fetchMangaAndChapterDetails(
         manga: SManga,
-        fetchArtwork: Boolean
+        fetchArtwork: Boolean,
     ): Result<MangaDetailChapterInformation, ResultError> {
         TimberKt.d { "fetch manga and chapter details" }
 
@@ -84,7 +84,7 @@ class MangaHandler {
 
     suspend fun fetchMangaDetails(
         mangaUUID: String,
-        fetchArtwork: Boolean
+        fetchArtwork: Boolean,
     ): Result<Pair<SManga, List<SourceArtwork>>, ResultError> {
         return withContext(Dispatchers.IO) {
             val artworks = artworkAsync(mangaUUID, fetchArtwork)
@@ -98,7 +98,7 @@ class MangaHandler {
                     apiMangaParser.mangaDetailsParse(
                         mangaDto.data,
                         stats.await(),
-                        simpleChapters.await()
+                        simpleChapters.await(),
                     )
                 }
                 .andThen { sManga -> Ok(sManga to artworks.await()) }
@@ -121,14 +121,11 @@ class MangaHandler {
             )
     }
 
-    private fun CoroutineScope.mangaAsync(
-        mangaUUID: String,
-    ) = async { service.viewManga(mangaUUID).getOrResultError("Error getting Manga Detail") }
+    private fun CoroutineScope.mangaAsync(mangaUUID: String) = async {
+        service.viewManga(mangaUUID).getOrResultError("Error getting Manga Detail")
+    }
 
-    private fun CoroutineScope.artworkAsync(
-        mangaUUID: String,
-        fetchArtwork: Boolean,
-    ) = async {
+    private fun CoroutineScope.artworkAsync(mangaUUID: String, fetchArtwork: Boolean) = async {
         when (fetchArtwork) {
             true -> artworkHandler.getArtwork(mangaUUID).getOrElse { emptyList() }
             false -> emptyList()
@@ -166,7 +163,7 @@ class MangaHandler {
 
     suspend fun fetchChapterList(
         mangaUUID: String,
-        lastChapterNumber: Int?
+        lastChapterNumber: Int?,
     ): Result<List<SChapter>, ResultError> {
         return withContext(Dispatchers.IO) {
             val langs = MdUtil.getLangsToShow(preferencesHelper)
@@ -181,10 +178,10 @@ class MangaHandler {
                                         mangaUUID,
                                         langs,
                                         chapterListDto.limit,
-                                        chapterListDto.total
+                                        chapterListDto.total,
                                     )
                             false -> chapterListDto.data
-                        },
+                        }
                     )
                 }
                 .andThen { results ->
@@ -198,7 +195,7 @@ class MangaHandler {
         mangaUUID: String,
         langs: List<String>,
         limit: Int,
-        total: Int
+        total: Int,
     ): List<ChapterDataDto> {
         return withContext(Dispatchers.IO) {
             val totalRequestNo = (total / limit)
@@ -221,7 +218,7 @@ class MangaHandler {
     private suspend fun fetchOffset(
         mangaUUID: String,
         langs: List<String>,
-        offset: Int
+        offset: Int,
     ): Result<ChapterListDto, ResultError> {
         return service
             .viewChapters(mangaUUID, langs, offset)

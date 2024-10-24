@@ -27,13 +27,7 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
     var incognito = false
 
     init {
-        val a =
-            context.obtainStyledAttributes(
-                attrs,
-                R.styleable.Toolbar,
-                0,
-                defStyleRes,
-            )
+        val a = context.obtainStyledAttributes(attrs, R.styleable.Toolbar, 0, defStyleRes)
         titleTextAppearance = a.getResourceId(R.styleable.Toolbar_titleTextAppearance, 0)
         a.recycle()
     }

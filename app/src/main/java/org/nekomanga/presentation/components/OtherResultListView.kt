@@ -34,26 +34,15 @@ fun ResultList(
         verticalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         items(results) { displayResult ->
-            ResultRow(
-                displayResult = displayResult,
-                onClick = { onClick(displayResult.uuid) },
-            )
+            ResultRow(displayResult = displayResult, onClick = { onClick(displayResult.uuid) })
         }
     }
 }
 
 @Composable
-private fun ResultRow(
-    displayResult: DisplayResult,
-    onClick: () -> Unit,
-) {
-    ElevatedCard(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-        ) {
+private fun ResultRow(displayResult: DisplayResult, onClick: () -> Unit) {
+    ElevatedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Text(
                 text = displayResult.title,
                 style = MaterialTheme.typography.titleMedium,

@@ -132,7 +132,7 @@ fun TrackingSheet(
                 TrackingDate(
                     readingDate = ReadingDate.Start,
                     currentDate = trackAndService.track.startedReadingDate,
-                    dateFormat = dateFormat
+                    dateFormat = dateFormat,
                 ),
             )
         } else if (calendarFinishedTrackDialog is ShowDialog) {
@@ -142,14 +142,14 @@ fun TrackingSheet(
                 TrackingDate(
                     readingDate = ReadingDate.Finish,
                     trackAndService.track.finishedReadingDate,
-                    dateFormat = dateFormat
-                )
+                    dateFormat = dateFormat,
+                ),
             )
         }
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(Size.small)
+            verticalArrangement = Arrangement.spacedBy(Size.small),
         ) {
             items(servicesProvider()) { service ->
                 val track = tracksProvider().firstOrNull { it.trackServiceId == service.id }
@@ -226,7 +226,7 @@ private fun TrackingServiceItem(
                 1.dp,
                 MaterialTheme.colorScheme.onSurface.copy(
                     alpha = NekoColors.disabledAlphaLowContrast
-                )
+                ),
             ),
         modifier = Modifier.padding(horizontal = Size.small),
     ) {
@@ -251,7 +251,7 @@ private fun TrackingServiceItem(
                     service = trackAndService.service,
                     statusClick,
                     scoreClick,
-                    chapterClick
+                    chapterClick,
                 )
                 if (service.supportsReadingDates) {
                     Divider()
@@ -259,7 +259,7 @@ private fun TrackingServiceItem(
                         track = trackAndService.track,
                         dateFormat = dateFormat,
                         startDateClick = startDateClick,
-                        finishDateClick = finishDateClick
+                        finishDateClick = finishDateClick,
                     )
                 }
             }
@@ -272,7 +272,7 @@ private fun NoTrack(
     themeColor: ThemeColorState,
     service: TrackServiceItem,
     onLogoClick: (String, String) -> Unit,
-    searchTrackerClick: () -> Unit
+    searchTrackerClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxSize().height(Size.huge).clickable { searchTrackerClick() },
@@ -284,7 +284,7 @@ private fun NoTrack(
             text = stringResource(id = R.string.add_tracking),
             color = themeColor.buttonColor,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
@@ -343,7 +343,7 @@ private fun TrackRowTwo(
     service: TrackServiceItem,
     statusClick: () -> Unit,
     scoreClick: () -> Unit,
-    chapterClick: () -> Unit
+    chapterClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
@@ -366,9 +366,7 @@ private fun TrackRowTwo(
                     when {
                         track.totalChapters > 0 &&
                             track.lastChapterRead.toInt() == track.totalChapters ->
-                            stringResource(
-                                R.string.all_chapters_read,
-                            )
+                            stringResource(R.string.all_chapters_read)
                         track.totalChapters > 0 ->
                             stringResource(
                                 R.string.chapter_x_of_y,
@@ -386,7 +384,7 @@ private fun TrackRowTwo(
                 Text(
                     text = chapterText,
                     style = MaterialTheme.typography.bodyMedium.copy(letterSpacing = (-.3f).sp),
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
             VerticalDivider()
@@ -427,7 +425,7 @@ fun TrackRowThree(
     track: TrackItem,
     dateFormat: DateFormat,
     startDateClick: () -> Unit = {},
-    finishDateClick: () -> Unit = {}
+    finishDateClick: () -> Unit = {},
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
@@ -478,12 +476,12 @@ private fun Logo(service: TrackServiceItem, track: TrackItem?, onClick: (String,
                 .background(color = Color(service.logoColor))
                 .conditional(track != null) {
                     clickable { onClick(track!!.trackingUrl, track.title) }
-                },
+                }
     ) {
         Image(
             painter = painterResource(id = service.logoRes),
             contentDescription = null,
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier.align(Alignment.Center),
         )
     }
 }

@@ -2,6 +2,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.BasePlugin
 import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -9,6 +10,7 @@ plugins {
     id(androidx.plugins.library.get().pluginId) apply false
     alias(libs.plugins.google.services) apply false
     id(kotlinx.plugins.android.get().pluginId) apply false
+    alias(kotlinx.plugins.compose.compiler) apply false
     id(kotlinx.plugins.jvm.get().pluginId) apply false
     id(kotlinx.plugins.parcelize.get().pluginId) apply false
     alias(libs.plugins.about.libraries) apply false
@@ -20,9 +22,9 @@ plugins {
 subprojects {
     tasks {
         withType<KotlinCompile> {
-            kotlinOptions {
-                jvmTarget = JavaVersion.VERSION_17.toString()
-                freeCompilerArgs +=
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_17)
+                freeCompilerArgs.addAll(
                     listOf(
                         "-Xcontext-receivers",
                         "-opt-in=kotlin.Experimental",
@@ -42,14 +44,9 @@ subprojects {
                         "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
                         "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
                     )
-
-                // https://developer.android.com/jetpack/androidx/releases/compose-compiler#1.5.9
-                kotlinOptions.freeCompilerArgs +=
-                    listOf(
-                        "-P",
-                        "plugin:androidx.compose.compiler.plugins.kotlin:nonSkippingGroupOptimization=true",
-                    )
+                )
             }
+
             this.dependsOn("ktfmtFormat")
         }
 
@@ -58,6 +55,7 @@ subprojects {
             testLogging { events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED) }
         }
     }
+
     plugins.withType<BasePlugin> {
         plugins.apply(libs.plugins.ktfmt.get().pluginId)
         ktfmt {

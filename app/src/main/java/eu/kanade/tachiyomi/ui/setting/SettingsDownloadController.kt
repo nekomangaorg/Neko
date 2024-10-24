@@ -98,22 +98,22 @@ class SettingsDownloadController : SettingsController() {
                             context.resources.getQuantityString(
                                 R.plurals.next_unread_chapters,
                                 2,
-                                2
+                                2,
                             ),
                             context.resources.getQuantityString(
                                 R.plurals.next_unread_chapters,
                                 3,
-                                3
+                                3,
                             ),
                             context.resources.getQuantityString(
                                 R.plurals.next_unread_chapters,
                                 5,
-                                5
+                                5,
                             ),
                             context.resources.getQuantityString(
                                 R.plurals.next_unread_chapters,
                                 10,
-                                10
+                                10,
                             ),
                         )
                     entryValues = listOf(0, 2, 3, 5, 10)

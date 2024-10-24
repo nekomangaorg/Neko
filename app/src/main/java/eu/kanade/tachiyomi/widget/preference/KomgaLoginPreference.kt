@@ -18,11 +18,8 @@ import org.nekomanga.R
 
 class KomgaLoginPreference
 @JvmOverloads
-constructor(
-    context: Context,
-    val source: Komga,
-    attrs: AttributeSet? = null,
-) : Preference(context, attrs) {
+constructor(context: Context, val source: Komga, attrs: AttributeSet? = null) :
+    Preference(context, attrs) {
 
     init {
         widgetLayoutResource = R.layout.pref_widget_imageview
@@ -47,7 +44,7 @@ constructor(
                             24f,
                             R.color.material_on_surface_disabled,
                         )
-                },
+                }
             )
         }
         val summary = (holder.findViewById(android.R.id.summary) as? TextView)

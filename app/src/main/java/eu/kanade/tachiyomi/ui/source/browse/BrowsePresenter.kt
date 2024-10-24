@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.unique
 import eu.kanade.tachiyomi.util.updateVisibility
 import java.util.Date
 import kotlinx.collections.immutable.ImmutableList
@@ -72,7 +73,7 @@ class BrowsePresenter(
                 defaultContentRatings =
                     preferences.contentRatingSelections().get().toImmutableSet(),
                 screenType = BrowseScreenType.Homepage,
-            ),
+            )
         )
     val browseScreenState: StateFlow<BrowseScreenState> = _browseScreenState.asStateFlow()
 
@@ -97,7 +98,7 @@ class BrowsePresenter(
             onRequest = {
                 browseRepository.getSearchPage(
                     browseScreenState.value.page,
-                    browseScreenState.value.filters
+                    browseScreenState.value.filters,
                 )
             },
             getNextKey = { _browseScreenState.value.page + 1 },
@@ -111,7 +112,7 @@ class BrowsePresenter(
                                 when (resultError) {
                                     is ResultError.Generic -> resultError.errorString
                                     else -> (resultError as ResultError.HttpError).message
-                                },
+                                }
                             ),
                     )
                 }
@@ -155,7 +156,7 @@ class BrowsePresenter(
                 it.copy(
                     sideNavMode = SideNavMode.findByPrefValue(preferences.sideNavMode().get()),
                     isLoggedIn = browseRepository.isLoggedIn(),
-                    firstLoad = false
+                    firstLoad = false,
                 )
             }
         }
@@ -226,7 +227,7 @@ class BrowsePresenter(
                         state.copy(
                             error = UiText.String(resultError.message()),
                             initialLoading = false,
-                            hideFooterButton = false
+                            hideFooterButton = false,
                         )
                     }
                 }
@@ -235,7 +236,7 @@ class BrowsePresenter(
                         state.copy(
                             homePageManga = it.updateVisibility(preferences),
                             initialLoading = false,
-                            hideFooterButton = false
+                            hideFooterButton = false,
                         )
                     }
                 }
@@ -265,7 +266,7 @@ class BrowsePresenter(
                                     DisplayMangaHolder(
                                         BrowseScreenType.Follows,
                                         it.distinctBy { it.url }.toImmutableList(),
-                                        it.filterVisibility(preferences).toImmutableList()
+                                        it.filterVisibility(preferences).toImmutableList(),
                                     ),
                                 initialLoading = false,
                             )
@@ -277,8 +278,9 @@ class BrowsePresenter(
 
     fun retry() {
         presenterScope.launchIO {
+            val initialLoading = _browseScreenState.value.page == 1
             _browseScreenState.update { state ->
-                state.copy(initialLoading = true, error = null, page = 1)
+                state.copy(initialLoading = initialLoading, error = null)
             }
             when (browseScreenState.value.screenType) {
                 BrowseScreenType.Homepage -> getHomepage()
@@ -310,7 +312,7 @@ class BrowsePresenter(
                                 DisplayMangaHolder(
                                     resultType = BrowseScreenType.Filter,
                                     allDisplayManga = persistentListOf(),
-                                    filteredDisplayManga = persistentListOf()
+                                    filteredDisplayManga = persistentListOf(),
                                 ),
                         )
                     }
@@ -326,7 +328,7 @@ class BrowsePresenter(
                                     _browseScreenState.update { state ->
                                         state.copy(
                                             error = UiText.String(it.message()),
-                                            initialLoading = false
+                                            initialLoading = false,
                                         )
                                     }
                                 }
@@ -335,7 +337,7 @@ class BrowsePresenter(
                                         it.copy(
                                             otherResults = dr.toImmutableList(),
                                             screenType = BrowseScreenType.Other,
-                                            initialLoading = false
+                                            initialLoading = false,
                                         )
                                     }
                                 }
@@ -345,7 +347,7 @@ class BrowsePresenter(
                                 _browseScreenState.update { state ->
                                     state.copy(
                                         error = UiText.String("Invalid List UUID"),
-                                        initialLoading = false
+                                        initialLoading = false,
                                     )
                                 }
                             } else {
@@ -355,7 +357,7 @@ class BrowsePresenter(
                                         _browseScreenState.update { state ->
                                             state.copy(
                                                 error = UiText.String(it.message()),
-                                                initialLoading = false
+                                                initialLoading = false,
                                             )
                                         }
                                     }
@@ -389,7 +391,7 @@ class BrowsePresenter(
                                 _browseScreenState.update { state ->
                                     state.copy(
                                         error = UiText.String("Invalid Author UUID"),
-                                        initialLoading = false
+                                        initialLoading = false,
                                     )
                                 }
                             } else if (
@@ -398,7 +400,7 @@ class BrowsePresenter(
                                 _browseScreenState.update { state ->
                                     state.copy(
                                         error = UiText.String("Invalid Group UUID"),
-                                        initialLoading = false
+                                        initialLoading = false,
                                     )
                                 }
                             } else {
@@ -413,7 +415,7 @@ class BrowsePresenter(
                             isDeepLink = true,
                             title = UiText.String(""),
                             initialLoading = false,
-                            error = UiText.String(uuid)
+                            error = UiText.String(uuid),
                         )
                     }
                 }
@@ -427,7 +429,7 @@ class BrowsePresenter(
                             _browseScreenState.update { state ->
                                 state.copy(
                                     error = UiText.String(it.message()),
-                                    initialLoading = false
+                                    initialLoading = false,
                                 )
                             }
                         }
@@ -442,7 +444,7 @@ class BrowsePresenter(
                                             it.filters.copy(
                                                 query = Filter.Query("", QueryType.Title)
                                             ),
-                                        handledIncomingQuery = true
+                                        handledIncomingQuery = true,
                                     )
                                 }
                             }
@@ -457,7 +459,7 @@ class BrowsePresenter(
                         createInitialDexFilter("")
                             .copy(
                                 queryMode = QueryType.List,
-                                query = Filter.Query(text = uuid, type = QueryType.List)
+                                query = Filter.Query(text = uuid, type = QueryType.List),
                             )
                     _browseScreenState.update { it.copy(filters = searchFilters) }
                     if (!_browseScreenState.value.handledIncomingQuery) {
@@ -469,7 +471,7 @@ class BrowsePresenter(
                             _browseScreenState.update { state ->
                                 state.copy(
                                     error = UiText.String(it.message()),
-                                    initialLoading = false
+                                    initialLoading = false,
                                 )
                             }
                         }
@@ -508,7 +510,7 @@ class BrowsePresenter(
                     _browseScreenState.update {
                         it.copy(
                             isDeepLink = true,
-                            title = UiText.StringResource(R.string.scanlator_group)
+                            title = UiText.StringResource(R.string.scanlator_group),
                         )
                     }
                     val searchFilters =
@@ -528,14 +530,14 @@ class BrowsePresenter(
             if (browseScreenState.value.filters.queryMode == QueryType.Author) {
                 _browseScreenState.update {
                     it.copy(
-                        filters = createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid)),
+                        filters = createInitialDexFilter("").copy(authorId = Filter.AuthorId(uuid))
                     )
                 }
                 getSearchPage()
             } else if (browseScreenState.value.filters.queryMode == QueryType.Group) {
                 _browseScreenState.update {
                     it.copy(
-                        filters = createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid)),
+                        filters = createInitialDexFilter("").copy(groupId = Filter.GroupId(uuid))
                     )
                 }
                 getSearchPage()
@@ -549,11 +551,7 @@ class BrowsePresenter(
 
     fun randomManga() {
         presenterScope.launch {
-            _browseScreenState.update {
-                it.copy(
-                    initialLoading = true,
-                )
-            }
+            _browseScreenState.update { it.copy(initialLoading = true) }
             browseRepository
                 .getRandomManga()
                 .onFailure { error ->
@@ -637,7 +635,7 @@ class BrowsePresenter(
                         displayMangaHolder =
                             it.displayMangaHolder.copy(
                                 allDisplayManga = tempList.toPersistentList()
-                            ),
+                            )
                     )
                 }
 
@@ -655,7 +653,7 @@ class BrowsePresenter(
                             displayMangaHolder =
                                 it.displayMangaHolder.copy(
                                     filteredDisplayManga = tempFilterList.toPersistentList()
-                                ),
+                                )
                         )
                     }
                 }
@@ -724,7 +722,7 @@ class BrowsePresenter(
                             blankFilter.contentRatings.map {
                                 if (it.rating == rating) it.copy(state = true)
                                 else it.copy(state = false)
-                            },
+                            }
                     )
                 } else {
                     blankFilter.copy(
@@ -733,7 +731,7 @@ class BrowsePresenter(
                                 if (it.tag.prettyPrint.equals(tag, true))
                                     it.copy(state = ToggleableState.On)
                                 else it
-                            },
+                            }
                     )
                 }
             _browseScreenState.update { it.copy(filters = filters) }
@@ -749,7 +747,7 @@ class BrowsePresenter(
                     filters =
                         blankFilter.copy(
                             queryMode = QueryType.Author,
-                            query = Filter.Query(creator, QueryType.Author)
+                            query = Filter.Query(creator, QueryType.Author),
                         )
                 )
             }
@@ -767,14 +765,14 @@ class BrowsePresenter(
                             lookupAndReplaceEntry(
                                 browseScreenState.value.filters.contentRatings,
                                 { it.rating == newFilter.rating },
-                                newFilter
+                                newFilter,
                             )
                         if (list.none { it.state }) {
                             val default =
                                 lookupAndReplaceEntry(
                                     list,
                                     { it.rating == MangaContentRating.Safe },
-                                    Filter.ContentRating(MangaContentRating.Safe, true)
+                                    Filter.ContentRating(MangaContentRating.Safe, true),
                                 )
                             browseScreenState.value.filters.copy(contentRatings = default)
                         } else {
@@ -786,7 +784,7 @@ class BrowsePresenter(
                             lookupAndReplaceEntry(
                                 browseScreenState.value.filters.originalLanguage,
                                 { it.language == newFilter.language },
-                                newFilter
+                                newFilter,
                             )
                         browseScreenState.value.filters.copy(originalLanguage = list)
                     }
@@ -795,7 +793,7 @@ class BrowsePresenter(
                             lookupAndReplaceEntry(
                                 browseScreenState.value.filters.publicationDemographics,
                                 { it.demographic == newFilter.demographic },
-                                newFilter
+                                newFilter,
                             )
                         browseScreenState.value.filters.copy(publicationDemographics = list)
                     }
@@ -804,7 +802,7 @@ class BrowsePresenter(
                             lookupAndReplaceEntry(
                                 browseScreenState.value.filters.statuses,
                                 { it.status == newFilter.status },
-                                newFilter
+                                newFilter,
                             )
                         browseScreenState.value.filters.copy(statuses = list)
                     }
@@ -813,7 +811,7 @@ class BrowsePresenter(
                             lookupAndReplaceEntry(
                                 browseScreenState.value.filters.tags,
                                 { it.tag == newFilter.tag },
-                                newFilter
+                                newFilter,
                             )
                         browseScreenState.value.filters.copy(tags = list)
                     }
@@ -842,25 +840,25 @@ class BrowsePresenter(
                             QueryType.Title -> {
                                 browseScreenState.value.filters.copy(
                                     queryMode = QueryType.Title,
-                                    query = newFilter
+                                    query = newFilter,
                                 )
                             }
                             QueryType.Author -> {
                                 browseScreenState.value.filters.copy(
                                     queryMode = QueryType.Author,
-                                    query = newFilter
+                                    query = newFilter,
                                 )
                             }
                             QueryType.Group -> {
                                 browseScreenState.value.filters.copy(
                                     queryMode = QueryType.Group,
-                                    query = newFilter
+                                    query = newFilter,
                                 )
                             }
                             QueryType.List -> {
                                 browseScreenState.value.filters.copy(
                                     queryMode = QueryType.List,
-                                    query = newFilter
+                                    query = newFilter,
                                 )
                             }
                         }
@@ -880,7 +878,7 @@ class BrowsePresenter(
     private fun <T> lookupAndReplaceEntry(
         list: List<T>,
         indexMethod: (T) -> Boolean,
-        newEntry: T
+        newEntry: T,
     ): ImmutableList<T> {
         val index = list.indexOfFirst { indexMethod(it) }
         val mutableList = list.toMutableList()
@@ -948,7 +946,7 @@ class BrowsePresenter(
             }
             presenterScope.launch {
                 val allDisplayManga =
-                    _browseScreenState.value.displayMangaHolder.allDisplayManga.resync(db)
+                    _browseScreenState.value.displayMangaHolder.allDisplayManga.resync(db).unique()
                 _browseScreenState.update {
                     it.copy(
                         displayMangaHolder =
@@ -956,7 +954,7 @@ class BrowsePresenter(
                                 allDisplayManga = allDisplayManga.toImmutableList(),
                                 filteredDisplayManga =
                                     allDisplayManga.filterVisibility(preferences).toImmutableList(),
-                            ),
+                            )
                     )
                 }
             }
@@ -972,7 +970,7 @@ class BrowsePresenter(
                 _browseScreenState.update {
                     it.copy(
                         initialLoading = false,
-                        error = UiText.StringResource(R.string.no_network_connection)
+                        error = UiText.StringResource(R.string.no_network_connection),
                     )
                 }
             }

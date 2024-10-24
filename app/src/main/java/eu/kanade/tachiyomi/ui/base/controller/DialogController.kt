@@ -37,7 +37,7 @@ abstract class DialogController : Controller {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup,
-        savedViewState: Bundle?
+        savedViewState: Bundle?,
     ): View {
         dialog = onCreateDialog(savedViewState)
         dialog!!.setOwnerActivity(activity!!)
@@ -95,7 +95,7 @@ abstract class DialogController : Controller {
             RouterTransaction.with(this)
                 .pushChangeHandler(SimpleSwapChangeHandler(false))
                 .popChangeHandler(SimpleSwapChangeHandler(false))
-                .tag(tag),
+                .tag(tag)
         )
     }
 

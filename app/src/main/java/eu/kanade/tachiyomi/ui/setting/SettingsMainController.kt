@@ -30,7 +30,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                 iconDrawable =
                     MaterialDesignDx.Icon.gmf_tune.create(
                         context,
-                        colorAttr = R.attr.colorOnSurface
+                        colorAttr = R.attr.colorOnSurface,
                     )
                 titleRes = R.string.general
                 onClick { navigateTo(SettingsGeneralController()) }
@@ -107,7 +107,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                 iconDrawable =
                     MaterialDesignDx.Icon.gmf_sync.create(
                         context,
-                        colorAttr = R.attr.colorOnSurface
+                        colorAttr = R.attr.colorOnSurface,
                     )
                 titleRes = R.string.tracking
                 onClick { navigateTo(SettingsTrackingController()) }
@@ -125,7 +125,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                 iconDrawable =
                     MaterialDesignDx.Icon.gmf_code.create(
                         context,
-                        colorAttr = R.attr.colorOnSurface
+                        colorAttr = R.attr.colorOnSurface,
                     )
                 titleRes = R.string.advanced
                 onClick { navigateTo(SettingsAdvancedController()) }
@@ -142,9 +142,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
     override fun onActionViewExpand(item: MenuItem?) {
         SettingsSearchController.lastSearch = "" // reset saved search query
-        router.pushController(
-            RouterTransaction.with(SettingsSearchController()),
-        )
+        router.pushController(RouterTransaction.with(SettingsSearchController()))
     }
 
     private fun navigateTo(controller: Controller) {

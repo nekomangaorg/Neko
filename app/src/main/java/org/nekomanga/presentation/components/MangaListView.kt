@@ -87,7 +87,7 @@ fun MangaListWithHeader(
                 mangaList,
                 key = { _, displayManga ->
                     Objects.hash(displayManga.title, displayManga.mangaId, stringRes)
-                }
+                },
             ) { _, displayManga ->
                 MangaRow(
                     displayManga = displayManga,
@@ -115,7 +115,7 @@ private fun MangaRow(
         MangaListCover(displayManga, shouldOutlineCover)
 
         Column(
-            modifier = Modifier.padding(Size.tiny).align(alignment = Alignment.CenterVertically),
+            modifier = Modifier.padding(Size.tiny).align(alignment = Alignment.CenterVertically)
         ) {
             val titleLineCount =
                 when (displayManga.displayText.isBlank()) {
@@ -126,7 +126,7 @@ private fun MangaRow(
             MangaListTitle(title = displayManga.title, maxLines = titleLineCount)
             MangaListSubtitle(
                 text = displayManga.displayText,
-                textRes = displayManga.displayTextRes
+                textRes = displayManga.displayTextRes,
             )
         }
     }

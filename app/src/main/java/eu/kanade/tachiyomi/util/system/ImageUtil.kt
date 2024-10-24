@@ -27,10 +27,9 @@ import com.hippo.unifile.UniFile
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.URLConnection
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -144,7 +143,7 @@ object ImageUtil {
         image: Bitmap?,
         alwaysUseWhite: Boolean,
         preferBlack: Boolean,
-        context: Context
+        context: Context,
     ): Drawable {
         val backgroundColor =
             if (alwaysUseWhite) {
@@ -405,10 +404,10 @@ object ImageUtil {
                 if (!secondHalf) 0 else width / 2,
                 0,
                 if (secondHalf) width else width / 2,
-                height
+                height,
             ),
             result.rect,
-            null
+            null,
         )
         progressCallback?.invoke(99)
         val output = ByteArrayOutputStream()
@@ -461,20 +460,8 @@ object ImageUtil {
         val canvas = Canvas(result)
         canvas.drawColor(Color.BLACK)
         progressCallback?.invoke(98)
-        val upperPart =
-            Rect(
-                0,
-                0,
-                result.width,
-                result.height / 2,
-            )
-        val lowerPart =
-            Rect(
-                0,
-                result.height / 2 + gap,
-                result.width,
-                result.height,
-            )
+        val upperPart = Rect(0, 0, result.width, result.height / 2)
+        val lowerPart = Rect(0, result.height / 2 + gap, result.width, result.height)
         canvas.drawBitmap(
             imageBitmap,
             Rect(
@@ -523,7 +510,7 @@ object ImageUtil {
             Bitmap.createBitmap(
                 width + width2 + gapInPx,
                 max(height, height2),
-                Bitmap.Config.ARGB_8888
+                Bitmap.Config.ARGB_8888,
             )
         val canvas = Canvas(result)
         canvas.drawColor(background)
@@ -578,7 +565,7 @@ object ImageUtil {
     }
 
     /** Splits tall images to improve performance of reader */
-    fun splitTallImage(imageFile: UniFile, imageFilePath: String): Boolean {
+    fun splitTallImage(tmpDir: UniFile, imageFile: UniFile, fileName: String): Boolean {
         if (
             isAnimatedAndSupported(imageFile.openInputStream()) ||
                 !isTallImage(imageFile.openInputStream())
@@ -607,12 +594,17 @@ object ImageUtil {
 
         return try {
             splitDataList.forEach { splitData ->
-                val splitPath = splitImagePath(imageFilePath, splitData.index)
+                val splitImageName = splitImageName(fileName, splitData.index)
+                // Remove pre-existing split if exists (this split shouldn't exist under normal
+                // circumstances)
+                tmpDir.findFile(splitImageName)?.delete()
+
+                val splitFile = tmpDir.createFile(splitImageName)!!
 
                 val region =
                     Rect(0, splitData.topOffset, splitData.splitWidth, splitData.bottomOffset)
 
-                FileOutputStream(splitPath).use { outputStream ->
+                splitFile.openOutputStream().use { outputStream ->
                     val splitBitmap = bitmapRegionDecoder.decodeRegion(region, options)
                     splitBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                     splitBitmap.recycle()
@@ -626,8 +618,8 @@ object ImageUtil {
         } catch (e: Exception) {
             // Image splits were not successfully saved so delete them and keep the original image
             splitDataList
-                .map { splitImagePath(imageFilePath, it.index) }
-                .forEach { File(it).delete() }
+                .map { splitImageName(fileName, it.index) }
+                .forEach { tmpDir.findFile(it)?.delete() }
             TimberKt.e(e) { "Error splitting image" }
             false
         } finally {
@@ -635,22 +627,22 @@ object ImageUtil {
         }
     }
 
-    private fun splitImagePath(imageFilePath: String, index: Int) =
-        imageFilePath.substringBeforeLast(".") + "__${"%03d".format(index + 1)}.jpg"
+    private fun splitImageName(fileName: String, index: Int) =
+        "${fileName}__${"%03d".format(Locale.ENGLISH, index + 1)}.jpg"
 
     private val BitmapFactory.Options.splitData
         get(): List<SplitData> {
             val imageHeight = outHeight
             val imageWidth = outWidth
 
-            val optimalImageHeight = displayMaxHeightInPx * 2
+            val optimalImageHeight = displayMaxHeightInPx * 4
 
             // -1 so it doesn't try to split when imageHeight = optimalImageHeight
             val partCount = (imageHeight - 1) / optimalImageHeight + 1
             val optimalSplitHeight = imageHeight / partCount
 
             Timber.d(
-                "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split",
+                "Splitting image with height of $imageHeight into $partCount part with estimated ${optimalSplitHeight}px height per split"
             )
 
             return mutableListOf<SplitData>().apply {
@@ -722,7 +714,7 @@ object ImageUtil {
     private fun Bitmap.isSidePadded(
         rightSide: Boolean,
         checkWhite: Boolean,
-        halfCheck: Boolean = false
+        halfCheck: Boolean = false,
     ): Int {
         val left = (width * 0.0275).toInt()
         val right = width - left
@@ -845,6 +837,6 @@ object ImageUtil {
     private val SUPPLEMENTARY_MIMETYPE_MAPPING =
         mapOf(
             // https://issuetracker.google.com/issues/182703810
-            "image/jxl" to "jxl",
+            "image/jxl" to "jxl"
         )
 }

@@ -9,10 +9,8 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Category
 import org.nekomanga.R
 
-class LibraryHeaderItem(
-    private val categoryF: (Int) -> Category,
-    val catId: Int,
-) : AbstractHeaderItem<LibraryHeaderHolder>() {
+class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int) :
+    AbstractHeaderItem<LibraryHeaderHolder>() {
 
     override fun getLayoutRes(): Int {
         return R.layout.library_category_header_item

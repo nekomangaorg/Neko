@@ -128,10 +128,8 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
     }
 
     /** Diff util callback used to dispatch delta updates instead of full dataset changes. */
-    private class Callback(
-        private val oldItems: List<Any>,
-        private val newItems: List<Any>,
-    ) : DiffUtil.Callback() {
+    private class Callback(private val oldItems: List<Any>, private val newItems: List<Any>) :
+        DiffUtil.Callback() {
 
         /** Returns true if these two items are the same. */
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {

@@ -87,7 +87,7 @@ class AboutPresenter : BaseCoroutinePresenter<AboutPresenter>() {
                 _snackbarState.emit(
                     SnackbarState(
                         messageRes = R.string._copied_to_clipboard,
-                        fieldRes = R.string.build_information
+                        fieldRes = R.string.build_information,
                     )
                 )
             }

@@ -42,9 +42,7 @@ class SettingsReaderController : SettingsController() {
                     entries =
                         listOf(
                             context.getString(R.string.no_animation),
-                            context.getString(
-                                R.string.fast,
-                            ),
+                            context.getString(R.string.fast),
                             context.getString(R.string.normal),
                         )
                     entryValues =
@@ -66,11 +64,7 @@ class SettingsReaderController : SettingsController() {
                     entryValues = listOf(4, 6, 8, 10, 12, 14, 16, 20)
                     entries =
                         entryValues.map {
-                            context.resources.getQuantityString(
-                                R.plurals.pages_plural,
-                                it,
-                                it,
-                            )
+                            context.resources.getQuantityString(R.plurals.pages_plural, it, it)
                         }
                     defaultValue = 6
                     summaryRes = R.string.amount_of_pages_to_preload
@@ -271,12 +265,7 @@ class SettingsReaderController : SettingsController() {
                     key = readerPreferences.zoomStart().key()
                     titleRes = R.string.zoom_start_position
                     entriesRes =
-                        arrayOf(
-                            R.string.automatic,
-                            R.string.left,
-                            R.string.right,
-                            R.string.center,
-                        )
+                        arrayOf(R.string.automatic, R.string.left, R.string.right, R.string.center)
                     entryRange = 1..4
                     defaultValue = 1
                 }

@@ -10,7 +10,7 @@ class StaggeredGridLayoutManagerAccurateOffset(
     context: Context?,
     attr: AttributeSet?,
     spanCount: Int,
-    orientation: Int
+    orientation: Int,
 ) : StaggeredGridLayoutManager(context, attr, spanCount, orientation) {
 
     var rView: RecyclerView? = null

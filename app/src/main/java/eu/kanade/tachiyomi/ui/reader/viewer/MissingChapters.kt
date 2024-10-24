@@ -8,7 +8,7 @@ private val pattern = Regex("""\d+""")
 
 fun hasMissingChapters(
     higherReaderChapter: ReaderChapter?,
-    lowerReaderChapter: ReaderChapter?
+    lowerReaderChapter: ReaderChapter?,
 ): Boolean {
     if (higherReaderChapter == null || lowerReaderChapter == null) return false
     return hasMissingChapters(higherReaderChapter.chapter, lowerReaderChapter.chapter)
@@ -31,7 +31,7 @@ fun hasMissingChapters(higherChapterNumber: Float, lowerChapterNumber: Float): B
 
 fun calculateChapterDifference(
     higherReaderChapter: ReaderChapter?,
-    lowerReaderChapter: ReaderChapter?
+    lowerReaderChapter: ReaderChapter?,
 ): Float {
     if (higherReaderChapter == null || lowerReaderChapter == null) return 0f
     return calculateChapterDifference(higherReaderChapter.chapter, lowerReaderChapter.chapter)

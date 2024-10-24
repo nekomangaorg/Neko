@@ -78,7 +78,7 @@ internal class AppUpdateNotifier(private val context: Context) {
                     context,
                     releaseUrl.hashCode(),
                     releaseIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 ),
             )
         }
@@ -168,7 +168,7 @@ internal class AppUpdateNotifier(private val context: Context) {
                 context.getString(R.string.cancel),
                 NotificationReceiver.dismissNotificationPendingBroadcast(
                     context,
-                    Notifications.ID_INSTALL
+                    Notifications.ID_INSTALL,
                 ),
             )
             addReleasePageAction()

@@ -24,9 +24,7 @@ interface MangaQueries : DbProvider {
     fun getMangaList() =
         db.get()
             .listOfObjects(Manga::class.java)
-            .withQuery(
-                Query.builder().table(MangaTable.TABLE).build(),
-            )
+            .withQuery(Query.builder().table(MangaTable.TABLE).build())
             .prepare()
 
     fun getLibraryMangaList() =
@@ -41,7 +39,7 @@ interface MangaQueries : DbProvider {
                         MangaCategoryTable.TABLE,
                         CategoryTable.TABLE,
                     )
-                    .build(),
+                    .build()
             )
             .withGetResolver(LibraryMangaGetResolver.INSTANCE)
             .prepare()
@@ -55,7 +53,7 @@ interface MangaQueries : DbProvider {
                     .where("${MangaTable.COL_FAVORITE} = ?")
                     .whereArgs(1)
                     .orderBy(MangaTable.COL_TITLE)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -67,7 +65,7 @@ interface MangaQueries : DbProvider {
                     .table(MangaTable.TABLE)
                     .where("${MangaTable.COL_URL} = ? AND ${MangaTable.COL_SOURCE} = ?")
                     .whereArgs(url, sourceId)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -79,7 +77,7 @@ interface MangaQueries : DbProvider {
                     .table(MangaTable.TABLE)
                     .where("${MangaTable.COL_URL} = ?")
                     .whereArgs(url)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -91,7 +89,7 @@ interface MangaQueries : DbProvider {
                     .table(MangaTable.TABLE)
                     .where("${MangaTable.COL_ID} = ?")
                     .whereArgs(id)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -111,11 +109,7 @@ interface MangaQueries : DbProvider {
         db.put()
             .objects(manga)
             .withPutResolver(
-                MangaFlagsPutResolver(
-                    MangaTable.COL_CHAPTER_FLAGS,
-                    Manga::chapter_flags,
-                    true,
-                ),
+                MangaFlagsPutResolver(MangaTable.COL_CHAPTER_FLAGS, Manga::chapter_flags, true)
             )
             .prepare()
 
@@ -165,7 +159,7 @@ interface MangaQueries : DbProvider {
                     .table(MangaTable.TABLE)
                     .where("${MangaTable.COL_FAVORITE} = ?")
                     .whereArgs(0)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -180,26 +174,20 @@ interface MangaQueries : DbProvider {
                         SELECT ${ChapterTable.COL_MANGA_ID} FROM ${ChapterTable.TABLE} WHERE ${ChapterTable.COL_READ} = 1 OR ${ChapterTable.COL_LAST_PAGE_READ} != 0
                     )
                     """
-                            .trimIndent(),
+                            .trimIndent()
                     )
                     .whereArgs(0)
-                    .build(),
+                    .build()
             )
             .prepare()
 
     fun deleteAllManga() =
-        db.delete()
-            .byQuery(
-                DeleteQuery.builder().table(MangaTable.TABLE).build(),
-            )
-            .prepare()
+        db.delete().byQuery(DeleteQuery.builder().table(MangaTable.TABLE).build()).prepare()
 
     fun getReadNotInLibraryMangas() =
         db.get()
             .listOfObjects(Manga::class.java)
-            .withQuery(
-                RawQuery.builder().query(getReadMangaNotInLibraryQuery()).build(),
-            )
+            .withQuery(RawQuery.builder().query(getReadMangaNotInLibraryQuery()).build())
             .prepare()
 
     fun getLastReadManga() =
@@ -209,7 +197,7 @@ interface MangaQueries : DbProvider {
                 RawQuery.builder()
                     .query(getLastReadMangaQuery())
                     .observesTables(MangaTable.TABLE)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -220,7 +208,7 @@ interface MangaQueries : DbProvider {
                 RawQuery.builder()
                     .query(getLastFetchedMangaQuery())
                     .observesTables(MangaTable.TABLE)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -231,7 +219,7 @@ interface MangaQueries : DbProvider {
                 RawQuery.builder()
                     .query(getTotalChapterMangaQuery())
                     .observesTables(MangaTable.TABLE)
-                    .build(),
+                    .build()
             )
             .prepare()
 

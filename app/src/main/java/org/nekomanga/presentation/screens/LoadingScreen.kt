@@ -18,7 +18,7 @@ fun LoadingScreen(contentPadding: PaddingValues = PaddingValues()) {
             Modifier.zIndex(1f)
                 .padding(Size.small)
                 .padding(top = contentPadding.calculateTopPadding())
-                .align(Alignment.TopCenter),
+                .align(Alignment.TopCenter)
         )
     }
 }

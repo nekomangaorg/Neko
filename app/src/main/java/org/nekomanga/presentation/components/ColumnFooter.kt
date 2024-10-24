@@ -14,8 +14,8 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -33,6 +33,7 @@ import org.nekomanga.presentation.theme.Size
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ColumnScope.SearchFooter(
+    modifier: Modifier = Modifier,
     themeColorState: ThemeColorState,
     title: String,
     labelText: String,
@@ -53,7 +54,8 @@ fun ColumnScope.SearchFooter(
 
     OutlinedTextField(
         modifier =
-            Modifier.fillMaxWidth()
+            modifier
+                .fillMaxWidth()
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .onFocusEvent {
                     if (it.isFocused || it.hasFocus) {
@@ -70,14 +72,14 @@ fun ColumnScope.SearchFooter(
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.error,
                 )
             } else if (title.isNotEmpty()) {
                 IconButton(onClick = { textChanged("") }) {
                     Icon(
                         imageVector = Icons.Default.Cancel,
                         contentDescription = null,
-                        tint = themeColorState.buttonColor
+                        tint = themeColorState.buttonColor,
                     )
                 }
             }
@@ -85,7 +87,7 @@ fun ColumnScope.SearchFooter(
         isError = isError,
         onValueChange = { textChanged(it) },
         colors =
-            TextFieldDefaults.outlinedTextFieldColors(
+            OutlinedTextFieldDefaults.colors(
                 focusedLabelColor = themeColorState.buttonColor,
                 focusedBorderColor = themeColorState.buttonColor,
                 cursorColor = themeColorState.buttonColor,
@@ -93,10 +95,7 @@ fun ColumnScope.SearchFooter(
                 errorCursorColor = MaterialTheme.colorScheme.error,
                 errorLabelColor = MaterialTheme.colorScheme.error,
             ),
-        keyboardOptions =
-            KeyboardOptions.Default.copy(
-                imeAction = ImeAction.Search,
-            ),
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions =
             KeyboardActions(
                 onSearch = {
@@ -104,7 +103,7 @@ fun ColumnScope.SearchFooter(
                         focusManager.clearFocus()
                         search(title)
                     }
-                },
+                }
             ),
     )
 }

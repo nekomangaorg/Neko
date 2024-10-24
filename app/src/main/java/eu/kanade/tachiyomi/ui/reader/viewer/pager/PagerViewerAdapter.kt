@@ -169,7 +169,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 oldCurrent?.second == current ||
                     (current.index + 1) <
                         (((oldCurrent?.second ?: oldCurrent?.first) as? ReaderPage)?.index ?: 0)
-            },
+            }
         )
 
         // The listener may be removed when we split a page, so the ui may not have updated properly
@@ -322,7 +322,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 // Step 5: chunk em
                 if (items.isNotEmpty()) {
                     subJoinedItems.addAll(
-                        items.chunked(2).map { Pair(it.first()!!, it.getOrNull(1)) },
+                        items.chunked(2).map { Pair(it.first()!!, it.getOrNull(1)) }
                     )
                 }
                 otherItems.getOrNull(pagedIndex)?.let {

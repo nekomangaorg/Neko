@@ -25,7 +25,7 @@ interface MangaCategoryQueries : DbProvider {
                         "${MangaCategoryTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaList.size)})"
                     )
                     .whereArgs(*mangaList.map { it.id }.toTypedArray())
-                    .build(),
+                    .build()
             )
             .prepare()
 

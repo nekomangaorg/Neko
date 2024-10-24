@@ -22,16 +22,14 @@ interface MergeMangaQueries : DbProvider {
                     .table(MergeMangaTable.TABLE)
                     .where("${MergeMangaTable.COL_MANGA_ID} = ?")
                     .whereArgs(mangaId)
-                    .build(),
+                    .build()
             )
             .prepare()
 
     fun getAllMergeManga() =
         db.get()
             .listOfObjects(MergeMangaImpl::class.java)
-            .withQuery(
-                Query.builder().table(MergeMangaTable.TABLE).build(),
-            )
+            .withQuery(Query.builder().table(MergeMangaTable.TABLE).build())
             .prepare()
 
     fun deleteMergeMangaForType(mangaId: Long, mergeType: MergeType) =
@@ -43,7 +41,7 @@ interface MergeMangaQueries : DbProvider {
                         "${MergeMangaTable.COL_MANGA_ID} = ? AND ${MergeMangaTable.COL_MERGE_TYPE} = ?"
                     )
                     .whereArgs(mangaId, mergeType.id)
-                    .build(),
+                    .build()
             )
             .prepare()
 }

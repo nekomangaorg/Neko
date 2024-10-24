@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchNonCancellable
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.drop
@@ -231,7 +233,7 @@ class DownloadManager(val context: Context) {
      * @param source the source of the chapters.
      */
     fun deleteChapters(chapters: List<Chapter>, manga: Manga) {
-        launchIO {
+        GlobalScope.launchNonCancellable {
             cache.removeChapters(chapters, manga)
             removeFromDownloadQueue(chapters)
             try {
@@ -239,26 +241,29 @@ class DownloadManager(val context: Context) {
                 val mangaDir = provider.findMangaDir(manga)
 
                 val chapterDirs =
-                    provider.findChapterDirs(
-                        chapters,
-                        manga,
-                    ) +
-                        provider.findTempChapterDirs(
-                            chapters,
-                            manga,
-                        )
-                launchIO {
-                    chapterDirs.forEach { it.delete() }
+                    provider.findChapterDirs(chapters, manga) +
+                        provider.findTempChapterDirs(chapters, manga)
 
-                    if (
-                        cache.getDownloadCount(manga, true) == 0
-                    ) { // Delete manga directory if empty
-                        chapterDirs.firstOrNull()?.parentFile?.delete()
-                    }
+                if (chapterDirs.isEmpty()) {
+                    pendingDeleter.deletePendingChapter(manga, chapters)
+                } else {
 
-                    // Delete manga directory if empty
-                    if (mangaDir?.listFiles()?.isEmpty() == true) {
-                        deleteManga(manga, removeQueued = false)
+                    GlobalScope.launchNonCancellable {
+                        chapterDirs.forEach {
+                            it.delete()
+                            pendingDeleter.deletePendingChapter(manga, chapters)
+                        }
+
+                        if (
+                            cache.getDownloadCount(manga, true) == 0
+                        ) { // Delete manga directory if empty
+                            chapterDirs.firstOrNull()?.parentFile?.delete()
+                        }
+
+                        // Delete manga directory if empty
+                        if (mangaDir?.listFiles()?.isEmpty() == true) {
+                            deleteManga(manga, removeQueued = false)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -435,7 +440,7 @@ class DownloadManager(val context: Context) {
                 emitAll(
                     queueState.value
                         .filter { download -> download.status == Download.State.DOWNLOADING }
-                        .asFlow(),
+                        .asFlow()
                 )
             }
 
@@ -448,7 +453,7 @@ class DownloadManager(val context: Context) {
                 emitAll(
                     queueState.value
                         .filter { download -> download.status == Download.State.DOWNLOADING }
-                        .asFlow(),
+                        .asFlow()
                 )
             }
 }

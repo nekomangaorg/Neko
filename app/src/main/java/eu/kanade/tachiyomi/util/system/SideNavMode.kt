@@ -6,8 +6,7 @@ import org.nekomanga.R
 enum class SideNavMode(val prefValue: Int, @StringRes val stringRes: Int) {
     DEFAULT(0, R.string.default_behavior),
     NEVER(1, R.string.never),
-    ALWAYS(2, R.string.always),
-    ;
+    ALWAYS(2, R.string.always);
 
     companion object {
         fun findByPrefValue(id: Int): SideNavMode {

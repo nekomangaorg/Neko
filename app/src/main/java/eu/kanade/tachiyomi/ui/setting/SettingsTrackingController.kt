@@ -65,7 +65,7 @@ class SettingsTrackingController :
                         MdConstants.ContentRating.safe,
                         MdConstants.ContentRating.suggestive,
                         MdConstants.ContentRating.erotica,
-                        MdConstants.ContentRating.pornographic
+                        MdConstants.ContentRating.pornographic,
                     )
 
                 defaultValue =
@@ -73,7 +73,7 @@ class SettingsTrackingController :
                         MdConstants.ContentRating.safe,
                         MdConstants.ContentRating.suggestive,
                         MdConstants.ContentRating.erotica,
-                        MdConstants.ContentRating.pornographic
+                        MdConstants.ContentRating.pornographic,
                     )
             }
 
@@ -94,10 +94,7 @@ class SettingsTrackingController :
                 switchPreference {
                     isPersistent = true
                     isIconSpaceReserved = true
-                    title =
-                        context.getString(
-                            R.string.auto_track,
-                        )
+                    title = context.getString(R.string.auto_track)
 
                     preferences
                         .getStringPref(Keys.trackUsername(trackManager.myAnimeList.id))
@@ -145,7 +142,7 @@ class SettingsTrackingController :
                                     context.getString(
                                         R.string.could_not_update_scoring_,
                                         error?.localizedMessage.orEmpty(),
-                                    ),
+                                    )
                                 )
                             }
                         }
@@ -154,10 +151,7 @@ class SettingsTrackingController :
                 switchPreference {
                     isPersistent = true
                     isIconSpaceReserved = true
-                    title =
-                        context.getString(
-                            R.string.auto_track,
-                        )
+                    title = context.getString(R.string.auto_track)
 
                     preferences
                         .getStringPref(Keys.trackUsername(trackManager.aniList.id))
@@ -182,10 +176,7 @@ class SettingsTrackingController :
                     key = "auto_add_kitsu"
                     isPersistent = true
                     isIconSpaceReserved = true
-                    title =
-                        context.getString(
-                            R.string.auto_track,
-                        )
+                    title = context.getString(R.string.auto_track)
 
                     preferences
                         .getStringPref(Keys.trackUsername(trackManager.kitsu.id))
@@ -212,10 +203,7 @@ class SettingsTrackingController :
                     key = "auto_add_mangaupdates"
                     isPersistent = true
                     isIconSpaceReserved = true
-                    title =
-                        context.getString(
-                            R.string.auto_track,
-                        )
+                    title = context.getString(R.string.auto_track)
 
                     preferences
                         .getStringPref(Keys.trackUsername(trackManager.mangaUpdates.id))
@@ -282,7 +270,7 @@ class SettingsTrackingController :
                         login()
                     }
                 }
-            },
+            }
         )
     }
 

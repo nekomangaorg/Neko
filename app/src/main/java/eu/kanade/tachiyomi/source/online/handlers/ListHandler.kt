@@ -1,11 +1,15 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.NetworkServices
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
@@ -23,21 +27,38 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
+// If the List Changes ever go live this entire file can be overridden by that branch
 class ListHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkServices>().service }
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
-    suspend fun retrieveList(listUUID: String): Result<ListResults, ResultError> {
+    suspend fun retrieveMangaFromList(
+        listUUID: String,
+        page: Int,
+        privateList: Boolean = false,
+        useDefaultContentRating: Boolean = false,
+    ): Result<ListResults, ResultError> {
         return withContext(Dispatchers.IO) {
             service.viewList(listUUID).getOrResultError("Error getting list").andThen { listDto ->
-                val mangaIds =
+                val allMangaIds =
                     listDto.data.relationships
                         .filter { it.type == MdConstants.Types.manga }
                         .map { it.id }
-                when (mangaIds.isEmpty()) {
+                when (allMangaIds.isEmpty()) {
                     true ->
                         Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
                     false -> {
+                        val mangaIds =
+                            when (allMangaIds.size < MdConstants.Limits.manga) {
+                                true -> allMangaIds
+                                false ->
+                                    allMangaIds.subList(
+                                        MdUtil.getMangaListOffset(page),
+                                        MdUtil.getMangaListOffset(page) + MdConstants.Limits.manga -
+                                            1,
+                                    )
+                            }
+
                         val enabledContentRatings =
                             preferencesHelper.contentRatingSelections().get()
                         val contentRatings =
@@ -47,9 +68,11 @@ class ListHandler {
 
                         val queryParameters =
                             mutableMapOf(
-                                "ids[]" to mangaIds,
-                                "limit" to mangaIds.size,
-                                "contentRating[]" to contentRatings,
+                                MdConstants.SearchParameters.mangaIds to mangaIds,
+                                MdConstants.SearchParameters.offset to
+                                    MdUtil.getMangaListOffset(page),
+                                MdConstants.SearchParameters.limit to MdConstants.Limits.manga,
+                                MdConstants.SearchParameters.contentRatingParam to contentRatings,
                             )
                         val coverQuality = preferencesHelper.thumbnailQuality().get()
                         service
@@ -61,13 +84,16 @@ class ListHandler {
                                         displayScreenType =
                                             DisplayScreenType.List(
                                                 listDto.data.attributes.name ?: "",
-                                                listUUID
+                                                listUUID,
                                             ),
                                         sourceManga =
                                             mangaListDto.data
                                                 .map { it.toSourceManga(coverQuality) }
                                                 .toImmutableList(),
-                                    ),
+                                        hasNextPage =
+                                            (mangaListDto.limit + mangaListDto.offset) <
+                                                mangaIds.size,
+                                    )
                                 )
                             }
                     }
@@ -75,9 +101,45 @@ class ListHandler {
             }
         }
     }
+
+    suspend fun retrieveAllMangaFromList(
+        listUUID: String,
+        privateList: Boolean,
+    ): Result<ListResults, ResultError> {
+        var hasPages = true
+        var page = 1
+        val list: MutableList<SourceManga> = mutableListOf()
+        var displayScreenType: DisplayScreenType? = null
+        var resultError: ResultError? = null
+        while (hasPages) {
+            retrieveMangaFromList(listUUID, page, privateList, false)
+                .onFailure {
+                    hasPages = false
+                    resultError = it
+                }
+                .onSuccess {
+                    page++
+                    hasPages = it.hasNextPage
+                    list += it.sourceManga
+                    displayScreenType = it.displayScreenType
+                }
+        }
+
+        return when (resultError != null) {
+            true -> Err(resultError!!)
+            false ->
+                Ok(
+                    ListResults(
+                        displayScreenType = displayScreenType!!,
+                        sourceManga = list.toImmutableList(),
+                    )
+                )
+        }
+    }
 }
 
 data class ListResults(
     val displayScreenType: DisplayScreenType,
-    val sourceManga: ImmutableList<SourceManga>
+    val sourceManga: ImmutableList<SourceManga>,
+    val hasNextPage: Boolean = false,
 )

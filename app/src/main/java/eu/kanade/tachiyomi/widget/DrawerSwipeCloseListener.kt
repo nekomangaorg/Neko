@@ -13,7 +13,7 @@ class DrawerSwipeCloseListener(
         if (drawerView == navigationView) {
             drawer.setDrawerLockMode(
                 androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED,
-                drawerView
+                drawerView,
             )
         }
     }
@@ -22,7 +22,7 @@ class DrawerSwipeCloseListener(
         if (drawerView == navigationView) {
             drawer.setDrawerLockMode(
                 androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED,
-                drawerView
+                drawerView,
             )
         }
     }

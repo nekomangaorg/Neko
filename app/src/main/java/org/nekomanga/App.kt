@@ -72,7 +72,7 @@ open class App : Application(), DefaultLifecycleObserver {
                 Toast.makeText(
                         applicationContext,
                         "Error! App requires WebView to be installed",
-                        Toast.LENGTH_LONG
+                        Toast.LENGTH_LONG,
                     )
                     .show()
             }

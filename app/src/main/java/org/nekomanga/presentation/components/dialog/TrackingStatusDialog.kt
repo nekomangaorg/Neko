@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -38,11 +38,11 @@ fun TrackingStatusDialog(
     initialStatus: Int,
     service: TrackServiceItem,
     onDismiss: () -> Unit,
-    trackStatusChange: (Int) -> Unit
+    trackStatusChange: (Int) -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
         var selectedStatus by remember { mutableStateOf(initialStatus) }
         val scope = rememberCoroutineScope()
@@ -51,7 +51,7 @@ fun TrackingStatusDialog(
                 Text(
                     text = stringResource(id = R.string.status),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             },
             text = {
@@ -86,7 +86,7 @@ fun TrackingStatusDialog(
                             Gap(Size.small)
                             Text(
                                 text = service.status(status),
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleMedium,
                             )
                         }
                     }
@@ -97,7 +97,7 @@ fun TrackingStatusDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

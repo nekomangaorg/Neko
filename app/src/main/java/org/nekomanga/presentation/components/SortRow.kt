@@ -55,7 +55,7 @@ fun SortRow(
                     imageVector = Icons.Filled.ArrowUpward,
                     contentDescription = null,
                     tint = tintColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
             MangaConstants.SortState.Descending -> {
@@ -63,7 +63,7 @@ fun SortRow(
                     imageVector = Icons.Filled.ArrowDownward,
                     contentDescription = null,
                     tint = tintColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
             MangaConstants.SortState.None -> {
@@ -77,7 +77,7 @@ fun SortRow(
 
 private fun changeSortState(
     sortState: MangaConstants.SortState,
-    sortChanged: (MangaConstants.SortState) -> Unit
+    sortChanged: (MangaConstants.SortState) -> Unit,
 ) {
     val newState =
         when (sortState) {

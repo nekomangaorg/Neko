@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.util.category.CategoryUtil
 import eu.kanade.tachiyomi.util.filterVisibility
 import eu.kanade.tachiyomi.util.resync
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.unique
 import java.util.Date
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +48,7 @@ class DisplayPresenter(
                 isComfortableGrid = libraryPreferences.layout().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
                 showLibraryEntries = preferences.browseShowLibrary().get(),
-            ),
+            )
         )
     val displayScreenState: StateFlow<DisplayScreenState> = _displayScreenState.asStateFlow()
 
@@ -116,7 +117,7 @@ class DisplayPresenter(
                     it.copy(
                         showLibraryEntries = show,
                         filteredDisplayManga =
-                            it.allDisplayManga.filterVisibility(preferences).toImmutableList()
+                            it.allDisplayManga.filterVisibility(preferences).toImmutableList(),
                     )
                 }
             }
@@ -170,11 +171,7 @@ class DisplayPresenter(
             val tempDisplayManga = tempList[index].copy(inLibrary = favorite)
             tempList[index] = tempDisplayManga
 
-            _displayScreenState.update {
-                it.copy(
-                    allDisplayManga = tempList.toImmutableList(),
-                )
-            }
+            _displayScreenState.update { it.copy(allDisplayManga = tempList.toImmutableList()) }
 
             val filteredIndex =
                 _displayScreenState.value.filteredDisplayManga.indexOfFirst {
@@ -184,9 +181,7 @@ class DisplayPresenter(
                 val tempFilterList = _displayScreenState.value.filteredDisplayManga.toMutableList()
                 tempFilterList[filteredIndex] = tempDisplayManga
                 _displayScreenState.update {
-                    it.copy(
-                        filteredDisplayManga = tempFilterList.toImmutableList(),
-                    )
+                    it.copy(filteredDisplayManga = tempFilterList.toImmutableList())
                 }
             }
 
@@ -229,12 +224,12 @@ class DisplayPresenter(
     fun updateMangaForChanges() {
         presenterScope.launch {
             val newDisplayManga =
-                _displayScreenState.value.allDisplayManga.resync(db).toImmutableList()
+                _displayScreenState.value.allDisplayManga.resync(db).unique().toImmutableList()
             _displayScreenState.update {
                 it.copy(
                     allDisplayManga = newDisplayManga,
                     filteredDisplayManga =
-                        newDisplayManga.filterVisibility(preferences).toImmutableList()
+                        newDisplayManga.filterVisibility(preferences).toImmutableList(),
                 )
             }
         }

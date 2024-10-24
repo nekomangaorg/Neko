@@ -8,7 +8,7 @@ jobs:
     name: Close old issues
     runs-on: ubuntu-latest
     steps:
-      - uses: nonproto/auto-closer@v1.0.0
+      - uses: nonproto/auto-closer@1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AC_LABEL: "staged for next release"

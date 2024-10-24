@@ -98,8 +98,8 @@ fun SimilarScreen(
                             listGridAppBarAction(
                                 isList = similarScreenState.value.isList,
                                 onClick = switchDisplayClick,
-                            ),
-                        ),
+                            )
+                        )
                 )
             },
         ) { incomingPaddingValues ->

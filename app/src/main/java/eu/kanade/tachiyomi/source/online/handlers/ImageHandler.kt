@@ -4,7 +4,6 @@ import com.github.michaelbull.result.get
 import com.github.michaelbull.result.getError
 import com.github.michaelbull.result.getOrThrow
 import com.github.michaelbull.result.onSuccess
-import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.NetworkServices
@@ -16,7 +15,6 @@ import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.util.getOrResultError
-import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.system.withNonCancellableContext
 import java.util.Date
@@ -54,7 +52,7 @@ class ImageHandler {
     suspend fun getImage(page: Page, isLogged: Boolean): Response {
         return withIOContext {
             return@withIOContext when {
-                isExternal(page, "mangaplus") ->
+                isExternal(page, "mangaplus") || isExternal(page, "jumpg-assets") ->
                     getImageResponse(mangaPlusHandler.client, mangaPlusHandler.headers, page)
                 isExternal(page, "comikey") ->
                     getImageResponse(comikeyHandler.client, comikeyHandler.headers, page)
@@ -85,6 +83,7 @@ class ImageHandler {
 
         if (
             (attempt.getError() != null || !attempt.get()!!.isSuccessful) &&
+                attempt.getError() !is CancellationException &&
                 !request.url.toString().startsWith(MdConstants.cdnUrl)
         ) {
             TimberKt.e(attempt.getError()) {
@@ -120,16 +119,12 @@ class ImageHandler {
 
     private suspend fun reportFailedImage(url: String) {
         val atHomeImageReportDto =
-            AtHomeImageReportDto(
-                url,
-                false,
-                duration = 30.seconds.inWholeMilliseconds,
-            )
+            AtHomeImageReportDto(url, false, duration = 30.seconds.inWholeMilliseconds)
         sendReport(atHomeImageReportDto)
     }
 
     private suspend fun reportImageWithResponse(response: Response) {
-        val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
+        val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size.toLong()
         val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
         val cache = response.header("X-Cache", "") == "HIT"
         val atHomeImageReportDto =
@@ -151,9 +146,7 @@ class ImageHandler {
             TimberKt.d { "$tag image is at CDN don't report to md@home node" }
             return
         }
-        networkServices.service.atHomeImageReport(atHomeImageReportDto).onFailure {
-            this.log("trying to post to dex@home")
-        }
+        networkServices.service.atHomeImageReport(atHomeImageReportDto)
     }
 
     private suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
@@ -172,10 +165,7 @@ class ImageHandler {
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
 
                     networkServices.atHomeService
-                        .getAtHomeServer(
-                            page.mangaDexChapterId,
-                            preferences.usePort443Only().get(),
-                        )
+                        .getAtHomeServer(page.mangaDexChapterId, preferences.usePort443Only().get())
                         .getOrResultError("getting image")
                         .getOrThrow { Exception(it.message()) }
                         .baseUrl
@@ -199,7 +189,7 @@ class ImageHandler {
     private suspend fun getImageResponse(
         client: OkHttpClient,
         headers: Headers,
-        page: Page
+        page: Page,
     ): Response {
         return client
             .newCachelessCallWithProgress(buildRequest(page.imageUrl!!, headers), page)
@@ -207,6 +197,7 @@ class ImageHandler {
     }
 
     private fun isExternal(page: Page, scanlatorName: String): Boolean {
+        TimberKt.d { "PAGE IMAGE URL: ${page.imageUrl}" }
         return page.imageUrl?.contains(scanlatorName, true) ?: false
     }
 

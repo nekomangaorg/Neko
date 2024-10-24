@@ -4,6 +4,7 @@ plugins {
     id(kotlinx.plugins.parcelize.get().pluginId)
     alias(libs.plugins.about.libraries)
     alias(kotlinx.plugins.serialization)
+    alias(kotlinx.plugins.compose.compiler)
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase) apply false
 }
@@ -23,8 +24,8 @@ android {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
         applicationId = "org.nekomanga.neko"
-        versionCode = 6
-        versionName = "2.16.5"
+        versionCode = 14
+        versionName = "2.18.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -68,20 +69,37 @@ android {
         shaders = false
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = compose.versions.compose.compiler.version.get()
-    }
 
     flavorDimensions.add("default")
 
     productFlavors { create("standard") { buildConfigField("Boolean", "INCLUDE_UPDATER", "true") } }
 }
 
+composeCompiler {
+    // Enable experimental compiler opts
+    // https://developer.android.com/jetpack/androidx/releases/compose-compiler#1.5.9
+    enableNonSkippingGroupOptimization.set(true)
+
+    val enableMetrics =
+        project.providers.gradleProperty("enableComposeCompilerMetrics").orNull.toBoolean()
+    val enableReports =
+        project.providers.gradleProperty("enableComposeCompilerReports").orNull.toBoolean()
+
+    val rootProjectDir = rootProject.layout.buildDirectory.asFile.get()
+    val relativePath = projectDir.relativeTo(rootDir)
+    if (enableMetrics) {
+        val buildDirPath = rootProjectDir.resolve("compose-metrics").resolve(relativePath)
+        metricsDestination.set(buildDirPath)
+    }
+    if (enableReports) {
+        val buildDirPath = rootProjectDir.resolve("compose-reports").resolve(relativePath)
+        reportsDestination.set(buildDirPath)
+    }
+}
+
 dependencies {
     implementation(projects.constants)
     implementation(projects.core)
-
-    implementation("com.github.akshaaatt:Onboarding:1.1.3")
 
     implementation(kotlinx.bundles.kotlin)
 
@@ -129,9 +147,6 @@ dependencies {
     implementation(libs.sqlite)
     implementation(libs.sqlite.android)
 
-    // Model View Presenter
-    implementation(libs.bundles.nucleus)
-
     // Dependency injection
     implementation(libs.injekt.core)
 
@@ -144,13 +159,12 @@ dependencies {
     // Required outsde of version catalog cause aar
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("com.mikepenz:community-material-typeface:7.0.96.0-kotlin@aar")
-    implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
-    implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
+    implementation("com.mikepenz:community-material-typeface:7.0.96.1-kotlin@aar")
+    implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.3-kotlin@aar")
+    implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.2-kotlin@aar")
 
     // UI
     implementation(libs.bundles.fastadapter)
-    implementation(libs.loadingButtonAndroid)
 
     implementation(libs.bundles.flexibleadapter)
 
@@ -175,7 +189,7 @@ dependencies {
     implementation(libs.tokenbucket)
     implementation(libs.bundles.sandwich)
     implementation(libs.aboutLibraries.compose)
-    // debugImplementation(libs.leakcanary)
+    debugImplementation(libs.leakcanary)
 
     implementation(libs.bundles.results)
 

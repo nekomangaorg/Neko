@@ -113,7 +113,7 @@ class PagerPageHolder(
             when (val theme = viewer.config.readerTheme) {
                 3 -> Color.TRANSPARENT
                 else -> ThemeUtil.readerBackgroundColor(theme)
-            },
+            }
         )
         progressBar.foregroundTintList =
             ColorStateList.valueOf(
@@ -122,8 +122,8 @@ class PagerPageHolder(
                         R.attr.colorPrimaryInverse
                     } else {
                         R.attr.colorPrimary
-                    },
-                ),
+                    }
+                )
             )
     }
 
@@ -237,7 +237,7 @@ class PagerPageHolder(
                         override fun onImageLoadError(e: Exception) {
                             onImageDecodeError()
                         }
-                    },
+                    }
                 )
             }
         }
@@ -510,10 +510,8 @@ class PagerPageHolder(
                                     } finally {
                                         page.bg = pageView?.background
                                         page.bgType =
-                                            getBGType(
-                                                viewer.config.readerTheme,
-                                                context,
-                                            ) + item.hashCode()
+                                            getBGType(viewer.config.readerTheme, context) +
+                                                item.hashCode()
                                     }
                                 }
                             }
@@ -581,11 +579,7 @@ class PagerPageHolder(
         return withContext(Default) {
             val readerPreferences by injectLazy<ReaderPreferences>()
             ImageUtil.autoSetBackground(
-                BitmapFactory.decodeByteArray(
-                    bytesArray,
-                    0,
-                    bytesArray.size,
-                ),
+                BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size),
                 readerPreferences.readerTheme().get() == 2,
                 readerPreferences.readerTheme().get() == 4,
                 context,
@@ -702,7 +696,7 @@ class PagerPageHolder(
 
     private fun mergeOrSplitPages(
         imageStream: InputStream,
-        imageStream2: InputStream?
+        imageStream2: InputStream?,
     ): InputStream {
         if (ImageUtil.isAnimatedAndSupported(imageStream)) {
             imageStream.reset()
@@ -847,7 +841,7 @@ class PagerPageHolder(
             imageBitmap2,
             isLTR,
             bg,
-            viewer.config.doublePageGap
+            viewer.config.doublePageGap,
         ) {
             scope.launchUI {
                 if (it == 100) {

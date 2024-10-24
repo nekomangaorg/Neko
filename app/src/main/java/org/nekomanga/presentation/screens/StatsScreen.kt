@@ -103,14 +103,14 @@ fun StatsScreen(
                         .padding(
                             top = incomingPaddingValues.calculateTopPadding(),
                             start = 16.dp,
-                            end = 16.dp
+                            end = 16.dp,
                         ),
                 contentAlignment = Alignment.BottomCenter,
             ) {
                 EmptyScreen(
                     iconicImage = CommunityMaterial.Icon2.cmd_heart_off,
                     iconSize = 128.dp,
-                    message = stringResource(id = R.string.unable_to_generate_stats)
+                    message = stringResource(id = R.string.unable_to_generate_stats),
                 )
             }
         } else {
@@ -118,14 +118,14 @@ fun StatsScreen(
                 SimpleStats(
                     statsState = statsState.value,
                     contentPadding = incomingPaddingValues,
-                    windowSizeClass = windowSizeClass
+                    windowSizeClass = windowSizeClass,
                 )
             } else {
                 DetailedStats(
                     detailedStats = detailedState.value,
                     colors = colors,
                     contentPadding = incomingPaddingValues,
-                    windowSizeClass = windowSizeClass
+                    windowSizeClass = windowSizeClass,
                 )
             }
         }

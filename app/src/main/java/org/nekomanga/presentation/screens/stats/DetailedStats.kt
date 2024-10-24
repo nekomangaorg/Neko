@@ -76,7 +76,7 @@ fun DetailedStats(
     detailedStats: DetailedState,
     colors: ImmutableList<Color>,
     contentPadding: PaddingValues,
-    windowSizeClass: WindowSizeClass
+    windowSizeClass: WindowSizeClass,
 ) {
     var filterState by rememberSaveable { mutableStateOf(Filter.None) }
 
@@ -108,9 +108,7 @@ fun DetailedStats(
         sortType = Sort.Entries
     }
 
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(top = contentPadding.calculateTopPadding()),
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().padding(top = contentPadding.calculateTopPadding())) {
         FilterChipHeader(filterState, filterStateClick)
 
         val context = LocalContext.current
@@ -127,7 +125,7 @@ fun DetailedStats(
                     colors,
                     contentPadding,
                     viewType,
-                    sortChipClick
+                    sortChipClick,
                 )
             }
             Filter.Status -> {
@@ -138,7 +136,7 @@ fun DetailedStats(
                     colors,
                     contentPadding,
                     viewType,
-                    sortChipClick
+                    sortChipClick,
                 )
             }
             Filter.ContentRating -> {
@@ -148,7 +146,7 @@ fun DetailedStats(
                     colors,
                     contentPadding,
                     viewType,
-                    sortChipClick
+                    sortChipClick,
                 )
             }
             Filter.Category -> {
@@ -158,7 +156,7 @@ fun DetailedStats(
                     colors,
                     contentPadding,
                     viewType,
-                    sortChipClick
+                    sortChipClick,
                 )
             }
             Filter.Tag -> {
@@ -175,7 +173,7 @@ fun DetailedStats(
 private fun FilterChipHeader(filterState: Filter, filterStateClick: (Filter) -> Unit) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(Size.tiny)
+        horizontalArrangement = Arrangement.spacedBy(Size.tiny),
     ) {
         item { Gap(Size.tiny) }
         CustomChip(
@@ -379,7 +377,7 @@ private fun StartYearView(
             lineData = lineData,
             chartWidth = chartWidth,
             modifier = modifier,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.secondary,
         )
     }
 }
@@ -484,7 +482,7 @@ private fun DefaultView(
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())
+        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
     ) {
         if (showSortChip) {
             item { SortChip(sortType = sortType, onClick = sortChipClick) }
@@ -497,10 +495,8 @@ private fun DefaultView(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    graph(chartWidth = chartWidth, modifier = Modifier)
-                    Column(
-                        Modifier.fillMaxWidth(.9f).padding(16.dp),
-                    ) {
+                    graph(Modifier, chartWidth)
+                    Column(Modifier.fillMaxWidth(.9f).padding(16.dp)) {
                         sortedSeries.forEach { entry ->
                             StatCard(
                                 header = entry.key,
@@ -517,7 +513,7 @@ private fun DefaultView(
                 }
             }
         } else {
-            item { graph(chartWidth = chartWidth, modifier = Modifier.fillMaxWidth()) }
+            item { graph(Modifier.fillMaxWidth(), chartWidth) }
             item { Gap(Size.small) }
             items(sortedSeries, key = { it.key }) { entry ->
                 StatCard(
@@ -539,7 +535,7 @@ private fun DefaultView(
 private fun DetailedCardView(
     mangaList: ImmutableList<StatsConstants.DetailedStatManga>,
     contentPadding: PaddingValues,
-    viewType: ViewType
+    viewType: ViewType,
 ) {
     if (viewType == ViewType.Split) {
         LazyGridWrapper(contentPadding = contentPadding) {
@@ -573,7 +569,7 @@ private fun StatCardView(
             contentPadding = contentPadding,
             showSortChip = showSortChip,
             sortType = sortType,
-            sortChipClick = sortChipClick
+            sortChipClick = sortChipClick,
         ) {
             items(sortedSeries, key = { it.first }) { entry ->
                 StatCard(
@@ -593,7 +589,7 @@ private fun StatCardView(
             contentPadding = contentPadding,
             showSortChip = showSortChip,
             sortType = sortType,
-            sortChipClick = sortChipClick
+            sortChipClick = sortChipClick,
         ) {
             items(sortedSeries, key = { it.first }) { entry ->
                 StatCard(
@@ -617,11 +613,11 @@ private fun LazyGridWrapper(
     showSortChip: Boolean = false,
     sortType: Sort = Sort.Entries,
     sortChipClick: () -> Unit = {},
-    content: LazyGridScope.() -> Unit
+    content: LazyGridScope.() -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(400.dp),
-        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())
+        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
     ) {
         if (showSortChip) {
             item(span = { GridItemSpan(maxCurrentLineSpan) }) {
@@ -638,11 +634,11 @@ private fun LazyListWrapper(
     showSortChip: Boolean = false,
     sortType: Sort = Sort.Entries,
     sortChipClick: () -> Unit = {},
-    content: LazyListScope.() -> Unit
+    content: LazyListScope.() -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding())
+        contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
     ) {
         if (showSortChip) {
             item { SortChip(sortType = sortType, onClick = sortChipClick) }
@@ -668,7 +664,7 @@ private fun SortChip(sortType: Sort, onClick: () -> Unit) {
 private fun LazyListScope.CustomChip(
     isSelected: Boolean,
     onClick: () -> Unit,
-    @StringRes label: Int
+    @StringRes label: Int,
 ) {
     item(key = label) {
         FilterChip(
@@ -687,17 +683,15 @@ private fun LazyListScope.CustomChip(
 
 @Composable
 private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modifier) {
-    ElevatedCard(
-        modifier = modifier.padding(horizontal = 16.dp, vertical = Size.small),
-    ) {
+    ElevatedCard(modifier = modifier.padding(horizontal = 16.dp, vertical = Size.small)) {
         Column(
             modifier =
-                Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.tiny),
+                Modifier.fillMaxWidth().padding(horizontal = Size.small, vertical = Size.tiny)
         ) {
             Text(
                 text = manga.title,
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -705,11 +699,11 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
             ) {
                 Line(
                     stringResource(id = R.string.typeNoSemi),
-                    stringResource(id = manga.type.typeRes)
+                    stringResource(id = manga.type.typeRes),
                 )
                 Line(
                     stringResource(id = R.string.status),
-                    stringResource(id = manga.status.statusRes)
+                    stringResource(id = manga.status.statusRes),
                 )
             }
             Row(
@@ -718,20 +712,20 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
             ) {
                 Line(
                     stringResource(id = R.string.read_duration),
-                    manga.readDuration.getReadDuration(stringResource(id = R.string.none))
+                    manga.readDuration.getReadDuration(stringResource(id = R.string.none)),
                 )
                 Line(
                     stringResource(id = R.string.start_year),
-                    manga.startYear?.toString() ?: stringResource(id = R.string.n_a)
+                    manga.startYear?.toString() ?: stringResource(id = R.string.n_a),
                 )
             }
             Line(
                 stringResource(id = R.string.read_chapter_count),
-                manga.readChapters.toString() + " / " + manga.totalChapters.toString()
+                manga.readChapters.toString() + " / " + manga.totalChapters.toString(),
             )
             Line(
                 stringResource(id = R.string.chapters_bookmarked),
-                manga.bookmarkedChapters.toString()
+                manga.bookmarkedChapters.toString(),
             )
 
             Line(stringResource(id = R.string.categories), manga.categories.joinToString(", "))
@@ -743,7 +737,7 @@ private fun DetailedCard(manga: StatsConstants.DetailedStatManga, modifier: Modi
 private fun Line(label: String, value: String) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(Size.small),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "$label:",
@@ -753,7 +747,7 @@ private fun Line(label: String, value: String) {
                     color =
                         MaterialTheme.colorScheme.onSurface.copy(
                             alpha = NekoColors.mediumAlphaHighContrast
-                        )
+                        ),
                 ),
         )
         Text(text = value, style = MaterialTheme.typography.bodyMedium)
@@ -762,10 +756,7 @@ private fun Line(label: String, value: String) {
 
 @Composable
 private fun Pie(pieData: List<PieData>, chartWidth: Float, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.padding(16.dp),
-        contentAlignment = Alignment.Center,
-    ) {
+    Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {
         if (pieData.isNotEmpty()) {
             PieChart(
                 modifier = Modifier.fillMaxWidth(chartWidth),
@@ -788,7 +779,7 @@ private fun Line(
     lineData: List<LineData>,
     chartWidth: Float,
     modifier: Modifier = Modifier,
-    color: Color
+    color: Color,
 ) {
     Box(
         modifier =
@@ -834,10 +825,10 @@ private fun StatCard(
     readChapters: Int,
     totalChapters: Int,
     readDuration: Long,
-    totalReadDuration: Long
+    totalReadDuration: Long,
 ) {
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = Size.small),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = Size.small)
     ) {
         val labelStyle =
             MaterialTheme.typography.labelSmall.copy(
@@ -845,47 +836,38 @@ private fun StatCard(
                 color =
                     MaterialTheme.colorScheme.onSurface.copy(
                         alpha = NekoColors.mediumAlphaHighContrast
-                    )
+                    ),
             )
         val valueStyle = MaterialTheme.typography.bodyMedium
         val headerStyle =
             MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
-                color = headerColor
+                color = headerColor,
             )
 
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = Size.small)) {
             Text(text = header, style = headerStyle, modifier = Modifier.fillMaxWidth())
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(id = R.string.count),
-                        style = labelStyle,
-                    )
+                    Text(text = stringResource(id = R.string.count), style = labelStyle)
                     Text(text = count.toString(), style = valueStyle)
                     Text(text = percentage(count, totalCount), style = valueStyle)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(id = R.string.chapters_read),
-                        style = labelStyle,
-                    )
+                    Text(text = stringResource(id = R.string.chapters_read), style = labelStyle)
 
                     Text(text = "$readChapters / $totalChapters", style = valueStyle)
                     Text(text = percentage(readChapters, totalChapters), style = valueStyle)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = stringResource(id = R.string.read_duration),
-                        style = labelStyle,
-                    )
+                    Text(text = stringResource(id = R.string.read_duration), style = labelStyle)
 
                     Text(
                         text = readDuration.getReadDuration(stringResource(id = R.string.none)),
-                        style = valueStyle
+                        style = valueStyle,
                     )
                     Text(text = percentage(readDuration, totalReadDuration), style = valueStyle)
                 }
@@ -928,7 +910,7 @@ private fun <T> colorMap(sortedSeries: List<T>, colors: List<Color>): ImmutableM
 private fun <T> pieData(
     sortedSeries: ImmutableList<Map.Entry<T, List<StatsConstants.DetailedStatManga>>>,
     colorMap: ImmutableMap<T, Color>,
-    sortType: Sort
+    sortType: Sort,
 ): ImmutableList<PieData> {
     return sortedSeries
         .mapNotNull { entry ->

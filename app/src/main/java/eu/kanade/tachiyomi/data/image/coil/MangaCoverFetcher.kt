@@ -59,9 +59,9 @@ class MangaCoverFetcher(
                     url = url,
                     inLibrary = inLibrary,
                     originalArtwork = originalThumbnailUrl,
-                    mangaId = mangaId
+                    mangaId = mangaId,
                 ),
-                options
+                options,
             )
     }
 
@@ -84,7 +84,7 @@ class MangaCoverFetcher(
                     mangaId = mangaId,
                     inLibrary = inLibrary,
                     originalThumbnail = originalThumbnailUrl,
-                    ogFile = File(url.substringAfter("file://"))
+                    ogFile = File(url.substringAfter("file://")),
                 )
                 fileLoader(File(url.substringAfter("file://")))
             }
@@ -105,7 +105,7 @@ class MangaCoverFetcher(
                     mangaId = mangaId,
                     inLibrary = inLibrary,
                     originalThumbnail = originalThumbnailUrl,
-                    ogFile = customCoverFile
+                    ogFile = customCoverFile,
                 )
                 return fileLoader(customCoverFile)
             }
@@ -119,7 +119,7 @@ class MangaCoverFetcher(
                 mangaId = mangaId,
                 inLibrary = inLibrary,
                 originalThumbnail = originalThumbnailUrl,
-                ogFile = coverFile
+                ogFile = coverFile,
             )
             return fileLoader(coverFile)
         }
@@ -134,7 +134,7 @@ class MangaCoverFetcher(
                         mangaId = mangaId,
                         inLibrary = inLibrary,
                         originalThumbnail = originalThumbnailUrl,
-                        ogFile = snapshotCoverCache
+                        ogFile = snapshotCoverCache,
                     )
                     return fileLoader(snapshotCoverCache)
                 }
@@ -143,7 +143,7 @@ class MangaCoverFetcher(
                 setRatioAndColorsInScope(
                     mangaId = mangaId,
                     inLibrary = inLibrary,
-                    originalThumbnail = originalThumbnailUrl
+                    originalThumbnail = originalThumbnailUrl,
                 )
                 return SourceResult(
                     source = snapshot.toImageSource(),
@@ -161,7 +161,7 @@ class MangaCoverFetcher(
                 setRatioAndColorsInScope(
                     mangaId = mangaId,
                     inLibrary = inLibrary,
-                    originalThumbnail = originalThumbnailUrl
+                    originalThumbnail = originalThumbnailUrl,
                 )
                 if (responseCoverCache != null) {
                     return fileLoader(responseCoverCache)
@@ -279,9 +279,7 @@ class MangaCoverFetcher(
         else null
     }
 
-    private fun writeToDiskCache(
-        response: Response,
-    ): DiskCache.Snapshot? {
+    private fun writeToDiskCache(response: Response): DiskCache.Snapshot? {
         val editor = diskCacheLazy.value.edit(diskCacheKey!!) ?: return null
         try {
             diskCacheLazy.value.fileSystem.write(editor.data) {
@@ -305,7 +303,7 @@ class MangaCoverFetcher(
         originalThumbnail: String,
         inLibrary: Boolean,
         ogFile: File? = null,
-        force: Boolean = false
+        force: Boolean = false,
     ) {
         fileScope.launch {
             MangaCoverMetadata.setRatioAndColors(
@@ -313,7 +311,7 @@ class MangaCoverFetcher(
                 originalThumbnail,
                 inLibrary,
                 ogFile,
-                force
+                force,
             )
         }
     }
@@ -378,7 +376,7 @@ class MangaCoverFetcher(
 
     private enum class Type {
         File,
-        URL
+        URL,
     }
 
     companion object {

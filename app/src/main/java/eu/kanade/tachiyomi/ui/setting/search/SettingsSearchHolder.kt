@@ -42,7 +42,7 @@ class SettingsSearchHolder(view: View, val adapter: SettingsSearchAdapter) :
         val color =
             ColorUtils.setAlphaComponent(
                 itemView.context.getResourceColor(R.attr.colorSecondary),
-                75
+                75,
             )
         binding.searchResultPrefTitle.text =
             item.settingsSearchResult.title.highlightText(item.searchResult, color)

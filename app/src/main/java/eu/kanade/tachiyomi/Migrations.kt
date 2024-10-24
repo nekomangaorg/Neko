@@ -17,9 +17,7 @@ object Migrations {
      * @param preferences Preferences of the application.
      * @return true if a migration is performed, false otherwise.
      */
-    fun upgrade(
-        preferences: PreferencesHelper,
-    ): Boolean {
+    fun upgrade(preferences: PreferencesHelper): Boolean {
         val context = preferences.context
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         prefs.edit { remove(AppDownloadInstallJob.NOTIFY_ON_INSTALL_KEY) }
@@ -28,9 +26,11 @@ object Migrations {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 
             // Always set up background tasks to ensure they're running
-            if (BuildConfig.INCLUDE_UPDATER) {
-                AppUpdateJob.setupTask(context)
+            when (BuildConfig.INCLUDE_UPDATER) {
+                true -> AppUpdateJob.setupTask(context)
+                false -> AppUpdateJob.cancelTask(context)
             }
+
             LibraryUpdateJob.setupTask(context)
             BackupCreatorJob.setupTask(context, 12)
 

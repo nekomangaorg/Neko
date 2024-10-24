@@ -24,7 +24,7 @@ object ThemeUtil {
                     4,
                     9 -> AppCompatDelegate.MODE_NIGHT_YES
                     else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                },
+                }
             )
         preferences.lightTheme().set(Themes.DEFAULT)
         preferences.darkTheme().set(Themes.DEFAULT)

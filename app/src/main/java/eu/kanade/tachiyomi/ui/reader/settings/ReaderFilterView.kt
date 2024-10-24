@@ -180,7 +180,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
     fun setWindowBrightness() {
         setCustomBrightnessValue(
             readerPreferences.customBrightnessValue().get(),
-            !readerPreferences.customBrightness().get()
+            !readerPreferences.customBrightness().get(),
         )
     }
 

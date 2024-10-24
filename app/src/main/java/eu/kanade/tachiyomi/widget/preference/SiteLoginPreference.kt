@@ -42,7 +42,7 @@ constructor(
                         24f,
                         R.color.material_on_surface_disabled,
                     )
-            },
+            }
         )
         val summary = (holder.findViewById(android.R.id.summary) as? TextView)
         summary?.isVisible = true

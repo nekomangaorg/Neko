@@ -42,7 +42,7 @@ class SimilarPresenter(
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 isComfortableGrid = libraryPreferences.layout().get() == 2,
                 rawColumnCount = libraryPreferences.gridSize().get(),
-            ),
+            )
         )
 
     val similarScreenState: StateFlow<SimilarScreenState> = _similarScreenState.asStateFlow()
@@ -90,7 +90,7 @@ class SimilarPresenter(
                         displayManga =
                             list
                                 .associate { group -> group.type to group.manga.toImmutableList() }
-                                .toImmutableMap()
+                                .toImmutableMap(),
                     )
                 }
             }
@@ -155,11 +155,7 @@ class SimilarPresenter(
                 tempMap[mapKey] = tempList.toImmutableList()
             }
 
-            _similarScreenState.update {
-                it.copy(
-                    displayManga = tempMap.toImmutableMap(),
-                )
-            }
+            _similarScreenState.update { it.copy(displayManga = tempMap.toImmutableMap()) }
         }
     }
 
@@ -199,7 +195,7 @@ class SimilarPresenter(
                                             it.currentArtwork.copy(
                                                 url = dbManga.user_cover ?: "",
                                                 originalArtwork =
-                                                    dbManga.thumbnail_url ?: MdConstants.noCoverUrl
+                                                    dbManga.thumbnail_url ?: MdConstants.noCoverUrl,
                                             )
                                     )
                                 }

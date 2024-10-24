@@ -31,10 +31,7 @@ class StatusHandler {
             return@withContext authService
                 .readingStatusAllManga()
                 .getOrResultError("getting reading status")
-                .mapBoth(
-                    success = { it.statuses },
-                    failure = { emptyMap() },
-                )
+                .mapBoth(success = { it.statuses }, failure = { emptyMap() })
         }
     }
 

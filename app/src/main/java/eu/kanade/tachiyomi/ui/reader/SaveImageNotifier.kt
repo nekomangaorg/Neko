@@ -47,7 +47,7 @@ class SaveImageNotifier(private val context: Context) {
                         } else {
                             onError(null)
                         }
-                    },
+                    }
                 )
                 .build()
         Coil.imageLoader(context).enqueue(request)
@@ -72,7 +72,7 @@ class SaveImageNotifier(private val context: Context) {
                 NotificationReceiver.shareImagePendingBroadcast(
                     context,
                     file.uri.path ?: "",
-                    notificationId
+                    notificationId,
                 ),
             )
             // Delete action
@@ -82,7 +82,7 @@ class SaveImageNotifier(private val context: Context) {
                 NotificationReceiver.deleteImagePendingBroadcast(
                     context,
                     file.uri.path ?: "",
-                    notificationId
+                    notificationId,
                 ),
             )
 

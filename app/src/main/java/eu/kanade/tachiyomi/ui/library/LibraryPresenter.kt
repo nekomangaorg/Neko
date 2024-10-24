@@ -231,17 +231,12 @@ class LibraryPresenter(
         libraryPreferences.lastUsedCategory().set(order)
         val category = categories.find { it.order == order }?.id ?: return
         currentCategory = category
-        view?.onNextLibraryUpdate(
-            sectionedLibraryItems[currentCategory] ?: blankItem(),
-        )
+        view?.onNextLibraryUpdate(sectionedLibraryItems[currentCategory] ?: blankItem())
     }
 
     fun blankItem(id: Int = currentCategory): List<LibraryItem> {
         return listOf(
-            LibraryItem(
-                LibraryManga.createBlank(id),
-                LibraryHeaderItem({ getCategory(id) }, id),
-            ),
+            LibraryItem(LibraryManga.createBlank(id), LibraryHeaderItem({ getCategory(id) }, id))
         )
     }
 
@@ -753,9 +748,7 @@ class LibraryPresenter(
                         ) {
                             val headerItem = headerItems[catId]
                             if (headerItem != null) {
-                                items.add(
-                                    LibraryItem(LibraryManga.createBlank(catId), headerItem),
-                                )
+                                items.add(LibraryItem(LibraryManga.createBlank(catId), headerItem))
                             }
                         } else if (catId in categoriesHidden && showAll && categories.size > 1) {
                             val mangaToRemove = items.filter { it.manga.category == catId }
@@ -779,7 +772,7 @@ class LibraryPresenter(
                                             mangaToRemove.size,
                                         ),
                                         headerItem,
-                                    ),
+                                    )
                                 )
                             }
                         }
@@ -809,11 +802,8 @@ class LibraryPresenter(
     }
 
     private fun getCustomMangaItems(
-        libraryManga: List<LibraryManga>,
-    ): Pair<
-        List<LibraryItem>,
-        List<Category>,
-    > {
+        libraryManga: List<LibraryManga>
+    ): Pair<List<LibraryItem>, List<Category>> {
         val tagItems: MutableMap<String, LibraryHeaderItem> = mutableMapOf()
 
         // internal function to make headers
@@ -878,7 +868,7 @@ class LibraryPresenter(
                                     listOf(
                                         LibraryItem(
                                             manga,
-                                            makeOrGetHeader(context.getString(R.string.not_tracked))
+                                            makeOrGetHeader(context.getString(R.string.not_tracked)),
                                         )
                                     )
                                 false -> results
@@ -947,7 +937,7 @@ class LibraryPresenter(
                         } else {
                             it.name
                         }
-                    },
+                    }
                 )
         if (libraryPreferences.collapsedDynamicAtBottom().get()) {
             headers = headers.filterNot { it.isHidden } + headers.filter { it.isHidden }
@@ -969,8 +959,8 @@ class LibraryPresenter(
                     items.add(
                         LibraryItem(
                             LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size),
-                            headerItem
-                        ),
+                            headerItem,
+                        )
                     )
                 }
             }
@@ -990,7 +980,7 @@ class LibraryPresenter(
                 SManga.CANCELLED -> R.string.cancelled
                 SManga.HIATUS -> R.string.hiatus
                 else -> R.string.unknown
-            },
+            }
         )
     }
 
@@ -1169,7 +1159,7 @@ class LibraryPresenter(
     /** Returns first unread chapter of a manga */
     fun getFirstUnread(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
-        return ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(chapters, false)
+        return ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(chapters)
     }
 
     /** Update a category's sorting */
@@ -1208,11 +1198,7 @@ class LibraryPresenter(
     }
 
     /** Shift a manga's category via drag & drop */
-    fun moveMangaToCategory(
-        manga: LibraryManga,
-        catId: Int?,
-        mangaIds: List<Long>,
-    ) {
+    fun moveMangaToCategory(manga: LibraryManga, catId: Int?, mangaIds: List<Long>) {
         presenterScope.launch {
             val categoryId = catId ?: return@launch
             val category = categories.find { catId == it.id } ?: return@launch
@@ -1303,18 +1289,10 @@ class LibraryPresenter(
         } else {
             if (allCategoriesExpanded()) {
                 libraryPreferences.collapsedDynamicCategories() +=
-                    categories.map {
-                        getDynamicCategoryName(
-                            it,
-                        )
-                    }
+                    categories.map { getDynamicCategoryName(it) }
             } else {
                 libraryPreferences.collapsedDynamicCategories() -=
-                    categories.map {
-                        getDynamicCategoryName(
-                            it,
-                        )
-                    }
+                    categories.map { getDynamicCategoryName(it) }
             }
         }
         getLibrary()
@@ -1350,10 +1328,7 @@ class LibraryPresenter(
         }
     }
 
-    fun markReadStatus(
-        mangaList: List<Manga>,
-        markRead: Boolean,
-    ): HashMap<Manga, List<Chapter>> {
+    fun markReadStatus(mangaList: List<Manga>, markRead: Boolean): HashMap<Manga, List<Chapter>> {
         val mapMangaChapters = HashMap<Manga, List<Chapter>>()
         presenterScope.launchIO {
             mangaList.forEach { manga ->
@@ -1372,9 +1347,7 @@ class LibraryPresenter(
         return mapMangaChapters
     }
 
-    fun undoMarkReadStatus(
-        mangaList: HashMap<Manga, List<Chapter>>,
-    ) {
+    fun undoMarkReadStatus(mangaList: HashMap<Manga, List<Chapter>>) {
         presenterScope.launchNonCancellable {
             mangaList.forEach { (_, chapters) ->
                 db.updateChaptersProgress(chapters).executeAsBlocking()
@@ -1383,10 +1356,7 @@ class LibraryPresenter(
         }
     }
 
-    fun confirmMarkReadStatus(
-        mangaList: HashMap<Manga, List<Chapter>>,
-        markRead: Boolean,
-    ) {
+    fun confirmMarkReadStatus(mangaList: HashMap<Manga, List<Chapter>>, markRead: Boolean) {
         if (preferences.readingSync().get()) {
             mangaList.forEach { entry ->
                 val nonMergedChapterIds =
@@ -1469,9 +1439,7 @@ class LibraryPresenter(
                             val distinctSources = libraryManga.distinctBy { it.source }
                             val randomSource =
                                 sourceManager
-                                    .get(
-                                        distinctSources.randomOrNull(random)?.source ?: 0L,
-                                    )
+                                    .get(distinctSources.randomOrNull(random)?.source ?: 0L)
                                     ?.name
                             randomSource?.chopByWords(30)
                         }
@@ -1504,7 +1472,7 @@ class LibraryPresenter(
                             }
                         }
                         else -> ""
-                    } ?: "",
+                    } ?: ""
                 )
 
             if (!libraryPreferences.showSearchSuggestions().isSet()) {
@@ -1531,7 +1499,7 @@ class LibraryPresenter(
                                 mangaId = manga.id!!,
                                 url = manga.merge_manga_url!!,
                                 mergeType = MergeType.MangaLife,
-                            ),
+                            )
                         )
                         .executeAsBlocking()
                     manga.merge_manga_url = null
@@ -1558,7 +1526,7 @@ class LibraryPresenter(
                                 .replace(""",{"language":"OTHER","state":true}""", "")
                                 .replace(""",{"language":"OTHER","state":false}""", "")
                                 .replace(""",{"language":"SERBO_CROATIAN","state":false}""", "")
-                                .replace(""",{"language":"SERBO_CROATIAN","state":true}""", ""),
+                                .replace(""",{"language":"SERBO_CROATIAN","state":true}""", "")
                     )
                 }
             db.insertBrowseFilters(updatedFilters).executeAsBlocking()

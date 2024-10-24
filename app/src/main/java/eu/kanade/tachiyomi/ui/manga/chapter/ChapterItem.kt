@@ -30,7 +30,7 @@ class ChapterItem(chapter: Chapter, val manga: Manga) :
 
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): ChapterHolder {
         return ChapterHolder(view, adapter as MangaDetailsAdapter)
     }

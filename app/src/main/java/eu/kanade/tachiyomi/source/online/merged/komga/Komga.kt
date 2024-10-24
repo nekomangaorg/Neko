@@ -40,10 +40,17 @@ class Komga : ReducedHttpSource() {
 
     suspend fun loginWithUrl(username: String, password: String, url: String): Boolean {
         return withIOContext {
-            val komgaUrl = "$url/api/v1/series?page=0&size=1".toHttpUrlOrNull()!!.newBuilder()
-            val response =
-                createClient(username, password).newCall(GET(komgaUrl.toString(), headers)).await()
-            response.isSuccessful
+            try {
+                val komgaUrl = "$url/api/v1/series?page=0&size=1".toHttpUrlOrNull()!!.newBuilder()
+                val response =
+                    createClient(username, password)
+                        .newCall(GET(komgaUrl.toString(), headers))
+                        .await()
+                response.isSuccessful
+            } catch (e: Exception) {
+                TimberKt.w(e) { "error logging into komga" }
+                false
+            }
         }
     }
 

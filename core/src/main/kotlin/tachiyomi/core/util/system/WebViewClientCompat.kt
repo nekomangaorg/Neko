@@ -46,10 +46,7 @@ abstract class WebViewClientCompat : WebViewClient() {
         return shouldInterceptRequestCompat(view, request.url.toString())
     }
 
-    final override fun shouldInterceptRequest(
-        view: WebView,
-        url: String,
-    ): WebResourceResponse? {
+    final override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? {
         return shouldInterceptRequestCompat(view, url)
     }
 

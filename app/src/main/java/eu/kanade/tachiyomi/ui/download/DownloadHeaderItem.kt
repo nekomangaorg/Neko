@@ -7,11 +7,8 @@ import eu.davidea.flexibleadapter.items.AbstractExpandableHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import org.nekomanga.R
 
-data class DownloadHeaderItem(
-    val id: Long,
-    val name: String,
-    val size: Int,
-) : AbstractExpandableHeaderItem<DownloadHeaderHolder, DownloadItem>() {
+data class DownloadHeaderItem(val id: Long, val name: String, val size: Int) :
+    AbstractExpandableHeaderItem<DownloadHeaderHolder, DownloadItem>() {
 
     override fun getLayoutRes(): Int {
         return R.layout.download_header

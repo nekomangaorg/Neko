@@ -124,7 +124,7 @@ fun Snackbar.getText(): CharSequence {
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         v.updatePaddingRelative(
-            bottom = WindowInsetsCompat.toWindowInsetsCompat(insets).getInsets(systemBars()).bottom,
+            bottom = WindowInsetsCompat.toWindowInsetsCompat(insets).getInsets(systemBars()).bottom
         )
         return insets
     }
@@ -231,7 +231,7 @@ fun View.checkHeightThen(f: () -> Unit) {
                     f()
                 }
             }
-        },
+        }
     )
 }
 
@@ -246,7 +246,7 @@ fun View.requestApplyInsetsWhenAttached() {
                 }
 
                 override fun onViewDetachedFromWindow(v: View) = Unit
-            },
+            }
         )
     }
 }
@@ -288,7 +288,7 @@ fun SwipeRefreshLayout.setStyle() {
 fun MaterialButton.resetStrokeColor() {
     strokeColor =
         ColorStateList.valueOf(
-            ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorOnSurface), 31),
+            ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorOnSurface), 31)
         )
 }
 
@@ -425,11 +425,7 @@ fun MaterialCardView.makeShapeCorners(
         .build()
 }
 
-fun setCards(
-    showOutline: Boolean,
-    mainCard: MaterialCardView,
-    badgeView: MaterialCardView?,
-) {
+fun setCards(showOutline: Boolean, mainCard: MaterialCardView, badgeView: MaterialCardView?) {
     badgeView?.strokeWidth = if (showOutline) 0.75f.dpToPx.toInt() else 0
     badgeView?.cardElevation = if (showOutline) 0f else 3f.dpToPx
     mainCard.strokeWidth = if (showOutline) 1.dpToPx else 0
@@ -484,7 +480,7 @@ fun Dialog.blurBehindWindow(
                     window
                         ?.decorView
                         ?.setRenderEffect(
-                            RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP),
+                            RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP)
                         )
                 } else {
                     window?.decorView?.setRenderEffect(null)
@@ -578,14 +574,12 @@ fun View.animateBlur(
             val amount = animator.animatedValue as Float
             try {
                 setRenderEffect(
-                    RenderEffect.createBlurEffect(amount, amount, Shader.TileMode.CLAMP),
+                    RenderEffect.createBlurEffect(amount, amount, Shader.TileMode.CLAMP)
                 )
             } catch (_: Exception) {}
         }
         if (removeBlurAtEnd) {
-            addListener(
-                onEnd = { setRenderEffect(null) },
-            )
+            addListener(onEnd = { setRenderEffect(null) })
         }
     }
 }

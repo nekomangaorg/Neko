@@ -74,9 +74,7 @@ fun InformationBlock(
     val mediumAlpha =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
-    Column(
-        modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small),
-    ) {
+    Column(modifier = modifier.fillMaxWidth().fillMaxHeight().padding(horizontal = Size.small)) {
         if (!titleProvider().isNullOrEmpty()) {
             NoRippleText(
                 text = titleProvider(),
@@ -85,7 +83,7 @@ fun InformationBlock(
                 style =
                     MaterialTheme.typography.headlineSmall.copy(
                         letterSpacing = (-.5).sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     ),
                 color = highAlpha,
             )
@@ -202,7 +200,7 @@ fun InformationBlock(
                     Image(
                         imageVector = Icons.Filled.HotelClass,
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha)
+                        colorFilter = ColorFilter.tint(mediumAlpha),
                     )
                     Gap(Size.tiny)
                     NoRippleText(
@@ -225,7 +223,7 @@ fun InformationBlock(
                     Image(
                         imageVector = Icons.Filled.Bookmarks,
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha)
+                        colorFilter = ColorFilter.tint(mediumAlpha),
                     )
                     Gap(Size.tiny)
                     NoRippleText(
@@ -249,7 +247,7 @@ fun InformationBlock(
                     Image(
                         imageVector = Icons.Filled.Comment,
                         contentDescription = null,
-                        colorFilter = ColorFilter.tint(mediumAlpha)
+                        colorFilter = ColorFilter.tint(mediumAlpha),
                     )
                     Gap(Size.tiny)
                     NoRippleText(
@@ -264,7 +262,7 @@ fun InformationBlock(
                 Gap(Size.tiny)
                 com.mikepenz.iconics.compose.Image(
                     asset = CommunityMaterial.Icon.cmd_check_decagram,
-                    colorFilter = ColorFilter.tint(mediumAlpha)
+                    colorFilter = ColorFilter.tint(mediumAlpha),
                 )
             }
         }

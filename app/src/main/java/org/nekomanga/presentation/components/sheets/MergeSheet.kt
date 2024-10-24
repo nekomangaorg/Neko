@@ -87,28 +87,28 @@ fun MergeSheet(
                     text = stringResource(id = R.string.merge_source_, text),
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
 
                 Gap(Size.tiny)
 
                 TextButton(
                     onClick = { openMergeSource(isMergedManga.url, isMergedManga.title) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
                         text = stringResource(id = R.string.open_merged_in_webview),
-                        color = themeColorState.buttonColor
+                        color = themeColorState.buttonColor,
                     )
                 }
                 Gap(Size.tiny)
                 TextButton(
                     onClick = { removeMergeSource(isMergedManga.mergeType) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(
                         text = stringResource(id = R.string.remove_merged_source),
-                        color = themeColorState.buttonColor
+                        color = themeColorState.buttonColor,
                     )
                 }
                 Gap(Size.tiny)
@@ -129,6 +129,7 @@ fun MergeSheet(
                                         MergeType.Komga -> R.drawable.ic_komga_logo
                                         MergeType.MangaLife -> R.drawable.ic_mangalife_logo
                                         MergeType.Toonily -> R.drawable.ic_toonily
+                                        MergeType.WeebCentral -> R.drawable.ic_weebcentral_logo
                                     }
                                 MergeLogo(id = id, onClick = { mergeType = validMergeType })
                             }
@@ -144,13 +145,13 @@ fun MergeSheet(
                         Box(
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .requiredHeightIn(Size.none, maxLazyHeight.dp),
+                                    .requiredHeightIn(Size.none, maxLazyHeight.dp)
                         ) {
                             if (mergeSearchResults is MergeSearchResult.Success) {
                                 SuccessResults(
                                     mergeMangaList = mergeSearchResults.mergeMangaList,
                                     mergeType = mergeType!!,
-                                    mergeMangaClick = mergeMangaClick
+                                    mergeMangaClick = mergeMangaClick,
                                 )
                             }
                             NonSuccessResultsAndChips(
@@ -186,7 +187,7 @@ private fun MergeLogo(@DrawableRes id: Int, onClick: () -> Unit) {
             Modifier.clip(RoundedCornerShape(Shapes.coverRadius))
                 .clickable(onClick = onClick)
                 .padding(Size.small)
-                .clip(RoundedCornerShape(Shapes.coverRadius)),
+                .clip(RoundedCornerShape(Shapes.coverRadius))
     ) {
         Image(
             painter = painterResource(id = id),
@@ -200,7 +201,7 @@ private fun MergeLogo(@DrawableRes id: Int, onClick: () -> Unit) {
 private fun SuccessResults(
     mergeMangaList: List<SourceMergeManga>,
     mergeType: MergeType,
-    mergeMangaClick: (SourceMergeManga) -> Unit
+    mergeMangaClick: (SourceMergeManga) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 100.dp),
@@ -210,7 +211,7 @@ private fun SuccessResults(
                 top = 16.dp,
                 bottom = Size.huge * 2,
                 start = Size.small,
-                end = Size.small
+                end = Size.small,
             ),
         verticalArrangement = Arrangement.spacedBy(Size.small),
         horizontalArrangement = Arrangement.spacedBy(Size.small),
@@ -221,7 +222,7 @@ private fun SuccessResults(
                     Modifier.aspectRatio(3f / 4f)
                         .fillMaxWidth(.25f)
                         .clip(RoundedCornerShape(Shapes.coverRadius))
-                        .clickable { mergeMangaClick(item) },
+                        .clickable { mergeMangaClick(item) }
             ) {
                 AsyncImage(
                     model =
@@ -239,7 +240,7 @@ private fun SuccessResults(
                         .align(Alignment.BottomStart)
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = .95f)),
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = .95f))
                             ),
                             shape =
                                 RoundedCornerShape(
@@ -257,9 +258,7 @@ private fun SuccessResults(
                         overflow = TextOverflow.Ellipsis,
                         color = Color.White,
                         style =
-                            MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
+                            MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                     )
                 }
             }
@@ -273,7 +272,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
     searchResults: MergeSearchResult,
     title: String,
     altTitles: List<String>,
-    chipClick: (String) -> Unit
+    chipClick: (String) -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
@@ -284,7 +283,7 @@ private fun BoxScope.NonSuccessResultsAndChips(
             is MergeSearchResult.Loading ->
                 CircularProgressIndicator(
                     color = themeColorState.buttonColor,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp),
                 )
             is MergeSearchResult.NoResult ->
                 Text(text = stringResource(id = R.string.no_results_found))

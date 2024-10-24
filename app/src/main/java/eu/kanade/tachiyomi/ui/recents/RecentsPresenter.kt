@@ -63,9 +63,7 @@ class RecentsPresenter(
     private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
     private val continueReadingHeader =
-        RecentMangaHeaderItem(
-            RecentMangaHeaderItem.CONTINUE_READING,
-        )
+        RecentMangaHeaderItem(RecentMangaHeaderItem.CONTINUE_READING)
     var finished = false
     var heldItems: HashMap<Int, List<RecentMangaItem>> = hashMapOf()
     private var shouldMoveToTop = false
@@ -290,25 +288,13 @@ class RecentsPresenter(
                             }
                         }
                         .take(4)
-                        .map {
-                            RecentMangaItem(
-                                it.first,
-                                it.second,
-                                newChaptersHeader,
-                            )
-                        }
+                        .map { RecentMangaItem(it.first, it.second, newChaptersHeader) }
                         .toMutableList()
                 val cReadingItems =
                     pairs
                         .filter { it.first.history.id != null }
                         .take(9 - nChaptersItems.size)
-                        .map {
-                            RecentMangaItem(
-                                it.first,
-                                it.second,
-                                continueReadingHeader,
-                            )
-                        }
+                        .map { RecentMangaItem(it.first, it.second, continueReadingHeader) }
                         .toMutableList()
                 if (nChaptersItems.isNotEmpty()) {
                     nChaptersItems.add(RecentMangaItem(header = newChaptersHeader))
@@ -524,7 +510,7 @@ class RecentsPresenter(
                 statusHandler.marksChaptersStatus(
                     manga.uuid(),
                     listOf(chapter.mangadex_chapter_id),
-                    read
+                    read,
                 )
             }
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()

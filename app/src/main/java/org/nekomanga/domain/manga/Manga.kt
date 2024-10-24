@@ -10,7 +10,7 @@ data class SourceManga(
     val url: String,
     val title: String,
     val displayText: String = "",
-    @StringRes val displayTextRes: Int? = null
+    @StringRes val displayTextRes: Int? = null,
 )
 
 data class DisplayManga(
@@ -24,10 +24,7 @@ data class DisplayManga(
     @StringRes val displayTextRes: Int? = null,
 )
 
-data class MergeArtwork(
-    val url: String,
-    val mergeType: MergeType,
-)
+data class MergeArtwork(val url: String, val mergeType: MergeType)
 
 data class Artwork(
     val url: String = "",

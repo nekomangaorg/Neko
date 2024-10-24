@@ -30,7 +30,7 @@ class GLUtil private constructor() {
                     display,
                     configurationsList,
                     totalConfigurations[0],
-                    totalConfigurations
+                    totalConfigurations,
                 )
 
                 val textureSize = IntArray(1)
@@ -43,7 +43,7 @@ class GLUtil private constructor() {
                         display,
                         configurationsList[i],
                         EGL10.EGL_MAX_PBUFFER_WIDTH,
-                        textureSize
+                        textureSize,
                     )
 
                     // Keep track of the maximum texture size

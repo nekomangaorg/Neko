@@ -15,11 +15,7 @@ data class MangaListDto(
     val data: List<MangaDataDto>,
 )
 
-@Serializable
-data class MangaDto(
-    val result: String,
-    val data: MangaDataDto,
-)
+@Serializable data class MangaDto(val result: String, val data: MangaDataDto)
 
 @Serializable
 data class MangaDataDto(
@@ -45,10 +41,7 @@ data class MangaAttributesDto(
     val tags: List<TagDto>,
 )
 
-@Serializable
-data class TagDto(
-    val id: String,
-)
+@Serializable data class TagDto(val id: String)
 
 @Serializable
 data class RelationshipDtoList(
@@ -84,42 +77,19 @@ data class AuthorListDto(
     val total: Int,
 )
 
-@Serializable
-data class AuthorDto(
-    val id: String,
-    val attributes: AuthorAttributesDto,
-)
+@Serializable data class AuthorDto(val id: String, val attributes: AuthorAttributesDto)
 
-@Serializable
-data class AuthorAttributesDto(
-    val name: String,
-    val biography: JsonElement,
-)
+@Serializable data class AuthorAttributesDto(val name: String, val biography: JsonElement)
 
-@Serializable
-data class ReadingStatusDto(
-    val status: String?,
-)
+@Serializable data class ReadingStatusDto(val status: String?)
 
-@Serializable
-data class ReadingStatusMapDto(
-    val statuses: Map<String, String?>,
-)
+@Serializable data class ReadingStatusMapDto(val statuses: Map<String, String?>)
 
-@Serializable
-data class ReadChapterDto(
-    val data: List<String>,
-)
+@Serializable data class ReadChapterDto(val data: List<String>)
 
-@Serializable
-data class CoverListDto(
-    val results: List<CoverDto>,
-)
+@Serializable data class CoverListDto(val results: List<CoverDto>)
 
-@Serializable
-data class CoverDto(
-    val data: CoverDataDto,
-)
+@Serializable data class CoverDto(val data: CoverDataDto)
 
 @Serializable
 data class CoverDataDto(
@@ -127,16 +97,9 @@ data class CoverDataDto(
     val relationships: List<RelationshipDto>,
 )
 
-@Serializable
-data class CoverAttributesDto(
-    val fileName: String,
-)
+@Serializable data class CoverAttributesDto(val fileName: String)
 
-@Serializable
-data class AggregateDto(
-    val result: String,
-    val volumes: JsonElement,
-)
+@Serializable data class AggregateDto(val result: String, val volumes: JsonElement)
 
 @Serializable
 data class AggregateVolume(
@@ -145,11 +108,7 @@ data class AggregateVolume(
     val chapters: Map<String, AggregateChapter>,
 )
 
-@Serializable
-data class AggregateChapter(
-    val chapter: String,
-    val count: String,
-)
+@Serializable data class AggregateChapter(val chapter: String, val count: String)
 
 inline fun <reified T> JsonElement.asMdMap(): Map<String, T> {
     return runCatching { MdUtil.jsonParser.decodeFromJsonElement<Map<String, T>>(jsonObject) }

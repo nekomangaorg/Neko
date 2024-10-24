@@ -23,7 +23,7 @@ import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
 fun listGridAppBarAction(
     isList: Boolean,
     isEnabled: Boolean = true,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ): AppBar.Action {
     return when (isList) {
         true ->
@@ -31,14 +31,14 @@ fun listGridAppBarAction(
                 title = UiText.StringResource(resourceId = R.string.display_as_grid),
                 icon = Icons.Filled.ViewModule,
                 onClick = onClick,
-                isEnabled = isEnabled
+                isEnabled = isEnabled,
             )
         false ->
             AppBar.Action(
                 title = UiText.StringResource(resourceId = R.string.display_as_list),
                 icon = Icons.Filled.ViewList,
                 onClick = onClick,
-                isEnabled = isEnabled
+                isEnabled = isEnabled,
             )
     }
 }
@@ -49,21 +49,19 @@ fun showLibraryEntriesAction(showEntries: Boolean, onClick: () -> Unit): AppBar.
             AppBar.Action(
                 title = UiText.StringResource(R.string.hide_library_manga),
                 icon = Icons.Filled.VisibilityOff,
-                onClick = onClick
+                onClick = onClick,
             )
         false ->
             AppBar.Action(
                 title = UiText.StringResource(R.string.show_library_manga),
                 icon = Icons.Filled.Visibility,
-                onClick = onClick
+                onClick = onClick,
             )
     }
 }
 
 @Composable
-fun AppBarActions(
-    actions: List<AppBar.AppBarAction>,
-) {
+fun AppBarActions(actions: List<AppBar.AppBarAction>) {
     var showMenu by remember { mutableStateOf(false) }
 
     actions.filterIsInstance<AppBar.Action>().map {

@@ -71,7 +71,7 @@ class FollowsSyncProcessor {
                             updateNotification(
                                 networkManga.title,
                                 count.andIncrement,
-                                listManga.size
+                                listManga.size,
                             )
                             var dbManga =
                                 db.getManga(networkManga.url, sourceManager.mangaDex.id)
@@ -90,14 +90,18 @@ class FollowsSyncProcessor {
                             if (!dbManga.favorite) {
                                 countOfAdded.incrementAndGet()
                                 dbManga.favorite = true
+
+                                db.insertManga(dbManga).executeAsBlocking()
+
+                                dbManga =
+                                    db.getManga(networkManga.url, sourceManager.mangaDex.id)
+                                        .executeAsBlocking()
                                 if (defaultCategory != null) {
-                                    val mc = MangaCategory.create(dbManga, defaultCategory)
+                                    val mc = MangaCategory.create(dbManga!!, defaultCategory)
                                     db.setMangaCategories(listOf(mc), listOf(dbManga))
                                 }
 
-                                return@mapNotNull db.insertManga(dbManga)
-                                    .executeAsBlocking()
-                                    .insertedId()
+                                return@mapNotNull dbManga?.id
                             }
                             return@mapNotNull null
                         }

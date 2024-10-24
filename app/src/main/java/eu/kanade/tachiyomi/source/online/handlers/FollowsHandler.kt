@@ -58,12 +58,12 @@ class FollowsHandler {
                                         true ->
                                             fetchRestOfFollows(
                                                 mangaListDto.limit,
-                                                mangaListDto.total
+                                                mangaListDto.total,
                                             ) + mangaListDto
                                         false -> listOf(mangaListDto)
                                     }
                                     .map { it.data }
-                                    .flatten(),
+                                    .flatten()
                             )
                         }
                         .andThen { allResults ->
@@ -94,7 +94,7 @@ class FollowsHandler {
 
     private fun allFollowsParser(
         mangaDataDtoList: List<MangaDataDto>,
-        readingStatusMap: Map<String, String?>
+        readingStatusMap: Map<String, String?>,
     ): List<SourceManga> {
         val coverQuality = preferences.thumbnailQuality().get()
         return mangaDataDtoList

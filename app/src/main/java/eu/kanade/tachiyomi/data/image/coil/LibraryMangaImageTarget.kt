@@ -14,10 +14,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.system.launchIO
 import uy.kohesive.injekt.injectLazy
 
-class LibraryMangaImageTarget(
-    override val view: ImageView,
-    val manga: Manga,
-) : ImageViewTarget(view) {
+class LibraryMangaImageTarget(override val view: ImageView, val manga: Manga) :
+    ImageViewTarget(view) {
 
     private val coverCache: CoverCache by injectLazy()
 

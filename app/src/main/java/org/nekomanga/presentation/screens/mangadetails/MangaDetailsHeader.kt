@@ -19,9 +19,9 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -48,10 +48,10 @@ import eu.kanade.tachiyomi.ui.manga.MergeConstants
 import jp.wasabeef.gap.Gap
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.R
-import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.UiText
 import org.nekomanga.presentation.components.dropdown.SimpleDropDownItem
 import org.nekomanga.presentation.components.dropdown.SimpleDropdownMenu
+import org.nekomanga.presentation.components.nekoRippleConfiguration
 import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Size
 
@@ -77,8 +77,8 @@ fun MangaDetailsHeader(
     quickReadClick: () -> Unit = {},
 ) {
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
         var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -120,12 +120,9 @@ fun MangaDetailsHeader(
                             .background(
                                 Brush.verticalGradient(
                                     colors =
-                                        listOf(
-                                            Color.Transparent,
-                                            MaterialTheme.colorScheme.surface
-                                        ),
-                                ),
-                            ),
+                                        listOf(Color.Transparent, MaterialTheme.colorScheme.surface)
+                                )
+                            )
                 )
 
                 Column(modifier = Modifier.align(Alignment.BottomStart)) {
@@ -155,7 +152,7 @@ fun MangaDetailsHeader(
                     AnimatedVisibility(
                         visible = !isSearching,
                         enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
+                        exit = fadeOut() + shrinkVertically(),
                     ) {
                         Column {
                             Gap(height = 16.dp)
@@ -201,14 +198,14 @@ fun MangaDetailsHeader(
         AnimatedVisibility(
             visible = !isSearching,
             enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            exit = fadeOut() + shrinkVertically(),
         ) {
             Column {
                 if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) {
                     QuickReadButton(
                         { generalState.value.nextUnreadChapter },
                         themeColorState,
-                        quickReadClick
+                        quickReadClick,
                     )
                 }
                 Gap(Size.tiny)
@@ -232,7 +229,7 @@ fun MangaDetailsHeader(
                     QuickReadButton(
                         { generalState.value.nextUnreadChapter },
                         themeColorState,
-                        quickReadClick
+                        quickReadClick,
                     )
                     Gap(Size.tiny)
                 }
@@ -250,7 +247,8 @@ private fun ColumnScope.QuickReadButton(
     if (quickReadTextProvider().text.isNotEmpty() && quickReadTextProvider().id != null) {
         Gap(Size.tiny)
         CompositionLocalProvider(
-            LocalRippleTheme provides DynamicRippleTheme(themeColorState.altContainerColor)
+            LocalRippleConfiguration provides
+                nekoRippleConfiguration(themeColorState.altContainerColor)
         ) {
             ElevatedButton(
                 onClick = quickReadClick,
@@ -265,10 +263,10 @@ private fun ColumnScope.QuickReadButton(
                     text =
                         stringResource(
                             id = quickReadTextProvider().id!!,
-                            quickReadTextProvider().text
+                            quickReadTextProvider().text,
                         ),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.surface
+                    color = MaterialTheme.colorScheme.surface,
                 )
             }
         }
@@ -281,7 +279,7 @@ private fun FavoriteDropDown(
     themeColorState: ThemeColorState,
     moveCategories: () -> Unit,
     toggleFavorite: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     SimpleDropdownMenu(
         expanded = favoriteExpanded,

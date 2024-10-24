@@ -15,12 +15,12 @@ enum class MdSort(val displayName: String, val key: String, val state: MangaCons
     LeastFollows(
         "Fewest follows",
         MdConstants.Sort.followCount,
-        MangaConstants.SortState.Ascending
+        MangaConstants.SortState.Ascending,
     ),
     RecentlyAdded(
         "Recently added",
         MdConstants.Sort.createdAt,
-        MangaConstants.SortState.Descending
+        MangaConstants.SortState.Descending,
     ),
     OldestAdded("Oldest added", MdConstants.Sort.createdAt, MangaConstants.SortState.Descending),
     YearAscending("Year asc", MdConstants.Sort.year, MangaConstants.SortState.Ascending),

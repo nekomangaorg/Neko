@@ -2,14 +2,14 @@ package org.nekomanga.presentation.components.dialog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -31,7 +31,7 @@ fun SaveFilterDialog(
     themeColorState: ThemeColorState,
     currentSavedFilters: List<BrowseFilterImpl>,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     val context = LocalContext.current
     var saveFilterText by remember { mutableStateOf("") }
@@ -39,8 +39,8 @@ fun SaveFilterDialog(
     var errorMessage by remember { mutableStateOf("") }
 
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
         LaunchedEffect(saveFilterText, currentSavedFilters) {
             if (saveFilterText.isEmpty()) {
@@ -66,7 +66,7 @@ fun SaveFilterDialog(
                         singleLine = true,
                         maxLines = 1,
                         colors =
-                            TextFieldDefaults.outlinedTextFieldColors(
+                            OutlinedTextFieldDefaults.colors(
                                 cursorColor = themeColorState.buttonColor,
                                 focusedLabelColor = themeColorState.buttonColor,
                                 focusedBorderColor = themeColorState.buttonColor,
@@ -78,7 +78,7 @@ fun SaveFilterDialog(
                         style =
                             MaterialTheme.typography.labelSmall.copy(
                                 color = MaterialTheme.colorScheme.error
-                            )
+                            ),
                     )
                 }
             },
@@ -100,7 +100,7 @@ fun SaveFilterDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

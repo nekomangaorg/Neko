@@ -136,9 +136,6 @@ inline fun <reified T> Response.parseAs(): T {
 }
 
 context(Json)
-fun <T> decodeFromJsonResponse(
-    deserializer: DeserializationStrategy<T>,
-    response: Response,
-): T {
+fun <T> decodeFromJsonResponse(deserializer: DeserializationStrategy<T>, response: Response): T {
     return response.body.source().use { decodeFromBufferedSource(deserializer, it) }
 }

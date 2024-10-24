@@ -62,17 +62,14 @@ class MangaShortcutManager(
                             (Coil.imageLoader(context).execute(request).drawable as? BitmapDrawable)
                                 ?.bitmap
 
-                        ShortcutInfo.Builder(
-                                context,
-                                "Manga-${item.id?.toString() ?: item.title}",
-                            )
+                        ShortcutInfo.Builder(context, "Manga-${item.id?.toString() ?: item.title}")
                             .setShortLabel(
                                 item.title.takeUnless { it.isBlank() }
-                                    ?: context.getString(R.string.manga),
+                                    ?: context.getString(R.string.manga)
                             )
                             .setLongLabel(
                                 item.title.takeUnless { it.isBlank() }
-                                    ?: context.getString(R.string.manga),
+                                    ?: context.getString(R.string.manga)
                             )
                             .setIcon(
                                 if (bitmap != null)
@@ -86,14 +83,14 @@ class MangaShortcutManager(
                                     }
                                 else {
                                     Icon.createWithResource(context, R.drawable.ic_book_24dp)
-                                },
+                                }
                             )
                             .setIntent(
                                 SearchActivity.openMangaIntent(context, item.id, true)
                                     .addFlags(
                                         Intent.FLAG_ACTIVITY_CLEAR_TOP or
                                             Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                    ),
+                                    )
                             )
                             .build()
                     }

@@ -13,11 +13,8 @@ import eu.kanade.tachiyomi.util.system.disableItems
 
 class MultiListMatPreference
 @JvmOverloads
-constructor(
-    activity: Activity?,
-    context: Context,
-    attrs: AttributeSet? = null,
-) : ListMatPreference(activity, context, attrs) {
+constructor(activity: Activity?, context: Context, attrs: AttributeSet? = null) :
+    ListMatPreference(activity, context, attrs) {
 
     var allSelectionRes: Int? = null
     var noSelectionRes: Int? = null

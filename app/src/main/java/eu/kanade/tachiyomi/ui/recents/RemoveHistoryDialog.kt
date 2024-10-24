@@ -50,7 +50,7 @@ T : RemoveHistoryDialog.Listener {
                 activity.getString(
                     R.string.reset_all_chapters_for_this_,
                     manga!!.seriesType(activity),
-                ),
+                )
             )
             .setNegativeButton(android.R.string.cancel, null)
             .setPositiveButton(R.string.reset) { dialog, _ -> onPositive(dialog.isPromptChecked) }

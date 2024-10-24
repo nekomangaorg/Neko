@@ -198,7 +198,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     fun bigToolbarHeight(
         includeSearchToolbar: Boolean,
         includeTabs: Boolean,
-        includeLargeToolbar: Boolean
+        includeLargeToolbar: Boolean,
     ): Int {
         return if (!includeLargeToolbar || !binding.appBar.useLargeToolbar) {
             toolbarHeight + if (includeTabs) 48.dpToPx else 0
@@ -206,7 +206,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             binding.appBar.getEstimatedLayout(
                 includeSearchToolbar,
                 includeTabs,
-                includeLargeToolbar
+                includeLargeToolbar,
             )
         }
     }
@@ -271,6 +271,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
         val content: ViewGroup = binding.mainContent
         downloadManager.isDownloaderRunning.onEach(::downloadStatusChanged).launchIn(lifecycleScope)
+        lifecycleScope.launchIO { downloadManager.deletePendingChapters() }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowCustomEnabled(true)
@@ -288,16 +290,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             }
             // Consume any horizontal insets and pad all content in. There's not much we can do
             // with horizontal insets
-            v.updatePadding(
-                left = systemInsets.left,
-                right = systemInsets.right,
-            )
-            binding.appBar.updatePadding(
-                top = systemInsets.top,
-            )
-            binding.bottomNav?.updatePadding(
-                bottom = systemInsets.bottom,
-            )
+            v.updatePadding(left = systemInsets.left, right = systemInsets.right)
+            binding.appBar.updatePadding(top = systemInsets.top)
+            binding.bottomNav?.updatePadding(bottom = systemInsets.bottom)
             binding.sideNav?.updatePadding(
                 left = 0,
                 right = 0,
@@ -424,7 +419,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     }
                     return true
                 }
-            },
+            }
         )
 
         binding.appBar.alpha = 1f
@@ -486,7 +481,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                         )
                     }
                 }
-            },
+            }
         )
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller)
@@ -501,11 +496,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             securityPreferences.incognitoMode().set(false)
 
             // Show changelog if needed
-            if (
-                Migrations.upgrade(
-                    preferences,
-                )
-            ) {
+            if (Migrations.upgrade(preferences)) {
                 if (!BuildConfig.DEBUG) {
                     content.post { whatsNewSheet().show() }
                 }
@@ -535,7 +526,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             .launchIn(lifecycleScope)
         setFloatingToolbar(
             canShowFloatingToolbar(router.backstack.lastOrNull()?.controller),
-            changeBG = false
+            changeBG = false,
         )
     }
 
@@ -576,7 +567,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         show: Boolean,
         solidBG: Boolean = false,
         changeBG: Boolean = true,
-        showSearchAnyway: Boolean = false
+        showSearchAnyway: Boolean = false,
     ) {
         val controller =
             if (this::router.isInitialized) router.backstack.lastOrNull()?.controller else null
@@ -629,7 +620,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         val bgColor = binding.appBar.backgroundColor ?: Color.TRANSPARENT
         if (changeBG && (if (solidBG) bgColor == Color.TRANSPARENT else false)) {
             binding.appBar.setBackgroundColor(
-                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface),
+                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface)
             )
         }
         setupSearchTBMenu(binding.toolbar.menu)
@@ -693,10 +684,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 }
                 // if in portrait with 2/3 button mode, translucent nav bar
                 else -> {
-                    ColorUtils.setAlphaComponent(
-                        getResourceColor(R.attr.colorPrimaryVariant),
-                        179,
-                    )
+                    ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorPrimaryVariant), 179)
                 }
             }
     }
@@ -722,10 +710,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             delay(duration.toLong())
             delay(100)
             if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255) {
-                window?.statusBarColor =
-                    getResourceColor(
-                        android.R.attr.statusBarColor,
-                    )
+                window?.statusBarColor = getResourceColor(android.R.attr.statusBarColor)
             }
         }
         super.onSupportActionModeFinished(mode)
@@ -767,9 +752,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     )
                     .outerCircleColorInt(getResourceColor(R.attr.colorSecondary))
                     .outerCircleAlpha(0.95f)
-                    .titleTextSize(
-                        20,
-                    )
+                    .titleTextSize(20)
                     .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary))
                     .descriptionTextSize(16)
                     .descriptionTextColorInt(getResourceColor(R.attr.colorOnSecondary))
@@ -851,7 +834,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                         when (intent.action) {
                             SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
                             else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
-                        },
+                        }
                     )
                 }
             }
@@ -977,7 +960,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     when (nav.selectedItemId) {
                         R.id.nav_library -> 0
                         else -> 1
-                    },
+                    }
                 )
         }
     }
@@ -1050,7 +1033,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 toolbar.menu,
                 true,
                 currentItemsId,
-                toolbar.menu.children.toList().lastIndex
+                toolbar.menu.children.toList().lastIndex,
             )
         }
 
@@ -1084,7 +1067,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         menu: Menu,
         isVisible: Boolean,
         currentItemsId: List<Int>,
-        index: Int
+        index: Int,
     ) {
         if (currentItemsId.contains(oldMenuItem.itemId)) {
             val newItem = menu.findItem(oldMenuItem.itemId) ?: return
@@ -1100,20 +1083,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         val menuItem =
             if (oldMenuItem.hasSubMenu()) {
                 menu
-                    .addSubMenu(
-                        oldMenuItem.groupId,
-                        oldMenuItem.itemId,
-                        index,
-                        oldMenuItem.title,
-                    )
+                    .addSubMenu(oldMenuItem.groupId, oldMenuItem.itemId, index, oldMenuItem.title)
                     .item
             } else {
-                menu.add(
-                    oldMenuItem.groupId,
-                    oldMenuItem.itemId,
-                    index,
-                    oldMenuItem.title,
-                )
+                menu.add(oldMenuItem.groupId, oldMenuItem.itemId, index, oldMenuItem.title)
             }
         menuItem.isVisible = isVisible
         menuItem.actionView = oldMenuItem.actionView
@@ -1138,7 +1111,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     menuItem.subMenu!!,
                     isSubVisible,
                     currentItemsId,
-                    index
+                    index,
                 )
                 if (!isExclusiveCheckable) {
                     isExclusiveCheckable =
@@ -1151,7 +1124,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             menuItem.subMenu?.setGroupCheckable(
                 oldSubMenu.children.first().groupId,
                 isCheckable,
-                isExclusiveCheckable
+                isExclusiveCheckable,
             )
             menuItem.subMenu?.children?.toList()?.forEach {
                 if (!newMenuIds.contains(it.itemId)) {
@@ -1168,10 +1141,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 if (overflowDialog != null) return false
                 val overflowDialog = OverflowDialog(this)
                 this.overflowDialog = overflowDialog
-                overflowDialog.blurBehindWindow(
-                    window,
-                    onDismiss = { this.overflowDialog = null },
-                )
+                overflowDialog.blurBehindWindow(window, onDismiss = { this.overflowDialog = null })
                 overflowDialog.show()
             }
             else -> return super.onOptionsItemSelected(item)
@@ -1252,11 +1222,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
         } else {
             animationSet?.cancel()
             animationSet = AnimatorSet()
-            val alphaAnimation =
-                ValueAnimator.ofFloat(
-                    nav.alpha,
-                    if (hideBottomNav) 0f else 1f,
-                )
+            val alphaAnimation = ValueAnimator.ofFloat(nav.alpha, if (hideBottomNav) 0f else 1f)
             alphaAnimation.addUpdateListener { valueAnimator ->
                 nav.alpha = valueAnimator.animatedValue as Float
             }
@@ -1307,11 +1273,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                 binding.tabsFrameLayout.alpha = 0f
                 binding.tabsFrameLayout.isVisible = true
             }
-            val tA =
-                ValueAnimator.ofFloat(
-                    binding.tabsFrameLayout.alpha,
-                    if (show) 1f else 0f,
-                )
+            val tA = ValueAnimator.ofFloat(binding.tabsFrameLayout.alpha, if (show) 1f else 0f)
             tA.addUpdateListener { valueAnimator ->
                 binding.tabsFrameLayout.alpha = valueAnimator.animatedValue as Float
             }
@@ -1368,11 +1330,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
             onMenuItemClicked = { _, item ->
                 if (item == 0) {
                     try {
-                        val intent =
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                RELEASE_URL.toUri(),
-                            )
+                        val intent = Intent(Intent.ACTION_VIEW, RELEASE_URL.toUri())
                         startActivity(intent)
                     } catch (e: Throwable) {
                         toast(e.message)

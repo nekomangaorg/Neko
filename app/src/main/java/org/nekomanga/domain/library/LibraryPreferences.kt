@@ -16,6 +16,11 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun lastUpdateTimestamp() = this.preferenceStore.getLong("library_update_last_timestamp")
 
+    fun lastUpdateAttemptTimestamp() =
+        this.preferenceStore.getLong("library_update_last_attempt_timestamp")
+
+    fun libraryUpdateIds() = this.preferenceStore.getString("library_update_ids")
+
     fun autoUpdateDeviceRestrictions() =
         this.preferenceStore.getStringSet("library_update_restriction")
 
@@ -43,7 +48,7 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
     fun layout() =
         this.preferenceStore.getInt(
             "pref_display_library_layout",
-            LibraryItem.LAYOUT_COMFORTABLE_GRID
+            LibraryItem.LAYOUT_COMFORTABLE_GRID,
         )
 
     fun sortingMode() = this.preferenceStore.getInt("library_sorting_mode")

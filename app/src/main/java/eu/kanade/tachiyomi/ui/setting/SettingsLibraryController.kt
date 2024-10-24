@@ -59,7 +59,7 @@ class SettingsLibraryController : SettingsController() {
                                 LibraryPresenter.setSearchSuggestion(
                                     libraryPreferences,
                                     db,
-                                    Injekt.get()
+                                    Injekt.get(),
                                 )
                             }
                         } else {
@@ -253,10 +253,7 @@ class SettingsLibraryController : SettingsController() {
                     titleRes = R.string.categories_on_manual
 
                     entriesRes =
-                        arrayOf(
-                            R.string.first_category,
-                            R.string.categories_in_global_update,
-                        )
+                        arrayOf(R.string.first_category, R.string.categories_in_global_update)
                     entryRange = 0..1
                     defaultValue = -1
                 }

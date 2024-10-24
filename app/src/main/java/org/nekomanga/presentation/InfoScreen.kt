@@ -65,10 +65,7 @@ fun InfoScreen(
                             )
                         }
                         .windowInsetsPadding(NavigationBarDefaults.windowInsets)
-                        .padding(
-                            horizontal = Size.medium,
-                            vertical = Size.small,
-                        ),
+                        .padding(horizontal = Size.medium, vertical = Size.small)
             ) {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
@@ -81,18 +78,14 @@ fun InfoScreen(
                 if (rejectText != null && onRejectClick != null) {
                     OutlinedButton(
                         modifier = Modifier.fillMaxWidth(),
-                        border =
-                            BorderStroke(
-                                width = Size.extraExtraTiny,
-                                color = tint,
-                            ),
+                        border = BorderStroke(width = Size.extraExtraTiny, color = tint),
                         onClick = onRejectClick,
                     ) {
                         Text(text = rejectText)
                     }
                 }
             }
-        },
+        }
     ) { paddingValues ->
         // Status bar scrim
         Box(
@@ -100,7 +93,7 @@ fun InfoScreen(
                 Modifier.zIndex(2f)
                     .background(MaterialTheme.colorScheme.background)
                     .fillMaxWidth()
-                    .height(paddingValues.calculateTopPadding()),
+                    .height(paddingValues.calculateTopPadding())
         )
 
         Column(
@@ -109,7 +102,7 @@ fun InfoScreen(
                     .fillMaxWidth()
                     .padding(paddingValues)
                     .padding(top = Size.large)
-                    .padding(horizontal = Size.medium),
+                    .padding(horizontal = Size.medium)
         ) {
             when (icon != null) {
                 true -> {
@@ -131,13 +124,13 @@ fun InfoScreen(
                 modifier = Modifier.fillMaxWidth(),
                 text = headingText,
                 style = MaterialTheme.typography.headlineLarge,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
             Text(
                 text = subtitleText,
                 modifier = Modifier.padding(vertical = Size.small),
                 style = MaterialTheme.typography.titleSmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             content()

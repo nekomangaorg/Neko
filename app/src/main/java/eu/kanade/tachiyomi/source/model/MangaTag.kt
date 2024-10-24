@@ -21,7 +21,6 @@ enum class MangaTag(val uuid: String, val prettyPrint: String) : Parcelable {
     DEMONS("39730448-9a5f-48a2-85b0-a70db87b1233", "Demons"),
     DOUJINSHI("b13b2a48-c720-44a9-9c77-39c9979373fb", "Doujinshi"),
     DRAMA("b9af3a63-f058-46de-a9a0-e0c13906197a", "Drama"),
-    ECCHI("fad12b5e-68ba-460e-b933-9ae8318f5b65", "Ecchi"),
     FAN_COLORED("7b2ce280-79ef-4c09-9b58-12b7c23a9b78", "Fan Colored"),
     FANTASY("cdc58593-87dd-415e-bbc0-2ec27bf404cc", "Fantasy"),
     FOUR_KOMA("b11fda93-8f1d-4bef-b2ed-8803d3733170", "4-koma"),
@@ -80,8 +79,7 @@ enum class MangaTag(val uuid: String, val prettyPrint: String) : Parcelable {
     VILLAINESS("d14322ac-4d6f-4e9b-afd9-629d5f4d8a41", "Villainess"),
     VIRTUAL_REALITY("8c86611e-fab7-4986-9dec-d1a2f44acdd5", "Virtual Reality"),
     WEB_COMIC("e197df38-d0e7-43b5-9b09-2842d0c326dd", "Web Comic"),
-    WUXIA("acc803a4-c95a-4c22-86fc-eb6b582d82a2", "Wuxia"),
-    ;
+    WUXIA("acc803a4-c95a-4c22-86fc-eb6b582d82a2", "Wuxia");
 
     companion object {
 

@@ -70,11 +70,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         }
 
     private val binding =
-        MaterialSpinnerViewBinding.inflate(
-            LayoutInflater.from(context),
-            this,
-            false,
-        )
+        MaterialSpinnerViewBinding.inflate(LayoutInflater.from(context), this, false)
 
     init {
         addView(binding.root)

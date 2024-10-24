@@ -94,10 +94,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         binding.swipeRefresh.setOnRefreshListener { refreshPage() }
 
         window.statusBarColor =
-            ColorUtils.setAlphaComponent(
-                getResourceColor(R.attr.colorSurface),
-                255,
-            )
+            ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorSurface), 255)
 
         ViewCompat.setOnApplyWindowInsetsListener(content) { v, insets ->
             // if pure white theme on a device that does not support dark status bar
@@ -161,10 +158,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
 
     private fun setWebDarkMode() {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
-            setForceDarkStrategy(
-                binding.webview.settings,
-                DARK_STRATEGY_WEB_THEME_DARKENING_ONLY,
-            )
+            setForceDarkStrategy(binding.webview.settings, DARK_STRATEGY_WEB_THEME_DARKENING_ONLY)
             if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
                 setForceDark(
                     binding.webview.settings,
@@ -203,7 +197,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                     R.attr.colorSurface,
                     R.attr.actionBarTintColor,
                     R.attr.colorPrimaryVariant,
-                ),
+                )
             )
         setWebDarkMode()
         val colorSurface = attrs.getColor(0, 0)

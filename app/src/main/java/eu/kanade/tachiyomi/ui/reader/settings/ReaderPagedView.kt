@@ -30,7 +30,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
 
             doublePageGap.bindToIntPreference(
                 readerPreferences.doublePageGap(),
-                R.array.double_page_gap
+                R.array.double_page_gap,
             )
             binding.navigatePan.bindToPreference(readerPreferences.navigateToPan())
             binding.landscapeZoom.bindToPreference(readerPreferences.landscapeZoom())
@@ -126,7 +126,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             when (readerPreferences.imageScaleType().get()) {
                 SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
                 SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
-                SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP, -> true
+                SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
                 else -> false
             }
         val ogView = (context as? Activity)?.window?.decorView

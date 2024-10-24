@@ -91,7 +91,7 @@ internal class ThemeStep : OnboardingStep {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(text = stringResource(id = R.string.follow_system_theme))
                 Switch(
@@ -112,13 +112,13 @@ internal class ThemeStep : OnboardingStep {
                             }
                             false -> preferences.nightMode().set(context.appDelegateNightMode())
                         }
-                    }
+                    },
                 )
             }
 
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(Size.medium)
+                horizontalArrangement = Arrangement.spacedBy(Size.medium),
             ) {
                 lightThemes.forEach { theme ->
                     val isSelected =
@@ -135,15 +135,15 @@ internal class ThemeStep : OnboardingStep {
                                 context,
                                 isSelected = isSelected,
                                 followingSystemTheme = followingSystemTheme,
-                                isDarkTheme = false
+                                isDarkTheme = false,
                             )
-                        }
+                        },
                     )
                 }
             }
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(Size.medium)
+                horizontalArrangement = Arrangement.spacedBy(Size.medium),
             ) {
                 darkThemes.forEach { theme ->
                     val isSelected =
@@ -160,9 +160,9 @@ internal class ThemeStep : OnboardingStep {
                                 context,
                                 isSelected = isSelected,
                                 followingSystemTheme = followingSystemTheme,
-                                isDarkTheme = true
+                                isDarkTheme = true,
                             )
-                        }
+                        },
                     )
                 }
             }
@@ -174,7 +174,7 @@ internal class ThemeStep : OnboardingStep {
         isDarkTheme: Boolean,
         darkAppTheme: Themes,
         lightAppTheme: Themes,
-        nightMode: Int
+        nightMode: Int,
     ): Boolean {
         return when (nightMode) {
             AppCompatDelegate.MODE_NIGHT_YES -> darkAppTheme == theme && isDarkTheme
@@ -189,7 +189,7 @@ internal class ThemeStep : OnboardingStep {
         context: Context,
         isSelected: Boolean,
         followingSystemTheme: Boolean,
-        isDarkTheme: Boolean
+        isDarkTheme: Boolean,
     ) {
         TimberKt.d {
             """

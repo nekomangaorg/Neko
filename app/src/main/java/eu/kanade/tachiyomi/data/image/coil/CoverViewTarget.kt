@@ -25,7 +25,7 @@ class CoverViewTarget(
             view.setImageDrawable(
                 view.context.iconicsDrawableLarge(
                     MaterialDesignDx.Icon.gmf_broken_image,
-                    color = android.R.attr.textColorSecondary
+                    color = android.R.attr.textColorSecondary,
                 )
             )
         } else {

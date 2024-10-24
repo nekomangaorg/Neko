@@ -112,7 +112,7 @@ class BackupNotifier(private val context: Context) {
                     context.getString(R.string.stop),
                     NotificationReceiver.cancelRestorePendingBroadcast(
                         context,
-                        Notifications.ID_RESTORE_PROGRESS
+                        Notifications.ID_RESTORE_PROGRESS,
                     ),
                 )
             }
@@ -143,9 +143,7 @@ class BackupNotifier(private val context: Context) {
                 R.string.restore_duration,
                 TimeUnit.MILLISECONDS.toMinutes(time),
                 TimeUnit.MILLISECONDS.toSeconds(time) -
-                    TimeUnit.MINUTES.toSeconds(
-                        TimeUnit.MILLISECONDS.toMinutes(time),
-                    ),
+                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(time)),
             )
 
         with(completeNotificationBuilder) {
@@ -156,7 +154,7 @@ class BackupNotifier(private val context: Context) {
                     errorCount,
                     timeString,
                     errorCount,
-                ),
+                )
             )
 
             // Clear old actions if they exist

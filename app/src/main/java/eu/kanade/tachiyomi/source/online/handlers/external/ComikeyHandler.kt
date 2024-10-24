@@ -187,7 +187,7 @@ class ComikeyHandler {
 
                                         dimension <= 1536 && it.type == "image/webp"
                                     }
-                                    .href,
+                                    .href
                             )
                         } else {
                             addPathSegments(it.href)
@@ -271,10 +271,7 @@ class ComikeyHandler {
         }
     }
 
-    private class JsInterface(
-        private val latch: CountDownLatch,
-        private val json: Json,
-    ) {
+    private class JsInterface(private val latch: CountDownLatch, private val json: Json) {
         var manifest: ComikeyEpisodeManifest? = null
             private set
 
@@ -313,10 +310,7 @@ class ComikeyHandler {
         val readingOrder: List<ComikeyPage>,
     )
 
-    @Serializable
-    data class ComikeyEpisodeManifestMetadata(
-        val readingProgression: String,
-    )
+    @Serializable data class ComikeyEpisodeManifestMetadata(val readingProgression: String)
 
     @Serializable
     data class ComikeyPage(

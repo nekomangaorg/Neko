@@ -58,10 +58,7 @@ class WebtoonConfig(
 
         readerPreferences
             .webtoonNavInverted()
-            .register(
-                { tappingInverted = it },
-                { navigator.invertMode = it },
-            )
+            .register({ tappingInverted = it }, { navigator.invertMode = it })
 
         readerPreferences
             .webtoonNavInverted()

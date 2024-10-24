@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.minimumInteractiveComponentSize
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.ripple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -61,7 +61,7 @@ fun ToolTipButton(
                 Text(
                     modifier = Modifier.padding(Size.tiny),
                     style = MaterialTheme.typography.bodyLarge,
-                    text = toolTipLabel
+                    text = toolTipLabel,
                 )
             }
         },
@@ -81,11 +81,7 @@ fun ToolTipButton(
                 ),
         ) {
             if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    modifier = iconModifier,
-                    contentDescription = toolTipLabel,
-                )
+                Icon(imageVector = icon, modifier = iconModifier, contentDescription = toolTipLabel)
             } else {
                 Icon(
                     painter = painter!!,
@@ -138,11 +134,7 @@ fun Modifier.iconButtonCombinedClickable(
     if (isEnabled) {
         combinedClickable(
             interactionSource = remember { MutableInteractionSource() },
-            indication =
-                rememberRipple(
-                    bounded = false,
-                    radius = IconButtonTokens.StateLayerSize / 2,
-                ),
+            indication = ripple(bounded = false, radius = IconButtonTokens.StateLayerSize / 2),
             onClickLabel = toolTipLabel,
             role = Role.Button,
             onClick = onClick,

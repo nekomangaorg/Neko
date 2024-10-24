@@ -78,7 +78,7 @@ class NetworkHelper(val context: Context) {
                                     .maxContentLength(250000L)
                                     .redactHeaders(emptySet())
                                     .alwaysReadResponseBody(false)
-                                    .build(),
+                                    .build()
                             )
                         }
                         when (networkPreferences.dohProvider().get()) {
@@ -162,7 +162,7 @@ class NetworkHelper(val context: Context) {
             .apply {
                 add(
                     HttpHeaders.USER_AGENT,
-                    "Neko ${BuildConfig.VERSION_NAME}" + System.getProperty("http.agent")
+                    "Neko ${BuildConfig.VERSION_NAME}" + System.getProperty("http.agent"),
                 )
                 add(HttpHeaders.REFERER, MdConstants.baseUrl)
                 add(HttpHeaders.CONTENT_TYPE, "application/json")

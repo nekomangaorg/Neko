@@ -19,7 +19,7 @@ interface ArtworkQueries : DbProvider {
                     .table(ArtworkTable.TABLE)
                     .where("${ArtworkTable.COL_MANGA_ID} = ?")
                     .whereArgs(manga.id!!)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -31,7 +31,7 @@ interface ArtworkQueries : DbProvider {
                     .table(ArtworkTable.TABLE)
                     .where("${ArtworkTable.COL_MANGA_ID} = ?")
                     .whereArgs(mangaId)
-                    .build(),
+                    .build()
             )
             .prepare()
 
@@ -42,7 +42,7 @@ interface ArtworkQueries : DbProvider {
                     .table(ArtworkTable.TABLE)
                     .where("${ArtworkTable.COL_MANGA_ID} = ?")
                     .whereArgs(manga.id!!)
-                    .build(),
+                    .build()
             )
             .prepare()
 }

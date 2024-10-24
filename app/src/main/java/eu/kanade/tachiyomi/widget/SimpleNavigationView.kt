@@ -22,11 +22,8 @@ import org.nekomanga.R as TR
 @SuppressLint("PrivateResource", "RestrictedApi")
 open class SimpleNavigationView
 @JvmOverloads
-constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
-) : ScrimInsetsFrameLayout(context, attrs, defStyleAttr) {
+constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+    ScrimInsetsFrameLayout(context, attrs, defStyleAttr) {
 
     /** Max width of the navigation view. */
     private var maxWidth: Int
@@ -45,19 +42,12 @@ constructor(
                 R.style.Widget_Design_NavigationView,
             )
 
-        ViewCompat.setBackground(
-            this,
-            a.getDrawable(R.styleable.NavigationView_android_background),
-        )
+        ViewCompat.setBackground(this, a.getDrawable(R.styleable.NavigationView_android_background))
 
         if (a.hasValue(R.styleable.NavigationView_elevation)) {
             ViewCompat.setElevation(
                 this,
-                a.getDimensionPixelSize(
-                        R.styleable.NavigationView_elevation,
-                        0,
-                    )
-                    .toFloat(),
+                a.getDimensionPixelSize(R.styleable.NavigationView_elevation, 0).toFloat(),
             )
         }
 

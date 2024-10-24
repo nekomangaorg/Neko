@@ -103,10 +103,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                             lerpColor(
                                 ColorUtils.setAlphaComponent(
                                     navPrimary,
-                                    if (hasLightNav) 0 else 179
+                                    if (hasLightNav) 0 else 179,
                                 ),
                                 navPrimary,
-                                trueProgress
+                                trueProgress,
                             )
                     }
                 }
@@ -159,7 +159,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         state == BottomSheetBehavior.STATE_EXPANDED
                     activity.reEnableBackPressedCallBack()
                 }
-            },
+            }
         )
 
         adapter = FastAdapter.with(itemAdapter)
@@ -206,7 +206,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         refreshList()
                     }
                 }
-            },
+            }
         )
 
         backgroundTintList =
@@ -215,7 +215,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     primary
                 } else {
                     fullPrimary
-                },
+                }
             )
 
         binding.chapterRecycler.addOnScrollListener(
@@ -231,7 +231,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
                     }
                 }
-            },
+            }
         )
 
         binding.chapterRecycler.layoutManager = LinearLayoutManager(context)
@@ -274,10 +274,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun lerpColorCalc(colorStart: Int, colorEnd: Int, percent: Int): Int {
-        return (min(colorStart, colorEnd) * (100 - percent) +
-            max(
-                colorStart,
-                colorEnd,
-            ) * percent) / 100
+        return (min(colorStart, colorEnd) * (100 - percent) + max(colorStart, colorEnd) * percent) /
+            100
     }
 }

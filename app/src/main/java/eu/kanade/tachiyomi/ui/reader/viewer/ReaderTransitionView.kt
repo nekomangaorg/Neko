@@ -105,8 +105,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(contex
         val icon =
             context
                 .contextCompatDrawable(
-                    if (isDownloaded) R.drawable.ic_file_download_24dp
-                    else R.drawable.ic_cloud_24dp,
+                    if (isDownloaded) R.drawable.ic_file_download_24dp else R.drawable.ic_cloud_24dp
                 )
                 ?.mutate()
                 ?.apply {
@@ -153,7 +152,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout(contex
             resources.getQuantityString(
                 R.plurals.missing_chapters_warning,
                 chapterDifference.toInt(),
-                chapterDifference.toInt()
+                chapterDifference.toInt(),
             )
         binding.warning.isVisible = true
     }

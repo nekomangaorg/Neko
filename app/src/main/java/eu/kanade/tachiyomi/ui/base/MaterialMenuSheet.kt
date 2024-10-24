@@ -126,7 +126,7 @@ class MaterialMenuSheet(
                             elevate(notAtTop)
                         }
                     }
-                },
+                }
             )
         }
     }

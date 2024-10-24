@@ -8,9 +8,9 @@ import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.DropdownMenuItem as MaterialDropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,17 +49,15 @@ fun MainDropdownMenu(
     val background = MaterialTheme.colorScheme.background
     val secondary = MaterialTheme.colorScheme.secondary
     val backgroundArgb = remember {
-        ColorUtils.blendARGB(
-            background.toArgb(),
-            secondary.toArgb(),
-            0.05f,
-        )
+        ColorUtils.blendARGB(background.toArgb(), secondary.toArgb(), 0.05f)
     }
     MaterialTheme(
         colorScheme = MaterialTheme.colorScheme.copy(surface = MaterialTheme.colorScheme.surface),
         shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(16.dp)),
     ) {
-        CompositionLocalProvider(LocalRippleTheme provides (defaultThemeColorState().rippleTheme)) {
+        CompositionLocalProvider(
+            LocalRippleConfiguration provides (defaultThemeColorState().rippleConfiguration)
+        ) {
             CascadeDropdownMenu(
                 expanded = expanded,
                 offset = DpOffset(12.dp, Size.none),
@@ -119,7 +117,7 @@ private fun Row(
     subTitle: UiText? = null,
     icon: UiIcon,
     onClick: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     MaterialDropdownMenuItem(
         text = {
@@ -129,8 +127,8 @@ private fun Row(
                     style =
                         MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface,
-                            letterSpacing = (-.5).sp
-                        )
+                            letterSpacing = (-.5).sp,
+                        ),
                 )
                 if (subTitle != null) {
                     Text(
@@ -141,7 +139,7 @@ private fun Row(
                                     MaterialTheme.colorScheme.onSurface.copy(
                                         alpha = NekoColors.mediumAlphaLowContrast
                                     ),
-                                letterSpacing = (-.5).sp
+                                letterSpacing = (-.5).sp,
                             ),
                     )
                 }
@@ -154,13 +152,13 @@ private fun Row(
                         imageVector = icon.icon,
                         modifier = Modifier.size(24.dp),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 is UiIcon.IIcon ->
                     Image(
                         asset = icon.icon,
                         modifier = Modifier.size(24.dp),
-                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface)
+                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onSurface),
                     )
             }
         },

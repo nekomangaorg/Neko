@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import java.io.File
 import kotlin.math.max
+import kotlinx.coroutines.delay
 import org.nekomanga.R
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.logging.TimberKt
@@ -176,11 +177,7 @@ val displayMaxHeightInPx: Int
  */
 val Context.animatorDurationScale: Float
     get() =
-        Settings.Global.getFloat(
-            this.contentResolver,
-            Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f,
-        )
+        Settings.Global.getFloat(this.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
 
 /**
  * Helper method to create a notification builder.
@@ -280,12 +277,7 @@ fun Context.defaultBrowserPackageName(): String? {
 }
 
 fun Context.openInWebView(url: String, title: String = "") {
-    val intent =
-        WebViewActivity.newIntent(
-            this.applicationContext,
-            url,
-            title,
-        )
+    val intent = WebViewActivity.newIntent(this.applicationContext, url, title)
     startActivity(intent)
 }
 
@@ -336,6 +328,7 @@ fun Context.isInNightMode(): Boolean {
 suspend fun CoroutineWorker.tryToSetForeground() {
     try {
         setForeground(getForegroundInfo())
+        delay(500)
     } catch (e: IllegalStateException) {
         TimberKt.e(e) { "Not allowed to set foreground job" }
     }

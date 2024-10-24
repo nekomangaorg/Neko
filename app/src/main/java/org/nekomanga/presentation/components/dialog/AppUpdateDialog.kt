@@ -22,7 +22,7 @@ import org.nekomanga.R
 fun AppUpdateDialog(
     release: GithubRelease,
     onDismissRequest: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
 ) {
     val body = release.info.substringBeforeLast("| Variant | SHA-256")
     val url = release.downloadLink

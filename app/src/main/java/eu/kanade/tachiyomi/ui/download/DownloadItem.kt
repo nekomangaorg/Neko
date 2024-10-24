@@ -8,10 +8,8 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.download.model.Download
 import org.nekomanga.R
 
-class DownloadItem(
-    val download: Download,
-    header: DownloadHeaderItem,
-) : AbstractSectionableItem<DownloadHolder, DownloadHeaderItem>(header) {
+class DownloadItem(val download: Download, header: DownloadHeaderItem) :
+    AbstractSectionableItem<DownloadHolder, DownloadHeaderItem>(header) {
 
     /** Whether this item is currently selected. */
     var isSelected = false
@@ -29,12 +27,7 @@ class DownloadItem(
      */
     override fun createViewHolder(
         view: View,
-        adapter:
-            FlexibleAdapter<
-                IFlexible<
-                    RecyclerView.ViewHolder,
-                >,
-            >,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): DownloadHolder {
         return DownloadHolder(view, adapter as DownloadAdapter)
     }

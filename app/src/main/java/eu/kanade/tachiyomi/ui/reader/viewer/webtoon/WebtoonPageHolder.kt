@@ -41,10 +41,8 @@ import rx.schedulers.Schedulers
  * @param viewer the webtoon viewer.
  * @constructor creates a new webtoon holder.
  */
-class WebtoonPageHolder(
-    private val frame: ReaderPageImageView,
-    viewer: WebtoonViewer,
-) : WebtoonBaseHolder(frame, viewer) {
+class WebtoonPageHolder(private val frame: ReaderPageImageView, viewer: WebtoonViewer) :
+    WebtoonBaseHolder(frame, viewer) {
 
     /** Loading progress bar to indicate the current progress. */
     private val progressBar = createProgressBar()
@@ -279,7 +277,7 @@ class WebtoonPageHolder(
         return ImageUtil.splitAndStackBitmap(
             imageStream,
             viewer.config.invertDoublePages,
-            viewer.hasMargins
+            viewer.hasMargins,
         )
     }
 

@@ -140,6 +140,7 @@ class Downloader(
 
         DownloadJob.stop(context)
     }
+
     /** Pauses the downloader */
     fun pause() {
         cancelDownloaderJob()
@@ -326,12 +327,7 @@ class Downloader(
                         // Don't trust index from source
                         val reIndexedPages =
                             pages.mapIndexed { index, page ->
-                                Page(
-                                    index,
-                                    page.url,
-                                    page.imageUrl,
-                                    uri = page.uri,
-                                )
+                                Page(index, page.url, page.imageUrl, uri = page.uri)
                             }
                         download.pages = reIndexedPages
                         reIndexedPages
@@ -414,26 +410,18 @@ class Downloader(
             val file =
                 when {
                     imageFile != null -> imageFile
-                    chapterCache.isImageInCache(
-                        page.imageUrl!!,
-                    ) ->
+                    chapterCache.isImageInCache(page.imageUrl!!) ->
                         copyImageFromCache(
                             chapterCache.getImageFile(page.imageUrl!!),
                             tmpDir,
-                            filename
+                            filename,
                         )
                     else -> downloadImage(page, download.source, tmpDir, filename)
                 }
 
             // When the page is ready, set page path, progress (just in case) and status
-            val success = splitTallImageIfNeeded(page, tmpDir)
-            if (!success) {
-                notifier.onError(
-                    context.getString(R.string.download_notifier_split_failed),
-                    download.chapterItem.name,
-                    download.mangaItem.title,
-                )
-            }
+            splitTallImageIfNeeded(page, tmpDir)
+
             page.uri = file.uri
             page.progress = 100
             page.status = Page.State.READY
@@ -458,7 +446,7 @@ class Downloader(
         page: Page,
         source: HttpSource,
         tmpDir: UniFile,
-        filename: String
+        filename: String,
     ): UniFile {
         page.status = Page.State.DOWNLOAD_IMAGE
         page.progress = 0
@@ -525,29 +513,26 @@ class Downloader(
         return ImageUtil.getExtensionFromMimeType(mime)
     }
 
-    private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile): Boolean {
-        if (!readerPreferences.splitTallImages().get()) return true
+    private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile) {
+        if (!readerPreferences.splitTallImages().get()) return
 
-        val filename = String.format("%03d", page.number)
-        val imageFile =
-            tmpDir.listFiles()?.find { it.name!!.startsWith(filename) }
-                ?: throw Error(
-                    context.getString(R.string.download_notifier_split_page_not_found, page.number)
-                )
-        val imageFilePath =
-            imageFile.filePath
-                ?: throw Error(
-                    context.getString(R.string.download_notifier_split_page_not_found, page.number)
-                )
+        try {
+            val fileName = "%03d".format(Locale.ENGLISH, page.number)
+            val imageFile =
+                tmpDir.listFiles()?.firstOrNull { it.name.orEmpty().startsWith(fileName) }
+                    ?: throw Error(
+                        context.getString(
+                            R.string.download_notifier_split_page_not_found,
+                            page.number,
+                        )
+                    )
 
-        // check if the original page was previously split before then skip.
-        if (imageFile.name!!.contains("__")) return true
+            // Check if the original page was previously split before then skip.
+            if (imageFile.name.orEmpty().startsWith("${fileName}__")) return
 
-        return try {
-            ImageUtil.splitTallImage(imageFile, imageFilePath)
+            ImageUtil.splitTallImage(tmpDir, imageFile, fileName)
         } catch (e: Exception) {
-            TimberKt.e(e) { "Error splitting tall image" }
-            false
+            TimberKt.e(e) { "Failed to split downloaded image" }
         }
     }
 
@@ -557,10 +542,7 @@ class Downloader(
      * @param download the download to check.
      * @param tmpDir the directory where the download is currently stored.
      */
-    private fun isDownloadSuccessful(
-        download: Download,
-        tmpDir: UniFile,
-    ): Boolean {
+    private fun isDownloadSuccessful(download: Download, tmpDir: UniFile): Boolean {
         // Page list hasn't been initialized or all pages have not been downloaded
         if (download.pages?.size == null || download.pages!!.size != download.downloadedImages) {
             return false
@@ -584,11 +566,7 @@ class Downloader(
     }
 
     /** Archive the chapter pages as a CBZ. */
-    private fun archiveChapter(
-        mangaDir: UniFile,
-        dirname: String,
-        tmpDir: UniFile,
-    ) {
+    private fun archiveChapter(mangaDir: UniFile, dirname: String, tmpDir: UniFile) {
         val zip = mangaDir.createFile("$dirname.cbz$TMP_DIR_SUFFIX")!!
         ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
             zipOut.setMethod(ZipEntry.STORED)

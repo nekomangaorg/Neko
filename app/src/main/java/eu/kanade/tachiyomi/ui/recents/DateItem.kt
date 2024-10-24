@@ -20,7 +20,7 @@ class DateItem(val date: Date, val addedString: Boolean = false) :
 
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): Holder {
         return Holder(view, adapter)
     }
@@ -29,7 +29,7 @@ class DateItem(val date: Date, val addedString: Boolean = false) :
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: Holder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.bind(this)
     }

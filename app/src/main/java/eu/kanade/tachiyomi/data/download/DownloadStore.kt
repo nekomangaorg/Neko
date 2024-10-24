@@ -19,10 +19,7 @@ import uy.kohesive.injekt.injectLazy
  *
  * @param context the application context.
  */
-class DownloadStore(
-    context: Context,
-    private val sourceManager: SourceManager,
-) {
+class DownloadStore(context: Context, private val sourceManager: SourceManager) {
 
     /** Preference file where active downloads are stored. */
     private val preferences = context.getSharedPreferences("active_downloads", Context.MODE_PRIVATE)

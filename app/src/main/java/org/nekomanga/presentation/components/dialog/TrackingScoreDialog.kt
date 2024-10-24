@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,11 +31,11 @@ fun TrackingScoreDialog(
     themeColorState: ThemeColorState,
     trackAndService: TrackingConstants.TrackAndService,
     onDismiss: () -> Unit,
-    trackScoreChange: (Int) -> Unit
+    trackScoreChange: (Int) -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
         val displayedScore = trackAndService.service.displayScore(trackAndService.track)
         val index =
@@ -53,7 +53,7 @@ fun TrackingScoreDialog(
                 Text(
                     text = stringResource(id = R.string.score),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             },
             text = {
@@ -81,7 +81,7 @@ fun TrackingScoreDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

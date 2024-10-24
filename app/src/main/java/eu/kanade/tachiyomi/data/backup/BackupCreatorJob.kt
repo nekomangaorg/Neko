@@ -82,7 +82,7 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
                 workManager.enqueueUniquePeriodicWork(
                     TAG_AUTO,
                     ExistingPeriodicWorkPolicy.UPDATE,
-                    request
+                    request,
                 )
             }
         }

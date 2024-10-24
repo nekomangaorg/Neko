@@ -33,12 +33,7 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     private val separators by lazy {
-        arrayOf(
-            binding.separator1,
-            binding.separator2,
-            binding.separator3,
-            binding.separator4,
-        )
+        arrayOf(binding.separator1, binding.separator2, binding.separator3, binding.separator4)
     }
 
     override fun isActivated(): Boolean {
@@ -123,8 +118,8 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
                         R.attr.colorOnSecondary
                     } else {
                         R.attr.colorOnBackground
-                    },
-                ),
+                    }
+                )
             )
             listener?.onFilterClicked(
                 this,
@@ -158,8 +153,8 @@ class FilterTagGroup @JvmOverloads constructor(context: Context, attrs: Attribut
                     R.attr.colorOnSecondary
                 } else {
                     R.attr.colorOnBackground
-                },
-            ),
+                }
+            )
         )
     }
 }

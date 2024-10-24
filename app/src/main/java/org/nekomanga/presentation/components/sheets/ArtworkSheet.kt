@@ -23,10 +23,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,8 +69,8 @@ fun ArtworkSheet(
     resetClick: () -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalTextSelectionColors provides themeColorState.textSelectionColors
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalTextSelectionColors provides themeColorState.textSelectionColors,
     ) {
         if (alternativeArtwork.isEmpty()) {
             BaseSheet(themeColor = themeColorState) {
@@ -115,7 +115,7 @@ fun ArtworkSheet(
                     ArtworkButton(
                         text = stringResource(id = R.string.save),
                         color = themeColorState.buttonColor,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     ) {
                         saveClick(currentImage)
                     }
@@ -123,14 +123,14 @@ fun ArtworkSheet(
                         ArtworkButton(
                             text = stringResource(id = R.string.set),
                             color = themeColorState.buttonColor,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             setClick(currentImage)
                         }
                         ArtworkButton(
                             text = stringResource(id = R.string.reset),
                             color = themeColorState.buttonColor,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             resetClick()
                         }
@@ -138,7 +138,7 @@ fun ArtworkSheet(
                     ArtworkButton(
                         text = stringResource(id = R.string.share),
                         color = themeColorState.buttonColor,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     ) {
                         shareClick(currentImage)
                     }
@@ -155,15 +155,12 @@ fun ArtworkSheet(
                 if (alternativeArtwork.size > 1) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(Size.tiny, Alignment.Bottom)
+                        verticalArrangement = Arrangement.spacedBy(Size.tiny, Alignment.Bottom),
                     ) {
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(Size.tiny)) {
                             items(alternativeArtwork) { artwork ->
                                 Box {
-                                    Thumbnail(
-                                        artwork = artwork,
-                                        thumbnailSize = thumbnailSize,
-                                    ) {
+                                    Thumbnail(artwork = artwork, thumbnailSize = thumbnailSize) {
                                         currentImage = artwork
                                     }
                                     if (artwork.active) {
@@ -207,11 +204,9 @@ private fun Thumbnail(artwork: Artwork, thumbnailSize: Dp, thumbnailClicked: () 
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier =
-            Modifier.size(thumbnailSize)
-                .clip(
-                    RoundedCornerShape(Shapes.coverRadius),
-                )
-                .clickable { thumbnailClicked() },
+            Modifier.size(thumbnailSize).clip(RoundedCornerShape(Shapes.coverRadius)).clickable {
+                thumbnailClicked()
+            },
     )
 }
 
@@ -225,14 +220,14 @@ private fun BoxScope.VolumeSection(thumbnailSize: Dp, gradientHeight: Dp, artwor
                 .clip(
                     RoundedCornerShape(
                         bottomStart = Shapes.coverRadius,
-                        bottomEnd = Shapes.coverRadius
+                        bottomEnd = Shapes.coverRadius,
                     )
                 )
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface),
-                    ),
-                ),
+                        colors = listOf(Color.Transparent, MaterialTheme.colorScheme.onSurface)
+                    )
+                )
     )
     Text(
         text = artwork.volume,
@@ -250,13 +245,13 @@ private fun ActiveIndicator(themeColorState: ThemeColorState) {
         modifier =
             Modifier.padding(Size.tiny)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface),
+                .background(MaterialTheme.colorScheme.surface)
     ) {
         Icon(
             imageVector = Icons.Filled.Star,
             modifier = Modifier.padding(Size.tiny),
             contentDescription = null,
-            tint = themeColorState.buttonColor
+            tint = themeColorState.buttonColor,
         )
     }
 }

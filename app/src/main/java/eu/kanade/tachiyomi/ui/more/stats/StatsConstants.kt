@@ -17,12 +17,16 @@ object StatsConstants {
         val globalUpdateCount: Int = 0,
         val downloadCount: Int = 0,
         val tagCount: Int = 0,
-        val mergeCount: Int = 0,
+        val komgaMergeCount: Int = 0,
+        val mangaLifeMergeCount: Int = 0,
+        val toonilyMergeCount: Int = 0,
+        val weebCentralMergeCount: Int = 0,
         val averageMangaRating: Double = 0.0,
         val averageUserRating: Double = 0.0,
         val trackerCount: Int = 0,
         val readDuration: String = "",
         val lastLibraryUpdate: String = "",
+        val lastLibraryUpdateAttempt: String = "",
     )
 
     data class DetailedState(

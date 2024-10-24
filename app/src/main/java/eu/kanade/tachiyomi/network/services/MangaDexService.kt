@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.RelationshipDtoList
-import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.core.network.ProxyRetrofitQueryMap
@@ -65,14 +64,10 @@ interface MangaDexService {
     ): ApiResponse<AggregateDto>
 
     @GET("${MdConstants.Api.statistics}${MdConstants.Api.manga}/{id}")
-    suspend fun mangaStatistics(
-        @Path("id") mangaId: String,
-    ): ApiResponse<StatisticResponseDto>
+    suspend fun mangaStatistics(@Path("id") mangaId: String): ApiResponse<StatisticResponseDto>
 
     @GET("${MdConstants.Api.statistics}${MdConstants.Api.chapter}/{id}")
-    suspend fun chapterStatistics(
-        @Path("id") chapterId: String,
-    ): ApiResponse<StatisticResponseDto>
+    suspend fun chapterStatistics(@Path("id") chapterId: String): ApiResponse<StatisticResponseDto>
 
     @GET("${MdConstants.Api.manga}/{id}/relation")
     suspend fun relatedManga(@Path("id") id: String): ApiResponse<RelationListDto>
@@ -126,7 +121,5 @@ interface MangaDexService {
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
 
     @POST(MdConstants.atHomeReportUrl)
-    suspend fun atHomeImageReport(
-        @Body atHomeImageReportDto: AtHomeImageReportDto
-    ): ApiResponse<ResultDto>
+    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)
 }

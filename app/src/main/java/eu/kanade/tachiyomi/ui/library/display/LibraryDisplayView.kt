@@ -96,7 +96,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                         R.string.landscape
                     } else {
                         R.string.portrait
-                    },
+                    }
                 )
             val alt =
                 (if (view.measuredHeight >= 720.dpToPx) {
@@ -113,7 +113,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                         R.string.portrait
                     } else {
                         R.string.landscape
-                    },
+                    }
                 )
             "$mainOrientation: $mainText ? $altOrientation: $altText"
         }
@@ -131,7 +131,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                     libraryPreferences.gridSize().set((slider.value / 2f) - .5f)
                     setGridText(slider.value)
                 }
-            },
+            }
         )
     }
 

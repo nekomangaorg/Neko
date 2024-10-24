@@ -226,14 +226,14 @@ internal class DownloadNotifier(private val context: Context) {
         // Create notification
         with(errorNotificationBuilder) {
             setContentTitle(
-                mangaTitle?.plus(": $chapter") ?: context.getString(R.string.download_error),
+                mangaTitle?.plus(": $chapter") ?: context.getString(R.string.download_error)
             )
             setContentText(error ?: context.getString(R.string.could_not_download_unexpected_error))
             setStyle(
                 NotificationCompat.BigTextStyle()
                     .bigText(
-                        error ?: context.getString(R.string.could_not_download_unexpected_error),
-                    ),
+                        error ?: context.getString(R.string.could_not_download_unexpected_error)
+                    )
             )
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setCategory(NotificationCompat.CATEGORY_ERROR)
@@ -246,7 +246,7 @@ internal class DownloadNotifier(private val context: Context) {
                         0,
                         customIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                    ),
+                    )
                 )
             } else {
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))

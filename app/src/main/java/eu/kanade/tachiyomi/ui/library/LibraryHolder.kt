@@ -16,10 +16,8 @@ import org.nekomanga.R
  * @param adapter the adapter handling this holder.
  * @param listener a listener to react to the single tap and long tap events.
  */
-abstract class LibraryHolder(
-    view: View,
-    val adapter: LibraryCategoryAdapter,
-) : BaseFlexibleViewHolder(view, adapter) {
+abstract class LibraryHolder(view: View, val adapter: LibraryCategoryAdapter) :
+    BaseFlexibleViewHolder(view, adapter) {
 
     protected val color =
         ColorUtils.setAlphaComponent(itemView.context.getResourceColor(R.attr.colorSecondary), 75)

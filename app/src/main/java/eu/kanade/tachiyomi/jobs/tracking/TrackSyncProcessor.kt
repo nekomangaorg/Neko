@@ -60,7 +60,7 @@ class TrackSyncProcessor {
                                                 val id =
                                                     trackManager.getIdFromManga(
                                                         trackServiceItem,
-                                                        manga
+                                                        manga,
                                                     )
                                                 if (id != null) {
                                                     val trackResult =
@@ -70,7 +70,7 @@ class TrackSyncProcessor {
                                                                 .getService(trackService.id)!!
                                                                 .toTrackServiceItem(),
                                                             manga,
-                                                            false
+                                                            false,
                                                         )
                                                     when (trackResult) {
                                                         is TrackingConstants.TrackSearchResult.Success -> {
@@ -79,9 +79,9 @@ class TrackSyncProcessor {
                                                             trackingCoordinator.registerTracking(
                                                                 TrackingConstants.TrackAndService(
                                                                     trackSearchItem.trackItem,
-                                                                    trackServiceItem
+                                                                    trackServiceItem,
                                                                 ),
-                                                                manga.id!!
+                                                                manga.id!!,
                                                             )
                                                         }
                                                         else -> Unit

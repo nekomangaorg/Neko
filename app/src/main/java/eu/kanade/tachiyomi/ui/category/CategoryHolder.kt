@@ -107,12 +107,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) :
             binding.editText.clearFocus()
             binding.editButton.drawable
                 ?.mutate()
-                ?.setTint(
-                    ContextCompat.getColor(
-                        itemView.context,
-                        R.color.gray_button,
-                    ),
-                )
+                ?.setTint(ContextCompat.getColor(itemView.context, R.color.gray_button))
             binding.reorder.setImageDrawable(regularDrawable)
         }
     }
@@ -122,7 +117,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) :
             if (
                 adapter.categoryItemListener.onCategoryRename(
                     flexibleAdapterPosition,
-                    binding.editText.text.toString()
+                    binding.editText.text.toString(),
                 )
             ) {
                 isEditing(false)

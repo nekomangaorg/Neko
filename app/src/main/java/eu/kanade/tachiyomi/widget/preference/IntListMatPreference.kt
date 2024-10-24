@@ -8,11 +8,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class IntListMatPreference
 @JvmOverloads
-constructor(
-    activity: Activity?,
-    context: Context,
-    attrs: AttributeSet? = null,
-) : MatPreference(activity, context, attrs) {
+constructor(activity: Activity?, context: Context, attrs: AttributeSet? = null) :
+    MatPreference(activity, context, attrs) {
     var entryValues: List<Int> = emptyList()
     var entryRange: IntRange
         get() = 0..0

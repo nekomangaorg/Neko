@@ -59,7 +59,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) : Contro
                     viewScope.cancel()
                     TimberKt.d { "Destroy view for ${controller.instance()}" }
                 }
-            },
+            }
         )
     }
 
@@ -170,7 +170,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) : Contro
 
                     return onCollapse?.invoke(item) ?: true
                 }
-            },
+            }
         )
 
         if (expandActionViewFromInteraction) {

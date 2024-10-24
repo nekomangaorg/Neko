@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.widget.preference
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
-import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.util.system.toast
@@ -23,7 +22,7 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
 
     constructor(
         service: TrackService,
-        @StringRes usernameLabelRes: Int?
+        @StringRes usernameLabelRes: Int?,
     ) : this(usernameLabelRes, Bundle().apply { putInt("key", service.id) })
 
     override fun setCredentialsOnView(view: View) =
@@ -36,10 +35,9 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
 
     override fun checkLogin() {
         v?.apply {
-            binding.login.apply {
-                progressType = ProgressType.INDETERMINATE
-                startAnimation()
-            }
+            binding.progress.visibility = View.VISIBLE
+            binding.login.visibility = View.GONE
+
             if (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank()) {
                 errorResult()
                 context.toast(R.string.username_must_not_be_blank)
@@ -72,9 +70,9 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
         v?.apply {
             dialog?.setCancelable(true)
             dialog?.setCanceledOnTouchOutside(true)
-            binding.login.revertAnimation {
-                binding.login.text = activity!!.getText(R.string.unknown_error)
-            }
+            binding.progress.visibility = View.GONE
+            binding.login.visibility = View.VISIBLE
+            scope.launch { context.toast(R.string.unknown_error) }
         }
     }
 

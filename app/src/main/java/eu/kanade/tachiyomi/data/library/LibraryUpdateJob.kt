@@ -140,6 +140,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val notifier = LibraryUpdateNotifier(context)
 
     override suspend fun doWork(): Result {
+
         if (WORK_NAME_AUTO in tags) {
             if (
                 DEVICE_ONLY_ON_WIFI in libraryPreferences.autoUpdateDeviceRestrictions().get() &&
@@ -153,12 +154,29 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             }
         }
 
+        libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
+
         tryToSetForeground()
 
         instance = WeakReference(this)
 
         val selectedScheme = libraryPreferences.updatePrioritization().get()
-        val savedMangaList = inputData.getLongArray(KEY_MANGA_LIST)?.asList()
+
+        val savedMangaList =
+            when (inputData.getBoolean(KEY_MANGA_LIST, false)) {
+                true -> {
+                    val set =
+                        libraryPreferences
+                            .libraryUpdateIds()
+                            .get()
+                            .splitToSequence("||")
+                            .map { it.toLong() }
+                            .toSet()
+                    libraryPreferences.libraryUpdateIds().delete()
+                    set
+                }
+                false -> null
+            }
 
         val mangaList =
             (if (savedMangaList != null) {
@@ -232,7 +250,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 LibraryPreferences.MANGA_TRACKING_PLAN_TO_READ in restrictions &&
                     hasTrackWithGivenStatus(
                         libraryManga,
-                        context.getString(R.string.follows_plan_to_read)
+                        context.getString(R.string.follows_plan_to_read),
                     ) -> {
                     skippedUpdates[libraryManga] =
                         context.getString(R.string.skipped_reason_tracking_plan_to_read)
@@ -241,7 +259,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 LibraryPreferences.MANGA_TRACKING_DROPPED in restrictions &&
                     hasTrackWithGivenStatus(
                         libraryManga,
-                        context.getString(R.string.follows_dropped)
+                        context.getString(R.string.follows_dropped),
                     ) -> {
                     skippedUpdates[libraryManga] =
                         context.getString(R.string.skipped_reason_tracking_dropped)
@@ -250,7 +268,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 LibraryPreferences.MANGA_TRACKING_ON_HOLD in restrictions &&
                     hasTrackWithGivenStatus(
                         libraryManga,
-                        context.getString(R.string.follows_on_hold)
+                        context.getString(R.string.follows_on_hold),
                     ) -> {
                     skippedUpdates[libraryManga] =
                         context.getString(R.string.skipped_reason_tracking_on_hold)
@@ -259,7 +277,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 LibraryPreferences.MANGA_TRACKING_COMPLETED in restrictions &&
                     hasTrackWithGivenStatus(
                         libraryManga,
-                        context.getString(R.string.follows_completed)
+                        context.getString(R.string.follows_completed),
                     ) -> {
                     skippedUpdates[libraryManga] =
                         context.getString(R.string.skipped_reason_tracking_completed)
@@ -364,9 +382,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
         }
     }
 
-    private suspend fun updateMangaInSource(
-        source: Long,
-    ): Boolean {
+    private suspend fun updateMangaInSource(source: Long): Boolean {
         if (mangaToUpdateMap[source] == null) return false
         var currentCount = 0
         var hasDownloads = false
@@ -407,7 +423,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                         MangaDetailChapterInformation(
                             null,
                             emptyList(),
-                            source.fetchChapterList(manga).getOrThrow { Exception(it.message()) }
+                            source.fetchChapterList(manga).getOrThrow { Exception(it.message()) },
                         )
                     } else {
                         source.fetchMangaAndChapterDetails(manga, true).getOrThrow {
@@ -641,22 +657,17 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             skippedUpdates.isNotEmpty() &&
                 Notifications.isNotificationChannelEnabled(
                     context,
-                    Notifications.Channel.Library.Skipped
+                    Notifications.Channel.Library.Skipped,
                 )
         ) {
-            val skippedFile =
-                writeErrorFile(
-                        skippedUpdates,
-                        "skipped",
-                    )
-                    .getUriCompat(context)
+            val skippedFile = writeErrorFile(skippedUpdates, "skipped").getUriCompat(context)
             notifier.showUpdateSkippedNotification(skippedUpdates.map { it.key.title }, skippedFile)
         }
         if (
             failedUpdates.isNotEmpty() &&
                 Notifications.isNotificationChannelEnabled(
                     context,
-                    Notifications.Channel.Library.Error
+                    Notifications.Channel.Library.Error,
                 )
         ) {
             val errorFile = writeErrorFile(failedUpdates)
@@ -735,7 +746,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                                 if (!hasDownloads) {
                                     hasDownloads = hasDLs
                                 }
-                            },
+                            }
                         )
                     }
                 } else {
@@ -840,16 +851,17 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
             val builder = Data.Builder()
             category?.id?.let { id -> builder.putInt(KEY_CATEGORY, id) }
 
+            val libraryPreferences = Injekt.injectLazy<LibraryPreferences>()
             if (mangaToUse != null) {
-                builder.putLongArray(
-                    KEY_MANGA_LIST,
-                    mangaToUse.mapNotNull { it.id }.toLongArray(),
-                )
+                builder.putBoolean(KEY_MANGA_LIST, true)
+                libraryPreferences.value
+                    .libraryUpdateIds()
+                    .set(mangaToUse.mapNotNull { it.id }.toLongArray().joinToString("||"))
             } else if (mangaIdsToUse != null) {
-                builder.putLongArray(
-                    KEY_MANGA_LIST,
-                    mangaIdsToUse.toLongArray(),
-                )
+                builder.putBoolean(KEY_MANGA_LIST, true)
+                libraryPreferences.value
+                    .libraryUpdateIds()
+                    .set(mangaIdsToUse.toLongArray().joinToString("||"))
             }
             val inputData = builder.build()
             val request =

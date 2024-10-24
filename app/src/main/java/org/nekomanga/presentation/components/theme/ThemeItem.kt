@@ -76,12 +76,12 @@ fun ThemeItem(theme: Themes, isDarkTheme: Boolean, selected: Boolean, onClick: (
             selected,
             selectedColor = MaterialTheme.colorScheme.primary,
             themeMatchesApp,
-            onClick
+            onClick,
         )
         Text(
             text = stringResource(id = if (isDarkTheme) theme.darkNameRes else theme.nameRes),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodySmall,
         )
     }
 }
@@ -106,7 +106,7 @@ fun AppThemePreviewItem(
         onClick = onClick,
         modifier = Modifier.height(180.dp).fillMaxWidth(),
         colors = CardDefaults.outlinedCardColors(containerColor = colorScheme.background),
-        border = BorderStroke(width = Size.tiny, color = selectedColor)
+        border = BorderStroke(width = Size.tiny, color = selectedColor),
     ) {
         // App Bar
         Row(
@@ -121,13 +121,10 @@ fun AppThemePreviewItem(
                         .background(
                             color = colorScheme.surfaceVariant,
                             shape = MaterialTheme.shapes.small,
-                        ),
+                        )
             )
 
-            Box(
-                modifier = Modifier.weight(0.3f),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
+            Box(modifier = Modifier.weight(0.3f), contentAlignment = Alignment.CenterEnd) {
                 if (selected) {
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
@@ -142,30 +139,27 @@ fun AppThemePreviewItem(
         Box(
             modifier =
                 Modifier.padding(start = Size.small, top = Size.extraTiny)
-                    .background(
-                        color = DividerDefaults.color,
-                        shape = MaterialTheme.shapes.small,
-                    )
+                    .background(color = DividerDefaults.color, shape = MaterialTheme.shapes.small)
                     .fillMaxWidth(0.5f)
-                    .aspectRatio(MangaCover.Book.ratio),
+                    .aspectRatio(MangaCover.Book.ratio)
         ) {
             Row(
                 modifier =
                     Modifier.padding(Size.small)
                         .size(width = Size.large, height = Size.medium)
-                        .clip(RoundedCornerShape(Size.small)),
+                        .clip(RoundedCornerShape(Size.small))
             ) {
                 Box(
                     modifier =
                         Modifier.fillMaxHeight()
                             .width(Size.smedium)
-                            .background(colorScheme.tertiary),
+                            .background(colorScheme.tertiary)
                 )
                 Box(
                     modifier =
                         Modifier.fillMaxHeight()
                             .width(Size.smedium)
-                            .background(colorScheme.secondary),
+                            .background(colorScheme.secondary)
                 )
             }
         }
@@ -175,9 +169,7 @@ fun AppThemePreviewItem(
             modifier = Modifier.fillMaxWidth().weight(1f),
             contentAlignment = Alignment.BottomCenter,
         ) {
-            Surface(
-                tonalElevation = Size.small,
-            ) {
+            Surface(tonalElevation = Size.small) {
                 Row(
                     modifier =
                         Modifier.height(Size.extraLarge)
@@ -196,15 +188,12 @@ fun AppThemePreviewItem(
                                             alpha = NekoColors.mediumAlphaHighContrast
                                         ),
                                     shape = CircleShape,
-                                ),
+                                )
                     )
                     Box(
                         modifier =
                             Modifier.size(Size.medium)
-                                .background(
-                                    color = colorScheme.primary,
-                                    shape = CircleShape,
-                                ),
+                                .background(color = colorScheme.primary, shape = CircleShape)
                     )
                     Box(
                         modifier =
@@ -215,7 +204,7 @@ fun AppThemePreviewItem(
                                             alpha = NekoColors.mediumAlphaHighContrast
                                         ),
                                     shape = CircleShape,
-                                ),
+                                )
                     )
                 }
             }

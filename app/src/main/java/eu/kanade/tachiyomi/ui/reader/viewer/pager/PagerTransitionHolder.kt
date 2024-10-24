@@ -20,10 +20,8 @@ import rx.android.schedulers.AndroidSchedulers
 
 /** View of the ViewPager that contains a chapter transition. */
 @SuppressLint("ViewConstructor")
-class PagerTransitionHolder(
-    val viewer: PagerViewer,
-    val transition: ChapterTransition,
-) : LinearLayout(viewer.activity), ViewPagerAdapter.PositionableView {
+class PagerTransitionHolder(val viewer: PagerViewer, val transition: ChapterTransition) :
+    LinearLayout(viewer.activity), ViewPagerAdapter.PositionableView {
 
     /** Item that identifies this view. Needed by the adapter to not recreate views. */
     override val item: Any
@@ -55,7 +53,7 @@ class PagerTransitionHolder(
         transitionView.bind(
             transition,
             viewer.downloadManager,
-            viewer.activity.viewModel.state.value.manga
+            viewer.activity.viewModel.state.value.manga,
         )
         transition.to?.let { observeStatus(it) }
     }

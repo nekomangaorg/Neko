@@ -16,12 +16,12 @@ class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundl
 
     constructor(
         body: String,
-        url: String
+        url: String,
     ) : this(
         Bundle().apply {
             putString(BODY_KEY, body)
             putString(URL_KEY, url)
-        },
+        }
     )
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {

@@ -109,7 +109,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : FastScroller(contex
 
     private fun dispatchTouchToRecycler(
         event: MotionEvent,
-        block: (MotionEvent.() -> Unit)? = null
+        block: (MotionEvent.() -> Unit)? = null,
     ) {
         val ev2 = MotionEvent.obtain(event)
         ev2.offsetLocation(this.x, this.y)

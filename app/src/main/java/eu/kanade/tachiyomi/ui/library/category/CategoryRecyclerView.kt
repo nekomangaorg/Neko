@@ -14,10 +14,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 
 class CategoryRecyclerView
 @JvmOverloads
-constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-) : RecyclerView(context, attrs) {
+constructor(context: Context, attrs: AttributeSet? = null) : RecyclerView(context, attrs) {
 
     val manager = LinearLayoutManager(context)
     private val fastAdapter: FastAdapter<CategoryItem>
@@ -59,10 +56,7 @@ constructor(
     fun scrollToCategory(order: Int) {
         val index = itemAdapter.adapterItems.indexOfFirst { it.category.order == order }
         if (index > -1) {
-            manager.scrollToPositionWithOffset(
-                index,
-                (height - 38.dpToPx) / 2,
-            )
+            manager.scrollToPositionWithOffset(index, (height - 38.dpToPx) / 2)
         }
     }
 

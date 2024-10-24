@@ -139,7 +139,7 @@ class MangaUpdateCoordinator {
     private fun ProducerScope<MangaResult>.startChapterJob(
         scope: CoroutineScope,
         manga: Manga,
-        mangaWasAlreadyInitialized: Boolean
+        mangaWasAlreadyInitialized: Boolean,
     ): Job {
         return scope.launchIO {
             val deferredChapters = async {
@@ -189,7 +189,7 @@ class MangaUpdateCoordinator {
                             manga,
                             newChapters.first
                                 .mapNotNull { it.toSimpleChapter()?.toChapterItem() }
-                                .sortedBy { it.chapter.chapterNumber }
+                                .sortedBy { it.chapter.chapterNumber },
                         )
                     }
                 }

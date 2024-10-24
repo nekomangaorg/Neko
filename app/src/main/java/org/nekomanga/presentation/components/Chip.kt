@@ -16,11 +16,7 @@ import org.nekomanga.presentation.theme.Size
 
 /** custom chip so you can pass combinedClickable */
 @Composable
-fun Chip(
-    label: String,
-    containerColor: Color,
-    modifier: Modifier = Modifier,
-) {
+fun Chip(label: String, containerColor: Color, modifier: Modifier = Modifier) {
     Surface(
         modifier = Modifier.clip(RoundedCornerShape(Size.small)).then(modifier),
         tonalElevation = Size.small,

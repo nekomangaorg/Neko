@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.lang.toResultError
 import kotlin.math.floor
+import org.nekomanga.constants.Constants
 import org.nekomanga.constants.MdConstants
 import org.nekomanga.domain.manga.Stats
 import org.nekomanga.domain.network.ResultError
@@ -31,7 +32,7 @@ class ApiMangaParser {
     fun mangaDetailsParse(
         mangaDto: MangaDataDto,
         stats: Stats,
-        simpleChapters: List<String>
+        simpleChapters: List<String>,
     ): Result<SManga, ResultError> {
         try {
             val mangaAttributesDto = mangaDto.attributes
@@ -51,7 +52,7 @@ class ApiMangaParser {
                     }
                     .mapNotNull { it.attributes!!.name }
                     .distinct()
-                    .joinToString(" ⋅ ")
+                    .joinToString(Constants.SEPARATOR)
 
             manga.artist =
                 mangaDto.relationships
@@ -60,7 +61,7 @@ class ApiMangaParser {
                     }
                     .mapNotNull { it.attributes!!.name }
                     .distinct()
-                    .joinToString(" ⋅ ")
+                    .joinToString(Constants.SEPARATOR)
 
             val altTitles =
                 mangaAttributesDto.altTitles?.map { it.asMdMap<String>().values }?.flatten()
@@ -146,7 +147,7 @@ class ApiMangaParser {
                     chapterListResponse
                         .asSequence()
                         .map { mapChapter(it, lastChapterNumber, groupMap) }
-                        .toList(),
+                        .toList()
                 )
             }
             .getOrElse {
@@ -193,7 +194,7 @@ class ApiMangaParser {
 
 fun ChapterDataDto.buildChapterName(
     chapter: SChapter? = null,
-    lastChapterNumber: Int? = null
+    lastChapterNumber: Int? = null,
 ): String {
     val chapterName = mutableListOf<String>()
     // Build chapter name

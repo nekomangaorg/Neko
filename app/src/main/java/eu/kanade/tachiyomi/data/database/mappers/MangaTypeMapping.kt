@@ -54,11 +54,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 
 class MangaTypeMapping :
-    SQLiteTypeMapping<Manga>(
-        MangaPutResolver(),
-        MangaGetResolver(),
-        MangaDeleteResolver(),
-    )
+    SQLiteTypeMapping<Manga>(MangaPutResolver(), MangaGetResolver(), MangaDeleteResolver())
 
 class MangaPutResolver : DefaultPutResolver<Manga>() {
 

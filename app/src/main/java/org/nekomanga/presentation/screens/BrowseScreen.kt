@@ -139,7 +139,7 @@ fun BrowseScreen(
         modifier =
             Modifier.fillMaxSize().conditional(mainDropdownShowing) {
                 this.blur(16.dp).clickable(enabled = false) {}
-            },
+            }
     ) {
         ModalBottomSheetLayout(
             sheetState = sheetState,
@@ -177,7 +177,7 @@ fun BrowseScreen(
                                         listGridAppBarAction(
                                             isList = browseScreenState.value.isList,
                                             onClick = switchDisplayClick,
-                                        ),
+                                        )
                                     )
                                 false -> emptyList()
                             } +
@@ -185,7 +185,7 @@ fun BrowseScreen(
                                     showLibraryEntriesAction(
                                         showEntries = browseScreenState.value.showLibraryEntries,
                                         onClick = switchLibraryVisibilityClick,
-                                    ),
+                                    )
                                 ) +
                                 if (browseScreenState.value.isDeepLink) {
                                     emptyList()
@@ -201,9 +201,9 @@ fun BrowseScreen(
                                             menuShowing = { visible ->
                                                 mainDropdownShowing = visible
                                             },
-                                        ),
+                                        )
                                     )
-                                },
+                                }
                     )
                 },
             ) { incomingContentPadding ->
@@ -234,8 +234,8 @@ fun BrowseScreen(
                                         longClickedMangaId?.let {
                                             toggleFavorite(it, selectedCategories)
                                         }
-                                    },
-                                ),
+                                    }
+                                )
                             )
                         }
                     } else {
@@ -246,14 +246,14 @@ fun BrowseScreen(
                 Box(
                     modifier =
                         Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
-                            .fillMaxSize(),
+                            .fillMaxSize()
                 ) {
                     if (browseScreenState.value.initialLoading) {
                         Loading(
                             Modifier.zIndex(1f)
                                 .padding(Size.small)
                                 .padding(recyclerContentPadding)
-                                .align(Alignment.TopCenter),
+                                .align(Alignment.TopCenter)
                         )
                     } else if (browseScreenState.value.error != null) {
                         EmptyScreen(
@@ -333,9 +333,7 @@ fun BrowseScreen(
                                 if (sameScreen && !newIsFilterScreen) {
                                     // do nothing
                                 } else if (newIsFilterScreen) {
-                                    openSheet(
-                                        BrowseBottomSheetScreen.FilterSheet(),
-                                    )
+                                    openSheet(BrowseBottomSheetScreen.FilterSheet())
                                 } else {
                                     changeScreenType(newScreenType)
                                 }
@@ -350,7 +348,7 @@ fun BrowseScreen(
             Box(
                 modifier =
                     Modifier.fillMaxSize()
-                        .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast)),
+                        .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
             ) {}
         }
     }
@@ -361,7 +359,7 @@ private fun ScreenTypeFooter(
     screenType: BrowseScreenType,
     modifier: Modifier = Modifier,
     isLoggedIn: Boolean,
-    screenTypeClick: (BrowseScreenType) -> Unit
+    screenTypeClick: (BrowseScreenType) -> Unit,
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),

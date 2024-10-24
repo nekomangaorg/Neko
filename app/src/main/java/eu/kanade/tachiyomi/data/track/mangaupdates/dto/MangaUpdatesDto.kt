@@ -8,17 +8,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Context(
-    @SerialName("session_token") val sessionToken: String,
-    val uid: Long,
-)
+data class Context(@SerialName("session_token") val sessionToken: String, val uid: Long)
 
 @Serializable
-data class Image(
-    val url: Url? = null,
-    val height: Int? = null,
-    val width: Int? = null,
-)
+data class Image(val url: Url? = null, val height: Int? = null, val width: Int? = null)
 
 @Serializable
 data class ListItem(
@@ -35,10 +28,7 @@ fun ListItem.copyTo(track: Track): Track {
     }
 }
 
-@Serializable
-data class Rating(
-    val rating: Float? = null,
-)
+@Serializable data class Rating(val rating: Float? = null)
 
 fun Rating.copyTo(track: Track): Track {
     return track.apply { this.score = rating ?: 0f }
@@ -72,20 +62,8 @@ fun Record.toTrackSearch(id: Int): TrackSearch {
     }
 }
 
-@Serializable
-data class Series(
-    val id: Long? = null,
-    val title: String? = null,
-)
+@Serializable data class Series(val id: Long? = null, val title: String? = null)
 
-@Serializable
-data class Status(
-    val volume: Int? = null,
-    val chapter: Int? = null,
-)
+@Serializable data class Status(val volume: Int? = null, val chapter: Int? = null)
 
-@Serializable
-data class Url(
-    val original: String? = null,
-    val thumb: String? = null,
-)
+@Serializable data class Url(val original: String? = null, val thumb: String? = null)

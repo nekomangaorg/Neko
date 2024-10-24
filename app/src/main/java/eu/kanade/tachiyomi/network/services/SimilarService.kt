@@ -11,6 +11,6 @@ interface SimilarService {
     )
     suspend fun getSimilarMangaString(
         @Path("uuidTwoDigitPrefix") uuidTwoDigitPrefix: String,
-        @Path("uuidThreeDigitPrefix") uuidThreeDigitPrefix: String
+        @Path("uuidThreeDigitPrefix") uuidThreeDigitPrefix: String,
     ): ApiResponse<String>
 }

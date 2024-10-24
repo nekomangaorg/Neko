@@ -80,7 +80,7 @@ internal class PermissionStep : OnboardingStep {
                             @Suppress("DEPRECATION")
                             Settings.Secure.getInt(
                                 context.contentResolver,
-                                Settings.Secure.INSTALL_NON_MARKET_APPS
+                                Settings.Secure.INSTALL_NON_MARKET_APPS,
                             ) != 0
                         }
                     batteryGranted =
@@ -94,9 +94,7 @@ internal class PermissionStep : OnboardingStep {
             onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
         }
 
-        Column(
-            modifier = Modifier.padding(vertical = Size.medium),
-        ) {
+        Column(modifier = Modifier.padding(vertical = Size.medium)) {
             PermissionItem(
                 title = stringResource(R.string.onboarding_permission_install_apps),
                 subtitle = stringResource(R.string.onboarding_permission_install_apps_description),
@@ -151,10 +149,7 @@ internal class PermissionStep : OnboardingStep {
             headlineContent = { Text(text = title) },
             supportingContent = { Text(text = subtitle) },
             trailingContent = {
-                OutlinedButton(
-                    enabled = !granted,
-                    onClick = onButtonClick,
-                ) {
+                OutlinedButton(enabled = !granted, onClick = onButtonClick) {
                     if (granted) {
                         Icon(
                             imageVector = Icons.Default.Check,

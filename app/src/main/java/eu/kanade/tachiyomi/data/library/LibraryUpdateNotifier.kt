@@ -109,9 +109,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                     setContentText(context.getString(R.string.tap_to_see_details))
                     setStyle(
                         NotificationCompat.BigTextStyle()
-                            .bigText(
-                                errors.joinToString("\n") { it.chop(TITLE_MAX_LEN) },
-                            ),
+                            .bigText(errors.joinToString("\n") { it.chop(TITLE_MAX_LEN) })
                     )
                     setContentIntent(pendingIntent)
                     setSmallIcon(R.drawable.ic_neko_notification)
@@ -149,9 +147,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                     setContentText(context.getString(R.string.tap_to_see_details))
                     setStyle(
                         NotificationCompat.BigTextStyle()
-                            .bigText(
-                                skips.joinToString("\n") { it.chop(TITLE_MAX_LEN) },
-                            ),
+                            .bigText(skips.joinToString("\n") { it.chop(TITLE_MAX_LEN) })
                     )
                     setContentIntent(pendingIntent)
                     setSmallIcon(R.drawable.ic_neko_notification)
@@ -222,7 +218,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                         context,
                                         manga,
                                         chapters.first(),
-                                    ),
+                                    )
                                 )
                                 addAction(
                                     R.drawable.ic_eye_24dp,
@@ -256,7 +252,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                 setAutoCancel(true)
                             },
                             manga.id.hashCode(),
-                        ),
+                        )
                     )
                 }
             }
@@ -275,14 +271,14 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     R.plurals.for_n_titles,
                                     updates.size,
                                     updates.size,
-                                ),
+                                )
                             )
                             if (!securityPreferences.hideNotificationContent().get()) {
                                 setStyle(
                                     NotificationCompat.BigTextStyle()
                                         .bigText(
-                                            updates.keys.joinToString("\n") { it.title.chop(45) },
-                                        ),
+                                            updates.keys.joinToString("\n") { it.title.chop(45) }
+                                        )
                                 )
                             }
                         } else if (!securityPreferences.hideNotificationContent().get()) {

@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -32,8 +32,8 @@ fun BaseSheet(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColor.rippleTheme,
-        LocalTextSelectionColors provides themeColor.textSelectionColors
+        LocalRippleConfiguration provides themeColor.rippleConfiguration,
+        LocalTextSelectionColors provides themeColor.textSelectionColors,
     ) {
         val screenHeight = LocalConfiguration.current.screenHeightDp
         val maxSheetHeight = screenHeight * maxSheetHeightPercentage
@@ -43,9 +43,7 @@ fun BaseSheet(
                 Modifier.fillMaxWidth().requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
             shape = RoundedCornerShape(topStart = Shapes.sheetRadius, topEnd = Shapes.sheetRadius),
         ) {
-            Column(
-                modifier = Modifier.navigationBarsPadding().imePadding(),
-            ) {
+            Column(modifier = Modifier.navigationBarsPadding().imePadding()) {
                 if (showHandle) {
                     sheetHandle()
                 }

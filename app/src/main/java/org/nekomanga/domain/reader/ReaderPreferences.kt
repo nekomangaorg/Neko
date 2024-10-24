@@ -42,13 +42,13 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
     fun defaultReadingMode() =
         this.preferenceStore.getInt(
             "pref_default_reading_mode_key",
-            ReadingModeType.RIGHT_TO_LEFT.flagValue
+            ReadingModeType.RIGHT_TO_LEFT.flagValue,
         )
 
     fun defaultOrientationType() =
         this.preferenceStore.getInt(
             "pref_default_orientation_type_key",
-            OrientationType.FREE.flagValue
+            OrientationType.FREE.flagValue,
         )
 
     fun imageScaleType() = this.preferenceStore.getInt("pref_image_scale_type_key", 1)
@@ -89,13 +89,13 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
     fun pagerNavInverted() =
         this.preferenceStore.getEnum(
             "reader_tapping_inverted",
-            ViewerNavigation.TappingInvertMode.NONE
+            ViewerNavigation.TappingInvertMode.NONE,
         )
 
     fun webtoonNavInverted() =
         this.preferenceStore.getEnum(
             "reader_tapping_inverted_webtoon",
-            ViewerNavigation.TappingInvertMode.NONE
+            ViewerNavigation.TappingInvertMode.NONE,
         )
 
     fun pageLayout() = this.preferenceStore.getInt("page_layout", PageLayout.AUTOMATIC.value)
@@ -110,7 +110,7 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
     fun webtoonReaderHideThreshold() =
         this.preferenceStore.getEnum(
             "reader_hide_threshold",
-            PreferenceValues.ReaderHideThreshold.LOW
+            PreferenceValues.ReaderHideThreshold.LOW,
         )
 
     fun webtoonInvertDoublePages() = this.preferenceStore.getBoolean("webtoon_invert_double_pages")
@@ -118,7 +118,7 @@ class ReaderPreferences(private val preferenceStore: PreferenceStore) {
     fun readerBottomButtons() =
         this.preferenceStore.getStringSet(
             "reader_bottom_buttons",
-            ReaderBottomButton.BUTTONS_DEFAULTS
+            ReaderBottomButton.BUTTONS_DEFAULTS,
         )
 
     fun preloadPageAmount() = this.preferenceStore.getInt("preload_size", 6)

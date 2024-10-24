@@ -80,7 +80,7 @@ class DownloadJob(val context: Context, workerParameters: WorkerParameters) :
             val noWifi = requireWifi && !state.isWifi
             if (noWifi) {
                 downloadManager.downloaderStop(
-                    applicationContext.getString(R.string.no_wifi_connection),
+                    applicationContext.getString(R.string.no_wifi_connection)
                 )
             }
             !noWifi

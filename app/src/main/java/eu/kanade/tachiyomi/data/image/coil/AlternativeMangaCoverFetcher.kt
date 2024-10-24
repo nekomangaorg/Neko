@@ -46,7 +46,7 @@ class AlternativeMangaCoverFetcher(
         ArtworkKeyer()
             .key(
                 Artwork(url = url, inLibrary = false, originalArtwork = "", mangaId = mangaId),
-                options
+                options,
             )
     }
 
@@ -216,9 +216,7 @@ class AlternativeMangaCoverFetcher(
         else null
     }
 
-    private fun writeToDiskCache(
-        response: Response,
-    ): DiskCache.Snapshot? {
+    private fun writeToDiskCache(response: Response): DiskCache.Snapshot? {
         val editor = diskCacheLazy.value.openEditor(diskCacheKey!!) ?: return null
         try {
             diskCacheLazy.value.fileSystem.write(editor.data) {
@@ -256,7 +254,7 @@ class AlternativeMangaCoverFetcher(
 
     private enum class Type {
         File,
-        URL
+        URL,
     }
 
     companion object {

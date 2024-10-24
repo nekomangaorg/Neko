@@ -51,6 +51,7 @@ import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.domain.reader.ReaderPreferences
 import org.nekomanga.domain.storage.StorageManager
 import org.nekomanga.domain.storage.StoragePreferences
+import org.nekomanga.domain.track.store.DelayedTrackingStore
 import tachiyomi.core.preference.AndroidPreferenceStore
 import tachiyomi.core.preference.PreferenceStore
 import tachiyomi.core.util.storage.AndroidStorageFolderProvider
@@ -134,6 +135,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(TrackSyncProcessor())
 
+        addSingleton(DelayedTrackingStore(app))
+
         addSingleton(SimilarRepository())
 
         addSingleton(MangaUpdateCoordinator())
@@ -177,7 +180,7 @@ class PreferenceModule(val application: Application) : InjektModule {
             StoragePreferences(
                 context = application,
                 folderProvider = get<AndroidStorageFolderProvider>(),
-                preferenceStore = get()
+                preferenceStore = get(),
             )
         }
 
@@ -193,11 +196,6 @@ class PreferenceModule(val application: Application) : InjektModule {
 
         addSingletonFactory { MangaDetailsPreferences(get()) }
 
-        addSingletonFactory {
-            PreferencesHelper(
-                context = application,
-                preferenceStore = get(),
-            )
-        }
+        addSingletonFactory { PreferencesHelper(context = application, preferenceStore = get()) }
     }
 }

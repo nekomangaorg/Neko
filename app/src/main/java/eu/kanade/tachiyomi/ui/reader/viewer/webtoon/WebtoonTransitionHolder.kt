@@ -18,10 +18,8 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 
 /** Holder of the webtoon viewer that contains a chapter transition. */
-class WebtoonTransitionHolder(
-    val layout: LinearLayout,
-    viewer: WebtoonViewer,
-) : WebtoonBaseHolder(layout, viewer) {
+class WebtoonTransitionHolder(val layout: LinearLayout, viewer: WebtoonViewer) :
+    WebtoonBaseHolder(layout, viewer) {
 
     /** Subscription for status changes of the transition page. */
     private var statusSubscription: Subscription? = null
@@ -63,7 +61,7 @@ class WebtoonTransitionHolder(
         transitionView.bind(
             transition,
             viewer.downloadManager,
-            viewer.activity.viewModel.state.value.manga
+            viewer.activity.viewModel.state.value.manga,
         )
         transition.to?.let { observeStatus(it, transition) }
     }

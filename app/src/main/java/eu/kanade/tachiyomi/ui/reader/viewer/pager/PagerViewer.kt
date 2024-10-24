@@ -342,11 +342,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         TimberKt.d { "setChaptersInternal" }
         val forceTransition =
             config.alwaysShowChapterTransition ||
-                adapter.joinedItems
-                    .getOrNull(
-                        pager.currentItem,
-                    )
-                    ?.first is ChapterTransition
+                adapter.joinedItems.getOrNull(pager.currentItem)?.first is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
         // Layout the pager once a chapter is being set

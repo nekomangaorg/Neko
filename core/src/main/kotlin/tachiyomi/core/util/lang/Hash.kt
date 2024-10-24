@@ -5,24 +5,7 @@ import java.security.MessageDigest
 object Hash {
 
     private val chars =
-        charArrayOf(
-            '0',
-            '1',
-            '2',
-            '3',
-            '4',
-            '5',
-            '6',
-            '7',
-            '8',
-            '9',
-            'a',
-            'b',
-            'c',
-            'd',
-            'e',
-            'f',
-        )
+        charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
 
     private val MD5
         get() = MessageDigest.getInstance("MD5")

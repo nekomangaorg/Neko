@@ -47,17 +47,8 @@ open class TabbedLibraryDisplaySheet(val controller: Controller) :
         (controller as? LibraryController)?.displaySheet = null
     }
 
-    override fun getTabViews(): List<View> =
-        listOf(
-            displayView,
-            badgesView,
-            categoryView,
-        )
+    override fun getTabViews(): List<View> = listOf(displayView, badgesView, categoryView)
 
     override fun getTabTitles(): List<Int> =
-        listOf(
-            R.string.display,
-            R.string.badges,
-            R.string.categories,
-        )
+        listOf(R.string.display, R.string.badges, R.string.categories)
 }

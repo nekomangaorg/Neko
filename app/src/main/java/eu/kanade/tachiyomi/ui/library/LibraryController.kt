@@ -259,7 +259,7 @@ class LibraryController(
                 "\"${libraryPreferences.searchSuggestions().get()}\""
             } else {
                 view?.context?.getString(R.string.your_library)?.lowercase(Locale.ROOT)
-            },
+            }
         )
     }
 
@@ -357,7 +357,7 @@ class LibraryController(
     private fun removeStaggeredObserver() {
         if (staggeredObserver != null) {
             binding.libraryGridRecycler.recycler.viewTreeObserver.removeOnGlobalLayoutListener(
-                staggeredObserver,
+                staggeredObserver
             )
             staggeredObserver = null
         }
@@ -392,9 +392,7 @@ class LibraryController(
 
     fun updateHopperPosition() {
         val shortAnimationDuration =
-            resources?.getInteger(
-                android.R.integer.config_shortAnimTime,
-            ) ?: 0
+            resources?.getInteger(android.R.integer.config_shortAnimTime) ?: 0
         if (libraryPreferences.autoHideHopper().get()) {
             // Flow same snap rules as bottom nav
             val closerToHopperBottom = hopperOffset > maxHopperOffset / 2
@@ -467,13 +465,7 @@ class LibraryController(
     fun showCategoryText(name: String) {
         textAnim?.cancel()
         textAnim =
-            binding.jumperCategoryText
-                .animate()
-                .alpha(0f)
-                .setDuration(250L)
-                .setStartDelay(
-                    2000,
-                )
+            binding.jumperCategoryText.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
         textAnim?.start()
         binding.jumperCategoryText.alpha = 1f
         binding.jumperCategoryText.text = name
@@ -679,10 +671,8 @@ class LibraryController(
         val activityBinding = activityBinding ?: return
         val bigToolbarHeight = fullAppBarHeight ?: return
         val value =
-            max(
-                0,
-                bigToolbarHeight + activityBinding.appBar.y.roundToInt(),
-            ) + activityBinding.appBar.paddingTop
+            max(0, bigToolbarHeight + activityBinding.appBar.y.roundToInt()) +
+                activityBinding.appBar.paddingTop
         if (value != binding.fastScroller.marginTop) {
             binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = value
@@ -789,10 +779,7 @@ class LibraryController(
                     activityBinding
                         ?.searchToolbar
                         ?.menu
-                        ?.performIdentifierAction(
-                            R.id.action_search,
-                            0,
-                        )
+                        ?.performIdentifierAction(R.id.action_search, 0)
             }
             true
         }
@@ -1013,22 +1000,16 @@ class LibraryController(
         with(binding.libraryGridRecycler.recycler) {
             viewScope.launchUI {
                 updatePaddingRelative(
-                    bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0),
+                    bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0)
                 )
             }
             useStaggered(libraryPreferences)
             if (libraryLayout == LibraryItem.LAYOUT_LIST) {
                 spanCount = 1
-                updatePaddingRelative(
-                    start = 0,
-                    end = 0,
-                )
+                updatePaddingRelative(start = 0, end = 0)
             } else {
                 setGridSize(libraryPreferences)
-                updatePaddingRelative(
-                    start = 5.dpToPx,
-                    end = 5.dpToPx,
-                )
+                updatePaddingRelative(start = 5.dpToPx, end = 5.dpToPx)
             }
             (manager as? GridLayoutManager)?.spanSizeLookup =
                 object : GridLayoutManager.SpanSizeLookup() {
@@ -1153,7 +1134,7 @@ class LibraryController(
                             activity?.openInBrowser(
                                 "https://tachiyomi.org/help/guides/getting-started/#installing-an-extension"
                             )
-                        },
+                        }
                     )
                 } else {
                     emptyList()
@@ -1163,11 +1144,7 @@ class LibraryController(
         adapter.setItems(mangaMap)
         if (binding.libraryGridRecycler.recycler.translationX != 0f) {
             val time =
-                binding.root.resources
-                    .getInteger(
-                        android.R.integer.config_shortAnimTime,
-                    )
-                    .toLong()
+                binding.root.resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
             viewScope.launchUI {
                 delay(time / 2)
                 binding.libraryGridRecycler.recycler.translationX = 0f
@@ -1277,8 +1254,8 @@ class LibraryController(
                     R.drawable.ic_arrow_start_24dp
                 } else {
                     R.drawable.ic_expand_less_24dp
-                },
-            ),
+                }
+            )
         )
         binding.roundedCategoryHopper.downCategory.setImageDrawable(
             context.contextCompatDrawable(
@@ -1286,13 +1263,11 @@ class LibraryController(
                     R.drawable.ic_arrow_end_24dp
                 } else {
                     R.drawable.ic_expand_more_24dp
-                },
-            ),
+                }
+            )
         )
         binding.roundedCategoryHopper.categoryButton.setImageDrawable(
-            context.contextCompatDrawable(
-                LibraryGroup.groupTypeDrawableRes(presenter.groupType),
-            ),
+            context.contextCompatDrawable(LibraryGroup.groupTypeDrawableRes(presenter.groupType))
         )
     }
 
@@ -1621,13 +1596,9 @@ class LibraryController(
         when {
             lastClickPosition == -1 -> setSelection(position)
             lastClickPosition > position ->
-                for (i in position until lastClickPosition) setSelection(
-                    i,
-                )
+                for (i in position until lastClickPosition) setSelection(i)
             lastClickPosition < position ->
-                for (i in lastClickPosition + 1..position) setSelection(
-                    i,
-                )
+                for (i in lastClickPosition + 1..position) setSelection(i)
             else -> setSelection(position)
         }
         lastClickPosition = position
@@ -1707,10 +1678,7 @@ class LibraryController(
         if (toPosition < 1) return false
         return (adapter.getItem(toPosition) !is LibraryHeaderItem) &&
             (newHeader?.category?.id == item.manga.category ||
-                !presenter.mangaIsInCategory(
-                    item.manga,
-                    newHeader?.category?.id,
-                ))
+                !presenter.mangaIsInCategory(item.manga, newHeader?.category?.id))
     }
 
     override fun onItemReleased(position: Int) {
@@ -1743,11 +1711,7 @@ class LibraryController(
                 return
             }
             if (newHeader?.category != null) {
-                moveMangaToCategory(
-                    item.manga,
-                    newHeader.category,
-                    mangaIds,
-                )
+                moveMangaToCategory(item.manga, newHeader.category, mangaIds)
             }
         }
         lastItemPosition = null
@@ -1755,7 +1719,7 @@ class LibraryController(
 
     private fun getSectionItems(
         header: IHeader<*>,
-        skipItem: ISectionable<*, *>
+        skipItem: ISectionable<*, *>,
     ): List<ISectionable<*, *>> {
         val sectionItems: MutableList<ISectionable<*, *>> = ArrayList()
         var startPosition: Int = adapter.getGlobalPositionOf(header)
@@ -1777,9 +1741,7 @@ class LibraryController(
         presenter.moveMangaToCategory(manga, category.id, mangaIds)
         snack?.dismiss()
         snack =
-            view?.snack(
-                resources!!.getString(R.string.moved_to_, category.name),
-            ) {
+            view?.snack(resources!!.getString(R.string.moved_to_, category.name)) {
                 anchorView = anchorView()
                 view.elevation = 15f.dpToPx
                 setAction(R.string.undo) {
@@ -1933,6 +1895,7 @@ class LibraryController(
         }
         return false
     }
+
     // endregion
 
     // region Toolbar options methods
@@ -2031,6 +1994,7 @@ class LibraryController(
         }
         return true
     }
+
     // endregion
 
     // region Action Mode Methods
@@ -2081,6 +2045,7 @@ class LibraryController(
         }
         return false
     }
+
     // endregion
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
@@ -2154,19 +2119,13 @@ class LibraryController(
                 }
                 addCallback(
                     object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        override fun onDismissed(
-                            transientBottomBar: Snackbar?,
-                            event: Int,
-                        ) {
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                             super.onDismissed(transientBottomBar, event)
                             if (!undoing) {
-                                presenter.confirmMarkReadStatus(
-                                    mapMangaChapters,
-                                    markRead,
-                                )
+                                presenter.confirmMarkReadStatus(mapMangaChapters, markRead)
                             }
                         }
-                    },
+                    }
                 )
             }
         (activity as? MainActivity)?.setUndoSnackBar(snack)
@@ -2215,7 +2174,7 @@ class LibraryController(
                             super.onDismissed(transientBottomBar, event)
                             if (!undoing) presenter.confirmDeletion(mangaList)
                         }
-                    },
+                    }
                 )
             }
         (activity as? MainActivity)?.setUndoSnackBar(snack)

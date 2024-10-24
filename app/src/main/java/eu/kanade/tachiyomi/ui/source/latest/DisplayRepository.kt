@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.toDisplayManga
-import okhttp3.internal.toImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import org.nekomanga.domain.manga.DisplayManga
 import org.nekomanga.domain.network.ResultError
 import uy.kohesive.injekt.Injekt
@@ -25,7 +25,7 @@ class DisplayRepository(
 
     suspend fun getPage(
         page: Int,
-        displayScreenType: DisplayScreenType
+        displayScreenType: DisplayScreenType,
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return when (displayScreenType) {
             is DisplayScreenType.LatestChapters -> getLatestChapterPage(page)
@@ -71,7 +71,7 @@ class DisplayRepository(
         listUUID: String
     ): Result<Pair<Boolean, List<DisplayManga>>, ResultError> {
         return mangaDex
-            .fetchList(listUUID)
+            .fetchAllList(listUUID)
             .mapBoth(
                 success = { listResults ->
                     val displayMangaList =

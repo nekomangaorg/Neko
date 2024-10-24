@@ -80,7 +80,7 @@ open class MangaDex : HttpSource() {
                     Ok(
                         it.data.toSourceManga(
                             preferences.thumbnailQuality().get(),
-                            useNoCoverUrl = false
+                            useNoCoverUrl = false,
                         )
                     )
                 }
@@ -110,7 +110,7 @@ open class MangaDex : HttpSource() {
                                     name = groupDto.attributes.name,
                                     uuid = groupDto.id,
                                     description = groupDto.attributes.description,
-                                ),
+                                )
                             )
                         }
                     }
@@ -135,7 +135,11 @@ open class MangaDex : HttpSource() {
     }
 
     suspend fun fetchList(listId: String): Result<ListResults, ResultError> {
-        return listHandler.retrieveList(listId)
+        return listHandler.retrieveMangaFromList(listId, 1)
+    }
+
+    suspend fun fetchAllList(listId: String): Result<ListResults, ResultError> {
+        return listHandler.retrieveAllMangaFromList(listId, false)
     }
 
     suspend fun fetchHomePageInfo(
@@ -190,7 +194,7 @@ open class MangaDex : HttpSource() {
                                 ListResults(
                                     displayScreenType = DisplayScreenType.PopularNewTitles(),
                                     sourceManga =
-                                        mangaListPage.sourceManga.shuffled().toImmutableList()
+                                        mangaListPage.sourceManga.shuffled().toImmutableList(),
                                 )
                             )
                         }
@@ -201,13 +205,13 @@ open class MangaDex : HttpSource() {
                     latestChapterHandler
                         .getPage(
                             blockedScanlatorUUIDs = blockedScanlatorUUIDs,
-                            limit = MdConstants.Limits.latestSmaller
+                            limit = MdConstants.Limits.latestSmaller,
                         )
                         .andThen { mangaListPage ->
                             Ok(
                                 ListResults(
                                     displayScreenType = DisplayScreenType.LatestChapters(),
-                                    sourceManga = mangaListPage.sourceManga
+                                    sourceManga = mangaListPage.sourceManga,
                                 )
                             )
                         }
@@ -221,7 +225,7 @@ open class MangaDex : HttpSource() {
                             Ok(
                                 ListResults(
                                     displayScreenType = DisplayScreenType.RecentlyAdded(),
-                                    sourceManga = mangaListPage.sourceManga
+                                    sourceManga = mangaListPage.sourceManga,
                                 )
                             )
                         }
@@ -234,7 +238,7 @@ open class MangaDex : HttpSource() {
                     seasonal.await(),
                     staffPick.await(),
                     nekoDevPicks.await(),
-                    recentlyAdded.await()
+                    recentlyAdded.await(),
                 )
             }
         }
@@ -250,14 +254,14 @@ open class MangaDex : HttpSource() {
 
     suspend fun latestChapters(
         page: Int,
-        blockedScanlatorUUIDs: List<String>
+        blockedScanlatorUUIDs: List<String>,
     ): Result<MangaListPage, ResultError> {
         return latestChapterHandler.getPage(page, blockedScanlatorUUIDs)
     }
 
     suspend fun getMangaDetails(
         mangaUUID: String,
-        fetchArtwork: Boolean = true
+        fetchArtwork: Boolean = true,
     ): Result<Pair<SManga, List<SourceArtwork>>, ResultError> {
         return logTimeTaken("Total time to get manga details $mangaUUID") {
             mangaHandler.fetchMangaDetails(mangaUUID, fetchArtwork)
@@ -266,7 +270,7 @@ open class MangaDex : HttpSource() {
 
     suspend fun fetchMangaAndChapterDetails(
         manga: SManga,
-        fetchArtwork: Boolean
+        fetchArtwork: Boolean,
     ): Result<MangaDetailChapterInformation, ResultError> {
         return mangaHandler.fetchMangaAndChapterDetails(manga, fetchArtwork)
     }

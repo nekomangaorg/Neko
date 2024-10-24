@@ -11,10 +11,8 @@ import androidx.appcompat.widget.AppCompatTextView
 import eu.kanade.tachiyomi.widget.OutlineSpan
 
 /** Page indicator found at the bottom of the reader */
-class PageIndicatorTextView(
-    context: Context,
-    attrs: AttributeSet? = null,
-) : AppCompatTextView(context, attrs) {
+class PageIndicatorTextView(context: Context, attrs: AttributeSet? = null) :
+    AppCompatTextView(context, attrs) {
 
     init {
         setTextColor(fillColor)
@@ -45,10 +43,6 @@ class PageIndicatorTextView(
         private val strokeColor = Color.rgb(45, 45, 45)
 
         // A span object with text outlining properties
-        val spanOutline =
-            OutlineSpan(
-                strokeColor = strokeColor,
-                strokeWidth = 4f,
-            )
+        val spanOutline = OutlineSpan(strokeColor = strokeColor, strokeWidth = 4f)
     }
 }

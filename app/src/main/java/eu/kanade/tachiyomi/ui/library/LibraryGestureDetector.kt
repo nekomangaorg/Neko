@@ -79,7 +79,7 @@ class LibraryGestureDetector(private val controller: LibraryController) :
                             (-(controller.view!!.width -
                                     controller.binding.categoryHopperFrame.width) / 2)
                                 .toFloat()
-                        },
+                        }
                     )
                     .withEndAction {
                         hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
@@ -102,7 +102,7 @@ class LibraryGestureDetector(private val controller: LibraryController) :
                             0f
                         } else {
                             ((controller.view!!.width - hopperFrame.width) / 2).toFloat()
-                        },
+                        }
                     )
                     .withEndAction {
                         hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {

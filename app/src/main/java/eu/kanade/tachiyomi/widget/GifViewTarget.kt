@@ -10,7 +10,7 @@ import coil.target.ImageViewTarget
 class GifViewTarget(
     view: ImageView,
     private val progressBar: View?,
-    private val decodeErrorLayout: ViewGroup?
+    private val decodeErrorLayout: ViewGroup?,
 ) : ImageViewTarget(view) {
 
     override fun onError(error: Drawable?) {

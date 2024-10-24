@@ -183,9 +183,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             val data = file.inputStream()
 
             val params =
-                PackageInstaller.SessionParams(
-                    PackageInstaller.SessionParams.MODE_FULL_INSTALL,
-                )
+                PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
             params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
             val sessionId = packageInstaller.createSession(params)
             val session = packageInstaller.openSession(sessionId)
@@ -209,7 +207,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                     context,
                     -10053,
                     newIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
                 )
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
@@ -265,7 +263,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
             context: Context,
             url: String?,
             notifyOnInstall: Boolean,
-            waitUntilIdle: Boolean = false
+            waitUntilIdle: Boolean = false,
         ) {
             val data = Data.Builder()
             data.putString(EXTRA_DOWNLOAD_URL, url)
@@ -285,7 +283,7 @@ class AppDownloadInstallJob(private val context: Context, workerParams: WorkerPa
                                             NetworkType.CONNECTED
                                         } else {
                                             NetworkType.UNMETERED
-                                        },
+                                        }
                                     )
                                     .setRequiresDeviceIdle(true)
                                     .build()

@@ -28,7 +28,7 @@ class CategoryItem(val category: Category) : AbstractFlexibleItem<CategoryHolder
      */
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): CategoryHolder {
         return CategoryHolder(view, adapter as CategoryAdapter)
     }
@@ -45,7 +45,7 @@ class CategoryItem(val category: Category) : AbstractFlexibleItem<CategoryHolder
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: CategoryHolder,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
         holder.bind(category)
         holder.isEditing(isEditing)

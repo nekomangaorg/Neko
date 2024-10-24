@@ -108,5 +108,5 @@ private val unsafeHeaderNames =
         "cookie2",
         "keep-alive",
         "transfer-encoding",
-        "set-cookie"
+        "set-cookie",
     )

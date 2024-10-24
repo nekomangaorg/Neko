@@ -83,7 +83,7 @@ object MangaConstants {
     data class NextUnreadChapter(
         @StringRes val id: Int? = null,
         val text: String = "",
-        val simpleChapter: SimpleChapter? = null
+        val simpleChapter: SimpleChapter? = null,
     )
 
     data class SortFilter(
@@ -93,28 +93,15 @@ object MangaConstants {
         val matchesGlobalDefaults: Boolean = true,
     )
 
-    data class SortOption(
-        val sortState: SortState,
-        val sortType: SortType,
-    )
+    data class SortOption(val sortState: SortState, val sortType: SortType)
 
-    data class ScanlatorFilter(
-        val scanlators: ImmutableList<ScanlatorOption>,
-    )
+    data class ScanlatorFilter(val scanlators: ImmutableList<ScanlatorOption>)
 
-    data class ScanlatorOption(
-        val name: String,
-        val disabled: Boolean = false,
-    )
+    data class ScanlatorOption(val name: String, val disabled: Boolean = false)
 
-    data class LanguageFilter(
-        val languages: ImmutableList<LanguageOption>,
-    )
+    data class LanguageFilter(val languages: ImmutableList<LanguageOption>)
 
-    data class LanguageOption(
-        val name: String,
-        val disabled: Boolean = false,
-    )
+    data class LanguageOption(val name: String, val disabled: Boolean = false)
 
     data class ChapterDisplay(
         val showAll: Boolean = false,
@@ -195,7 +182,7 @@ object MangaConstants {
 
         data class PreviousUnread(
             override val canUndo: Boolean,
-            val altChapters: List<ChapterItem>
+            val altChapters: List<ChapterItem>,
         ) : MarkAction()
 
         data class Read(override val canUndo: Boolean = false) : MarkAction()
@@ -203,7 +190,7 @@ object MangaConstants {
         data class Unread(
             override val canUndo: Boolean = false,
             val lastRead: Int? = null,
-            val pagesLeft: Int? = null
+            val pagesLeft: Int? = null,
         ) : MarkAction()
     }
 

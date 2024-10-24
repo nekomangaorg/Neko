@@ -108,10 +108,7 @@ class BilibiliHandler {
 
     private fun imageUrlRequest(baseUrls: List<String>): Request {
         val jsonPayload = buildJsonObject {
-            put(
-                "urls",
-                buildJsonArray { baseUrls.forEach { add(it) } }.toString(),
-            )
+            put("urls", buildJsonArray { baseUrls.forEach { add(it) } }.toString())
         }
         val requestBody = jsonPayload.toString().toRequestBody(JSON_MEDIA_TYPE)
 
@@ -129,11 +126,7 @@ class BilibiliHandler {
         )
     }
 
-    @Serializable
-    data class BilibiliPageDto(
-        val token: String,
-        val url: String,
-    )
+    @Serializable data class BilibiliPageDto(val token: String, val url: String)
 
     @Serializable
     data class BilibiliResultDto<T>(
@@ -142,15 +135,9 @@ class BilibiliHandler {
         @SerialName("msg") val message: String = "",
     )
 
-    @Serializable
-    data class BilibiliReader(
-        val images: List<BilibiliImageDto> = emptyList(),
-    )
+    @Serializable data class BilibiliReader(val images: List<BilibiliImageDto> = emptyList())
 
-    @Serializable
-    data class BilibiliImageDto(
-        val path: String,
-    )
+    @Serializable data class BilibiliImageDto(val path: String)
 
     @Serializable
     data class BilibiliComicDto(

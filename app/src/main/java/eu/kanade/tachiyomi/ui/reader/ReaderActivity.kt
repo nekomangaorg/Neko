@@ -207,10 +207,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     var isScrollingThroughPagesOrChapters = false
 
     val decimalFormat by lazy {
-        DecimalFormat(
-            "#.###",
-            DecimalFormatSymbols().apply { decimalSeparator = '.' },
-        )
+        DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
     }
 
     companion object {
@@ -360,6 +357,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     /** Called when the activity is destroyed. Cleans up the viewer, configuration and any view. */
     override fun onDestroy() {
         super.onDestroy()
+        viewModel.deletePendingChapters()
         viewer?.destroy()
         binding.chaptersSheet.chaptersBottomSheet.adapter = null
         viewer = null
@@ -451,7 +449,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         R.drawable.ic_book_open_split_24dp
                     else -> R.drawable.ic_single_page_24dp
                 },
-            ),
+            )
         )
         with(binding.readerNav) {
             listOf(leftPageText, rightPageText).forEach {
@@ -496,7 +494,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         R.string.remove_crop
                     } else {
                         R.string.crop_borders
-                    },
+                    }
                 )
         }
     }
@@ -647,11 +645,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
     private fun initializeMenu() {
         // Set binding.toolbar
         setSupportActionBar(binding.toolbar)
-        val primaryColor =
-            ColorUtils.setAlphaComponent(
-                getResourceColor(R.attr.colorSurface),
-                200,
-            )
+        val primaryColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorSurface), 200)
         binding.appBar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -768,7 +762,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                     override fun onStopTrackingTouch(slider: Slider) {
                         isScrollingThroughPagesOrChapters = false
                     }
-                },
+                }
             )
             listOf(root, leftChapter, rightChapter, pageSeekbar).forEach {
                 it.setOnTouchListener { _, event ->
@@ -932,7 +926,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                         R.string.theres_no_next_chapter
                     } else {
                         R.string.theres_no_previous_chapter
-                    },
+                    }
                 )
             }
         }
@@ -998,11 +992,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 }
             popupMenu(
                 items =
-                    listOf(
-                            PageLayout.SINGLE_PAGE,
-                            PageLayout.DOUBLE_PAGES,
-                            PageLayout.SPLIT_PAGES,
-                        )
+                    listOf(PageLayout.SINGLE_PAGE, PageLayout.DOUBLE_PAGES, PageLayout.SPLIT_PAGES)
                         .map { it.value to it.stringRes },
                 selectedItemId = selectedId.value,
             ) {
@@ -1121,7 +1111,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                     ReadingModeType.VERTICAL.flagValue -> R.string.vertical_viewer
                                     ReadingModeType.WEBTOON.flagValue -> R.string.webtoon_style
                                     else -> R.string.left_to_right_viewer
-                                },
+                                }
                             )
                             .lowercase(Locale.getDefault()),
                     ),
@@ -1164,7 +1154,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 Color.BLACK
             } else {
                 getResourceColor(R.attr.background)
-            },
+            }
         )
 
         supportActionBar?.title = manga.title
@@ -1184,6 +1174,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
     override fun onPause() {
         viewModel.saveCurrentChapterReadingProgress()
+        viewModel.deletePendingChapters()
         super.onPause()
     }
 
@@ -1433,16 +1424,8 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 )
             } else {
                 listOf(
-                    MaterialMenuSheet.MenuSheetItem(
-                        0,
-                        R.drawable.ic_share_24dp,
-                        R.string.share,
-                    ),
-                    MaterialMenuSheet.MenuSheetItem(
-                        1,
-                        R.drawable.ic_save_24dp,
-                        R.string.save,
-                    ),
+                    MaterialMenuSheet.MenuSheetItem(0, R.drawable.ic_share_24dp, R.string.share),
+                    MaterialMenuSheet.MenuSheetItem(1, R.drawable.ic_save_24dp, R.string.save),
                     MaterialMenuSheet.MenuSheetItem(
                         2,
                         R.drawable.ic_photo_24dp,
@@ -1647,7 +1630,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                 Success -> R.string.cover_updated
                 AddToLibraryFirst -> R.string.must_be_in_library_to_edit
                 Error -> R.string.failed_to_update_cover
-            },
+            }
         )
     }
 
@@ -1658,7 +1641,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
             if (errors.size > 1) {
                 getString(
                     R.string.failed_to_update_,
-                    errors.joinToString(", ") { getString(it.first.nameRes()) }
+                    errors.joinToString(", ") { getString(it.first.nameRes()) },
                 )
             } else {
                 val (service, errorMessage) = errors.first()
@@ -1832,7 +1815,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
 
             merge(
                     readerPreferences.grayscale().changes(),
-                    readerPreferences.invertedColors().changes()
+                    readerPreferences.invertedColors().changes(),
                 )
                 .onEach {
                     setLayerPaint(
@@ -1969,11 +1952,11 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
                                             0f,
                                             1f,
                                             0f,
-                                        ),
-                                    ),
+                                        )
+                                    )
                                 )
                             }
-                        },
+                        }
                     )
             }
         }
@@ -2017,10 +2000,7 @@ class ReaderActivity : BaseActivity<ReaderActivityBinding>() {
         private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
             val paint =
                 if (grayscale || invertedColors) {
-                    getCombinedPaint(
-                        grayscale,
-                        invertedColors,
-                    )
+                    getCombinedPaint(grayscale, invertedColors)
                 } else {
                     null
                 }

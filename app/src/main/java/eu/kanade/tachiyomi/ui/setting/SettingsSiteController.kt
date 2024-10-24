@@ -122,11 +122,7 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
                 key = PreferenceKeys.thumbnailQuality
                 titleRes = R.string.thumbnail_quality
                 entriesRes =
-                    arrayOf(
-                        R.string.original_thumb,
-                        R.string.medium_thumb,
-                        R.string.low_thumb,
-                    )
+                    arrayOf(R.string.original_thumb, R.string.medium_thumb, R.string.low_thumb)
                 entryRange = 0..2
                 defaultValue = 0
             }
@@ -294,11 +290,7 @@ class SettingsSiteController : SettingsController(), MangadexLogoutDialog.Listen
             return activity
                 .materialAlertDialog()
                 .setTitle(R.string.show_languages)
-                .setMultiChoiceItems(
-                    allLangs,
-                    enabledLangs,
-                ) { dialog, position, _ ->
-                }
+                .setMultiChoiceItems(allLangs, enabledLangs) { dialog, position, _ -> }
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok) { dialog, t ->
                     val listView = (dialog as AlertDialog).listView

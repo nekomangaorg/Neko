@@ -1060,6 +1060,10 @@
     <string name="mean_score">Avg user score</string>
     <string name="manga_tracked">Tracked manga</string>
     <string name="chapters_downloaded">Downloaded chapters</string>
+    <string name="komga_merged">Komga merged</string>
+    <string name="mangalife_merged">MangaLife merged</string>
+    <string name="toonily_merged">Toonily merged</string>
+    <string name="weebcentral_merged">Weeb Central merged</string>
     <string name="total_tags">Total tags</string>
     <string name="manga_local">Local manga</string>
     <string name="global_update_manga">Globally updated</string>
@@ -1070,6 +1074,7 @@
     <string name="typeNoSemi">Type</string>
     <string name="read_duration">Read duration</string>
     <string name="last_library_update">Last library update</string>
+    <string name="last_library_update_attempt">Last library update attempt</string>
     <string name="manga_status_distribution">Status distribution</string>
     <string name="content_rating_distribution">Content rating</string>
     <string name="manga_score_distribution">Score distribution</string>

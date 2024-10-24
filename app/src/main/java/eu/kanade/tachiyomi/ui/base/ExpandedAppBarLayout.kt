@@ -234,7 +234,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
         includeSearchToolbar: Boolean,
         includeTabs: Boolean,
         includeLargeToolbar: Boolean,
-        ignoreSearch: Boolean = false
+        ignoreSearch: Boolean = false,
     ): Int {
         val hasLargeToolbar =
             includeLargeToolbar && useLargeToolbar && (!compactSearchMode || ignoreSearch)
@@ -340,10 +340,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
                             if (offset > realHeight - shortH - tabHeight) {
                                 smallHeight
                             } else {
-                                min(
-                                    -offset.toFloat(),
-                                    0f,
-                                )
+                                min(-offset.toFloat(), 0f)
                             },
                         ) + top.toFloat(),
                     )
@@ -377,12 +374,8 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
         bigView?.alpha = MathUtils.clamp(if (alpha.isNaN()) 1f else alpha, 0f, 1f)
         val toolbarTextView = mainToolbar?.toolbarTitle ?: return
         toolbarTextView.setTextColorAlpha(
-            (MathUtils.clamp(
-                    (1 - ((if (alpha.isNaN()) 1f else alpha) + 0.95f)) * 2,
-                    0f,
-                    1f,
-                ) * 255)
-                .roundToInt(),
+            (MathUtils.clamp((1 - ((if (alpha.isNaN()) 1f else alpha) + 0.95f)) * 2, 0f, 1f) * 255)
+                .roundToInt()
         )
         val mainToolbar = mainToolbar ?: return
         mainToolbar.alpha =
@@ -419,7 +412,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
     fun snapAppBarY(
         controller: Controller?,
         recyclerView: RecyclerView,
-        callback: (() -> Unit)?
+        callback: (() -> Unit)?,
     ): Float {
         yAnimator?.cancel()
         val halfWay = compactAppBarHeight / 2
@@ -429,7 +422,7 @@ constructor(context: Context, attrs: AttributeSet? = null) : AppBarLayout(contex
                     android.R.integer.config_shortAnimTime
                 } else {
                     android.R.integer.config_longAnimTime
-                },
+                }
             ) ?: 0
         val realHeight = preLayoutHeightWhileSearching + paddingTop
         val closerToTop = abs(y) > realHeight - halfWay

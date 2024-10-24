@@ -93,7 +93,7 @@ class SearchActivity : MainActivity() {
         show: Boolean,
         solidBG: Boolean,
         changeBG: Boolean,
-        showSearchAnyway: Boolean
+        showSearchAnyway: Boolean,
     ) {
         super.setFloatingToolbar(show, solidBG, changeBG, showSearchAnyway)
         val useLargeTB = binding.appBar.useLargeToolbar
@@ -204,12 +204,7 @@ class SearchActivity : MainActivity() {
                                     MdConstants.DeepLinkPrefix.manga + id
                                 }
                             }
-                        router.replaceTopController(
-                            BrowseController(
-                                    query,
-                                )
-                                .withFadeTransaction(),
-                        )
+                        router.replaceTopController(BrowseController(query).withFadeTransaction())
                     }
                 }
             }
@@ -243,7 +238,7 @@ class SearchActivity : MainActivity() {
                 router.replaceTopController(
                     RouterTransaction.with(MangaDetailController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler()),
+                        .popChangeHandler(FadeChangeHandler())
                 )
             }
             SHORTCUT_SOURCE -> {
@@ -252,14 +247,14 @@ class SearchActivity : MainActivity() {
                 router.replaceTopController(
                     RouterTransaction.with(BrowseController())
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler()),
+                        .popChangeHandler(FadeChangeHandler())
                 )
             }
             SHORTCUT_READER_SETTINGS -> {
                 router.replaceTopController(
                     RouterTransaction.with(SettingsReaderController())
                         .pushChangeHandler(SimpleSwapChangeHandler())
-                        .popChangeHandler(FadeChangeHandler()),
+                        .popChangeHandler(FadeChangeHandler())
                 )
             }
             else -> return false
@@ -269,20 +264,12 @@ class SearchActivity : MainActivity() {
 
     companion object {
         fun openMangaIntent(context: Context, id: Long?, canReturnToMain: Boolean = false) =
-            Intent(
-                    context,
-                    SearchActivity::class.java,
-                )
-                .apply {
-                    action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
-                    putExtra(MangaDetailController.MANGA_EXTRA, id)
-                }
+            Intent(context, SearchActivity::class.java).apply {
+                action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
+                putExtra(MangaDetailController.MANGA_EXTRA, id)
+            }
 
         fun openReaderSettings(context: Context) =
-            Intent(
-                    context,
-                    SearchActivity::class.java,
-                )
-                .apply { action = SHORTCUT_READER_SETTINGS }
+            Intent(context, SearchActivity::class.java).apply { action = SHORTCUT_READER_SETTINGS }
     }
 }

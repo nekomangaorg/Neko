@@ -32,12 +32,7 @@ import org.nekomanga.R
 import org.nekomanga.databinding.DownloadBottomSheetBinding
 import uy.kohesive.injekt.injectLazy
 
-class DownloadBottomSheet
-@JvmOverloads
-constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-) :
+class DownloadBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     LinearLayout(context, attrs),
     DownloadAdapter.DownloadItemListener,
     FlexibleAdapter.OnActionStateListener {
@@ -228,7 +223,7 @@ constructor(
 
     private fun <R : Comparable<R>> reorderQueue(
         selector: (DownloadItem) -> R,
-        reverse: Boolean = false
+        reverse: Boolean = false,
     ) {
         val adapter = adapter ?: return
         val newDownloads = mutableListOf<Download>()

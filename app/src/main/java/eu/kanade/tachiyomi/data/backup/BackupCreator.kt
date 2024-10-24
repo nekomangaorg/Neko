@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.data.backup.models.BackupChapter
 import eu.kanade.tachiyomi.data.backup.models.BackupHistory
 import eu.kanade.tachiyomi.data.backup.models.BackupManga
 import eu.kanade.tachiyomi.data.backup.models.BackupMergeManga
-import eu.kanade.tachiyomi.data.backup.models.BackupSerializer
 import eu.kanade.tachiyomi.data.backup.models.BackupTracking
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -69,11 +68,7 @@ class BackupCreator(val context: Context) {
                 throw NoLibraryManga()
             }
 
-            backup =
-                Backup(
-                    backupManga(databaseManga, flags),
-                    backupCategories(),
-                )
+            backup = Backup(backupManga(databaseManga, flags), backupCategories())
         }
 
         var file: UniFile? = null
@@ -100,7 +95,7 @@ class BackupCreator(val context: Context) {
                 throw IllegalStateException("Failed to get handle on file")
             }
 
-            val byteArray = parser.encodeToByteArray(BackupSerializer, backup!!)
+            val byteArray = parser.encodeToByteArray(Backup.serializer(), backup!!)
             if (byteArray.isEmpty()) {
                 throw IllegalStateException(context.getString(R.string.empty_backup_error))
             }
