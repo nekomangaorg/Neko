@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MergeType
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -72,6 +73,21 @@ class StatsPresenter(
                 val tracks = getTracks(libraryList)
                 val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
                 val lastUpdateAttempt = libraryPreferences.lastUpdateAttemptTimestamp().get()
+
+                val favoritedMangalist = db.getFavoriteMangaList().executeAsBlocking()
+
+                val mergedMangaList =
+                    db.getAllMergeManga().executeAsBlocking().mapNotNull { mergedManga ->
+                        when (
+                            favoritedMangalist.firstOrNull { manga ->
+                                manga.id!! == mergedManga.mangaId
+                            } != null
+                        ) {
+                            true -> mergedManga
+                            false -> null
+                        }
+                    }
+
                 _simpleState.value =
                     StatsConstants.SimpleState(
                         screenState = StatsConstants.ScreenState.Simple,
@@ -80,10 +96,15 @@ class StatsPresenter(
                         readCount = libraryList.sumOf { it.read },
                         bookmarkCount = libraryList.sumOf { it.bookmarkCount },
                         trackedCount = getMangaByTrackCount(libraryList, tracks),
-                        mergeCount =
-                            db.getAllMergeManga()
-                                .executeAsBlocking()
-                                .distinctBy { it.mangaId }
+                        komgaMergeCount =
+                            mergedMangaList.filter { it.mergeType == MergeType.Komga }.count(),
+                        mangaLifeMergeCount =
+                            mergedMangaList.filter { it.mergeType == MergeType.MangaLife }.count(),
+                        toonilyMergeCount =
+                            mergedMangaList.filter { it.mergeType == MergeType.Toonily }.count(),
+                        weebCentralMergeCount =
+                            mergedMangaList
+                                .filter { it.mergeType == MergeType.WeebCentral }
                                 .count(),
                         globalUpdateCount = getGlobalUpdateManga(libraryList).count(),
                         downloadCount = libraryList.sumOf { getDownloadCount(it) },

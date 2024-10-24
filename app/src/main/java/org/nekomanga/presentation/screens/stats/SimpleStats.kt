@@ -82,8 +82,14 @@ fun SimpleStats(
                     context.getString(R.string.manga_tracked),
                 numberFormat.format(statsState.tagCount).toString() to
                     context.getString(R.string.total_tags),
-                numberFormat.format(statsState.mergeCount).toString() to
-                    context.getString(R.string.merged),
+                numberFormat.format(statsState.komgaMergeCount).toString() to
+                    context.getString(R.string.komga_merged),
+                numberFormat.format(statsState.mangaLifeMergeCount).toString() to
+                    context.getString(R.string.mangalife_merged),
+                numberFormat.format(statsState.toonilyMergeCount).toString() to
+                    context.getString(R.string.toonily_merged),
+                numberFormat.format(statsState.weebCentralMergeCount).toString() to
+                    context.getString(R.string.weebcentral_merged),
             )
             .toImmutableList()
     }

@@ -1042,6 +1042,10 @@
     <string name="mean_score">Avg user score</string>
     <string name="manga_tracked">Tracked manga</string>
     <string name="chapters_downloaded">Downloaded chapters</string>
+    <string name="komga_merged">Komga merged</string>
+    <string name="mangalife_merged">MangaLife merged</string>
+    <string name="toonily_merged">Toonily merged</string>
+    <string name="weebcentral_merged">Weeb Central merged</string>
     <string name="total_tags">Total tags</string>
     <string name="manga_local">Local manga</string>
     <string name="global_update_manga">Globally updated</string>
