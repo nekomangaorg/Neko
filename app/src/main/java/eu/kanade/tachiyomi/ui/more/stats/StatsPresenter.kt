@@ -71,6 +71,7 @@ class StatsPresenter(
             } else {
                 val tracks = getTracks(libraryList)
                 val lastUpdate = libraryPreferences.lastUpdateTimestamp().get()
+                val lastUpdateAttempt = libraryPreferences.lastUpdateAttemptTimestamp().get()
                 _simpleState.value =
                     StatsConstants.SimpleState(
                         screenState = StatsConstants.ScreenState.Simple,
@@ -96,7 +97,10 @@ class StatsPresenter(
                         readDuration = getReadDuration(),
                         averageMangaRating = getAverageMangaRating(libraryList),
                         averageUserRating = getUserScore(tracks),
-                        lastLibraryUpdate = if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
+                        lastLibraryUpdate =
+                            if (lastUpdate == 0L) "" else lastUpdate.timeSpanFromNow,
+                        lastLibraryUpdateAttempt =
+                            if (lastUpdateAttempt == 0L) "" else lastUpdateAttempt.timeSpanFromNow,
                     )
             }
         }

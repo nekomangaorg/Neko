@@ -137,6 +137,7 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
     private val notifier = LibraryUpdateNotifier(context)
 
     override suspend fun doWork(): Result {
+
         if (WORK_NAME_AUTO in tags) {
             if (
                 DEVICE_ONLY_ON_WIFI in libraryPreferences.autoUpdateDeviceRestrictions().get() &&
@@ -149,6 +150,8 @@ class LibraryUpdateJob(private val context: Context, workerParameters: WorkerPar
                 return Result.retry()
             }
         }
+
+        libraryPreferences.lastUpdateAttemptTimestamp().set(Date().time)
 
         tryToSetForeground()
 

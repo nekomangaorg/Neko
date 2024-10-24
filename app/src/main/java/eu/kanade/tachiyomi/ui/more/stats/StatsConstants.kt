@@ -23,6 +23,7 @@ object StatsConstants {
         val trackerCount: Int = 0,
         val readDuration: String = "",
         val lastLibraryUpdate: String = "",
+        val lastLibraryUpdateAttempt: String = "",
     )
 
     data class DetailedState(

@@ -1052,6 +1052,7 @@
     <string name="typeNoSemi">Type</string>
     <string name="read_duration">Read duration</string>
     <string name="last_library_update">Last library update</string>
+    <string name="last_library_update_attempt">Last library update attempt</string>
     <string name="manga_status_distribution">Status distribution</string>
     <string name="content_rating_distribution">Content rating</string>
     <string name="manga_score_distribution">Score distribution</string>

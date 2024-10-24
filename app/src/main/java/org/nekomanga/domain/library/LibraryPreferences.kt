@@ -16,6 +16,9 @@ class LibraryPreferences(private val preferenceStore: PreferenceStore) {
 
     fun lastUpdateTimestamp() = this.preferenceStore.getLong("library_update_last_timestamp")
 
+    fun lastUpdateAttemptTimestamp() =
+        this.preferenceStore.getLong("library_update_last_attempt_timestamp")
+
     fun libraryUpdateIds() = this.preferenceStore.getString("library_update_ids")
 
     fun autoUpdateDeviceRestrictions() =
