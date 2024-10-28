@@ -190,4 +190,8 @@ class MangaDexLoginHelper {
     fun sessionToken(): String {
         return preferences.sessionToken().get()
     }
+
+    fun refreshToken(): String {
+        return preferences.refreshToken().get()
+    }
 }
