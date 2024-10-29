@@ -116,10 +116,7 @@ fun Manga.toDisplayManga(
 }
 
 fun Manga.toSimpleManga(): SimpleManga {
-    return SimpleManga(
-        id = this.id!!,
-        title = (this as? MangaImpl)?.title ?: this.title,
-    )
+    return SimpleManga(id = this.id!!, title = (this as? MangaImpl)?.title ?: this.title)
 }
 
 fun SManga.getSlug(): String {

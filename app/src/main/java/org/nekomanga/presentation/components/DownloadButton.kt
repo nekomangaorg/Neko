@@ -58,7 +58,7 @@ fun DownloadButton(
     themeColorState: ThemeColorState,
     downloadState: Download.State,
     downloadProgress: Int,
-    onDownload: (MangaConstants.DownloadAction) -> Unit
+    onDownload: (MangaConstants.DownloadAction) -> Unit,
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         var showChapterDropdown by remember { mutableStateOf(false) }
@@ -94,7 +94,7 @@ fun DownloadButton(
                                         onDownload(MangaConstants.DownloadAction.Remove)
                                     }
                                 },
-                            ),
+                            )
                         )
                     }
                     else -> {

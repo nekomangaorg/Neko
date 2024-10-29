@@ -2,10 +2,10 @@ package org.nekomanga.presentation.components.dialog
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,12 +28,12 @@ fun DeleteHistoryDialog(
     name: String,
     @StringRes title: Int,
     @StringRes description: Int,
-    onConfirm: () -> Unit
+    onConfirm: () -> Unit,
 ) {
 
     CompositionLocalProvider(
-        LocalRippleTheme provides themeColorState.rippleTheme,
-        LocalContentColor provides MaterialTheme.colorScheme.onSurface
+        LocalRippleConfiguration provides themeColorState.rippleConfiguration,
+        LocalContentColor provides MaterialTheme.colorScheme.onSurface,
     ) {
         AlertDialog(
             title = { Text(text = stringResource(id = title)) },
@@ -78,7 +78,7 @@ fun DeleteHistoryDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors =
-                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)
+                        ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = R.string.cancel))
                 }

@@ -85,7 +85,7 @@ fun HistoryCard(
         animateColorAsState(
             if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
             else MaterialTheme.colorScheme.surface,
-            label = "historyCardExpansion"
+            label = "historyCardExpansion",
         )
     val lowContrastColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
@@ -102,7 +102,7 @@ fun HistoryCard(
         val titleColor =
             getReadTextColor(
                 isRead = feedManga.chapters.all { it.chapter.read },
-                themeColorState.buttonColor
+                themeColorState.buttonColor,
             )
 
         Text(
@@ -184,11 +184,9 @@ fun HistoryCard(
                             }
                     ) {
                         Gap(Size.smedium)
-                        Box(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium),
-                        ) {
+                        Box(modifier = Modifier.fillMaxWidth().padding(horizontal = Size.medium)) {
                             Column(
-                                modifier = Modifier.align(Alignment.CenterStart).fillMaxWidth(.75f),
+                                modifier = Modifier.align(Alignment.CenterStart).fillMaxWidth(.75f)
                             ) {
                                 FeedChapterTitleLine(
                                     hideChapterTitles = hideChapterTitles,
@@ -207,14 +205,14 @@ fun HistoryCard(
                                     textColor =
                                         getReadTextColor(
                                             isRead = chapterItem.chapter.read,
-                                            lowContrastColor
+                                            lowContrastColor,
                                         ),
                                 )
                             }
 
                             Box(
                                 modifier = Modifier.align(Alignment.CenterEnd),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
                                 Row() {
                                     Buttons(
@@ -256,15 +254,12 @@ private fun HistoryRow(
     val mediumAlphaColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Size.tiny)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             FeedCover(
                 artwork = artwork,
                 outlined = outlineCovers,
                 coverSize = Size.squareCover,
-                onClick = mangaClick
+                onClick = mangaClick,
             )
             ChapterInfo(
                 modifier =
@@ -328,7 +323,7 @@ private fun ChapterInfo(
                     pluralStringResource(
                         id = R.plurals.pages_left,
                         count = 1,
-                        chapterItem.chapter.pagesLeft
+                        chapterItem.chapter.pagesLeft,
                     ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = readColor,
@@ -403,7 +398,7 @@ private fun LastReadLine(
     scanlator: String,
     language: String,
     style: TextStyle,
-    textColor: Color
+    textColor: Color,
 ) {
     val statuses = mutableListOf<String>()
 

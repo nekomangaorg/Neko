@@ -115,7 +115,7 @@ fun FeedPage(
                         DateUtils.getRelativeTimeSpanString(
                                 feedManga.date,
                                 now,
-                                DateUtils.DAY_IN_MILLIS
+                                DateUtils.DAY_IN_MILLIS,
                             )
                             .toString()
                     // there should only ever be 1
@@ -140,7 +140,7 @@ fun FeedPage(
                                         Modifier.padding(
                                             start = Size.small,
                                             top = Size.small,
-                                            end = Size.small
+                                            end = Size.small,
                                         ),
                                 )
                             }
@@ -173,7 +173,7 @@ fun FeedPage(
 @Composable
 fun getReadTextColor(
     isRead: Boolean,
-    defaultColor: Color = MaterialTheme.colorScheme.onSurface
+    defaultColor: Color = MaterialTheme.colorScheme.onSurface,
 ): Color {
     return when (isRead) {
         true ->
@@ -188,11 +188,9 @@ fun FeedCover(
     outlined: Boolean,
     coverSize: Dp,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
-    Box(
-        modifier = modifier.clip(RoundedCornerShape(Shapes.coverRadius)).clickable { onClick() },
-    ) {
+    Box(modifier = modifier.clip(RoundedCornerShape(Shapes.coverRadius)).clickable { onClick() }) {
         MangaCover.Square.invoke(
             artwork = artwork,
             shouldOutlineCover = outlined,
@@ -208,7 +206,7 @@ fun FeedChapterTitleLine(
     chapterNumber: Float,
     title: String,
     style: TextStyle,
-    textColor: Color
+    textColor: Color,
 ) {
     val titleText =
         when (hideChapterTitles) {
@@ -231,7 +229,7 @@ fun FeedChapterTitleLine(
                 style.copy(
                     color = textColor,
                     fontWeight = FontWeight.Medium,
-                    letterSpacing = (-.6).sp
+                    letterSpacing = (-.6).sp,
                 ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

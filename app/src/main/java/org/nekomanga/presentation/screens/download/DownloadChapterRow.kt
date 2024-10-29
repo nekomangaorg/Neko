@@ -64,19 +64,19 @@ private fun ChapterRow(download: Download) {
                 .background(color = MaterialTheme.colorScheme.surface)
                 .padding(top = Size.small, bottom = Size.small),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(
             modifier =
                 Modifier.align(Alignment.CenterVertically)
                     .padding(horizontal = Size.medium)
                     .fillMaxWidth(.9f),
-            verticalArrangement = Arrangement.spacedBy(Size.tiny)
+            verticalArrangement = Arrangement.spacedBy(Size.tiny),
         ) {
             Text(
                 text = download.mangaItem.title,
                 style = MaterialTheme.typography.titleSmall,
-                maxLines = 1
+                maxLines = 1,
             )
             Text(
                 text = download.chapterItem.name,
@@ -87,13 +87,13 @@ private fun ChapterRow(download: Download) {
                                 alpha = NekoColors.mediumAlphaLowContrast
                             )
                     ),
-                maxLines = 1
+                maxLines = 1,
             )
             when (download.status == Download.State.QUEUE) {
                 true ->
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
                     )
                 false -> {
                     val currentProgress by
@@ -104,7 +104,7 @@ private fun ChapterRow(download: Download) {
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
                         progress = { currentProgress },
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
                     )
                 }
             }
@@ -112,7 +112,7 @@ private fun ChapterRow(download: Download) {
         Icon(
             imageVector = Icons.Default.MoreVert,
             contentDescription = null,
-            modifier = Modifier.padding(end = Size.medium)
+            modifier = Modifier.padding(end = Size.medium),
         )
     }
 }

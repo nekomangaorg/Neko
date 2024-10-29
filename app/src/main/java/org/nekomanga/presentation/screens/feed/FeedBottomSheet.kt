@@ -51,7 +51,7 @@ fun FeedBottomSheet(
     BaseSheet(
         themeColor = themeColorState,
         maxSheetHeightPercentage = .6f,
-        bottomPaddingAroundContent = contentPadding.calculateBottomPadding()
+        bottomPaddingAroundContent = contentPadding.calculateBottomPadding(),
     ) {
         Gap(16.dp)
 
@@ -82,7 +82,7 @@ private fun LazyListScope.historyContent(
         ) {
             Text(
                 text = stringResource(id = R.string.group_chapters_together),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
             var expanded by remember { mutableStateOf(false) }
             var selectedText =
@@ -99,7 +99,7 @@ private fun LazyListScope.historyContent(
                         start = Size.small,
                         top = Size.small,
                         bottom = Size.small,
-                        end = Size.none
+                        end = Size.none,
                     ),
                 onExpandedChange = { expanded = !expanded },
             ) {
@@ -126,7 +126,7 @@ private fun LazyListScope.historyContent(
                             text = {
                                 Text(
                                     text = stringResource(id = textRes),
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = MaterialTheme.typography.bodyMedium,
                                 )
                             },
                             onClick = {
@@ -142,9 +142,7 @@ private fun LazyListScope.historyContent(
     }
     item {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            TextButton(
-                onClick = clearHistoryClick,
-            ) {
+            TextButton(onClick = clearHistoryClick) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Outlined.DeleteForever, contentDescription = null)
                     Text(text = stringResource(id = R.string.clear_history))
@@ -154,10 +152,7 @@ private fun LazyListScope.historyContent(
     }
 }
 
-private fun LazyListScope.uploadsContent(
-    fetchSort: Boolean,
-    sortClick: () -> Unit,
-) {
+private fun LazyListScope.uploadsContent(fetchSort: Boolean, sortClick: () -> Unit) {
     item {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -166,7 +161,7 @@ private fun LazyListScope.uploadsContent(
         ) {
             Text(
                 text = stringResource(id = R.string.sort_fetched_time),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
             Switch(checked = fetchSort, onCheckedChange = { sortClick() })
         }

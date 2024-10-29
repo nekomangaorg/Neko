@@ -109,7 +109,7 @@ fun FeedScreen(
         modifier =
             Modifier.fillMaxSize().conditional(mainDropdownShowing) {
                 this.blur(16.dp).clickable(enabled = false) {}
-            },
+            }
     ) {
         ModalBottomSheetLayout(
             sheetState = sheetState,
@@ -157,7 +157,7 @@ fun FeedScreen(
                                     helpClick = helpClick,
                                     menuShowing = { visible -> mainDropdownShowing = visible },
                                 ),
-                            ),
+                            )
                     )
                 },
             ) { incomingContentPadding ->
@@ -185,7 +185,7 @@ fun FeedScreen(
                     Box(
                         modifier =
                             Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
-                                .fillMaxSize(),
+                                .fillMaxSize()
                     ) {
                         val (feedManga, hasMoreResults) =
                             if (feedScreenState.value.searchFeedManga.isNotEmpty()) {
@@ -199,7 +199,7 @@ fun FeedScreen(
                             FeedScreenType.Downloads -> {
                                 DownloadScreen(
                                     downloads = feedScreenState.value.downloads,
-                                    contentPadding = recyclerContentPadding
+                                    contentPadding = recyclerContentPadding,
                                 )
                             }
                             else ->
@@ -243,7 +243,7 @@ fun FeedScreen(
             Box(
                 modifier =
                     Modifier.fillMaxSize()
-                        .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast)),
+                        .background(Color.Black.copy(alpha = NekoColors.mediumAlphaLowContrast))
             )
         }
     }
@@ -251,7 +251,7 @@ fun FeedScreen(
         DeleteAllHistoryDialog(
             defaultThemeColorState(),
             onDismiss = { showClearHistoryDialog = false },
-            onConfirm = { feedSettingActions.clearHistoryClick() }
+            onConfirm = { feedSettingActions.clearHistoryClick() },
         )
     }
 }
@@ -261,7 +261,7 @@ private fun ScreenTypeFooter(
     screenType: FeedScreenType,
     modifier: Modifier = Modifier,
     hasDownloads: Boolean,
-    screenTypeClick: (FeedScreenType) -> Unit
+    screenTypeClick: (FeedScreenType) -> Unit,
 ) {
     LazyRow(
         modifier = modifier.fillMaxWidth(),

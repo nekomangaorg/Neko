@@ -13,16 +13,13 @@ import kotlinx.collections.immutable.ImmutableList
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun DownloadScreen(
-    downloads: ImmutableList<Download>,
-    contentPadding: PaddingValues,
-) {
+fun DownloadScreen(downloads: ImmutableList<Download>, contentPadding: PaddingValues) {
     val scrollState = rememberLazyListState()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = scrollState,
         contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(Size.small)
+        verticalArrangement = Arrangement.spacedBy(Size.small),
     ) {
         items(downloads, { download -> download.chapterItem.id }) { download ->
             DownloadChapterRow(download)

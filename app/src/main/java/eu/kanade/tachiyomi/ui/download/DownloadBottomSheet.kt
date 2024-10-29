@@ -114,10 +114,7 @@ class DownloadBottomSheet @JvmOverloads constructor(context: Context, attrs: Att
     private fun updateDLTitle(download: Download?) {
         binding.titleText.text =
             if (download != null) {
-                resources.getString(
-                    R.string.downloading_,
-                    download.chapterItem.name,
-                )
+                resources.getString(R.string.downloading_, download.chapterItem.name)
             } else {
                 ""
             }

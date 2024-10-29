@@ -138,7 +138,7 @@ interface HistoryQueries : DbProvider {
                 RawQuery.builder()
                     .query(getAllChapterHistoryByMangaId(mangaId))
                     .observesTables(HistoryTable.TABLE)
-                    .build(),
+                    .build()
             )
             .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
             .prepare()

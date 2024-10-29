@@ -45,9 +45,7 @@ class FeedRepository(
                 }
                 .toPersistentList()
 
-        return feedManga.copy(
-            chapters = simpleChapters,
-        )
+        return feedManga.copy(chapters = simpleChapters)
     }
 
     suspend fun getPage(
@@ -67,7 +65,7 @@ class FeedRepository(
                                     search = searchQuery,
                                     offset = offset,
                                     limit = limit,
-                                    sortByFetched = uploadsFetchSort
+                                    sortByFetched = uploadsFetchSort,
                                 )
                                 .executeAsBlocking()
                                 .mapNotNull {
@@ -99,7 +97,7 @@ class FeedRepository(
                                     db.getRecentMangaLimit(
                                             search = searchQuery,
                                             offset = offset,
-                                            isResuming = false
+                                            isResuming = false,
                                         )
                                         .executeOnIO()
                                         .mapNotNull { history ->
@@ -119,7 +117,7 @@ class FeedRepository(
                                                             chpHistory.manga,
                                                             chpHistory.chapter.toSimpleChapter(
                                                                 chpHistory.history.last_read
-                                                            )!!
+                                                            )!!,
                                                         )
                                                     }
                                                     .toPersistentList()
@@ -150,7 +148,7 @@ class FeedRepository(
                                     db.getHistoryUngrouped(
                                             search = searchQuery,
                                             offset = offset,
-                                            isResuming = false
+                                            isResuming = false,
                                         )
                                         .executeOnIO()
                                         .groupBy {
@@ -167,7 +165,7 @@ class FeedRepository(
                                                             it.manga,
                                                             it.chapter.toSimpleChapter(
                                                                 it.history.last_read
-                                                            )!!
+                                                            )!!,
                                                         )
                                                     }
                                                     .toPersistentList()
@@ -185,7 +183,7 @@ class FeedRepository(
                                     db.getHistoryUngrouped(
                                             search = searchQuery,
                                             offset = offset,
-                                            isResuming = false
+                                            isResuming = false,
                                         )
                                         .executeOnIO()
                                         .mapNotNull {
@@ -196,7 +194,7 @@ class FeedRepository(
                                                     it.manga,
                                                     it.chapter.toSimpleChapter(
                                                         it.history.last_read
-                                                    )!!
+                                                    )!!,
                                                 )
                                             it.history.last_read
                                             FeedManga(
@@ -273,7 +271,7 @@ class FeedRepository(
     suspend fun downloadChapter(
         feedManga: FeedManga,
         chapterItem: ChapterItem,
-        downloadAction: MangaConstants.DownloadAction
+        downloadAction: MangaConstants.DownloadAction,
     ) {
         val dbManga = db.getManga(feedManga.mangaId).executeOnIO()!!
         val dbChapter = chapterItem.chapter.toDbChapter()

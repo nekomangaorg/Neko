@@ -26,7 +26,7 @@ interface ChapterQueries : DbProvider {
                     .table(ChapterTable.TABLE)
                     .where("${ChapterTable.COL_MANGA_ID} = ?")
                     .whereArgs(mangaId)
-                    .build(),
+                    .build()
             )
             .prepare()
 

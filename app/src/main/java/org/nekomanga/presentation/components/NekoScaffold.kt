@@ -144,7 +144,7 @@ fun NekoScaffold(
                             navigationIcon,
                             onNavigationIconClicked,
                             actions,
-                            scrollBehavior
+                            scrollBehavior,
                         )
                     NekoScaffoldType.SearchOutline ->
                         SearchOutlineTopAppBar(
@@ -152,7 +152,7 @@ fun NekoScaffold(
                             searchPlaceHolder,
                             color,
                             actions,
-                            scrollBehavior
+                            scrollBehavior,
                         )
                 }
             }
@@ -270,7 +270,7 @@ fun SearchOutlineTopAppBar(
                 },
                 colors =
                     SearchBarDefaults.colors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                 onSearch = { onSearchText(it) },
                 active = false,
@@ -301,7 +301,7 @@ fun SearchOutlineTopAppBar(
                         color =
                             MaterialTheme.colorScheme.onSurface.copy(
                                 alpha = NekoColors.mediumAlphaHighContrast
-                            )
+                            ),
                     )
                 },
                 trailingIcon = {
@@ -309,7 +309,7 @@ fun SearchOutlineTopAppBar(
                         AnimatedVisibility(
                             visible = searchText.isNotBlank(),
                             enter = fadeIn(),
-                            exit = fadeOut()
+                            exit = fadeOut(),
                         ) {
                             ToolTipButton(
                                 toolTipLabel = stringResource(id = R.string.clear),
@@ -328,11 +328,7 @@ fun SearchOutlineTopAppBar(
                 content = {},
             )
         },
-        colors =
-            topAppBarColors(
-                containerColor = color,
-                scrolledContainerColor = color,
-            ),
+        colors = topAppBarColors(containerColor = color, scrolledContainerColor = color),
         scrollBehavior = scrollBehavior,
     )
 }

@@ -15,11 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun FooterFilterChip(
-    selected: Boolean,
-    onClick: () -> Unit,
-    name: String,
-) {
+fun FooterFilterChip(selected: Boolean, onClick: () -> Unit, name: String) {
     FilterChip(
         selected = selected,
         onClick = onClick,
@@ -32,7 +28,7 @@ fun FooterFilterChip(
         label = {
             Text(
                 text = name,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium)
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
             )
         },
         colors =

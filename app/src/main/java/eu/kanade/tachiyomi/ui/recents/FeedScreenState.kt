@@ -38,7 +38,7 @@ enum class FeedHistoryGroup {
     Never,
     Series,
     Day,
-    Week
+    Week,
 }
 
 data class FeedSettingActions(

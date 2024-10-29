@@ -73,11 +73,9 @@ private fun UpdatesRow(
             artwork = artwork,
             outlined = outlineCovers,
             coverSize = Size.extraHuge,
-            onClick = mangaClick
+            onClick = mangaClick,
         )
-        Column(
-            modifier = Modifier.padding(horizontal = Size.small).weight(3f),
-        ) {
+        Column(modifier = Modifier.padding(horizontal = Size.small).weight(3f)) {
             val titleColor = getReadTextColor(isRead = chapterItem.chapter.read)
             val updatedColor = getReadTextColor(isRead = chapterItem.chapter.read, mediumAlphaColor)
             FeedChapterTitleLine(
@@ -107,7 +105,7 @@ private fun UpdatesRow(
             themeColorState = themeColorState,
             downloadState = chapterItem.downloadState,
             downloadProgress = chapterItem.downloadProgress,
-            onDownload = downloadClick
+            onDownload = downloadClick,
         )
     }
 }

@@ -411,7 +411,7 @@ private fun ChapterInfo(
             themeColorState = themeColorState,
             downloadState = downloadState,
             downloadProgress = downloadProgress,
-            onDownload = onDownload
+            onDownload = onDownload,
         )
     }
 }

@@ -26,7 +26,7 @@ private const val PROGRESS_DELAY = 50L
 data class Download(
     val source: HttpSource,
     val mangaItem: SimpleManga,
-    val chapterItem: SimpleChapter
+    val chapterItem: SimpleChapter,
 ) {
 
     var pages: List<Page>? = null
