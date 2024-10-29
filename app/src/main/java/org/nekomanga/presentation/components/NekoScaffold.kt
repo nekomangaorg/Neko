@@ -256,7 +256,7 @@ fun SearchOutlineTopAppBar(
             SearchBar(
                 modifier =
                     Modifier.fillMaxWidth()
-                        .padding(Size.small)
+                        .padding(horizontal = Size.small)
                         .onFocusChanged {
                             if (it.hasFocus) {
                                 searchEnabled = true
