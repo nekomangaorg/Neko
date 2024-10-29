@@ -277,6 +277,10 @@ class FeedPresenter(
         }
     }
 
+    fun removeDownload(download: Download) {
+        presenterScope.launchIO { downloadManager.deletePendingDownloads(listOf(download)) }
+    }
+
     /**
      * Finds the manga in the given list, finds the matching chapters and updates the chapter and
      * the list. Returning the updated list or false if the chapter didnt exist
@@ -452,6 +456,7 @@ class FeedPresenter(
                 .progressFlow()
                 .catch { error -> TimberKt.e(error) }
                 .collect { download ->
+                    TimberKt.d { "ESCO ${download.progress} ${download.progress}" }
                     updateDownloadOnFeed(download.chapterItem.id, download.mangaItem.id, download)
                     updateDownloadQueue(download)
                 }

@@ -69,6 +69,8 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     },
                     updateLibrary = { start -> updateLibrary(start, context) },
                 ),
+            downloadScreenActions =
+                DownloadScreenActions(downloadSwiped = { presenter.removeDownload(it) }),
             settingsClick = { (this.activity as? MainActivity)?.showSettings() },
             statsClick = { (this.activity as? MainActivity)?.showStats() },
             aboutClick = { (this.activity as? MainActivity)?.showAbout() },

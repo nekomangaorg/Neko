@@ -19,22 +19,25 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.data.download.model.Download
+import kotlinx.coroutines.launch
 import org.nekomanga.R
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NekoSwipeToDismiss
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun DownloadChapterRow(download: Download) {
+fun DownloadChapterRow(download: Download, downloadSwiped: () -> Unit) {
     val dismissState = rememberDismissState(initialValue = DismissValue.Default)
     NekoSwipeToDismiss(
         state = dismissState,
@@ -48,11 +51,17 @@ fun DownloadChapterRow(download: Download) {
         },
         dismissContent = { ChapterRow(download) },
     )
-    when {
-        dismissState.isDismissed(DismissDirection.EndToStart) -> Unit
-        //  Reset(dismissState = dismissState, action = onRead)
-        dismissState.isDismissed(DismissDirection.StartToEnd) -> Unit
-    //   Reset(dismissState = dismissState, action = onBookmark)
+    if (
+        dismissState.isDismissed(DismissDirection.EndToStart) ||
+            dismissState.isDismissed(DismissDirection.StartToEnd)
+    ) {
+        val scope = rememberCoroutineScope()
+        LaunchedEffect(key1 = dismissState.dismissDirection) {
+            scope.launch {
+                dismissState.reset()
+                downloadSwiped()
+            }
+        }
     }
 }
 

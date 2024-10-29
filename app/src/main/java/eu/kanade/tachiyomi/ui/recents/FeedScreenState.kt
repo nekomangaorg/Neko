@@ -58,6 +58,8 @@ data class FeedScreenActions(
     val updateLibrary: (Boolean) -> Unit,
 )
 
+data class DownloadScreenActions(val downloadSwiped: (Download) -> Unit)
+
 data class FeedManga(
     val mangaTitle: String,
     val date: Long,

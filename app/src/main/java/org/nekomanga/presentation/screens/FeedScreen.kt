@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import eu.kanade.tachiyomi.ui.recents.DownloadScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedScreenState
@@ -72,6 +73,7 @@ fun FeedScreen(
     loadNextPage: () -> Unit,
     feedSettingActions: FeedSettingActions,
     feedScreenActions: FeedScreenActions,
+    downloadScreenActions: DownloadScreenActions,
     incognitoClick: () -> Unit,
     settingsClick: () -> Unit,
     statsClick: () -> Unit,
@@ -198,8 +200,9 @@ fun FeedScreen(
                         when (feedScreenType) {
                             FeedScreenType.Downloads -> {
                                 DownloadScreen(
-                                    downloads = feedScreenState.value.downloads,
                                     contentPadding = recyclerContentPadding,
+                                    downloads = feedScreenState.value.downloads,
+                                    downloadScreenActions = downloadScreenActions,
                                 )
                             }
                             else ->
