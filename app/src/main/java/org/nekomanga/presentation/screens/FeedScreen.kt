@@ -197,6 +197,15 @@ fun FeedScreen(
                                     feedScreenState.value.hasMoreResults
                             }
 
+                        if (
+                            feedScreenType == FeedScreenType.Downloads &&
+                                feedScreenState.value.downloads.isEmpty()
+                        ) {
+                            feedScreenActions.switchViewType(
+                                feedScreenState.value.previousScreenType
+                            )
+                        }
+
                         when (feedScreenType) {
                             FeedScreenType.Downloads -> {
                                 DownloadScreen(

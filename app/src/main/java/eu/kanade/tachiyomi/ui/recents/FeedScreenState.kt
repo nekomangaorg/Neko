@@ -13,6 +13,7 @@ data class FeedScreenState(
     val firstLoad: Boolean = true,
     val isRefreshing: Boolean = false,
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
+    val previousScreenType: FeedScreenType = FeedScreenType.Updates,
     val updatesSortedByFetch: Boolean = true,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean,
