@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.recents
 
-import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaConstants
 import eu.kanade.tachiyomi.util.system.SideNavMode
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
+import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.domain.manga.Artwork
 
 data class FeedScreenState(
@@ -24,7 +24,7 @@ data class FeedScreenState(
     val incognitoMode: Boolean = false,
     val allFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val searchFeedManga: ImmutableList<FeedManga> = persistentListOf(),
-    val downloads: ImmutableList<Download> = persistentListOf(),
+    val downloads: ImmutableList<DownloadItem> = persistentListOf(),
     val searchQuery: String = "",
 )
 
@@ -58,7 +58,7 @@ data class FeedScreenActions(
     val updateLibrary: (Boolean) -> Unit,
 )
 
-data class DownloadScreenActions(val downloadSwiped: (Download) -> Unit)
+data class DownloadScreenActions(val downloadSwiped: (DownloadItem) -> Unit)
 
 data class FeedManga(
     val mangaTitle: String,

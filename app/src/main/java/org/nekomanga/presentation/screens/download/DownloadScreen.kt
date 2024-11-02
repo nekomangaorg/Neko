@@ -8,17 +8,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.recents.DownloadScreenActions
 import kotlinx.collections.immutable.ImmutableList
+import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.presentation.theme.Size
 
 @Composable
 fun DownloadScreen(
     contentPadding: PaddingValues,
-    downloads: ImmutableList<Download>,
+    downloads: ImmutableList<DownloadItem>,
     downloadScreenActions: DownloadScreenActions,
 ) {
+
     val scrollState = rememberLazyListState()
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -26,8 +27,8 @@ fun DownloadScreen(
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(Size.small),
     ) {
-        items(downloads, { download -> download.chapterItem.id }) { download ->
-            DownloadChapterRow(download, { downloadScreenActions.downloadSwiped(download) })
+        items(downloads, { download -> download.chapterItem.chapter.id }) { download ->
+            DownloadChapterRow(download) { downloadScreenActions.downloadSwiped(download) }
         }
     }
 }

@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.download
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,65 +9,52 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import eu.kanade.tachiyomi.data.download.model.Download
-import kotlinx.coroutines.launch
+import me.saket.swipe.SwipeAction
 import org.nekomanga.R
+import org.nekomanga.domain.download.DownloadItem
+import org.nekomanga.presentation.components.ChapterSwipe
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.components.NekoSwipeToDismiss
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun DownloadChapterRow(download: Download, downloadSwiped: () -> Unit) {
-    val dismissState = rememberDismissState(initialValue = DismissValue.Default)
-    NekoSwipeToDismiss(
-        state = dismissState,
+fun DownloadChapterRow(chapter: DownloadItem, downloadSwiped: () -> Unit) {
+    val swipeAction =
+        SwipeAction(
+            icon = rememberVectorPainter(Icons.Filled.DeleteForever),
+            background = MaterialTheme.colorScheme.secondary,
+            onSwipe = downloadSwiped,
+        )
+
+    ChapterSwipe(
         modifier = Modifier.padding(vertical = Dp(1f)),
-        background = {
-            when (dismissState.dismissDirection) {
-                DismissDirection.EndToStart -> Background(alignment = Alignment.CenterEnd)
-                DismissDirection.StartToEnd -> Background(alignment = Alignment.CenterStart)
-                else -> Unit
-            }
-        },
-        dismissContent = { ChapterRow(download) },
-    )
-    if (
-        dismissState.isDismissed(DismissDirection.EndToStart) ||
-            dismissState.isDismissed(DismissDirection.StartToEnd)
+        startSwipeAction = swipeAction,
+        endSwipeAction = swipeAction,
     ) {
-        val scope = rememberCoroutineScope()
-        LaunchedEffect(key1 = dismissState.dismissDirection) {
-            scope.launch {
-                dismissState.reset()
-                downloadSwiped()
-            }
-        }
+        ChapterRow(chapter)
     }
 }
 
 @Composable
-private fun ChapterRow(download: Download) {
+private fun ChapterRow(download: DownloadItem) {
+
     Row(
         modifier =
             Modifier.fillMaxWidth()
@@ -88,7 +76,7 @@ private fun ChapterRow(download: Download) {
                 maxLines = 1,
             )
             Text(
-                text = download.chapterItem.name,
+                text = download.chapterItem.chapter.name,
                 style =
                     MaterialTheme.typography.bodyMedium.copy(
                         color =
@@ -98,21 +86,23 @@ private fun ChapterRow(download: Download) {
                     ),
                 maxLines = 1,
             )
-            when (download.status == Download.State.QUEUE) {
+
+            when (download.chapterItem.downloadState == Download.State.QUEUE) {
                 true ->
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
                         color = MaterialTheme.colorScheme.secondary,
                     )
                 false -> {
-                    val currentProgress by
-                        remember(download.progress.toFloat()) {
-                            mutableFloatStateOf(download.progress.toFloat())
-                        }
+                    val animatedProgress by
+                        animateFloatAsState(
+                            targetValue = download.chapterItem.downloadProgress.toFloat() / 100,
+                            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+                        )
 
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
-                        progress = { currentProgress },
+                        progress = { animatedProgress },
                         color = MaterialTheme.colorScheme.secondary,
                     )
                 }

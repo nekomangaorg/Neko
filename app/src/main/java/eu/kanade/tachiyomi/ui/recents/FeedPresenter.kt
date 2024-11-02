@@ -26,6 +26,7 @@ import org.nekomanga.core.security.SecurityPreferences
 import org.nekomanga.domain.chapter.ChapterItem
 import org.nekomanga.domain.chapter.SimpleChapter
 import org.nekomanga.domain.details.MangaDetailsPreferences
+import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.domain.library.LibraryPreferences
 import org.nekomanga.logging.TimberKt
 import org.nekomanga.util.paging.DefaultPaginator
@@ -88,9 +89,21 @@ class FeedPresenter(
         super.onCreate()
         LibraryUpdateJob.updateFlow.onEach(::onUpdateManga).launchIn(presenterScope)
         presenterScope.launchIO {
-            _feedScreenState.update {
-                it.copy(downloads = downloadManager.queueState.value.toImmutableList())
-            }
+            val downloads =
+                downloadManager.queueState.value
+                    .map { download ->
+                        DownloadItem(
+                            mangaItem = download.mangaItem,
+                            chapterItem =
+                                download.chapterItem.toChapterItem(
+                                    download.status,
+                                    download.progress,
+                                ),
+                        )
+                    }
+                    .toImmutableList()
+
+            _feedScreenState.update { it.copy(downloads = downloads) }
         }
         observeDownloads()
 
@@ -277,8 +290,8 @@ class FeedPresenter(
         }
     }
 
-    fun removeDownload(download: Download) {
-        presenterScope.launchIO { downloadManager.deletePendingDownloads(listOf(download)) }
+    fun removeDownload(download: DownloadItem) {
+        presenterScope.launchIO { downloadManager.deletePendingDownloadsItems(listOf(download)) }
     }
 
     /**
@@ -422,13 +435,18 @@ class FeedPresenter(
     private fun updateDownloadQueue(download: Download) {
         val mutableList = _feedScreenState.value.downloads.toMutableList()
         val indexOfDownload =
-            mutableList.indexOfFirst { it.chapterItem.id == download.chapterItem.id }
+            mutableList.indexOfFirst { it.chapterItem.chapter.id == download.chapterItem.id }
         if (indexOfDownload >= 0) {
             if (download.status == Download.State.DOWNLOADED) {
                 mutableList.removeAt(indexOfDownload)
             } else {
-                mutableList[indexOfDownload] = download
+                mutableList[indexOfDownload] =
+                    mutableList[indexOfDownload].copy(
+                        chapterItem =
+                            download.chapterItem.toChapterItem(download.status, download.progress)
+                    )
             }
+
             _feedScreenState.update { it.copy(downloads = mutableList.toImmutableList()) }
         }
     }
@@ -437,7 +455,21 @@ class FeedPresenter(
 
         pausablePresenterScope.launchIO {
             downloadManager.queueState.collectLatest { queueDownloads ->
-                _feedScreenState.update { it.copy(downloads = queueDownloads.toImmutableList()) }
+                val downloads =
+                    queueDownloads
+                        .map { download ->
+                            DownloadItem(
+                                mangaItem = download.mangaItem,
+                                chapterItem =
+                                    download.chapterItem.toChapterItem(
+                                        download.status,
+                                        download.progress,
+                                    ),
+                            )
+                        }
+                        .toImmutableList()
+
+                _feedScreenState.update { it.copy(downloads = downloads) }
             }
         }
 
@@ -456,7 +488,6 @@ class FeedPresenter(
                 .progressFlow()
                 .catch { error -> TimberKt.e(error) }
                 .collect { download ->
-                    TimberKt.d { "ESCO ${download.progress} ${download.progress}" }
                     updateDownloadOnFeed(download.chapterItem.id, download.mangaItem.id, download)
                     updateDownloadQueue(download)
                 }

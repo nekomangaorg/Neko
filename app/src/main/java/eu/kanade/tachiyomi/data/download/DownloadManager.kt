@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.runBlocking
 import org.nekomanga.R
+import org.nekomanga.domain.download.DownloadItem
 import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -222,6 +223,20 @@ class DownloadManager(val context: Context) {
             val manga = entry.value.first().mangaItem
             val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
             deleteChapters(entry.value.map { it.chapterItem.toDbChapter() }, dbManga)
+        }
+    }
+
+    /**
+     * Calls delete chapter, which deletes temp downloads
+     *
+     * @param downloads list of downloads to cancel
+     */
+    fun deletePendingDownloadsItems(downloads: List<DownloadItem>) {
+        val downloadsByManga = downloads.groupBy { it.mangaItem.id }
+        downloadsByManga.forEach { entry ->
+            val manga = entry.value.first().mangaItem
+            val dbManga = db.getManga(manga.id).executeAsBlocking() ?: return
+            deleteChapters(entry.value.map { it.chapterItem.chapter.toDbChapter() }, dbManga)
         }
     }
 

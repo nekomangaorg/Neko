@@ -182,6 +182,8 @@ dependencies {
 
     implementation(compose.bundles.charting)
 
+    implementation(compose.swipe)
+
     implementation(libs.pastelplaceholders)
     implementation(libs.bundles.conductor)
     implementation(libs.fuzzysearch)
