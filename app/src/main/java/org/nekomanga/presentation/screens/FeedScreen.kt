@@ -186,7 +186,9 @@ fun FeedScreen(
 
                     Box(
                         modifier =
-                            Modifier.padding(bottom = navBarPadding.calculateBottomPadding())
+                            Modifier.padding(
+                                    bottom = navBarPadding.calculateBottomPadding() - Size.small
+                                )
                                 .fillMaxSize()
                     ) {
                         val (feedManga, hasMoreResults) =
@@ -211,6 +213,7 @@ fun FeedScreen(
                                 DownloadScreen(
                                     contentPadding = recyclerContentPadding,
                                     downloads = feedScreenState.value.downloads,
+                                    downloaderRunning = feedScreenState.value.downloaderRunning,
                                     downloadScreenActions = downloadScreenActions,
                                 )
                             }
@@ -276,7 +279,7 @@ private fun ScreenTypeFooter(
     screenTypeClick: (FeedScreenType) -> Unit,
 ) {
     LazyRow(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().padding(bottom = Size.smedium),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

@@ -35,7 +35,11 @@ import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
 
 @Composable
-fun DownloadChapterRow(chapter: DownloadItem, downloadSwiped: () -> Unit) {
+fun DownloadChapterRow(
+    chapter: DownloadItem,
+    downloaderRunning: Boolean,
+    downloadSwiped: () -> Unit,
+) {
     val swipeAction =
         SwipeAction(
             icon = rememberVectorPainter(Icons.Filled.DeleteForever),
@@ -48,12 +52,12 @@ fun DownloadChapterRow(chapter: DownloadItem, downloadSwiped: () -> Unit) {
         startSwipeAction = swipeAction,
         endSwipeAction = swipeAction,
     ) {
-        ChapterRow(chapter)
+        ChapterRow(chapter, downloaderRunning)
     }
 }
 
 @Composable
-private fun ChapterRow(download: DownloadItem) {
+private fun ChapterRow(download: DownloadItem, downloaderRunning: Boolean) {
 
     Row(
         modifier =
@@ -91,7 +95,9 @@ private fun ChapterRow(download: DownloadItem) {
                 true ->
                     LinearProgressIndicator(
                         modifier = Modifier.fillMaxWidth(),
+                        progress = { 0f },
                         color = MaterialTheme.colorScheme.secondary,
+                        drawStopIndicator = {},
                     )
                 false -> {
                     val animatedProgress by

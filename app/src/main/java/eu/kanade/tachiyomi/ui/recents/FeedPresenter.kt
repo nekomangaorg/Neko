@@ -187,6 +187,15 @@ class FeedPresenter(
         presenterScope.launch { securityPreferences.incognitoMode().toggle() }
     }
 
+    fun toggleDownloader() {
+        presenterScope.launch {
+            when (downloadManager.isRunning) {
+                true -> downloadManager.pauseDownloads()
+                false -> downloadManager.startDownloads()
+            }
+        }
+    }
+
     fun toggleUploadsSortOrder() {
         presenterScope.launchIO { preferences.sortFetchedTime().toggle() }
     }
@@ -477,6 +486,12 @@ class FeedPresenter(
                         .toImmutableList()
 
                 _feedScreenState.update { it.copy(downloads = downloads) }
+            }
+        }
+
+        pausablePresenterScope.launchIO {
+            downloadManager.isDownloaderRunning.collectLatest { running ->
+                _feedScreenState.update { it.copy(downloaderRunning = running) }
             }
         }
 

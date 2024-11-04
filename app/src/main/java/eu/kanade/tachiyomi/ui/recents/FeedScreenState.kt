@@ -26,6 +26,7 @@ data class FeedScreenState(
     val allFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val searchFeedManga: ImmutableList<FeedManga> = persistentListOf(),
     val downloads: ImmutableList<DownloadItem> = persistentListOf(),
+    val downloaderRunning: Boolean = false,
     val searchQuery: String = "",
 )
 
@@ -59,7 +60,10 @@ data class FeedScreenActions(
     val updateLibrary: (Boolean) -> Unit,
 )
 
-data class DownloadScreenActions(val downloadSwiped: (DownloadItem) -> Unit)
+data class DownloadScreenActions(
+    val downloadSwiped: (DownloadItem) -> Unit,
+    val fabClick: () -> Unit,
+)
 
 data class FeedManga(
     val mangaTitle: String,
