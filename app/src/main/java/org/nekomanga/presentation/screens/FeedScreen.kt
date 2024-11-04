@@ -110,7 +110,7 @@ fun FeedScreen(
     Box(
         modifier =
             Modifier.fillMaxSize().conditional(mainDropdownShowing) {
-                this.blur(16.dp).clickable(enabled = false) {}
+                this.blur(Size.medium).clickable(enabled = false) {}
             }
     ) {
         ModalBottomSheetLayout(
@@ -134,8 +134,7 @@ fun FeedScreen(
         ) {
             NekoScaffold(
                 type =
-                    if (feedScreenState.value.feedScreenType == FeedScreenType.Downloads)
-                        NekoScaffoldType.Title
+                    if (feedScreenState.value.showingDownloads) NekoScaffoldType.Title
                     else NekoScaffoldType.SearchOutline,
                 incognitoMode = feedScreenState.value.incognitoMode,
                 searchPlaceHolder = searchHint,
@@ -200,24 +199,23 @@ fun FeedScreen(
                             }
 
                         if (
-                            feedScreenType == FeedScreenType.Downloads &&
+                            feedScreenState.value.showingDownloads &&
                                 feedScreenState.value.downloads.isEmpty()
                         ) {
-                            feedScreenActions.switchViewType(
-                                feedScreenState.value.previousScreenType
-                            )
+                            feedScreenActions.toggleShowingDownloads()
                         }
-
-                        when (feedScreenType) {
-                            FeedScreenType.Downloads -> {
+                        when (
+                            feedScreenState.value.showingDownloads &&
+                                feedScreenState.value.downloads.isNotEmpty()
+                        ) {
+                            true ->
                                 DownloadScreen(
                                     contentPadding = recyclerContentPadding,
                                     downloads = feedScreenState.value.downloads,
                                     downloaderRunning = feedScreenState.value.downloaderRunning,
                                     downloadScreenActions = downloadScreenActions,
                                 )
-                            }
-                            else ->
+                            false ->
                                 FeedPage(
                                     contentPadding = recyclerContentPadding,
                                     feedMangaList = feedManga,
@@ -233,16 +231,22 @@ fun FeedScreen(
                                     loadNextPage = loadNextPage,
                                 )
                         }
+
                         if (!feedScreenState.value.firstLoad) {
-                            ScreenTypeFooter(
+                            ScreenFooter(
                                 screenType = feedScreenType,
                                 modifier =
                                     Modifier.align(Alignment.BottomStart).conditional(sideNav) {
                                         this.navigationBarsPadding()
                                     },
-                                hasDownloads = feedScreenState.value.downloads.isNotEmpty(),
+                                showDownloads = feedScreenState.value.downloads.isNotEmpty(),
+                                downloadsSelected = feedScreenState.value.showingDownloads,
+                                downloadsClicked = feedScreenActions.toggleShowingDownloads,
                                 screenTypeClick = { newScreenType: FeedScreenType ->
                                     scope.launch { sheetState.hide() }
+                                    if (feedScreenState.value.showingDownloads) {
+                                        feedScreenActions.toggleShowingDownloads()
+                                    }
                                     if (feedScreenType != newScreenType) {
                                         feedScreenActions.switchViewType(newScreenType)
                                     }
@@ -272,10 +276,12 @@ fun FeedScreen(
 }
 
 @Composable
-private fun ScreenTypeFooter(
+private fun ScreenFooter(
     screenType: FeedScreenType,
     modifier: Modifier = Modifier,
-    hasDownloads: Boolean,
+    showDownloads: Boolean,
+    downloadsSelected: Boolean,
+    downloadsClicked: () -> Unit,
     screenTypeClick: (FeedScreenType) -> Unit,
 ) {
     LazyRow(
@@ -287,7 +293,7 @@ private fun ScreenTypeFooter(
 
         item {
             FooterFilterChip(
-                selected = screenType == FeedScreenType.History,
+                selected = screenType == FeedScreenType.History && downloadsSelected == false,
                 onClick = { screenTypeClick(FeedScreenType.History) },
                 name = stringResource(R.string.history),
             )
@@ -295,17 +301,17 @@ private fun ScreenTypeFooter(
 
         item {
             FooterFilterChip(
-                selected = screenType == FeedScreenType.Updates,
+                selected = screenType == FeedScreenType.Updates && downloadsSelected == false,
                 onClick = { screenTypeClick(FeedScreenType.Updates) },
                 name = stringResource(R.string.updates),
             )
         }
 
-        if (hasDownloads) {
+        if (showDownloads) {
             item {
                 FooterFilterChip(
-                    selected = screenType == FeedScreenType.Downloads,
-                    onClick = { screenTypeClick(FeedScreenType.Downloads) },
+                    selected = downloadsSelected,
+                    onClick = downloadsClicked,
                     name = stringResource(R.string.downloads),
                 )
             }

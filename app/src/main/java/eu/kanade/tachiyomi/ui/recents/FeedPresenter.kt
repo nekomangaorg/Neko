@@ -46,7 +46,6 @@ class FeedPresenter(
         MutableStateFlow(
             FeedScreenState(
                 feedScreenType = preferences.feedViewType().get(),
-                previousScreenType = preferences.feedViewType().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
@@ -170,13 +169,7 @@ class FeedPresenter(
     }
 
     fun switchViewType(feedScreenType: FeedScreenType) {
-        presenterScope.launch {
-            if (feedScreenType == FeedScreenType.Downloads) {
-                _feedScreenState.update { it.copy(previousScreenType = it.feedScreenType) }
-            }
-
-            preferences.feedViewType().set(feedScreenType)
-        }
+        presenterScope.launch { preferences.feedViewType().set(feedScreenType) }
     }
 
     fun toggleGroupHistoryType(historyGrouping: FeedHistoryGroup) {
@@ -185,6 +178,12 @@ class FeedPresenter(
 
     fun toggleIncognitoMode() {
         presenterScope.launch { securityPreferences.incognitoMode().toggle() }
+    }
+
+    fun toggleShowingDownloads() {
+        presenterScope.launch {
+            _feedScreenState.update { it.copy(showingDownloads = !it.showingDownloads) }
+        }
     }
 
     fun toggleDownloader() {

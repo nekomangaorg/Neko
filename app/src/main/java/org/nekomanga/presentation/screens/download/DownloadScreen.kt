@@ -50,7 +50,10 @@ fun DownloadScreen(
         ExtendedFloatingActionButton(
             modifier =
                 Modifier.align(Alignment.BottomEnd)
-                    .padding(bottom = contentPadding.calculateBottomPadding() - Size.medium),
+                    .padding(
+                        bottom = contentPadding.calculateBottomPadding() - Size.medium,
+                        end = Size.small,
+                    ),
             onClick = downloadScreenActions.fabClick,
             icon = {
                 when (downloaderRunning) {

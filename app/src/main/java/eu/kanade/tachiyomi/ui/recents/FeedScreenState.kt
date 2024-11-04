@@ -13,7 +13,7 @@ data class FeedScreenState(
     val firstLoad: Boolean = true,
     val isRefreshing: Boolean = false,
     val feedScreenType: FeedScreenType = FeedScreenType.Updates,
-    val previousScreenType: FeedScreenType = FeedScreenType.Updates,
+    val showingDownloads: Boolean = false,
     val updatesSortedByFetch: Boolean = true,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean,
@@ -33,7 +33,6 @@ data class FeedScreenState(
 enum class FeedScreenType {
     History,
     Updates,
-    Downloads,
 }
 
 enum class FeedHistoryGroup {
@@ -53,6 +52,7 @@ data class FeedScreenActions(
     val mangaClick: (Long) -> Unit,
     val chapterClick: (Long, Long) -> Unit,
     val switchViewType: (FeedScreenType) -> Unit,
+    val toggleShowingDownloads: () -> Unit,
     val deleteHistoryClick: (FeedManga, SimpleChapter) -> Unit,
     val deleteAllHistoryClick: (FeedManga) -> Unit,
     val search: (String?) -> Unit,

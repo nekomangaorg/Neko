@@ -67,6 +67,7 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                             presenter.downloadChapter(chapterItem, feedManga, downloadAction)
                         }
                     },
+                    toggleShowingDownloads = presenter::toggleShowingDownloads,
                     updateLibrary = { start -> updateLibrary(start, context) },
                 ),
             downloadScreenActions =
