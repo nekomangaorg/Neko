@@ -81,21 +81,20 @@ fun HistoryCard(
     deleteHistoryClick: (SimpleChapter) -> Unit,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
+    val canExpand by remember { mutableStateOf(feedManga.chapters.size > 1) }
     val cardColor: Color by
         animateColorAsState(
-            if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-            else MaterialTheme.colorScheme.surface,
+            if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small)
+            else MaterialTheme.colorScheme.primaryContainer,
             label = "historyCardExpansion",
         )
     val lowContrastColor =
         MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
-    val canExpand = feedManga.chapters.size > 1
     var showRemoveHistoryDialog by remember { mutableIntStateOf(-1) }
     var showRemoveAllHistoryDialog by remember { mutableStateOf(false) }
 
     ElevatedCard(
-        enabled = canExpand,
-        onClick = { mangaClick() },
+        onClick = mangaClick,
         modifier = Modifier.fillMaxWidth().padding(Size.small).animateContentSize(),
         colors = CardDefaults.cardColors(containerColor = cardColor),
     ) {
@@ -107,7 +106,7 @@ fun HistoryCard(
 
         Text(
             text = feedManga.mangaTitle,
-            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             color = titleColor,
@@ -208,6 +207,17 @@ fun HistoryCard(
                                             lowContrastColor,
                                         ),
                                 )
+                                if (chapterItem.chapter.pagesLeft > 0) {
+                                    PagesLeftLine(
+                                        pagesLeft = chapterItem.chapter.pagesLeft,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textColor =
+                                            getReadTextColor(
+                                                isRead = chapterItem.chapter.read,
+                                                lowContrastColor,
+                                            ),
+                                    )
+                                }
                             }
 
                             Box(
@@ -316,24 +326,23 @@ private fun ChapterInfo(
             style = MaterialTheme.typography.bodyMedium,
             textColor = readColor,
         )
-        if (!chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0) {
-            Text(
-                modifier = Modifier.weight(1f),
-                text =
-                    pluralStringResource(
-                        id = R.plurals.pages_left,
-                        count = 1,
-                        chapterItem.chapter.pagesLeft,
-                    ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = readColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
 
         Spacer(modifier.weight(1f))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            if (!chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0) {
+                Text(
+                    text =
+                        pluralStringResource(
+                            R.plurals.pages_left,
+                            chapterItem.chapter.pagesLeft,
+                            chapterItem.chapter.pagesLeft,
+                        ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = readColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             if (canExpand) {
                 Spacer(modifier.weight(1f))
                 TextButton(onClick = expandClick) {
@@ -441,6 +450,23 @@ private fun LastReadLine(
         }
         Text(
             text = statuses.joinToString(Constants.SEPARATOR),
+            style =
+                style.copy(
+                    color = textColor,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = (-.6).sp,
+                ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun PagesLeftLine(pagesLeft: Int, style: TextStyle, textColor: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = pluralStringResource(id = R.plurals.pages_left, count = pagesLeft),
             style =
                 style.copy(
                     color = textColor,

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,8 +38,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import eu.kanade.tachiyomi.ui.recents.DownloadScreenActions
 import eu.kanade.tachiyomi.ui.recents.FeedHistoryGroup
 import eu.kanade.tachiyomi.ui.recents.FeedScreenActions
@@ -183,10 +186,16 @@ fun FeedScreen(
                                         .calculateBottomPadding(),
                         )
 
+                    val layoutDirection = LocalLayoutDirection.current
                     Box(
                         modifier =
                             Modifier.padding(
-                                    bottom = navBarPadding.calculateBottomPadding() - Size.small
+                                    start = navBarPadding.calculateStartPadding(layoutDirection),
+                                    bottom =
+                                        max(
+                                            navBarPadding.calculateBottomPadding() - Size.small,
+                                            0.dp,
+                                        ),
                                 )
                                 .fillMaxSize()
                     ) {
