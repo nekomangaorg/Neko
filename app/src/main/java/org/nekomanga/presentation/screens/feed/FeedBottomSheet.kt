@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.screens.feed
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -42,7 +43,11 @@ fun FeedBottomSheet(
     feedScreenType: FeedScreenType,
     historyGrouping: FeedHistoryGroup,
     sortByFetched: Boolean,
+    outlineCovers: Boolean,
+    outlineCards: Boolean,
     sortClick: () -> Unit,
+    outlineCardsClick: () -> Unit,
+    outlineCoversClick: () -> Unit,
     groupHistoryClick: (FeedHistoryGroup) -> Unit,
     clearHistoryClick: () -> Unit,
     themeColorState: ThemeColorState = defaultThemeColorState(),
@@ -61,8 +66,24 @@ fun FeedBottomSheet(
         ) {
             when (feedScreenType) {
                 FeedScreenType.History ->
-                    historyContent(historyGrouping, groupHistoryClick, clearHistoryClick)
-                FeedScreenType.Updates -> uploadsContent(sortByFetched, sortClick)
+                    historyContent(
+                        historyGrouping = historyGrouping,
+                        outlineCovers = outlineCovers,
+                        outlineCards = outlineCards,
+                        outlineCoversClick = outlineCoversClick,
+                        outlineCardsClick = outlineCardsClick,
+                        groupHistoryClick = groupHistoryClick,
+                        clearHistoryClick = clearHistoryClick,
+                    )
+                FeedScreenType.Updates ->
+                    uploadsContent(
+                        fetchSort = sortByFetched,
+                        outlineCovers = outlineCovers,
+                        outlineCards = outlineCards,
+                        sortClick = sortClick,
+                        outlineCoversClick = outlineCoversClick,
+                        outlineCardsClick = outlineCardsClick,
+                    )
             }
         }
     }
@@ -70,6 +91,10 @@ fun FeedBottomSheet(
 
 private fun LazyListScope.historyContent(
     historyGrouping: FeedHistoryGroup,
+    outlineCovers: Boolean,
+    outlineCards: Boolean,
+    outlineCoversClick: () -> Unit,
+    outlineCardsClick: () -> Unit,
     groupHistoryClick: (FeedHistoryGroup) -> Unit,
     clearHistoryClick: () -> Unit,
 ) {
@@ -139,6 +164,8 @@ private fun LazyListScope.historyContent(
             }
         }
     }
+    item { Checkbox(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
+    item { Checkbox(R.string.show_outline_around_cards, outlineCards, outlineCardsClick) }
     item {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             TextButton(onClick = clearHistoryClick) {
@@ -151,18 +178,26 @@ private fun LazyListScope.historyContent(
     }
 }
 
-private fun LazyListScope.uploadsContent(fetchSort: Boolean, sortClick: () -> Unit) {
-    item {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(id = R.string.sort_fetched_time),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Switch(checked = fetchSort, onCheckedChange = { sortClick() })
-        }
+private fun LazyListScope.uploadsContent(
+    fetchSort: Boolean,
+    outlineCovers: Boolean,
+    outlineCards: Boolean,
+    sortClick: () -> Unit,
+    outlineCoversClick: () -> Unit,
+    outlineCardsClick: () -> Unit,
+) {
+    item { Checkbox(R.string.sort_fetched_time, fetchSort, sortClick) }
+    item { Checkbox(R.string.show_outline_around_covers, outlineCovers, outlineCoversClick) }
+}
+
+@Composable
+private fun Checkbox(@StringRes textRes: Int, checked: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = stringResource(id = textRes), style = MaterialTheme.typography.bodyMedium)
+        Switch(checked = checked, onCheckedChange = { onClick() })
     }
 }

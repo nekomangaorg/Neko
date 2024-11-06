@@ -43,6 +43,8 @@ class FeedController : BaseComposeController<FeedPresenter>() {
                     groupHistoryClick = presenter::toggleGroupHistoryType,
                     clearHistoryClick = presenter::deleteAllHistoryForAllManga,
                     switchUploadsSortOrder = presenter::toggleUploadsSortOrder,
+                    outlineCoversClick = presenter::toggleOutlineCovers,
+                    outlineCardsClick = presenter::toggleOutlineCards,
                 ),
             feedScreenActions =
                 FeedScreenActions(

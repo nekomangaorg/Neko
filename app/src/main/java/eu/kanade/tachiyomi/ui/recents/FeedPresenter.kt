@@ -47,6 +47,7 @@ class FeedPresenter(
             FeedScreenState(
                 feedScreenType = preferences.feedViewType().get(),
                 outlineCovers = libraryPreferences.outlineOnCovers().get(),
+                outlineCards = preferences.feedViewOutlineCards().get(),
                 incognitoMode = securityPreferences.incognitoMode().get(),
                 groupChaptersUpdates = preferences.groupChaptersUpdates().get(),
                 historyGrouping = preferences.historyChapterGrouping().get(),
@@ -123,6 +124,19 @@ class FeedPresenter(
                 _feedScreenState.update { state -> state.copy(incognitoMode = it) }
             }
         }
+
+        presenterScope.launch {
+            preferences.feedViewOutlineCards().changes().collectLatest {
+                _feedScreenState.update { state -> state.copy(outlineCards = it) }
+            }
+        }
+
+        presenterScope.launch {
+            libraryPreferences.outlineOnCovers().changes().collectLatest {
+                _feedScreenState.update { state -> state.copy(outlineCovers = it) }
+            }
+        }
+
         presenterScope.launch {
             preferences.groupChaptersUpdates().changes().collectLatest {
                 _feedScreenState.update { state -> state.copy(groupChaptersUpdates = it) }
@@ -174,6 +188,14 @@ class FeedPresenter(
 
     fun toggleGroupHistoryType(historyGrouping: FeedHistoryGroup) {
         presenterScope.launch { preferences.historyChapterGrouping().set(historyGrouping) }
+    }
+
+    fun toggleOutlineCards() {
+        presenterScope.launch { preferences.feedViewOutlineCards().toggle() }
+    }
+
+    fun toggleOutlineCovers() {
+        presenterScope.launch { libraryPreferences.outlineOnCovers().toggle() }
     }
 
     fun toggleIncognitoMode() {

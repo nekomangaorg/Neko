@@ -187,6 +187,8 @@ class PreferencesHelper(val context: Context, val preferenceStore: PreferenceSto
     fun historyChapterGrouping() =
         preferenceStore.getEnum(Keys.historyChapterGrouping, FeedHistoryGroup.Series)
 
+    fun feedViewOutlineCards() = preferenceStore.getBoolean("feedViewCardOutlined", false)
+
     fun showTitleFirstInRecents() =
         this.preferenceStore.getBoolean(Keys.showTitleFirstInRecents, false)
 

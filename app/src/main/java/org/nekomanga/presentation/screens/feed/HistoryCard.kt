@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -20,11 +21,13 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
@@ -71,7 +74,8 @@ import org.nekomanga.presentation.theme.Size
 fun HistoryCard(
     feedManga: FeedManga,
     themeColorState: ThemeColorState,
-    outlineCovers: Boolean,
+    outlineCard: Boolean,
+    outlineCover: Boolean,
     hideChapterTitles: Boolean,
     groupedBySeries: Boolean,
     downloadClick: (ChapterItem, MangaConstants.DownloadAction) -> Unit,
@@ -85,7 +89,7 @@ fun HistoryCard(
     val cardColor: Color by
         animateColorAsState(
             if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small)
-            else MaterialTheme.colorScheme.primaryContainer,
+            else MaterialTheme.colorScheme.surfaceVariant,
             label = "historyCardExpansion",
         )
     val lowContrastColor =
@@ -93,10 +97,11 @@ fun HistoryCard(
     var showRemoveHistoryDialog by remember { mutableIntStateOf(-1) }
     var showRemoveAllHistoryDialog by remember { mutableStateOf(false) }
 
-    ElevatedCard(
-        onClick = mangaClick,
+    Card(
         modifier = Modifier.fillMaxWidth().padding(Size.small).animateContentSize(),
-        colors = CardDefaults.cardColors(containerColor = cardColor),
+        outlineCard = outlineCard,
+        cardColor = CardDefaults.cardColors(containerColor = cardColor),
+        mangaClick = mangaClick,
     ) {
         val titleColor =
             getReadTextColor(
@@ -122,7 +127,7 @@ fun HistoryCard(
             artwork = feedManga.artwork,
             chapterItem = feedManga.chapters.first(),
             themeColorState = themeColorState,
-            outlineCovers = outlineCovers,
+            outlineCovers = outlineCover,
             hideChapterTitles = hideChapterTitles,
             canExpand = canExpand,
             isExpanded = expanded,
@@ -241,6 +246,34 @@ fun HistoryCard(
                 }
             }
             Gap(Size.medium)
+        }
+    }
+}
+
+@Composable
+fun Card(
+    modifier: Modifier = Modifier,
+    outlineCard: Boolean,
+    cardColor: CardColors,
+    mangaClick: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    when (outlineCard) {
+        true -> {
+            OutlinedCard(
+                onClick = mangaClick,
+                modifier = modifier,
+                colors = cardColor,
+                content = content,
+            )
+        }
+        false -> {
+            ElevatedCard(
+                onClick = mangaClick,
+                modifier = modifier,
+                colors = cardColor,
+                content = content,
+            )
         }
     }
 }
@@ -466,7 +499,7 @@ private fun LastReadLine(
 private fun PagesLeftLine(pagesLeft: Int, style: TextStyle, textColor: Color) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = pluralStringResource(id = R.plurals.pages_left, count = pagesLeft),
+            text = pluralStringResource(R.plurals.pages_left, pagesLeft, pagesLeft),
             style =
                 style.copy(
                     color = textColor,

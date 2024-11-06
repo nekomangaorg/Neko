@@ -17,6 +17,7 @@ data class FeedScreenState(
     val updatesSortedByFetch: Boolean = true,
     val sideNavMode: SideNavMode = SideNavMode.DEFAULT,
     val outlineCovers: Boolean,
+    val outlineCards: Boolean,
     val hideChapterTitles: Boolean,
     val offset: Int = 0,
     val hasMoreResults: Boolean = true,
@@ -46,6 +47,8 @@ data class FeedSettingActions(
     val groupHistoryClick: (FeedHistoryGroup) -> Unit,
     val clearHistoryClick: () -> Unit,
     val switchUploadsSortOrder: () -> Unit,
+    val outlineCoversClick: () -> Unit,
+    val outlineCardsClick: () -> Unit,
 )
 
 data class FeedScreenActions(

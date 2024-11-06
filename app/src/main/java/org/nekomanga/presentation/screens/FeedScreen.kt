@@ -126,11 +126,15 @@ fun FeedScreen(
                         feedScreenType = feedScreenState.value.feedScreenType,
                         historyGrouping = feedScreenState.value.historyGrouping,
                         sortByFetched = feedScreenState.value.updatesSortedByFetch,
+                        outlineCovers = feedScreenState.value.outlineCovers,
+                        outlineCards = feedScreenState.value.outlineCards,
                         groupHistoryClick = { feedHistoryGroup ->
                             feedSettingActions.groupHistoryClick(feedHistoryGroup)
                         },
                         clearHistoryClick = { showClearHistoryDialog = true },
                         sortClick = { feedSettingActions.switchUploadsSortOrder() },
+                        outlineCoversClick = { feedSettingActions.outlineCoversClick() },
+                        outlineCardsClick = { feedSettingActions.outlineCardsClick() },
                     )
                 }
             },
@@ -234,6 +238,7 @@ fun FeedScreen(
                                             FeedHistoryGroup.Series,
                                     feedScreenType = feedScreenState.value.feedScreenType,
                                     outlineCovers = feedScreenState.value.outlineCovers,
+                                    outlineCards = feedScreenState.value.outlineCards,
                                     hideChapterTitles = feedScreenState.value.hideChapterTitles,
                                     updatesFetchSort = feedScreenState.value.updatesSortedByFetch,
                                     feedScreenActions = feedScreenActions,

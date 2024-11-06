@@ -228,6 +228,7 @@
     <string name="uniform_grid_covers">Uniform grid covers</string>
     <string name="use_staggered_grid">Use staggered grid</string>
     <string name="show_outline_around_covers">Show outline around covers</string>
+    <string name="show_outline_around_cards">Show outline around cards</string>
     <string name="grid_size">Grid size</string>
     <string name="_per_row">%d per row</string>
     <string name="hide_unread_badges">Hide unread badges</string>

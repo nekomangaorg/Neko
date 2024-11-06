@@ -55,6 +55,7 @@ fun FeedPage(
     contentPadding: PaddingValues,
     feedMangaList: ImmutableList<FeedManga>,
     outlineCovers: Boolean,
+    outlineCards: Boolean,
     hasMoreResults: Boolean,
     hideChapterTitles: Boolean,
     groupedBySeries: Boolean,
@@ -83,7 +84,8 @@ fun FeedPage(
                     HistoryCard(
                         feedManga = feedManga,
                         themeColorState = themeColorState,
-                        outlineCovers = outlineCovers,
+                        outlineCover = outlineCovers,
+                        outlineCard = outlineCards,
                         hideChapterTitles = hideChapterTitles,
                         groupedBySeries = groupedBySeries,
                         downloadClick = { chp, action ->
