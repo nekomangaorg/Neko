@@ -58,7 +58,7 @@ class BackupCreator(val context: Context) {
         databaseHelper.inTransaction {
             val databaseManga =
                 getFavoriteManga() +
-                    if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA) {
+                    if (flags and BACKUP_READ_MANGA_MASK == BACKUP_READ_MANGA || isAutoBackup) {
                         getReadManga()
                     } else {
                         emptyList()
