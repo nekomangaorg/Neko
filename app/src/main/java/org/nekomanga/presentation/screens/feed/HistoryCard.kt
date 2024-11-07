@@ -212,7 +212,9 @@ fun HistoryCard(
                                             lowContrastColor,
                                         ),
                                 )
-                                if (chapterItem.chapter.pagesLeft > 0) {
+                                if (
+                                    !chapterItem.chapter.read && chapterItem.chapter.pagesLeft > 0
+                                ) {
                                     PagesLeftLine(
                                         pagesLeft = chapterItem.chapter.pagesLeft,
                                         style = MaterialTheme.typography.bodyMedium,
