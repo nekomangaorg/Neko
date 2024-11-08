@@ -89,7 +89,7 @@ fun HistoryCard(
     val cardColor: Color by
         animateColorAsState(
             if (expanded) MaterialTheme.colorScheme.surfaceColorAtElevation(Size.small)
-            else MaterialTheme.colorScheme.surfaceVariant,
+            else MaterialTheme.colorScheme.surfaceColorAtElevation(Size.extraTiny),
             label = "historyCardExpansion",
         )
     val lowContrastColor =
