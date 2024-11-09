@@ -11,7 +11,7 @@ googleServicesPluginVersion = "4.4.2"
 iconicsVersion = "5.4.0"
 injektCoreVersion = "1.16.1"
 kotlinResultVersion = "2.0.0"
-ktfmtVersion = "0.20.1"
+ktfmtVersion = "0.21.0"
 okhttpVersion = "5.0.0-alpha.14"
 photoViewVersion = "2.3.0"
 retrofitVersion = "2.11.0"
@@ -29,7 +29,7 @@ cascade-compose = { module = "me.saket.cascade:cascade-compose", version.ref = "
 cascade = { module = "me.saket.cascade:cascade", version.ref = "cascadeVersion" }
 injekt-core = { module = "uy.kohesive.injekt:injekt-core", version.ref = "injektCoreVersion" }
 material = "com.google.android.material:material:1.12.0"
-desugaring = "com.android.tools:desugar_jdk_libs:2.1.2"
+desugaring = "com.android.tools:desugar_jdk_libs:2.1.3"
 photoView = { module = "com.github.chrisbanes:PhotoView", version.ref = "photoViewVersion" }
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"
 flex-box = "com.google.android.flexbox:flexbox:3.0.0"
