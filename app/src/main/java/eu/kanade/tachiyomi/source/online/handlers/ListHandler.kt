@@ -24,7 +24,6 @@ import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
-import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -63,7 +62,6 @@ class ListHandler {
                                     allMangaIds.subList(initial, end)
                                 }
                             }
-                        TimberKt.d { "ESCO ${mangaIds.firstOrNull()}" }
 
                         val enabledContentRatings =
                             preferencesHelper.contentRatingSelections().get()
@@ -84,7 +82,6 @@ class ListHandler {
                             .search(ProxyRetrofitQueryMap(queryParameters))
                             .getOrResultError("Error trying to load manga list")
                             .andThen { mangaListDto ->
-                                TimberKt.d { "ESCO ${mangaListDto.data.firstOrNull()?.id}" }
                                 Ok(
                                     ListResults(
                                         displayScreenType =
@@ -112,7 +109,6 @@ class ListHandler {
         listUUID: String,
         privateList: Boolean,
     ): Result<ListResults, ResultError> {
-        TimberKt.d { "ESCO retrieveAllMangaFromList Called" }
         var hasPages = true
         var page = 1
         var list: List<SourceManga> = listOf()
@@ -127,10 +123,6 @@ class ListHandler {
                 .onSuccess { successResult ->
                     page++
                     hasPages = successResult.hasNextPage
-                    TimberKt.d { "ESCO retrieveAllMangaFromList list size ${list.size}" }
-                    TimberKt.d {
-                        "ESCO successResult ${successResult.sourceManga.firstOrNull()?.title}"
-                    }
                     list = list + (successResult.sourceManga.toMutableList())
                     displayScreenType = successResult.displayScreenType
                 }
