@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toSourceManga
 import eu.kanade.tachiyomi.ui.source.latest.DisplayScreenType
 import eu.kanade.tachiyomi.util.getOrResultError
+import kotlin.math.min
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -23,6 +24,7 @@ import org.nekomanga.core.network.ProxyRetrofitQueryMap
 import org.nekomanga.domain.manga.MangaContentRating
 import org.nekomanga.domain.manga.SourceManga
 import org.nekomanga.domain.network.ResultError
+import org.nekomanga.logging.TimberKt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -44,20 +46,24 @@ class ListHandler {
                     listDto.data.relationships
                         .filter { it.type == MdConstants.Types.manga }
                         .map { it.id }
-                when (allMangaIds.isEmpty()) {
+                when (allMangaIds.isEmpty() || allMangaIds.size < MdUtil.getMangaListOffset(page)) {
                     true ->
                         Ok(ListResults(DisplayScreenType.List("", listUUID), persistentListOf()))
                     false -> {
                         val mangaIds =
                             when (allMangaIds.size < MdConstants.Limits.manga) {
                                 true -> allMangaIds
-                                false ->
-                                    allMangaIds.subList(
-                                        MdUtil.getMangaListOffset(page),
-                                        MdUtil.getMangaListOffset(page) + MdConstants.Limits.manga -
-                                            1,
-                                    )
+                                false -> {
+
+                                    val initial = MdUtil.getMangaListOffset(page)
+                                    val potentialMax =
+                                        MdUtil.getMangaListOffset(page) + MdConstants.Limits.manga
+                                    val end = min(potentialMax, allMangaIds.size - 1)
+
+                                    allMangaIds.subList(initial, end)
+                                }
                             }
+                        TimberKt.d { "ESCO ${mangaIds.firstOrNull()}" }
 
                         val enabledContentRatings =
                             preferencesHelper.contentRatingSelections().get()
@@ -69,8 +75,7 @@ class ListHandler {
                         val queryParameters =
                             mutableMapOf(
                                 MdConstants.SearchParameters.mangaIds to mangaIds,
-                                MdConstants.SearchParameters.offset to
-                                    MdUtil.getMangaListOffset(page),
+                                MdConstants.SearchParameters.offset to 0,
                                 MdConstants.SearchParameters.limit to MdConstants.Limits.manga,
                                 MdConstants.SearchParameters.contentRatingParam to contentRatings,
                             )
@@ -79,6 +84,7 @@ class ListHandler {
                             .search(ProxyRetrofitQueryMap(queryParameters))
                             .getOrResultError("Error trying to load manga list")
                             .andThen { mangaListDto ->
+                                TimberKt.d { "ESCO ${mangaListDto.data.firstOrNull()?.id}" }
                                 Ok(
                                     ListResults(
                                         displayScreenType =
@@ -92,7 +98,7 @@ class ListHandler {
                                                 .toImmutableList(),
                                         hasNextPage =
                                             (mangaListDto.limit + mangaListDto.offset) <
-                                                mangaIds.size,
+                                                listDto.data.relationships.size,
                                     )
                                 )
                             }
@@ -106,9 +112,10 @@ class ListHandler {
         listUUID: String,
         privateList: Boolean,
     ): Result<ListResults, ResultError> {
+        TimberKt.d { "ESCO retrieveAllMangaFromList Called" }
         var hasPages = true
         var page = 1
-        val list: MutableList<SourceManga> = mutableListOf()
+        var list: List<SourceManga> = listOf()
         var displayScreenType: DisplayScreenType? = null
         var resultError: ResultError? = null
         while (hasPages) {
@@ -117,11 +124,15 @@ class ListHandler {
                     hasPages = false
                     resultError = it
                 }
-                .onSuccess {
+                .onSuccess { successResult ->
                     page++
-                    hasPages = it.hasNextPage
-                    list += it.sourceManga
-                    displayScreenType = it.displayScreenType
+                    hasPages = successResult.hasNextPage
+                    TimberKt.d { "ESCO retrieveAllMangaFromList list size ${list.size}" }
+                    TimberKt.d {
+                        "ESCO successResult ${successResult.sourceManga.firstOrNull()?.title}"
+                    }
+                    list = list + (successResult.sourceManga.toMutableList())
+                    displayScreenType = successResult.displayScreenType
                 }
         }
 
