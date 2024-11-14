@@ -328,7 +328,7 @@ fun Context.isInNightMode(): Boolean {
 suspend fun CoroutineWorker.tryToSetForeground() {
     try {
         setForeground(getForegroundInfo())
-        delay(500)
+        delay(1000)
     } catch (e: IllegalStateException) {
         TimberKt.e(e) { "Not allowed to set foreground job" }
     }
