@@ -50,8 +50,6 @@ import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
-import com.getkeepsafe.taptargetview.TapTarget
-import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.primitives.Ints.max
@@ -467,7 +465,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
                     handler: ControllerChangeHandler,
                 ) {
                     nav.translationY = 0f
-                    showDLQueueTutorial()
                     if (router.backstackSize == 1) {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
                             window?.setSoftInputMode(
@@ -729,44 +726,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
     override fun onResume() {
         super.onResume()
         checkForAppUpdates()
-        showDLQueueTutorial()
         reEnableBackPressedCallBack()
-    }
-
-    private fun showDLQueueTutorial() {
-        if (
-            router.backstackSize == 1 &&
-                this !is SearchActivity &&
-                downloadManager.queueState.value.isNotEmpty() &&
-                !preferences.shownDownloadQueueTutorial().get()
-        ) {
-            if (!isBindingInitialized) return
-            val recentsItem = nav.getItemView(R.id.nav_feed) ?: return
-            preferences.shownDownloadQueueTutorial().set(true)
-            TapTargetView.showFor(
-                this,
-                TapTarget.forView(
-                        recentsItem,
-                        getString(R.string.manage_whats_downloading),
-                        getString(R.string.visit_recents_for_download_queue),
-                    )
-                    .outerCircleColorInt(getResourceColor(R.attr.colorSecondary))
-                    .outerCircleAlpha(0.95f)
-                    .titleTextSize(20)
-                    .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary))
-                    .descriptionTextSize(16)
-                    .descriptionTextColorInt(getResourceColor(R.attr.colorOnSecondary))
-                    .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
-                    .targetCircleColor(android.R.color.white)
-                    .targetRadius(45),
-                object : TapTargetView.Listener() {
-                    override fun onTargetClick(view: TapTargetView) {
-                        super.onTargetClick(view)
-                        nav.selectedItemId = R.id.nav_feed
-                    }
-                },
-            )
-        }
     }
 
     override fun onPause() {
@@ -1302,7 +1262,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>() {
 
             if (hasQueue) {
                 nav.getOrCreateBadge(R.id.nav_feed)
-                showDLQueueTutorial()
             } else {
                 nav.removeBadge(R.id.nav_feed)
             }
