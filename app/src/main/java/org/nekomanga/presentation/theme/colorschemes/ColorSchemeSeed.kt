@@ -4,7 +4,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-internal object ColorSchemeSeed : BaseColorScheme() {
+internal object Seed : BaseColorScheme() {
     override val lightScheme =
         lightColorScheme(
             primary = Color(0xFFFFFFFF),
@@ -19,9 +19,9 @@ internal object ColorSchemeSeed : BaseColorScheme() {
             onTertiary = Color(0xFFFFFFFF),
             tertiaryContainer = Color(0xFFFFFFFF),
             onTertiaryContainer = Color(0xFFFFFFFF),
-            error = Color(0xFFFFFFFF),
+            error = Color(0xFFC14033),
             onError = Color(0xFFFFFFFF),
-            errorContainer = Color(0xFFFFFFFF),
+            errorContainer = Color(0xFFDC6559),
             onErrorContainer = Color(0xFFFFFFFF),
             background = Color(0xFFFFFFFF),
             onBackground = Color(0xFFFFFFFF),

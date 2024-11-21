@@ -60,7 +60,7 @@ internal object NekoColorScheme : BaseColorScheme() {
             onTertiaryContainer = Color(0xFFFFFFFF),
             error = Color(0xFFC14033),
             onError = Color(0xFFFFFFFF),
-            errorContainer = Color(0xFF000000),
+            errorContainer = Color(0xFFDC6559),
             onErrorContainer = Color(0xFF000000),
             background = Color(0xFF292929),
             onBackground = Color(0xFFFFFFFF),
