@@ -38,12 +38,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material3.createMdc3Theme
-import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import org.nekomanga.R
 import org.nekomanga.presentation.components.MangaCover
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.presentation.theme.Themes
 
 @Composable
 fun ThemeItem(theme: Themes, isDarkTheme: Boolean, selected: Boolean, onClick: () -> Unit) {
@@ -53,7 +53,7 @@ fun ThemeItem(theme: Themes, isDarkTheme: Boolean, selected: Boolean, onClick: (
     configuration.uiMode =
         if (isDarkTheme) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
     val themeContext = context.createConfigurationContext(configuration)
-    themeContext.setTheme(theme.styleRes)
+    themeContext.setTheme(theme.styleRes())
     val colorScheme =
         createMdc3Theme(
                 context = themeContext,
@@ -79,7 +79,7 @@ fun ThemeItem(theme: Themes, isDarkTheme: Boolean, selected: Boolean, onClick: (
             onClick,
         )
         Text(
-            text = stringResource(id = if (isDarkTheme) theme.darkNameRes else theme.nameRes),
+            text = stringResource(id = if (isDarkTheme) theme.darkNameRes() else theme.nameRes()),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodySmall,
         )
@@ -215,7 +215,5 @@ fun AppThemePreviewItem(
 @Preview
 @Composable
 private fun PreviewThemeItem() {
-    Surface() {
-        ThemeItem(theme = Themes.SPRING_AND_DUSK, isDarkTheme = false, selected = false) {}
-    }
+    Surface() { ThemeItem(theme = Themes.SpringAndDusk, isDarkTheme = false, selected = false) {} }
 }

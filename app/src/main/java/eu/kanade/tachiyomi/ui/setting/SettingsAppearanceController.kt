@@ -39,7 +39,7 @@ class SettingsAppearanceController : SettingsController() {
                     titleRes = R.string.app_theme
                     lastScrollPostionLight = lastThemeXLight
                     lastScrollPostionDark = lastThemeXDark
-                    summary = context.getString(context.getPrefTheme(preferences).nameRes)
+                    summary = context.getString(context.getPrefTheme(preferences).nameRes())
                     activity = this@SettingsAppearanceController.activity
                 }
 

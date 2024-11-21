@@ -25,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import com.google.android.material.color.DynamicColors
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import org.nekomanga.R
@@ -33,6 +32,7 @@ import org.nekomanga.logging.TimberKt
 import org.nekomanga.presentation.components.theme.ThemeItem
 import org.nekomanga.presentation.extensions.collectAsState
 import org.nekomanga.presentation.theme.Size
+import org.nekomanga.presentation.theme.Themes
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -61,7 +61,7 @@ internal class ThemeStep : OnboardingStep {
         Themes.entries
             .filter {
                 (!it.isDarkTheme || it.followsSystem) &&
-                    (it.styleRes != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
+                    (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
             }
             .toSet()
 
@@ -70,7 +70,7 @@ internal class ThemeStep : OnboardingStep {
                 Themes.entries
                     .filter {
                         (!it.isDarkTheme || it.followsSystem) &&
-                            (it.styleRes != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
+                            (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                     }
                     .toSet()
             }
@@ -81,7 +81,7 @@ internal class ThemeStep : OnboardingStep {
                 Themes.entries
                     .filter {
                         (it.isDarkTheme || it.followsSystem) &&
-                            (it.styleRes != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
+                            (it.styleRes() != R.style.Theme_Tachiyomi_Monet || supportsDynamic)
                     }
                     .toSet()
             }
