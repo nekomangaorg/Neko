@@ -12,6 +12,7 @@ import org.nekomanga.presentation.theme.Typefaces.appTypography
 import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
+import org.nekomanga.presentation.theme.colorschemes.OrangeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
 import org.nekomanga.presentation.theme.colorschemes.PurpleColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
@@ -44,10 +45,11 @@ fun nekoThemeColorScheme(): ColorScheme {
             .get()
 
     return when (theme) {
+        Themes.Green -> GreenColorScheme
         Themes.Monet -> MonetColorScheme(LocalContext.current)
+        Themes.Orange -> OrangeColorScheme
         Themes.Pink -> PinkColorScheme
         Themes.Purple -> PurpleColorScheme
-        Themes.Green -> GreenColorScheme
         Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme
     }.getColorScheme(isSystemInDarkTheme())

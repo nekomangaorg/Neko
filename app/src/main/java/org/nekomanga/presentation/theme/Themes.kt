@@ -10,7 +10,7 @@ enum class Themes {
     Neko,
     Purple,
     Green,
-    MangaDex,
+    Orange,
     Outrun,
     Pink,
     Red,
@@ -30,7 +30,7 @@ enum class Themes {
             this == Monet -> R.style.Theme_Tachiyomi_Monet
             this == Outrun -> R.style.Theme_Tachiyomi_Outrun
             this == Pink -> R.style.Theme_Tachiyomi_MidnightDusk
-            this == MangaDex -> R.style.Theme_Tachiyomi_MangaDex
+            this == Orange -> R.style.Theme_Tachiyomi_MangaDex
             this == BlueGreen -> R.style.Theme_Tachiyomi_SapphireDusk
             this == Purple -> R.style.Theme_Tachiyomi_Lavender
             this == Red -> R.style.Theme_Tachiyomi_Strawberries
@@ -53,7 +53,7 @@ enum class Themes {
             this == Monet -> R.string.a_brighter_you
             this == Outrun -> R.string.outrun
             this == Pink -> R.string.spring_blossom
-            this == MangaDex -> R.string.mangadex
+            this == Orange -> R.string.orange_juice
             this == BlueGreen -> R.string.teal_ocean
             this == Purple -> R.string.lavender
             this == Red -> R.string.strawberry_daiquiri
