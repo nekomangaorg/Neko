@@ -13,6 +13,7 @@ import org.nekomanga.presentation.theme.colorschemes.LavenderColorScheme
 import org.nekomanga.presentation.theme.colorschemes.LimeColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
+import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -45,6 +46,7 @@ fun nekoThemeColorScheme(): ColorScheme {
         Themes.Monet -> MonetColorScheme(LocalContext.current)
         Themes.Lavender -> LavenderColorScheme
         Themes.Lime -> LimeColorScheme
+        Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme
     }.getColorScheme(isSystemInDarkTheme())
 }

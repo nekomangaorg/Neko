@@ -40,8 +40,8 @@ internal object NekoColorScheme : BaseColorScheme() {
             surfaceContainerLowest = Color(0xFFFFFFFF),
             surfaceContainerLow = Color(0xFFFFFFFF),
             surfaceContainer = Color(0xFFFFFFFF),
-            surfaceContainerHigh = Color(0xFFFFFFFF),
-            surfaceContainerHighest = Color(0xFFFFFFFF),
+            surfaceContainerHigh = Color(0xFFe6e6e6),
+            surfaceContainerHighest = Color(0xFFCCCCCC),
         )
 
     override val darkScheme =
@@ -76,10 +76,10 @@ internal object NekoColorScheme : BaseColorScheme() {
             inversePrimary = Color(0xFF000000),
             surfaceDim = Color(0xFF292929),
             surfaceBright = Color(0xFF292929),
-            surfaceContainerLowest = Color(0xFF292929),
-            surfaceContainerLow = Color(0xFF292929),
+            surfaceContainerLowest = Color(0xFF212121),
+            surfaceContainerLow = Color(0xFF252525),
             surfaceContainer = Color(0xFF292929),
-            surfaceContainerHigh = Color(0xFF292929),
-            surfaceContainerHighest = Color(0xFF292929),
+            surfaceContainerHigh = Color(0xFF3E3E3E),
+            surfaceContainerHighest = Color(0xFF545454),
         )
 }

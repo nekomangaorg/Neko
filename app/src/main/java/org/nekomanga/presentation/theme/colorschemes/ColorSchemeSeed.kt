@@ -4,6 +4,9 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
+// Shades for hex colors https://noeldelgado.github.io/shadowlord/
+// Color palette https://paletton.com/
+
 internal object ColorSchemeSeed : BaseColorScheme() {
     override val lightScheme =
         lightColorScheme(

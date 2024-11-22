@@ -37,11 +37,11 @@ internal object LavenderColorScheme : BaseColorScheme() {
             inversePrimary = Color(0xFFD6BAFF),
             surfaceDim = Color(0xFFFFFFFF),
             surfaceBright = Color(0xFFFFFFFF),
-            surfaceContainerLowest = Color(0xFFEDE2FF),
-            surfaceContainerLow = Color(0xFFEDE2FF),
+            surfaceContainerLowest = Color(0xFFF1E8FF),
+            surfaceContainerLow = Color(0xFFEFE5FF),
             surfaceContainer = Color(0xFFEDE2FF),
-            surfaceContainerHigh = Color(0xFFEDE2FF),
-            surfaceContainerHighest = Color(0xFFEDE2FF),
+            surfaceContainerHigh = Color(0xFFD5CBE6),
+            surfaceContainerHighest = Color(0xFFBEB5CC),
         )
 
     override val darkScheme =
@@ -76,10 +76,10 @@ internal object LavenderColorScheme : BaseColorScheme() {
             inversePrimary = Color(0xFFD6BAFF),
             surfaceDim = Color(0xFF000000),
             surfaceBright = Color(0xFF000000),
-            surfaceContainerLowest = Color(0xFF111129),
-            surfaceContainerLow = Color(0xFF111129),
+            surfaceContainerLowest = Color(0xFF0E0E21),
+            surfaceContainerLow = Color(0xFF0F0F25),
             surfaceContainer = Color(0xFF111129),
-            surfaceContainerHigh = Color(0xFF111129),
-            surfaceContainerHighest = Color(0xFF111129),
+            surfaceContainerHigh = Color(0xFF29293E),
+            surfaceContainerHighest = Color(0xFF414154),
         )
 }

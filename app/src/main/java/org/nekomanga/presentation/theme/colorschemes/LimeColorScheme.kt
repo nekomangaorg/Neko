@@ -37,11 +37,11 @@ internal object LimeColorScheme : BaseColorScheme() {
             inversePrimary = Color(0xFFAEDFC0),
             surfaceDim = Color(0xFFE9EFEB),
             surfaceBright = Color(0xFFE9EFEB),
-            surfaceContainerLowest = Color(0xFFE9EFEB),
-            surfaceContainerLow = Color(0xFFE9EFEB),
+            surfaceContainerLowest = Color(0xFFF0F4F1),
+            surfaceContainerLow = Color(0xFFEDF2EF),
             surfaceContainer = Color(0xFFE9EFEB),
-            surfaceContainerHigh = Color(0xFFE9EFEB),
-            surfaceContainerHighest = Color(0xFFE9EFEB),
+            surfaceContainerHigh = Color(0xFFD2D7D4),
+            surfaceContainerHighest = Color(0xFFBABFBC),
         )
 
     override val darkScheme =
@@ -76,10 +76,10 @@ internal object LimeColorScheme : BaseColorScheme() {
             inversePrimary = Color(0xFF000000),
             surfaceDim = Color(0xFF202125),
             surfaceBright = Color(0xFF202125),
-            surfaceContainerLowest = Color(0xFF202125),
-            surfaceContainerLow = Color(0xFF202125),
+            surfaceContainerLowest = Color(0xFF1A1A1E),
+            surfaceContainerLow = Color(0xFF1D1E21),
             surfaceContainer = Color(0xFF202125),
-            surfaceContainerHigh = Color(0xFF202125),
-            surfaceContainerHighest = Color(0xFF202125),
+            surfaceContainerHigh = Color(0xFF36373B),
+            surfaceContainerHighest = Color(0xFF4D4D51),
         )
 }
