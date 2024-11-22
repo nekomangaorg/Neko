@@ -9,10 +9,11 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import org.nekomanga.presentation.theme.Typefaces.appTypography
-import org.nekomanga.presentation.theme.colorschemes.LavenderColorScheme
-import org.nekomanga.presentation.theme.colorschemes.LimeColorScheme
+import org.nekomanga.presentation.theme.colorschemes.GreenColorScheme
 import org.nekomanga.presentation.theme.colorschemes.MonetColorScheme
 import org.nekomanga.presentation.theme.colorschemes.NekoColorScheme
+import org.nekomanga.presentation.theme.colorschemes.PinkColorScheme
+import org.nekomanga.presentation.theme.colorschemes.PurpleColorScheme
 import org.nekomanga.presentation.theme.colorschemes.TakoColorScheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -44,8 +45,9 @@ fun nekoThemeColorScheme(): ColorScheme {
 
     return when (theme) {
         Themes.Monet -> MonetColorScheme(LocalContext.current)
-        Themes.Lavender -> LavenderColorScheme
-        Themes.Lime -> LimeColorScheme
+        Themes.Pink -> PinkColorScheme
+        Themes.Purple -> PurpleColorScheme
+        Themes.Green -> GreenColorScheme
         Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme
     }.getColorScheme(isSystemInDarkTheme())

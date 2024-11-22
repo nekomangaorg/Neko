@@ -41,16 +41,16 @@ object ThemeUtil {
             putString(
                 PreferenceKeys.lightTheme,
                 when (lightTheme) {
-                    "SPRING" -> Themes.SpringAndDusk
-                    "STRAWBERRY_DAIQUIRI" -> Themes.Strawberries
+                    "SPRING" -> Themes.Pink
+                    "STRAWBERRY_DAIQUIRI" -> Themes.Red
                     else -> Themes.Neko
                 }.name,
             )
             putString(
                 PreferenceKeys.darkTheme,
                 when (darkTheme) {
-                    "DUSK" -> Themes.SpringAndDusk
-                    "CHOCOLATE_STRAWBERRIES" -> Themes.Strawberries
+                    "DUSK" -> Themes.Pink
+                    "CHOCOLATE_STRAWBERRIES" -> Themes.Red
                     else -> Themes.Neko
                 }.name,
             )

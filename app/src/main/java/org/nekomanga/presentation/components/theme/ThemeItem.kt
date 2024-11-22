@@ -215,5 +215,5 @@ fun AppThemePreviewItem(
 @Preview
 @Composable
 private fun PreviewThemeItem() {
-    Surface() { ThemeItem(theme = Themes.SpringAndDusk, isDarkTheme = false, selected = false) {} }
+    Surface() { ThemeItem(theme = Themes.Pink, isDarkTheme = false, selected = false) {} }
 }

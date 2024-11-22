@@ -4,7 +4,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-internal object LimeColorScheme : BaseColorScheme() {
+internal object GreenColorScheme : BaseColorScheme() {
     override val lightScheme =
         lightColorScheme(
             primary = Color(0xFF57BD79),
