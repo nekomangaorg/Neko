@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.theme
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
@@ -47,10 +48,18 @@ fun nekoThemeColorScheme(): ColorScheme {
             }
             .get()
 
+    return colorSchemeFromTheme(LocalContext.current, theme, isSystemInDarkTheme())
+}
+
+fun colorSchemeFromTheme(
+    context: Context,
+    theme: Themes,
+    isSystemInDarkTheme: Boolean,
+): ColorScheme {
     return when (theme) {
         Themes.BlueGreen -> BlueGreenColorScheme
         Themes.Green -> GreenColorScheme
-        Themes.Monet -> MonetColorScheme(LocalContext.current)
+        Themes.Monet -> MonetColorScheme(context)
         Themes.Orange -> OrangeColorScheme
         Themes.Pink -> PinkColorScheme
         Themes.Purple -> PurpleColorScheme
@@ -58,5 +67,5 @@ fun nekoThemeColorScheme(): ColorScheme {
         Themes.Red -> RedColorScheme
         Themes.Tako -> TakoColorScheme
         else -> NekoColorScheme
-    }.getColorScheme(isSystemInDarkTheme())
+    }.getColorScheme(isSystemInDarkTheme)
 }

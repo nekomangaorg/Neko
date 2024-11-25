@@ -404,7 +404,7 @@ fun FilterBrowseSheet(
                     shape = RoundedCornerShape(35),
                     colors =
                         ButtonDefaults.elevatedButtonColors(
-                            containerColor = themeColorState.buttonColor
+                            containerColor = MaterialTheme.colorScheme.primary
                         ),
                 ) {
                     Icon(
@@ -416,7 +416,7 @@ fun FilterBrowseSheet(
                     Text(
                         text = stringResource(id = R.string.filter),
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.surface,
+                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
             }

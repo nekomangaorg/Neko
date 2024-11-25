@@ -32,8 +32,8 @@ internal object SeedColorScheme : BaseColorScheme() {
             onSurface = Color(0xFF000000),
             surfaceVariant = Color(0xFFFFFFFF),
             onSurfaceVariant = Color(0xFF000000),
-            outline = Color(0xFFFFFFFF),
-            outlineVariant = Color(0xFFFFFFFF),
+            outline = Color(0xFFFFFFFF), // 60% less than primary
+            outlineVariant = Color(0xFFFFFFFF), // 80% less than primary
             scrim = Color(0xFFFFFFFF),
             inverseSurface = Color(0xFFFFFFFF),
             inverseOnSurface = Color(0xFFFFFFFF),
